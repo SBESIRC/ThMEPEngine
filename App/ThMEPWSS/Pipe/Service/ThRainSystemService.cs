@@ -1112,10 +1112,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         {
             if (!br.ObjectId.IsValid || !br.BlockTableRecord.IsValid) return;
             if (!br.Visible) return;
-            if (isInXref)
-            {
-                if (!ThMEPWSS.Service.CheckService.CheckWssXref(br)) return;
-            }
             if (IsLayerVisible(br))
             {
                 var _name = br.GetEffectiveName();
@@ -4648,6 +4644,19 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSENTIRETY + fixY), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSPILGRIM - fixX, THESAURUSSTAMPEDE) };
                                                     var segs = vecs.ToGLineSegments(p + fixV);
                                                     drawDomePipes(segs);
+                                                    {
+                                                        var seg = new List<Vector2d> { new Vector2d(THESAURUSPLEASING, THESAURUSSTAMPEDE), new Vector2d(THESAURUSIMPOSING, THESAURUSSTAMPEDE) }.ToGLineSegments(p).Last();
+                                                        var pt1 = seg.StartPoint.ToPoint3d();
+                                                        var pt2 = seg.EndPoint.ToPoint3d();
+                                                        var dim = new AlignedDimension();
+                                                        dim.XLine1Point = pt1;
+                                                        dim.XLine2Point = pt2;
+                                                        dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetY(-THESAURUSEUPHORIA);
+                                                        dim.DimensionText = METACOMMUNICATION;
+                                                        dim.Layer = THESAURUSINVOICE;
+                                                        ByLayer(dim);
+                                                        DrawEntityLazy(dim);
+                                                    }
                                                 }
                                             }
                                         }
@@ -4716,6 +4725,19 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     drawDomePipes(segs);
                                                     Dr.DrawRainPort(segs.Last().EndPoint.ToPoint3d());
                                                     DrawBlockReference(THESAURUSEMPHASIS, segs.Last().EndPoint.ToPoint3d(), br => { br.Layer = DENDROCHRONOLOGIST; });
+                                                    {
+                                                        var seg = new List<Vector2d> { new Vector2d(THESAURUSPLEASING, THESAURUSSTAMPEDE), new Vector2d(THESAURUSIMPOSING, THESAURUSSTAMPEDE) }.ToGLineSegments(p).Last();
+                                                        var pt1 = seg.StartPoint.ToPoint3d();
+                                                        var pt2 = seg.EndPoint.ToPoint3d();
+                                                        var dim = new AlignedDimension();
+                                                        dim.XLine1Point = pt1;
+                                                        dim.XLine2Point = pt2;
+                                                        dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetY(-THESAURUSEUPHORIA);
+                                                        dim.DimensionText = METACOMMUNICATION;
+                                                        dim.Layer = THESAURUSINVOICE;
+                                                        ByLayer(dim);
+                                                        DrawEntityLazy(dim);
+                                                    }
                                                 }
                                             }
                                         }
@@ -4806,6 +4828,19 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                         var segs = vecs.ToGLineSegments(pt);
                                                         drawDomePipes(segs);
                                                         {
+                                                        }
+                                                        {
+                                                            var seg = new List<Vector2d> { new Vector2d(THESAURUSPLEASING, THESAURUSSTAMPEDE), new Vector2d(THESAURUSIMPOSING, THESAURUSSTAMPEDE) }.ToGLineSegments(p).Last();
+                                                            var pt1 = seg.StartPoint.ToPoint3d().OffsetXY(-CRYSTALLOGRAPHER,-COMPANIABLENESS);
+                                                            var pt2 = pt1.OffsetX(THESAURUSSCINTILLATE);
+                                                            var dim = new AlignedDimension();
+                                                            dim.XLine1Point = pt1;
+                                                            dim.XLine2Point = pt2;
+                                                            dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetY(-THESAURUSINHERIT);
+                                                            dim.DimensionText = METACOMMUNICATION;
+                                                            dim.Layer = THESAURUSINVOICE;
+                                                            ByLayer(dim);
+                                                            DrawEntityLazy(dim);
                                                         }
                                                     }
                                                     else
@@ -8717,6 +8752,9 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const int THESAURUSCOSTLY = 2047;
         public const int THESAURUSFORBIDDEN = 1247;
         public const int THESAURUSAROUND = 1745;
+        public const int CRYSTALLOGRAPHER = 2232;
+        public const int COMPANIABLENESS = 113;
+        public const int THESAURUSSCINTILLATE = 1231;
         public static bool IsRainLabel(string label)
         {
             if (label == null) return INTRAVASCULARLY;

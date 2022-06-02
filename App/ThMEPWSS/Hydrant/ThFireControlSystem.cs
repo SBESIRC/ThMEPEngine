@@ -66,19 +66,16 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 vm.Serialnumber = (vm.Serialnumber ?? "").Trim();
                 if (vm.Serialnumber == "0") vm.Serialnumber = "";
             }
-            var _generalCount = vm.CountsGeneral;
-            var _refugeCount = vm.CountsRefuge;
-            if (_generalCount <= 0) return;
-            if (_generalCount == 1)
+            var generalCount = vm.CountsGeneral;
+            var refugeCount = vm.CountsRefuge;
+            if (generalCount <= 0) return;
+            if (generalCount == 1)
             {
-                _generalCount++;
-                _refugeCount++;
+                generalCount++;
+                refugeCount++;
             }
             FocusMainWindow();
-            var opt = new PromptPointOptions("\n请选择消火栓系统图排布的起点");
-            var result = Active.Editor.GetPoint(opt);
-            if (result.Status != PromptStatus.OK) return;
-            var basePoint = result.Value;
+            if (!TrySelectPoint(out var basePoint, "\n请选择消火栓系统图排布的起点")) return;
             {
                 if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
             }
@@ -108,7 +105,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var maxNumStorey = floorDatas.Select(x => x.FloorNum).Max() + "F";
                 var hasFullHalfPlatformLine = false;
                 var refugeFloors = floorDatas.Where(x => x.IsRefugeFloor).Select(x => $"{x.FloorNum}F").ToList();
-                if (refugeFloors.Count == 0) _refugeCount = _generalCount;
+                if (refugeFloors.Count == 0) refugeCount = generalCount;
                 if (refugeFloors.Count > 6)
                 {
                     var dm = new ThFireSystemDiagram(vm.Serialnumber, refugeFloors.Count, floorDatas.Count - refugeFloors.Count, 0, new());
@@ -176,7 +173,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             var p1xs = new List<Point3d>();
                             var p3s = new List<Point3d>();
                             var width_HaveHandPumpConnection = handConnFloors.Count * width_HandPumpConnection;
-                            var span = OFFSET_X1 + width_HaveHandPumpConnection + (_refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
+                            var span = OFFSET_X1 + width_HaveHandPumpConnection + (refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
                             var lineLen = span * floorRanges.Count;
                             double getRangeOffsetX() => rgi * span;
                             Point3d getGeneralBsPt(int i, int j)
@@ -184,10 +181,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var dx = ringsCount * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
-                                var dc = _refugeCount - _generalCount;
+                                var dc = refugeCount - generalCount;
                                 if (dc > 0)
                                 {
-                                    if (j >= _generalCount / 2)
+                                    if (j >= generalCount / 2)
                                     {
                                         dx += dc * SPAN_X;
                                     }
@@ -196,7 +193,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             }
                             Point3d getRefugeBsPt(int i, int j)
                             {
-                                var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                                var dx = (ringsCount + generalCount / 2) * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
@@ -261,12 +258,15 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             textInfos.Add(new DBTextInfo(px.OffsetXY(2000, 130), label, "W-NOTE", "TH-STYLE3"));
                                             lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(lineLen, 0)), "W-NOTE"));
                                         }
-                                        fs.Add(new Tuple<int, Action>(i, () => { DrawStoreyLine(storey, bsPt1, lineLen, getStoreyHeightText()); }));
+                                        if (rgi == floorRanges.Count - 1)
+                                        {
+                                            fs.Add(new Tuple<int, Action>(i, () => { DrawStoreyLine(storey, bsPt1, lineLen, getStoreyHeightText()); }));
+                                        }
                                     }
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                     {
                                         int c1 = 0, c2 = 0;
-                                        for (int _j = 0; _j < _generalCount; _j++)
+                                        for (int _j = 0; _j < generalCount; _j++)
                                         {
                                             var j = getRealJ(_j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -434,7 +434,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var storey = allStoreys[i];
                                         if (IsNumStorey(storey))
                                         {
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt = getGeneralBsPt(i, j);
                                                 vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -442,7 +442,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         }
                                     }
                                 }
-                                for (int j = 0; j < _generalCount; j++)
+                                for (int j = 0; j < generalCount; j++)
                                 {
                                     var st = getGeneralBsPt(iRF, j);
                                     var ed = getGeneralBsPt(rg.Item2, j);
@@ -478,7 +478,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 if (IsNumStorey(storey))
                                                 {
-                                                    foreach (var j in Enumerable.Range(0, _generalCount))
+                                                    foreach (var j in Enumerable.Range(0, generalCount))
                                                     {
                                                         var bsPt = getGeneralBsPt(i, j);
                                                         {
@@ -527,7 +527,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 {
                                                                     var _k = k;
                                                                     var _j = getRealJ(j);
-                                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                                    var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                                     labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                                     {
                                                                         var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -662,7 +662,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var h1 = HEIGHT - 550.0;
                                                 var h2 = h1 - 250.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 p1xs.Add(p1);
                                                 p3s.Add(p3);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
@@ -740,9 +740,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p9 = p9.OffsetX(200);
                                                         }
                                                         textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                        if (_refugeCount > _generalCount)
+                                                        if (refugeCount > generalCount)
                                                         {
-                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                             textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                         }
                                                         {
@@ -777,7 +777,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 var hlines = new List<GLineSegment>();
                                                 var hdrills = new List<GRect>();
-                                                for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                                for (int j = 0; j < refugeCount - generalCount; j++)
                                                 {
                                                     var bsPt = getRefugeBsPt(i, j);
                                                     drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -787,7 +787,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawFire(p8);
                                                     textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var bsPt1 = getGeneralBsPt(i, j);
                                                     var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -804,7 +804,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var ok = false;
                                                         if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                         {
-                                                            var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                            var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                             if (!isLeft)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -822,7 +822,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var s = segs[1];
                                                                 var p9 = s.StartPoint;
                                                                 vsels.Add(p9.ToPoint3d());
-                                                                if (j == _generalCount - 1)
+                                                                if (j == generalCount - 1)
                                                                 {
                                                                     vsels.Add(bsPt1.OffsetY(h2));
                                                                 }
@@ -833,14 +833,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipes(segs);
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        if (j < _generalCount - 1)
+                                                        if (j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -852,12 +852,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j != 0 && j + 1 <= _generalCount / 2)
+                                                        if (j != 0 && j + 1 <= generalCount / 2)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -866,7 +866,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -875,7 +875,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
                                                             var p9 = bsPt1.OffsetY(h2);
                                                             vsels.Add(p9);
@@ -883,10 +883,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
                                                     var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                    var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                    var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                     hlines.Add(new GLineSegment(p5, p6));
                                                 }
                                                 vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -901,7 +901,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                         brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -917,7 +917,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -985,7 +985,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var p0 = getStoreyBsPt(i).OffsetX(getRangeOffsetX());
                                                 var h1 = HEIGHT - 400.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 p1xs.Add(p1);
                                                 p3s.Add(p3);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
@@ -1052,10 +1052,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                                 }
-                                                if (_generalCount > 0)
+                                                if (generalCount > 0)
                                                 {
                                                     var p5 = getGeneralBsPt(i - 1, 0);
-                                                    var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                    var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                     vsels.Add(p5.OffsetY(h1));
                                                     vkills.Add(p5.OffsetY(h1).OffsetY(.1));
                                                     vsels.Add(p6.OffsetY(h1));
@@ -1094,9 +1094,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i, j);
@@ -1106,7 +1106,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     vsels.Add(p);
                                                                     vkills.Add(p.OffsetY(-.1));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
@@ -1119,8 +1119,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                                var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                                if (j > 0 && j < _generalCount - 1)
+                                                                var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                                if (j > 0 && j < generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -1148,12 +1148,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
                                                             var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt2.OffsetY(h1));
                                                                 vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -1170,13 +1170,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                                 }));
                                                             }
-                                                            if (j < _generalCount / 2 - 1)
+                                                            if (j < generalCount / 2 - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                             }
                                                             hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                            if (j < _generalCount / 2)
+                                                            if (j < generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -1194,12 +1194,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j >= _generalCount / 2)
+                                                            if (j >= generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
-                                                                    if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                    if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                     {
                                                                         vsels.Add(p9.ToPoint3d());
                                                                         vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -1207,7 +1207,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipe(_segs[0]);
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -1217,13 +1217,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j == _generalCount / 2 - 1)
+                                                            if (j == generalCount / 2 - 1)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             }
-                                                            if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                            if (j >= generalCount / 2 && j < generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -1240,11 +1240,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     {
                                         var storey = allStoreys[i];
                                         var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var hasExtraFire = getHasExtraFire(i, j);
                                             bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                             if (!hasFullHalfPlatformLine)
@@ -1446,7 +1446,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     {
                                                                         st = st.OffsetXY(300, 0);
                                                                     }
-                                                                    if (j == _generalCount - 1)
+                                                                    if (j == generalCount - 1)
                                                                     {
                                                                         if (isLeft)
                                                                         {
@@ -1499,7 +1499,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                             {
                                                                                 st = st.OffsetXY(300, 300);
                                                                             }
-                                                                            if (j == _generalCount - 1)
+                                                                            if (j == generalCount - 1)
                                                                             {
                                                                                 if (isLeft)
                                                                                 {
@@ -1700,7 +1700,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         }
                                     }
                                     {
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(0, j);
                                             var p5 = bsPt;
@@ -1740,7 +1740,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             lineInfos.Add(new LineInfo(seg, "W-FRPT-NOTE"));
                                             if (rgi == 0)
                                             {
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var p = getGeneralBsPt(0, j);
                                                     lineInfos.Add(new LineInfo(new GLineSegment(p, p.OffsetY(-900)), "W-FRPT-NOTE"));
@@ -1765,10 +1765,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 if (rgi != floorRanges.Count - 1)
                                                 {
                                                     var bds = new List<GRect>();
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
                                                         {
-                                                            if (j != 0 && j != _refugeCount - 1)
+                                                            if (j != 0 && j != refugeCount - 1)
                                                             {
                                                                 var px = getGeneralBsPt(i, j).OffsetXY(-510, -610);
                                                                 brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(210, -300)));
@@ -1794,7 +1794,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                             }
                                                         }
-                                                        if (j != _generalCount - 1)
+                                                        if (j != generalCount - 1)
                                                         {
                                                             var dy = -610.0;
                                                             var vecs = new List<Vector2d> { new Vector2d(300, dy) };
@@ -1808,10 +1808,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             bds.Add(drawValve(px.OffsetX(dx) + vecs[0].ToVector3d()));
                                                         }
                                                     }
-                                                    var seg = new GLineSegment(getGeneralBsPt(i, 0), getGeneralBsPt(i, _generalCount - 1)).Offset(0, -610);
+                                                    var seg = new GLineSegment(getGeneralBsPt(i, 0), getGeneralBsPt(i, generalCount - 1)).Offset(0, -610);
                                                     drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                                 }
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     if (j == 0 && rgi != floorRanges.Count - 1)
                                                     {
@@ -1824,110 +1824,118 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 if (rgi == floorRanges.Count - 1)
                                                 {
-                                                    var p1s = new List<Point3d>();
-                                                    var bds = new List<GRect>();
-                                                    var h = HEIGHT / 2 - 300;
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    if (vm.IsRoofRing)
                                                     {
-                                                        var bsPt = getGeneralBsPt(i, j);
-                                                        if (j != 0 && j != _generalCount - 1)
+                                                        var bds = new List<GRect>();
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
-                                                            var px = bsPt;
-                                                            vsels.Add(px.OffsetY(300));
-                                                            vsels.Add(px.OffsetY(-300));
-                                                            vkills.Add(px.OffsetY(-300 + .1));
-                                                            vkills.Add(px.OffsetY(300 - .1));
-                                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300)));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
-                                                        }
-                                                        var p1 = bsPt.OffsetY(h);
-                                                        p1s.Add(p1);
-                                                        vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                                        if (_generalCount > 1)
-                                                        {
-                                                            if (j == _generalCount - 1)
+                                                            if (j == 0)
+                                                                {
+                                                                    var px = getGeneralBsPt(i, j);
+                                                                    {
+                                                                        var p = px;
+                                                                        px = p.OffsetXY(600, 600);
+                                                                        var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
+                                                                        bi.DynaDict["可见性"] = "试验消火栓";
+                                                                        brInfos.Add(bi);
+                                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
+                                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
+                                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                        px = p;
+                                                                    }
+                                                                }
+                                                            if (j != generalCount - 1)
                                                             {
-                                                                if (_generalCount == 2)
-                                                                {
-                                                                    var (w, _) = getValveSize();
-                                                                    var p3 = p1s.First();
-                                                                    var p4 = p1s.Last();
-                                                                    bds.Add(drawValve(GetMidPoint(p3, p4).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
-                                                                }
-                                                                else
-                                                                {
-                                                                    bds.Add(drawValve(p1.OffsetX(-600)));
-                                                                }
+                                                                var px = getGeneralBsPt(i, j);
+                                                                bds.Add(drawValve(px.OffsetXY(300, 600)));
                                                             }
-                                                            else if (j == _generalCount - 2)
+                                                            if (j == generalCount - 1)
                                                             {
+                                                                var px = getGeneralBsPt(i, j);
+                                                                drawDomePipes(GeoFac.GetLines(new GLineSegment(getGeneralBsPt(i, 0).OffsetY(600), getGeneralBsPt(i, j).OffsetY(600)).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                            }
+                                                            if (j == 0 || j == generalCount - 1)
+                                                            {
+                                                                var px = getGeneralBsPt(i, j);
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                            }
+                                                            if (j != 0 && j != generalCount - 1)
+                                                            {
+                                                                var px = getGeneralBsPt(i, j);
+                                                                vsels.Add(px.OffsetY(-300));
+                                                                vkills.Add(px.OffsetY(-300 + .1));
+                                                                brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300)));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            }
+                                                        }
+                                                    }
+                                                    else if (vm.IsTopLayerRing)
+                                                    {
+                                                        var bds = new List<GRect>();
+                                                        for (int j = 0; j < generalCount; j++)
+                                                        {
+                                                            var px = getGeneralBsPt(i, j);
+                                                            if (j != 0 && j != generalCount - 1)
+                                                            {
+                                                                vsels.Add(px.OffsetY(-600));
+                                                                vkills.Add(px.OffsetY(-600 + .1));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -600), px.OffsetXY(-210, -600)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, -600), px.OffsetXY(-600, -600)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -600), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, -600)));
                                                             }
                                                             else
                                                             {
-                                                                Point3d p2;
-                                                                if (j == 0)
-                                                                {
-                                                                    p2 = p1.OffsetX(400);
-                                                                }
-                                                                else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
-                                                                {
-                                                                    var (w, _) = getValveSize();
-                                                                    p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
-                                                                }
-                                                                else
-                                                                {
-                                                                    p2 = p1.OffsetX(700);
-                                                                }
-                                                                bds.Add(drawValve(p2));
-                                                                if (j + 1 == _generalCount / 2)
-                                                                {
-                                                                    var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
-                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
-                                                                    if (dn != null)
-                                                                    {
-                                                                        var px = p2.OffsetY(150);
-                                                                        var x1 = getGeneralBsPt(i, 0).X;
-                                                                        if (px.X - x1 < 1500)
-                                                                        {
-                                                                            px = px.ReplaceX(x1 + 1500);
-                                                                        }
-                                                                        textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                                    }
-                                                                }
+                                                                vsels.Add(px.OffsetY(-300));
+                                                                vkills.Add(px.OffsetY(-300 + .1));
                                                             }
-                                                        }
-                                                    }
-                                                    if (_generalCount == 2)
-                                                    {
-                                                        var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
-                                                        var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
-                                                        if (dn != null)
-                                                        {
-                                                            var bsPt = getGeneralBsPt(i, 0);
-                                                            var p1 = bsPt.OffsetY(h);
-                                                            textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                        }
-                                                    }
-                                                    if (_generalCount == 1)
-                                                    {
-                                                    }
-                                                    else if (_generalCount > 1)
-                                                    {
-                                                        var bsp = p1s.First();
-                                                        drawTestFire(bsp, 300, 1000);
-                                                    }
-                                                    if (_generalCount > 1)
-                                                    {
-                                                        if (rgi == floorRanges.Count - 1)
-                                                        {
-                                                            var seg = new GLineSegment(p1s.First(), p1s.Last());
-                                                            if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
-                                                            drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                            if (j == 0)
+                                                                {
+                                                                    var p = px;
+                                                                    px = p.OffsetXY(600, 0);
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(p.OffsetXY(600, 0), p.OffsetXY(600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                    var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
+                                                                    bi.DynaDict["可见性"] = "试验消火栓";
+                                                                    brInfos.Add(bi);
+                                                                    brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
+                                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                    px = p;
+                                                                }
+                                                            if (j != generalCount - 1)
+                                                            {
+                                                                bds.Add(drawValve(px.OffsetXY(300, -300)));
+                                                            }
+                                                            if (j == generalCount - 1)
+                                                            {
+                                                                drawDomePipes(GeoFac.GetLines(new GLineSegment(getGeneralBsPt(i, 0).OffsetY(-300), getGeneralBsPt(i, j).OffsetY(-300)).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -1954,32 +1962,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     if (rgi != floorRanges.Count - 1) return;
                                     var segs = new List<Vector2d> { new Vector2d(offsetX, 0), new Vector2d(0, height), }.ToGLineSegments(bsp).Skip(1).ToList();
                                     drawDomePipes(segs);
-                                    {
-                                        var px = segs.Last().EndPoint.ToPoint3d();
-                                        var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 300));
-                                        bi.DynaDict["可见性"] = "试验消火栓";
-                                        brInfos.Add(bi);
-                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 600)));
-                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 0)));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(-180, 0)), "W-FRPT-HYDT-PIPE"));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 0), px.OffsetXY(-600, 0)), "W-FRPT-HYDT-PIPE"));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 0), px.OffsetXY(-600, 600)), "W-FRPT-HYDT-PIPE"));
-                                        var p7 = px.OffsetXY(-600, 300);
-                                        lineInfos.Add(new LineInfo(new GLineSegment(p7, px.OffsetXY(-1200, 300)), "W-FRPT-HYDT-PIPE"));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1332), px.OffsetXY(-388, 1544)), "W-WSUP-NOTE"));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1544), px.OffsetXY(2354, 1544)), "W-WSUP-NOTE"));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
-                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        {
-                                        }
-                                        {
-                                            var dn = "DN65";
-                                            var (w, h) = GetDBTextSize(dn, TEXT_HEIGHT, .7, "TH-STLYE3");
-                                            textInfos.Add(new DBTextInfo(p7.OffsetXY(-w - 100, -h - 100), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                        }
-                                    }
                                 }
                             }
                                 foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
@@ -1993,10 +1975,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                         {
                             var dx = ringsCount * SPAN_X;
                             dx += width_HaveHandPumpConnection;
-                            var dc = _refugeCount - _generalCount;
+                            var dc = refugeCount - generalCount;
                             if (dc > 0)
                             {
-                                if (j >= _generalCount / 2)
+                                if (j >= generalCount / 2)
                                 {
                                     dx += dc * SPAN_X;
                                 }
@@ -2005,7 +1987,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                         }
                         Point3d getRefugeBsPt(int i, int j)
                         {
-                            var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                            var dx = (ringsCount + generalCount / 2) * SPAN_X;
                             dx += width_HaveHandPumpConnection;
                             return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                         }
@@ -2050,7 +2032,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     if (_vm.ExistsSpecialFloor) v = _vm.Items.FirstOrDefault(m => test(m.Floor, GetStoreyScore(allStoreys[i])))?.Height ?? v;
                                     total += v;
                                 }
-                                var lineLen = OFFSET_X1 + width_HaveHandPumpConnection + (_refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
+                                var lineLen = OFFSET_X1 + width_HaveHandPumpConnection + (refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
                                 var fs = new List<Tuple<int, Action>>();
                                 foreach (var i in Enumerable.Range(0, allStoreys.Count))
                                 {
@@ -2075,7 +2057,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                 {
                                     int c1 = 0, c2 = 0;
-                                    for (int _j = 0; _j < _generalCount; _j++)
+                                    for (int _j = 0; _j < generalCount; _j++)
                                     {
                                         var j = getRealJ(_j);
                                         var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -2241,7 +2223,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var storey = allStoreys[i];
                                 if (IsNumStorey(storey))
                                 {
-                                    for (int j = 0; j < _generalCount; j++)
+                                    for (int j = 0; j < generalCount; j++)
                                     {
                                         var bsPt = getGeneralBsPt(i, j);
                                         vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -2275,7 +2257,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                             if (IsNumStorey(storey))
                                             {
-                                                foreach (var j in Enumerable.Range(0, _generalCount))
+                                                foreach (var j in Enumerable.Range(0, generalCount))
                                                 {
                                                     var bsPt = getGeneralBsPt(i, j);
                                                     {
@@ -2322,7 +2304,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         {
                                                             var _k = k;
                                                             var _j = getRealJ(j);
-                                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                             labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                             {
                                                                 var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -2455,7 +2437,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var h1 = HEIGHT - 550.0;
                                             var h2 = h1 - 250.0;
                                             var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                            var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                            var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                             var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                             var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                             {
@@ -2531,9 +2513,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         p9 = p9.OffsetX(200);
                                                     }
                                                     textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    if (_refugeCount > _generalCount)
+                                                    if (refugeCount > generalCount)
                                                     {
-                                                        var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                        var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                         textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                     }
                                                     {
@@ -2568,7 +2550,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                             var hlines = new List<GLineSegment>();
                                             var hdrills = new List<GRect>();
-                                            for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                            for (int j = 0; j < refugeCount - generalCount; j++)
                                             {
                                                 var bsPt = getRefugeBsPt(i, j);
                                                 drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -2578,7 +2560,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 drawFire(p8);
                                                 textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                             }
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt1 = getGeneralBsPt(i, j);
                                                 var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -2593,7 +2575,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var ok = false;
                                                 if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                 {
-                                                    var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                    var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                     if (!isLeft)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -2612,7 +2594,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var s = segs[1];
                                                         var p9 = s.StartPoint;
                                                         vsels.Add(p9.ToPoint3d());
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
                                                             vsels.Add(bsPt1.OffsetY(h2));
                                                         }
@@ -2622,14 +2604,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     drawDomePipes(segs);
                                                 }
-                                                if (_refugeCount == _generalCount)
+                                                if (refugeCount == generalCount)
                                                 {
-                                                    if (j < _generalCount - 1)
+                                                    if (j < generalCount - 1)
                                                     {
                                                         hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                         hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                     }
-                                                    if (j > 0 && j < _generalCount - 1)
+                                                    if (j > 0 && j < generalCount - 1)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                         var p9 = _segs.Last().EndPoint;
@@ -2641,12 +2623,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 else
                                                 {
-                                                    if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                    if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                     {
                                                         hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                         hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                     }
-                                                    if (j != 0 && j + 1 <= _generalCount / 2)
+                                                    if (j != 0 && j + 1 <= generalCount / 2)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                         var p9 = _segs.Last().EndPoint;
@@ -2655,7 +2637,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(_segs[0]);
                                                         drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                     }
-                                                    if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                    if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                         var p9 = _segs.Last().EndPoint;
@@ -2664,7 +2646,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(_segs[0]);
                                                         drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                     }
-                                                    if (j == _generalCount - 1)
+                                                    if (j == generalCount - 1)
                                                     {
                                                         var p9 = bsPt1.OffsetY(h2);
                                                         vsels.Add(p9);
@@ -2672,10 +2654,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                 }
                                             }
-                                            if (_generalCount > 1)
+                                            if (generalCount > 1)
                                             {
                                                 var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                 hlines.Add(new GLineSegment(p5, p6));
                                             }
                                             vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -2690,7 +2672,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                     brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                    brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -2706,7 +2688,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -2774,7 +2756,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var p0 = getStoreyBsPt(i);
                                             var h1 = HEIGHT - 400.0;
                                             var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                            var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                            var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                             var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                             var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                             var hlines = new List<GLineSegment>();
@@ -2839,10 +2821,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                             }
-                                            if (_generalCount > 0)
+                                            if (generalCount > 0)
                                             {
                                                 var p5 = getGeneralBsPt(i - 1, 0);
-                                                var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                 hlines.Add(new GLineSegment(p5.OffsetY(h1), p6.OffsetY(h1)));
                                                 vsels.Add(p5.OffsetY(h1));
                                                 vkills.Add(p5.OffsetY(h1).OffsetY(.1));
@@ -2882,9 +2864,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_refugeCount == _generalCount)
+                                                if (refugeCount == generalCount)
                                                 {
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
@@ -2894,7 +2876,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 vsels.Add(p);
                                                                 vkills.Add(p.OffsetY(-.1));
                                                             }
-                                                            if (j != _generalCount - 1)
+                                                            if (j != generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             }
@@ -2907,12 +2889,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j != _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j != generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             }
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                 var p9 = _segs.Last().EndPoint;
@@ -2947,12 +2929,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 else
                                                 {
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
                                                         var bsPt1 = getGeneralBsPt(i, j);
                                                         var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                        var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             vsels.Add(bsPt2.OffsetY(h1));
                                                             vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -2969,13 +2951,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                             }));
                                                         }
-                                                        if (j < _generalCount / 2 - 1)
+                                                        if (j < generalCount / 2 - 1)
                                                         {
                                                             hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                         }
                                                         hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                        if (j < _generalCount / 2)
+                                                        if (j < generalCount / 2)
                                                         {
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -2993,12 +2975,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                             }
                                                         }
-                                                        if (j >= _generalCount / 2)
+                                                        if (j >= generalCount / 2)
                                                         {
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                 var p9 = _segs.Last().EndPoint;
-                                                                if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                 {
                                                                     vsels.Add(p9.ToPoint3d());
                                                                     vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -3006,7 +2988,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 drawDomePipe(_segs[0]);
                                                                 drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                             }
-                                                            if (j != _generalCount - 1)
+                                                            if (j != generalCount - 1)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                 var p9 = _segs.Last().EndPoint;
@@ -3016,13 +2998,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                             }
                                                         }
-                                                        if (j == _generalCount / 2 - 1)
+                                                        if (j == generalCount / 2 - 1)
                                                         {
                                                             var (w, _) = getValveSize();
                                                             hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                         }
-                                                        if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                        if (j >= generalCount / 2 && j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -3039,11 +3021,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 {
                                     var storey = allStoreys[i];
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                    for (int j = 0; j < _generalCount; j++)
+                                    for (int j = 0; j < generalCount; j++)
                                     {
                                         var bsPt = getGeneralBsPt(i, j);
                                         var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                        var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                        var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                         var hasExtraFire = getHasExtraFire(i, j);
                                         bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                         if (!hasFullHalfPlatformLine)
@@ -3240,7 +3222,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     {
                                                                         st = st.OffsetXY(300, 0);
                                                                     }
-                                                                    if (j == _generalCount - 1)
+                                                                    if (j == generalCount - 1)
                                                                     {
                                                                         if (isLeft)
                                                                         {
@@ -3293,7 +3275,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                             {
                                                                                 st = st.OffsetXY(300, 300);
                                                                             }
-                                                                            if (j == _generalCount - 1)
+                                                                            if (j == generalCount - 1)
                                                                             {
                                                                                 if (isLeft)
                                                                                 {
@@ -3494,7 +3476,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 }
                                 {
                                     var p7s = new List<Point3d>();
-                                    for (int j = 0; j < _generalCount; j++)
+                                    for (int j = 0; j < generalCount; j++)
                                     {
                                         var bsPt = getGeneralBsPt(0, j);
                                         var p5 = bsPt;
@@ -3572,17 +3554,17 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var p1s = new List<Point3d>();
                                         var bds = new List<GRect>();
                                         var h = HEIGHT / 2 - 300;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var p1 = bsPt.OffsetY(h);
                                             p1s.Add(p1);
                                             vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                            if (_generalCount > 1)
+                                            if (generalCount > 1)
                                             {
-                                                if (j == _generalCount - 1)
+                                                if (j == generalCount - 1)
                                                 {
-                                                    if (_generalCount == 2)
+                                                    if (generalCount == 2)
                                                     {
                                                         var (w, _) = getValveSize();
                                                         var p3 = p1s.First();
@@ -3594,7 +3576,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         bds.Add(drawValve(p1.OffsetX(-600)));
                                                     }
                                                 }
-                                                else if (j == _generalCount - 2)
+                                                else if (j == generalCount - 2)
                                                 {
                                                 }
                                                 else
@@ -3604,7 +3586,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     {
                                                         p2 = p1.OffsetX(400);
                                                     }
-                                                    else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
+                                                    else if (refugeCount > generalCount && j + 1 == generalCount / 2)
                                                     {
                                                         var (w, _) = getValveSize();
                                                         p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
@@ -3614,7 +3596,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         p2 = p1.OffsetX(700);
                                                     }
                                                     bds.Add(drawValve(p2));
-                                                    if (j + 1 == _generalCount / 2)
+                                                    if (j + 1 == generalCount / 2)
                                                     {
                                                         var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                         var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -3632,7 +3614,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                             }
                                         }
-                                        if (_generalCount == 2)
+                                        if (generalCount == 2)
                                         {
                                             var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                             var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -3643,24 +3625,24 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                             }
                                         }
-                                        if (_generalCount == 1)
+                                        if (generalCount == 1)
                                         {
                                         }
-                                        else if (_generalCount > 1)
+                                        else if (generalCount > 1)
                                         {
                                             var bsp = p1s.First();
                                             drawTestFire(bsp, 300, 1000);
                                         }
-                                        if (_generalCount > 1)
+                                        if (generalCount > 1)
                                         {
                                             var seg = new GLineSegment(p1s.First(), p1s.Last());
                                             if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
                                             drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                         }
-                                        for (int j = 1; j < _generalCount - 1; j++)
+                                        for (int j = 1; j < generalCount - 1; j++)
                                         {
                                             var p1 = p1s[j];
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
                                             if (isLeft) vecs = vecs.GetYAxisMirror();
                                             var segs = vecs.ToGLineSegments(p1);
@@ -3686,27 +3668,27 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                     else if (vm.IsTopLayerRing)
                                     {
-                                        if (_generalCount == 1)
+                                        if (generalCount == 1)
                                         {
                                             var bsPt = getGeneralBsPt(i, 0);
                                             drawTestFire(bsPt, 1000, 0);
                                         }
-                                        else if (_generalCount > 1)
+                                        else if (generalCount > 1)
                                         {
                                             var h1 = 300;
                                             var h2 = 300;
                                             {
                                                 var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
                                                 drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                var p4 = getGeneralBsPt(i - 1, generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
                                                 if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
                                                 {
                                                     var bds = new List<GRect>();
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
-                                                            if (_generalCount == 2)
+                                                            if (generalCount == 2)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
@@ -3716,7 +3698,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
                                                             }
                                                         }
-                                                        else if (j == _generalCount - 2)
+                                                        else if (j == generalCount - 2)
                                                         {
                                                         }
                                                         else if (j == 0)
@@ -3728,7 +3710,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         {
                                                             var p = getGeneralBsPt(i - 1, j);
                                                             var dx = 710.0;
-                                                            if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
+                                                            if (refugeCount != generalCount && j + 1 == generalCount / 2)
                                                             {
                                                                 dx += 2300;
                                                             }
@@ -3747,9 +3729,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
                                                 vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
                                             }
-                                            for (int j = 1; j < _generalCount - 1; j++)
+                                            for (int j = 1; j < generalCount - 1; j++)
                                             {
-                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                 var p = getGeneralBsPt(i - 1, j);
                                                 var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
                                                 if (isLeft)
@@ -3824,35 +3806,35 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             var vlines = new List<LineString>(4096);
                             double getFixX()
                             {
-                                return basePoint.X - Enumerable.Range(0, _generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).Min() + OFFSET_X1;
+                                return basePoint.X - Enumerable.Range(0, generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).Min() + OFFSET_X1;
                             }
                             var FIXX = getFixX();
                             int getVj(int j, int rgi)
                             {
                                 var x = _getGeneralBasePt(0, j, rgi).X;
-                                return Enumerable.Range(0, _generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).OrderBy(x => x).ToList().IndexOf(x);
+                                return Enumerable.Range(0, generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).OrderBy(x => x).ToList().IndexOf(x);
                             }
                             Point3d _getGeneralBasePt(int i, int j, int rgi)
                             {
                                 var dx = ringsCount * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
-                                var dc = _refugeCount - _generalCount;
+                                var dc = refugeCount - generalCount;
                                 if (dc > 0)
                                 {
-                                    if (j >= _generalCount / 2)
+                                    if (j >= generalCount / 2)
                                     {
                                         dx += dc * SPAN_X;
                                     }
                                 }
                                 if (rgi > 0)
                                 {
-                                    if ((j + 1 > _generalCount / 2))
+                                    if ((j + 1 > generalCount / 2))
                                     {
-                                        dx += rgi * SPAN_X * (_generalCount / 2 + _generalCount % 2);
+                                        dx += rgi * SPAN_X * (generalCount / 2 + generalCount % 2);
                                     }
                                     else
                                     {
-                                        dx -= rgi * SPAN_X * (_generalCount / 2);
+                                        dx -= rgi * SPAN_X * (generalCount / 2);
                                     }
                                 }
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
@@ -3871,7 +3853,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             }
                             Point3d getRefugeBsPt(int i, int j)
                             {
-                                var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                                var dx = (ringsCount + generalCount / 2) * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                             }
@@ -3917,7 +3899,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         if (_vm.ExistsSpecialFloor) v = _vm.Items.FirstOrDefault(m => test(m.Floor, GetStoreyScore(allStoreys[i])))?.Height ?? v;
                                         total += v;
                                     }
-                                    var lineLen = OFFSET_X1 + width_HaveHandPumpConnection + _refugeCount * SPAN_X * floorRanges.Count + OFFSET_X2;
+                                    var lineLen = OFFSET_X1 + width_HaveHandPumpConnection + refugeCount * SPAN_X * floorRanges.Count + OFFSET_X2;
                                     var fs = new List<Tuple<int, Action>>();
                                     foreach (var i in Enumerable.Range(0, allStoreys.Count))
                                     {
@@ -3942,7 +3924,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                     {
                                         int c1 = 0, c2 = 0;
-                                        for (int _j = 0; _j < _generalCount; _j++)
+                                        for (int _j = 0; _j < generalCount; _j++)
                                         {
                                             var j = getRealJ(_j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -4108,7 +4090,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var storey = allStoreys[i];
                                     if (IsNumStorey(storey))
                                     {
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -4142,7 +4124,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 if (IsNumStorey(storey))
                                                 {
-                                                    foreach (var j in Enumerable.Range(0, _generalCount))
+                                                    foreach (var j in Enumerable.Range(0, generalCount))
                                                     {
                                                         var bsPt = getGeneralBsPt(i, j);
                                                         {
@@ -4190,7 +4172,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 var _k = k;
                                                                 var _j = getRealJ(j);
-                                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                                 labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                                 {
                                                                     var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -4325,7 +4307,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var h1 = HEIGHT - 550.0;
                                                 var h2 = h1 - 250.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 {
@@ -4401,9 +4383,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p9 = p9.OffsetX(200);
                                                         }
                                                         textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                        if (_refugeCount > _generalCount)
+                                                        if (refugeCount > generalCount)
                                                         {
-                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                             textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                         }
                                                         {
@@ -4438,7 +4420,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 var hlines = new List<GLineSegment>();
                                                 var hdrills = new List<GRect>();
-                                                for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                                for (int j = 0; j < refugeCount - generalCount; j++)
                                                 {
                                                     var bsPt = getRefugeBsPt(i, j);
                                                     drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -4448,7 +4430,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawFire(p8);
                                                     textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var bsPt1 = getGeneralBsPt(i, j);
                                                     var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -4463,7 +4445,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var ok = false;
                                                     if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                     {
-                                                        var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                        var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                         if (!isLeft)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -4482,7 +4464,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             var s = segs[1];
                                                             var p9 = s.StartPoint;
                                                             vsels.Add(p9.ToPoint3d());
-                                                            if (j == _generalCount - 1)
+                                                            if (j == generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt1.OffsetY(h2));
                                                             }
@@ -4492,14 +4474,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                         drawDomePipes(segs);
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        if (j < _generalCount - 1)
+                                                        if (j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -4511,12 +4493,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j != 0 && j + 1 <= _generalCount / 2)
+                                                        if (j != 0 && j + 1 <= generalCount / 2)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -4525,7 +4507,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -4534,7 +4516,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
                                                             var p9 = bsPt1.OffsetY(h2);
                                                             vsels.Add(p9);
@@ -4542,10 +4524,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
                                                     var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                    var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                    var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                     hlines.Add(new GLineSegment(p5, p6));
                                                 }
                                                 vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -4560,7 +4542,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                         brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -4576,7 +4558,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -4644,7 +4626,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var p0 = getStoreyBsPt(i);
                                                 var h1 = HEIGHT - 400.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 var hlines = new List<GLineSegment>();
@@ -4709,10 +4691,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                                 }
-                                                if (_generalCount > 0)
+                                                if (generalCount > 0)
                                                 {
                                                     var p5 = getGeneralBsPt(i - 1, 0);
-                                                    var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                    var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                     hlines.Add(new GLineSegment(p5.OffsetY(h1), p6.OffsetY(h1)));
                                                     vsels.Add(p5.OffsetY(h1));
                                                     vkills.Add(p5.OffsetY(h1).OffsetY(.1));
@@ -4752,9 +4734,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i, j);
@@ -4764,7 +4746,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     vsels.Add(p);
                                                                     vkills.Add(p.OffsetY(-.1));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
@@ -4777,12 +4759,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                                var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                                if (j != _generalCount - 1)
+                                                                var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
-                                                                if (j > 0 && j < _generalCount - 1)
+                                                                if (j > 0 && j < generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -4817,12 +4799,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
                                                             var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt2.OffsetY(h1));
                                                                 vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -4839,13 +4821,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                                 }));
                                                             }
-                                                            if (j < _generalCount / 2 - 1)
+                                                            if (j < generalCount / 2 - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                             }
                                                             hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                            if (j < _generalCount / 2)
+                                                            if (j < generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -4863,12 +4845,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j >= _generalCount / 2)
+                                                            if (j >= generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
-                                                                    if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                    if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                     {
                                                                         vsels.Add(p9.ToPoint3d());
                                                                         vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -4876,7 +4858,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipe(_segs[0]);
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -4886,13 +4868,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j == _generalCount / 2 - 1)
+                                                            if (j == generalCount / 2 - 1)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             }
-                                                            if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                            if (j >= generalCount / 2 && j < generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -4909,11 +4891,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     {
                                         var storey = allStoreys[i];
                                         var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var hasExtraFire = getHasExtraFire(i, j);
                                             bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                             if (!hasFullHalfPlatformLine)
@@ -5101,7 +5083,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         {
                                                                             st = st.OffsetXY(300, 0);
                                                                         }
-                                                                        if (j == _generalCount - 1)
+                                                                        if (j == generalCount - 1)
                                                                         {
                                                                             if (isLeft)
                                                                             {
@@ -5152,7 +5134,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                                 {
                                                                                     st = st.OffsetXY(300, 300);
                                                                                 }
-                                                                                if (j == _generalCount - 1)
+                                                                                if (j == generalCount - 1)
                                                                                 {
                                                                                     if (isLeft)
                                                                                     {
@@ -5349,7 +5331,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                     {
                                         var p7s = new List<Point3d>();
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(0, j);
                                             var p5 = bsPt;
@@ -5403,14 +5385,416 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                         }
                                     }
+                                    for (int i = 0; i < allStoreys.Count; i++)
                                     {
-                                        var i = iRF;
+                                        var storey = allStoreys[i];
+                                        if (storey == "RF")
                                         {
-                                            for (int j = 1; j < _generalCount - 1; j++)
+                                            if (!(refugeFloors.Count > 6))
                                             {
-                                                var px = getGeneralBsPt(i, j);
-                                                vsels.Add(px.OffsetY(-300));
-                                                vkills.Add(px.OffsetY(-300 + .1));
+                                                if (vm.IsRoofRing)
+                                                {
+                                                    var stepH = 600.0;
+                                                    if (rgi == floorRanges.Count - 1)
+                                                    {
+                                                        for (int k = 0; k < floorRanges.Count; k++)
+                                                        {
+                                                            var bds = new List<GRect>();
+                                                            for (int j = 0; j < generalCount; j++)
+                                                            {
+                                                                {
+                                                                    var px = getGeneralBasePt(i, j, k);
+                                                                    var dy = 600 + k * stepH - 900;
+                                                                    if (dy > 0)
+                                                                    {
+                                                                        if (j == 0 || j == generalCount - 1)
+                                                                        {
+                                                                            dy += 900;
+                                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, dy)), "W-FRPT-HYDT-PIPE"));
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (j == 0 || j == generalCount - 1)
+                                                                        {
+                                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                        }
+                                                                    }
+                                                                }
+                                                                if (j != generalCount - 1)
+                                                                {
+                                                                    var vecs = new List<Vector2d> { new Vector2d(300, 600 + stepH * k) };
+                                                                    var bsPt = getGeneralBasePt(i, j, k);
+                                                                    var px = bsPt;
+                                                                    bds.Add(drawValve(px + vecs[0].ToVector3d()));
+                                                                }
+                                                                if (!(j == 0 || j == generalCount - 1))
+                                                                {
+                                                                    var bsPt = getGeneralBasePt(i, j, k);
+                                                                    var px = bsPt;
+                                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300).OffsetXY(0, stepH * k)));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300 + stepH * k), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                }
+                                                            }
+                                                            for (int j = 0; j < generalCount; j++)
+                                                            {
+                                                                if (j == 0)
+                                                                {
+                                                                    var seg = getSeg(i, Enumerable.Range(0, generalCount).ToArray(), k).Offset(0, 600 + k * stepH);
+                                                                    drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                                }
+                                                            }
+                                                        }
+                                                        for (int k = 0; k < floorRanges.Count; k++)
+                                                            {
+                                                                if (k == floorRanges.Count - 1)
+                                                                {
+                                                                    var bsPt = getGeneralBasePt(i, 0, k);
+                                                                    var px = bsPt.OffsetY(k * stepH).OffsetXY(600, 600);
+                                                                    {
+                                                                        var p = px;
+                                                                        {
+                                                                            px = px.OffsetXY(500, 50);
+                                                                            {
+                                                                                var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                                if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                            }
+                                                                        }
+                                                                        px = p;
+                                                                    }
+                                                                    var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
+                                                                    bi.DynaDict["可见性"] = "试验消火栓";
+                                                                    brInfos.Add(bi);
+                                                                    brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
+                                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                }
+                                                            }
+                                                    }
+                                                    else
+                                                    {
+                                                        var j = 0;
+                                                        var k = rgi;
+                                                        {
+                                                            var bsPt = getGeneralBasePt(i, 0, k);
+                                                            var px = bsPt.OffsetY(k * stepH);
+                                                            {
+                                                                var p = px;
+                                                                if (j == 0)
+                                                                {
+                                                                    px = px.OffsetXY(1000, 600 + 50);
+                                                                    {
+                                                                        var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                        if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                    }
+                                                                }
+                                                                px = p;
+                                                            }
+                                                            {
+                                                                var p = px;
+                                                                px = px.OffsetXY(0, 600);
+                                                                brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));
+                                                                textInfos.Add(new DBTextInfo(px.OffsetXY(212, 994), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                px = p;
+                                                            }
+                                                        }
+                                                    }
+                                                    {
+                                                        for (int j = 1; j < generalCount - 1; j++)
+                                                        {
+                                                            var px = getGeneralBsPt(i, j);
+                                                            vsels.Add(px.OffsetY(-300));
+                                                            vkills.Add(px.OffsetY(-300 + .1));
+                                                        }
+                                                    }
+                                                }
+                                                else if (vm.IsTopLayerRing)
+                                                {
+                                                    var pts = new List<Point3d>();
+                                                    var bds = new List<GRect>();
+                                                    for (int j = 0; j < generalCount; j++)
+                                                    {
+                                                        var stepH = 200.0;
+                                                        {
+                                                            var px = getGeneralBasePt(i, j, rgi);
+                                                            var pt = px.OffsetY(-(floorRanges.Count - rgi) * stepH);
+                                                            pts.Add(pt);
+                                                            vsels.Add(pt);
+                                                            vkills.Add(pt.OffsetY(.1));
+                                                            if (j != generalCount - 1)
+                                                            {
+                                                                bds.Add(drawValve(pt.OffsetX(300)));
+                                                            }
+                                                            if (j == generalCount - 1)
+                                                            {
+                                                                var st = pts.First();
+                                                                var ed = pts.Last();
+                                                                drawDomePipes(GeoFac.GetLines(new GLineSegment(st, ed).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                                if (rgi == floorRanges.Count - 1)
+                                                                {
+                                                                    var p = px;
+                                                                    px = st;
+                                                                    var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
+                                                                    bi.DynaDict["可见性"] = "试验消火栓";
+                                                                    brInfos.Add(bi);
+                                                                    brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
+                                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                    px = p;
+                                                                }
+                                                                else
+                                                                {
+                                                                    var p = px;
+                                                                    px = st;
+                                                                    brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));
+                                                                    textInfos.Add(new DBTextInfo(px.OffsetXY(212, 994), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                                    px = p;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (vm.IsRoofRing)
+                                                {
+                                                    var p1s = new List<Point3d>();
+                                                    var bds = new List<GRect>();
+                                                    var h = HEIGHT / 2 - 300;
+                                                    for (int j = 0; j < generalCount; j++)
+                                                    {
+                                                        var bsPt = getGeneralBsPt(i, j);
+                                                        var p1 = bsPt.OffsetY(h);
+                                                        p1s.Add(p1);
+                                                        vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
+                                                        if (generalCount > 1)
+                                                        {
+                                                            if (j == generalCount - 1)
+                                                            {
+                                                                if (generalCount == 2)
+                                                                {
+                                                                    var (w, _) = getValveSize();
+                                                                    var p3 = p1s.First();
+                                                                    var p4 = p1s.Last();
+                                                                    bds.Add(drawValve(GetMidPoint(p3, p4).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
+                                                                }
+                                                                else
+                                                                {
+                                                                    bds.Add(drawValve(p1.OffsetX(-600)));
+                                                                }
+                                                            }
+                                                            else if (j == generalCount - 2)
+                                                            {
+                                                            }
+                                                            else
+                                                            {
+                                                                Point3d p2;
+                                                                if (j == 0)
+                                                                {
+                                                                    p2 = p1.OffsetX(400);
+                                                                }
+                                                                else if (refugeCount > generalCount && j + 1 == generalCount / 2)
+                                                                {
+                                                                    var (w, _) = getValveSize();
+                                                                    p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
+                                                                }
+                                                                else
+                                                                {
+                                                                    p2 = p1.OffsetX(700);
+                                                                }
+                                                                bds.Add(drawValve(p2));
+                                                                if (j + 1 == generalCount / 2 && rgi == floorRanges.Count - 1)
+                                                                {
+                                                                    var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
+                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
+                                                                    if (dn != null)
+                                                                    {
+                                                                        var px = p2.OffsetY(150);
+                                                                        var x1 = getGeneralBsPt(i, 0).X;
+                                                                        if (px.X - x1 < 1500)
+                                                                        {
+                                                                            px = px.ReplaceX(x1 + 1500);
+                                                                        }
+                                                                        textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    if (generalCount == 2)
+                                                    {
+                                                        var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
+                                                        var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
+                                                        if (dn != null)
+                                                        {
+                                                            var bsPt = getGeneralBsPt(i, 0);
+                                                            var p1 = bsPt.OffsetY(h);
+                                                            textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                        }
+                                                    }
+                                                    if (generalCount == 1)
+                                                    {
+                                                    }
+                                                    else if (generalCount > 1)
+                                                    {
+                                                        var bsp = p1s.First();
+                                                        drawTestFire(bsp, 300, 1000);
+                                                    }
+                                                    if (generalCount > 1)
+                                                    {
+                                                        var seg = new GLineSegment(p1s.First(), p1s.Last());
+                                                        if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
+                                                        drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                    }
+                                                    for (int j = 1; j < generalCount - 1; j++)
+                                                    {
+                                                        var p1 = p1s[j];
+                                                        var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
+                                                        var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
+                                                        if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                        var segs = vecs.ToGLineSegments(p1);
+                                                        {
+                                                            var s = segs[1];
+                                                            var p3 = s.StartPoint;
+                                                            var p4 = segs.Last().EndPoint;
+                                                            var r3 = GRect.Create(p3, .01, .01);
+                                                            var r4 = GRect.Create(p4, .01, .01);
+                                                            var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(-.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
+                                                            var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
+                                                            vlines = vlines.Except(lines).ToList();
+                                                            lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
+                                                            lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
+                                                            var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
+                                                            vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
+                                                            segs.RemoveAt(1);
+                                                            var bd = drawValve((isLeft ? s.StartPoint : s.EndPoint).OffsetX(150).ToPoint3d());
+                                                            drawDomePipes(GeoFac.GetLines(s.ToLineString().Difference(bd.ToPolygon())));
+                                                        }
+                                                        drawDomePipes(segs);
+                                                    }
+                                                }
+                                                else if (vm.IsTopLayerRing)
+                                                {
+                                                    if (generalCount == 1)
+                                                    {
+                                                        var bsPt = getGeneralBsPt(i, 0);
+                                                        drawTestFire(bsPt, 1000, 0);
+                                                    }
+                                                    else if (generalCount > 1)
+                                                    {
+                                                        var h1 = 300;
+                                                        var h2 = 300;
+                                                        {
+                                                            var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                            drawTestFire(p3.ToPoint3d(), 600, 1000);
+                                                            var p4 = getGeneralBsPt(i - 1, generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                            if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
+                                                            {
+                                                                var bds = new List<GRect>();
+                                                                for (int j = 0; j < generalCount; j++)
+                                                                {
+                                                                    if (j == generalCount - 1)
+                                                                    {
+                                                                        if (generalCount == 2)
+                                                                        {
+                                                                            var (w, _) = getValveSize();
+                                                                            bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
+                                                                        }
+                                                                    }
+                                                                    else if (j == generalCount - 2)
+                                                                    {
+                                                                    }
+                                                                    else if (j == 0)
+                                                                    {
+                                                                        var dx = 400;
+                                                                        bds.Add(drawValve(p3.OffsetX(dx).ToPoint3d()));
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        var p = getGeneralBsPt(i - 1, j);
+                                                                        var dx = 710.0;
+                                                                        if (refugeCount != generalCount && j + 1 == generalCount / 2)
+                                                                        {
+                                                                            dx += 2300;
+                                                                        }
+                                                                        bds.Add(drawValve(p.OffsetXY(dx, HEIGHT - h1)));
+                                                                    }
+                                                                }
+                                                                drawDomePipes(GeoFac.GetLines(new GLineSegment(p4, p3).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                            }
+                                                            var r3 = GRect.Create(p3, .01, .01);
+                                                            var r4 = GRect.Create(p4, .01, .01);
+                                                            var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
+                                                            var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
+                                                            vlines = vlines.Except(lines).ToList();
+                                                            lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
+                                                            lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
+                                                            var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
+                                                            vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
+                                                        }
+                                                        for (int j = 1; j < generalCount - 1; j++)
+                                                        {
+                                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
+                                                            var p = getGeneralBsPt(i - 1, j);
+                                                            var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
+                                                            if (isLeft)
+                                                            {
+                                                                drawDomePipes(GeoFac.GetLines(segs[0].ToLineString().Difference(drawValve(segs[0].StartPoint.OffsetX(210).ToPoint3d()).ToPolygon())));
+                                                            }
+                                                            else
+                                                            {
+                                                                drawDomePipes(GeoFac.GetLines(segs[0].ToLineString().Difference(drawValve(segs[0].EndPoint.OffsetX(150).ToPoint3d()).ToPolygon())));
+                                                            }
+                                                            drawDomePipe(segs[1]);
+                                                            var p3 = segs[0].StartPoint;
+                                                            var p4 = segs[0].StartPoint.OffsetY(h2);
+                                                            var r3 = GRect.Create(p3, .01, .01);
+                                                            var r4 = GRect.Create(p4, .01, .01);
+                                                            var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
+                                                            var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
+                                                            vlines = vlines.Except(lines).ToList();
+                                                            lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
+                                                            lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
+                                                            var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
+                                                            vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -5460,349 +5844,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         }
                                     }
                                 }
-                                for (int i = 0; i < allStoreys.Count; i++)
-                                {
-                                    var storey = allStoreys[i];
-                                    if (storey == "RF")
-                                    {
-                                        if (!(refugeFloors.Count > 6))
-                                        {
-                                            var stepH = 600.0;
-                                            if (rgi == floorRanges.Count - 1)
-                                            {
-                                                for (int k = 0; k < floorRanges.Count; k++)
-                                                {
-                                                    var bds = new List<GRect>();
-                                                    for (int j = 0; j < _generalCount; j++)
-                                                    {
-                                                        {
-                                                            var px = getGeneralBasePt(i, j, k);
-                                                            var dy = 600 + k * stepH - 900;
-                                                            if (dy > 0)
-                                                            {
-                                                                if (j == 0 || j == _generalCount - 1)
-                                                                {
-                                                                    dy += 900;
-                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, dy)), "W-FRPT-HYDT-PIPE"));
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                if (j == 0 || j == _generalCount - 1)
-                                                                {
-                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
-                                                                }
-                                                            }
-                                                        }
-                                                        if (j != _generalCount - 1)
-                                                        {
-                                                            var vecs = new List<Vector2d> { new Vector2d(300, 600 + stepH * k) };
-                                                            var bsPt = getGeneralBasePt(i, j, k);
-                                                            var px = bsPt;
-                                                            bds.Add(drawValve(px + vecs[0].ToVector3d()));
-                                                        }
-                                                        if (!(j == 0 || j == _generalCount - 1))
-                                                        {
-                                                            var bsPt = getGeneralBasePt(i, j, k);
-                                                            var px = bsPt;
-                                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300).OffsetXY(0, stepH * k)));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300 + stepH * k), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
-                                                        }
-                                                    }
-                                                    for (int j = 0; j < _generalCount; j++)
-                                                    {
-                                                        if (j == 0)
-                                                        {
-                                                            var seg = getSeg(i, Enumerable.Range(0, _generalCount).ToArray(), k).Offset(0, 600 + k * stepH);
-                                                            drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
-                                                        }
-                                                    }
-                                                }
-                                                for (int k = 0; k < floorRanges.Count; k++)
-                                                {
-                                                    if (k == floorRanges.Count - 1)
-                                                    {
-                                                        var bsPt = getGeneralBasePt(i, 0, k);
-                                                        var px = bsPt.OffsetY(k * stepH).OffsetXY(600, 600);
-                                                        {
-                                                            var p = px;
-                                                            {
-                                                                px = px.OffsetXY(500, 50);
-                                                                {
-                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
-                                                                    if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                                }
-                                                            }
-                                                            px = p;
-                                                        }
-                                                        var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
-                                                        bi.DynaDict["可见性"] = "试验消火栓";
-                                                        brInfos.Add(bi);
-                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
-                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                var j = 0;
-                                                var k = rgi;
-                                                {
-                                                    var bsPt = getGeneralBasePt(i, 0, k);
-                                                    var px = bsPt.OffsetY(k * stepH);
-                                                    {
-                                                        var p = px;
-                                                        if (j == 0)
-                                                        {
-                                                            px = px.OffsetXY(1000, 600 + 50);
-                                                            {
-                                                                var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
-                                                                if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                            }
-                                                        }
-                                                        px = p;
-                                                    }
-                                                    {
-                                                        var p = px;
-                                                        px = px.OffsetXY(0, 600);
-                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(212, 994), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        px = p;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (vm.IsRoofRing)
-                                            {
-                                                var p1s = new List<Point3d>();
-                                                var bds = new List<GRect>();
-                                                var h = HEIGHT / 2 - 300;
-                                                for (int j = 0; j < _generalCount; j++)
-                                                {
-                                                    var bsPt = getGeneralBsPt(i, j);
-                                                    var p1 = bsPt.OffsetY(h);
-                                                    p1s.Add(p1);
-                                                    vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                                    if (_generalCount > 1)
-                                                    {
-                                                        if (j == _generalCount - 1)
-                                                        {
-                                                            if (_generalCount == 2)
-                                                            {
-                                                                var (w, _) = getValveSize();
-                                                                var p3 = p1s.First();
-                                                                var p4 = p1s.Last();
-                                                                bds.Add(drawValve(GetMidPoint(p3, p4).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
-                                                            }
-                                                            else
-                                                            {
-                                                                bds.Add(drawValve(p1.OffsetX(-600)));
-                                                            }
-                                                        }
-                                                        else if (j == _generalCount - 2)
-                                                        {
-                                                        }
-                                                        else
-                                                        {
-                                                            Point3d p2;
-                                                            if (j == 0)
-                                                            {
-                                                                p2 = p1.OffsetX(400);
-                                                            }
-                                                            else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
-                                                            {
-                                                                var (w, _) = getValveSize();
-                                                                p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
-                                                            }
-                                                            else
-                                                            {
-                                                                p2 = p1.OffsetX(700);
-                                                            }
-                                                            bds.Add(drawValve(p2));
-                                                            if (j + 1 == _generalCount / 2 && rgi == floorRanges.Count - 1)
-                                                            {
-                                                                var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
-                                                                var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
-                                                                if (dn != null)
-                                                                {
-                                                                    var px = p2.OffsetY(150);
-                                                                    var x1 = getGeneralBsPt(i, 0).X;
-                                                                    if (px.X - x1 < 1500)
-                                                                    {
-                                                                        px = px.ReplaceX(x1 + 1500);
-                                                                    }
-                                                                    textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                if (_generalCount == 2)
-                                                {
-                                                    var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
-                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
-                                                    if (dn != null)
-                                                    {
-                                                        var bsPt = getGeneralBsPt(i, 0);
-                                                        var p1 = bsPt.OffsetY(h);
-                                                        textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    }
-                                                }
-                                                if (_generalCount == 1)
-                                                {
-                                                }
-                                                else if (_generalCount > 1)
-                                                {
-                                                    var bsp = p1s.First();
-                                                    drawTestFire(bsp, 300, 1000);
-                                                }
-                                                if (_generalCount > 1)
-                                                {
-                                                    var seg = new GLineSegment(p1s.First(), p1s.Last());
-                                                    if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
-                                                    drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
-                                                }
-                                                for (int j = 1; j < _generalCount - 1; j++)
-                                                {
-                                                    var p1 = p1s[j];
-                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
-                                                    var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
-                                                    if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                    var segs = vecs.ToGLineSegments(p1);
-                                                    {
-                                                        var s = segs[1];
-                                                        var p3 = s.StartPoint;
-                                                        var p4 = segs.Last().EndPoint;
-                                                        var r3 = GRect.Create(p3, .01, .01);
-                                                        var r4 = GRect.Create(p4, .01, .01);
-                                                        var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(-.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
-                                                        var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
-                                                        vlines = vlines.Except(lines).ToList();
-                                                        lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
-                                                        lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
-                                                        var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
-                                                        vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
-                                                        segs.RemoveAt(1);
-                                                        var bd = drawValve((isLeft ? s.StartPoint : s.EndPoint).OffsetX(150).ToPoint3d());
-                                                        drawDomePipes(GeoFac.GetLines(s.ToLineString().Difference(bd.ToPolygon())));
-                                                    }
-                                                    drawDomePipes(segs);
-                                                }
-                                            }
-                                            else if (vm.IsTopLayerRing)
-                                            {
-                                                if (_generalCount == 1)
-                                                {
-                                                    var bsPt = getGeneralBsPt(i, 0);
-                                                    drawTestFire(bsPt, 1000, 0);
-                                                }
-                                                else if (_generalCount > 1)
-                                                {
-                                                    var h1 = 300;
-                                                    var h2 = 300;
-                                                    {
-                                                        var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
-                                                        drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                        var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
-                                                        if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
-                                                        {
-                                                            var bds = new List<GRect>();
-                                                            for (int j = 0; j < _generalCount; j++)
-                                                            {
-                                                                if (j == _generalCount - 1)
-                                                                {
-                                                                    if (_generalCount == 2)
-                                                                    {
-                                                                        var (w, _) = getValveSize();
-                                                                        bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
-                                                                    }
-                                                                }
-                                                                else if (j == _generalCount - 2)
-                                                                {
-                                                                }
-                                                                else if (j == 0)
-                                                                {
-                                                                    var dx = 400;
-                                                                    bds.Add(drawValve(p3.OffsetX(dx).ToPoint3d()));
-                                                                }
-                                                                else
-                                                                {
-                                                                    var p = getGeneralBsPt(i - 1, j);
-                                                                    var dx = 710.0;
-                                                                    if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
-                                                                    {
-                                                                        dx += 2300;
-                                                                    }
-                                                                    bds.Add(drawValve(p.OffsetXY(dx, HEIGHT - h1)));
-                                                                }
-                                                            }
-                                                            drawDomePipes(GeoFac.GetLines(new GLineSegment(p4, p3).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
-                                                        }
-                                                        var r3 = GRect.Create(p3, .01, .01);
-                                                        var r4 = GRect.Create(p4, .01, .01);
-                                                        var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
-                                                        var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
-                                                        vlines = vlines.Except(lines).ToList();
-                                                        lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
-                                                        lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
-                                                        var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
-                                                        vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
-                                                    }
-                                                    for (int j = 1; j < _generalCount - 1; j++)
-                                                    {
-                                                        var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
-                                                        var p = getGeneralBsPt(i - 1, j);
-                                                        var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
-                                                        if (isLeft)
-                                                        {
-                                                            drawDomePipes(GeoFac.GetLines(segs[0].ToLineString().Difference(drawValve(segs[0].StartPoint.OffsetX(210).ToPoint3d()).ToPolygon())));
-                                                        }
-                                                        else
-                                                        {
-                                                            drawDomePipes(GeoFac.GetLines(segs[0].ToLineString().Difference(drawValve(segs[0].EndPoint.OffsetX(150).ToPoint3d()).ToPolygon())));
-                                                        }
-                                                        drawDomePipe(segs[1]);
-                                                        var p3 = segs[0].StartPoint;
-                                                        var p4 = segs[0].StartPoint.OffsetY(h2);
-                                                        var r3 = GRect.Create(p3, .01, .01);
-                                                        var r4 = GRect.Create(p4, .01, .01);
-                                                        var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
-                                                        var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
-                                                        vlines = vlines.Except(lines).ToList();
-                                                        lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
-                                                        lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
-                                                        var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
-                                                        vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
                             }
                                 foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
                         }
@@ -5816,35 +5857,35 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             var vlines = new List<LineString>(4096);
                             double getFixX()
                             {
-                                return basePoint.X - Enumerable.Range(0, _generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).Min() + OFFSET_X1;
+                                return basePoint.X - Enumerable.Range(0, generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).Min() + OFFSET_X1;
                             }
                             var FIXX = getFixX();
                             int getVj(int j, int rgi)
                             {
                                 var x = _getGeneralBasePt(0, j, rgi).X;
-                                return Enumerable.Range(0, _generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).OrderBy(x => x).ToList().IndexOf(x);
+                                return Enumerable.Range(0, generalCount).SelectMany(j => Enumerable.Range(0, floorRanges.Count).Select(rgi => _getGeneralBasePt(0, j, rgi))).Select(x => x.X).OrderBy(x => x).ToList().IndexOf(x);
                             }
                             Point3d _getGeneralBasePt(int i, int j, int rgi)
                             {
                                 var dx = ringsCount * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
-                                var dc = _refugeCount - _generalCount;
+                                var dc = refugeCount - generalCount;
                                 if (dc > 0)
                                 {
-                                    if (j >= _generalCount / 2)
+                                    if (j >= generalCount / 2)
                                     {
                                         dx += dc * SPAN_X;
                                     }
                                 }
                                 if (rgi > 0)
                                 {
-                                    if ((j + 1 > _generalCount / 2))
+                                    if ((j + 1 > generalCount / 2))
                                     {
-                                        dx += rgi * SPAN_X * (_generalCount / 2 + _generalCount % 2);
+                                        dx += rgi * SPAN_X * (generalCount / 2 + generalCount % 2);
                                     }
                                     else
                                     {
-                                        dx -= rgi * SPAN_X * (_generalCount / 2);
+                                        dx -= rgi * SPAN_X * (generalCount / 2);
                                     }
                                 }
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
@@ -5863,7 +5904,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             }
                             Point3d getRefugeBsPt(int i, int j)
                             {
-                                var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                                var dx = (ringsCount + generalCount / 2) * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                             }
@@ -5909,7 +5950,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         if (_vm.ExistsSpecialFloor) v = _vm.Items.FirstOrDefault(m => test(m.Floor, GetStoreyScore(allStoreys[i])))?.Height ?? v;
                                         total += v;
                                     }
-                                    var lineLen = OFFSET_X1 + width_HaveHandPumpConnection + _refugeCount * SPAN_X * floorRanges.Count + OFFSET_X2;
+                                    var lineLen = OFFSET_X1 + width_HaveHandPumpConnection + refugeCount * SPAN_X * floorRanges.Count + OFFSET_X2;
                                     var fs = new List<Tuple<int, Action>>();
                                     foreach (var i in Enumerable.Range(0, allStoreys.Count))
                                     {
@@ -5929,12 +5970,15 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             textInfos.Add(new DBTextInfo(px.OffsetXY(2000, 130), label, "W-NOTE", "TH-STYLE3"));
                                             lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(lineLen, 0)), "W-NOTE"));
                                         }
-                                        fs.Add(new Tuple<int, Action>(i, () => { DrawStoreyLine(storey, bsPt1, lineLen, getStoreyHeightText()); }));
+                                        fs.Add(new Tuple<int, Action>(i, () =>
+                                        {
+                                            DrawStoreyLine(storey, bsPt1, lineLen, getStoreyHeightText());
+                                        }));
                                     }
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                     {
                                         int c1 = 0, c2 = 0;
-                                        for (int _j = 0; _j < _generalCount; _j++)
+                                        for (int _j = 0; _j < generalCount; _j++)
                                         {
                                             var j = getRealJ(_j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -6101,7 +6145,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var storey = allStoreys[i];
                                     if (IsNumStorey(storey))
                                     {
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -6135,7 +6179,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 if (IsNumStorey(storey))
                                                 {
-                                                    foreach (var j in Enumerable.Range(0, _generalCount))
+                                                    foreach (var j in Enumerable.Range(0, generalCount))
                                                     {
                                                         var bsPt = getGeneralBsPt(i, j);
                                                         {
@@ -6183,7 +6227,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 var _k = k;
                                                                 var _j = getRealJ(j);
-                                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                                 labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                                 {
                                                                     var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -6318,7 +6362,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var h1 = HEIGHT - 550.0;
                                                 var h2 = h1 - 250.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 {
@@ -6394,9 +6438,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p9 = p9.OffsetX(200);
                                                         }
                                                         textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                        if (_refugeCount > _generalCount)
+                                                        if (refugeCount > generalCount)
                                                         {
-                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                             textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                         }
                                                         {
@@ -6431,7 +6475,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 var hlines = new List<GLineSegment>();
                                                 var hdrills = new List<GRect>();
-                                                for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                                for (int j = 0; j < refugeCount - generalCount; j++)
                                                 {
                                                     var bsPt = getRefugeBsPt(i, j);
                                                     drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -6441,7 +6485,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawFire(p8);
                                                     textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var bsPt1 = getGeneralBsPt(i, j);
                                                     var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -6456,7 +6500,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var ok = false;
                                                     if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                     {
-                                                        var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                        var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                         if (!isLeft)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -6475,7 +6519,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             var s = segs[1];
                                                             var p9 = s.StartPoint;
                                                             vsels.Add(p9.ToPoint3d());
-                                                            if (j == _generalCount - 1)
+                                                            if (j == generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt1.OffsetY(h2));
                                                             }
@@ -6485,14 +6529,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                         drawDomePipes(segs);
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        if (j < _generalCount - 1)
+                                                        if (j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -6504,12 +6548,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j != 0 && j + 1 <= _generalCount / 2)
+                                                        if (j != 0 && j + 1 <= generalCount / 2)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -6518,7 +6562,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -6527,7 +6571,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
                                                             var p9 = bsPt1.OffsetY(h2);
                                                             vsels.Add(p9);
@@ -6535,10 +6579,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
                                                     var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                    var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                    var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                     hlines.Add(new GLineSegment(p5, p6));
                                                 }
                                                 vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -6553,7 +6597,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                         brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -6569,7 +6613,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -6637,7 +6681,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var p0 = getStoreyBsPt(i);
                                                 var h1 = HEIGHT - 400.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 var hlines = new List<GLineSegment>();
@@ -6702,10 +6746,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                                 }
-                                                if (_generalCount > 0)
+                                                if (generalCount > 0)
                                                 {
                                                     var p5 = getGeneralBsPt(i - 1, 0);
-                                                    var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                    var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                     hlines.Add(new GLineSegment(p5.OffsetY(h1), p6.OffsetY(h1)));
                                                     vsels.Add(p5.OffsetY(h1));
                                                     vkills.Add(p5.OffsetY(h1).OffsetY(.1));
@@ -6745,9 +6789,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i, j);
@@ -6757,7 +6801,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     vsels.Add(p);
                                                                     vkills.Add(p.OffsetY(-.1));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
@@ -6770,12 +6814,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                                var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                                if (j != _generalCount - 1)
+                                                                var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
-                                                                if (j > 0 && j < _generalCount - 1)
+                                                                if (j > 0 && j < generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -6810,12 +6854,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
                                                             var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt2.OffsetY(h1));
                                                                 vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -6832,13 +6876,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                                 }));
                                                             }
-                                                            if (j < _generalCount / 2 - 1)
+                                                            if (j < generalCount / 2 - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                             }
                                                             hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                            if (j < _generalCount / 2)
+                                                            if (j < generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -6856,12 +6900,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j >= _generalCount / 2)
+                                                            if (j >= generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
-                                                                    if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                    if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                     {
                                                                         vsels.Add(p9.ToPoint3d());
                                                                         vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -6869,7 +6913,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipe(_segs[0]);
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -6879,13 +6923,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j == _generalCount / 2 - 1)
+                                                            if (j == generalCount / 2 - 1)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             }
-                                                            if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                            if (j >= generalCount / 2 && j < generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -6902,11 +6946,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     {
                                         var storey = allStoreys[i];
                                         var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var hasExtraFire = getHasExtraFire(i, j);
                                             bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                             if (!hasFullHalfPlatformLine)
@@ -7094,7 +7138,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         {
                                                                             st = st.OffsetXY(300, 0);
                                                                         }
-                                                                        if (j == _generalCount - 1)
+                                                                        if (j == generalCount - 1)
                                                                         {
                                                                             if (isLeft)
                                                                             {
@@ -7145,7 +7189,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                                 {
                                                                                     st = st.OffsetXY(300, 300);
                                                                                 }
-                                                                                if (j == _generalCount - 1)
+                                                                                if (j == generalCount - 1)
                                                                                 {
                                                                                     if (isLeft)
                                                                                     {
@@ -7342,7 +7386,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                     {
                                         var p7s = new List<Point3d>();
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(0, j);
                                             var p5 = bsPt;
@@ -7396,25 +7440,86 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                         }
                                     }
+                                    if (vm.IsTopLayerRing)
+                                    {
+                                        var i = iRF;
+                                        if (rgi == floorRanges.Count - 1)
+                                        {
+                                            var bds = new List<GRect>();
+                                            for (int j = 0; j < generalCount; j++)
+                                            {
+                                                var px = getGeneralBsPt(i, j);
+                                                if (j != 0 && j != generalCount - 1)
+                                                {
+                                                    vsels.Add(px.OffsetY(-600));
+                                                    vkills.Add(px.OffsetY(-600 + .1));
+                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -600), px.OffsetXY(-210, -600)), "W-FRPT-HYDT-PIPE"));
+                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, -600), px.OffsetXY(-600, -600)), "W-FRPT-HYDT-PIPE"));
+                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -600), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, -600)));
+                                                }
+                                                else
+                                                {
+                                                    vsels.Add(px.OffsetY(-300));
+                                                    vkills.Add(px.OffsetY(-300 + .1));
+                                                }
+                                                if (j == 0)
+                                                    {
+                                                        var p = px;
+                                                        px = p.OffsetXY(600, 0);
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(p.OffsetXY(600, 0), p.OffsetXY(600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                        var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
+                                                        bi.DynaDict["可见性"] = "试验消火栓";
+                                                        brInfos.Add(bi);
+                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
+                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                        px = p;
+                                                    }
+                                                if (j != generalCount - 1)
+                                                {
+                                                    bds.Add(drawValve(px.OffsetXY(300, -300)));
+                                                }
+                                                if (j == generalCount - 1)
+                                                {
+                                                    drawDomePipes(GeoFac.GetLines(new GLineSegment(getGeneralBsPt(i, 0).OffsetY(-300), getGeneralBsPt(i, j).OffsetY(-300)).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                }
+                                            }
+                                        }
+                                    }
                                     {
                                         for (int i = 0; i < allStoreys.Count; i++)
                                         {
                                             if (i == rg.Item2)
                                             {
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     if (rgi == floorRanges.Count - 1)
                                                     {
-                                                        if (j != 0 && j != _generalCount - 1)
+                                                        if (j != 0 && j != generalCount - 1)
                                                         {
-                                                            var px = getGeneralBsPt(i, j);
-                                                            vsels.Add(px.OffsetY(-300));
-                                                            vkills.Add(px.OffsetY(-300 + .1));
+                                                            if (vm.IsRoofRing)
+                                                            {
+                                                                var px = getGeneralBsPt(i, j);
+                                                                vsels.Add(px.OffsetY(-300));
+                                                                vkills.Add(px.OffsetY(-300 + .1));
+                                                            }
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        if (j != 0 && j != _refugeCount - 1)
+                                                        if (j != 0 && j != refugeCount - 1)
                                                         {
                                                             var px = getGeneralBsPt(i, j).OffsetXY(-510, -610);
                                                             brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(210, -300)));
@@ -7495,120 +7600,126 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     {
                                         if (!(refugeFloors.Count > 6))
                                         {
-                                            var stepH = .0;
+                                            if (vm.IsRoofRing)
                                             {
-                                                for (int k = 0; k < floorRanges.Count; k++)
+                                                var stepH = .0;
                                                 {
-                                                    if (k != rgi) continue;
-                                                    var bds = new List<GRect>();
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int k = 0; k < floorRanges.Count; k++)
                                                     {
+                                                        if (k != rgi) continue;
+                                                        var bds = new List<GRect>();
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
-                                                            var px = getGeneralBasePt(i, j, k);
-                                                            var dy = 600 + k * stepH - 900;
-                                                            if (dy > 0)
                                                             {
-                                                                if (j == 0 || j == _generalCount - 1)
+                                                                var px = getGeneralBasePt(i, j, k);
+                                                                var dy = 600 + k * stepH - 900;
+                                                                if (dy > 0)
                                                                 {
-                                                                    dy += 900;
-                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, dy)), "W-FRPT-HYDT-PIPE"));
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                if (j == 0 || j == _generalCount - 1)
-                                                                {
-                                                                    if (rgi == floorRanges.Count - 1)
+                                                                    if (j == 0 || j == generalCount - 1)
                                                                     {
-                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                        dy += 900;
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, dy)), "W-FRPT-HYDT-PIPE"));
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (j == 0 || j == generalCount - 1)
+                                                                    {
+                                                                        if (rgi == floorRanges.Count - 1)
+                                                                        {
+                                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-                                                        }
-                                                        if (j != _generalCount - 1)
-                                                        {
-                                                            var dy = 600 + stepH * k;
-                                                            if (rgi != floorRanges.Count - 1) dy = -610;
-                                                            var vecs = new List<Vector2d> { new Vector2d(300, dy) };
-                                                            var bsPt = getGeneralBasePt(i, j, k);
-                                                            var px = bsPt;
-                                                            var dx = .0;
-                                                            if (rgi != floorRanges.Count - 1)
+                                                            if (j != generalCount - 1)
                                                             {
-                                                                dx += 680.0;
-                                                            }
-                                                            bds.Add(drawValve(px.OffsetX(dx) + vecs[0].ToVector3d()));
-                                                        }
-                                                        if (rgi == floorRanges.Count - 1)
-                                                        {
-                                                            if (!(j == 0 || j == _generalCount - 1) && k == rgi)
-                                                            {
+                                                                var dy = 600 + stepH * k;
+                                                                if (rgi != floorRanges.Count - 1) dy = -610;
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, dy) };
                                                                 var bsPt = getGeneralBasePt(i, j, k);
                                                                 var px = bsPt;
-                                                                brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300).OffsetXY(0, stepH * k)));
-                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300 + stepH * k), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
-                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                var dx = .0;
+                                                                if (rgi != floorRanges.Count - 1)
+                                                                {
+                                                                    dx += 680.0;
+                                                                }
+                                                                bds.Add(drawValve(px.OffsetX(dx) + vecs[0].ToVector3d()));
+                                                            }
+                                                            if (rgi == floorRanges.Count - 1)
+                                                            {
+                                                                if (!(j == 0 || j == generalCount - 1) && k == rgi)
+                                                                {
+                                                                    var bsPt = getGeneralBasePt(i, j, k);
+                                                                    var px = bsPt;
+                                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300).OffsetXY(0, stepH * k)));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300 + stepH * k), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                }
+                                                            }
+                                                        }
+                                                        for (int j = 0; j < generalCount; j++)
+                                                        {
+                                                            if (j == 0 && k == rgi)
+                                                            {
+                                                                if (rgi != floorRanges.Count - 1)
+                                                                    {
+                                                                        var px = getGeneralBsPt(i, j).OffsetXY(1500, -610 + 50);
+                                                                        {
+                                                                            var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                            if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                        }
+                                                                    }
+                                                                var dy = -610.0;
+                                                                if (rgi == floorRanges.Count - 1) dy = 600;
+                                                                var seg = getSeg(i, Enumerable.Range(0, generalCount).ToArray(), k).Offset(0, dy);
+                                                                drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                                             }
                                                         }
                                                     }
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int k = 0; k < floorRanges.Count; k++)
                                                     {
-                                                        if (j == 0 && k == rgi)
+                                                        if (k == rgi && (rgi == floorRanges.Count - 1))
                                                         {
-                                                             if(rgi != floorRanges.Count - 1)
+                                                            var bsPt = getGeneralBasePt(i, 0, k);
+                                                            var px = bsPt.OffsetY(k * stepH).OffsetXY(600, 600);
+                                                            {
+                                                                var p = px;
                                                                 {
-                                                                    var px = getGeneralBsPt(i, j).OffsetXY(1500, -610 + 50);
+                                                                    px = px.OffsetXY(500, 50);
                                                                     {
                                                                         var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
                                                                         if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                                     }
                                                                 }
-                                                            var dy = -610.0;
-                                                            if (rgi == floorRanges.Count - 1) dy = 600;
-                                                            var seg = getSeg(i, Enumerable.Range(0, _generalCount).ToArray(), k).Offset(0, dy);
-                                                            drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
-                                                        }
-                                                    }
-                                                }
-                                                for (int k = 0; k < floorRanges.Count; k++)
-                                                {
-                                                    if (k == rgi && (rgi == floorRanges.Count - 1))
-                                                    {
-                                                        var bsPt = getGeneralBasePt(i, 0, k);
-                                                        var px = bsPt.OffsetY(k * stepH).OffsetXY(600, 600);
-                                                        {
-                                                            var p = px;
-                                                            {
-                                                                px = px.OffsetXY(500, 50);
-                                                                {
-                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
-                                                                    if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                                }
+                                                                px = p;
                                                             }
-                                                            px = p;
+                                                            var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
+                                                            bi.DynaDict["可见性"] = "试验消火栓";
+                                                            brInfos.Add(bi);
+                                                            brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
+                                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
+                                                            textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                            textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                            textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                         }
-                                                        var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
-                                                        bi.DynaDict["可见性"] = "试验消火栓";
-                                                        brInfos.Add(bi);
-                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(-600, 900)));
-                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-420, 300)));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-180, 300)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-420, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, 900)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 600), px.OffsetXY(-1200, 600)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 1632), px.OffsetXY(-388, 1844)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-388, 1844), px.OffsetXY(2354, 1844)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                     }
                                                 }
+                                            }
+                                            else
+                                            {
                                             }
                                         }
                                         else
@@ -7618,17 +7729,17 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var p1s = new List<Point3d>();
                                                 var bds = new List<GRect>();
                                                 var h = HEIGHT / 2 - 300;
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var bsPt = getGeneralBsPt(i, j);
                                                     var p1 = bsPt.OffsetY(h);
                                                     p1s.Add(p1);
                                                     vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                                    if (_generalCount > 1)
+                                                    if (generalCount > 1)
                                                     {
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
-                                                            if (_generalCount == 2)
+                                                            if (generalCount == 2)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 var p3 = p1s.First();
@@ -7640,7 +7751,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 bds.Add(drawValve(p1.OffsetX(-600)));
                                                             }
                                                         }
-                                                        else if (j == _generalCount - 2)
+                                                        else if (j == generalCount - 2)
                                                         {
                                                         }
                                                         else
@@ -7650,7 +7761,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 p2 = p1.OffsetX(400);
                                                             }
-                                                            else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
+                                                            else if (refugeCount > generalCount && j + 1 == generalCount / 2)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
@@ -7660,7 +7771,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 p2 = p1.OffsetX(700);
                                                             }
                                                             bds.Add(drawValve(p2));
-                                                            if (j + 1 == _generalCount / 2 && rgi == floorRanges.Count - 1)
+                                                            if (j + 1 == generalCount / 2 && rgi == floorRanges.Count - 1)
                                                             {
                                                                 var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                                 var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -7678,7 +7789,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_generalCount == 2)
+                                                if (generalCount == 2)
                                                 {
                                                     var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                     var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -7689,24 +7800,24 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                     }
                                                 }
-                                                if (_generalCount == 1)
+                                                if (generalCount == 1)
                                                 {
                                                 }
-                                                else if (_generalCount > 1)
+                                                else if (generalCount > 1)
                                                 {
                                                     var bsp = p1s.First();
                                                     drawTestFire(bsp, 300, 1000);
                                                 }
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
                                                     var seg = new GLineSegment(p1s.First(), p1s.Last());
                                                     if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
                                                     drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                                 }
-                                                for (int j = 1; j < _generalCount - 1; j++)
+                                                for (int j = 1; j < generalCount - 1; j++)
                                                 {
                                                     var p1 = p1s[j];
-                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                    var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                     var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
                                                     if (isLeft) vecs = vecs.GetYAxisMirror();
                                                     var segs = vecs.ToGLineSegments(p1);
@@ -7732,27 +7843,27 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                             else if (vm.IsTopLayerRing)
                                             {
-                                                if (_generalCount == 1)
+                                                if (generalCount == 1)
                                                 {
                                                     var bsPt = getGeneralBsPt(i, 0);
                                                     drawTestFire(bsPt, 1000, 0);
                                                 }
-                                                else if (_generalCount > 1)
+                                                else if (generalCount > 1)
                                                 {
                                                     var h1 = 300;
                                                     var h2 = 300;
                                                     {
                                                         var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
                                                         drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                        var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                        var p4 = getGeneralBsPt(i - 1, generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
                                                         if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
                                                         {
                                                             var bds = new List<GRect>();
-                                                            for (int j = 0; j < _generalCount; j++)
+                                                            for (int j = 0; j < generalCount; j++)
                                                             {
-                                                                if (j == _generalCount - 1)
+                                                                if (j == generalCount - 1)
                                                                 {
-                                                                    if (_generalCount == 2)
+                                                                    if (generalCount == 2)
                                                                     {
                                                                         var (w, _) = getValveSize();
                                                                         bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
@@ -7762,7 +7873,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
                                                                     }
                                                                 }
-                                                                else if (j == _generalCount - 2)
+                                                                else if (j == generalCount - 2)
                                                                 {
                                                                 }
                                                                 else if (j == 0)
@@ -7774,7 +7885,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 {
                                                                     var p = getGeneralBsPt(i - 1, j);
                                                                     var dx = 710.0;
-                                                                    if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
+                                                                    if (refugeCount != generalCount && j + 1 == generalCount / 2)
                                                                     {
                                                                         dx += 2300;
                                                                     }
@@ -7793,9 +7904,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
                                                         vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
                                                     }
-                                                    for (int j = 1; j < _generalCount - 1; j++)
+                                                    for (int j = 1; j < generalCount - 1; j++)
                                                     {
-                                                        var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                        var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                         var p = getGeneralBsPt(i - 1, j);
                                                         var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
                                                         if (isLeft)
@@ -7838,7 +7949,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             var rg = floorRanges[rgi];
                             var vlines = new List<LineString>(4096);
                             var width_HaveHandPumpConnection = handConnFloors.Count * width_HandPumpConnection;
-                            var span = OFFSET_X1 + width_HaveHandPumpConnection + (_refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
+                            var span = OFFSET_X1 + width_HaveHandPumpConnection + (refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
                             var lineLen = span * floorRanges.Count;
                             double getRangeOffsetX() => rgi * span;
                             Point3d getGeneralBsPt(int i, int j)
@@ -7846,10 +7957,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var dx = ringsCount * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
-                                var dc = _refugeCount - _generalCount;
+                                var dc = refugeCount - generalCount;
                                 if (dc > 0)
                                 {
-                                    if (j >= _generalCount / 2)
+                                    if (j >= generalCount / 2)
                                     {
                                         dx += dc * SPAN_X;
                                     }
@@ -7858,7 +7969,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             }
                             Point3d getRefugeBsPt(int i, int j)
                             {
-                                var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                                var dx = (ringsCount + generalCount / 2) * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
@@ -7928,7 +8039,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                     {
                                         int c1 = 0, c2 = 0;
-                                        for (int _j = 0; _j < _generalCount; _j++)
+                                        for (int _j = 0; _j < generalCount; _j++)
                                         {
                                             var j = getRealJ(_j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -8096,7 +8207,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var storey = allStoreys[i];
                                         if (IsNumStorey(storey))
                                         {
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt = getGeneralBsPt(i, j);
                                                 vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -8104,7 +8215,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         }
                                     }
                                 }
-                                for (int j = 0; j < _generalCount; j++)
+                                for (int j = 0; j < generalCount; j++)
                                 {
                                     var st = getGeneralBsPt(iRF, j);
                                     var ed = getGeneralBsPt(rg.Item2, j);
@@ -8140,7 +8251,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 if (IsNumStorey(storey))
                                                 {
-                                                    foreach (var j in Enumerable.Range(0, _generalCount))
+                                                    foreach (var j in Enumerable.Range(0, generalCount))
                                                     {
                                                         var bsPt = getGeneralBsPt(i, j);
                                                         {
@@ -8189,7 +8300,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 {
                                                                     var _k = k;
                                                                     var _j = getRealJ(j);
-                                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                                    var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                                     labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                                     {
                                                                         var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -8325,7 +8436,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var h1 = HEIGHT - 550.0;
                                                 var h2 = h1 - 250.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 {
@@ -8401,9 +8512,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p9 = p9.OffsetX(200);
                                                         }
                                                         textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                        if (_refugeCount > _generalCount)
+                                                        if (refugeCount > generalCount)
                                                         {
-                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                             textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                         }
                                                         {
@@ -8438,7 +8549,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 var hlines = new List<GLineSegment>();
                                                 var hdrills = new List<GRect>();
-                                                for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                                for (int j = 0; j < refugeCount - generalCount; j++)
                                                 {
                                                     var bsPt = getRefugeBsPt(i, j);
                                                     drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -8448,7 +8559,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawFire(p8);
                                                     textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var bsPt1 = getGeneralBsPt(i, j);
                                                     var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -8465,7 +8576,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var ok = false;
                                                         if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                         {
-                                                            var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                            var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                             if (!isLeft)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -8483,7 +8594,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var s = segs[1];
                                                                 var p9 = s.StartPoint;
                                                                 vsels.Add(p9.ToPoint3d());
-                                                                if (j == _generalCount - 1)
+                                                                if (j == generalCount - 1)
                                                                 {
                                                                     vsels.Add(bsPt1.OffsetY(h2));
                                                                 }
@@ -8494,14 +8605,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipes(segs);
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        if (j < _generalCount - 1)
+                                                        if (j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -8513,12 +8624,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j != 0 && j + 1 <= _generalCount / 2)
+                                                        if (j != 0 && j + 1 <= generalCount / 2)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -8527,7 +8638,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -8536,7 +8647,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
                                                             var p9 = bsPt1.OffsetY(h2);
                                                             vsels.Add(p9);
@@ -8544,10 +8655,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
                                                     var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                    var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                    var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                     hlines.Add(new GLineSegment(p5, p6));
                                                 }
                                                 vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -8562,7 +8673,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                         brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -8578,7 +8689,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -8646,7 +8757,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var p0 = getStoreyBsPt(i);
                                                 var h1 = HEIGHT - 400.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 var hlines = new List<GLineSegment>();
@@ -8711,10 +8822,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                                 }
-                                                if (_generalCount > 0)
+                                                if (generalCount > 0)
                                                 {
                                                     var p5 = getGeneralBsPt(i - 1, 0);
-                                                    var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                    var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                     hlines.Add(new GLineSegment(p5.OffsetY(h1), p6.OffsetY(h1)));
                                                     vsels.Add(p5.OffsetY(h1));
                                                     vkills.Add(p5.OffsetY(h1).OffsetY(.1));
@@ -8754,9 +8865,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i, j);
@@ -8766,7 +8877,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     vsels.Add(p);
                                                                     vkills.Add(p.OffsetY(-.1));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
@@ -8779,12 +8890,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                                var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                                if (j != _generalCount - 1)
+                                                                var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
-                                                                if (j > 0 && j < _generalCount - 1)
+                                                                if (j > 0 && j < generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -8819,12 +8930,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
                                                             var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt2.OffsetY(h1));
                                                                 vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -8841,13 +8952,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                                 }));
                                                             }
-                                                            if (j < _generalCount / 2 - 1)
+                                                            if (j < generalCount / 2 - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                             }
                                                             hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                            if (j < _generalCount / 2)
+                                                            if (j < generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -8865,12 +8976,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j >= _generalCount / 2)
+                                                            if (j >= generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
-                                                                    if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                    if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                     {
                                                                         vsels.Add(p9.ToPoint3d());
                                                                         vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -8878,7 +8989,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipe(_segs[0]);
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -8888,13 +8999,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j == _generalCount / 2 - 1)
+                                                            if (j == generalCount / 2 - 1)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             }
-                                                            if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                            if (j >= generalCount / 2 && j < generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -8911,11 +9022,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     {
                                         var storey = allStoreys[i];
                                         var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var hasExtraFire = getHasExtraFire(i, j);
                                             bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                             if (!hasFullHalfPlatformLine)
@@ -9117,7 +9228,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     {
                                                                         st = st.OffsetXY(300, 0);
                                                                     }
-                                                                    if (j == _generalCount - 1)
+                                                                    if (j == generalCount - 1)
                                                                     {
                                                                         if (isLeft)
                                                                         {
@@ -9170,7 +9281,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                             {
                                                                                 st = st.OffsetXY(300, 300);
                                                                             }
-                                                                            if (j == _generalCount - 1)
+                                                                            if (j == generalCount - 1)
                                                                             {
                                                                                 if (isLeft)
                                                                                 {
@@ -9372,7 +9483,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                     {
                                         var p7s = new List<Point3d>();
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(0, j);
                                             var p5 = bsPt;
@@ -9470,17 +9581,17 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var p1s = new List<Point3d>();
                                             var bds = new List<GRect>();
                                             var h = HEIGHT / 2 - 300;
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt = getGeneralBsPt(i, j);
                                                 var p1 = bsPt.OffsetY(h);
                                                 p1s.Add(p1);
                                                 vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
-                                                    if (j == _generalCount - 1)
+                                                    if (j == generalCount - 1)
                                                     {
-                                                        if (_generalCount == 2)
+                                                        if (generalCount == 2)
                                                         {
                                                             var (w, _) = getValveSize();
                                                             var p3 = p1s.First();
@@ -9492,7 +9603,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             bds.Add(drawValve(p1.OffsetX(-600)));
                                                         }
                                                     }
-                                                    else if (j == _generalCount - 2)
+                                                    else if (j == generalCount - 2)
                                                     {
                                                     }
                                                     else
@@ -9502,7 +9613,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         {
                                                             p2 = p1.OffsetX(400);
                                                         }
-                                                        else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
+                                                        else if (refugeCount > generalCount && j + 1 == generalCount / 2)
                                                         {
                                                             var (w, _) = getValveSize();
                                                             p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
@@ -9512,7 +9623,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p2 = p1.OffsetX(700);
                                                         }
                                                         bds.Add(drawValve(p2));
-                                                        if (j + 1 == _generalCount / 2)
+                                                        if (j + 1 == generalCount / 2)
                                                         {
                                                             var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                             var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -9530,7 +9641,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                 }
                                             }
-                                            if (_generalCount == 2)
+                                            if (generalCount == 2)
                                             {
                                                 var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                 var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -9541,24 +9652,24 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
                                             }
-                                            if (_generalCount == 1)
+                                            if (generalCount == 1)
                                             {
                                             }
-                                            else if (_generalCount > 1)
+                                            else if (generalCount > 1)
                                             {
                                                 var bsp = p1s.First();
                                                 drawTestFire(bsp, 300, 1000);
                                             }
-                                            if (_generalCount > 1)
+                                            if (generalCount > 1)
                                             {
                                                 var seg = new GLineSegment(p1s.First(), p1s.Last());
                                                 if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
                                                 drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                             }
-                                            for (int j = 1; j < _generalCount - 1; j++)
+                                            for (int j = 1; j < generalCount - 1; j++)
                                             {
                                                 var p1 = p1s[j];
-                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                 var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
                                                 if (isLeft) vecs = vecs.GetYAxisMirror();
                                                 var segs = vecs.ToGLineSegments(p1);
@@ -9584,27 +9695,27 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         }
                                         else if (vm.IsTopLayerRing)
                                         {
-                                            if (_generalCount == 1)
+                                            if (generalCount == 1)
                                             {
                                                 var bsPt = getGeneralBsPt(i, 0);
                                                 drawTestFire(bsPt, 1000, 0);
                                             }
-                                            else if (_generalCount > 1)
+                                            else if (generalCount > 1)
                                             {
                                                 var h1 = 300;
                                                 var h2 = 300;
                                                 {
                                                     var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
                                                     drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                    var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                    var p4 = getGeneralBsPt(i - 1, generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
                                                     if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
                                                     {
                                                         var bds = new List<GRect>();
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
-                                                            if (j == _generalCount - 1)
+                                                            if (j == generalCount - 1)
                                                             {
-                                                                if (_generalCount == 2)
+                                                                if (generalCount == 2)
                                                                 {
                                                                     var (w, _) = getValveSize();
                                                                     bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
@@ -9614,7 +9725,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
                                                                 }
                                                             }
-                                                            else if (j == _generalCount - 2)
+                                                            else if (j == generalCount - 2)
                                                             {
                                                             }
                                                             else if (j == 0)
@@ -9626,7 +9737,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 var p = getGeneralBsPt(i - 1, j);
                                                                 var dx = 710.0;
-                                                                if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
+                                                                if (refugeCount != generalCount && j + 1 == generalCount / 2)
                                                                 {
                                                                     dx += 2300;
                                                                 }
@@ -9645,9 +9756,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
                                                     vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
                                                 }
-                                                for (int j = 1; j < _generalCount - 1; j++)
+                                                for (int j = 1; j < generalCount - 1; j++)
                                                 {
-                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                    var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                     var p = getGeneralBsPt(i - 1, j);
                                                     var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
                                                     if (isLeft)
@@ -9686,7 +9797,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             var rg = floorRanges[rgi];
                             var vlines = new List<LineString>(4096);
                             var width_HaveHandPumpConnection = handConnFloors.Count * width_HandPumpConnection;
-                            var span = OFFSET_X1 + width_HaveHandPumpConnection + (_refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
+                            var span = OFFSET_X1 + width_HaveHandPumpConnection + (refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
                             var lineLen = span * floorRanges.Count;
                             double getRangeOffsetX() => rgi * span;
                             Point3d getGeneralBsPt(int i, int j)
@@ -9694,10 +9805,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var dx = ringsCount * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
-                                var dc = _refugeCount - _generalCount;
+                                var dc = refugeCount - generalCount;
                                 if (dc > 0)
                                 {
-                                    if (j >= _generalCount / 2)
+                                    if (j >= generalCount / 2)
                                     {
                                         dx += dc * SPAN_X;
                                     }
@@ -9706,7 +9817,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             }
                             Point3d getRefugeBsPt(int i, int j)
                             {
-                                var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                                var dx = (ringsCount + generalCount / 2) * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
@@ -9776,7 +9887,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                     {
                                         int c1 = 0, c2 = 0;
-                                        for (int _j = 0; _j < _generalCount; _j++)
+                                        for (int _j = 0; _j < generalCount; _j++)
                                         {
                                             var j = getRealJ(_j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -9944,7 +10055,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var storey = allStoreys[i];
                                         if (IsNumStorey(storey))
                                         {
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt = getGeneralBsPt(i, j);
                                                 vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -9979,7 +10090,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 if (IsNumStorey(storey))
                                                 {
-                                                    foreach (var j in Enumerable.Range(0, _generalCount))
+                                                    foreach (var j in Enumerable.Range(0, generalCount))
                                                     {
                                                         var bsPt = getGeneralBsPt(i, j);
                                                         {
@@ -10028,7 +10139,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 {
                                                                     var _k = k;
                                                                     var _j = getRealJ(j);
-                                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                                    var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                                     labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                                     {
                                                                         var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -10164,7 +10275,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var h1 = HEIGHT - 550.0;
                                                 var h2 = h1 - 250.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 {
@@ -10240,9 +10351,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p9 = p9.OffsetX(200);
                                                         }
                                                         textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                        if (_refugeCount > _generalCount)
+                                                        if (refugeCount > generalCount)
                                                         {
-                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                            var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                             textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                         }
                                                         {
@@ -10277,7 +10388,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 var hlines = new List<GLineSegment>();
                                                 var hdrills = new List<GRect>();
-                                                for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                                for (int j = 0; j < refugeCount - generalCount; j++)
                                                 {
                                                     var bsPt = getRefugeBsPt(i, j);
                                                     drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -10287,7 +10398,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawFire(p8);
                                                     textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
-                                                for (int j = 0; j < _generalCount; j++)
+                                                for (int j = 0; j < generalCount; j++)
                                                 {
                                                     var bsPt1 = getGeneralBsPt(i, j);
                                                     var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -10304,7 +10415,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var ok = false;
                                                         if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                         {
-                                                            var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                            var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                             if (!isLeft)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -10322,7 +10433,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var s = segs[1];
                                                                 var p9 = s.StartPoint;
                                                                 vsels.Add(p9.ToPoint3d());
-                                                                if (j == _generalCount - 1)
+                                                                if (j == generalCount - 1)
                                                                 {
                                                                     vsels.Add(bsPt1.OffsetY(h2));
                                                                 }
@@ -10333,14 +10444,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipes(segs);
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        if (j < _generalCount - 1)
+                                                        if (j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -10352,12 +10463,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                             hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                         }
-                                                        if (j != 0 && j + 1 <= _generalCount / 2)
+                                                        if (j != 0 && j + 1 <= generalCount / 2)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -10366,7 +10477,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                        if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                             var p9 = _segs.Last().EndPoint;
@@ -10375,7 +10486,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             drawDomePipe(_segs[0]);
                                                             drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                         }
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
                                                             var p9 = bsPt1.OffsetY(h2);
                                                             vsels.Add(p9);
@@ -10383,10 +10494,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
                                                     var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                    var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                    var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                     hlines.Add(new GLineSegment(p5, p6));
                                                 }
                                                 vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -10401,7 +10512,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                         brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -10417,7 +10528,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -10485,7 +10596,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var p0 = getStoreyBsPt(i);
                                                 var h1 = HEIGHT - 400.0;
                                                 var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                                var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                                var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                                 var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                                 var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                                 var hlines = new List<GLineSegment>();
@@ -10550,10 +10661,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                                 }
-                                                if (_generalCount > 0)
+                                                if (generalCount > 0)
                                                 {
                                                     var p5 = getGeneralBsPt(i - 1, 0);
-                                                    var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                    var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                     hlines.Add(new GLineSegment(p5.OffsetY(h1), p6.OffsetY(h1)));
                                                     vsels.Add(p5.OffsetY(h1));
                                                     vkills.Add(p5.OffsetY(h1).OffsetY(.1));
@@ -10593,9 +10704,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                         }
                                                     }
-                                                    if (_refugeCount == _generalCount)
+                                                    if (refugeCount == generalCount)
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i, j);
@@ -10605,7 +10716,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     vsels.Add(p);
                                                                     vkills.Add(p.OffsetY(-.1));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
@@ -10618,12 +10729,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             }
                                                             {
                                                                 var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                                var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                                if (j != _generalCount - 1)
+                                                                var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 }
-                                                                if (j > 0 && j < _generalCount - 1)
+                                                                if (j > 0 && j < generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -10658,12 +10769,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
                                                             var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt2.OffsetY(h1));
                                                                 vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -10680,13 +10791,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                                 }));
                                                             }
-                                                            if (j < _generalCount / 2 - 1)
+                                                            if (j < generalCount / 2 - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                             }
                                                             hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                            if (j < _generalCount / 2)
+                                                            if (j < generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -10704,12 +10815,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j >= _generalCount / 2)
+                                                            if (j >= generalCount / 2)
                                                             {
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
-                                                                    if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                    if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                     {
                                                                         vsels.Add(p9.ToPoint3d());
                                                                         vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -10717,7 +10828,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipe(_segs[0]);
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
-                                                                if (j != _generalCount - 1)
+                                                                if (j != generalCount - 1)
                                                                 {
                                                                     var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                     var p9 = _segs.Last().EndPoint;
@@ -10727,13 +10838,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                                 }
                                                             }
-                                                            if (j == _generalCount / 2 - 1)
+                                                            if (j == generalCount / 2 - 1)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                                 hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             }
-                                                            if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                            if (j >= generalCount / 2 && j < generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                                 hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -10750,11 +10861,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     {
                                         var storey = allStoreys[i];
                                         var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var hasExtraFire = getHasExtraFire(i, j);
                                             bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                             if (!hasFullHalfPlatformLine)
@@ -10956,7 +11067,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     {
                                                                         st = st.OffsetXY(300, 0);
                                                                     }
-                                                                    if (j == _generalCount - 1)
+                                                                    if (j == generalCount - 1)
                                                                     {
                                                                         if (isLeft)
                                                                         {
@@ -11009,7 +11120,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                             {
                                                                                 st = st.OffsetXY(300, 300);
                                                                             }
-                                                                            if (j == _generalCount - 1)
+                                                                            if (j == generalCount - 1)
                                                                             {
                                                                                 if (isLeft)
                                                                                 {
@@ -11211,7 +11322,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                     {
                                         var p7s = new List<Point3d>();
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(0, j);
                                             var p5 = bsPt;
@@ -11308,17 +11419,17 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var p1s = new List<Point3d>();
                                             var bds = new List<GRect>();
                                             var h = HEIGHT / 2 - 300;
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt = getGeneralBsPt(i, j);
                                                 var p1 = bsPt.OffsetY(h);
                                                 p1s.Add(p1);
                                                 vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                                if (_generalCount > 1)
+                                                if (generalCount > 1)
                                                 {
-                                                    if (j == _generalCount - 1)
+                                                    if (j == generalCount - 1)
                                                     {
-                                                        if (_generalCount == 2)
+                                                        if (generalCount == 2)
                                                         {
                                                             var (w, _) = getValveSize();
                                                             var p3 = p1s.First();
@@ -11330,7 +11441,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             bds.Add(drawValve(p1.OffsetX(-600)));
                                                         }
                                                     }
-                                                    else if (j == _generalCount - 2)
+                                                    else if (j == generalCount - 2)
                                                     {
                                                     }
                                                     else
@@ -11340,7 +11451,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         {
                                                             p2 = p1.OffsetX(400);
                                                         }
-                                                        else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
+                                                        else if (refugeCount > generalCount && j + 1 == generalCount / 2)
                                                         {
                                                             var (w, _) = getValveSize();
                                                             p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
@@ -11350,7 +11461,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             p2 = p1.OffsetX(700);
                                                         }
                                                         bds.Add(drawValve(p2));
-                                                        if (j + 1 == _generalCount / 2)
+                                                        if (j + 1 == generalCount / 2)
                                                         {
                                                             var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                             var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -11368,7 +11479,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                 }
                                             }
-                                            if (_generalCount == 2)
+                                            if (generalCount == 2)
                                             {
                                                 var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                 var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -11379,24 +11490,24 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
                                             }
-                                            if (_generalCount == 1)
+                                            if (generalCount == 1)
                                             {
                                             }
-                                            else if (_generalCount > 1)
+                                            else if (generalCount > 1)
                                             {
                                                 var bsp = p1s.First();
                                                 drawTestFire(bsp, 300, 1000);
                                             }
-                                            if (_generalCount > 1)
+                                            if (generalCount > 1)
                                             {
                                                 var seg = new GLineSegment(p1s.First(), p1s.Last());
                                                 if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
                                                 drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                             }
-                                            for (int j = 1; j < _generalCount - 1; j++)
+                                            for (int j = 1; j < generalCount - 1; j++)
                                             {
                                                 var p1 = p1s[j];
-                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                 var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
                                                 if (isLeft) vecs = vecs.GetYAxisMirror();
                                                 var segs = vecs.ToGLineSegments(p1);
@@ -11422,27 +11533,27 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         }
                                         else if (vm.IsTopLayerRing)
                                         {
-                                            if (_generalCount == 1)
+                                            if (generalCount == 1)
                                             {
                                                 var bsPt = getGeneralBsPt(i, 0);
                                                 drawTestFire(bsPt, 1000, 0);
                                             }
-                                            else if (_generalCount > 1)
+                                            else if (generalCount > 1)
                                             {
                                                 var h1 = 300;
                                                 var h2 = 300;
                                                 {
                                                     var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
                                                     drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                    var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                    var p4 = getGeneralBsPt(i - 1, generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
                                                     if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
                                                     {
                                                         var bds = new List<GRect>();
-                                                        for (int j = 0; j < _generalCount; j++)
+                                                        for (int j = 0; j < generalCount; j++)
                                                         {
-                                                            if (j == _generalCount - 1)
+                                                            if (j == generalCount - 1)
                                                             {
-                                                                if (_generalCount == 2)
+                                                                if (generalCount == 2)
                                                                 {
                                                                     var (w, _) = getValveSize();
                                                                     bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
@@ -11452,7 +11563,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
                                                                 }
                                                             }
-                                                            else if (j == _generalCount - 2)
+                                                            else if (j == generalCount - 2)
                                                             {
                                                             }
                                                             else if (j == 0)
@@ -11464,7 +11575,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 var p = getGeneralBsPt(i - 1, j);
                                                                 var dx = 710.0;
-                                                                if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
+                                                                if (refugeCount != generalCount && j + 1 == generalCount / 2)
                                                                 {
                                                                     dx += 2300;
                                                                 }
@@ -11483,9 +11594,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
                                                     vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
                                                 }
-                                                for (int j = 1; j < _generalCount - 1; j++)
+                                                for (int j = 1; j < generalCount - 1; j++)
                                                 {
-                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                    var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                     var p = getGeneralBsPt(i - 1, j);
                                                     var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
                                                     if (isLeft)
@@ -11526,7 +11637,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                         var rg = floorRanges[rgi];
                         var vlines = new List<LineString>(4096);
                         var width_HaveHandPumpConnection = handConnFloors.Count * width_HandPumpConnection;
-                        var span = OFFSET_X1 + width_HaveHandPumpConnection + (_refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
+                        var span = OFFSET_X1 + width_HaveHandPumpConnection + (refugeCount + ringsCount * 2) * SPAN_X + OFFSET_X2;
                         var lineLen = span * floorRanges.Count;
                         double getRangeOffsetX() => rgi * span;
                         Point3d getGeneralBsPt(int i, int j)
@@ -11534,10 +11645,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             var dx = ringsCount * SPAN_X;
                             dx += width_HaveHandPumpConnection;
                             dx += getRangeOffsetX();
-                            var dc = _refugeCount - _generalCount;
+                            var dc = refugeCount - generalCount;
                             if (dc > 0)
                             {
-                                if (j >= _generalCount / 2)
+                                if (j >= generalCount / 2)
                                 {
                                     dx += dc * SPAN_X;
                                 }
@@ -11546,7 +11657,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                         }
                         Point3d getRefugeBsPt(int i, int j)
                         {
-                            var dx = (ringsCount + _generalCount / 2) * SPAN_X;
+                            var dx = (ringsCount + generalCount / 2) * SPAN_X;
                             dx += width_HaveHandPumpConnection;
                             dx += getRangeOffsetX();
                             return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
@@ -11616,7 +11727,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
                                 {
                                     int c1 = 0, c2 = 0;
-                                    for (int _j = 0; _j < _generalCount; _j++)
+                                    for (int _j = 0; _j < generalCount; _j++)
                                     {
                                         var j = getRealJ(_j);
                                         var arg = pr.Items.First(x => x.PipeId - 1 == j);
@@ -11784,7 +11895,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var storey = allStoreys[i];
                                     if (IsNumStorey(storey))
                                     {
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
@@ -11819,7 +11930,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                             if (IsNumStorey(storey))
                                             {
-                                                foreach (var j in Enumerable.Range(0, _generalCount))
+                                                foreach (var j in Enumerable.Range(0, generalCount))
                                                 {
                                                     var bsPt = getGeneralBsPt(i, j);
                                                     {
@@ -11868,7 +11979,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 var _k = k;
                                                                 var _j = getRealJ(j);
-                                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                                 labelList.Add(new Tuple<int, int, int, Action>(i, k, j, () =>
                                                                 {
                                                                     var text = $"X{_k}L{vm.Serialnumber}-{_j + 1}";
@@ -12003,7 +12114,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var h1 = HEIGHT - 550.0;
                                             var h2 = h1 - 250.0;
                                             var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                            var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                            var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                             var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                             var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                             {
@@ -12079,9 +12190,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         p9 = p9.OffsetX(200);
                                                     }
                                                     textInfos.Add(new DBTextInfo(p9, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    if (_refugeCount > _generalCount)
+                                                    if (refugeCount > generalCount)
                                                     {
-                                                        var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, _refugeCount - _generalCount - 1)).OffsetY(h1);
+                                                        var p = GetMidPoint(getRefugeBsPt(i, 0), getRefugeBsPt(i, refugeCount - generalCount - 1)).OffsetY(h1);
                                                         textInfos.Add(new DBTextInfo(p.OffsetXY(-w / 2, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                     }
                                                     {
@@ -12116,7 +12227,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             }
                                             var hlines = new List<GLineSegment>();
                                             var hdrills = new List<GRect>();
-                                            for (int j = 0; j < _refugeCount - _generalCount; j++)
+                                            for (int j = 0; j < refugeCount - generalCount; j++)
                                             {
                                                 var bsPt = getRefugeBsPt(i, j);
                                                 drawDomePipes(new List<Vector2d> { new Vector2d(0, h2), new Vector2d(-300, 0), new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(h2 - 300) + fireOffsetY) }.ToGLineSegments(bsPt).Skip(2).ToList());
@@ -12126,7 +12237,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 drawFire(p8);
                                                 textInfos.Add(new DBTextInfo(p7.OffsetXY(50, -350), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                             }
-                                            for (int j = 0; j < _generalCount; j++)
+                                            for (int j = 0; j < generalCount; j++)
                                             {
                                                 var bsPt1 = getGeneralBsPt(i, j);
                                                 var bsPt2 = getGeneralBsPt(i + 1, j);
@@ -12143,7 +12254,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var ok = false;
                                                     if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.First(x => x.PipeId - 1 == getRealJ(j)).PipeConnectionType == "高位-板下")
                                                     {
-                                                        var isLeft = _refugeCount > _generalCount && _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                        var isLeft = refugeCount > generalCount && refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                         if (!isLeft)
                                                         {
                                                             var _segs = new List<Vector2d> { new Vector2d(0, -250), new Vector2d(-600, 0), new Vector2d(0, -300) }.ToGLineSegments(bsPt2);
@@ -12161,7 +12272,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             var s = segs[1];
                                                             var p9 = s.StartPoint;
                                                             vsels.Add(p9.ToPoint3d());
-                                                            if (j == _generalCount - 1)
+                                                            if (j == generalCount - 1)
                                                             {
                                                                 vsels.Add(bsPt1.OffsetY(h2));
                                                             }
@@ -12172,14 +12283,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipes(segs);
                                                     }
                                                 }
-                                                if (_refugeCount == _generalCount)
+                                                if (refugeCount == generalCount)
                                                 {
-                                                    if (j < _generalCount - 1)
+                                                    if (j < generalCount - 1)
                                                     {
                                                         hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                         hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                     }
-                                                    if (j > 0 && j < _generalCount - 1)
+                                                    if (j > 0 && j < generalCount - 1)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                         var p9 = _segs.Last().EndPoint;
@@ -12191,12 +12302,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 else
                                                 {
-                                                    if (j + 1 != _generalCount / 2 && j != _generalCount - 1)
+                                                    if (j + 1 != generalCount / 2 && j != generalCount - 1)
                                                     {
                                                         hdrills.Add(drawValve(segs.Last().EndPoint.OffsetX(250).ToPoint3d()));
                                                         hdrills.Add(drawValve(getGeneralBsPt(i, j).OffsetXY(856, h2)));
                                                     }
-                                                    if (j != 0 && j + 1 <= _generalCount / 2)
+                                                    if (j != 0 && j + 1 <= generalCount / 2)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                         var p9 = _segs.Last().EndPoint;
@@ -12205,7 +12316,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(_segs[0]);
                                                         drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                     }
-                                                    if (j + 1 > _generalCount / 2 && j != _generalCount - 1)
+                                                    if (j + 1 > generalCount / 2 && j != generalCount - 1)
                                                     {
                                                         var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h2)).Skip(1).ToList();
                                                         var p9 = _segs.Last().EndPoint;
@@ -12214,7 +12325,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(_segs[0]);
                                                         drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                     }
-                                                    if (j == _generalCount - 1)
+                                                    if (j == generalCount - 1)
                                                     {
                                                         var p9 = bsPt1.OffsetY(h2);
                                                         vsels.Add(p9);
@@ -12222,10 +12333,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                 }
                                             }
-                                            if (_generalCount > 1)
+                                            if (generalCount > 1)
                                             {
                                                 var p5 = getGeneralBsPt(i, 0).OffsetY(h2);
-                                                var p6 = getGeneralBsPt(i, _generalCount - 1).OffsetY(h2);
+                                                var p6 = getGeneralBsPt(i, generalCount - 1).OffsetY(h2);
                                                 hlines.Add(new GLineSegment(p5, p6));
                                             }
                                             vlines.Add(new GLineSegment(p2, p1).ToLineString());
@@ -12240,7 +12351,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
                                                     brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
-                                                    brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
+                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885 - 150, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
@@ -12256,7 +12367,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -1125 + fixY), px.OffsetXY(-2035, -1125 + fixY)));
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1735, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1735 - 60, -1125 + fixY), px.OffsetXY(-1685, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
@@ -12324,7 +12435,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var p0 = getStoreyBsPt(i);
                                             var h1 = HEIGHT - 400.0;
                                             var p1 = p0.OffsetXY(OFFSET_X1 + (ringsCount - k - 1) * SPAN_X + getHandConnWidth(i), h1);
-                                            var p3 = p0.OffsetXY(OFFSET_X1 + (_refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
+                                            var p3 = p0.OffsetXY(OFFSET_X1 + (refugeCount + k + ringsCount) * SPAN_X + width_HaveHandPumpConnection, h1);
                                             var p2 = new Point2d(p1.X, basePoint.Y).ToPoint3d();
                                             var p4 = new Point2d(p3.X, basePoint.Y).ToPoint3d();
                                             var hlines = new List<GLineSegment>();
@@ -12389,10 +12500,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 basementInfos.Add(new Tuple<int, Point3d, Point3d>(zid, p7, p8));
                                             }
-                                            if (_generalCount > 0)
+                                            if (generalCount > 0)
                                             {
                                                 var p5 = getGeneralBsPt(i - 1, 0);
-                                                var p6 = getGeneralBsPt(i - 1, _generalCount - 1);
+                                                var p6 = getGeneralBsPt(i - 1, generalCount - 1);
                                                 hlines.Add(new GLineSegment(p5.OffsetY(h1), p6.OffsetY(h1)));
                                                 vsels.Add(p5.OffsetY(h1));
                                                 vkills.Add(p5.OffsetY(h1).OffsetY(.1));
@@ -12432,9 +12543,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                     }
                                                 }
-                                                if (_refugeCount == _generalCount)
+                                                if (refugeCount == generalCount)
                                                 {
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i, j);
@@ -12444,7 +12555,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 vsels.Add(p);
                                                                 vkills.Add(p.OffsetY(-.1));
                                                             }
-                                                            if (j != _generalCount - 1)
+                                                            if (j != generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             }
@@ -12457,12 +12568,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                         {
                                                             var bsPt1 = getGeneralBsPt(i - 1, j);
-                                                            var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                            if (j != _generalCount - 1)
+                                                            var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                            if (j != generalCount - 1)
                                                             {
                                                                 hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             }
-                                                            if (j > 0 && j < _generalCount - 1)
+                                                            if (j > 0 && j < generalCount - 1)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                 var p9 = _segs.Last().EndPoint;
@@ -12497,12 +12608,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                                 else
                                                 {
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
                                                         var bsPt1 = getGeneralBsPt(i, j);
                                                         var bsPt2 = getGeneralBsPt(i - 1, j);
-                                                        var bsPt3 = getGeneralBsPt(i - 1, _generalCount - 1);
-                                                        if (j > 0 && j < _generalCount - 1)
+                                                        var bsPt3 = getGeneralBsPt(i - 1, generalCount - 1);
+                                                        if (j > 0 && j < generalCount - 1)
                                                         {
                                                             vsels.Add(bsPt2.OffsetY(h1));
                                                             vkills.Add(bsPt2.OffsetY(h1 + .1));
@@ -12519,13 +12630,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", st) { Scale = AIR_VALVE_SCALE });
                                                             }));
                                                         }
-                                                        if (j < _generalCount / 2 - 1)
+                                                        if (j < generalCount / 2 - 1)
                                                         {
                                                             hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
                                                         }
                                                         hdrills.Add(new GLineSegment(bsPt1.OffsetY(h1).OffsetX(-150), bsPt1.OffsetY(h1).OffsetX(150)).ToLineString().Buffer(.1).ToGRect());
-                                                        if (j < _generalCount / 2)
+                                                        if (j < generalCount / 2)
                                                         {
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(-600, 0), new Vector2d(0, -300), new Vector2d(600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
@@ -12543,12 +12654,12 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].StartPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                             }
                                                         }
-                                                        if (j >= _generalCount / 2)
+                                                        if (j >= generalCount / 2)
                                                         {
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt1.OffsetY(h1)).Skip(1).ToList();
                                                                 var p9 = _segs.Last().EndPoint;
-                                                                if (_generalCount == 2 && vm.CountsGeneral == 1)
+                                                                if (generalCount == 2 && vm.CountsGeneral == 1)
                                                                 {
                                                                     vsels.Add(p9.ToPoint3d());
                                                                     vkills.Add(p9.OffsetY(-.1).ToPoint3d());
@@ -12556,7 +12667,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 drawDomePipe(_segs[0]);
                                                                 drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                             }
-                                                            if (j != _generalCount - 1)
+                                                            if (j != generalCount - 1)
                                                             {
                                                                 var _segs = new List<Vector2d> { new Vector2d(600, 0), new Vector2d(0, -300), new Vector2d(-600, 0) }.ToGLineSegments(bsPt2.OffsetY(h1)).Skip(1).ToList();
                                                                 var p9 = _segs.Last().EndPoint;
@@ -12566,13 +12677,13 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 drawDomePipes(GeoFac.GetLines(_segs[1].ToLineString().Difference(drawValve(_segs[1].EndPoint.OffsetX(156).ToPoint3d()).ToPolygon())));
                                                             }
                                                         }
-                                                        if (j == _generalCount / 2 - 1)
+                                                        if (j == generalCount / 2 - 1)
                                                         {
                                                             var (w, _) = getValveSize();
                                                             hdrills.Add(drawValve(GetMidPoint(bsPt1.OffsetXY(0, h1), getGeneralBsPt(i, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                             hdrills.Add(drawValve(GetMidPoint(bsPt2.OffsetXY(0, h1), getGeneralBsPt(i - 1, j + 1).OffsetXY(0, h1)).OffsetX(-w / 2)));
                                                         }
-                                                        if (j >= _generalCount / 2 && j < _generalCount - 1)
+                                                        if (j >= generalCount / 2 && j < generalCount - 1)
                                                         {
                                                             hdrills.Add(drawValve(bsPt1.OffsetXY(850, h1)));
                                                             hdrills.Add(drawValve(bsPt2.OffsetXY(850, h1)));
@@ -12589,11 +12700,11 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 {
                                     var storey = allStoreys[i];
                                     var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
-                                    for (int j = 0; j < _generalCount; j++)
+                                    for (int j = 0; j < generalCount; j++)
                                     {
                                         var bsPt = getGeneralBsPt(i, j);
                                         var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
-                                        var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                        var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                         var hasExtraFire = getHasExtraFire(i, j);
                                         bool hasHalfPlatform = getHasHalfPlatform(i, j);
                                         if (!hasFullHalfPlatformLine)
@@ -12795,7 +12906,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 {
                                                                     st = st.OffsetXY(300, 0);
                                                                 }
-                                                                if (j == _generalCount - 1)
+                                                                if (j == generalCount - 1)
                                                                 {
                                                                     if (isLeft)
                                                                     {
@@ -12848,7 +12959,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         {
                                                                             st = st.OffsetXY(300, 300);
                                                                         }
-                                                                        if (j == _generalCount - 1)
+                                                                        if (j == generalCount - 1)
                                                                         {
                                                                             if (isLeft)
                                                                             {
@@ -13050,7 +13161,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 }
                                 {
                                     var p7s = new List<Point3d>();
-                                    for (int j = 0; j < _generalCount; j++)
+                                    for (int j = 0; j < generalCount; j++)
                                     {
                                         var bsPt = getGeneralBsPt(0, j);
                                         var p5 = bsPt;
@@ -13128,17 +13239,17 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var p1s = new List<Point3d>();
                                         var bds = new List<GRect>();
                                         var h = HEIGHT / 2 - 300;
-                                        for (int j = 0; j < _generalCount; j++)
+                                        for (int j = 0; j < generalCount; j++)
                                         {
                                             var bsPt = getGeneralBsPt(i, j);
                                             var p1 = bsPt.OffsetY(h);
                                             p1s.Add(p1);
                                             vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                            if (_generalCount > 1)
+                                            if (generalCount > 1)
                                             {
-                                                if (j == _generalCount - 1)
+                                                if (j == generalCount - 1)
                                                 {
-                                                    if (_generalCount == 2)
+                                                    if (generalCount == 2)
                                                     {
                                                         var (w, _) = getValveSize();
                                                         var p3 = p1s.First();
@@ -13150,7 +13261,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         bds.Add(drawValve(p1.OffsetX(-600)));
                                                     }
                                                 }
-                                                else if (j == _generalCount - 2)
+                                                else if (j == generalCount - 2)
                                                 {
                                                 }
                                                 else
@@ -13160,7 +13271,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     {
                                                         p2 = p1.OffsetX(400);
                                                     }
-                                                    else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
+                                                    else if (refugeCount > generalCount && j + 1 == generalCount / 2)
                                                     {
                                                         var (w, _) = getValveSize();
                                                         p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
@@ -13170,7 +13281,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         p2 = p1.OffsetX(700);
                                                     }
                                                     bds.Add(drawValve(p2));
-                                                    if (j + 1 == _generalCount / 2)
+                                                    if (j + 1 == generalCount / 2)
                                                     {
                                                         var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                                         var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -13188,7 +13299,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 }
                                             }
                                         }
-                                        if (_generalCount == 2)
+                                        if (generalCount == 2)
                                         {
                                             var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
                                             var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
@@ -13199,24 +13310,24 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                             }
                                         }
-                                        if (_generalCount == 1)
+                                        if (generalCount == 1)
                                         {
                                         }
-                                        else if (_generalCount > 1)
+                                        else if (generalCount > 1)
                                         {
                                             var bsp = p1s.First();
                                             drawTestFire(bsp, 300, 1000);
                                         }
-                                        if (_generalCount > 1)
+                                        if (generalCount > 1)
                                         {
                                             var seg = new GLineSegment(p1s.First(), p1s.Last());
                                             if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
                                             drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                         }
-                                        for (int j = 1; j < _generalCount - 1; j++)
+                                        for (int j = 1; j < generalCount - 1; j++)
                                         {
                                             var p1 = p1s[j];
-                                            var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                            var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                             var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
                                             if (isLeft) vecs = vecs.GetYAxisMirror();
                                             var segs = vecs.ToGLineSegments(p1);
@@ -13242,27 +13353,27 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                     else if (vm.IsTopLayerRing)
                                     {
-                                        if (_generalCount == 1)
+                                        if (generalCount == 1)
                                         {
                                             var bsPt = getGeneralBsPt(i, 0);
                                             drawTestFire(bsPt, 1000, 0);
                                         }
-                                        else if (_generalCount > 1)
+                                        else if (generalCount > 1)
                                         {
                                             var h1 = 300;
                                             var h2 = 300;
                                             {
                                                 var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
                                                 drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
+                                                var p4 = getGeneralBsPt(i - 1, generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
                                                 if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
                                                 {
                                                     var bds = new List<GRect>();
-                                                    for (int j = 0; j < _generalCount; j++)
+                                                    for (int j = 0; j < generalCount; j++)
                                                     {
-                                                        if (j == _generalCount - 1)
+                                                        if (j == generalCount - 1)
                                                         {
-                                                            if (_generalCount == 2)
+                                                            if (generalCount == 2)
                                                             {
                                                                 var (w, _) = getValveSize();
                                                                 bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
@@ -13272,7 +13383,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
                                                             }
                                                         }
-                                                        else if (j == _generalCount - 2)
+                                                        else if (j == generalCount - 2)
                                                         {
                                                         }
                                                         else if (j == 0)
@@ -13284,7 +13395,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         {
                                                             var p = getGeneralBsPt(i - 1, j);
                                                             var dx = 710.0;
-                                                            if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
+                                                            if (refugeCount != generalCount && j + 1 == generalCount / 2)
                                                             {
                                                                 dx += 2300;
                                                             }
@@ -13303,9 +13414,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
                                                 vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
                                             }
-                                            for (int j = 1; j < _generalCount - 1; j++)
+                                            for (int j = 1; j < generalCount - 1; j++)
                                             {
-                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
+                                                var isLeft = refugeCount != generalCount && (j + 1 > generalCount / 2);
                                                 var p = getGeneralBsPt(i - 1, j);
                                                 var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
                                                 if (isLeft)
