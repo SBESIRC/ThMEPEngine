@@ -588,7 +588,8 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
-
+        public static double ObstacleArea;
+        public static double TotalArea;
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {

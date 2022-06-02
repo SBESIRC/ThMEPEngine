@@ -111,14 +111,14 @@ namespace ThParkingStall.Core.Tools
             if (seglineConnectToBound.Item1 && !mid.Coordinate.ExistPtInDirection(IntSecPts, false))//负向需要连接，且未连接
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                if(LineIntSecPts.Count!= 0)
-                    P0 = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y).Last();
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y);
+                if(quryed.Count() > 0) P0 = quryed.Last();
             }
             if (seglineConnectToBound.Item2&&!mid.Coordinate.ExistPtInDirection(IntSecPts,true))
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                if (LineIntSecPts.Count != 0)
-                    P1 = LineIntSecPts.Where(c =>c.X + c.Y > mid.X + mid.Y).First();
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y > mid.X + mid.Y);
+                if (quryed.Count() > 0) P0 = quryed.First();
             }
             return new LineSegment(P0, P1);
         }

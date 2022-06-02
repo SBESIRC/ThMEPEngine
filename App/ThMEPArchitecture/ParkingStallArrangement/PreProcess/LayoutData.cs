@@ -47,7 +47,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  Polygon SegLineBoundary;//智能边界，外部障碍物为不可穿障碍物
         public  List<Polygon> InnerBuildings; //不可穿障碍物（中间障碍物）,包含坡道
         public  List<int> OuterBuildingIdxs; //可穿建筑物（外围障碍物）的index,包含坡道
-        //public  List<Polygon> ObstacleBoundaries =new List<Polygon>();// 建筑物物直角轮廓，外扩合并得到(3000)直角多边形，用于算插入比
+        //public List<Polygon> ObstacleBoundaries = new List<Polygon>();// 建筑物物直角轮廓，外扩合并得到(3000)直角多边形，用于算插入比
         public  List<Polygon> TightBoundaries = new List<Polygon>();//紧密轮廓，外扩合并+内缩2750得到。用于计算最大最小值
         public  List<Polygon> BoundingBoxes = new List<Polygon>();// 障碍物的外包框（矩形）
         public  List<Polygon> Buildings; // 初始障碍物,包含坡道
@@ -339,7 +339,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 ObstacleSpatialIndex = new MNTSSpatialIndex(Obstacles);
                 if (Ramps.Count != 0) BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
                 else BuildingSpatialIndex = ObstacleSpatialIndex;
-                //UpdateObstacleBoundaries();
+                UpdateObstacleBoundaries();
                 GetSegLineBoundary();
                 BoundLineSpatialIndex = new MNTSSpatialIndex(WallLine.Shell.ToLineStrings());
             }
@@ -372,16 +372,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
             BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
         }
-        //private  void UpdateObstacleBoundaries()
-        //{
-        //    var distance = ParameterStock.BuildingTolerance;
-        //    BufferParameters bufferParameters = new BufferParameters(8, EndCapStyle.Square, JoinStyle.Mitre, 5.0);
-        //    var buffered = new MultiPolygon(Obstacles.ToArray()).Buffer(distance, bufferParameters);
-        //    Geometry result = new MultiPolygon(buffered.Union().Get<Polygon>(true).ToArray());
-        //    result = result.Buffer(-distance, bufferParameters);
-        //    result = result.Intersection(WallLine);
-        //    ObstacleBoundaries = result.Get<Polygon>(true);
-        //}
+        private void UpdateObstacleBoundaries()
+        {
+            var distance = ParameterStock.BuildingTolerance;
+            BufferParameters bufferParameters = new BufferParameters(8, EndCapStyle.Square, JoinStyle.Mitre, 5.0);
+            var buffered = new MultiPolygon(Buildings.ToArray()).Buffer(distance, bufferParameters);
+            Geometry result = new MultiPolygon(buffered.Union().Get<Polygon>(true).ToArray());
+            result = result.Buffer(-distance, bufferParameters);
+            result = result.Intersection(WallLine);
+            //ObstacleBoundaries = result.Get<Polygon>(true);
+            var mmtoM = 0.001 * 0.001;
+            ParameterStock.TotalArea = WallLine.Area*mmtoM;
+            ParameterStock.ObstacleArea = result.Area * mmtoM; 
+            Logger?.Information($"地库总面积:"+ string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2) );
+            Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.ObstacleArea) + "m" + Convert.ToChar(0x00b2) );
+        }
         #endregion
         #region 分割线检查
         public bool SegLineVaild()
