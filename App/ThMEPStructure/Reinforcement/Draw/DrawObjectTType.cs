@@ -1006,6 +1006,54 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 CIndexList.Add(idx6);
                                 CIndexList.Add(Helper.FindPairPoint(points, idx6, 1));
                             }
+                            
+                        }
+                        else if (num == 20)
+                        {
+                            CIndexList.Add(0);
+                            CIndexList.Add(1);
+                            int idx1 = Helper.FindClosePoint(points, 1, 2, 2);
+                            if (idx1 != -1)
+                            {
+                                CIndexList.Add(idx1);
+                                CIndexList.Add(Helper.FindPairPoint(points, idx1, 2));
+                            }
+                            CIndexList.Add(2);
+                            int idx2 = Helper.FindMidPoint(points, 2, 3);
+                            if (idx2 != -1)
+                            {
+                                CIndexList.Add(idx2);
+                            }
+                            CIndexList.Add(3);
+                            CIndexList.Add(4);
+                            CIndexList.Add(5);
+                            int idx4 = Helper.FindClosePoint(points, 5, 6, 6);
+                            if (idx4 != -1)
+                            {
+                                CIndexList.Add(idx4);
+                                CIndexList.Add(Helper.FindPairPoint(points, idx4, 2));
+                            }
+                            CIndexList.Add(6);
+                            int idx5 = Helper.FindMidPoint(points, 6, 7);
+                            if (idx5 != -1)
+                            {
+                                CIndexList.Add(idx5);
+                            }
+                            CIndexList.Add(7);
+                            CIndexList.Add(8);
+                            CIndexList.Add(9);
+                            int idx6 = Helper.FindClosePoint(points, 0, 1, 0);
+                            if (idx6 != -1)
+                            {
+                                CIndexList.Add(idx6);
+                                CIndexList.Add(Helper.FindPairPoint(points, idx6, 1));
+                            }
+                            int idx7 = Helper.FindMidPoint(points, 0, 9);
+                            if (idx7 != -1)
+                            {
+                                CIndexList.Add(idx7);
+                                CIndexList.Add(Helper.FindMidPoint(points, 4, 5));
+                            }
                         }
                         for (int i = 0; i < CIndexList.Count; i++)
                         {
@@ -1013,9 +1061,9 @@ namespace ThMEPStructure.Reinforcement.Draw
                             ZongjinPoint_list[CIndexList[i]].size = dim;
                         }
 
-                        if (num > 18)
+                        if (num > 20)
                         {
-                            int other = num - 18;
+                            int other = num - 20;
                             //将剩余的C筋分配，这种情况为墙出现更多的纵筋
                             int leftNum = Helper.NumOfTwoPoint(points, 1, 2);
                             int rightNum = Helper.NumOfTwoPoint(points, 7, 8);
@@ -1295,14 +1343,63 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 CIndexList.Add(Helper.FindPairPoint(points, idx6, 2));
                             }
                         }
+                        else if (num == 20)
+                        {
+                            
+                                CIndexList.Add(0);
+                                CIndexList.Add(1);
+                                int idx1 = Helper.FindClosePoint(points, 1, 2, 2);
+                                if (idx1 != -1)
+                                {
+                                    CIndexList.Add(idx1);
+                                    CIndexList.Add(Helper.FindPairPoint(points, idx1, 2));
+                                }
+                                CIndexList.Add(2);
+                                int idx2 = Helper.FindMidPoint(points, 2, 3);
+                                if (idx2 != -1)
+                                {
+                                    CIndexList.Add(idx2);
+                                }
+                                CIndexList.Add(3);
+                                CIndexList.Add(4);
+                                CIndexList.Add(5);
+                                int idx4 = Helper.FindClosePoint(points, 5, 6, 6);
+                                if (idx4 != -1)
+                                {
+                                    CIndexList.Add(idx4);
+                                    CIndexList.Add(Helper.FindPairPoint(points, idx4, 2));
+                                }
+                                CIndexList.Add(6);
+                                int idx5 = Helper.FindMidPoint(points, 6, 7);
+                                if (idx5 != -1)
+                                {
+                                    CIndexList.Add(idx5);
+                                }
+                                CIndexList.Add(7);
+                                CIndexList.Add(8);
+                                CIndexList.Add(9);
+                                int idx6 = Helper.FindClosePoint(points, 0, 1, 0);
+                                if (idx6 != -1)
+                                {
+                                    CIndexList.Add(idx6);
+                                    CIndexList.Add(Helper.FindPairPoint(points, idx6, 1));
+                                }
+                                int idx7 = Helper.FindMidPoint(points, 0, 9);
+                                if (idx7 != -1)
+                                {
+                                    CIndexList.Add(idx7);
+                                    CIndexList.Add(Helper.FindMidPoint(points, 4, 5));
+                                }
+                            
+                        }
                         for (int i = 0; i < CIndexList.Count; i++)
                         {
                             ZongjinPoint_list[CIndexList[i]].hasUse = true;
                             ZongjinPoint_list[CIndexList[i]].size = dim;
                         }
-                        if (num > 18)
+                        if (num > 20)
                         {
-                            int other = num - 18;
+                            int other = num - 20;
                             //将剩余的C筋分配，这种情况为墙出现更多的纵筋
                             int leftNum = Helper.NumOfTwoPoint(points, 1, 2);
                             int rightNum = Helper.NumOfTwoPoint(points, 7, 8);

@@ -325,8 +325,7 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         private string GetYBZReinforceSpec(List<Tuple<string, string>> values)
         {
-            string pattern = @"(实配){1}\s{0,}(AS)\s{0,}[=]{1}";
-            var res = values.Where(o => Regex.IsMatch(o.Item2.ToUpper(), pattern));
+            var res = values.Where(o => IsContainsShiPeiAs(o.Item2));
             if (res.Count() == 1)
             {
                 return GetReinforceSpec(res.First().Item2);
@@ -334,23 +333,37 @@ namespace ThMEPStructure.Reinforcement.Service
             else
             {
                 return "";
-            }
+            }        
         }
+
+        private bool IsContainsShiPeiAs(string content)
+        {
+            // 单元格中的内容是否包括"实配AS"
+            string pattern = @"(实配){1}\s{0,}(AS)";
+            return Regex.IsMatch(content.ToUpper(), pattern);
+        }
+
         private string GetReinforceSpec(string content)
         {
-            var index = content.IndexOf("实配");
-            if (index > 0)
+            var values = new List<string>();
+            string pattern = @"\d+\s*[ZCzc]{1}\s*\d+";
+            foreach(Match match in Regex.Matches(content, pattern))
             {
-                var reinforce = RemoveEmpty(content.Substring(0, index));
+                values.Add(match.Value.ToUpper());
+            }
+            if (values.Count > 0)
+            {
+                var reinforce = string.Join("+", values.ToArray());
+                reinforce = RemoveEmpty(reinforce);
                 reinforce = ReplaceZToC(reinforce);
                 return reinforce;
             }
             else
-
             {
                 return "";
             }
         }
+
         private string GetGBZReinforceSpec(List<Tuple<string, string>> values)
         {
             var res = values.Where(o => o.Item1.Contains("实配"));
@@ -519,7 +532,41 @@ namespace ThMEPStructure.Reinforcement.Service
                 var values = new List<string>();
                 for (int row = specValueStartRow; row < specValueEndRow; row++)
                 {
-                    values.Add(GetMergeValue(worksheet, row, columnIndexes[i]));
+                    int shiPeiRowIndex = -1,shiPeiColuIndex=-1;
+                    // 根据当前行查找实配
+                    for (int currentColIndex = columnIndexes[i]; currentColIndex >= 0; currentColIndex--)
+                    {
+                        var cellString = GetMergeValue(worksheet, row, currentColIndex);
+                        if (IsContainsShiPeiAs(cellString))
+                        {
+                            shiPeiRowIndex = row;
+                            shiPeiColuIndex = currentColIndex;
+                        }
+                    }
+                    if(shiPeiRowIndex>=0 && shiPeiColuIndex>=0)
+                    {
+                        var cellString = GetMergeValue(worksheet, shiPeiRowIndex, shiPeiColuIndex);
+                        var reinforceSpec = GetReinforceSpec(cellString);
+                        if(!string.IsNullOrEmpty(reinforceSpec))
+                        {
+                            reinforceSpec = "实配As=" + reinforceSpec;
+                            values.Add(reinforceSpec);
+                        }
+                        else
+                        {
+                            var cellString1 = GetMergeValue(worksheet, shiPeiRowIndex, shiPeiColuIndex-1);
+                            var reinforceSpec1 = GetReinforceSpec(cellString1);
+                            if (!string.IsNullOrEmpty(reinforceSpec1))
+                            {
+                                reinforceSpec1 = "实配As=" + reinforceSpec1;
+                                values.Add(reinforceSpec1);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        values.Add(GetMergeValue(worksheet, row, columnIndexes[i]));
+                    }  
                 }
                 datas.Add(values);
             }
@@ -782,6 +829,10 @@ namespace ThMEPStructure.Reinforcement.Service
             if(IsInteger(content))
             {
                 return int.Parse(content.Trim());
+            }
+            else if(ThReinforcementUtils.GetIntegers(content).Count==1)
+            {
+                return ThReinforcementUtils.GetIntegers(content)[0];
             }
             else
             {
