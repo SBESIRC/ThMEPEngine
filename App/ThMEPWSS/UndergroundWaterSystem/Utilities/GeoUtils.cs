@@ -76,6 +76,34 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 }
             }
         }
+        public static string AnalysisLineSegmentLIST(List<Line> lines)
+        {
+            string s = "";
+            foreach (var line in lines)
+            {
+                s += AnalysisLineString(line) + ",";
+            }
+            s = s.Remove(s.Length - 1, 1);
+            return s;
+        }
+        public static string AnalysisLineString(Line line)
+        {
+            string s = "";
+            s += line.StartPoint.X.ToString() + "," + line.StartPoint.Y.ToString() + ",";
+            s += line.EndPoint.X.ToString() + "," + line.EndPoint.Y.ToString() + ",";
+            s = s.Remove(s.Length - 1, 1);
+            return s;
+        }
+        public static string AnalysisLineStringLIST(List<Line> lines)
+        {
+            string s = "";
+            foreach (var line in lines)
+            {
+                s += AnalysisLineString(line) + ";";
+            }
+            s = s.Remove(s.Length - 1, 1);
+            return s;
+        }
         private static void TraverseConnectedLinesWithJoinedPoints(
          ref List<Line> emilinatedSelfLines, Point3d point, double tolBrokenLine, Vector3d SelfLine,
          ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines, List<Polyline> crossedplys)
@@ -106,6 +134,20 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 double angle = vec_j.GetAngleTo(SelfLine);
                 var angle_cond = Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < 1;
                 if (angle_cond) continue;
+                int count_on_line = 0;
+                foreach (var lin in lines)
+                {
+                    if (lin.GetClosestPointTo(point, false).DistanceTo(point) < 10)
+                        count_on_line++;
+                }
+                if (count_on_line > 1) continue;
+                count_on_line = 0;
+                foreach (var lin in lines)
+                {
+                    if (lin.GetClosestPointTo(p, false).DistanceTo(p) < 10)
+                        count_on_line++;
+                }
+                if (count_on_line > 1) continue;
                 Line line = new Line(point, p);
                 line.Linetype = lines[i].Linetype;
                 connectedLines.Add(line);
@@ -137,6 +179,20 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             //plylist.ForEach(o => dbObjsOriStart.Add(o));
             for (int i = 0; i < lines.Count; i++)
             {
+                if(i==197)
+                {
+                    ;
+                }
+                var t = new Point3d(813267740, 373015186.5,5000);
+                if (lines[i].GetClosestPointTo(t,false).DistanceTo(t) < 10)
+                {
+                    ;
+                }
+                t = new Point3d(813267740, 373015186.5, 0);
+                if (lines[i].GetClosestPointTo(t, false).DistanceTo(t) < 10)
+                {
+                    ;
+                }
                 emilinatedSelfLines.RemoveAt(i);
                 Point3d ptStart = lines[i].StartPoint;
                 Point3d ptEnd = lines[i].EndPoint;
@@ -146,12 +202,28 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 {
                     TraverseConnectedLinesWithHinderpts(ref emilinatedSelfLines, ptStart, tolBrokenLine, SelfLine, ref lines,
                         i, toldegree, ref connectedLines);
+                    t = new Point3d(813267729.6, 373015326, 0);
+                    foreach (var l in connectedLines)
+                    {
+                        if (l.GetClosestPointTo(t, false).DistanceTo(t) < 10)
+                        {
+                            ;
+                        }
+                    }
                 }
                 if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0
                     && ClosestPointInVertLines(ptEnd, lines[i], lines) > 1)
                 {
                     TraverseConnectedLinesWithHinderpts(ref emilinatedSelfLines, ptEnd, tolBrokenLine, SelfLine, ref lines,
                         i, toldegree, ref connectedLines);
+                    t = new Point3d(813267729.6, 373015326, 0);
+                    foreach (var l in connectedLines)
+                    {
+                        if (l.GetClosestPointTo(t, false).DistanceTo(t) < 10)
+                        {
+                            ;
+                        }
+                    }
                 }
                 var crossedStart = GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriJoined).Cast<Polyline>().ToList();
                 if (crossedStart.Count > 0
@@ -159,6 +231,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 {
                     TraverseConnectedLinesWithJoinedPoints(ref emilinatedSelfLines, ptStart, tolBrokenLine, SelfLine, ref lines,
                         i, toldegree, ref connectedLines, crossedStart);
+                    t = new Point3d(813267729.6, 373015326, 0);
+                    foreach (var l in connectedLines)
+                    {
+                        if (l.GetClosestPointTo(t, false).DistanceTo(t) < 10)
+                        {
+                            ;
+                        }
+                    }
                 }
                 var crossedEnd = GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriJoined).Cast<Polyline>().ToList();
                 if (crossedEnd.Count > 0
@@ -166,6 +246,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 {
                     TraverseConnectedLinesWithJoinedPoints(ref emilinatedSelfLines, ptEnd, tolBrokenLine, SelfLine, ref lines,
                         i, toldegree, ref connectedLines, crossedEnd);
+                    t = new Point3d(813267729.6, 373015326, 0);
+                    foreach (var l in connectedLines)
+                    {
+                        if (l.GetClosestPointTo(t, false).DistanceTo(t) < 10)
+                        {
+                            ;
+                        }
+                    }
                 }
                 emilinatedSelfLines.Insert(i, lines[i]);
             }

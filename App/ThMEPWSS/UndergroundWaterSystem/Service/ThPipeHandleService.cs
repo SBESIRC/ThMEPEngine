@@ -4,12 +4,14 @@ using Dreambuild.AutoCAD;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.UndergroundWaterSystem.Command;
+using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
@@ -75,6 +77,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var retLines = new List<Line>();
             retLines.AddRange(FindDirectLine(objectLine, ref lines));
             retLines.AddRange(FindNearLine(objectLine, ref lines));
+            var s = "";
+            if(retLines.Count>0)
+                s = AnalysisLineSegmentLIST(retLines);
+            string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var mode = FileMode.Create;
+            FileStream fs = new FileStream(dir + "\\lines.txt", mode);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(s);
+            sw.Close();
+            fs.Close();
             return retLines;
         }
         private bool IsDirectLine(Line objectLine, Line targetLine)
@@ -83,6 +95,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             Point3d objectPt2 = objectLine.EndPoint;
             double distance1 = targetLine.GetClosestPointTo(objectPt1, false).DistanceTo(objectPt1);
             double distance2 = targetLine.GetClosestPointTo(objectPt2, false).DistanceTo(objectPt2);
+            if (distance1 < 10.0)
+            {
+                objectLine.StartPoint.CreateSquare(300).AddToCurrentSpace();
+            }
+            if (distance2 < 10.0)
+            {
+                objectLine.EndPoint.CreateSquare(300).AddToCurrentSpace();
+            }
             if (distance1 < 10.0 || distance2 < 10.0)
             {
                 return true;
@@ -95,6 +115,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             Point3d targetPt2 = targetLine.EndPoint;
             double distance1 = objectLine.GetClosestPointTo(targetPt1, false).DistanceTo(targetPt1);
             double distance2 = objectLine.GetClosestPointTo(targetPt2, false).DistanceTo(targetPt2);
+            if (distance1 < 10.0)
+            {
+                targetLine.StartPoint.CreateSquare(300).AddToCurrentSpace();
+            }
+            if (distance2 < 10.0)
+            {
+                targetLine.EndPoint.CreateSquare(300).AddToCurrentSpace();
+            }
             if (distance1 < 10.0 || distance2 < 10.0)
             {
                 return true;
