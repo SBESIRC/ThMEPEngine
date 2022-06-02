@@ -141,7 +141,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             GenerateLanes();
             GeneratePerpModules();
             GenerateCarsInModules();
-            ProcessLanes();
+            ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
             PostProcess();
         }

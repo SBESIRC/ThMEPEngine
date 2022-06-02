@@ -95,7 +95,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
 
-            ProcessLanes(true);
+            ProcessLanes(ref IniLanes,true);
             for (int i = 0; i < Walls.Count; i++)
             {
                 for (int j = 0; j < Walls[i].Coordinates.Count() - 1; j++)
@@ -194,7 +194,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var lanes = new List<Lane>();
             CarModules.Where(e => !e.IsInVertUnsureModule).ToList().ForEach(e => lanes.Add(new Lane(e.Line, e.Vec)));
             //lanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true, lanes);
-
+            ProcessLanes(ref lanes);
             for (int i = 0; i < lanes.Count; i++)
             {
                 var vl = lanes[i].Line;
@@ -225,15 +225,15 @@ namespace ThParkingStall.Core.MPartitionLayout
                 GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, false, true, true, generate_middle_pillar, isin_backback, true);
             }
         }
-        public void ProcessLanes(bool preprocess=false)
+        public void ProcessLanes(ref List<Lane> lanes, bool preprocess = false)
         {
-            for (int i = 0; i < IniLanes.Count; i++)
+            for (int i = 0; i < lanes.Count; i++)
             {
-                if (IsConnectedToLaneDouble(IniLanes[i].Line)) continue;
-                if(IsConnectedToLane(IniLanes[i].Line,false))
-                    IniLanes[i].Line=new LineSegment(IniLanes[i].Line.P1,IniLanes[i].Line.P0);
-                var endp = IniLanes[i].Line.P1;
-                var laneSdl = LineSegmentSDL(endp, Vector(IniLanes[i].Line).Normalize(), 10000);
+                if (IsConnectedToLaneDouble(lanes[i].Line)) continue;
+                if (IsConnectedToLane(lanes[i].Line,false))
+                    lanes[i].Line=new LineSegment(lanes[i].Line.P1, lanes[i].Line.P0);
+                var endp = lanes[i].Line.P1;
+                var laneSdl = LineSegmentSDL(endp, Vector(lanes[i].Line).Normalize(), 10000);
                 var laneSdlbuffer=laneSdl.Buffer(DisLaneWidth/2);
                 var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(laneSdlbuffer).Cast<Polygon>().ToList();
                 var points = new List<Coordinate>();
@@ -256,7 +256,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var split = splits.First();
                     if (/*split.Length > 10 && */split.Length< 10000)
                     {
-                        IniLanes[i].Line = new LineSegment(IniLanes[i].Line.P0, split.P1);
+                        lanes[i].Line = new LineSegment(lanes[i].Line.P0, split.P1);
                     }
                 }
             }
@@ -570,6 +570,22 @@ namespace ThParkingStall.Core.MPartitionLayout
 
                         var ploritolane = PolyFromLines(splitback, splitori);
                         splitori = splitori.Translation(vec * DisLaneWidth / 2);
+                        var splitori_buffer = splitori.Buffer(DisLaneWidth / 2);
+                        var obs_splitori_buffer_crossed = ObstaclesSpatialIndex.SelectCrossingGeometry(splitori_buffer).Cast<Polygon>();
+                        var obs_splitori_buffer_crossed_points = new List<Coordinate>();
+                        foreach (var crossed in obs_splitori_buffer_crossed)
+                        {
+                            obs_splitori_buffer_crossed_points.AddRange(crossed.Coordinates);
+                            obs_splitori_buffer_crossed_points.AddRange(crossed.IntersectPoint(splitori_buffer));
+                        }
+                        obs_splitori_buffer_crossed_points = obs_splitori_buffer_crossed_points.Where( p => splitori_buffer.Contains(p)).Select(p => splitori.ClosestPoint(p)).ToList();
+                        obs_splitori_buffer_crossed_points=RemoveDuplicatePts(obs_splitori_buffer_crossed_points);
+                        obs_splitori_buffer_crossed_points = SortAlongCurve(obs_splitori_buffer_crossed_points, splitori.ToLineString());
+                        var splitori_splits = SplitLine(splitori, obs_splitori_buffer_crossed_points).ToList();
+                        if (splitori_splits.Count > 0)
+                        {
+                            splitori= splitori_splits.OrderByDescending( e=> e.Length).First();
+                        }
                         if (((lane.ClosestPoint(splitori.P0).Distance(splitori.P0) >/* 5000*/splitori.Length / 3
                             || lane.ClosestPoint(splitori.P1).Distance(splitori.P1) > splitori.Length / 3)
                             && ObstaclesSpatialIndex.SelectCrossingGeometry(ploritolane).Cast<Polygon>().Where(e => Boundary.Contains(e.Envelope.Centroid) || Boundary.IntersectPoint(e).Count() > 0).Count() > 0)
