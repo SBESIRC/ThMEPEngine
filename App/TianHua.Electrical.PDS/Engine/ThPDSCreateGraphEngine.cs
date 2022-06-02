@@ -200,9 +200,9 @@ namespace TianHua.Electrical.PDS.Engine
                         EdgeMapList.Add(edgeMap);
 
                         // 移回原位
-                        EntitiesReset(transformer, loadExtractService.MarkBlocks.Keys.ToCollection());
-                        EntitiesReset(transformer, loadExtractService.DistBoxBlocks.Keys.ToCollection());
-                        EntitiesReset(transformer, loadExtractService.LoadBlocks.Keys.ToCollection());
+                        EntitiesReset(acad, transformer, loadExtractService.MarkBlocks);
+                        EntitiesReset(acad, transformer, loadExtractService.DistBoxBlocks);
+                        EntitiesReset(acad, transformer, loadExtractService.LoadBlocks);
                     }
                 }
             }
@@ -240,16 +240,20 @@ namespace TianHua.Electrical.PDS.Engine
             blockData.ForEach(o =>
             {
                 var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                block.TransformBy(o.Value.OwnerSpace2WCS);
                 transformer.Transform(block);
                 ThMEPEntityExtension.ProjectOntoXYPlane(block);
             });
         }
 
-        private void EntitiesReset(ThMEPOriginTransformer transformer, DBObjectCollection collection)
+        private void EntitiesReset(AcadDatabase acad, ThMEPOriginTransformer transformer,
+            Dictionary<Entity, ThPDSBlockReferenceData> blockData)
         {
-            collection.OfType<Entity>().ForEach(o =>
+            blockData.ForEach(o =>
             {
-                transformer.Reset(o);
+                var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                block.TransformBy(o.Value.OwnerSpace2WCS.Inverse());
+                transformer.Reset(block);
             });
         }
 

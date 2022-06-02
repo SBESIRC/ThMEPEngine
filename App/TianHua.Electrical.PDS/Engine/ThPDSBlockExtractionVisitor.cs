@@ -9,6 +9,7 @@ using Linq2Acad;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -50,30 +51,13 @@ namespace TianHua.Electrical.PDS.Engine
         private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
         {
             var results = new List<ThRawIfcDistributionElementData>();
-            if (IsDistributionElement(br) && CheckLayerValid(br))
+            if (IsDistributionElement(br) && CheckLayerValid(br) && br.Bounds.HasValue)
             {
-                if (matrix == Matrix3d.Identity)
+                results.Add(new ThRawIfcDistributionElementData()
                 {
-                    results.Add(new ThRawIfcDistributionElementData()
-                    {
-                        Data = br,
-                        Geometry = br.GeometricExtents.ToRectangle(),
-                    });
-                }
-                else
-                {
-                    using (var acad = AcadDatabase.Use(br.Database))
-                    {
-                        var brCopy = br.GetTransformedCopy(matrix);
-                        acad.ModelSpace.Add(brCopy);
-                        results.Add(new ThRawIfcDistributionElementData()
-                        {
-                            Data = brCopy,
-                            Geometry = brCopy.GeometricExtents.ToRectangle(),
-                        });
-                        brCopy.Erase();
-                    }
-                }
+                    Data = new ThPDSBlockReferenceData(br.Id, matrix),
+                    Geometry = br.GeometricExtents.ToRectangle(),
+                });
             }
             return results;
         }
