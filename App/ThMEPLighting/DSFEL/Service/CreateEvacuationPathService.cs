@@ -4,7 +4,7 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
 using ThMEPLighting.DSFEL.Model;
 
 namespace ThMEPLighting.DSFEL.Service

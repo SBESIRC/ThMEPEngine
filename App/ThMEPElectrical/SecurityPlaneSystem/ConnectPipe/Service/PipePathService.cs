@@ -11,8 +11,7 @@ using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem.Utils;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
 using ThMEPElectrical.StructureHandleService;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm_New;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
 {
@@ -185,7 +184,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
             mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderBy(x => x.Area).First();
 
             //----初始化寻路类
-            AStarOptimizeRoutePlanner aStarRoute = new AStarOptimizeRoutePlanner(mapFrame, dir, 50, 50);
+            AStarRoutePlanner<Point3d> aStarRoute = new AStarRoutePlanner<Point3d>(mapFrame, dir, blockPt, 50, 50);
 
             //----设置障碍物
             var objs = holes.ToCollection();
@@ -194,7 +193,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
             aStarRoute.SetObstacle(resHoles);
 
             //----计算路径
-            var path = aStarRoute.Plan(startPt, blockPt);
+            var path = aStarRoute.Plan(startPt);
             if (path != null)
             {
                 resLines = path;

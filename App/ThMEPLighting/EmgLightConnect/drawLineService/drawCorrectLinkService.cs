@@ -9,7 +9,6 @@ using ThCADExtension;
 using NFox.Cad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPLighting.EmgLightConnect.Model;
 
 namespace ThMEPLighting.EmgLightConnect.Service
