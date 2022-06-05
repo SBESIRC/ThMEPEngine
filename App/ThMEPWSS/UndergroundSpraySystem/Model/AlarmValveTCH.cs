@@ -27,7 +27,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var Results = acadDatabase
                     .ModelSpace
                     .OfType<Entity>()
-                    .Where(o => IsTargetLayer(o.Layer))
                     .Where(o => IsTarget(o))
                     .ToList();
 
@@ -45,10 +44,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 return pts;
             }
         }
-        private bool IsTargetLayer(string layer)
-        {
-            return layer.ToUpper() == "W-FRPT-SPRL-EQPM";
-        }
+
         private bool IsTarget(Entity entity)
         {
             if (entity is BlockReference blockReference)

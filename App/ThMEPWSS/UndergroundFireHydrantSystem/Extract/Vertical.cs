@@ -23,20 +23,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         public List<Point3dEx> VerticalPts { get; private set; }
         public DBObjectCollection Extract(AcadDatabase acadDatabase, Point3dCollection polygon)
         {
-            var Results = acadDatabase.ModelSpace  //处理非块非圆
+            var Results = acadDatabase.ModelSpace //TCH_PIPE
                .OfType<Entity>()
-               .Where(e => e is not Circle)
                .Where(e => IsTargetLayer(e.Layer))
-               .Where(e => IsTargetObject(e));
+               .Where(e => e.IsTCHPipe());
 
             var Results1 = acadDatabase.ModelSpace   //处理圆
                    .OfType<Circle>()
                    .Where(o => IsTargetLayer(o.Layer));
 
-            var Results2 = ExtractBlocks(acadDatabase.Database, "定位立管");
+            var Results2 = acadDatabase  //BlockRefrence
+                   .ModelSpace
+                   .OfType<BlockReference>()
+                   .Where(o => o.GetEffectiveName().Contains("定位立管"))
+                   .ToList();
 
-            //var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-            //var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
             var DBObjs = Results.ToCollection();
 
             //spatialIndex不支持圆
@@ -49,18 +50,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
             foreach (DBObject db in DBObjs)
             {
-                if(db is BlockReference br)//图块
-                {
-                    ExplodeBlock(br, DBobjsResults);
-                }
-                else if(IsTargetObject(db as Entity))//天正对象
-                {
-                    if(IsPipeLayer((db as Entity).Layer))
-                    {
-                        continue;
-                    }
-                    ExplodeTZBlock(db as Entity, DBobjsResults);
-                } 
+                ExplodeTZBlock(db as Entity, DBobjsResults);
             }
             foreach (var db in DBObjs1)//添加圆
             {
@@ -70,7 +60,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             foreach (var db in Results2)
             {
-                ExplodeDWLG(db as BlockReference, DBobjsResults);//添加定位立管
+                ExplodeDWLG(db, DBobjsResults);//添加定位立管
             }
 
             var rstSpatialIndex = new ThCADCoreNTSSpatialIndex(DBobjsResults);
@@ -89,13 +79,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                  || layer.Equals("W-FRPT-HYDT-EQPM")
                  || layer.Equals("W-FRPT-HYDT");
         }
-        private static bool IsTargetObject(Entity ent)
-        {
-            var type = ent.GetType().Name;
-            return type.Equals("BlockReference")
-                || type.Equals("ImpEntity")
-                || type.Equals("ImpCurve");
-        }
+
         private static void ExplodeBlock(BlockReference br, DBObjectCollection DBobjsResults)
         {
             if (IsDWLGBlock(br))//如果是定位立管
@@ -130,44 +114,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
         private static void ExplodeTZBlock(Entity ent, DBObjectCollection DBobjsResults)
         {
-            if (ent is null) return;
-            //炸天正块
-            var objs = new DBObjectCollection();
             try
             {
-                ent.Explode(objs);//把块炸开
+                var objs = new DBObjectCollection();
+                ent.Explode(objs);
+
+                objs.Cast<Entity>()
+                    .Where(e => e is Circle)
+                    .ForEach(e => DBobjsResults.Add(new DBPoint((e as Circle).Center)));
             }
             catch
             {
-                return;
-            }
-            //此处无法支持天正对象炸开后为空的情况
-            if(objs.Count == 0)
-            {
-                if(ent.GetRXClass().DxfName.ToUpper().Contains("TCH_PIPEFITTING"))
-                {
-                    var maxPt = ent.GeometricExtents.MaxPoint;
-                    var minPt = ent.GeometricExtents.MinPoint;
-                    if (maxPt.DistanceTo(minPt) < 1.0)//几何形状是一个点
-                    {
-                        var dbPt = new DBPoint(maxPt);
-                        DBobjsResults.Add(dbPt);
-                    }
-                    return;
-                }
-            }
-            foreach (var obj in objs)//遍历
-            {
-                if (obj is Circle circle)//圆
-                {
-                    var dbPt = new DBPoint(circle.Center);
-                    DBobjsResults.Add(dbPt);
-                    continue;
-                }
-                if (IsTargetObject(obj as Entity))//天正对象
-                {
-                    ExplodeTZBlock(obj as Entity, DBobjsResults);//炸
-                }
             }
         }
         private static bool IsDWLGBlock(BlockReference br)
@@ -194,35 +151,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var dbPt = new DBPoint(circle.Center);
                 DBobjsResults.Add(dbPt);
             }
-        }
-
-        private DBObjectCollection ExtractBlocks(Database db, string blockName)
-        {
-            Func<Entity, bool> IsBlkNameQualified = (e) =>
-            {
-                if (e is BlockReference br)
-                {
-                    try
-                    {
-                        return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper()) &&
-                               IsTargetLayer(br.Layer);
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-                return false;
-            };
-            var blkVisitor = new ThBlockReferenceExtractionVisitor();
-            blkVisitor.CheckQualifiedLayer = (e) => true;
-            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
-
-            var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(blkVisitor);
-            extractor.ExtractFromMS(db);
-            extractor.Extract(db);
-            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
 
         private static bool IsRepeatedPt(Point3dEx pt, List<Point3dEx> verticalPts)
