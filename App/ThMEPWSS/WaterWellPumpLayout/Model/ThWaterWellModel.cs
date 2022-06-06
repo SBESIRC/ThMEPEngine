@@ -582,12 +582,12 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         }
         public double GetAcreage()//获取集水井面积
         {
-            double acreage = Length / 1000.0 * (Width / 1000.0);
+            double acreage = (Length-100) / 1000.0 * ((Width-100) / 1000.0);
             return acreage;
         }
         public string GetWellSize()//获取集水井尺寸
         {
-            string strSize = Length.ToString() + "*" + Width.ToString();
+            string strSize = (Length - 100).ToString() + "*" + (Width - 100).ToString();
             return strSize;
         }
         //public void CheckHavePump(ThWaterPumpModel pump)
