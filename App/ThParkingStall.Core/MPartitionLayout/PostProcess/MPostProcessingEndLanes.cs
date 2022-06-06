@@ -807,14 +807,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var line_depth_test = line.Translation(Vector(lane).Normalize() * 1000);
                 var rec_test = PolyFromLines(line, line_depth_test);
                 var lanecrossed = laneboxpacialindex.SelectCrossingGeometry(rec_test).Cast<Polygon>();
-                if (lanecrossed.Count() > 0)
+                if (lanecrossed.Count() > 0 && lanecrossed.First().IntersectPoint(rec_test).Count() > 0)
                 {
                     var cross = lanecrossed.First();
                     var insec_pt = cross.IntersectPoint(rec_test).First();
                     var move_dis = line.ClosestPoint(insec_pt, true).Distance(insec_pt);
                     line = line.Translation(Vector(lane).Normalize() * move_dis);
                 }
-
                 var line_depth = line.Translation(Vector(lane).Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.CollisionD - MParkingPartitionPro.CollisionTOP));
                 var rec = PolyFromLines(line, line_depth);
                 var rec_sc = rec.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck);
