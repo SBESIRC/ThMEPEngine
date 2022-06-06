@@ -79,6 +79,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
             if (!TrySelectPoint(out var basePoint, "\n请选择消火栓系统图排布的起点")) return;
             var u2w = Active.Editor.UCS2WCS();
             basePoint = basePoint.TransformBy(u2w.Inverse());
+            var baseOffset = basePoint.ToVector3d();
+            basePoint = default;
             var fixMatrix = u2w;
             {
                 if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
@@ -13491,7 +13493,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 }
                 foreach (var info in lineInfos)
                 {
-                    var line = DrawLineSegmentLazy(info.Line);
+                    var line = DrawLineSegmentLazy(info.Line.Offset(baseOffset.ToVector2d()));
                     line.TransformBy(fixMatrix);
                     if (!string.IsNullOrEmpty(info.LayerName))
                     {
@@ -13501,7 +13503,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 }
                 foreach (var info in textInfos)
                 {
-                    var dbt = DrawTextLazy(info.Text, info.BasePoint.ToPoint2d());
+                    var dbt = DrawTextLazy(info.Text, info.BasePoint.Offset(baseOffset).ToPoint2d());
                     dbt.Rotation = info.Rotation;
                     dbt.WidthFactor = .7;
                     dbt.Height = TEXT_HEIGHT;
@@ -13512,7 +13514,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 }
                 foreach (var info in brInfos)
                 {
-                    DrawBlockReference(info.BlockName, info.BasePoint, layer: info.LayerName, cb: br =>
+                    DrawBlockReference(info.BlockName, info.BasePoint.Offset(baseOffset), layer: info.LayerName, cb: br =>
                     {
                         ByLayer(br);
                         {
