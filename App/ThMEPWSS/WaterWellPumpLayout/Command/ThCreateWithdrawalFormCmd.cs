@@ -58,7 +58,7 @@ namespace ThMEPWSS.Command
             ActionName = "生成提资表";
             configInfo = vm.GetConfigInfo();
         }
-        
+
         private void ImportBlockFile()
         {
             //导入一个块
@@ -71,7 +71,7 @@ namespace ThMEPWSS.Command
                 acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-NOTE"), true);
             }
         }
-      
+
         public override void SubExecute()
         {
             try
@@ -93,8 +93,8 @@ namespace ThMEPWSS.Command
                 {
                     var tmpItem = new FormItem();
                     tmpItem.StrNumber = wellConfig.PumpNumber;
-                    tmpItem.StrLength = wellConfig.WellModelList.FirstOrDefault().Length.ToString();
-                    tmpItem.StrWidth = wellConfig.WellModelList.FirstOrDefault().Width.ToString();
+                    tmpItem.StrLength = (wellConfig.WellModelList.FirstOrDefault().Length - 100).ToString();
+                    tmpItem.StrWidth = (wellConfig.WellModelList.FirstOrDefault().Width - 100).ToString();
                     tmpItem.StrPumpCount = wellConfig.PumpCount;
                     tmpItem.StrWellCount = wellConfig.WellCount.ToString();
 
