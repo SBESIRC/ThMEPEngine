@@ -109,7 +109,8 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         private List<ThGeometry> CreateHolesGeos()
         {
             var geos = new List<ThGeometry>();
-            holes.ForEach(o =>
+            var unionHoles = holes.ToCollection().UnionPolygons(true).Cast<Entity>().ToList();
+            unionHoles.ForEach(o =>
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.Hole.ToString());

@@ -25,6 +25,7 @@ namespace ThParkingStall.Core.InterProcess
         public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
         public List<List<int>> SeglineIndexList ;// 分割线相交关系
         public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
+        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
         #endregion
         #region ViewModel Parameters
         //平行车位尺寸,长度
@@ -59,7 +60,7 @@ namespace ThParkingStall.Core.InterProcess
         public int D2 = 200;
         //迭代次数
         public int IterationCount = -1;
-
+        public int RunMode;
         #endregion
         public Chromosome chromosome;
     }

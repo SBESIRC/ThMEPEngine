@@ -309,6 +309,10 @@ namespace ThMEPStructure.StructPlane.Service
                 var beamLines = new ObjectIdCollection();
                 var beamTexts = new Dictionary<ObjectId,Vector3d>();
 
+                // 这两个数据是为了给10mm楼板用的
+                var slabs = new DBObjectCollection();
+                var tenThckSlabTexts = new DBObjectCollection();
+                
                 // 打印到图纸中
                 geos.ForEach(o =>
                 {
@@ -319,8 +323,19 @@ namespace ThMEPStructure.StructPlane.Service
                         // 文字为注释
                         if (category == "IfcSlab")
                         {
-                            var printer = new ThSlabAnnotationPrinter();
-                            Append(printer.Print(db, dbText));
+                            if(IsTenThickSlab(dbText.TextString))
+                            {
+                                // 不要打印到界面上
+                                //tenThckSlabTexts.Add(dbText); // 后面打开
+
+                                var printer = new ThSlabAnnotationPrinter();
+                                Append(printer.Print(db, dbText));
+                            }
+                            else
+                            {
+                                var printer = new ThSlabAnnotationPrinter();
+                                Append(printer.Print(db, dbText));
+                            }
                         }
                         else if (category == "IfcBeam")
                         {
@@ -391,21 +406,23 @@ namespace ThMEPStructure.StructPlane.Service
                         }
                         else if (category == "IfcSlab")
                         {
-                            var outlineConfig = GetSlabConfig(o.Properties);
-                            var bg = o.Properties.GetElevation();
+                            var outlineConfig = ThSlabPrinter.GetSlabConfig();
+                            var bg = o.Properties.GetElevation();                            
                             if(slabHatchConfigs.ContainsKey(bg))
                             {
                                 var hatchConfig = slabHatchConfigs[bg];
                                 var printer = new ThSlabPrinter(hatchConfig, outlineConfig);
-                                if(o.Boundary is Polyline polyline)
+                                if (o.Boundary is Polyline polyline)
                                 {
+                                    slabs.Add(polyline);
                                     Append(printer.Print(db, polyline));
                                 }
-                                else if(o.Boundary is MPolygon mPolygon)
+                                else if (o.Boundary is MPolygon mPolygon)
                                 {
+                                    slabs.Add(mPolygon);
                                     Append(printer.Print(db, mPolygon));
                                 }
-                            }
+                            }                            
                         }
                         else if (category == "IfcOpeningElement")
                         {
@@ -417,9 +434,30 @@ namespace ThMEPStructure.StructPlane.Service
                     }
                 });
 
+                // 创建楼梯间楼板斜线标记
+                var builder = new ThBuildStairSlabLineService();
+                var slabCorners = builder.Build(tenThckSlabTexts,slabs);
+                if(slabCorners.Count>0)
+                {
+                    var textConfig = ThStairLineMarkPrinter.GetTextConfig();
+                    var lineConfig = ThStairLineMarkPrinter.GetLineConfig();
+                    var stairLinePrinter = new ThStairLineMarkPrinter(lineConfig, textConfig);
+                    slabCorners.OfType<Line>().ForEach(l => Append(stairLinePrinter.Print(db, l)));
+                }
+                
                 return Tuple.Create(beamLines, beamTexts);
             }   
         }      
+
+        private bool IsTenThickSlab(string content)
+        {
+            var values = content.GetDoubles();
+            if(values.Count==1)
+            {
+                return Math.Abs(values[0] - 10.0) <= 1e-4;
+            }
+            return false;
+        }
 
         private Vector3d ToVector(string vecContent)
         {
@@ -663,10 +701,6 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return new HatchPrintConfig();
             }
-        }
-        private PrintConfig GetSlabConfig(Dictionary<string, object> properties)
-        {
-            return ThSlabPrinter.GetSlabConfig();
         }
         private Dictionary<string,HatchPrintConfig> GetSlabHatchConfigs(List<string> elevations)
         {

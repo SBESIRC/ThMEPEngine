@@ -1,227 +1,228 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0"
-    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{0D803D87-011D-48EE-AF5C-B1216BE7F8AB}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>ThMEPStructure</RootNamespace>
-        <AssemblyName>ThMEPStructure</AssemblyName>
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-    </PropertyGroup>
-    <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-    <ItemGroup>
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Net.Http" />
-        <Reference Include="System.Xml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="ArchiecturePlane\Print\ThCommonPrinter.cs" />
-        <Compile Include="ArchiecturePlane\Service\ThArchSvgEntityPrintService.cs" />
-        <Compile Include="ArchiecturePlane\Service\ThArchPrintManager.cs" />
-        <Compile Include="ArchiecturePlane\Service\ThArchPlaneUtils.cs" />
-        <Compile Include="Common\Utils.cs" />
-        <Compile Include="GirderConnect\BuildBeam\BuildBeamLayoutConfig.cs" />
-        <Compile Include="GirderConnect\BuildBeam\ThBuildBeam.cs" />
-        <Compile Include="GirderConnect\Command\ThDoubleBeamLineCommand.cs" />
-        <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Data\LayerDealer.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Data\MainBeamLayoutConfig.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\AreaDealer.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\BorderConnectToNear.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\DicTuplesDealer.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\LineDealer.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsCenters.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsDealer.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\ShowInfo.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureDealer.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThGroupService.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThMainBuildingLayerManager.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\TypeConvertor.cs" />
-        <Compile Include="GirderConnect\ConnectMainBeam\Utils\WallConnect.cs" />
-        <Compile Include="GirderConnect\Data\BeamConfig.cs" />
-        <Compile Include="GirderConnect\Data\MainBeamPostProcess.cs" />
-        <Compile Include="GirderConnect\Data\MainBeamPreProcess.cs" />
-        <Compile Include="GirderConnect\Data\ThBeamConnectorDataFactory.cs" />
-        <Compile Include="GirderConnect\Data\ThBeamConnectorExpandColumnOverride.cs" />
-        <Compile Include="GirderConnect\Data\ThCurveExtractionVisitor.cs" />
-        <Compile Include="GirderConnect\Data\ThMainBuildingHatchExtractionVisitor.cs" />
-        <Compile Include="GirderConnect\Data\Utils\DataClassify.cs" />
-        <Compile Include="GirderConnect\Data\Utils\DataProcess.cs" />
-        <Compile Include="GirderConnect\Data\Utils\HandleOverlap.cs" />
-        <Compile Include="GirderConnect\Command\SecondaryBeamConnectCmd.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\RegionGrowAlgorithm.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\EvaluationModel.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\FusionRegion.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\LayoutResult.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\SecondaryBeamLayoutConfig.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\BeamEdge.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\BeamType.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\ThBeamTopologyGraph.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Model\ThBeamTopologyNode.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Service\BeamExtend.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Service\ConnectSecondaryBeamService.cs" />
-        <Compile Include="GirderConnect\SecondaryBeamConnect\Service\GetPrimitivesService.cs" />
-        <Compile Include="GirderConnect\Service\ImportService.cs" />
-        <Compile Include="Reinforcement\Command\ThReinforceDrawCmd.cs" />
-        <Compile Include="Reinforcement\Command\ThReinforceTableDrawCmd.cs" />
-        <Compile Include="Reinforcement\Command\ThReinforceTestData.cs" />
-        <Compile Include="Reinforcement\Command\ThTTypeReinforceDrawCmd.cs" />
-        <Compile Include="Reinforcement\Command\ThLTypeReinforceDrawCmd.cs" />
-        <Compile Include="Reinforcement\Command\ThRectTypeReinforceDrawCmd.cs" />
-        <Compile Include="Reinforcement\Command\ThYjkReinforceExtractCmd.cs" />
-        <Compile Include="Reinforcement\Data\YJK\ThExtractLeaderMarkService.cs" />
-        <Compile Include="Reinforcement\Data\YJK\ThExtractWallService.cs" />
-        <Compile Include="Reinforcement\Data\YJK\ThExtractWallColumnService.cs" />
-        <Compile Include="Reinforcement\Draw\DrawMain.cs" />
-        <Compile Include="Reinforcement\Draw\DrawObjectBase.cs" />
-        <Compile Include="Reinforcement\Draw\DrawObjectLType.cs" />
-        <Compile Include="Reinforcement\Draw\DrawObjectRectangle.cs" />
-        <Compile Include="Reinforcement\Draw\DrawObjectTType.cs" />
-        <Compile Include="Reinforcement\Draw\GangJinBase.cs" />
-        <Compile Include="Reinforcement\Draw\GangJinLink.cs" />
-        <Compile Include="Reinforcement\Draw\GangJinReinforce.cs" />
-        <Compile Include="Reinforcement\Draw\GangJinStirrup.cs" />
-        <Compile Include="Reinforcement\Draw\Helper.cs" />
-        <Compile Include="Reinforcement\Draw\Test.cs" />
-        <Compile Include="Reinforcement\Draw\ThReinforceTableBuilder.cs" />
-        <Compile Include="Reinforcement\Model\EdgeComponentExtractInfo.cs" />
-        <Compile Include="Reinforcement\Model\ThEdgeComponent.cs" />
-        <Compile Include="Reinforcement\Model\ThLTypeEdgeComponent.cs" />
-        <Compile Include="Reinforcement\Model\ThRectangleEdgeComponent.cs" />
-        <Compile Include="Reinforcement\Model\ThTTypeEdgeComponent.cs" />
-        <Compile Include="Reinforcement\Model\ThWallColumnReinforceConfig.cs" />
-        <Compile Include="Reinforcement\Data\YJK\ThYJKDataSetFactory.cs" />
-        <Compile Include="Reinforcement\Service\ThAnalysisService.cs" />
-        <Compile Include="Reinforcement\Service\ThBuiltinWallColumnTableQueryService.cs" />
-        <Compile Include="Reinforcement\Service\ThDataGroupService.cs" />
-        <Compile Include="Reinforcement\Service\ThEdgeComponentMarkFindService.cs" />
-        <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
-        <Compile Include="Reinforcement\Service\ThHuaRunSecAnalysisService.cs" />
-        <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
-        <Compile Include="Reinforcement\Service\ThReinforceEnhanceService.cs" />
-        <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
-        <Compile Include="Reinforcement\Service\ThSteelDataManager.cs" />
-        <Compile Include="Reinforcement\Service\ThStirrupEnhanceService.cs" />
-        <Compile Include="Reinforcement\Service\ThTTypeSpecAnalysisService.cs" />
-        <Compile Include="Reinforcement\Service\ThLTypeSpecAnalysisService.cs" />
-        <Compile Include="Reinforcement\Service\ThRectangleSpecAnalysisService.cs" />
-        <Compile Include="Reinforcement\Service\ThShapeAnalysisService.cs" />
-        <Compile Include="Reinforcement\Service\ThReinforcementUtils.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="Model\Printer\PrintConfig.cs" />
-        <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
-        <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
-        <Compile Include="StructPlane\Print\ThColumnPrinter.cs" />
-        <Compile Include="StructPlane\Print\ThHolePrinter.cs" />
-        <Compile Include="Common\ThPrintService.cs" />
-        <Compile Include="StructPlane\Print\ThShearwallPrinter.cs" />
-        <Compile Include="StructPlane\Print\ThSlabAnnotationPrinter.cs" />
-        <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
-        <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
-        <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
-        <Compile Include="StructPlane\Service\ThAdjustDbTextRotationService.cs" />
-        <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
-        <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
-        <Compile Include="StructPlane\Service\ThMultiSvgPrintService.cs" />
-        <Compile Include="StructPlane\Service\ThPrintDrawingHeadService.cs" />
-        <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
-        <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
-        <Compile Include="StructPlane\Service\ThStructurePlaneGenerator.cs" />
-        <Compile Include="StructPlane\Service\ThSvgEntityPrintService.cs" />
-        <Compile Include="StructPlane\Service\ThStructurePlaneConfig.cs" />
-        <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
-        <Compile Include="ThMEPStructureApp.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\CADExtension\CADExtension.csproj">
-            <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
-            <Name>CADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
-            <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
-            <Name>ThDotNetARX</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
-            <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
-            <Name>ThCADCore</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
-            <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
-            <Name>ThCADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-            <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
-            <Name>ThMEPEngineCore</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <Choose>
-        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="ManagedLibrary.v16">
-                    <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="ManagedLibrary.v16">
-                    <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-    </Choose>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <PropertyGroup>
-        <PostBuildEvent>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0D803D87-011D-48EE-AF5C-B1216BE7F8AB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ThMEPStructure</RootNamespace>
+    <AssemblyName>ThMEPStructure</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArchiecturePlane\Print\ThCommonPrinter.cs" />
+    <Compile Include="ArchiecturePlane\Service\ThArchSvgEntityPrintService.cs" />
+    <Compile Include="ArchiecturePlane\Service\ThArchPrintManager.cs" />
+    <Compile Include="ArchiecturePlane\Service\ThArchPlaneUtils.cs" />
+    <Compile Include="Common\Utils.cs" />
+    <Compile Include="GirderConnect\BuildBeam\BuildBeamLayoutConfig.cs" />
+    <Compile Include="GirderConnect\BuildBeam\ThBuildBeam.cs" />
+    <Compile Include="GirderConnect\Command\ThDoubleBeamLineCommand.cs" />
+    <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Data\LayerDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Data\MainBeamLayoutConfig.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\AreaDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\BorderConnectToNear.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\DicTuplesDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\LineDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsCenters.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\ShowInfo.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThGroupService.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThMainBuildingLayerManager.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\TypeConvertor.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\WallConnect.cs" />
+    <Compile Include="GirderConnect\Data\BeamConfig.cs" />
+    <Compile Include="GirderConnect\Data\MainBeamPostProcess.cs" />
+    <Compile Include="GirderConnect\Data\MainBeamPreProcess.cs" />
+    <Compile Include="GirderConnect\Data\ThBeamConnectorDataFactory.cs" />
+    <Compile Include="GirderConnect\Data\ThBeamConnectorExpandColumnOverride.cs" />
+    <Compile Include="GirderConnect\Data\ThCurveExtractionVisitor.cs" />
+    <Compile Include="GirderConnect\Data\ThMainBuildingHatchExtractionVisitor.cs" />
+    <Compile Include="GirderConnect\Data\Utils\DataClassify.cs" />
+    <Compile Include="GirderConnect\Data\Utils\DataProcess.cs" />
+    <Compile Include="GirderConnect\Data\Utils\HandleOverlap.cs" />
+    <Compile Include="GirderConnect\Command\SecondaryBeamConnectCmd.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\RegionGrowAlgorithm.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\EvaluationModel.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\FusionRegion.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\LayoutResult.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\SecondaryBeamLayoutConfig.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\BeamEdge.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\BeamType.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\ThBeamTopologyGraph.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\ThBeamTopologyNode.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Service\BeamExtend.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Service\ConnectSecondaryBeamService.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Service\GetPrimitivesService.cs" />
+    <Compile Include="GirderConnect\Service\ImportService.cs" />
+    <Compile Include="Reinforcement\Command\ThReinforceDrawCmd.cs" />
+    <Compile Include="Reinforcement\Command\ThReinforceTableDrawCmd.cs" />
+    <Compile Include="Reinforcement\Command\ThReinforceTestData.cs" />
+    <Compile Include="Reinforcement\Command\ThTTypeReinforceDrawCmd.cs" />
+    <Compile Include="Reinforcement\Command\ThLTypeReinforceDrawCmd.cs" />
+    <Compile Include="Reinforcement\Command\ThRectTypeReinforceDrawCmd.cs" />
+    <Compile Include="Reinforcement\Command\ThYjkReinforceExtractCmd.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThExtractLeaderMarkService.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThExtractWallService.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThExtractWallColumnService.cs" />
+    <Compile Include="Reinforcement\Draw\DrawMain.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectBase.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectLType.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectRectangle.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectTType.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinBase.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinLink.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinReinforce.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinStirrup.cs" />
+    <Compile Include="Reinforcement\Draw\Helper.cs" />
+    <Compile Include="Reinforcement\Draw\Test.cs" />
+    <Compile Include="Reinforcement\Draw\ThReinforceTableBuilder.cs" />
+    <Compile Include="Reinforcement\Model\EdgeComponentExtractInfo.cs" />
+    <Compile Include="Reinforcement\Model\ThEdgeComponent.cs" />
+    <Compile Include="Reinforcement\Model\ThLTypeEdgeComponent.cs" />
+    <Compile Include="Reinforcement\Model\ThRectangleEdgeComponent.cs" />
+    <Compile Include="Reinforcement\Model\ThTTypeEdgeComponent.cs" />
+    <Compile Include="Reinforcement\Model\ThWallColumnReinforceConfig.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThYJKDataSetFactory.cs" />
+    <Compile Include="Reinforcement\Service\ThAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThBuiltinWallColumnTableQueryService.cs" />
+    <Compile Include="Reinforcement\Service\ThDataGroupService.cs" />
+    <Compile Include="Reinforcement\Service\ThEdgeComponentMarkFindService.cs" />
+    <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
+    <Compile Include="Reinforcement\Service\ThHuaRunSecAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
+    <Compile Include="Reinforcement\Service\ThReinforceEnhanceService.cs" />
+    <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
+    <Compile Include="Reinforcement\Service\ThSteelDataManager.cs" />
+    <Compile Include="Reinforcement\Service\ThStirrupEnhanceService.cs" />
+    <Compile Include="Reinforcement\Service\ThTTypeSpecAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThLTypeSpecAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThRectangleSpecAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThShapeAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThReinforcementUtils.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Model\Printer\PrintConfig.cs" />
+    <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThColumnPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThHolePrinter.cs" />
+    <Compile Include="Common\ThPrintService.cs" />
+    <Compile Include="StructPlane\Print\ThShearwallPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThSlabAnnotationPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
+    <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThStairLineMarkPrinter.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustDbTextRotationService.cs" />
+    <Compile Include="StructPlane\Service\ThBuildStairSlabLineService.cs" />
+    <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
+    <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
+    <Compile Include="StructPlane\Service\ThMultiSvgPrintService.cs" />
+    <Compile Include="StructPlane\Service\ThPrintDrawingHeadService.cs" />
+    <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
+    <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
+    <Compile Include="StructPlane\Service\ThStructurePlaneGenerator.cs" />
+    <Compile Include="StructPlane\Service\ThSvgEntityPrintService.cs" />
+    <Compile Include="StructPlane\Service\ThStructurePlaneConfig.cs" />
+    <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
+    <Compile Include="ThMEPStructureApp.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
+      <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
+      <Name>ThDotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
+      <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
+      <Name>ThCADCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
             if $(Configuration)==Debug-NET45 (
             Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
             )
@@ -236,5 +237,5 @@
             )
             Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"
         </PostBuildEvent>
-    </PropertyGroup>
+  </PropertyGroup>
 </Project>

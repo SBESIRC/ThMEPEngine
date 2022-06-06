@@ -27,6 +27,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadConductorConfig();
             LoadCableCondiutConfig();
             LoadMotorConfig();
+            LoadDistributionMeteringConfig();
             LoadMeterConfig();
             LoadMTConfig();
             LoadCPSConfig();
@@ -738,6 +739,138 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         }
 
         /// <summary>
+        /// 加载电表箱出线回路配置
+        /// </summary>
+        private static void LoadDistributionMeteringConfig()
+        {
+            DistributionMeteringConfiguration.ShanghaiResidential.Add(new ShanghaiResidentialInfo()
+            {
+                LowPower = 0,
+                HighPower = 6,
+                Phase = ThPDSPhase.一相,
+                CB1 = new List<string>() { "63A/1P" },
+                MT = new List<string>() { "5(40)A", "5(60)A" },
+                CB2 = new List<string>() { "40A/2P", "40A/1P+N" },
+                Conductor = "2x16+E16",
+            });
+            DistributionMeteringConfiguration.ShanghaiResidential.Add(new ShanghaiResidentialInfo()
+            {
+                LowPower = 6,
+                HighPower = 8,
+                Phase = ThPDSPhase.一相,
+                CB1 = new List<string>() { "63A/1P" },
+                MT = new List<string>() { "5(40)A", "5(60)A" },
+                CB2 = new List<string>() { "40A/2P", "40A/1P+N" },
+                Conductor = "2x16+E16",
+            });
+            DistributionMeteringConfiguration.ShanghaiResidential.Add(new ShanghaiResidentialInfo()
+            {
+                LowPower = 8,
+                HighPower = 12,
+                Phase = ThPDSPhase.一相,
+                CB1 = new List<string>() { "80A/1P" },
+                MT = new List<string>() { "5(60)A" },
+                CB2 = new List<string>() { "63A/2P", "63A/1P+N" },
+                Conductor = "2x25+E16",
+            });
+            DistributionMeteringConfiguration.ShanghaiResidential.Add(new ShanghaiResidentialInfo()
+            {
+                LowPower = 12,
+                HighPower = 20,
+                Phase = ThPDSPhase.三相,
+                CB1 = new List<string>() { "63A/3P" },
+                MT = new List<string>() { "3x5(60)A" },
+                CB2 = new List<string>() { "40A/4P", "40A/3P+N" },
+                Conductor = "4x16+E16",
+            });
+            DistributionMeteringConfiguration.ShanghaiResidential.Add(new ShanghaiResidentialInfo()
+            {
+                LowPower = 20,
+                HighPower = 29,
+                Phase = ThPDSPhase.三相,
+                CB1 = new List<string>() { "80A/3P" },
+                MT = new List<string>() { "3x5(60)A" },
+                CB2 = new List<string>() { "63A/4P", "63A/3P+N" },
+                Conductor = "4x25+E16",
+            });
+            DistributionMeteringConfiguration.ShanghaiResidential.Add(new ShanghaiResidentialInfo()
+            {
+                LowPower = 29,
+                HighPower = 49,
+                Phase = ThPDSPhase.三相,
+                CB1 = new List<string>() { "100A/3P" },
+                MT = new List<string>() { "3x10(100)A", "3x20(100)A" },
+                CB2 = new List<string>() { "80A/4P", "80A/3P+N" },
+                Conductor = "4x25+E16",
+            });
+
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 0,
+                HighPower = 8,
+                Phase = ThPDSPhase.一相,
+                CB = new List<string>() { "40A/2P", "40A/1P+N" },
+                Conductor = "2x10+E10",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 8,
+                HighPower = 12,
+                Phase = ThPDSPhase.一相,
+                CB = new List<string>() { "63A/2P/ST", "63A/1P+N/ST" },
+                Conductor = "2x16+E16",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 12,
+                HighPower = 16,
+                Phase = ThPDSPhase.一相,
+                CB = new List<string>() { "80A/2P/ST", "80A/1P+N/ST" },
+                Conductor = "2x25+E16",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 16,
+                HighPower = 20,
+                Phase = ThPDSPhase.一相,
+                CB = new List<string>() { "100A/2P/ST", "100A/1P+N/ST" },
+                Conductor = "2x25+E16",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 20,
+                HighPower = 26,
+                Phase = ThPDSPhase.三相,
+                CB = new List<string>() { "40A/4P", "40A/3P+N" },
+                Conductor = "4x10+E10",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 26,
+                HighPower = 40,
+                Phase = ThPDSPhase.三相,
+                CB = new List<string>() { "63A/4P/ST", "63A/3P+N/ST" },
+                Conductor = "4x16+E16",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 40,
+                HighPower = 53,
+                Phase = ThPDSPhase.三相,
+                CB = new List<string>() { "80A/4P/ST", "80A/3P+N/ST" },
+                Conductor = "4x25+E16",
+            });
+            DistributionMeteringConfiguration.JiangsuResidential.Add(new JiangsuResidentialInfo()
+            {
+                LowPower = 53,
+                HighPower = 66,
+                Phase = ThPDSPhase.三相,
+                CB = new List<string>() { "100A/4P/ST", "100A/3P+N/ST" },
+                Conductor = "4x25+E16",
+            });
+        }
+
+        /// <summary>
         /// 加载电能表配置
         /// </summary>
         private static void LoadMeterConfig()
@@ -749,9 +882,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 new MTComponentInfo(){ Amps = 10, parameter = "2.5(10)"},
                 new MTComponentInfo(){ Amps = 12, parameter = "3(12)"},
                 new MTComponentInfo(){ Amps = 20, parameter = "5(20)"},
+                new MTComponentInfo(){ Amps = 20, parameter = "5(40)"},
                 new MTComponentInfo(){ Amps = 40, parameter = "10(40)"},
+                new MTComponentInfo(){ Amps = 60, parameter = "5(60)"},
                 new MTComponentInfo(){ Amps = 60, parameter = "15(60)"},
                 new MTComponentInfo(){ Amps = 80, parameter = "20(80)"},
+                new MTComponentInfo(){ Amps = 100, parameter = "10(100)"},
+                new MTComponentInfo(){ Amps = 100, parameter = "20(100)"},
                 new MTComponentInfo(){ Amps = 100, parameter = "30(100)"},
             };
         }

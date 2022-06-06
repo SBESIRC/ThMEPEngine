@@ -138,13 +138,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, ThCADCoreNTSSpatialIndex verticalSpatialIndex = null)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
-            //var line111 = new Line(new Point3d(1598961.3, 389022,0),new Point3d(1598961.3, 390022,0));
-            //var line222 = new Line(new Point3d(1598961.3, 388122,0), new Point3d(1598961.3, 388622,0));
-            //var line333 = new Line(new Point3d(1598961.3, 388822, 0), new Point3d(1598758.2, 388822, 0));
-            //lineList.Clear();
-            //lineList.Add(line111);
-            //lineList.Add(line222);
-            //lineList.Add(line333);
+
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
@@ -157,16 +151,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
                 var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
 
-                var testPt = new Point3d(1598961.3, 389022,0);
-                var testPt2 = new Point3d(1598961.3, 388622, 0);
-                //if (pt1._pt.DistanceTo(testPt)<10 || pt2._pt.DistanceTo(testPt) < 10)
-                //{
-                //    ;
-                //}
-                //if (pt1._pt.DistanceTo(testPt2) < 10 || pt2._pt.DistanceTo(testPt2) < 10)
-                //{
-                //    ;
-                //}
                 if (pt1.DistanceToEx(pt2) > 1001 || pt1.DistanceToEx(pt2) < 1)
                 {
                     continue;

@@ -20,6 +20,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<FloorFramed> _roofFloors;
         List<FloorFramed> _maxRoofFloors;
         List<FloorFramed> _minRoofFloors;
+        double _convertPipeDimLineLength = 2000;
         public RoofLayout(List<FloorFramed> roofFloors, List<RoofPointInfo> roofWaterBuckets, Dictionary<string, List<ThIfcRoom>> roofFloorRooms) 
         {
             _roofFloors = new List<FloorFramed>();
@@ -89,11 +90,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 retRes.AddRange(maxToMinRoofs);
             return retRes;
         }
-        public List<CreateBlockInfo> RoofY1LGravityConverter(FloorFramed livingFloor, List<CreateBlockInfo> floorY1LBlcoks, out List<CreateBasicElement> addLines,double findY1LDis) 
+        public List<CreateBlockInfo> RoofY1LGravityConverter(FloorFramed livingFloor, List<CreateBlockInfo> floorY1LBlcoks, out List<CreateBasicElement> addLines,out List<CreateDBTextElement> addText ,double findY1LDis) 
         {
             //获取改楼层的Y1L
             addLines = new List<CreateBasicElement>();
             var retRes = new List<CreateBlockInfo>();
+            addText = new List<CreateDBTextElement>();
             if (null == floorY1LBlcoks || floorY1LBlcoks.Count < 1)
                 return retRes;
             var maxRoofConvert = MaxRoofPipeConvert();
@@ -111,10 +113,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     continue;
                 item.tag = DrainSysAGCommon.NOTCOPYTAG;
                 retRes.Add(item);
+                var dimDir = (Vector3d.XAxis - Vector3d.YAxis).GetNormal();
+                var dimAddLines = PipeAddDim(livingFloor.floorUid, item.createPoint, dimDir, _convertPipeDimLineLength, "接雨水口", out List<CreateDBTextElement> dimAddTexts);
+                if (dimAddLines != null)
+                    addLines.AddRange(dimAddLines);
+                if (null != dimAddTexts)
+                    addText.AddRange(dimAddTexts);
                 //位置偏差大需要连线
                 var lineDir = (liveFloorY1L.createPoint - item.createPoint).GetNormal();
-                var lineSp = item.createPoint;
-                var lineEp = liveFloorY1L.createPoint - lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(item, "可见性1"));
+                var lineSp = item.createPoint + lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(liveFloorY1L, "可见性1"));
+                var lineEp = liveFloorY1L.createPoint;
                 if (lineSp.DistanceTo(lineEp) < 10)
                     continue;
                 if (lineSp.DistanceTo(lineEp) > item.createPoint.DistanceTo(liveFloorY1L.createPoint))
@@ -123,10 +131,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return retRes;
         }
-        public List<CreateBlockInfo> RoofY1LSideConverter(FloorFramed livingFloor, List<CreateBlockInfo> floorY1LBlcoks, out List<CreateBasicElement> addLines, double findY1LDis)
+        public List<CreateBlockInfo> RoofY1LSideConverter(FloorFramed livingFloor, List<CreateBlockInfo> floorY1LBlcoks, out List<CreateBasicElement> addLines, out List<CreateDBTextElement> addText, double findY1LDis)
         {
             addLines = new List<CreateBasicElement>();
             var retRes = new List<CreateBlockInfo>();
+            addText = new List<CreateDBTextElement>();
             if (null == floorY1LBlcoks || floorY1LBlcoks.Count < 1)
                 return retRes;
             var maxRoofConvert = MaxRoofPipeConvert();
@@ -146,6 +155,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (item.createPoint.DistanceTo(maxY1L.createPoint) < 100)
                         continue;
                     retRes.Add(item);
+                    var dimDir = (Vector3d.XAxis - Vector3d.YAxis).GetNormal();
+                    var dimAddLines = PipeAddDim(livingFloor.floorUid, maxY1L.createPoint, dimDir, _convertPipeDimLineLength, "接雨水口", out List<CreateDBTextElement> dimAddTexts);
+                    if (dimAddLines != null)
+                        addLines.AddRange(dimAddLines);
+                    if (null != dimAddTexts)
+                        addText.AddRange(dimAddTexts);
                     //位置偏差大需要连线
                     var lineDir = (maxY1L.createPoint - item.createPoint).GetNormal();
                     var lineSp = item.createPoint + lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(item, "可见性1"));
@@ -290,6 +305,29 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
             }
             return retRes;
+        }
+
+        List<CreateBasicElement> PipeAddDim(string floorId,Point3d startPt,Vector3d fisrtLineDir,double outLength,string dimText,out List<CreateDBTextElement> addTexts) 
+        {
+            var addLines = new List<CreateBasicElement>();
+            addTexts = new List<CreateDBTextElement>();
+            //转管时生成的立管加入标注
+            var lineSp = startPt;
+            var lineEp = lineSp + fisrtLineDir.MultiplyBy(outLength);
+            var upText = DrainSysAGCommon.CreateDBText(dimText, lineEp, ThWSSCommon.Layout_PipeRainTextLayerName, ThWSSCommon.Layout_TextStyle);
+            var upMaxPoint = upText.GeometricExtents.MaxPoint;
+            var upMinPoint = upText.GeometricExtents.MinPoint;
+            var upWidth = upMaxPoint.X - upMinPoint.X;
+            var upHeight = upMaxPoint.Y - upMinPoint.Y;
+            var leftDir = Vector3d.XAxis;
+
+            addLines.Add(new CreateBasicElement(floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeRainTextLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+            addLines.Add(new CreateBasicElement(floorId, new Line(lineEp, lineEp + leftDir.MultiplyBy(upWidth + 100)), ThWSSCommon.Layout_PipeRainTextLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+            var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + Vector3d.YAxis.MultiplyBy(10);
+            upText.Position = upTextPt;
+
+            addTexts.Add(new CreateDBTextElement(floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+            return addLines;
         }
         RoofPointInfo GetRoofPointInfo(Point3d centerPoint) 
         {

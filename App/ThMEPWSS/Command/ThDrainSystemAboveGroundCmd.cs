@@ -382,11 +382,15 @@ namespace ThMEPWSS.Command
                             tchPipe.TextDirection = otherLine.LineDirection().Negate();
                         }
                         var textFirst = texts.First();
-                        var numStr = textFirst.dbText.TextString.Split('-').ToList().Last();
+                        var spliteStr = textFirst.dbText.TextString.Split('-').ToList();
+                        var numStr = spliteStr.Last();
+                        var floorNum = spliteStr.First();
+                        floorNum = floorNum.Replace(item.tag, "");
                         int.TryParse(numStr, out int intNum);
-                        tchPipe.FloorNum = "";
+                        tchPipe.FloorNum = floorNum;
                         tchPipe.TextStyle = "_TWT_SERIAL";
                         tchPipe.DimType = 0;
+                        tchPipe.FloorType = 4;
                         tchPipe.TextHeight = 3.5;
                         tchPipe.DimRadius = 4.0;
                         tchPipe.Spacing = 4.0;
@@ -470,7 +474,7 @@ namespace ThMEPWSS.Command
             }
             //Y1L转换,重力和侧入雨水斗转换在不同的楼层
             var y1 = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("Y1L")).ToList();
-            var addY1Ls = roofLayout.RoofY1LGravityConverter(livingHighestFloor, y1, out List<CreateBasicElement> addLines, _roofY1ConvertAddLineDistance);
+            var addY1Ls = roofLayout.RoofY1LGravityConverter(livingHighestFloor, y1, out List<CreateBasicElement> addLines,out List<CreateDBTextElement> addTexts, _roofY1ConvertAddLineDistance);
             if (null != addY1Ls && addY1Ls.Count > 0)
                 createBlockInfos.AddRange(addY1Ls);
             if (null != addLines && addLines.Count > 0) 
@@ -478,17 +482,21 @@ namespace ThMEPWSS.Command
                 createBasicElems.AddRange(addLines);
                 foreach (var item in addLines)
                 {
-                    if (item.baseCurce is Line)
+                    if (item.baseCurce is Line && item.layerName == ThWSSCommon.Layout_PipeRainDrainConnectLayerName)
                         _roofY1ConvertLines.Add(item);
                 }
             }
+            if (addTexts != null)
+                createTextElems.AddRange(addTexts);
             addY1Ls.Clear();
             //侧入雨水斗的转换线在屋面
-            addY1Ls = roofLayout.RoofY1LSideConverter(livingHighestFloor, y1, out addLines, _roofY1ConvertAddLineDistance);
+            addY1Ls = roofLayout.RoofY1LSideConverter(livingHighestFloor, y1, out addLines,out addTexts, _roofY1ConvertAddLineDistance);
             if (null != addY1Ls && addY1Ls.Count > 0)
                 createBlockInfos.AddRange(addY1Ls);
             if (null != addLines && addLines.Count > 0)
                 createBasicElems.AddRange(addLines);
+            if (null != addTexts && addTexts.Count > 0)
+                createTextElems.AddRange(addTexts);
         }
         void LivingFloorLabelLayout(double midY, List<RoomModel> thisFloorRooms) 
         {

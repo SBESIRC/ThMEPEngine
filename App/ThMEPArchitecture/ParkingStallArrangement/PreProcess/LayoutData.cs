@@ -35,19 +35,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分割线
         public  List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public  List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
-
+        public List<Circle> CAD_Anchors = new List<Circle>();// 提取到的cad锚点
         // NTS 数据结构
         public  Polygon WallLine;//初始边界线
         public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分割线
         public  List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public  List<Ramp> Ramps = new List<Ramp>();// 坡道
-
+        public List<Anchor> Anchors = new List<Anchor>();
         // NTS 衍生数据
         public  List<LineSegment> VaildLanes;//分割线等价车道线
         public  Polygon SegLineBoundary;//智能边界，外部障碍物为不可穿障碍物
         public  List<Polygon> InnerBuildings; //不可穿障碍物（中间障碍物）,包含坡道
         public  List<int> OuterBuildingIdxs; //可穿建筑物（外围障碍物）的index,包含坡道
-        //public  List<Polygon> ObstacleBoundaries =new List<Polygon>();// 建筑物物直角轮廓，外扩合并得到(3000)直角多边形，用于算插入比
+        //public List<Polygon> ObstacleBoundaries = new List<Polygon>();// 建筑物物直角轮廓，外扩合并得到(3000)直角多边形，用于算插入比
         public  List<Polygon> TightBoundaries = new List<Polygon>();//紧密轮廓，外扩合并+内缩2750得到。用于计算最大最小值
         public  List<Polygon> BoundingBoxes = new List<Polygon>();// 障碍物的外包框（矩形）
         public  List<Polygon> Buildings; // 初始障碍物,包含坡道
@@ -63,8 +63,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         public List<List<int>> SeglineIndexList;//分割线连接关系
         public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
-        public List<(int,int,int,int)> SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
-
+        public List<(int,int,int,int)> SegLineIntSecNode = new List<(int, int, int, int)>();//四岔节点关系，上下左右的分割线index
 
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
@@ -90,7 +89,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             if (!Isvaild) return false;
             if(autoAdjustPriority)
             {
-
+                var CrossPts = SegLines.GetCrossPoints(WallLine);
+                var BreakedSegLines = new List<LineSegment>();
+                var segLines_C = SegLines.Select(l => l.Clone()).ToList();
+                segLines_C.ForEach(l => 
+                    BreakedSegLines.AddRange(l.Split(CrossPts.Select(c=>c.Coordinate).ToList())));
+                //基于交点打断
+                //var queryed = segLines_C.Where(l => CrossPts.Any(pt => l.Distance(pt.Coordinate) < 1)).ToList();
+                //queryed.ForEach(l => segLines_C.Remove(l));
+                ////获取新的分割线（延长）
+                //BreakedSegLines.AddRange(segLines_C);
+                SegLines = BreakedSegLines;
+                //获取连接关系
+                SeglineIndexList = SegLines.GetSegLineIntsecList();
+                SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
+                //获取交点关系
+                SegLineIntSecNode = SegLines.GetSegLineIntSecNode(CrossPts);
             }
             GetLowerUpperBound();
             //ShowLowerUpperBound();
@@ -136,6 +150,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var RampPolgons = UpdateWallLine();
             UpdateRamps(RampPolgons);
             UpdateObstacles();
+            UpdateAnchors();
             Buildings = RampPolgons;
             Buildings.AddRange(Obstacles);
             var boundaries = new List<Geometry> { WallLine.Shell };
@@ -226,6 +241,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     CAD_SegLines.Add(line);
                 }
             }
+            if (layerName.Contains("锚点"))
+            {
+                if (ent is BlockReference br)
+                {
+                    var dbObjs = new DBObjectCollection();
+                    br.Explode(dbObjs);
+                    foreach (var obj in dbObjs)
+                    {
+                        if (obj is Circle circle)
+                        {
+                            CAD_Anchors.Add(circle);
+                        }
+                    }
+                }
+                else if (ent is Circle circle)
+                {
+                    CAD_Anchors.Add(circle);
+                }
+            }
         }
         private void UpdateSegLines()
         {
@@ -288,6 +322,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 }
             }
         }
+        private void UpdateAnchors()
+        {
+            CAD_Anchors.ForEach(a => Anchors.Add(new Anchor(a.Center, a.Radius)));
+        }
         #endregion
         #region 预处理
         private void PreProcess()
@@ -301,7 +339,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 ObstacleSpatialIndex = new MNTSSpatialIndex(Obstacles);
                 if (Ramps.Count != 0) BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
                 else BuildingSpatialIndex = ObstacleSpatialIndex;
-                //UpdateObstacleBoundaries();
+                UpdateObstacleBoundaries();
                 GetSegLineBoundary();
                 BoundLineSpatialIndex = new MNTSSpatialIndex(WallLine.Shell.ToLineStrings());
             }
@@ -316,7 +354,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
             var wallBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2));//边界内缩
             wallBound = wallBound.Difference(ObstacleBoundsGeo);//取差值
-
+            //wallBound.Get<Polygon>(false).ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
             if (wallBound is Polygon wpoly) wallBound = wpoly.RemoveHoles();
             else if (wallBound is MultiPolygon mpoly)
             {
@@ -334,16 +372,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
             BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
         }
-        //private  void UpdateObstacleBoundaries()
-        //{
-        //    var distance = ParameterStock.BuildingTolerance;
-        //    BufferParameters bufferParameters = new BufferParameters(8, EndCapStyle.Square, JoinStyle.Mitre, 5.0);
-        //    var buffered = new MultiPolygon(Obstacles.ToArray()).Buffer(distance, bufferParameters);
-        //    Geometry result = new MultiPolygon(buffered.Union().Get<Polygon>(true).ToArray());
-        //    result = result.Buffer(-distance, bufferParameters);
-        //    result = result.Intersection(WallLine);
-        //    ObstacleBoundaries = result.Get<Polygon>(true);
-        //}
+        private void UpdateObstacleBoundaries()
+        {
+            var distance = ParameterStock.BuildingTolerance;
+            BufferParameters bufferParameters = new BufferParameters(8, EndCapStyle.Square, JoinStyle.Mitre, 5.0);
+            var buffered = new MultiPolygon(Buildings.ToArray()).Buffer(distance, bufferParameters);
+            Geometry result = new MultiPolygon(buffered.Union().Get<Polygon>(true).ToArray());
+            result = result.Buffer(-distance, bufferParameters);
+            result = result.Intersection(WallLine);
+            //ObstacleBoundaries = result.Get<Polygon>(true);
+            var mmtoM = 0.001 * 0.001;
+            ParameterStock.TotalArea = WallLine.Area*mmtoM;
+            ParameterStock.ObstacleArea = result.Area * mmtoM; 
+            Logger?.Information($"地库总面积:"+ string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2) );
+            Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.ObstacleArea) + "m" + Convert.ToChar(0x00b2) );
+        }
         #endregion
         #region 分割线检查
         public bool SegLineVaild()
@@ -570,21 +613,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var vaildSegs = SegLines.GetVaildSegLines(WallLine, 0);
             for (int i = 0; i < SegLines.Count; i++)
             {
-                var vaildSeg = vaildSegs[i];
-                if(vaildSeg == null)
-                {
-                    if (SegLines[i].IsVertical())
-                        LowerUpperBound.Add((SegLines[i].P0.X - (VMStock.RoadWidth / 2), SegLines[i].P0.X + (VMStock.RoadWidth / 2)));
-                    else
-                        LowerUpperBound.Add((SegLines[i].P0.Y - (VMStock.RoadWidth / 2), SegLines[i].P0.Y + (VMStock.RoadWidth / 2)));
-                    continue;
-                }
-                if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0)
+                if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0||
+                    Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius))
                 {
                     if (SegLines[i].IsVertical())
                         LowerUpperBound.Add((SegLines[i].P0.X, SegLines[i].P0.X));
                     else
                         LowerUpperBound.Add((SegLines[i].P0.Y, SegLines[i].P0.Y));
+                    continue;
+                }
+                var vaildSeg = vaildSegs[i];
+                if (vaildSeg == null)
+                {
+                    if (SegLines[i].IsVertical())
+                        LowerUpperBound.Add((SegLines[i].P0.X - (VMStock.RoadWidth / 2), SegLines[i].P0.X + (VMStock.RoadWidth / 2)));
+                    else
+                        LowerUpperBound.Add((SegLines[i].P0.Y - (VMStock.RoadWidth / 2), SegLines[i].P0.Y + (VMStock.RoadWidth / 2)));
                     continue;
                 }
                 if (vaildSeg.IsVertical())
@@ -744,6 +788,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     l.AddToCurrentSpace();
                 }
             }
+        }
+    }
+    public class Anchor
+    {
+        public Coordinate Center;
+        public double Radius;
+
+        public Anchor(Point3d center, double radius)
+        {
+            Center = center.ToNTSCoordinate();
+            Radius = radius;
         }
     }
 }

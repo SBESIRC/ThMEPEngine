@@ -1,29 +1,30 @@
 ﻿using System;
 using System.Linq;
-using Linq2Acad;
-using AcHelper.Commands;
+using System.IO;
 using System.Collections.Generic;
-using ThMEPWSS.Pipe.Model;
-using AcHelper;
+using System.Collections.ObjectModel;
+
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using AcHelper;
+using Linq2Acad;
+using AcHelper.Commands;
+using NFox.Cad;
+using ThMEPEngineCore.CAD;
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Command;
 using ThMEPWSS.Pipe;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThCADCore.NTS;
-using NFox.Cad;
-using System.IO;
-using ThCADExtension;
+
 using ThMEPWSS.Diagram.ViewModel;
-using ThMEPEngineCore.CAD;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterWellPumpLayout.Interface;
 using ThMEPWSS.WaterWellPumpLayout.Service;
-using DotNetARX;
-using ThMEPEngineCore.Command;
 using ThMEPWSS.WaterWellPumpLayout.Model;
-using System.Collections.ObjectModel;
 
 namespace ThMEPWSS.Command
 {
@@ -54,26 +55,11 @@ namespace ThMEPWSS.Command
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
                     waterWell.Init();
                     waterWellList.Add(waterWell);
-                }              
+                }
             }
             return waterWellList;
         }
-        public List<ThWaterPumpModel> GetDeepWellPumpList()
-        {
-            List<ThWaterPumpModel> deepWellPump = new List<ThWaterPumpModel>();
-            using (var database = AcadDatabase.Active())
-            using (var engine = new ThWDeepWellPumpEngine())
-            {
-                var range = new Point3dCollection();
-                engine.RecognizeMS(database.Database, range);
-                foreach (ThIfcDistributionFlowElement element in engine.Elements)
-                {
-                    ThWaterPumpModel pump = ThWaterPumpModel.Create(element.Outline);
-                    deepWellPump.Add(pump);
-                }
-            }
-            return deepWellPump;
-        }
+
         public List<Line> GetRoomLine(Point3dCollection range)
         {
             using (var database = AcadDatabase.Active())
@@ -82,15 +68,15 @@ namespace ThMEPWSS.Command
                 List<Line> resLine = new List<Line>();
                 var roomLines = acadDb.ModelSpace.OfType<Entity>()
                         .Where(o => o.Layer.Contains("AI-房间框线")).ToList();
-                if(range.Count == 0)
+                if (range.Count == 0)
                 {
-                    foreach(var l in roomLines)
+                    foreach (var l in roomLines)
                     {
-                        if(l is Polyline pline)
+                        if (l is Polyline pline)
                         {
                             resLine.AddRange(pline.ToLines());
                         }
-                        else if(l is Line line)
+                        else if (l is Line line)
                         {
                             resLine.Add(line);
                         }
@@ -185,26 +171,11 @@ namespace ThMEPWSS.Command
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                if (blockDb.Blocks.Contains(WaterWellBlockNames.DeepWaterPump))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump));
-                }
-                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser));
-                }
-                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser150))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150));
-                }
-                if (blockDb.Layers.Contains("W-EQPM"))
-                {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"));
-                }
-                if (blockDb.Layers.Contains("W-DRAI-EQPM"))
-                {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"));
-                }
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump),true);
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser), true);
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150), true);
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"), true);
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"), true);
             }
         }
         public override void SubExecute()
@@ -215,7 +186,7 @@ namespace ThMEPWSS.Command
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (var database = AcadDatabase.Active())
                 {
-                    if(WellConfigInfo == null || WellConfigInfo.Count == 0)
+                    if (WellConfigInfo == null || WellConfigInfo.Count == 0)
                     {
                         return;
                     }
@@ -224,16 +195,17 @@ namespace ThMEPWSS.Command
                     //获取墙
                     List<Line> wallLine = GetWallColumnEdgesInRange(input);
                     //获取潜水泵
-                    List<ThWaterPumpModel> pumpList = GetDeepWellPumpList();
+                    ThWaterWellPumpUtils.GetPumpIndex(out var pumpIndex, out var pumpDict);
+
                     foreach (var info in WellConfigInfo)
                     {
                         foreach (var well in info.WellModelList)
                         {
-                            foreach (var pump in pumpList)
-                            {
-                                well.CheckHavePump(pump);
-                            }
-                            well.NearWall(wallLine,50.0);
+                            //foreach (var pump in pumpList)
+                            //{
+                            well.CheckHavePumpIndex(pumpIndex, pumpDict);
+                            //}
+                            well.NearWall(wallLine, 50.0);
                         }
                     }
 
@@ -251,26 +223,26 @@ namespace ThMEPWSS.Command
                             break;
                         default:
                             break;
-                    } 
+                    }
                     var toDbService = new ThWaterWellToDBService();
                     foreach (var info in WellConfigInfo)
                     {
-                        foreach(var well in info.WellModelList)
+                        foreach (var well in info.WellModelList)
                         {
                             if (ConfigInfo.PumpInfo.isCoveredWaterWell)
                             {
-                                if(well.IsHavePump)
+                                if (well.IsHavePump)
                                 {
                                     toDbService.RemovePumpInDb(well.PumpModel);
                                     well.PumpModel = null;
                                     well.IsHavePump = false;
                                     //删除对应的水泵
                                 }
-                                toDbService.InsertPumpToDb(well,int.Parse(info.PumpCount),info.PumpNumber, fontHeight);
+                                toDbService.InsertPumpToDb(well, int.Parse(info.PumpCount), info.PumpNumber, fontHeight);
                             }
                             else
                             {
-                                if(well.IsHavePump)
+                                if (well.IsHavePump)
                                 {
                                     continue;
                                 }

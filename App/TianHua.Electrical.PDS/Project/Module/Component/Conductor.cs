@@ -15,11 +15,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber,LayingSite layingSite1, LayingSite layingSite2)
+        public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2, bool isResidentialDistributionPanel)
         {
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
+            this.IsResidentialDistributionPanel = isResidentialDistributionPanel;
             if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
@@ -51,7 +52,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 导体
+        /// 导体(消防应急照明回路导体)
         /// </summary>
         public Conductor(string conductorConfig,MaterialStructure materialStructure, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
         {
@@ -72,7 +73,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 导体
+        /// 导体(控制回路导体)
         /// </summary>
         public Conductor(string conductorConfig, string conductorType, ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
         {
@@ -88,6 +89,26 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 ViaCableTray = true;
             }
             ChooseMaterial(conductorType);
+            ChooseCrossSectionalArea(conductorConfig);
+            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+        }
+
+        /// <summary>
+        /// 导体(电表箱)
+        /// </summary>
+        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2, bool isResidentialDistributionPanel)
+        {
+            this.ComponentType = ComponentType.Conductor;
+            this.LayingSite1 = layingSite1;
+            this.LayingSite2 = layingSite2;
+            this.IsResidentialDistributionPanel = isResidentialDistributionPanel;
+            this.Phase = phase;
+            if (!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
+            //3x2.5+E2.5
+            ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(conductorConfig);
             ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
         }
@@ -139,7 +160,20 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private void ChooseMaterial(ThPDSLoadTypeCat_1 circuitType, bool fireLoad, double calculateCurrent)
         {
             var config = PDSProject.Instance.projectGlobalConfiguration;
-            if (circuitType == ThPDSLoadTypeCat_1.Luminaire)
+            if(this.IsResidentialDistributionPanel)
+            {
+                if (calculateCurrent >= 200)
+                {
+                    this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
+                    IsWire = false;
+                }
+                else
+                {
+                    this.ConductorUse = config.NonFireDistributionWire;
+                    IsWire = true;
+                }
+            }
+            else if (circuitType == ThPDSLoadTypeCat_1.Luminaire)
             {
                 if (fireLoad)
                 {
@@ -888,7 +922,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 是否是BA控制
         /// </summary>
         public bool IsBAControl { get; set; } = false;
-        
+
+        /// <summary>
+        /// 是否是住户配电箱对应回路
+        /// </summary>
+        public bool IsResidentialDistributionPanel { get; set; } = false;
+
         /// <summary>
         /// 是否指定外护套材质
         /// </summary>

@@ -326,7 +326,7 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
-                    var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData);
+                    var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData,false);
                     if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, autoSegLines, layoutData);
                 }
                 catch (Exception ex)
@@ -355,7 +355,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
             else
             {
-                var inputvaild = layoutData.ProcessSegLines(AutoSegLines);
+                var inputvaild = layoutData.ProcessSegLines(AutoSegLines,true);
                 if (!inputvaild) return;
             }
             var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
@@ -377,8 +377,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var res = GA.Run2();
                     var best = res.First();
                     subAreas = InterParameter.GetSubAreas(best);
-                    var finalSegLines = best.Genome.Select(g => g.ToLineSegment()).ToList();
-                    finalSegLines.ExtendAndIntSect(InterParameter.SeglineIndexList);
+                    var finalSegLines = InterParameter.ProcessToSegLines(best).Item1;
                     var layer = "最终分割线";
                     using (AcadDatabase acad = AcadDatabase.Active())
                     {
@@ -447,7 +446,7 @@ namespace ThMEPArchitecture.MultiProcess
                 return null;
             }
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
-            //girdLines = girdLines.RemoveDuplicated(5);
+            girdLines = girdLines.RemoveDuplicated(5);
             girdLines.SeglinePrecut(layoutData.WallLine);
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
             var grouped = girdLines.GroupSegLines().OrderBy(g => g.Count).Last();

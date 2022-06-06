@@ -51,8 +51,12 @@ namespace ThMEPElectrical.StructureHandleService
 
             Circle blindCircle = new Circle(pt, Vector3d.ZAxis, blindArea);
             var blindCriclePoly = blindCircle.Tessellate(length);
-
-            return resPoly.Difference(blindCriclePoly)[0] as Polyline;
+            var result = resPoly.Difference(blindCriclePoly);
+            if(result.Count == 0)
+            {
+                return null;
+            }
+            return result[0] as Polyline;
         }
 
         /// <summary>

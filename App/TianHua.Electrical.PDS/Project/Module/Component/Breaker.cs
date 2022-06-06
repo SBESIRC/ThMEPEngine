@@ -165,6 +165,51 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
         }
 
+        public Breaker(List<string> breakerConfig, List<string> tripDevice, string characteristics)
+        {
+            ComponentType = ComponentType.CB;
+
+            IsSpecifiedSelection = true;
+            List<Tuple<double, string>> configs = new List<Tuple<double, string>>();
+            var appendix = AppendixType.无;
+            breakerConfig.ForEach(o =>
+            {
+                //例：80A/2P/ST
+                string[] detaileds = o.Split('/');
+                configs.Add((double.Parse(detaileds[0].Replace("A", "")), detaileds[1]).ToTuple());
+                if (detaileds.Length == 3)
+                {
+                    appendix = (AppendixType)Enum.Parse(typeof(AppendixType), detaileds[2]);
+                }
+            });
+            BreakerComponentInfo breaker;
+            var breakers = BreakerConfiguration.breakerComponentInfos.Where(o =>
+                configs.Any(config => config.Item1 == o.Amps && config.Item2 == o.Poles)
+                && tripDevice.Contains(o.TripDevice)
+                && o.ResidualCurrent.IsNullOrWhiteSpace()
+                && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(characteristics))).ToList();
+            if (breakers.Count == 0)
+            {
+                throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
+            }
+            breaker = breakers.First();
+            Model = breaker.Model;
+            FrameSpecification = breaker.FrameSize;
+            PolesNum =breaker.Poles;
+            RatedCurrent =breaker.Amps.ToString();
+            TripUnitType =breaker.TripDevice;
+
+            Characteristics = characteristics;
+            Breakers = breakers;
+            AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
+            AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
+            AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
+            AlternativeTripDevice = breakers.Select(o => o.TripDevice).Distinct().ToList();
+            AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
+            Appendix = appendix;
+            AlternativeAppendixs = new List<AppendixType>() { appendix };
+        }
+
         /// <summary>
         /// 型号
         /// </summary>

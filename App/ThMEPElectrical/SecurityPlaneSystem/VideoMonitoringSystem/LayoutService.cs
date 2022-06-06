@@ -160,6 +160,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 default:
                     break;
             }
+            layoutModel.RemoveAll(o => o.IsNull());
             return CreateModels(layoutType, layoutModel);
         }
 

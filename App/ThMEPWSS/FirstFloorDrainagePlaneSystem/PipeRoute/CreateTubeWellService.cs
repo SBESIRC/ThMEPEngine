@@ -20,18 +20,24 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         double shortedDis = 400;
         List<RouteModel> routes;
         ThMEPOriginTransformer originTransformer;
-        public CreateTubeWellService(List<RouteModel> _routes, ThMEPOriginTransformer _originTransformer)
+        ParamSettingViewModel paramSetting = null;
+        public CreateTubeWellService(List<RouteModel> _routes, ThMEPOriginTransformer _originTransformer, ParamSettingViewModel _paramSetting)
         {
             routes = _routes;
             originTransformer = _originTransformer;
+            paramSetting = _paramSetting;
         }
 
         public List<RouteModel> Layout()
         {
             var usefulRoutes = routes.Where(x => x.connecLine != null).ToList();
+            if (paramSetting.IndirectDrainageSetting == DrainageSettingEnum.Tagging)
+            {
+                usefulRoutes = usefulRoutes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
+            }
             var otherRoutes = routes.Except(usefulRoutes).ToList();
             var routeDic = GroupRoutes(usefulRoutes);
-            var resLst = ClassifyRoutes(routeDic);
+            var resLst = ClassifyRoutes(routeDic, otherRoutes);
             var tubeWellPts = new List<KeyValuePair<VerticalPipeType, KeyValuePair<Point3d, Vector3d>>>();
             foreach (var routeLst in resLst)
             {
@@ -77,13 +83,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="routeDic"></param>
         /// <returns></returns>
-        private List<List<RouteModel>> ClassifyRoutes(Dictionary<Line, List<RouteModel>> routeDic)
+        private List<List<RouteModel>> ClassifyRoutes(Dictionary<Line, List<RouteModel>> routeDic, List<RouteModel> otherRoutes)
         {
             List<List<RouteModel>> resLst = new List<List<RouteModel>>();
             foreach (var dic in routeDic)
             {
                 var dir = (dic.Key.EndPoint - dic.Key.StartPoint).GetNormal();
-                resLst.AddRange(CalTubeWellRoute(dic.Value, dir));
+                var checkRoutes = routeDic.Where(x => x.Value != dic.Value).SelectMany(x => x.Value).ToList();
+                checkRoutes.AddRange(otherRoutes);
+                resLst.AddRange(CalTubeWellRoute(dic.Value, dir, checkRoutes));
             }
             return resLst;
         }
@@ -94,7 +102,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="routes"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        private List<List<RouteModel>> CalTubeWellRoute(List<RouteModel> routes, Vector3d dir)
+        private List<List<RouteModel>> CalTubeWellRoute(List<RouteModel> routes, Vector3d dir, List<RouteModel> otherRoutes)
         {
             var matrix = GeometryUtils.GetMatrix(dir);
             var routeTransDic = routes.ToDictionary(x => x, y =>
@@ -102,6 +110,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var pt = y.route.StartPoint.DistanceTo(y.startPosition) > y.route.EndPoint.DistanceTo(y.startPosition) ? y.route.StartPoint : y.route.EndPoint;
                 return pt.TransformBy(matrix);
             }).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
+            var routeLines = otherRoutes.Select(x => x.route.Clone() as Polyline).ToList();
+            routeLines.ForEach(x => x.TransformBy(matrix));
 
             var routeLst = new List<List<RouteModel>>();
             var resLst = new List<RouteModel>();
@@ -117,7 +127,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
                 else
                 {
-                    if (CheckService.CheckVerticalType(thisRoute.verticalPipeType, dic.Key.verticalPipeType) && point.Value.DistanceTo(dic.Value) < routeDis && resLst.Count <= 4)
+                    if (CheckService.CheckVerticalType(thisRoute.verticalPipeType, dic.Key.verticalPipeType) && point.Value.DistanceTo(dic.Value) < routeDis
+                        && resLst.Count <= 4 && !CheckService.CheckNoOtherMidRoute(point.Value, dic.Value, routeLines))
                     {
                         resLst.Add(dic.Key);
                     }

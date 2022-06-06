@@ -56,6 +56,7 @@ namespace ThMEPArchitecture.MultiProcess
             dataWraper.LowerUpperBound = layoutData.LowerUpperBound;
             dataWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
             dataWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
+            dataWraper.SegLineIntSecNode = layoutData.SegLineIntSecNode;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {
@@ -120,6 +121,7 @@ namespace ThMEPArchitecture.MultiProcess
             //datawraper.D2;
             //迭代次数
             datawraper.IterationCount = vm.IterationCount;
+            datawraper.RunMode = ((int)vm.RunMode);
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {

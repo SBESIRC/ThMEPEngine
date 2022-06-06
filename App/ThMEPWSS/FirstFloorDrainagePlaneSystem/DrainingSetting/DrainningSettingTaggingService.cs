@@ -37,12 +37,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
         /// <returns></returns>
         private List<RouteModel> CalTaggingPt()
         {
-            var line = pipes.First().connecLine;
             foreach (var pipe in pipes)
             {
+                var line = pipes.First().connecLine;
                 var allPts = GeometryUtils.GetAllPolylinePts(pipe.route).OrderBy(x => line.GetClosestPointTo(x, true).DistanceTo(x)).ToList();
                 var lastPt = allPts.First();
-                if (pipe.route.StartPoint.DistanceTo(lastPt) < pipe.route.EndPoint.DistanceTo(lastPt))
+                if (pipe.route.StartPoint.DistanceTo(pipe.startPosition) > pipe.route.EndPoint.DistanceTo(pipe.startPosition))
                 {
                     pipe.route.ReverseCurve();
                 }

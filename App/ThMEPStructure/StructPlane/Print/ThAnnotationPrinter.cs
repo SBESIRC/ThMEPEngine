@@ -26,7 +26,7 @@ namespace ThMEPStructure.StructPlane.Print
                 LayerName = ThPrintLayerManager.BeamTextLayName,
                 Height = 250,
                 WidthFactor = 0.7,
-                TextStyleName = "TH-STYLE3",
+                TextStyleName = ThPrintStyleManager.THSTYLE3,
             };
         }
         public static AnnotationPrintConfig GetHeadTextConfig()

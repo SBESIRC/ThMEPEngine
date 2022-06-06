@@ -29,10 +29,12 @@ namespace TianHua.Hvac.UI
             if (!string.IsNullOrEmpty(dwgId))
             {
                 var hisValue = HisFanViewModels.Where(c => c.DWGID == dwgId).FirstOrDefault();
-                if (hisValue == null || !hisValue.ShowInThisDwg) 
+                if (hisValue == null || !hisValue.ShowInThisDwg)
                 {
                     if (fanSelectUI.IsVisible)
+                    {
                         fanSelectUI.Close();
+                    }
                     return;
                 }
             }

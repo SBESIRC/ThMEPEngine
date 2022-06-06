@@ -93,13 +93,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
 
         private void HandleBlockReference(List<DrainingEquipmentModel> elements, BlockReference blkref, Matrix3d matrix)
         {
-            var name = ThMEPXRefService.OriginalFromXref(blkref.GetEffectiveName());
-            var type = GetEnumEquipmentType(name);
-            var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
-            var obb = blkref.ToOBB();
-            centerPoint = centerPoint.TransformBy(matrix);
-            obb.TransformBy(matrix);
-            elements.Add(new DrainingEquipmentModel(type, obb, centerPoint));
+            if (!blkref.IsTCHElement())
+            {
+                var name = ThMEPXRefService.OriginalFromXref(blkref.GetEffectiveName());
+                var type = GetEnumEquipmentType(name);
+                var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
+                var obb = blkref.ToOBBNoTCH();
+                centerPoint = centerPoint.TransformBy(matrix);
+                obb.TransformBy(matrix);
+                elements.Add(new DrainingEquipmentModel(type, obb, centerPoint));
+            }
         }
 
         private bool IsDistributionElement(Entity entity)
@@ -191,7 +194,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                         break;
                 }
             }
-            
+
             return thisType;
         }
 
@@ -265,7 +268,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
 
         private List<DrainingEquipmentModel> CalCirclePoint(DrainingEquipmentModel equipModel)
         {
-            List<DrainingEquipmentModel> resModel = new List<DrainingEquipmentModel>();            
+            List<DrainingEquipmentModel> resModel = new List<DrainingEquipmentModel>();
             if (equipModel.BlockReferenceGeo != null)
             {
                 var pt1 = equipModel.BlockReferenceGeo.GetPoint3dAt(0);
@@ -311,7 +314,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                     equipments.Add(block);
                 }
             }
-            
+
             return equipments;
         }
 

@@ -106,6 +106,20 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 double angle = vec_j.GetAngleTo(SelfLine);
                 var angle_cond = Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < 1;
                 if (angle_cond) continue;
+                int count_on_line = 0;
+                foreach (var lin in lines)
+                {
+                    if (lin.GetClosestPointTo(point, false).DistanceTo(point) < 10)
+                        count_on_line++;
+                }
+                if (count_on_line > 1) continue;
+                count_on_line = 0;
+                foreach (var lin in lines)
+                {
+                    if (lin.GetClosestPointTo(p, false).DistanceTo(p) < 10)
+                        count_on_line++;
+                }
+                if (count_on_line > 1) continue;
                 Line line = new Line(point, p);
                 line.Linetype = lines[i].Linetype;
                 connectedLines.Add(line);

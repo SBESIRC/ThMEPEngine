@@ -103,7 +103,7 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         public FireStartType FireStartType = FireStartType.星三角启动;
         public double NormalMotorPower = 45;//kw
         public FireStartType NormalStartType = FireStartType.星三角启动;//
-
+        public MeterBoxCircuitType MeterBoxCircuitType = MeterBoxCircuitType.国标_表在前;//电表箱出线回路类型
         public FireEmergencyLightingModel fireEmergencyLightingModel = FireEmergencyLightingModel.A型;
         public FireEmergencyLightingType fireEmergencyLightingType = FireEmergencyLightingType.集中电源;
         public CircuitSystem circuitSystem = CircuitSystem.双线制;
@@ -147,6 +147,18 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
     {
         分立元件,
         CPS,
+    }
+
+    public enum MeterBoxCircuitType
+    {
+        [Description("上海住宅")]
+        上海住宅,
+        [Description("江苏住宅")]
+        江苏住宅,
+        [Description("国标(表在前)")]
+        国标_表在前,
+        [Description("国标(表在后)")]
+        国标_表在后,
     }
 
     /// <summary>

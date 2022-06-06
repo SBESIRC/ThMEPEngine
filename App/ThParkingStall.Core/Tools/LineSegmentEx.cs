@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Mathematics;
+using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThParkingStall.Core.Tools
 {
@@ -191,7 +192,7 @@ namespace ThParkingStall.Core.Tools
             return result;
         }
 
-        public static List<LineSegment> Merge(this List<LineSegment> lines,double tol = 1)
+        public static List<LineSegment> MergeLineWithSharedPts(this List<LineSegment> lines,double tol = 1)
         {
             bool Finished = false;
             while (!Finished)
@@ -217,6 +218,24 @@ namespace ThParkingStall.Core.Tools
 
             return lines;
         }
+        public static LineSegment MergeLinesToMid(this List<LineSegment> lines)
+        {
+            var vert = lines.First().IsVertical();
+            if (lines.Any(l => l.IsVertical() != vert)) return null;
+            var values = new List<double>();
+            var valueMid = lines.Average(l => l.GetValue());
+            if (vert)
+            {
+                lines.ForEach(l => { values.Add(l.P0.Y); values.Add(l.P1.Y); });
+                return new LineSegment(valueMid, values.Min(), valueMid, values.Max());
+            }
+            else
+            {
+                lines.ForEach(l => { values.Add(l.P0.X); values.Add(l.P1.X); });
+                return new LineSegment( values.Min(), valueMid,  values.Max(),valueMid);
+            }
+
+        }
         public static (LineSegment, LineSegment) Split(this LineSegment line,Coordinate coordinate)
         {
             var coors = new List<Coordinate> { line.P0,line.P1,coordinate}.OrderBy(c => c.X+c.Y).ToArray();
@@ -237,6 +256,31 @@ namespace ThParkingStall.Core.Tools
             }
         }
 
+        public static List<LineSegment> Split(this LineSegment line,List<Coordinate> coordinates)
+        {
+            var coors = new List<Coordinate> { line.P0, line.P1 };
+            var quryed = coordinates.Where(c => line.Distance(c) < 1);
+            coors.AddRange(quryed);
+            coors = coors.OrderBy(c => c.X + c.Y).ToList();
+            var result = new List<LineSegment>();
+            if (line.IsVertical())
+            {
+                var X = line.P0.X;
+                for(int i = 0; i < coors.Count-1; i++)
+                {
+                    result.Add(new LineSegment(X, coors[i].Y, X, coors[i + 1].Y));
+                }
+            }
+            else
+            {
+                var Y = line.P0.Y;
+                for (int i = 0; i < coors.Count - 1; i++)
+                {
+                    result.Add(new LineSegment(coors[i].X, Y, coors[i+1].X, Y));
+                }
+            }
+            return result;
+        }
         public static LineSegment Extend(this LineSegment line,double distance)
         {
             if (line.IsVertical())
@@ -272,6 +316,37 @@ namespace ThParkingStall.Core.Tools
             var extended = line.Extend(distance);
             return extended.GetLineString().Intersection(lstr).Coordinates.ToList();
 
+        }
+
+        public static List<Point> GetCrossPoints(this List<LineSegment> segLines, Polygon area)
+        {
+            var areas = area.Shell.GetPolygons(segLines.ToLineStrings());//区域分割
+            areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
+            var subAreaSPIdx = new MNTSSpatialIndex(areas);
+            var IntSecPts = segLines.GetAllIntSecPs();
+            //找到被4个非空区域公用的pt
+            var PtToDefine = new List<Point>();
+            foreach (var pt in IntSecPts)
+            {
+                var neighbors = subAreaSPIdx.SelectCrossingGeometry(pt.Buffer(1));
+                if (neighbors.Count == 4)
+                {
+                    PtToDefine.Add(pt);
+                }
+            }
+            return PtToDefine;
+        }
+
+        public static double GetValue(this LineSegment segLine)
+        {
+            if (segLine.IsVertical())
+            {
+                return segLine.P0.X;
+            }
+            else
+            {
+                return segLine.P0.Y;
+            }
         }
     }
 }

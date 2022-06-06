@@ -56,13 +56,13 @@
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="0,5,0,0" >
                 <Button x:Name="btnFixDeepWaterPump" Content="布置" Click="btnFixDeepWaterPump_Click"/>
+                <Button x:Name="btnGenerTable" Content="生成提资表" Click="btnGenerTable_Click" Margin="0,5,0,0"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="4">
             <Rectangle Margin="0,5,0,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
             <StackPanel Orientation="Vertical"  VerticalAlignment="Center">
-                <Button x:Name="btnGenerTable" Content="生成提资表" Click="btnGenerTable_Click"/>
-                <Button x:Name="btnCheckPump" Content="校验潜水泵" Click="btnCheckPump_Click" Margin="0,5,0,0"/>
+                <Button x:Name="btnCheckPump" Content="校验潜水泵" Click="btnCheckPump_Click" />
             </StackPanel>
         </StackPanel>
     </Grid>

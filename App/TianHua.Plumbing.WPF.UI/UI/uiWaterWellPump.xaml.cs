@@ -30,11 +30,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public UiWaterWellPump()
         {
             InitializeComponent();
-            if(ViewModel == null)
+            if (ViewModel == null)
             {
-               ViewModel = new WaterwellPumpParamsViewModel();
+                ViewModel = new WaterwellPumpParamsViewModel();
             }
-            if(WellInfoWidget == null)
+            if (WellInfoWidget == null)
             {
                 WellInfoWidget = new uiWaterWellPumpInfo();
             }
@@ -52,6 +52,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void btnGenerTable_Click(object sender, RoutedEventArgs e)
         {
             ThCreateWithdrawalFormCmd cmd = new ThCreateWithdrawalFormCmd(ViewModel);
+            cmd.WellConfigInfo = WellInfoWidget.GetViewModel().WellConfigInfo;
             cmd.Execute();
         }
 
@@ -60,7 +61,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             TextBox txtBox = sender as TextBox;
 
             string strText = txtBox.Text;
-            if(strText.IsNullOrEmpty())
+            if (strText.IsNullOrEmpty())
             {
                 (sender as TextBox).Text = Convert.ToString(1.0);
             }
@@ -68,7 +69,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 double max = 9.9;
                 double min = 0.0;
-                double number = double.Parse(strText) ;
+                double number = double.Parse(strText);
                 if (number < min)
                     (sender as TextBox).Text = Convert.ToString(min);
                 else if (number > max)

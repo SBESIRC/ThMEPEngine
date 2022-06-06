@@ -78,13 +78,6 @@ namespace ThParkingStall.Core.Tools
             }
             return res;
         }
-        //public static bool PartInCommon(this LineString lstr1, LineString lstr2)
-        //{
-        //    if(lstr1 == null || lstr2 == null) return false;
-        //    var intSection = lstr1.Intersection(lstr2);
-        //    if (intSection.Length >0 ) return true;
-        //    else return false;
-        //}
         public static bool PartInCommon(this LineString lstr1, Geometry geo)
         {
             if (lstr1 == null || geo == null) return false;

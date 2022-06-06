@@ -544,8 +544,8 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         {
             VertexSort();//将点进行顺时针排序
             EdgeSort();//将边进行逆时针编号
-            Length = (int)(WellVertex[0].DistanceTo(WellVertex[1])/50.0 + 0.5)*50;//获取长
-            Width = (int)(WellVertex[0].DistanceTo(WellVertex[3])/50.0 + 0.5)*50;//获取宽
+            Length = (int)(WellVertex[0].DistanceTo(WellVertex[1]) / 50.0 + 0.5) * 50;//获取长
+            Width = (int)(WellVertex[0].DistanceTo(WellVertex[3]) / 50.0 + 0.5) * 50;//获取宽
             Position = Geometry.Position;//获取位置
         }
         public bool IsSquare()//判断是否是正方形
@@ -558,9 +558,17 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         }
         public bool IsSameType(ThWaterWellModel wellModel)//判断是否是同一类
         {
+            //需要加 泵数量 / 编号
             if (this.EffName == wellModel.EffName && this.GetWellSize() == wellModel.GetWellSize())
             {
-                return true;
+                if (this.PumpModel != null && wellModel.PumpModel != null && this.PumpModel.VisibilityValue == wellModel.PumpModel.VisibilityValue && this.PumpModel.AttriValue == wellModel.PumpModel.AttriValue)
+                {
+                    return true;
+                }
+                if (this.PumpModel == null && wellModel.PumpModel == null)
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -582,25 +590,75 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             string strSize = Length.ToString() + "*" + Width.ToString();
             return strSize;
         }
-        public void CheckHavePump(ThWaterPumpModel pump)
+        //public void CheckHavePump(ThWaterPumpModel pump)
+        //{
+        //    if (IsHavePump)
+        //    {
+        //        return;
+        //    }
+        //    //如果point在区域内，获取该点
+        //    if (WellObb.Contains(pump.Position))
+        //    {
+        //        PumpModel = pump;
+        //        IsHavePump = true;
+        //    }
+        //    if (IsHavePump == false)
+        //    {
+        //        if (WellObb.Intersects(pump.OBB))
+        //        {
+        //            PumpModel = pump;
+        //            IsHavePump = true;
+        //        }
+        //    }
+        //}
+
+        public void CheckHavePumpIndex(ThCADCoreNTSSpatialIndex pumpIndex, Dictionary<int, ThWaterPumpModel> pumpDict)
         {
-            if(IsHavePump)
+            if (IsHavePump)
             {
                 return;
             }
-            //如果point在区域内，获取该点
-            if (WellObb.Contains(pump.Position))
+            var inWellPump = pumpIndex.SelectCrossingPolygon(WellObb);
+            var pumpPoly = inWellPump.OfType<Polyline>().ToList();
+            if (pumpPoly.Count > 0)
             {
-                PumpModel = pump;
-                IsHavePump = true;
+                if (pumpPoly.Count == 1)
+                {
+                    PumpModel = pumpDict[pumpPoly[0].GetHashCode()];
+                    IsHavePump = true;
+                }
+                else
+                {
+                    var wellObj = new DBObjectCollection() { WellObb };
+                    var maxArea = double.MinValue;
+                    Polyline maxPumpPoly = null;
+                    foreach (var pump in pumpPoly)
+                    {
+                        var pumpArea = pump.Intersection(wellObj).OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                        if (pumpArea.Area >= maxArea)
+                        {
+                            maxArea = pumpArea.Area;
+                            maxPumpPoly = pump;
+                        }
+                    }
+                    if (maxPumpPoly != null)
+                    {
+                        PumpModel = pumpDict[maxPumpPoly.GetHashCode()];
+                        IsHavePump = true;
+                    }
+                }
             }
         }
+
+
         public void NearWall(List<Line> walls, double tol)
         {
             WallLines = walls;
+            NearWallEdge.Clear();
+
             for (int i = 0; i < WellEdge.Count; i++)
             {
-                if (IsNearWall(i, tol ,out double dist))
+                if (IsNearWall(i, tol, out double dist))
                 {
                     NearWallEdge.Add(i);
                 }
@@ -679,5 +737,6 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             space = spaceValue;
             return pumpPos;
         }
+
     }
 }

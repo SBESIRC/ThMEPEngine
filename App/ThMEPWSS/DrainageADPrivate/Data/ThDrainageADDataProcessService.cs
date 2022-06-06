@@ -21,7 +21,7 @@ using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.Sprinkler.Data;
 using ThMEPWSS.ViewModel;
-
+using ThMEPWSS.Common;
 using ThMEPWSS.DrainageADPrivate.Model;
 using ThMEPWSS.DrainageADPrivate.Service;
 
@@ -288,7 +288,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             {
                 var name = item.Name;
                 var blk = item.Outline as BlockReference;
-                var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
+                var pl = ThMEPWSSUtils.GetVisibleOBB(blk);
                 var type = ThDrainageADTermianlService.GetTerminalType(name, BlockNameDict);
 
                 if (type == ThDrainageADCommon.TerminalType.WaterHeater)
@@ -362,7 +362,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                     dir = new Vector3d(0, -1, 0);
                 }
                 dir = dir.TransformBy(blk.BlockTransform).GetNormal();
-                var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
+                var pl = ThMEPWSSUtils.GetVisibleOBB(blk);
                 var scale = Math.Abs(blk.ScaleFactors.X);
                 var valveModel = new ThValve()
                 {
@@ -395,7 +395,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             {
                 var dir = new Vector3d(1, 0, 0);
                 dir = dir.TransformBy(blk.BlockTransform).GetNormal();
-                var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
+                var pl = ThMEPWSSUtils.GetVisibleOBB(blk);
                 var scale = Math.Abs(blk.ScaleFactors.X);
 
                 var valveModel = new ThValve()

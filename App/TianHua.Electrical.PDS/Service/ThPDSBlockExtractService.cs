@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
+using Linq2Acad;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -37,89 +38,92 @@ namespace TianHua.Electrical.PDS.Service
         public void Extract(Database database, List<ThPDSBlockInfo> tableInfo, List<string> nameFilter,
             List<string> propertyFilter, List<string> distBoxKey)
         {
-            var engine = new ThPDSBlockExtractionEngine
+            using (var acad = AcadDatabase.Use(database))
             {
-                NameFilter = nameFilter.Distinct().ToList(),
-                PropertyFilter = propertyFilter.Distinct().ToList(),
-                DistBoxKey = distBoxKey,
-            };
-            engine.ExtractFromMS(database);
-            engine.Results.Select(o => o.Data as BlockReference)
-                .ForEach(block =>
+                var engine = new ThPDSBlockExtractionEngine
                 {
-                    var blockData = new ThPDSBlockReferenceData(block.ObjectId);
-                    if (blockData.EffectiveName.IndexOf(ThPDSCommon.LOAD_LABELS) == 0
-                        || blockData.EffectiveName.Contains(ThPDSCommon.PUMP_LABELS)
-                        || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_DETAILS))
+                    NameFilter = nameFilter.Distinct().ToList(),
+                    PropertyFilter = propertyFilter.Distinct().ToList(),
+                    DistBoxKey = distBoxKey,
+                };
+                engine.ExtractFromMS(database);
+                engine.Results.Select(o => o.Data as ThPDSBlockReferenceData)
+                    .ForEach(blockData =>
                     {
-                        MarkBlocks.Add(block, blockData);
-                        return;
-                    }
-                    else if (blockData.EffectiveName.Contains("E-BDB006-1"))
-                    {
-                        foreach (var row in tableInfo)
+                        var block = acad.Element<BlockReference>(blockData.ObjId, true);
+                        if (blockData.EffectiveName.IndexOf(ThPDSCommon.LOAD_LABELS) == 0
+                            || blockData.EffectiveName.Contains(ThPDSCommon.PUMP_LABELS)
+                            || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_DETAILS))
                         {
-                            if (row.BlockName == blockData.EffectiveName)
-                            {
-                                Assign(blockData, row);
-                                break;
-                            }
+                            MarkBlocks.Add(block, blockData);
+                            return;
                         }
-                        DistBoxBlocks.Add(block, blockData);
-                        return;
-                    }
-
-                    var checker = false;
-                    foreach (var item in blockData.Attributes)
-                    {
-                        if(!item.Key.Equals("BOX"))
+                        else if (blockData.EffectiveName.Contains("E-BDB006-1"))
                         {
-                            continue;
-                        }
-                        var value = item.Value;
-                        for (var i = 0; i < distBoxKey.Count; i++)
-                        {
-                            if (value.Contains(distBoxKey[i]) && !checker)
+                            foreach (var row in tableInfo)
                             {
-                                if(value.Contains("APE") && !distBoxKey[i].Equals("APE"))
+                                if (row.BlockName == blockData.EffectiveName)
                                 {
-                                    continue;
+                                    Assign(blockData, row);
+                                    break;
                                 }
+                            }
+                            DistBoxBlocks.Add(block, blockData);
+                            return;
+                        }
 
-                                foreach (var row in tableInfo)
+                        var checker = false;
+                        foreach (var item in blockData.Attributes)
+                        {
+                            if (!item.Key.Equals("BOX"))
+                            {
+                                continue;
+                            }
+                            var value = item.Value;
+                            for (var i = 0; i < distBoxKey.Count; i++)
+                            {
+                                if (value.Contains(distBoxKey[i]) && !checker)
                                 {
-                                    if (row.Properties == distBoxKey[i])
+                                    if (value.Contains("APE") && !distBoxKey[i].Equals("APE"))
                                     {
-                                        Assign(blockData, row);
-                                        checker = true;
-                                        break;
+                                        continue;
+                                    }
+
+                                    foreach (var row in tableInfo)
+                                    {
+                                        if (row.Properties == distBoxKey[i])
+                                        {
+                                            Assign(blockData, row);
+                                            checker = true;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    if (checker)
-                    {
-                        DistBoxBlocks.Add(block, blockData);
-                    }
-                    else
-                    {
-                        foreach (var row in tableInfo)
+                        if (checker)
                         {
-                            if (row.BlockName == blockData.EffectiveName)
+                            DistBoxBlocks.Add(block, blockData);
+                        }
+                        else
+                        {
+                            foreach (var row in tableInfo)
                             {
-                                Assign(blockData, row);
-                                break;
+                                if (row.BlockName == blockData.EffectiveName)
+                                {
+                                    Assign(blockData, row);
+                                    break;
+                                }
                             }
+                            if (LoadBlocks.Any(b => b.Value.Position.DistanceTo(blockData.Position) < 1.0))
+                            {
+                                return;
+                            }
+                            LoadBlocks.Add(block, blockData);
                         }
-                        if(LoadBlocks.Any(b => b.Value.Position.DistanceTo(blockData.Position) < 1.0))
-                        {
-                            return;
-                        }
-                        LoadBlocks.Add(block, blockData);
-                    }
-                });
+                    });
+            }
         }
 
         private void Assign(ThPDSBlockReferenceData blockData, ThPDSBlockInfo row)

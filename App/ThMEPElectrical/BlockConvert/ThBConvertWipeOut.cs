@@ -14,7 +14,7 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var wipeouts = new ObjectIdCollection();
+                var wipeOuts = new ObjectIdCollection();
                 var lines = new ObjectIdCollection();
                 var btr = acadDatabase.Blocks.ElementOrDefault(name);
                 foreach (ObjectId objId in btr)
@@ -22,17 +22,17 @@ namespace ThMEPElectrical.BlockConvert
                     var entity = acadDatabase.Element<Entity>(objId);
                     if (entity is Wipeout)
                     {
-                        wipeouts.Add(entity.ObjectId);
+                        wipeOuts.Add(entity.ObjectId);
                     }
                     if (entity is Line)
                     {
                         lines.Add(entity.ObjectId);
                     }
                 }
-                if (wipeouts.Count > 0)
+                if (wipeOuts.Count > 0)
                 {
                     var drawOrder = acadDatabase.Element<DrawOrderTable>(btr.DrawOrderTableId, true);
-                    drawOrder.MoveToBottom(wipeouts);
+                    drawOrder.MoveToBottom(wipeOuts);
                 }
                 if (lines.Count > 0)
                 {

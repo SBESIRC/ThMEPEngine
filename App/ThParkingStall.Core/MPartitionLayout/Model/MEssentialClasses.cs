@@ -50,6 +50,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public LineSegment Line;
         public Vector2D Vec;
         public bool IsInBackBackModule = false;
+        public bool IsInVertUnsureModule = false;
     }
     public class GenerateLaneParas
     {

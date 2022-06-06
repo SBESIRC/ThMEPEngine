@@ -29,7 +29,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             //交点打断
             lanes = GetLinesByInterruptingIntersections(lanes);
         }
-        private static void RemoveDuplicatedAndInvalidLanes(ref List<LineSegment> lanes)
+        public static void RemoveDuplicatedAndInvalidLanes(ref List<LineSegment> lanes)
         {
             if (lanes.Count < 2) return;
             //删除部分共线的直线只保留一份

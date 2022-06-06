@@ -90,7 +90,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 default:
                     break;
             }
-            var attri = new Dictionary<string, string>() { { "可见性", attriName } };
+            var attri = new Dictionary<string, object>() { { "可见性", attriName } };
             InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(layoutInfos, layerName, ThWSSCommon.DimsBlockName, attri, true);
         }

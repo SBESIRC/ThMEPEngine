@@ -808,7 +808,7 @@ namespace ThMEPWSS.FlatDiagramNs
                                     foreach (var pp in pps)
                                     {
                                         var dn = getPipeDn(getPipeType(pp.GetCenter()));
-                                        if(dn is not null)
+                                        if (dn is not null)
                                         {
                                             modify(GeoFac.GetLines(gpGeo, skipPolygon: THESAURUSOBSTINACY).Select(x => x.Buffer(THESAURUSHOUSING)).ToGeometry(), info => info.Text = dn);
                                         }
@@ -2044,7 +2044,8 @@ namespace ThMEPWSS.FlatDiagramNs
                                 var segs = linesf(pp.Buffer(THESAURUSHOUSING)).SelectMany(ls => GeoFac.GetLines(ls)).Distinct().ToList();
                                 if (segs.Count == THESAURUSHOUSING)
                                 {
-                                    draw(IRRESPONSIBLENESS, segs[THESAURUSSTAMPEDE].Center.ToGRect(INTROPUNITIVENESS).ToPolygon(), INTRAVASCULARLY, INTRAVASCULARLY, QUOTATIONPELVIC);
+                                    var dn = IRRESPONSIBLENESS;
+                                    draw(dn, segs[THESAURUSSTAMPEDE].Center.ToGRect(INTROPUNITIVENESS).ToPolygon(), INTRAVASCULARLY, INTRAVASCULARLY, QUOTATIONPELVIC);
                                 }
                             }
                         }
@@ -2357,17 +2358,49 @@ namespace ThMEPWSS.FlatDiagramNs
                                 if (segs.Count == THESAURUSSTAMPEDE) continue;
                                 var geo = GeoFac.CreateGeometry(segs.Select(x => x.ToLineString()));
                                 var buf = geo.Buffer(THESAURUSPERMUTATION);
-                                if (segs.Count == THESAURUSPERMUTATION)
+                                void changeDn()
                                 {
-                                    var pts = sankakuptsf(buf);
-                                    if (pts.Count(x => ((MLeaderInfo)x.UserData).Text is IRRESPONSIBLENESS) == THESAURUSHOUSING && pts.Count(x => ((MLeaderInfo)x.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER) == THESAURUSHOUSING)
+                                    foreach (var cleaningPort in geoData.CleaningPorts)
                                     {
-                                        foreach (var pt in pts.Where(x => ((MLeaderInfo)x.UserData).Text is IRRESPONSIBLENESS))
+                                        if (buf.Intersects(cleaningPort))
                                         {
-                                            ((MLeaderInfo)pt.UserData).Text = (pts.Where(x => ((MLeaderInfo)x.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER).First().UserData as MLeaderInfo).Text;
+                                            var dn = IRRESPONSIBLENESS;
+                                            if (kitchenst(buf)) dn = vm.Params.BasinDN;
+                                            var pts = sankakuptsf(buf);
+                                            foreach (var pt in pts.Where(x => ((MLeaderInfo)x.UserData).Text is THESAURUSDEPLORE))
+                                            {
+                                                ((MLeaderInfo)pt.UserData).Text = dn;
+                                            }
                                         }
                                     }
+                                    if (segs.Count == THESAURUSPERMUTATION)
+                                    {
+                                        var pts = sankakuptsf(buf);
+                                        if (pts.Count(x => ((MLeaderInfo)x.UserData).Text is IRRESPONSIBLENESS) == THESAURUSHOUSING && pts.Count(x => ((MLeaderInfo)x.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER) == THESAURUSHOUSING)
+                                        {
+                                            foreach (var pt in pts.Where(x => ((MLeaderInfo)x.UserData).Text is IRRESPONSIBLENESS))
+                                            {
+                                                ((MLeaderInfo)pt.UserData).Text = (pts.Where(x => ((MLeaderInfo)x.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER).First().UserData as MLeaderInfo).Text;
+                                            }
+                                        }
+                                        else if (pts.Count(x => ((MLeaderInfo)x.UserData).Text is QUOTATIONBREWSTER) == THESAURUSHOUSING && pts.Count(x => ((MLeaderInfo)x.UserData).Text is THESAURUSDEPLORE) == THESAURUSHOUSING)
+                                        {
+                                            foreach (var pt in pts.Where(x => ((MLeaderInfo)x.UserData).Text is THESAURUSDEPLORE))
+                                            {
+                                                ((MLeaderInfo)pt.UserData).Text = QUOTATIONBREWSTER;
+                                            }
+                                        }
+                                        else if (pts.Count(x => ((MLeaderInfo)x.UserData).Text is QUOTATIONDOPPLER) == THESAURUSHOUSING && pts.Count(x => ((MLeaderInfo)x.UserData).Text is THESAURUSDEPLORE) == THESAURUSHOUSING)
+                                        {
+                                            foreach (var pt in pts.Where(x => ((MLeaderInfo)x.UserData).Text is THESAURUSDEPLORE))
+                                            {
+                                                ((MLeaderInfo)pt.UserData).Text = QUOTATIONDOPPLER;
+                                            }
+                                        }
+                                        return;
+                                    }
                                 }
+                                changeDn();
                             }
                         });
                         prq.Enqueue(ACANTHOCEPHALANS, () =>

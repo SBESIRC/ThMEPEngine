@@ -111,14 +111,53 @@ namespace ThParkingStall.Core.Tools
             if (seglineConnectToBound.Item1 && !mid.Coordinate.ExistPtInDirection(IntSecPts, false))//负向需要连接，且未连接
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                P0 = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y).Last();
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y);
+                if(quryed.Count() > 0) P0 = quryed.Last();
             }
             if (seglineConnectToBound.Item2&&!mid.Coordinate.ExistPtInDirection(IntSecPts,true))
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                P1 = LineIntSecPts.Where(c =>c.X + c.Y > mid.X + mid.Y).First();
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y > mid.X + mid.Y);
+                if (quryed.Count() > 0) P0 = quryed.First();
             }
             return new LineSegment(P0, P1);
+        }
+
+        public static List<(int, int, int, int)> GetSegLineIntSecNode(this List<LineSegment> SegLines,List<Point> nodes)
+        {
+            var SegLineIntSecNode = new List<(int, int, int, int)>();
+
+            foreach(var pt in nodes)
+            {
+                SegLineIntSecNode.Add(pt.GetNeighbor(SegLines));
+            }
+            return SegLineIntSecNode;
+        }
+        private static (int, int, int, int) GetNeighbor(this Point pt, List<LineSegment> SegLines)
+        {
+            int top =-1;
+            int bottom = -1;
+            int left = -1;
+            int right = -1;
+            for(int i = 0; i < SegLines.Count; i++)
+            {
+                var segLine = SegLines[i];
+                if(segLine.Distance(pt.Coordinate) < 1)
+                {
+                    if (segLine.IsVertical())
+                    {
+                        if (segLine.MidPoint.Y > pt.Coordinate.Y) top = i;
+                        else bottom = i;
+                    }
+                    else
+                    {
+                        if (segLine.MidPoint.X > pt.Coordinate.X) right = i;
+                        else left = i;
+                    }
+                }
+            }
+            if (top == -1 || bottom == -1 || left == -1 || right == -1) throw new Exception("Can not find All the neighbors");
+            return(top,bottom,left,right);
         }
 
         public static void SeglinePrecut(this List<LineSegment> SegLines, Polygon WallLine, double prop = 0.8)

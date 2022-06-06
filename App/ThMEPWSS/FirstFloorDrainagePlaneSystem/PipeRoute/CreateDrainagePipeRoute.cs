@@ -9,6 +9,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
+using ThMEPEngineCore.CAD;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
@@ -135,8 +136,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                         poly.ReverseCurve();
                     }
                     var sp = intersectLine.StartPoint.DistanceTo(point) > intersectLine.EndPoint.DistanceTo(point) ? intersectLine.StartPoint : intersectLine.EndPoint;
-                    var pts = new Point3dCollection();
-                    intersectLine.IntersectWith(outFrame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    var pts = outFrame.IntersectWithEx(intersectLine);
                     if (pts.Count > 0)
                     {
                         var lastPt = pts.Cast<Point3d>().OrderByDescending(x => x.DistanceTo(sp)).FirstOrDefault();

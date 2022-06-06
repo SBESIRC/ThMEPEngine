@@ -18,7 +18,21 @@ namespace ThCADExtension
         public Matrix3d OwnerSpace2WCS { get; set; }
         public Matrix3d BlockTransform { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
-        public DynamicBlockReferencePropertyCollection CustomProperties { get; set; }
+        public DynamicBlockReferencePropertyCollection CustomProperties 
+        {
+            get
+            {
+                try
+                {
+                    return ObjId.GetDynProperties();
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
         public ThBlockReferenceData(ObjectId blockRef)
         {
             ObjId = blockRef;
@@ -29,13 +43,6 @@ namespace ThCADExtension
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
-            try
-            {
-                CustomProperties = blockRef.GetDynProperties();
-            }
-            catch
-            {
-            }
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
             OwnerSpace2WCS = Matrix3d.Identity;
@@ -50,7 +57,6 @@ namespace ThCADExtension
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
-            CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
             OwnerSpace2WCS = transfrom;

@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DotNetARX;
+
+using ThMEPWSS.Common;
+
 namespace ThMEPWSS.WaterWellPumpLayout.Model
 {
     public class ThWaterPumpModel
@@ -13,6 +17,9 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         public double Angle { set; get; }//泵角度
         public Point3d Position { set; get; }//水泵位置
         public BlockReference Geometry { set; get; }//水泵图块数据
+        public Polyline OBB { get; set; }
+        public string VisibilityValue { get; set; }
+        public string AttriValue { get; set; }
         public static ThWaterPumpModel Create(Entity ent)
         {
             ThWaterPumpModel pumpModel = null;
@@ -22,6 +29,9 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                 pumpModel.Angle = 0.0;
                 pumpModel.Geometry = blk;
                 pumpModel.Position = blk.Position;
+                pumpModel.OBB = ThMEPWSSUtils.GetVisibleOBB(blk);
+                pumpModel.VisibilityValue = GetPumpCount(blk);
+                pumpModel.AttriValue = blk.Id.GetAttributeInBlockReference("编号");
             }
             return pumpModel;
         }
@@ -98,6 +108,31 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                     }
                 }
             }
+        }
+
+        private static string GetPumpCount(BlockReference blk)
+        {
+            var visi = blk.Id.GetDynBlockValue("可见性");
+            var strCount = "0";
+            switch (visi)
+            {
+                case "单台":
+                    strCount = "1";
+                    break;
+                case "两台":
+                    strCount = "2";
+                    break;
+                case "三台":
+                    strCount = "3";
+                    break;
+                case "四台":
+                    strCount = "4";
+                    break;
+                default:
+                    break;
+            }
+
+            return strCount;
         }
     }
 }

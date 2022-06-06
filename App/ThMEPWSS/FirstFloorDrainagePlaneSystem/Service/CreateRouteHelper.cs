@@ -36,6 +36,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
 
             BFSPathPlaner pathPlaner = new BFSPathPlaner(step, wallPolys);
             var closetLine = pathPlaner.FindingClosetLine(startPt, lines, polyline);
+            if (closetLine == null)
+            {
+                return closeInfo;
+            }
             var closetPt = closetLine.GetClosestPointTo(startPt, false);
 
             return new KeyValuePair<Line, Point3d>(closetLine, closetPt);
