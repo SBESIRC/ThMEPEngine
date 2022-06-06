@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -89,6 +90,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                     }
                     txt.Layer = layerName;
                     txt.ColorIndex = 256;
+                    txt.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     acadDatabase.ModelSpace.Add(txt);
                 }
             }

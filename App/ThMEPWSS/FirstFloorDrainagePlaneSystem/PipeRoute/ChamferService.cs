@@ -225,6 +225,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <returns></returns>
         private Line ChamferByLine(Line line, Line thisLine, out Line resLine1, out Line resLine2)
         {
+            var adjustLength = length;
+            var minLength = line.Length < thisLine.Length ? line.Length : thisLine.Length;
+            if (minLength < adjustLength)
+            {
+                adjustLength = minLength;
+            }
+
             resLine1 = null;
             resLine2 = null;
             var sp = line.StartPoint;
@@ -232,14 +239,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             if (line.Length > length)
             {
                 var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                var lineEndP = line.EndPoint - lineDir * length;
+                var lineEndP = line.EndPoint - lineDir * adjustLength;
                 resLine1 = new Line(sp, lineEndP);
                 sp = lineEndP;
             }
             if (thisLine.Length > length)
             {
                 var lineDir = (thisLine.EndPoint - thisLine.StartPoint).GetNormal();
-                var lineSP = thisLine.StartPoint + lineDir * length;
+                var lineSP = thisLine.StartPoint + lineDir * adjustLength;
                 resLine2 = new Line(lineSP, ep);
                 ep = lineSP;
             }
