@@ -15,7 +15,6 @@ using ThMEPEngineCore.CAD;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.Pipe;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPEngineCore.Model;
@@ -212,9 +211,6 @@ namespace ThMEPWSS.Command
                     List<Line> wallLine = GetWallColumnEdgesInRange(input);
                     //获取潜水泵
                     ThWaterWellPumpUtils.GetPumpIndex(out var pumpIndex, out var pumpDict);
-
-                    DrawUtils.ShowGeometry(wallLine, "l0wall", 1);
-
 
                     foreach (var info in WellConfigInfo)
                     {
