@@ -60,7 +60,7 @@ namespace ThParkingStall.Core.InterProcess
         public int D2 = 200;
         //迭代次数
         public int IterationCount = -1;
-
+        public int RunMode;
         #endregion
         public Chromosome chromosome;
     }

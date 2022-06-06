@@ -121,6 +121,7 @@ namespace ThMEPArchitecture.MultiProcess
             //datawraper.D2;
             //迭代次数
             datawraper.IterationCount = vm.IterationCount;
+            datawraper.RunMode = ((int)vm.RunMode);
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {

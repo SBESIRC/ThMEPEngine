@@ -9,6 +9,11 @@ namespace ThParkingStall.Core.InterProcess
     [Serializable]
     public static class VMStock
     {
+        private static int _RunMode = 0;
+        public static int RunMode //自动,横纵
+        {
+            get { return _RunMode; }
+        }
         //平行车位尺寸,长度
         private static int _ParallelSpotLength = 6000; //mm
 
@@ -162,6 +167,7 @@ namespace ThParkingStall.Core.InterProcess
         }
         public static void Init(DataWraper datawraper)
         {
+            _RunMode = datawraper.RunMode;
             //平行车位尺寸,长度
             _ParallelSpotLength = datawraper.ParallelSpotLength; //mm
             //平行车位尺寸,宽度

@@ -354,7 +354,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
             var wallBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2));//边界内缩
             wallBound = wallBound.Difference(ObstacleBoundsGeo);//取差值
-
+            //wallBound.Get<Polygon>(false).ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
             if (wallBound is Polygon wpoly) wallBound = wpoly.RemoveHoles();
             else if (wallBound is MultiPolygon mpoly)
             {
