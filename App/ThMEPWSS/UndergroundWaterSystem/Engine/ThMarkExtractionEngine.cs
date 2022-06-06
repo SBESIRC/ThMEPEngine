@@ -59,6 +59,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     {
                         var explodeResult = GetAllEntitiesByExplodingTianZhengElementThoroughly(entity);
                         DBText ts = new DBText();
+                        var tmplines = new List<Line>();
                         foreach (var obj in explodeResult)
                         {
                             var ent = obj as Entity;
@@ -67,10 +68,22 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                                 if (ts.TextString.Length == 0) ts = t;
                                 else ts.TextString += t.TextString;
                             }
-                            else if (ent is Line l) textLines.Add(l.GetProjectLine());
-                            else if (ent is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
+                            else if (ent is Line l) tmplines.Add(l.GetProjectLine());
+                            else if (ent is Polyline pl) tmplines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
                         }
-                        if (ts.TextString.Length > 0) textList.Add(ts);
+                        if (ts.TextString.Length > 0)
+                        {
+                            var res = CombMarkList(new List<DBText>() { ts }, tmplines);
+                            if (res[0].Poistion.DistanceTo(new Point3d(ts.Position.X, ts.Position.Y, 0)) > 1)
+                            {
+                                results.Add(res[0]);
+                            }
+                            else
+                            {
+                                textList.Add(ts);
+                                textLines.AddRange(tmplines);
+                            }
+                        }
                     }
                     else
                     {
