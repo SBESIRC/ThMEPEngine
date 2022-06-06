@@ -159,6 +159,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     if (frame.Area > 10)
                     {
                         originTransformer.Transform(frame);
+                        frame.ProjectOntoXYPlane();
                         frameLst.Add(frame);
                     }
                 }

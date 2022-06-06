@@ -49,12 +49,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         /// 布置
         /// </summary>
         /// <param name="layoutInfos"></param>
-        private void Layout(List<List<KeyValuePair<Point3d, Vector3d>>> layoutInfos)
+        private void Layout(List<List<Tuple<Point3d, Vector3d, double>>> layoutInfos)
         {
             GetDrivepipeType(out string type, out string size);
-            var attri = new Dictionary<string, string>() { { "可见性", type } };
             foreach (var lInfo in layoutInfos)
             {
+                var attri = new Dictionary<string, object>() { { "可见性", type } };
+                attri.Add("距离", lInfo.First().Item3 * 2);
                 LayoutDrivepipe(lInfo, attri);  //放置套管
                 LayoutDimension(lInfo, size);
             }
@@ -65,18 +66,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         /// </summary>
         /// <param name="layoutInfo"></param>
         /// <param name="attri"></param>
-        private void LayoutDrivepipe(List<KeyValuePair<Point3d, Vector3d>> layoutInfo, Dictionary<string, string> attri)
+        private void LayoutDrivepipe(List<Tuple<Point3d, Vector3d, double>> layoutInfo, Dictionary<string, object> attri)
         {
             var lst = new List<KeyValuePair<Point3d, Vector3d>>();
             foreach (var lInfo in layoutInfo)
             {
-                var dir = lInfo.Value;
-                var pt = lInfo.Key + dir * length;
-                var transPt = originTransformer.Reset(pt);
+                var dir = lInfo.Item2;
+                var transPt = originTransformer.Reset(lInfo.Item1);
                 lst.Add(new KeyValuePair<Point3d, Vector3d>(transPt, dir));
             }
             InsertBlockService.scaleNum = scale;
-            InsertBlockService.InsertBlock(lst, ThWSSCommon.DrivepipeLayerName, ThWSSCommon.DrivepipeBlockName, attri);
+            InsertBlockService.InsertBlock(lst, ThWSSCommon.DrivepipeLayerName, ThWSSCommon.DrivepipeBlockName, attri, true);
         }
 
         /// <summary>
@@ -84,11 +84,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         /// </summary>
         /// <param name="layoutInfo"></param>
         /// <param name="size"></param>
-        private void LayoutDimension(List<KeyValuePair<Point3d, Vector3d>> layoutInfo, string size)
+        private void LayoutDimension(List<Tuple<Point3d, Vector3d, double>> layoutInfo, string size)
         {
-            var moveDir = layoutInfo.First().Value;
+            var moveDir = layoutInfo.First().Item2;
             var dir = Vector3d.ZAxis.CrossProduct(moveDir);
-            var allPts = OrderPipes(dir, layoutInfo.Select(x => x.Key).ToList());
+            var allPts = OrderPipes(dir, layoutInfo.Select(x => x.Item1).ToList());
             var connectPt = allPts.First() + noteLength * dir - moveDir * noteLength;
             var noteLines = new List<Polyline>();
             foreach (var pt in allPts)
@@ -156,9 +156,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         /// 分类布置管线
         /// </summary>
         /// <returns></returns>
-        private List<List<KeyValuePair<Point3d, Vector3d>>> GetLayoutInfo()
+        private List<List<Tuple<Point3d, Vector3d, double>>> GetLayoutInfo()
         {
-            var layoutInfos = new List<List<KeyValuePair<Point3d, Vector3d>>>();
+            var layoutInfos = new List<List<Tuple<Point3d, Vector3d, double>>>();
             while (routes.Count > 0)
             {
                 var firRoute = routes.First();
@@ -186,9 +186,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         /// <param name="resRoutes"></param>
         /// <param name="resPoly"></param>
         /// <returns></returns>
-        private List<KeyValuePair<Point3d, Vector3d>> GetLayoutPt(List<RouteModel> resRoutes, Polyline resPoly)
+        private List<Tuple<Point3d, Vector3d, double>> GetLayoutPt(List<RouteModel> resRoutes, Polyline resPoly)
         {
-            var layoutInfo = new List<KeyValuePair<Point3d, Vector3d>>();
+            var layoutInfo = new List<Tuple<Point3d, Vector3d, double>>();
             foreach (var rRoute in resRoutes)
             {
                 var pts = resPoly.IntersectWithEx(rRoute.route);
@@ -199,8 +199,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                     var firPt = orderPts.First();
                     var secPt = orderPts.Last();
                     var midPt = new Point3d((firPt.X + secPt.X) / 2, (firPt.Y + secPt.Y) / 2, 0);
+                    length = firPt.DistanceTo(secPt) / 2;
                     var dir = (secPt - firPt).GetNormal();
-                    layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(midPt, dir));
+                    midPt = midPt + dir * length;
+                    layoutInfo.Add(new Tuple<Point3d, Vector3d, double>(midPt, dir, length));
                 }
             }
             return layoutInfo;

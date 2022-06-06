@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -78,6 +79,31 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 判断是否存在其他的路由线
+        /// </summary>
+        /// <param name="pt1"></param>
+        /// <param name="pt2"></param>
+        /// <param name="polys"></param>
+        /// <returns></returns>
+        public static bool CheckNoOtherMidRoute(Point3d pt1, Point3d pt2, List<Polyline> polys)
+        {
+            if (polys.Count <= 0)
+            {
+                return false;
+            }
+            return polys.Any(x =>
+            {
+                var closetPt1 = x.GetClosestPointTo(pt1, true);
+                var closetPt2 = x.GetClosestPointTo(pt2, true);
+                if (closetPt1.IsEqualTo(closetPt2, new Tolerance(0.01, 0.01)) && (closetPt1 - pt1).GetNormal().IsEqualTo((pt2 - closetPt2).GetNormal(), new Tolerance(0.01, 0.01)))
+                {
+                    return true;
+                }
+                return false;
+            });
         }
     }
 }

@@ -26,7 +26,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
             }
         }
 
-        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPts, string layerName, string blockName, Dictionary<string, string> attNameValues, bool isDynAttri = false)
+        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPts, string layerName, string blockName, Dictionary<string, object> attNameValues, bool isDynAttri = false)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -130,7 +130,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
             }
         }
 
-        public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, string layerName, string blockName, Dictionary<string, string> attNameValues, bool isDynAttri)
+        public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, string layerName, string blockName, Dictionary<string, object> attNameValues, bool isDynAttri)
         {
             double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir);
             //控制旋转角度
@@ -141,13 +141,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
 
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
+                var attri = attNameValues.ToDictionary(x => x.Key, y => y.Value.ToString());
                 var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                     layerName,
                     blockName,
                     pt,
                     new Scale3d(scaleNum),
                     rotateAngle,
-                    attNameValues);
+                    attri);
                 if (isDynAttri)
                 {
                     foreach (var dynamic in attNameValues)

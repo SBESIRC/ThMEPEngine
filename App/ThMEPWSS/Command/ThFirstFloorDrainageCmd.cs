@@ -85,7 +85,7 @@ namespace ThMEPWSS.Command
                         routes = chamferService.Chamfer();
 
                         //放置管井
-                        CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes, originTransformer);
+                        CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes, originTransformer,paramSetting);
                         createTubeWellService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         routes = createTubeWellService.Layout();
 
@@ -146,10 +146,12 @@ namespace ThMEPWSS.Command
             {
                 if (room.Boundary is Polyline polyline)
                 {
+                    polyline.ProjectOntoXYPlane();
                     polyDic.Add(polyline, room.Tags);
                 }
                 else if (room.Boundary is MPolygon mPolygon)
                 {
+                    mPolygon.ProjectOntoXYPlane();
                     polyDic.Add(mPolygon.Shell(), room.Tags);
                     //roomPolys.AddRange(mPolygon.Holes());
                 }
