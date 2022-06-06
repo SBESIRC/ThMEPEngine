@@ -92,7 +92,7 @@ namespace ThMEPStructure.Reinforcement.Model
         }
         private void Init()
         {
-            C = 20;
+            C = 15;
             Frame = "A1";
             DrawScale = "1:25";
             TableRowHeight = 800;
@@ -163,7 +163,7 @@ namespace ThMEPStructure.Reinforcement.Model
         private void Init()
         {
             Size = 1;
-            StirrupRatio = 1.0;
+            StirrupRatio = 0.06;
             DwgSource = "YJK";
             WallLayer = "砼墙";
             ReinforceRatio = 0.06;

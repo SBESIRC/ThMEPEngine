@@ -124,7 +124,7 @@
             </GroupBox>
             <GroupBox Margin="0,10">
                 <GroupBox.Header>
-                    图层
+                    编号
                 </GroupBox.Header>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -149,7 +149,7 @@
             </GroupBox>
             <GroupBox Height="100" Margin="0,10">
                 <GroupBox.Header>
-                    图层
+                    归并系数
                 </GroupBox.Header>
                 <Grid>
                     <Grid.RowDefinitions>

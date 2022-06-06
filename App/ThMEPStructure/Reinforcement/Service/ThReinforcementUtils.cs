@@ -44,15 +44,25 @@ namespace ThMEPStructure.Reinforcement.Service
 
         public static DBObjectCollection PostProcess(this DBObjectCollection polygons, double areaTolerance = 1.0)
         {
-            var results = polygons.FilterSmallArea(areaTolerance);
+            var garbages = new DBObjectCollection();
+            garbages = garbages.Union(polygons);
+
             var roomSimplifier = new ThPolygonalElementSimplifier();
-            results = roomSimplifier.Normalize(results);
-            results = results.FilterSmallArea(areaTolerance);
-            results = roomSimplifier.MakeValid(results);
-            results = results.FilterSmallArea(areaTolerance);
-            results = roomSimplifier.Simplify(results);
-            results = results.FilterSmallArea(areaTolerance);
+            var objs1 = roomSimplifier.Normalize(polygons.FilterSmallArea(areaTolerance));
+            garbages = garbages.Union(objs1);
+
+            var objs2 = roomSimplifier.MakeValid(objs1.FilterSmallArea(areaTolerance));
+            garbages = garbages.Union(objs2);
+
+            var objs3 = roomSimplifier.Simplify(objs2.FilterSmallArea(areaTolerance));
+
+            var results = objs3.FilterSmallArea(areaTolerance);
             results = results.RepeatedRemoved();
+
+            garbages = garbages.Union(objs3.Difference(results));
+            garbages = garbages.Difference(polygons);
+            garbages.MDispose();
+
             return results;
         }
 
@@ -162,7 +172,7 @@ namespace ThMEPStructure.Reinforcement.Service
         public static Dictionary<Point3d, int> PointClassify(this Polyline polyline)
         {
             var result = new Dictionary<Point3d, int>();
-            var vertexes = polyline.Vertices();
+            var vertexes = RemoveClosePoints(polyline.Vertices());            
             var sorts = vertexes.OfType<Point3d>().SortPointsCCW(polyline.StartPoint).ToList();
             int n = sorts.Count;
             for (int i = 0; i < n; ++i)
@@ -183,6 +193,23 @@ namespace ThMEPStructure.Reinforcement.Service
                 }
             }
             return result;
+        }
+
+        public static Point3dCollection RemoveClosePoints(this Point3dCollection pts,double pointTolerance=1e-6)
+        {
+            var results = new Point3dCollection();
+            pts.OfType<Point3d>().ForEach(p1=>
+            {
+                bool isExist = results
+                .OfType<Point3d>()
+                .Where(p2 => p1.DistanceTo(p2) <= pointTolerance)
+                .Any();
+                if (!isExist)
+                {
+                    results.Add(p1);
+                }
+            });            
+            return results;
         }
 
         /// <summary>

@@ -69,10 +69,6 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             foreach(var edgeComponent in wallColumns.OfType<Polyline>())
             {
                 var shapeCode = Analysis(edgeComponent);
-                if (shapeCode == ShapeCode.Unknown)
-                {
-                    continue;
-                }
                 var leaderMarkInfs = markFindService.Find(edgeComponent);
                 if (leaderMarkInfs.Count != 1)
                 {

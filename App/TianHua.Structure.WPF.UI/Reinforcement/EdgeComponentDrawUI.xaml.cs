@@ -68,7 +68,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             this.Hide();
             drawVM.Draw();
-            this.Show();
+            this.Close();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
