@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
-using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.Reinforcement.Service;
 
@@ -27,8 +28,8 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
         }
         public void Extract(Database db,Point3dCollection pts)
         {
-            // 获取指定图层的对象
-            var objs = db.GetEntitiesFromMS(WallColumnLayers);
+            // 从本地和块中获取指定图层的对象
+            var objs = ExtractWallColumns(db, WallColumnLayers);
 
             // 获取提取对象中的线
             var cloneLines = objs.OfType<Line>().Select(o => o.Clone() as Line).ToCollection();
@@ -61,6 +62,19 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
 
             // 返回结果
             results.OfType<Entity>().ForEach(e => Elements.Add(e));
+        }
+
+        private DBObjectCollection ExtractWallColumns(Database database,List<string> layerFilter)
+        {
+            var visitor = new ThWallColumnExtractionVisitor()
+            {
+                LayerFilter = layerFilter,
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            extractor.ExtractFromMS(database);
+            return visitor.Results.Select(o => o.Geometry).ToCollection();
         }
     }
 }

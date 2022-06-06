@@ -6,6 +6,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.Reinforcement.Service;
 
@@ -28,7 +29,7 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
         public void Extract(Database db,Point3dCollection pts)
         {
             // 获取指定图层的对象
-            var objs = db.GetEntitiesFromMS(TextLayers);
+            var objs = GetLeaderMarks(db, TextLayers);
             objs = objs.OfType<Entity>().Where(e => e is DBText || e is Line).ToCollection();
 
             // 按图层对Objs分类
@@ -62,6 +63,19 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
                 transformer.Reset(results);
                 MarkTexts.Add(o.Key, results);
             });
+        }
+
+        private DBObjectCollection GetLeaderMarks(Database database,List<string> layerFilter)
+        {
+            var visitor = new ThLeaderMarkExtractionVisitor()
+            {
+                LayerFilter = layerFilter,
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            extractor.ExtractFromMS(database);
+            return visitor.Results.Select(o => o.Geometry).ToCollection();
         }
 
         private Dictionary<string, DBObjectCollection> Classify(DBObjectCollection objs)

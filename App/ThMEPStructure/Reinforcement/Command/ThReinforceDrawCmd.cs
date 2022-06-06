@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
@@ -176,8 +177,8 @@ namespace ThMEPStructure.Reinforcement.Command
                     var markPt1 = vertices
                         .OfType<Point3d>()
                         .Select(o=>o.TransformBy(wcs2Ucs))
-                        .OrderByDescending(o => o.X)
-                        .ThenByDescending(o => o.Y)
+                        .OrderByDescending(o => Math.Ceiling(o.Y))
+                        .ThenByDescending(o => Math.Ceiling(o.X))
                         .First();                    
                     results = Mark(number, Point3d.Origin, new Vector3d(1, 1, 0), new Vector3d(1, 0, 0));
                     var mt1 = Matrix3d.Displacement(markPt1 - Point3d.Origin);
@@ -188,8 +189,8 @@ namespace ThMEPStructure.Reinforcement.Command
                     var markPt2 = vertices
                         .OfType<Point3d>()
                         .Select(o => o.TransformBy(wcs2Ucs))
-                        .OrderByDescending(o => o.X)
-                        .ThenBy(o => o.Y)
+                        .OrderBy(o=> Math.Ceiling(o.Y))
+                        .ThenByDescending(o => Math.Ceiling(o.X))
                         .First();
                     results = Mark(number, Point3d.Origin, new Vector3d(1, -1, 0), new Vector3d(1, 0, 0));
                     var mt2 = Matrix3d.Displacement(markPt2 - Point3d.Origin);
@@ -200,8 +201,8 @@ namespace ThMEPStructure.Reinforcement.Command
                     var markPt3 = vertices
                         .OfType<Point3d>()
                         .Select(o => o.TransformBy(wcs2Ucs))
-                        .OrderBy(o => o.X)
-                        .ThenByDescending(o => o.Y)
+                        .OrderByDescending(o => Math.Ceiling(o.Y))
+                        .ThenBy(o => Math.Ceiling(o.X))                        
                         .First();                    
                     results = Mark(number, Point3d.Origin, new Vector3d(-1, 1, 0), new Vector3d(-1, 0, 0));
                     var mt3 = Matrix3d.Displacement(markPt3 - Point3d.Origin);
@@ -212,8 +213,8 @@ namespace ThMEPStructure.Reinforcement.Command
                     var markPt4 = vertices
                        .OfType<Point3d>()
                        .Select(o => o.TransformBy(wcs2Ucs))
-                       .OrderBy(o => o.X)
-                       .ThenBy(o => o.Y)
+                       .OrderBy(o => Math.Ceiling(o.Y))
+                       .ThenBy(o => Math.Ceiling(o.X))
                        .First();
                     results = Mark(number, Point3d.Origin, new Vector3d(-1, -1, 0), new Vector3d(-1, 0, 0));
                     var mt4 = Matrix3d.Displacement(markPt4 - Point3d.Origin);
@@ -245,29 +246,31 @@ namespace ThMEPStructure.Reinforcement.Command
             pts.Add(basePt);
             pts.Add(pt1);
             pts.Add(pt2);
-            var leaderLine =ThMEPEngineCore.CAD.ThDrawTool.CreatePolyline(pts, false);
+            var leaderLine =ThDrawTool.CreatePolyline(pts, false);
             leaderLine.Layer = MarkLineLayer;
             leaderLine.ColorIndex=(int)ColorIndex.BYLAYER;
             leaderLine.LineWeight = LineWeight.ByLayer;
             leaderLine.Linetype = "ByLayer";
 
             var dbText = new DBText();
-            dbText.Position = pt1 + vec2.GetNormal().MultiplyBy(100);
-            var line1 = new Line(pt1, pt2);
-            dbText.Rotation = line1.Angle;
+            dbText.Position = pt1.GetMidPt(pt2);
+            dbText.Rotation = 0.0;
             dbText.TextString = number;
             dbText.Height = 300;
             dbText.WidthFactor = 0.7;
             dbText.Layer = MarkTextLayer;
+            dbText.HorizontalMode = TextHorizontalMode.TextCenter;
+            dbText.VerticalMode = TextVerticalMode.TextBottom;
+            dbText.AlignmentPoint = dbText.Position;
             dbText.ColorIndex = (int)ColorIndex.BYLAYER;
             dbText.TextStyleId = DbHelper.GetTextStyleId(
                 ThImportTemplateStyleService.ThStyle3TextStyle);
-            line1.Dispose();
-
+         
             results.Add(leaderLine);
             results.Add(dbText);
             return results;
         }
+
         private Extents2d CreateExtents(string frame)
         {
             //"A0", "A1", "A2", "A3"

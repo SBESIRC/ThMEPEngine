@@ -83,6 +83,9 @@
     <Compile Include="Reinforcement\Command\ThLTypeReinforceDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThRectTypeReinforceDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThYjkReinforceExtractCmd.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThLeaderMarkExtractionVisitor.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThWallExtractionVisitor.cs" />
+    <Compile Include="Reinforcement\Data\YJK\ThWallColumnExtractionVisitor.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractLeaderMarkService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallColumnService.cs" />
