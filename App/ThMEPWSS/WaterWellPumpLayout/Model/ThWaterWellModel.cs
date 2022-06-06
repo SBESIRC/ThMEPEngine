@@ -654,6 +654,8 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         public void NearWall(List<Line> walls, double tol)
         {
             WallLines = walls;
+            NearWallEdge.Clear();
+
             for (int i = 0; i < WellEdge.Count; i++)
             {
                 if (IsNearWall(i, tol, out double dist))

@@ -1,29 +1,31 @@
 ﻿using System;
 using System.Linq;
-using Linq2Acad;
-using AcHelper.Commands;
+using System.IO;
 using System.Collections.Generic;
-using ThMEPWSS.Pipe.Model;
-using AcHelper;
+using System.Collections.ObjectModel;
+
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using AcHelper;
+using Linq2Acad;
+using AcHelper.Commands;
+using NFox.Cad;
+using ThMEPEngineCore.CAD;
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.Pipe;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThCADCore.NTS;
-using NFox.Cad;
-using System.IO;
-using ThCADExtension;
+
 using ThMEPWSS.Diagram.ViewModel;
-using ThMEPEngineCore.CAD;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterWellPumpLayout.Interface;
 using ThMEPWSS.WaterWellPumpLayout.Service;
-using DotNetARX;
-using ThMEPEngineCore.Command;
 using ThMEPWSS.WaterWellPumpLayout.Model;
-using System.Collections.ObjectModel;
 
 namespace ThMEPWSS.Command
 {
@@ -210,6 +212,8 @@ namespace ThMEPWSS.Command
                     List<Line> wallLine = GetWallColumnEdgesInRange(input);
                     //获取潜水泵
                     ThWaterWellPumpUtils.GetPumpIndex(out var pumpIndex, out var pumpDict);
+
+                    DrawUtils.ShowGeometry(wallLine, "l0wall", 1);
 
 
                     foreach (var info in WellConfigInfo)
