@@ -43,6 +43,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
     using ThMEPWSS.Pipe.Engine;
     using ThMEPEngineCore.Model;
     using ThMEPWSS.Hydrant.Service;
+    using GeometryExtensions;
     public static class ThFireControlSystemCmd
     {
         public static void ExecuteTH(FireControlSystemDiagramViewModel vm)
@@ -76,6 +77,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
             }
             FocusMainWindow();
             if (!TrySelectPoint(out var basePoint, "\n请选择消火栓系统图排布的起点")) return;
+            var u2w = Active.Editor.UCS2WCS();
+            basePoint = basePoint.TransformBy(u2w.Inverse());
+            var fixMatrix = u2w;
             {
                 if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
             }
@@ -1964,7 +1968,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     drawDomePipes(segs);
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
                         }
                     }
                     else
@@ -3792,7 +3796,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 }
                             }
                         }
-                            foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                            foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
                     }
                 }
                 else if (vm.IsMultiPipe)
@@ -5845,7 +5849,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
                         }
                     }
                     else
@@ -7936,7 +7940,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
                         }
                     }
                 }
@@ -9787,7 +9791,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
                         }
                     }
                     else
@@ -11626,7 +11630,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
                         }
                     }
                 }
@@ -13477,12 +13481,18 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 }
                             }
                         }
-                            foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                        {
+                            foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01))
+                            {
+                                lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                            }
+                        }
                     }
                 }
                 foreach (var info in lineInfos)
                 {
                     var line = DrawLineSegmentLazy(info.Line);
+                    line.TransformBy(fixMatrix);
                     if (!string.IsNullOrEmpty(info.LayerName))
                     {
                         line.Layer = info.LayerName;
@@ -13495,6 +13505,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                     dbt.Rotation = info.Rotation;
                     dbt.WidthFactor = .7;
                     dbt.Height = TEXT_HEIGHT;
+                    dbt.TransformBy(fixMatrix);
                     if (!string.IsNullOrEmpty(info.LayerName)) dbt.Layer = info.LayerName;
                     if (!string.IsNullOrEmpty(info.TextStyle)) DrawingQueue.Enqueue(adb => { SetTextStyle(dbt, info.TextStyle); });
                     ByLayer(dbt);
@@ -13507,6 +13518,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                         {
                             if (info.DynaDict != null && br.IsDynamicBlock) br.DynamicBlockReferencePropertyCollection.Cast<DynamicBlockReferenceProperty>().Where(x => !x.ReadOnly).Join(info.DynaDict, x => x.PropertyName, y => y.Key, (x, y) => x.Value = y.Value).Count();
                         }
+                        br.TransformBy(fixMatrix);
                     }, props: info.PropDict, scale: info.Scale, rotateDegree: info.Rotate.AngleToDegree());
                 }
                 FlushDQ(adb);
