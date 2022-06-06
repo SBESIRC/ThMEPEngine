@@ -171,26 +171,11 @@ namespace ThMEPWSS.Command
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                if (blockDb.Blocks.Contains(WaterWellBlockNames.DeepWaterPump))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump));
-                }
-                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser));
-                }
-                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser150))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150));
-                }
-                if (blockDb.Layers.Contains("W-EQPM"))
-                {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"));
-                }
-                if (blockDb.Layers.Contains("W-DRAI-EQPM"))
-                {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"));
-                }
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump),true);
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser), true);
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150), true);
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"), true);
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"), true);
             }
         }
         public override void SubExecute()
