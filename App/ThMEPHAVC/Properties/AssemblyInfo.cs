@@ -39,4 +39,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPHVAC.ThMEPHAVCApp))]
 [assembly: CommandClass(typeof(ThMEPHVAC.ThLoadCalculationSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPHVAC.ThHAVCIndoorFanCmds))]
+[assembly: CommandClass(typeof(ThMEPHVAC.ThFloorHeatingCmds))]
 
