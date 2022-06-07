@@ -664,6 +664,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 double.TryParse(br.GetAttributesStrValue("扬程"), out pump.paraH);
                                 double.TryParse(br.GetAttributesStrValue("电量"), out pump.paraN);
                                 double.TryParse(br.GetAttributesStrValue("井深"), out pump.Depth);
+                                double length = 0;
+                                double width = 0;
+                                double depth = 0;
+                                double.TryParse(br.GetAttributesStrValue("长"), out length);
+                                double.TryParse(br.GetAttributesStrValue("宽"), out width);
+                                double.TryParse(br.GetAttributesStrValue("深"), out depth);
+                                pump.Length = length.ToString();
+                                pump.Width = width.ToString();
+                                if (depth > 0) pump.Depth = depth / 1000;
                             }
                         }
                     }
