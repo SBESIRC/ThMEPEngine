@@ -135,7 +135,7 @@ namespace ThMEPElectrical.Command
                 var dir = model.Item2;
                 if (dir.Y < 0)
                 {
-                    dir = new Vector3d(dir.X, -dir.Y, 0);
+                    dir = dir.Negate();
                 }
                 double rotateAngle = Vector3d.YAxis.GetAngleTo(dir, Vector3d.ZAxis);
                 InsertBlockService.InsertBlock(ThMEPCommon.GT_LAYER_NAME, ThMEPCommon.TIMERECORDER_BLOCK_NAME, pt, rotateAngle, ThElectricalUIService.Instance.Parameter.scale);

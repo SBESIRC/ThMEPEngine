@@ -119,7 +119,7 @@ namespace ThMEPElectrical.StructureHandleService
                 originTransformer.Reset(boundary);
                 var doorRecognitionEngine = new ThDB3DoorRecognitionEngine();
                 doorRecognitionEngine.Recognize(acdb.Database, boundary.Vertices());
-                MSdoors = MSdoors.Union(doorRecognitionEngine.Elements.Select(o => o.Outline as Polyline)).ToList();
+                MSdoors = MSdoors.Union(doorRecognitionEngine.Elements.Select(o => o.Outline as Polyline)).OrderByDescending(o => o.Area).ToList();
                 var doors = new List<Polyline>();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(MSdoors.ToCollection());
                 while (MSdoors.Count > 0)

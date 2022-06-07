@@ -163,10 +163,17 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 if (aPath != null)
                 {
                     double range = 2 * ThElectricalUIService.Instance.Parameter.scale;
-                    aPath = connectBlockService.ConnectByPoint(bModel.ConnectPts, aPath);
-                    aPath.ReverseCurve();
-                    aPath = connectBlockService.ConnectByCircle(new List<Point3d>() { aModel.position }, aPath, range);
-                    resPaths.Add(aPath);
+                    if(bModel.Boundary.Contains(aPath.GetPoint3dAt(aPath.NumberOfVertices - 2)))
+                    {
+                        aPath.RemoveVertexAt(aPath.NumberOfVertices - 1);
+                    }
+                    if (aPath.NumberOfVertices >= 2)
+                    {
+                        aPath = connectBlockService.ConnectByPoint(bModel.ConnectPts, aPath);
+                        aPath.ReverseCurve();
+                        aPath = connectBlockService.ConnectByCircle(new List<Point3d>() { aModel.position }, aPath, range);
+                        resPaths.Add(aPath);
+                    }
                 }
             }
 
@@ -176,15 +183,33 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             {
                 useEHoles.Add(UtilService.GetBoungdingBox(aModel.position, bModel.layoutDir, avoidStep));
             }
+            if(resPaths.Count > 0)
+            {
+                useEHoles.AddRange(resPaths.Select(o => o.BufferFlatPL(10).Cast<Polyline>().First()));
+            }
             ePath = pipePath.CreatePipePath(roomPoly, electricLock.position, bModel.position, bModel.layoutDir, useEHoles);
             //修正连接线
             ePath = connectBlockService.AjustPathIntersection(ePath, aPath, electricLock.position, bModel.position, pathDis);
             if (ePath != null)
             {
-                ePath = connectBlockService.ConnectByPoint(bModel.ConnectPts, ePath);
-                ePath.ReverseCurve();
-                ePath = connectBlockService.ConnectByPoint(electricLock.ConnectPts, ePath);
-                resPaths.Add(ePath);
+                if (bModel.Boundary.Contains(ePath.GetPoint3dAt(ePath.NumberOfVertices - 2)))
+                {
+                    ePath.RemoveVertexAt(ePath.NumberOfVertices - 1);
+                }
+                if (ePath.NumberOfVertices >= 2)
+                {
+                    ePath = connectBlockService.ConnectByPoint(bModel.ConnectPts, ePath);
+                    ePath.ReverseCurve();
+                    if (electricLock.Boundary.Contains(ePath.GetPoint3dAt(ePath.NumberOfVertices - 2)))
+                    {
+                        ePath.RemoveVertexAt(ePath.NumberOfVertices - 1);
+                    }
+                    if (ePath.NumberOfVertices >= 2)
+                    {
+                        ePath = connectBlockService.ConnectByPoint(electricLock.ConnectPts, ePath);
+                        resPaths.Add(ePath);
+                    }
+                }
             }
             
             return resPaths.Where(x => x.Length < tolLength).ToList();
