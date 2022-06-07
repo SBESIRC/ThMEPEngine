@@ -360,7 +360,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (thTTypeEdgeComponent.Type == "A")
                     {
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(6);
+                            CIndexList.Add(7);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(2);
                             CIndexList.Add(3);
@@ -588,7 +593,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     }
                     else if (thTTypeEdgeComponent.Type == "B")
                     {
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(0);
+                            CIndexList.Add(9);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(0);
                             CIndexList.Add(4);
@@ -811,7 +821,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (thTTypeEdgeComponent.Type == "A")
                     {
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(6);
+                            CIndexList.Add(7);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(2);
                             CIndexList.Add(3);
@@ -1142,7 +1157,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     }
                     else if (thTTypeEdgeComponent.Type == "B")
                     {
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(0);
+                            CIndexList.Add(9);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(0);
                             CIndexList.Add(4);
@@ -1849,7 +1869,18 @@ namespace ThMEPStructure.Reinforcement.Draw
                     {
 
                         //主要标记C筋
-                        if (Cnum == 4)
+                        if (Cnum == 2)
+                        {
+                            if (enhanceStep == 1)
+                            {
+                                Helper.CreateRectAndLabel(points[7], points[6], 4, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[7], points[6], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            }
+                        }
+                        else if (Cnum == 4)
                         {
                             if (enhanceStep == 1)
                             {
@@ -2143,7 +2174,18 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (TReinStr.Rein_Detail_list[0].TypeNum <= TReinStr.num / 2)
                     {
-                        if (Cnum == 4)
+                        if (Cnum == 2)
+                        {
+                            if (enhanceStep == 1)
+                            {
+                                Helper.CreateRectAndLabel(points[0], points[9], 4, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[0], points[9], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            }
+                        }
+                        else if (Cnum == 4)
                         {
                             if (enhanceStep == 1)
                             {
@@ -2553,7 +2595,20 @@ namespace ThMEPStructure.Reinforcement.Draw
                     {
 
                         //主要标记C筋
-                        if (Cnum == 4)
+                        if (Cnum == 2)
+                        {
+                            if (enhanceStep == 1)
+                            {
+                                Helper.CreateRectAndLabel(points[6], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                Helper.CreateRectAndLabel(points[7], points[7], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[6], points[6], 1, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                Helper.CreateRectAndLabel(points[7], points[7], 1, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                            }
+                        }
+                        else if (Cnum == 4)
                         {
                             if (enhanceStep == 1)
                             {
@@ -3004,6 +3059,19 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (TReinStr.Rein_Detail_list[0].TypeNum <= TReinStr.num / 2)
                     {
+                        if (Cnum == 2)
+                        {
+                            if (enhanceStep == 1)
+                            {
+                                Helper.CreateRectAndLabel(points[0], points[0], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[9], points[9], 2, ZongjinPoints[9].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[0], points[0], 1, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[9], points[9], 1, ZongjinPoints[9].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
+                            }
+                        }
                         if (Cnum == 4)
                         {
                             if (enhanceStep == 1)

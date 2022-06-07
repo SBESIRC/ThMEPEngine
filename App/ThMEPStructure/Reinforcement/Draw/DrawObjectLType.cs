@@ -282,7 +282,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     if (thLTypeEdgeComponent.Type == "A")
                     {
                         //bw<300,bf<300,A型
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(4);
+                            CIndexList.Add(5);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(1);
                             CIndexList.Add(2);
@@ -436,7 +441,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     else
                     {
                         //B型
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(0);
+                            CIndexList.Add(7);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(0);
                             CIndexList.Add(2);
@@ -590,7 +600,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     if (thLTypeEdgeComponent.Type == "A")
                     {
                         //bw>=300,bf>=300
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(4);
+                            CIndexList.Add(5);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(1);
                             CIndexList.Add(2);
@@ -879,7 +894,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     else
                     {
                         //B型，bw，bf>=300
-                        if (num == 4)
+                        if (num == 2)
+                        {
+                            CIndexList.Add(0);
+                            CIndexList.Add(7);
+                        }
+                        else if (num == 4)
                         {
                             CIndexList.Add(0);
                             CIndexList.Add(2);
@@ -1483,7 +1503,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             StrToReinforce LReinStr = new StrToReinforce();
             LReinStr = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
-            L_FindCJin(points, LReinStr, ZongjinPoints);
+            L_FindCJin(points, LReinStr, ZongjinPoints); 
             if (thLTypeEdgeComponent.Bf < 300 && thLTypeEdgeComponent.Bw < 300)
             {
                 int Cnum = LReinStr.Rein_Detail_list[0].TypeNum;
@@ -1538,7 +1558,18 @@ namespace ThMEPStructure.Reinforcement.Draw
                     if (LReinStr.Rein_Detail_list[0].TypeNum <= LReinStr.num / 2)
                     {
                         //标记C筋
-                        if (Cnum == 4)
+                        if (Cnum == 2)
+                        {
+                            if (Step == 5)
+                            {
+                                Helper.CreateRectAndLabel(points[5], points[4], 4, ZongjinPoints[4].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[5], points[4], 2, ZongjinPoints[4].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            }
+                        }
+                        else if (Cnum == 4)
                         {
                             if (Step == 5)
                             {
@@ -2092,7 +2123,20 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (LReinStr.Rein_Detail_list[0].TypeNum <= LReinStr.num / 2)
                     {
-                        if (Cnum == 4)
+                        if (Cnum == 2)
+                        {
+                            if (Step == 5)
+                            {
+                                Helper.CreateRectAndLabel(points[5], points[5], 2, ZongjinPoints[5].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[4], points[4], 2, ZongjinPoints[4].size, LabelAndRect, CJintText, 400, 1500, 6, 200);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 400, 1500, 6, 200);
+                            }
+                        }
+                        else if (Cnum == 4)
                         {
                             if (Step == 5)
                             {
@@ -2544,7 +2588,20 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (LReinStr.Rein_Detail_list[0].TypeNum <= LReinStr.num / 2)
                     {
-                        if (Cnum == 4)
+                        if (Cnum == 2)
+                        {
+                            if (Step == 5)
+                            {
+                                Helper.CreateRectAndLabel(points[0], points[0], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[7], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
+                            }
+                            else
+                            {
+                                Helper.CreateRectAndLabel(points[0], points[0], 1, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[7], 1, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
+                            }
+                        }
+                        else if (Cnum == 4)
                         {
                             if (Step == 5)
                             {
