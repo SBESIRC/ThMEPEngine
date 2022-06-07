@@ -45,7 +45,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             LengthCanGIntegralModulesConnectSingle = 4 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength * 2;
             LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
             LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 4 + DisPillarLength * 2;
-            LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8 + DisPillarLength * 2;
+            LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth *7 + DisPillarLength * 2;
             GeneratePillars = gpillars;
             Walls = walls;
             Obstacles = obstacles;
@@ -118,7 +118,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double LengthCanGIntegralModulesConnectSingle = 3.5 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
         public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.5 + DisPillarLength;
-        public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8 + DisPillarLength * 2;
+        public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 7 + DisPillarLength * 2;
         public static double STRTreeCount = 10;
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();
         public List<LineSegment> OutUnsuredLanes = new List<LineSegment>();
