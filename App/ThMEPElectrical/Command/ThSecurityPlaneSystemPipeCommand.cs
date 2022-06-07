@@ -56,28 +56,31 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
-                // 获取线槽图层
-                PromptSelectionOptions trunkingOptions = new PromptSelectionOptions()
+                string trunkingLayer = string.Empty;//线槽图层
+                if (!ThElectricalUIService.Instance.Parameter.withinInGroup)
                 {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择线槽类型",
-                    RejectObjectsOnLockedLayers = true,
-                    SinglePickInSpace = true,
-                };
-                var trunkingDxfNames = new string[]
-                {
+                    // 获取线槽图层
+                    PromptSelectionOptions trunkingOptions = new PromptSelectionOptions()
+                    {
+                        AllowDuplicates = false,
+                        MessageForAdding = "选择线槽类型",
+                        RejectObjectsOnLockedLayers = true,
+                        SinglePickInSpace = true,
+                    };
+                    var trunkingDxfNames = new string[]
+                    {
                     RXClass.GetClass(typeof(Line)).DxfName,
                     RXClass.GetClass(typeof(Polyline)).DxfName,
                     "TCH_CABLETRY",//天正桥架
-                };
-                var trunkingFilter = ThSelectionFilterTool.Build(trunkingDxfNames);
-                var trunkingResult = Active.Editor.GetSelection(trunkingOptions, trunkingFilter);
-                if (trunkingResult.Status != PromptStatus.OK)
-                {
-                    return;
+                    };
+                    var trunkingFilter = ThSelectionFilterTool.Build(trunkingDxfNames);
+                    var trunkingResult = Active.Editor.GetSelection(trunkingOptions, trunkingFilter);
+                    if (trunkingResult.Status != PromptStatus.OK)
+                    {
+                        return;
+                    }
+                    trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
                 }
-                string trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
-
                 Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
@@ -112,13 +115,16 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
-                    
 
                     //获取连线图块
                     var blocks = GetBlocks(outFrame, originTransformer);
 
                     //获取线槽
-                    var trunkings = getPrimitivesService.GetTrunkings(outFrame, trunkingLayer);
+                    var trunkings = new List<Line>();
+                    if (!ThElectricalUIService.Instance.Parameter.withinInGroup)
+                    {
+                        trunkings = getPrimitivesService.GetTrunkings(outFrame, trunkingLayer);
+                    }
 
                     var ACEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.AC_BLOCK_NAMES, ThMEPCommon.AC_PIPE_LAYER_NAME, true);
                     var GTEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.GT_BLOCK_NAMES, ThMEPCommon.GT_PIPE_LAYER_NAME, true);
