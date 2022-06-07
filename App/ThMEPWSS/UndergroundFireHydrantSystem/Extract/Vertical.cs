@@ -67,17 +67,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
             return rstSpatialIndex.SelectCrossingPolygon(polygon);
         }
-
-        private static bool IsPipeLayer(string layer)
-        {
-            return layer.Contains("W-FRPT") && layer.Contains("HYDT") && layer.Contains("PIPE");
-        }
        
         private static bool IsTargetLayer(string layer)//立管图层
         {
             return layer.Equals("W-FRPT-HYDT-VPIPE")
                  || layer.Equals("W-FRPT-HYDT-EQPM")
-                 || layer.Equals("W-FRPT-HYDT");
+                 || layer.Equals("W-FRPT-HYDT")
+                 || layer.Equals("W-FRPT-EXTG");
         }
 
         private static void ExplodeBlock(BlockReference br, DBObjectCollection DBobjsResults)
@@ -123,8 +119,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     .Where(e => e is Circle)
                     .ForEach(e => DBobjsResults.Add(new DBPoint((e as Circle).Center)));
             }
-            catch
+            catch(Exception ex)
             {
+                ;
             }
         }
         private static bool IsDWLGBlock(BlockReference br)

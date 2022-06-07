@@ -14,12 +14,17 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundSpraySystem.Command;
+using Serilog;
+using System.IO;
 
 namespace ThMEPWSS.Command
 {
     public class ThFireHydrantCmd : ThMEPBaseCommand, IDisposable
     {
         readonly FireHydrantSystemViewModel _UiConfigs;
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "FireHydrantLog.txt");
+        public Serilog.Core.Logger Logger = null;
+
         public ThFireHydrantCmd(FireHydrantSystemViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
@@ -37,11 +42,14 @@ namespace ThMEPWSS.Command
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
+                    Logger = new LoggerConfiguration().WriteTo.File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), 
+                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
                     CreateFireHydrantSystem(currentDb);
                 }
             }
             catch (Exception ex)
             {
+                Logger?.Information(ex.Message);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
@@ -91,7 +99,7 @@ namespace ThMEPWSS.Command
                 if (exArea.Count == 0) return null;
                 return exArea;
             }
-            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
+            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt, Logger);//提取输入参数
 
             fireHydrantSysOut.HydrantWithReel = fireHydrantSysIn.HydrantWithReel;
             if (!inputFlag)

@@ -89,6 +89,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "TWT_TEXT";
         }
 
+
+        //特别耗时
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
         {
             if (ent is BlockReference br)

@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     public class GetInput
     {
         public static bool GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
-            Point3dCollection selectArea, Point3d startPt)
+            Point3dCollection selectArea, Point3d startPt, Serilog.Core.Logger Logger = null)
         {
             var lineList = new List<Line>();//管段列表
             var pointList = new List<Point3dEx>();//点集
@@ -99,7 +99,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
             var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textModel);
-          
+            ;
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
             var dbText = ThTextSet.ThText(new Point3d(), textModel);
             if(dbText.TextString.Trim().Count()!=0)

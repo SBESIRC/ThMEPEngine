@@ -176,7 +176,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, Point3d> CrossMainPtDic { get; set; }//跨层主环的对应点位置
         public FireHydrantSystemIn(double floorHeight = 5000, StoreyRect storeyRect = null)
         {
-            if (!(storeyRect is null))
+            if(storeyRect is not null)
             {
                 HasStoreyRect = storeyRect.HasStoreyRect;
                 FloorRect = storeyRect.FloorRect;

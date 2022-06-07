@@ -46,6 +46,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 try
                 {
                     var pt = rstPath[i];
+
+                    if(pt.DistanceToEx(new Point3dEx(1570561.8, 818422, 0)) < 10)
+                    {
+                        ;
+                    }
                     if(across)
                     {
                         if (i == 0 || i == rstPath.Count - 1)
@@ -59,18 +64,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (branchDic.ContainsKey(pt))
                     {
                         var tpts = branchDic[pt];
+                        for(int j = tpts.Count - 1; j >0; j--)
+                        {
+                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[j]))
+                            {
+                                branchDic[pt]?.Remove(tpts[j]);
+                            }
+                        }
                         if (tpts.Count == 2)
                         {
-                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
+                            var str1 = "";
+                            if(fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
                             {
-                                continue;
+                                str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
                             }
-                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[1]))
+                            var str2 = "";
+                            if (fireHydrantSysIn.TermPointDic.ContainsKey(tpts[1]))
                             {
-                                continue;
+                                str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
                             }
-                            var str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
-                            var str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
                             if (!str1.IsCurrentFloor() && !str2.IsCurrentFloor())
                             {
                                 pipeLength = 2 * fireHydrantSysIn.PipeWidth;
@@ -114,7 +126,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     ;
                 }
@@ -365,7 +377,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         }
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     ;
                 }
@@ -886,7 +898,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var stpt1 = new Point3dEx();
             if (fireHydrantSysIn.TermPointDic.ContainsKey(pt1))
             {
-                if (!fireHydrantSysIn.TermPointDic[pt1].PipeNumber?.Equals("") == true)
+                //if (fireHydrantSysIn.TermPointDic[pt1].PipeNumber?.Equals("") == true)
                 {
                     double XGap = 1600;
                     GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, pt1, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
@@ -901,7 +913,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             if (fireHydrantSysIn.TermPointDic.ContainsKey(pt2))
             {
-                if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber?.Equals("") == true)
+                //if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber?.Equals("") == true)
                 {
                     GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, pt2, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
 
