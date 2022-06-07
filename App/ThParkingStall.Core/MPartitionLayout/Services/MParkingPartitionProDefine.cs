@@ -124,6 +124,10 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<LineSegment> OutUnsuredLanes = new List<LineSegment>();
         public static bool DisplayFinal = true;
         public static int LayoutMode = ((int)LayoutDirection.LENGTH);
+        public static double LayoutScareFactor_Intergral = 0.7;
+        public static double LayoutScareFactor_Adjacent = 0.7;
+        public static double LayoutScareFactor_betweenBuilds = 0.7;
+        public static double LayoutScareFactor_SingleVert = 0.7;
         public enum LayoutDirection : int
         {
             LENGTH = 0,

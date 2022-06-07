@@ -351,40 +351,28 @@ namespace ThParkingStall.Core.MPartitionLayout
                         }
                     case 1:
                         {
-                            if (IsHorizontalLine(IniLanes[i].Line) && !isCurDirection)
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line))
+                            {
+                                length = length * LayoutScareFactor_SingleVert;
+                            }
+                            if (length > max_length)
                             {
                                 max_length = length;
                                 paras = _paras;
                             }
-                            else if (!IsHorizontalLine(IniLanes[i].Line) && isCurDirection) { }
-                            else
-                            {
-                                if (length > max_length)
-                                {
-                                    max_length = length;
-                                    paras = _paras;
-                                }
-                            }
-                            if (IsHorizontalLine(IniLanes[i].Line)) isCurDirection = true;
                             break;
                         }
                     case 2:
                         {
-                            if (IsVerticalLine(IniLanes[i].Line) && !isCurDirection)
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line))
+                            {
+                                length = length * LayoutScareFactor_SingleVert;
+                            }
+                            if (length > max_length)
                             {
                                 max_length = length;
                                 paras = _paras;
                             }
-                            else if (!IsVerticalLine(IniLanes[i].Line) && isCurDirection) { }
-                            else
-                            {
-                                if (length > max_length)
-                                {
-                                    max_length = length;
-                                    paras = _paras;
-                                }
-                            }
-                            if (IsVerticalLine(IniLanes[i].Line)) isCurDirection = true;
                             break;
                         }
                 }
@@ -414,40 +402,44 @@ namespace ThParkingStall.Core.MPartitionLayout
                         }
                     case 1:
                         {
-                            if (IsHorizontalLine(IniLanes[i].Line) && !isCurDirection)
+                            //if (IsHorizontalLine(IniLanes[i].Line) && !isCurDirection)
+                            //{
+                            //    max_length = length;
+                            //    paras = _paras;
+                            //}
+                            //else if (!IsHorizontalLine(IniLanes[i].Line) && isCurDirection) { }
+                            //else
+                            //{
+                            //    if (length > max_length)
+                            //    {
+                            //        max_length = length;
+                            //        paras = _paras;
+                            //    }
+                            //}
+                            //if (IsHorizontalLine(IniLanes[i].Line)) isCurDirection = true;
+                            //break;
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line))
+                            {
+                                length = length * LayoutScareFactor_Intergral;
+                            }
+                            if (length > max_length)
                             {
                                 max_length = length;
                                 paras = _paras;
                             }
-                            else if (!IsHorizontalLine(IniLanes[i].Line) && isCurDirection) { }
-                            else
-                            {
-                                if (length > max_length)
-                                {
-                                    max_length = length;
-                                    paras = _paras;
-                                }
-                            }
-                            if (IsHorizontalLine(IniLanes[i].Line)) isCurDirection = true;
                             break;
                         }
                     case 2:
                         {
-                            if (IsVerticalLine(IniLanes[i].Line) && !isCurDirection)
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line))
+                            {
+                                length = length * LayoutScareFactor_Intergral;
+                            }
+                            if (length > max_length)
                             {
                                 max_length = length;
                                 paras = _paras;
                             }
-                            else if (!IsVerticalLine(IniLanes[i].Line) && isCurDirection) { }
-                            else
-                            {
-                                if (length > max_length)
-                                {
-                                    max_length = length;
-                                    paras = _paras;
-                                }
-                            }
-                            if (IsVerticalLine(IniLanes[i].Line)) isCurDirection = true;
                             break;
                         }
                 }
@@ -463,7 +455,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (!IniLanes[i].CanBeMoved) return generate_lane_length;
             if (lane.Length < LengthCanGIntegralModulesConnectSingle) return generate_lane_length;
             var offsetlane = new LineSegment(lane);
-            offsetlane = offsetlane.Translation(vec * (DisModulus + DisLaneWidth / 2));
+            if(isBackBackModule)
+                offsetlane = offsetlane.Translation(vec * (DisModulus + DisLaneWidth / 2));
+            else
+                offsetlane = offsetlane.Translation(vec * (DisModulus));
             offsetlane = offsetlane.Scale(20);
             //与边界相交
 
@@ -472,8 +467,14 @@ namespace ThParkingStall.Core.MPartitionLayout
             foreach (var s in _splits)
             {
                 var k = s.Translation(-vec * DisLaneWidth / 2);
+                if (!isBackBackModule)
+                    k = s;
                 splits.AddRange(SplitBufferLineByPoly(k, DisLaneWidth / 2, Boundary)
-                    .Select(e => e.Translation(vec * DisLaneWidth / 2)));
+                    .Select(e =>
+                    {
+                        if (isBackBackModule) return e.Translation(vec * DisLaneWidth / 2);
+                        else return e;
+                    }));
             }
             var linesplitbounds =/* SplitLine(offsetlane, Boundary)*/
                 splits
@@ -506,8 +507,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
                 .Select(e =>
                 {
-                    e = e.Translation(-vec * (DisLaneWidth / 2));
-                    return e;
+                    if (isBackBackModule)
+                    {
+                        e = e.Translation(-vec * (DisLaneWidth / 2));
+                        return e;
+                    }
+                    else
+                        return e;
                 })
                 /*.Where(e => IsConnectedToLane(e))*/;
             bool generate = false;
@@ -1852,40 +1858,28 @@ namespace ThParkingStall.Core.MPartitionLayout
                         }
                     case 1:
                         {
-                            if (IsVerticalLine(IniLanes[i].Line) && !isCurDirection)
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line))
+                            {
+                                length = length * LayoutScareFactor_Adjacent;
+                            }
+                            if (length > max_length)
                             {
                                 max_length = length;
                                 paras = _paras;
                             }
-                            else if (!IsVerticalLine(IniLanes[i].Line) && isCurDirection) { }
-                            else
-                            {
-                                if (length > max_length)
-                                {
-                                    max_length = length;
-                                    paras = _paras;
-                                }
-                            }
-                            if (IsVerticalLine(IniLanes[i].Line)) isCurDirection = true;
                             break;
                         }
                     case 2:
                         {
-                            if (IsHorizontalLine(IniLanes[i].Line) && !isCurDirection)
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line))
+                            {
+                                length = length * LayoutScareFactor_Adjacent;
+                            }
+                            if (length > max_length)
                             {
                                 max_length = length;
                                 paras = _paras;
                             }
-                            else if (!IsHorizontalLine(IniLanes[i].Line) && isCurDirection) { }
-                            else
-                            {
-                                if (length > max_length)
-                                {
-                                    max_length = length;
-                                    paras = _paras;
-                                }
-                            }
-                            if (IsHorizontalLine(IniLanes[i].Line)) isCurDirection = true;
                             break;
                         }
                 }
@@ -2178,6 +2172,32 @@ namespace ThParkingStall.Core.MPartitionLayout
                     generate_lane_length = gline.Length;
                     if (generate_lane_length - dis_connected_double > 0)
                         generate_lane_length -= dis_connected_double;
+                }
+            }
+            if (paras.LanesToAdd.Count> 0)
+            {
+                switch (LayoutMode)
+                {
+                    case 0:
+                        {
+                            break;
+                        }
+                    case 1:
+                        {
+                            if (generate_lane_length > 0 && !IsHorizontalLine(paras.LanesToAdd[0].Line))
+                            {
+                                generate_lane_length *= LayoutScareFactor_betweenBuilds;
+                            }
+                            break;
+                        }
+                    case 2:
+                        {
+                            if (generate_lane_length > 0 && !IsVerticalLine(paras.LanesToAdd[0].Line))
+                            {
+                                generate_lane_length *= LayoutScareFactor_betweenBuilds;
+                            }
+                            break;
+                        }
                 }
             }
             return generate_lane_length;
