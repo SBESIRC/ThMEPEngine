@@ -69,6 +69,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public int Count;
         public Vector2D Vec;
         public List<Polygon> Bounds;
+        public bool IsInVertUnsureModule = true;
     }
     public class InfoCar
     {

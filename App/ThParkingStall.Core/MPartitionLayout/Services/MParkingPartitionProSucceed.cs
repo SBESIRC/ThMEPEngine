@@ -474,7 +474,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (IsConnectedToLane(line, true) && IsConnectedToLane(line, false)) return true;
             else return false;
         }
-        private int GenerateUsefulModules(LineSegment lane, Vector2D vec, List<Polygon> plys, ref int generatedcount)
+        private int GenerateUsefulModules(LineSegment lane, Vector2D vec, List<Polygon> plys, ref int generatedcount,ref bool isInVertUnsureModule)
         {
             int count = 0;
             var unittest = new LineSegment(lane);
@@ -624,11 +624,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 if (disa < DisLaneWidth / 2)
                 {
                     pta = pta.Translation((new Vector2D(pta, lane.P0)).Normalize() * (DisLaneWidth / 2 - disa));
+                    isInVertUnsureModule = false;
                 }
                 var disb = la.Line.ClosestPoint(ptb).Distance(ptb);
                 if (disb < DisLaneWidth / 2)
                 {
                     ptb = ptb.Translation(new Vector2D(ptb, lane.P1).Normalize() * (DisLaneWidth / 2 - disb));
+                    isInVertUnsureModule=false;
                 }
             }
             LineSegment eb = new LineSegment(lane.P1, ptb);
@@ -679,13 +681,14 @@ namespace ThParkingStall.Core.MPartitionLayout
             int mincount = 9999;
             List<Polygon> plys = new List<Polygon>();
             vec = vec.Normalize() * MaxLength;
+            var isInVertUnsureModule = true;
             for (int i = 0; i < ilanes.Count; i++)
             {
                 int mintotalcount = 7;
                 var unitbase = ilanes[i];
                 int generatedcount = 0;
                 var tmpplycount = plys.Count;
-                var curcount = GenerateUsefulModules(unitbase, vec, plys, ref generatedcount);
+                var curcount = GenerateUsefulModules(unitbase, vec, plys, ref generatedcount,ref isInVertUnsureModule);
                 if (plys.Count > tmpplycount)
                 {
                     var pl = plys[plys.Count - 1];
@@ -717,6 +720,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             result.Lanes = ilanes;
             result.Mminindex = minindex;
             result.Vec = vec;
+            result.IsInVertUnsureModule = isInVertUnsureModule;
             return result;
         }
         private void GeneratePerpModuleBoxes(List<Lane> lanes)
@@ -757,7 +761,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     module.Box = pl;
                     module.Line = a;
                     module.Vec = vec;
-                    module.IsInVertUnsureModule = true;
+                    //注：当模块两端连接车道时，调高排布的优先级；但优先级的设置IsInVertUnsureModule最初不是为了这种case.
+                    module.IsInVertUnsureModule = perpModlue.IsInVertUnsureModule;
                     CarModules.Add(module);
                 }
                 CarBoxes.AddRange(perpModlue.Bounds);
