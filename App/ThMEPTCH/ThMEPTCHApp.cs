@@ -1,8 +1,6 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Runtime;
-using DotNetARX;
 using System.IO;
+using Autodesk.AutoCAD.Runtime;
 
 namespace ThMEPTCH
 {
@@ -28,6 +26,7 @@ namespace ThMEPTCH
             //  Un-subscribing to those events;
             //  Etc.
         }
+
         [CommandMethod("TIANHUACAD", "THTCHPIPIMP", CommandFlags.Modal)]
         public void THTCHImportWaterPipe()
         {

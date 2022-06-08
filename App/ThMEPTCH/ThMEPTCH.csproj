@@ -70,10 +70,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Data\IO\ThSQLiteHelper.cs" />
+    <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />
     <Compile Include="Model\ThTCHBuildingStorey.cs" />
+    <Compile Include="Model\ThTCHSlab.cs" />
+    <Compile Include="Model\ThTCHOpening.cs" />
     <Compile Include="Model\ThTCHProject.cs" />
     <Compile Include="Model\ThTCHSite.cs" />
     <Compile Include="Model\ThTCHSprinkler.cs" />
@@ -81,6 +84,7 @@
     <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Model\ThTCHWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ThTGLXMLService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawVerticalPipeService.cs" />
@@ -91,10 +95,41 @@
     <Compile Include="TCHTables\TCHTwtVector.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipe.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipeDim.cs" />
+    <Compile Include="TCHXmlDataConvert\ITCHXmlConvert.cs" />
+    <Compile Include="TCHXmlDataConvert\TCHConvertAttribute.cs" />
+    <Compile Include="TCHXmlDataConvert\TCHConvertBase.cs" />
+    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlOpeningToThIfcDoorWindow.cs" />
+    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlSLabToThIfcFloor.cs" />
+    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlWallToThIfcWall.cs" />
+    <Compile Include="TCHXmlDataConvert\TCHXmlDataConvertService.cs" />
+    <Compile Include="TCHXmlDataConvert\XmConvertCommon.cs" />
+    <Compile Include="TCHXmlModels\Content.cs" />
+    <Compile Include="TCHXmlModels\Entity_Collection.cs" />
+    <Compile Include="TCHXmlModels\Tangent_obj_data.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\XmlAngle.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\XmlDouble.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\XmlInt.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\XmlPoint.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\XmlString.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\XmlMatrix3d.cs" />
+    <Compile Include="TCHXmlModels\TCHEntityModels\TCHFloor.cs" />
+    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_SLab.cs" />
+    <Compile Include="TCHXmlModels\TCHOpeningAttributes\Lib_Block.cs" />
+    <Compile Include="TCHXmlModels\TCHWallAttributes\Baseline.cs" />
+    <Compile Include="TCHXmlModels\TCHWallAttributes\DrawPara.cs" />
+    <Compile Include="TCHXmlModels\TCHWallAttributes\Height.cs" />
+    <Compile Include="TCHXmlModels\TCHWallAttributes\Link_WinDoor.cs" />
+    <Compile Include="TCHXmlModels\TCHBaseModels\TCHXmlBaseModel.cs" />
+    <Compile Include="TCHXmlModels\TCHEntityModels\TCHXmlEntity.cs" />
+    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_OPENING.cs" />
+    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_WALL.cs" />
+    <Compile Include="TCHXmlModels\TCHWallAttributes\Width.cs" />
     <Compile Include="ThMEPTCHApp.cs" />
     <Compile Include="ThMEPTCHCommon.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="TCHXmlModels\TCHAttributes\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
@@ -103,6 +138,10 @@
     <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
       <Name>ThDotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
+      <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
+      <Name>ThCADCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
       <Project>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</Project>
