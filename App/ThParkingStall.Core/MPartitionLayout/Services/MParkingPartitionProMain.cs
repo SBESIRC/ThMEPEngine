@@ -768,7 +768,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 var estimated_cars_count = ((int)Math.Floor(estimated_depth_count * estimated_module_count));
                 var estimated_this_fullcount = ((int)Math.Floor(tmpro_lane.Length / (DisVertCarWidth * 3 + DisPillarLength) * 3));
-                if (generatecars_count > estimated_cars_count && tmpro.Cars.Count >= estimated_this_fullcount / 3 + 2)
+                if (generatecars_count > estimated_cars_count * SingleVertModulePlacementFactor && tmpro.Cars.Count >= (estimated_this_fullcount / 3 + 2) * SingleVertModulePlacementFactor)
                 {
                     mod.IsInBackBackModule = true;
                     paras.CarBoxesToAdd.Add(plback);
