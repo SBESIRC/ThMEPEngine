@@ -168,7 +168,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (other != null)
             {
-                return this.Type == other.Type && this.Load.Equals(other.Load);
+                return this.Load.LoadUID == other.Load.LoadUID;
             }
             return false;
         }

@@ -29,7 +29,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (obj is ThPDSProjectGraphEdge edge)
             {
-                return Circuit.ID.CircuitNumber.Equals(edge.Circuit.ID.CircuitNumber);
+                return this.Circuit.CircuitUID == edge.Circuit.CircuitUID;
             }
             return false;
         }
