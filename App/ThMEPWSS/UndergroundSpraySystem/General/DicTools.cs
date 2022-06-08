@@ -165,14 +165,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             var usedPt = new List<Point3dEx>();
             foreach(var pt1 in ptOffsetDic.Keys)
             {
-                if(pt1._pt.DistanceTo(new Point3d(56146.8942, -697632.8504, 0))<10)
-                {
-                    ;
-                }
-                if (pt1._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
-                {
-                    ;
-                }
                 if (usedPt.Contains(pt1)) continue;
                 
                 if (!sprayIn.PtTextDic.ContainsKey(pt1)) continue;
@@ -180,14 +172,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 var str1 = sprayIn.PtTextDic[pt1].First();
                 foreach (var pt2 in ptOffsetDic.Keys)
                 {
-                    if (pt2._pt.DistanceTo(new Point3d(1016854.2, 2754896.8, 0)) < 10)
-                    {
-                        ;
-                    }
-                    if (pt2._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
-                    {
-                        ;
-                    }
                     if (usedPt.Contains(pt2)) continue;
                     if (!sprayIn.PtTextDic.ContainsKey(pt2)) continue;
                     

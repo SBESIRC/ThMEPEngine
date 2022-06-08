@@ -57,7 +57,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             return true;
         }
 
-        public static bool AddNewPtDic(this FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
+        public static bool AddNewPtDic(this FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines,
+            bool isMiddleRiser)
         {
             double tolerance = 120;
             if (objs.Count <= 1) return false;//立管连接的管线数目小于2，直接pass
@@ -99,6 +100,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 return false;
             }
             lines.Add(new Line(pt1._pt, pt2._pt));
+            if(isMiddleRiser)
+            {
+                fireHydrantSysIn.TermPtDic.Add(pt1);
+            }
             return true;
         }
 

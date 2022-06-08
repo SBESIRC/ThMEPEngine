@@ -24,6 +24,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
             foreach (var L in lineList)
             {
+                if(L.Length > 149 && L.Length < 151)
+                {
+                    ;
+                }
                 var pt1 = new Point3dEx(L.StartPoint);
                 var pt2 = new Point3dEx(L.EndPoint);
 
@@ -198,10 +202,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
-                if(pt.DistanceToEx(new Point3dEx(1517286.3, 873327,0))<10)
-                {
-                    ;
-                }
                 try
                 {
                     CreateTermPtDic2(pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
@@ -210,55 +210,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     ;
                 }
-#if DEBUG
-                var layer = "末端图层标记";
-                using (AcadDatabase acad = AcadDatabase.Active())
-                {
-                    if (!acad.Layers.Contains(layer))
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                    }
-                }
-                var str = "空";
-                if(fireHydrantSysIn.TermPointDic.ContainsKey(pt))
-                {
-                    str = fireHydrantSysIn.TermPointDic[pt].PipeNumber;
-                }
-                if(str is null)
-                {
-                    str = "空";
-                }
-
-                var dbtext = ThTextSet.ThText(pt._pt, str, layer);
-                using (AcadDatabase acad = AcadDatabase.Active())
-                {
-                    acad.CurrentSpace.Add(dbtext);
-                }
-#endif
-
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                {
-                    foreach (var tpt in fireHydrantSysIn.TermPointDic.Values)
-                    {
-                        var dbText = new DBText()
-                        {
-                            Position = tpt.PtEx._pt,
-                            Height = 300,
-                            TextString = Convert.ToString(tpt.Type)
-                        };
-                        acadDatabase.CurrentSpace.Add(dbText);
-                    }
-                }
             }
 
             foreach(var pt in fireHydrantSysIn.PtDic.Keys)
             {
                 if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
                 {
-                    if(pt.DistanceToEx(new Point3dEx(1666111.3, 952521.7, 0))<10)
-                    {
-                        ;
-                    }
                     if(!fireHydrantSysIn.TermPointDic.ContainsKey(pt))//且没有标记
                     {
                         var termPoint = new TermPoint(pt);

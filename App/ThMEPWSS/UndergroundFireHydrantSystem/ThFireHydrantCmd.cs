@@ -74,7 +74,7 @@ namespace ThMEPWSS.Command
                 loopStartPt = propPtRes.TransformBy(Active.Editor.UCS2WCS());
             }
 
-            var selectArea = Common.Utils.SelectAreas();//生成候选区域
+            var selectArea = ThMEPWSS.Assistant.DrawUtils.TrySelectRangeEx();
             if (selectArea.Count == 0)
             {
                 return null;
@@ -86,12 +86,13 @@ namespace ThMEPWSS.Command
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
             {
                 var opt = Active.Editor.GetPoint("\n指定消火栓系统图插入点");
+                
 
                 if (opt.Status != PromptStatus.OK)
                 {
                     return null;
                 }
-                fireHydrantSysOut.InsertPoint = opt.Value.TransformBy(Active.Editor.UCS2WCS());
+                fireHydrantSysOut.InsertPoint = opt.Value;
             }
             if (hasExtraSelection)
             {

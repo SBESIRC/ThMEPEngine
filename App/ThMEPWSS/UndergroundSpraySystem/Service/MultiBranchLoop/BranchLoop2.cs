@@ -66,10 +66,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                             try
                             {
                                 var pt = rstPath[i];
-                                if (pt._pt.DistanceTo(new Point3d(54845.8544, 113216.8772, 0)) < 10)
-                                    ;
-                                if (pt._pt.DistanceTo(new Point3d(48593.6155, 696037.2054, 0)) < 10)
-                                    ;
+          
                                 var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
                                 var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                                 var type = sprayIn.PtTypeDic[pt];

@@ -27,9 +27,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面", out bool hydrantWithReel);
                 return hydrantWithReel;
-#if DEBUG
-                DrawFireHydrant(database);
-#endif
             }
         }
 

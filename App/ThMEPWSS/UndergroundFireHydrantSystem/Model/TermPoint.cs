@@ -6,6 +6,9 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPEngineCore;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -89,7 +92,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             {
                 return;
             }
-            if(PipeNumber2.Contains("X") || PipeNumber2.Contains("-"))
+            if(PipeNumber2.Contains("X") || PipeNumber2.Contains("-") || PipeNumber2.Equals(PipeNumber))
             {
                 PipeNumber2 = "";
             }
@@ -97,10 +100,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            double offset = 200;
+            double offset = 300;
             var pt1 = TextLine.StartPoint.OffsetY(offset);
             var pt2 = TextLine.EndPoint.OffsetY(offset);
             var line = new Line(pt1,pt2);
+#if DEBUG
+
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                string layerName = "标注线获取文字";
+                try
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
+                }
+                catch { }
+                
+                line.LayerId = DbHelper.GetLayerId(layerName);
+                currentDb.CurrentSpace.Add(line);
+                
+            }
+#endif
             var midPt = General.GetMidPt(pt1,pt2);
             double tor = 1000;
             var DBObjs = spatialIndex.SelectFence(line);

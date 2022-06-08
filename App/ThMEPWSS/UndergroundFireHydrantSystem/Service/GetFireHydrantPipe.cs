@@ -46,11 +46,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 try
                 {
                     var pt = rstPath[i];
-
-                    if(pt.DistanceToEx(new Point3dEx(1570561.8, 818422, 0)) < 10)
-                    {
-                        ;
-                    }
                     if(across)
                     {
                         if (i == 0 || i == rstPath.Count - 1)

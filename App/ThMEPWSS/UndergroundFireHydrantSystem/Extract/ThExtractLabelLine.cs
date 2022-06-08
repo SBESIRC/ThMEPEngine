@@ -16,7 +16,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
     public class ThExtractLabelLine//引线提取
     {
-        public double LengthThresh = 500;//线长最小阈值
+        public double LengthThresh = 200;//线长最小阈值
         public DBObjectCollection LabelLineCollection { get; private set; }
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
@@ -46,8 +46,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                     ExplodeLabelLine(dbObj as Entity, LabelLineCollection);
                 }
-                //var cleanServiec = new ThLaneLineCleanService();
-                //LabelLineCollection = cleanServiec.CleanNoding(LabelLineCollection);
                 return LabelLineCollection;
             }
         }
@@ -60,9 +58,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-WSUP-DIMS" ||
                    layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
-                   layer.ToUpper() == "0" ||
                    layer.ToUpper() == "W-RAIN-NOTE" ||
                    layer.ToUpper() == "W-NOTE" ||
+                   layer.ToUpper() == "W-SHET-PROF" ||
                    layer.ToUpper() == "TWT_TEXT";
         }
 
@@ -93,9 +91,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     LabelPosition.Add(new Line(pt1,pt2));
                 }
             }
-            
+
 #if DEBUG
-            
+
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
                 string layerName = "标注线图层";

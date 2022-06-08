@@ -6,6 +6,7 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
@@ -76,6 +77,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var pt = General.GetMidPt(pt1, pt2);
                 pts.Add(pt);
             }
+#if DEBUG
+            var layer = "闸阀标记";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                }
+            }
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var pt in pts)
+                {
+                    var c = new Circle(pt, new Vector3d(0, 0, 1), 200);
+                    c.LayerId = DbHelper.GetLayerId(layer);
+                    acadDatabase.CurrentSpace.Add(c);
+                }
+            }
+#endif
             return pts;
         }
     }

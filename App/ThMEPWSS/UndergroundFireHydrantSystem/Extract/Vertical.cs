@@ -14,6 +14,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPEngineCore;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -76,38 +77,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                  || layer.Equals("W-FRPT-EXTG");
         }
 
-        private static void ExplodeBlock(BlockReference br, DBObjectCollection DBobjsResults)
-        {
-            if (IsDWLGBlock(br))//如果是定位立管
-            {
-                return;
-            }
-            else
-            {
-                var objs = new DBObjectCollection();
-                br.Explode(objs);//把块炸开
-                foreach (var obj in objs)//遍历
-                {
-                    var ent = obj as Entity;
-                    if (!ent.Visible)
-                    {
-                        continue;
-                    }
-                    if (obj is Circle circle)//圆
-                    {
-                        if (IsTargetLayer(circle.Layer))
-                        {
-                            var dbPt = new DBPoint(circle.Center);
-                            DBobjsResults.Add(dbPt);
-                        }
-                    }
-                    if (obj is BlockReference)//块
-                    {
-                        ExplodeBlock(obj as BlockReference, DBobjsResults);//炸块
-                    }
-                }
-            }
-        }
         private static void ExplodeTZBlock(Entity ent, DBObjectCollection DBobjsResults)
         {
             try
@@ -176,14 +145,22 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
             }
 #if DEBUG
-            using (AcadDatabase currentDb = AcadDatabase.Active())
+            var layer = "立管标记";
+            using (AcadDatabase acad = AcadDatabase.Active())
             {
-                foreach (var ptEx in VerticalPts)
+                if (!acad.Layers.Contains(layer))
                 {
-                    var pt = ptEx._pt;
-                    var c = new Circle(pt, new Vector3d(0, 0, 1), 200);
-                    c.LayerId = DbHelper.GetLayerId("立管圆圈图层");
-                    currentDb.CurrentSpace.Add(c);
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                }
+            }
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var pt in VerticalPts)
+                {
+                    var c = new Circle(pt._pt, new Vector3d(0, 0, 1), 200);
+                    c.LayerId = DbHelper.GetLayerId(layer);
+                    acadDatabase.CurrentSpace.Add(c);
                 }
             }
 #endif
