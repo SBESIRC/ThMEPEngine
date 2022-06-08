@@ -1,6 +1,8 @@
 ﻿using AcHelper;
 using System.IO;
+using DotNetARX;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH
 {
