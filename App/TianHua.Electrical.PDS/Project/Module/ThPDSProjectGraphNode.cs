@@ -76,8 +76,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                                 }
                                 break;
                             }
-                        case MeterBoxCircuitType.国标_表在前:
-                        case MeterBoxCircuitType.国标_表在后:
+                        case MeterBoxCircuitType.国标_表在断路器前:
+                        case MeterBoxCircuitType.国标_表在断路器后:
                         default:
                             break;
                     }

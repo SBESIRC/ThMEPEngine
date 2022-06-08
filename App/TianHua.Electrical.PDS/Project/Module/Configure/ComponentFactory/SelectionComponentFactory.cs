@@ -110,6 +110,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             var breaker = new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
             var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
             breaker.SetRatedCurrent(ratedCurrent);
+            _maxCalculateCurrent =  Math.Max(_maxCalculateCurrent, breaker.GetCascadeRatedCurrent());
             return breaker;
         }
 
@@ -137,6 +138,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             return new CPS(_calculateCurrent, _isLeakageProtection);
         }
+
         public override Meter CreatMeterTransformer()
         {
             if (_calculateCurrent < 100)

@@ -155,7 +155,8 @@ namespace TianHua.Electrical.PDS.Project
             else
             {
                 var DemandFactor = node.Load.DemandFactor;
-                if (node.Details.IsOnlyLoad)
+                var LastNode = _projectGraph.InEdges(node).FirstOrDefault();
+                if (LastNode.IsNull() || _projectGraph.OutDegree(LastNode.Source) == 1)
                     DemandFactor = 1.0;
                 var PowerFactor = node.Load.PowerFactor;
                 var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
@@ -179,8 +180,6 @@ namespace TianHua.Electrical.PDS.Project
             else
             {
                 var DemandFactor = miniBusbar.DemandFactor;
-                //if (miniBusbar.IsOnlyLoad)
-                //DemandFactor = 1.0;
                 var PowerFactor = miniBusbar.PowerFactor;
                 var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
                 miniBusbar.CalculateCurrent = Math.Round(miniBusbar.Power * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
@@ -472,9 +471,9 @@ namespace TianHua.Electrical.PDS.Project
                             {
                                 edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
                                 {
-                                    breaker1 = componentFactory.CreatBreaker(),
-                                    meter = componentFactory.CreatMeterTransformer(),
                                     breaker2 = componentFactory.CreatBreaker(),
+                                    meter = componentFactory.CreatMeterTransformer(),
+                                    breaker1 = componentFactory.CreatBreaker(),
                                     Conductor = componentFactory.CreatConductor(),
                                 };
                             }
@@ -494,7 +493,7 @@ namespace TianHua.Electrical.PDS.Project
                             }
                             break;
                         }
-                    case MeterBoxCircuitType.国标_表在前:
+                    case MeterBoxCircuitType.国标_表在断路器前:
                         {
                             edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
                             {
@@ -504,7 +503,7 @@ namespace TianHua.Electrical.PDS.Project
                             };
                             break;
                         }
-                    case MeterBoxCircuitType.国标_表在后:
+                    case MeterBoxCircuitType.国标_表在断路器后:
                         {
                             edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
                             {
@@ -530,9 +529,9 @@ namespace TianHua.Electrical.PDS.Project
             {
                 edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
                 {
-                    breaker1 = componentFactory.CreatBreaker(),
-                    meter = componentFactory.CreatCurrentTransformer(),
                     breaker2 = componentFactory.CreatBreaker(),
+                    meter = componentFactory.CreatCurrentTransformer(),
+                    breaker1 = componentFactory.CreatBreaker(),
                     Conductor = componentFactory.CreatConductor(),
                 };
             }
@@ -758,9 +757,9 @@ namespace TianHua.Electrical.PDS.Project
                     {
                         edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
                         {
-                            breaker1 = componentFactory.CreatBreaker(),
-                            meter = componentFactory.CreatCurrentTransformer(),
                             breaker2 = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            breaker1 = componentFactory.CreatBreaker(),
                             Conductor = componentFactory.CreatConductor(),
                         };
                         break;
@@ -769,9 +768,9 @@ namespace TianHua.Electrical.PDS.Project
                     {
                         edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
                         {
-                            breaker1 = componentFactory.CreatBreaker(),
-                            meter = componentFactory.CreatMeterTransformer(),
                             breaker2 = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatMeterTransformer(),
+                            breaker1 = componentFactory.CreatBreaker(),
                             Conductor = componentFactory.CreatConductor(),
                         };
                         break;
@@ -1593,8 +1592,8 @@ namespace TianHua.Electrical.PDS.Project
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
             {
-                var breaker1 = componentFactory.CreatBreaker();
-                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
+                var breaker2 = componentFactory.CreatBreaker();
+                shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
 
                 Meter meter;
                 if (shanghaiCTCircuit.meter.ComponentType == ComponentType.MT)
@@ -1614,16 +1613,16 @@ namespace TianHua.Electrical.PDS.Project
                     shanghaiCTCircuit.meter = shanghaiCTCircuit.meter.ComponentChange(meter);
                 }
 
-                var breaker2 = componentFactory.CreatBreaker();
-                shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
+                var breaker1 = componentFactory.CreatBreaker();
+                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
 
                 var conductor = componentFactory.CreatConductor();
                 shanghaiCTCircuit.Conductor = shanghaiCTCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
             {
-                var breaker1 = componentFactory.CreatBreaker();
-                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
+                var breaker2 = componentFactory.CreatBreaker();
+                shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
 
                 Meter meter;
                 if (shanghaiMTCircuit.meter.ComponentType == ComponentType.MT)
@@ -1643,8 +1642,8 @@ namespace TianHua.Electrical.PDS.Project
                     shanghaiMTCircuit.meter = shanghaiMTCircuit.meter.ComponentChange(meter);
                 }
 
-                var breaker2 = componentFactory.CreatBreaker();
-                shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
+                var breaker1 = componentFactory.CreatBreaker();
+                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
 
                 var conductor = componentFactory.CreatConductor();
                 shanghaiMTCircuit.Conductor = shanghaiMTCircuit.Conductor.ComponentChange(conductor);
@@ -1852,9 +1851,9 @@ namespace TianHua.Electrical.PDS.Project
                             {
                                 edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
                                 {
-                                    breaker1 = componentFactory.CreatBreaker(),
-                                    meter = componentFactory.CreatMeterTransformer(),
                                     breaker2 = componentFactory.CreatBreaker(),
+                                    meter = componentFactory.CreatMeterTransformer(),
+                                    breaker1 = componentFactory.CreatBreaker(),
                                     Conductor = componentFactory.CreatConductor(),
                                 };
                             }
@@ -1874,7 +1873,7 @@ namespace TianHua.Electrical.PDS.Project
                             }
                             break;
                         }
-                    case MeterBoxCircuitType.国标_表在前:
+                    case MeterBoxCircuitType.国标_表在断路器前:
                         {
                             edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
                             {
@@ -1884,7 +1883,7 @@ namespace TianHua.Electrical.PDS.Project
                             };
                             break;
                         }
-                    case MeterBoxCircuitType.国标_表在后:
+                    case MeterBoxCircuitType.国标_表在断路器后:
                         {
                             edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
                             {
@@ -1900,8 +1899,8 @@ namespace TianHua.Electrical.PDS.Project
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
             {
-                var breaker1 = componentFactory.CreatBreaker();
-                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
+                var breaker2 = componentFactory.CreatBreaker();
+                shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
 
                 Meter meter;
                 if (shanghaiCTCircuit.meter.ComponentType == ComponentType.MT)
@@ -1921,16 +1920,16 @@ namespace TianHua.Electrical.PDS.Project
                     shanghaiCTCircuit.meter = shanghaiCTCircuit.meter.ComponentChange(meter);
                 }
 
-                var breaker2 = componentFactory.CreatBreaker();
-                shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
+                var breaker1 = componentFactory.CreatBreaker();
+                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
 
                 var conductor = componentFactory.CreatConductor();
                 shanghaiCTCircuit.Conductor = shanghaiCTCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
             {
-                var breaker1 = componentFactory.CreatBreaker();
-                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
+                var breaker2 = componentFactory.CreatBreaker();
+                shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
 
                 Meter meter;
                 if (shanghaiMTCircuit.meter.ComponentType == ComponentType.MT)
@@ -1950,8 +1949,8 @@ namespace TianHua.Electrical.PDS.Project
                     shanghaiMTCircuit.meter = shanghaiMTCircuit.meter.ComponentChange(meter);
                 }
 
-                var breaker2 = componentFactory.CreatBreaker();
-                shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
+                var breaker1 = componentFactory.CreatBreaker();
+                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
 
                 var conductor = componentFactory.CreatConductor();
                 shanghaiMTCircuit.Conductor = shanghaiMTCircuit.Conductor.ComponentChange(conductor);
@@ -2174,19 +2173,19 @@ namespace TianHua.Electrical.PDS.Project
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
             {
-                var breaker1 = componentFactory.CreatBreaker();
-                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
-
                 var breaker2 = componentFactory.CreatBreaker();
                 shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
+
+                var breaker1 = componentFactory.CreatBreaker();
+                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
             {
-                var breaker1 = componentFactory.CreatBreaker();
-                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
-
                 var breaker2 = componentFactory.CreatBreaker();
                 shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
+
+                var breaker1 = componentFactory.CreatBreaker();
+                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_CTInFrontCircuit CTInFrontCircuit)
             {

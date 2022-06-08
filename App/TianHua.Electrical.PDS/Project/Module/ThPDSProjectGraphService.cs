@@ -581,7 +581,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     graph.RemoveVertex(oldLoad);
                 }
                 newEdge.ComponentSelection();
-                newEdge.Source.CheckCascadeWithNode();
+                newEdge.Source.CheckWithNode();
             }
         }
 

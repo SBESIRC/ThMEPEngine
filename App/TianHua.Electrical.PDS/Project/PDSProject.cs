@@ -167,7 +167,6 @@ namespace TianHua.Electrical.PDS.Project
                 newNode.Details.HighPower = load.InstalledCapacity.HighPower;
                 newNode.Details.IsDualPower = load.InstalledCapacity.IsDualPower;
             }
-            newNode.Details.IsOnlyLoad = node.Loads.Count == 1;
             return newNode;
         }
 

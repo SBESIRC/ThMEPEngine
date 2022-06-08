@@ -37,7 +37,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public double CascadeCurrent { get; set; }
 
-        public bool IsOnlyLoad { get; set; }
         public bool FirePowerMonitoring { get; set; }
         public bool ElectricalFireMonitoring { get; set; }
 

@@ -17,7 +17,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                 if(NewType.GetCircuitGroup() == CircuitGroup.Group1)
                 {
                     var newCircuit = (PDSBaseOutCircuit)System.Activator.CreateInstance(NewType);
-                    var OriginalComponents = circuit.GetType().GetProperties().Where(prop => prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent))).Select(prop => prop.GetValue(circuit)).Cast<PDSBaseComponent>().ToList();
+                    var OriginalComponents = circuit.GetType().GetProperties().Where(prop => prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent))).Select(prop => prop.GetValue(circuit)).Where(o => !o.IsNull()).Cast<PDSBaseComponent>().ToList();
                     //获取当前Type下所有的属性上标记的特性
                     var props = NewType.GetProperties();
                     for (int i = 0; i < props.Length; i++)
