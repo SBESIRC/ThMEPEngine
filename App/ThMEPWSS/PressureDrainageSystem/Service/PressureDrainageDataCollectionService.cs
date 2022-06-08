@@ -619,7 +619,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         Circle ci = new Circle(ptlocPipe, Vector3d.ZAxis, 50);
                         ci.Layer = "W-DRAI-EQPM";
 
-                        double mindis = double.PositiveInfinity;
+                        double mindis = 3000;
                         int index = -1;
                         for (int i = 0; i < this.CollectedData.HorizontalPipes.Count; i++)
                         {
@@ -630,10 +630,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 index = i;
                             }
                         }
-                        Line line = new Line(this.CollectedData.HorizontalPipes[index].GetClosestPointTo(ci.Center, false), ci.Center);
-                        if (line.Length > 0)
+                        if (index != -1)
                         {
-                            this.CollectedData.HorizontalPipes.Add(line);
+                            Line line = new Line(this.CollectedData.HorizontalPipes[index].GetClosestPointTo(ci.Center, false), ci.Center);
+                            if (line.Length > 0)
+                            {
+                                this.CollectedData.HorizontalPipes.Add(line);
+                            }
                         }
                         adb.Database.CreateAILayer("AdditonPipe",(short)0);
                         ci.Layer = "AdditonPipe";

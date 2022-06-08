@@ -118,6 +118,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 InsertPt = UCSTools.TranslateCoordinates(InsertPt, CoordSystem.UCS, CoordSystem.WCS);
                 List<Line> floorLines = new();
                 double FloorLineLength = spacing * 10 * PipeLineSystemUnits.Count;//楼板线长度&参考值
+                if (FloorLineLength < widthDisTofloorLineStartPt + 20000) FloorLineLength = widthDisTofloorLineStartPt + 20000;
                 floorLines.Add(new Line(new Point3d(InsertPt.X, InsertPt.Y, 0), new Point3d(InsertPt.X + FloorLineLength, InsertPt.Y, 0)));
                 int floorNumber = Modeldatas.FloorListDatas.Count;
                 double layerHeight = 0;

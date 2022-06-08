@@ -114,7 +114,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     else
                     {
-                        brId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "重力流雨水井编号", brlocPt3, new Scale3d(0), 0, atts);
+                        brId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", pipeLineSystemUnit.DrainWell != null ? pipeLineSystemUnit.DrainWell.WellTypeName : "重力流雨水井编号", brlocPt3, new Scale3d(0), 0, atts);
                     }
                     var br3 = adb.Element<BlockReference>(brId3);
                     DefinePropertiesOfCADObjects(br3, "W-NOTE");
@@ -179,7 +179,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         str = pipeLineSystemUnit.PipeLineUnits[0].VerticalPipes[index].AppendedDrainWell.Label;
                     }
                     atts.Add("-", str);
-                    var brId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "重力流雨水井编号", ptlocbr3, new Scale3d(0), 0, atts);
+                    var brId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", pipeLineSystemUnit.DrainWell != null ? pipeLineSystemUnit.DrainWell.WellTypeName : "重力流雨水井编号", ptlocbr3, new Scale3d(0), 0, atts);
                     var br10 = adb.Element<BlockReference>(brId3);
                     DefinePropertiesOfCADObjects(br10, "W-NOTE");
                     drainwellbr.Add(br10);
