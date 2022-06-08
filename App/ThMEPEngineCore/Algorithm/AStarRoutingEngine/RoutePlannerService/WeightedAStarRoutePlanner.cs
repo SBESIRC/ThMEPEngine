@@ -5,13 +5,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.AStarModel.GlobelAStarModel;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.CostGetterService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.MapService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.PublicMethod;
 
-namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
+namespace ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService
 {
-    public class GlobleAStarRoutePlanner<T>
+    /// <summary>
+    /// 该优化在于给洞口加不同的权重，并且给拐点加权，以此来控制弯头最少
+    /// AStarRoutePlanner A*路径规划。每个单元格Cell的位置用Point表示
+    /// F = G + H 。
+    /// G = 从起点A，沿着产生的路径，移动到网格上指定方格的移动耗费。
+    /// H = 从网格上那个方格移动到终点B的预估移动耗费。使用曼哈顿方法，它计算从当前格到目的格之间水平和垂直的方格的数量总和，忽略对角线方向。
+    /// </summary>
+    public class WeightedAStarRoutePlanner<T>
     {
         double _inflectionWeight = 0;       //拐点权重
         GlobleMap<T> map;
@@ -19,18 +27,18 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         public GlobleAdjustAStarPath PathAdjuster { set; get; }
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
-        public GlobleAStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800, double inflectionWeight = 1.5)
+        public WeightedAStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800, double inflectionWeight = 1.5)
         {
             _inflectionWeight = inflectionWeight;
             map = new GlobleMap<T>(polyline, dir, end, step, avoidFrameDistance, avoidHoleDistance);
 
             if (typeof(T) == typeof(Line))
             {
-                costGetter = new ToLineCostGetter();
+                costGetter = new ToWeightedLineCostGetter();
             }
             else if (typeof(T) == typeof(Point3d))
             {
-                costGetter = new ToPointCostGetter();
+                costGetter = new ToWeightedPointCostGetter();
             }
             PathAdjuster = new GlobleAdjustAStarPath();
         }
@@ -38,10 +46,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <summary>
         /// 设置障碍物
         /// </summary>
-        public void SetObstacle(List<MPolygon> holes, double wieght, double bufferDis = double.MaxValue)
+        public void SetObstacle(List<Polyline> holes, double wieght)
         {
             //设置障碍物
-            map.SetObstacle(holes, wieght, bufferDis);
+            map.SetObstacle(holes, wieght);
         }
 
         #region Plan

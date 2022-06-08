@@ -3,12 +3,10 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.AStarModel.GlobelAStarModel;
 
-namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
+namespace ThMEPEngineCore.Algorithm.AStarRoutingEngine.MapService
 {
     public class GlobleMap<T> : Map<T>
     {
@@ -57,17 +55,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         {
             var boundingBox = GetBoungdingBox(polyline);
             mapHelper.moveMatrix = Matrix3d.Displacement(boundingBox[0].GetAsVector());
-            //Point3d minPt = boundingBox[0].TransformBy(mapHelper.moveMatrix.Inverse());
-            //Point3d maxPt = boundingBox[1].TransformBy(mapHelper.moveMatrix.Inverse());
             this.polyline.TransformBy(mapHelper.ucsMatrix.Inverse());
-
-            ////----规划地图尺寸----
-            //double xValue = Math.Abs(maxPt.X - minPt.X);
-            //xValue = xValue <= 10 ? step : xValue;
-            //double yValue = Math.Abs(maxPt.Y - minPt.Y);
-            //yValue = yValue <= 10 ? step : yValue;
-            //int _columns = Convert.ToInt32(Math.Ceiling(xValue / step)) + 1;
-            //int _rows = Convert.ToInt32(Math.Ceiling(yValue / step)) + 1;
         }
 
         /// <summary>
@@ -117,22 +105,15 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         /// 设置障碍
         /// </summary>
         /// <param name="holes"></param>
-        public void SetObstacle(List<MPolygon> _holes, double Weight, double bufferDis)
+        public void SetObstacle(List<Polyline> _holes, double Weight)
         {
-            if (bufferDis == double.MaxValue)
+            var holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
+
+            foreach (var h in holes)
             {
-                bufferDis = avoidHoleDistance;
-            }
-            foreach (var h in _holes)
-            {
-                var mHole = h;
-                if (bufferDis != 0)
-                {
-                    mHole = h.Buffer(bufferDis, true).Cast<MPolygon>().First();
-                }
-                
-                holeObjs.Add(mHole);
-                obstacleCast.Add(mHole, Weight);
+                var MPolygon = h.ToNTSPolygon().ToDbMPolygon();
+                holeObjs.Add(MPolygon);
+                obstacleCast.Add(MPolygon, Weight);
             }
         }
 

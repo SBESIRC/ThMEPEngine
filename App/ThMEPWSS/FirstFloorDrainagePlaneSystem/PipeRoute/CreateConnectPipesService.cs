@@ -66,7 +66,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             //----设置障碍物
             foreach (var weightHole in holes)
             {
-                var resHoles = SelelctCrossing(weightHole.Key, mapFrame);
+                var resHoles = SelelctCrossing(weightHole.Key, mapFrame).Select(x => x.ToNTSPolygon().ToDbMPolygon()).ToList();
                 aStarRoute.SetObstacle(resHoles, weightHole.Value);
             }
 

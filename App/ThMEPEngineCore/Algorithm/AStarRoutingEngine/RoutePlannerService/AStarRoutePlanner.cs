@@ -1,28 +1,31 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.MapService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.CostGetterService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.PublicMethod;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.AStarModel.OriginAStarModel;
 
-namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
+namespace ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService
 {
-    public class GlobleAStarRoutePlanner<T>
+    /// <summary>
+    /// AStarRoutePlanner A*路径规划。每个单元格Cell的位置用Point表示
+    /// F = G + H 。
+    /// G = 从起点A，沿着产生的路径，移动到网格上指定方格的移动耗费。
+    /// H = 从网格上那个方格移动到终点B的预估移动耗费。使用曼哈顿方法，它计算从当前格到目的格之间水平和垂直的方格的数量总和，忽略对角线方向。
+    /// </summary>
+    public class AStarRoutePlanner<T>
     {
-        double _inflectionWeight = 0;       //拐点权重
-        GlobleMap<T> map;
+        Map<T> map;
         public ICostGetter costGetter { set; get; }
-        public GlobleAdjustAStarPath PathAdjuster { set; get; }
+        public AdjustAStarPath PathAdjuster { set; get; }
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
-        public GlobleAStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800, double inflectionWeight = 1.5)
+        public AStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800)
         {
-            _inflectionWeight = inflectionWeight;
-            map = new GlobleMap<T>(polyline, dir, end, step, avoidFrameDistance, avoidHoleDistance);
+            map = new Map<T>(polyline, dir, end, step, avoidFrameDistance, avoidHoleDistance);
 
             if (typeof(T) == typeof(Line))
             {
@@ -32,16 +35,25 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
             {
                 costGetter = new ToPointCostGetter();
             }
-            PathAdjuster = new GlobleAdjustAStarPath();
+            PathAdjuster = new AdjustAStarPath();
         }
 
         /// <summary>
         /// 设置障碍物
         /// </summary>
-        public void SetObstacle(List<MPolygon> holes, double wieght, double bufferDis = double.MaxValue)
+        public void SetObstacle(List<Polyline> holes)
         {
             //设置障碍物
-            map.SetObstacle(holes, wieght, bufferDis);
+            map.SetObstacle(holes);
+        }
+        public void SetObstacle2(List<Polyline> holes)
+        {
+            //设置障碍物
+            map.SetObstacle2(holes);
+        }
+        public void SetRoom(List<Line> holes)
+        {
+            map.SetRoom(holes);
         }
 
         #region Plan
@@ -50,18 +62,23 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
             //初始化起点终点信息
             map.SetStartAndEndInfo(start);
 
-            if (!map.IsInBounds(map.startPt))
+            if (!map.ContainsPt(map.startPt))
             {
                 return null;
             }
-
-            GlobleRoutePlanData<T> routePlanData = new GlobleRoutePlanData<T>(map);
+            if(costGetter is ToLineCostGetterEx cGetter)
+            {
+                cGetter.RoomCast = map.roomCast;
+                costGetter = cGetter;
+            }
+            RoutePlanData<T> routePlanData = new RoutePlanData<T>(map);
 
             //设置起点
-            GlobleNode startNode = new GlobleNode(map.startPt, null, 0, 0);
-            routePlanData.OpenedList.Add(startNode);
+            AStarNode startNode = new AStarNode(map.startPt, null, 0, 0);
+            routePlanData.OpenedList.Enqueue(startNode);
 
-            GlobleNode currenNode = startNode;
+            AStarNode currenNode = startNode;
+
             //从起始节点开始进行路径查找
             var lastNode = DoPlan(routePlanData, currenNode);
 
@@ -69,7 +86,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
             var resPt = GetPath(lastNode);
 
             //调整路径
-            //resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
+            resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
 
             var path = map.CreatePath(resPt);
             return path;
@@ -83,10 +100,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <param name="routePlanData"></param>
         /// <param name="currenNode"></param>
         /// <returns></returns>
-        private GlobleNode DoPlan(GlobleRoutePlanData<T> routePlanData, GlobleNode currenNode)
+        private AStarNode DoPlan(RoutePlanData<T> routePlanData, AStarNode currenNode)
         {
-            var insertX = map.mapHelper.insertPts.Select(x => x.X).Distinct().ToDictionary(x => x, y => (int)Math.Floor(y)).Where(x => x.Key != x.Value).ToDictionary(x => x.Key, y => y.Value);
-            var insertY = map.mapHelper.insertPts.Select(x => x.Y).Distinct().ToDictionary(x => x, y => (int)Math.Floor(y)).Where(x => x.Key != x.Value).ToDictionary(x => x.Key, y => y.Value);
             while (routePlanData.OpenedList.Count != 0)
             {
                 //取得当前节点
@@ -94,38 +109,33 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
 
                 foreach (CompassDirections direction in allCompassDirections)
                 {
-                    GloblePoint nextCell = GeometryHelper.GetAdjacentPoint(currenNode.Location, direction, insertX, insertY);
+                    Point nextCell = GeometryHelper.GetAdjacentPoint(currenNode.Location, direction);
                     if (!routePlanData.CellMap.IsInBounds(nextCell)) //相邻点已经在地图之外
-                        continue;
-
-                    var weight = routePlanData.CellMap.GetObstacleWeight(nextCell);
-                    if (weight == Double.MaxValue)
-                        continue;
-
-                    GlobleNode nextNode = this.GetNodeOnLocation(nextCell, routePlanData);
-                    double costG = costGetter.GetGCost(currenNode, nextCell) + weight;   //计算G值(加上权重)
-                    if (currenNode.Directions != CompassDirections.NotSet && currenNode.Directions != direction)
                     {
-                        costG = costG + _inflectionWeight;
+                        continue;
                     }
-                    double costH = costGetter.GetHCost(nextCell, routePlanData.CellMap.mapHelper.endEntity);    //计算H值
+
+                    if (routePlanData.CellMap.IsObstacle(nextCell))
+                        continue;
+
+                    AStarNode nextNode = this.GetNodeOnLocation(nextCell, routePlanData);
+                    int costG = (int)costGetter.GetGCost(currenNode, nextCell);   //计算G值
+                    int costH = (int)costGetter.GetHCost(nextCell, routePlanData.CellMap.mapHelper.endEntity);    //计算H值
                     if (nextNode != null)
                     {
-                        if (nextNode.CostG >= costG)
+                        if (nextNode.CostG > costG)
                         {
-                            var nodeCostG = nextNode.CostG;
                             //如果新的路径代价更小，则更新该位置上的节点的原始路径
-                            nextNode.ResetParentNode(currenNode, costG, direction);
+                            nextNode.ResetParentNode(currenNode, costG);
                         }
                     }
                     else
                     {
-                        nextNode = new GlobleNode(nextCell, currenNode, costG, costH);
-                        nextNode.Directions = direction;
-                        routePlanData.OpenedList.Add(nextNode);
+                        nextNode = new AStarNode(nextCell, currenNode, costG, costH);
+                        routePlanData.OpenedList.Enqueue(nextNode);
                     }
 
-                    if (Math.Abs(costH) < 0.1) //costH为0，表示相邻点就是目的点，规划完成，构造结果路径(给一点点误差)
+                    if (costH == 0) //costH为0，表示相邻点就是目的点，规划完成，构造结果路径
                     {
                         return nextNode;
                     }
@@ -145,25 +155,21 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <param name="routePlanData"></param>
         /// <param name="lastNode"></param>
         /// <returns></returns>
-        private List<GloblePoint> GetPath(GlobleNode lastNode)
+        private List<Point> GetPath(AStarNode lastNode)
         {
-            List<GloblePoint> route = new List<GloblePoint>();
-            if (lastNode.CostH > 0.1)
-            {
-                return route;
-            }
+            List<Point> route = new List<Point>();
             lastNode.Location.IsInflectionPoint = true;
             route.Insert(0, lastNode.Location);
-            GlobleNode tempNode = lastNode;
+            AStarNode tempNode = lastNode;
             while (tempNode.ParentNode != null)
             {
                 //判断点是否是拐点
                 tempNode.ParentNode.Location.IsInflectionPoint = CheckInflectionPoint(tempNode, tempNode.ParentNode);
 
                 route.Insert(0, tempNode.ParentNode.Location);
-                tempNode = tempNode.ParentNode;
+                tempNode = tempNode.ParentNode; 
             }
-
+             
             return route;
         }
         #endregion
@@ -172,15 +178,15 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <summary>
         /// 目标位置location是否已存在于开放列表或关闭列表中
         /// </summary>       
-        private GlobleNode GetNodeOnLocation(GloblePoint location, GlobleRoutePlanData<T> routePlanData)
+        private AStarNode GetNodeOnLocation(Point location, RoutePlanData<T> routePlanData)
         {
-            var node = routePlanData.OpenedList.Find(x=>x.Location.X == location.X && x.Location.Y == location.Y);
+            var node = routePlanData.OpenedList.Find(new AStarNode(location, null, 0, 0));
             if (node != null)
             {
                 return node;
             }
 
-            foreach (GlobleNode temp in routePlanData.ClosedList)
+            foreach (AStarNode temp in routePlanData.ClosedList)
             {
                 if (temp.Location.X == location.X && temp.Location.Y == location.Y)
                 {
@@ -196,20 +202,20 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <summary>
         /// 从开放列表中获取代价F最小的节点，以启动下一次递归
         /// </summary>      
-        private GlobleNode GetMinCostNode(List<GlobleNode> openedList)
+        private AStarNode GetMinCostNode(MinHeap<AStarNode> openedList)
         {
             if (openedList.Count == 0)
             {
                 return null;
             }
 
-            GlobleNode target = openedList.OrderBy(x => x.CostF).First();// openedList.Dequeue();
+            AStarNode target = openedList.Dequeue();
             return target;
         }
         #endregion
 
         #region IsInflectionPoint
-        private bool CheckInflectionPoint(GlobleNode currNode, GlobleNode nextNode)
+        private bool CheckInflectionPoint(AStarNode currNode, AStarNode nextNode)
         {
             if (nextNode.ParentNode == null)
             {
