@@ -40,10 +40,10 @@
         <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,3,0,3" Name="cbEarthSizes" ItemsSource="{Binding EarthGridSizes,Mode=OneWay}"
                       Text="{Binding EarthGridSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
         </ComboBox>
-        <Label Grid.Row="2" Grid.Column="0" Content="接地内轮廓线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
+        <Label Grid.Row="2" Grid.Column="0" Content="接地内边界线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
         <Button Grid.Row="2" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthInnerOutline" Content="绘  制" Width="60"
                     Click="btnEarthInnerOutline_Click"></Button>
-        <Label Grid.Row="3" Grid.Column="0" Content="接地外轮廓线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
+        <Label Grid.Row="3" Grid.Column="0" Content="接地外边界线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
         <Button Grid.Row="3" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthOutterOutline" Content="绘  制" Width="60"
                     Click="btnEarthOutterOutline_Click"></Button>
         <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  Margin="0,3,0,3" Name="btnDrawEarthingGrid" Content="绘制接地网" 
