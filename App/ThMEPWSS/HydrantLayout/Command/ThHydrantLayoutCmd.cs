@@ -81,6 +81,9 @@ namespace ThMEPWSS.HydrantLayout.Command
                 //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 //插入图块
+                var recordLayerStatus = new List<string> { ThHydrantCommon.Layer_Hydrant, ThHydrantCommon.Layer_Hydrant_Extinguisher };
+                var layerStatusDict = InsertBlkService.RecordLayerStatus(recordLayerStatus);
+
                 var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
                 var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
                 InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
@@ -140,6 +143,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 validHydrant.ForEach(x => InsertBlkService.CleanEntity(x.OriginModel.Data));
                 VerticalPipeOut.ForEach(x => InsertBlkService.CleanEntity(x.Data));
 
+                InsertBlkService.ResetLayerStatus(layerStatusDict);
             }
         }
 
