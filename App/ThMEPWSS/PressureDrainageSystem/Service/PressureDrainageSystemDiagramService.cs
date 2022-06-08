@@ -882,7 +882,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             string allocation = pump.Allocation;
             string para1 = "待填入", para2 = "待填入", para3 = "待填入", para4 = "待填入", para5 = "待填入", para6 = "待填入";
             double paraQ_real = -1;
-            if (pump.paraH > 0)
+            if (pump.Depth > 0)
             {
                 if (pump.Allocation == "")
                 {
@@ -909,7 +909,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     paraQ_real = pump.paraQ * 3;
                 }
             }
-            if (pump.paraQ > 0 && pump.Depth > 0)
+            if (pump.Depth > 0)
             {
                 if (paraQ_real <= 20)
                 {
