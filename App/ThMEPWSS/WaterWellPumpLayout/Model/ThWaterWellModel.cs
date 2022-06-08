@@ -566,8 +566,8 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         }
         public void InitWellData()
         {
-            VertexSortOri();
-            //VertexSort();//将点进行顺时针排序
+            //VertexSortOri();
+            VertexSort();//将点进行顺时针排序
             EdgeSort();//将边进行逆时针编号
             Length = (int)(WellVertex[0].DistanceTo(WellVertex[1]) / 50.0 + 0.5) * 50;//获取长
             Width = (int)(WellVertex[0].DistanceTo(WellVertex[3]) / 50.0 + 0.5) * 50;//获取宽
@@ -615,6 +615,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             string strSize = (Length - 100).ToString() + "*" + (Width - 100).ToString();
             return strSize;
         }
+        
         //public void CheckHavePump(ThWaterPumpModel pump)
         //{
         //    if (IsHavePump)
