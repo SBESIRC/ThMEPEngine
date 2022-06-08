@@ -889,7 +889,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                     if (DistBoxes.Contains(sourceEntity) || CableTrays.Contains(sourceEntity))
                     {
-                        //配电箱搭着配电箱
+                        //搭着配电箱
                         var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos.Texts, DistBoxKey, true);
                         if (item.Value.Count > 0)
                         {
