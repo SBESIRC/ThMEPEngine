@@ -46,6 +46,30 @@ namespace TianHua.Electrical.PDS.UI.Project
                 }
             }
         }
+        public bool MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables;
+            set
+            {
+                if (value != MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+        public bool FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution;
+            set
+            {
+                if (value != FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
         public int UniversalPipeDiameter
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.UniversalPipeDiameter;

@@ -117,6 +117,9 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
 
         public int ACChargerPower = 7;//交流电桩额定功率 kw
         public int DCChargerPower = 30;//直流电桩额定功率 kw
+
+        public bool MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables { get; set; } = true;
+        public bool FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution { get; set; }
         #endregion
     }
     public enum FireEmergencyLightingModel
