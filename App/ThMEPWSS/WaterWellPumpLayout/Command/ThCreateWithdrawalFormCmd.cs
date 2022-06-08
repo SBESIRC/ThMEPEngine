@@ -91,6 +91,10 @@ namespace ThMEPWSS.Command
 
                 foreach (var wellConfig in WellConfigInfo)
                 {
+                    if (wellConfig.PumpCount=="0")
+                    {
+                        continue;
+                    }
                     var tmpItem = new FormItem();
                     tmpItem.StrNumber = wellConfig.PumpNumber;
                     tmpItem.StrLength = (wellConfig.WellModelList.FirstOrDefault().Length - 100).ToString();
