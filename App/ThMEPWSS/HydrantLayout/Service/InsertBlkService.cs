@@ -40,8 +40,8 @@ namespace ThMEPWSS.HydrantLayout.Service
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             {
                 //解锁0图层，后面块有用0图层的
-                //DbHelper.EnsureLayerOn("0");
-                //DbHelper.EnsureLayerOn("DEFPOINTS");
+                DbHelper.EnsureLayerOn("0");
+                DbHelper.EnsureLayerOn("DEFPOINTS");
             }
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))

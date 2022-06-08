@@ -123,42 +123,5 @@ namespace ThMEPWSS
             }
         }
 
-
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThTryInsertBlk", CommandFlags.Modal)]
-        public void ThTryInsertBlk()
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant };
-                //var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant_Extinguisher };
-                //var blkList = new List<string>();
-                var layerList = new List<string> { };
-
-                var dict = new Dictionary<string, bool>();
-                var layers = acadDatabase.Layers;
-                foreach (var l in layers)
-                {
-                    
-                    dict.Add(l.Name, l.IsLocked);
-                }
-
-                InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
-
-
-
-                foreach (var l in layers)
-                {
-                    l.IsLocked = dict[l.Name];
-                }
-
-
-
-
-            }
-        }
-
     }
 }
