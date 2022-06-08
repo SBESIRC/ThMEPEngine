@@ -45,42 +45,42 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         /// <summary>
         /// 消防配电分支电路电缆
         /// </summary>
-        public ConductorUse FireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电分支线路, ItemsSource = new MaterialStructure[] { MaterialStructure.YJY, MaterialStructure.YJV, } };
+        public ConductorUse FireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电分支线路, ItemsSource = new MaterialStructure[] { MaterialStructure.YJY, MaterialStructure.YJV, } };
 
         /// <summary>
         /// 消防配电电线
         /// </summary>
-        public ConductorUse FireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防配电电线, ItemsSource = new MaterialStructure[] { MaterialStructure.BYJ, MaterialStructure.BV, } };
+        public ConductorUse FireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防配电电线, ItemsSource = new MaterialStructure[] { MaterialStructure.BYJ, MaterialStructure.BV, } };
 
         /// <summary>
         /// 非消防配电电缆
         /// </summary>
-        public ConductorUse NonFireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电缆 , ItemsSource = new MaterialStructure[] { MaterialStructure.YJY, MaterialStructure.BV, } };
+        public ConductorUse NonFireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电缆 , ItemsSource = new MaterialStructure[] { MaterialStructure.YJY, MaterialStructure.BV, } };
 
         /// <summary>
         /// 非消防配电电线
         /// </summary>
-        public ConductorUse NonFireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电线, ItemsSource = new MaterialStructure[] { MaterialStructure.BYJ, MaterialStructure.KYJV, } };
+        public ConductorUse NonFireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电线, ItemsSource = new MaterialStructure[] { MaterialStructure.BYJ, MaterialStructure.KYJV, } };
 
         /// <summary>
         /// 消防配电控制电缆
         /// </summary>
-        public ConductorUse FireDistributionControlCable = new ConductorUse() { OuterSheathMaterial = MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电控制电缆, ItemsSource = new MaterialStructure[] { MaterialStructure.KYJY, MaterialStructure.KYJV, } };
+        public ConductorUse FireDistributionControlCable = new ConductorUse() { OuterSheathMaterial = MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电控制电缆, ItemsSource = new MaterialStructure[] { MaterialStructure.KYJY, MaterialStructure.KYJV, } };
 
         /// <summary>
         /// 非消防配电控制电缆
         /// </summary>
-        public ConductorUse NonFireDistributionControlCable = new ConductorUse() { OuterSheathMaterial = MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.A, ConductorType = ConductorType.非消防配电控制电缆 , ItemsSource = new MaterialStructure[] { MaterialStructure.KYJY, MaterialStructure.KYJV, } };
+        public ConductorUse NonFireDistributionControlCable = new ConductorUse() { OuterSheathMaterial = MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.A, ConductorType = ConductorType.非消防配电控制电缆 , ItemsSource = new MaterialStructure[] { MaterialStructure.KYJY, MaterialStructure.KYJV, } };
 
         /// <summary>
         /// 消防控制信号软线
         /// </summary>
-        public ConductorUse FireControlSignalWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防控制信号软线, ItemsSource = new MaterialStructure[] { MaterialStructure.RYJ, MaterialStructure.RVV, } };
+        public ConductorUse FireControlSignalWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防控制信号软线, ItemsSource = new MaterialStructure[] { MaterialStructure.RYJ, MaterialStructure.RVV, } };
 
         /// <summary>
         /// 非消防控制信号软线
         /// </summary>
-        public ConductorUse NonFireControlSignalWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防控制信号软线, ItemsSource = new MaterialStructure[] { MaterialStructure.RYJ, MaterialStructure.RVV, } };
+        public ConductorUse NonFireControlSignalWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防控制信号软线, ItemsSource = new MaterialStructure[] { MaterialStructure.RYJ, MaterialStructure.RVV, } };
         #endregion
 
         #region 管材铺设原则
