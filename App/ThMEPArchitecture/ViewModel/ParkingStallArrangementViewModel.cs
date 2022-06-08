@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
@@ -474,6 +477,24 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("ThreadCount");
             }
         }
+        //横向优先_纵向车道计算长度调整_背靠背模块
+        public double LayoutScareFactor_Intergral = 0.7;
+        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+        public double LayoutScareFactor_Adjacent = 0.7;
+        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+        public double LayoutScareFactor_betweenBuilds = 0.7;
+        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+        public double LayoutScareFactor_SingleVert = 0.7;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+        public double SingleVertModulePlacementFactor = 1.0;
+        public void Set(HiddenParameter hp)
+        {
+            LayoutScareFactor_Intergral = hp.LayoutScareFactor_Intergral;
+            LayoutScareFactor_Adjacent = hp.LayoutScareFactor_Adjacent;
+            LayoutScareFactor_betweenBuilds = hp.LayoutScareFactor_betweenBuilds;
+            LayoutScareFactor_SingleVert = hp.LayoutScareFactor_SingleVert;
+            SingleVertModulePlacementFactor = hp.SingleVertModulePlacementFactor;
+        }
     }
 
     public static class ParameterStock
@@ -590,6 +611,7 @@ namespace ThMEPArchitecture.ViewModel
         }
         public static double ObstacleArea;
         public static double TotalArea;
+        public static bool ReadHiddenParameter = false;
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
@@ -603,6 +625,68 @@ namespace ThMEPArchitecture.ViewModel
             _ThreadCount = vm.ThreadCount;
             _UseMultiSelection = vm.UseMultiSelection;
             Setted = true;
+        }
+    }
+
+    public class HiddenParameter
+    {
+        public bool LogMainProcess = true;
+        public bool LogSubProcess = false;
+        //横向优先_纵向车道计算长度调整_背靠背模块
+        public double LayoutScareFactor_Intergral = 0.7;
+        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+        public double LayoutScareFactor_Adjacent = 0.7;
+        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+        public double LayoutScareFactor_betweenBuilds = 0.7;
+        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+        public double LayoutScareFactor_SingleVert = 0.7;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+        public double SingleVertModulePlacementFactor = 1.0;
+        private void Save()
+        {
+            TextWriter writer = null;
+            try
+            {
+                var contentsToWriteToFile = JsonConvert.SerializeObject(this);
+                var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var filePath = System.IO.Path.Combine(currentDllPath, "ThParkingStallConfig.json");
+                writer = new StreamWriter(filePath, false);
+                writer.Write(contentsToWriteToFile);
+            }
+            finally
+            {
+                if (writer != null)
+                    writer.Close();
+            }
+        }
+        public static HiddenParameter ReadOrCreateDefault() 
+        {
+            TextReader reader = null;
+            var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var filePath = System.IO.Path.Combine(currentDllPath, "ThParkingStallConfig.json");
+            HiddenParameter hp;
+            try
+            {
+                if (ParameterStock.ReadHiddenParameter &&File.Exists(filePath))
+                {
+                    reader = new StreamReader(filePath);
+                    var fileContents = reader.ReadToEnd();
+                    hp = JsonConvert.DeserializeObject<HiddenParameter>(fileContents);
+                }
+                else
+                {
+                    hp = new HiddenParameter();
+                    if (!File.Exists(filePath))hp.Save();
+                }
+                ParameterStock.LogMainProcess = hp.LogMainProcess;
+                ParameterStock.LogSubProcess = hp.LogSubProcess;
+                return hp;
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+            }
         }
     }
 }

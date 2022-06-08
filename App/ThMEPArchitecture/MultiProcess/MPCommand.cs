@@ -76,17 +76,24 @@ namespace ThMEPArchitecture.MultiProcess
         public override void SubExecute()
         {
             ParameterStock.Set(ParameterViewModel);
+            var hp = HiddenParameter.ReadOrCreateDefault();
+            ParameterViewModel.Set(hp);
             if (ParameterStock.LogMainProcess)
             {
                 Logger = new Serilog.LoggerConfiguration().WriteTo
                             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
             }
+            Logger?.Information($"############################################");
+            Logger?.Information("LayoutScareFactor_Intergral:" + ParameterViewModel.LayoutScareFactor_Intergral.ToString());
+            Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterViewModel.LayoutScareFactor_Adjacent.ToString());
+            Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterViewModel.LayoutScareFactor_betweenBuilds.ToString());
+            Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterViewModel.LayoutScareFactor_SingleVert.ToString());
+            Logger?.Information("SingleVertModulePlacementFactor:" + ParameterViewModel.SingleVertModulePlacementFactor.ToString());
             Utils.SetSeed();
             try
             {
                 if(_CommandMode == CommandMode.WithoutUI)
                 {
-                    Logger?.Information($"############################################");
                     Logger?.Information($"DEbug--读取复现");
                     //RunDebug();
                     using (var docLock = Active.Document.LockDocument())
@@ -99,7 +106,6 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                     {
-                        Logger?.Information($"############################################");
                         Logger?.Information($"无迭代速排");
                         Logger?.Information($"Random Seed:{Utils.GetSeed()}");
                         using (var docLock = Active.Document.LockDocument())
@@ -118,7 +124,6 @@ namespace ThMEPArchitecture.MultiProcess
                         }
                         else
                         {
-                            Logger?.Information($"############################################");
                             Logger?.Information($"多线程迭代");
                             Logger?.Information($"Random Seed:{Utils.GetSeed()}");
                             using (var docLock = Active.Document.LockDocument())
