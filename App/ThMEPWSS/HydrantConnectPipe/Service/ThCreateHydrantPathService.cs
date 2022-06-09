@@ -424,13 +424,13 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             //计算逃生路径(用A*算法)
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            GlobleAStarRoutePlanner<Line> aStarRoute = new GlobleAStarRoutePlanner<Line>(frame, dir, closetLane, 200, 300, 50);
+            GlobleAStarRoutePlanner<Line> aStarRoute = new GlobleAStarRoutePlanner<Line>(frame, dir, closetLane, 300, 300, 55, 20);
 
             //----设置障碍物
             aStarRoute.SetObstacle(holes.Select(x => x.ToNTSPolygon().ToDbMPolygon()).ToList(), Double.MaxValue);
             var mPolygonRooms = rooms.Select(x =>
             {
-                var buuferCol = x.Buffer(-300);
+                var buuferCol = x.Buffer(-350);
                 var outRoom = x.Buffer(10)[0] as Polyline;
                 if (buuferCol.Count > 0)
                 {
@@ -439,7 +439,23 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 }
                 return ThMPolygonTool.CreateMPolygon(outRoom);
             }).ToList();
-            aStarRoute.SetObstacle(mPolygonRooms, 20, 0);
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (var item in mPolygonRooms)
+                {
+                    //db.ModelSpace.Add(item);
+                }
+                foreach (var item in holes.Select(x => x.ToNTSPolygon().ToDbMPolygon()).ToList())
+                {
+                    //db.ModelSpace.Add(item);
+                }
+            }
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                //db.ModelSpace.Add(frame);
+                //db.ModelSpace.Add(closetLane.Clone() as Line);
+            }
+            aStarRoute.SetObstacle(mPolygonRooms, 100, 0);
 
             //----计算路径
             var path = aStarRoute.Plan(startPt);
