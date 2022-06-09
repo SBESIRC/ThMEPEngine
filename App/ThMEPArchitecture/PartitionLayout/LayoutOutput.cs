@@ -26,7 +26,8 @@ namespace ThMEPArchitecture.PartitionLayout
         public static string PCarLayerName = "平行式";
         public static string VCarLayerName = "C-标准车位-背靠背";
         public static string PCARBLKNAME = "AI-平行式2460";
-        public static string VCARBLKNAME = "AI-垂直式5124";
+        public static string VCARBLKNAME = "AI-垂直式车位5324";
+        public static string VCARBLKNAMEDOUBLEBACK = "AI-背靠背垂直式车位5124";
         public List<InfoCar> Cars;
         public List<Polyline> Columns;
         public List<Line> Lanes;
@@ -122,7 +123,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
             return ents;
         }
-        private static List<Entity> DrawVertCar()
+        private static List<Entity> DrawVertBackBackCar()
         {
             int color1 = 30;
             int colorgray = 8;
@@ -131,6 +132,83 @@ namespace ThMEPArchitecture.PartitionLayout
             var widthD = 300;
             var thickness = 100;
             var length = 5100;
+            var doorlength = 1200;
+            List<Entity> ents = new List<Entity>();
+            var ori = Point3d.Origin;
+
+            //
+            var pt = ori;
+            List<Point3d> pts = new List<Point3d>();
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(1, 0, 0) * width / 2));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * length));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(1, 0, 0) * width));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(0, 1, 0) * length));
+            pts.Add(pt);
+            var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
+            pl.ColorIndex = color1;
+            pl.Layer = VCarLayerName;
+            ents.Add(pl);
+            //
+            pt = ori;
+            pts.Clear();
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(1, 0, 0) * (width / 2 - widthD)));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * (length - widthD)));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(1, 0, 0) * (width - widthD * 2)));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(0, 1, 0) * (length - widthD)));
+            pts.Add(pt);
+            pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
+            pl.ColorIndex = colorgray;
+            ents.Add(pl);
+            //
+            pt = ori;
+            pts.Clear();
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(1, 0, 0) * (width / 2 - widthD)));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * thickness));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(1, 0, 0) * (width - widthD * 2)));
+            pts.Add(pt);
+            pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(0, 1, 0) * thickness));
+            pts.Add(pt);
+            pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
+            pl.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * (length - 1150)));
+            pl.ColorIndex = color1;
+            pl.Layer = VCarLayerName;
+            ents.Add(pl);
+            //
+            pt = ori;
+            pts.Clear();
+            pt = pt.TransformBy(Matrix3d.Displacement(new Vector3d(1, 0, 0) * (width / 2 - widthD)));
+            pt = pt.TransformBy(Matrix3d.Displacement(Vector3d.YAxis * (CT + 100)));
+            pts.Add(pt);
+            var vec = Vector3d.XAxis;
+            vec = vec.RotateBy(Math.PI / 3, Vector3d.ZAxis);
+            var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
+            door.ColorIndex = colorgray;
+            ents.Add(door);
+            var dr = door.Clone() as Line;
+            dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(0, 1, 0))));
+            ents.Add(dr);
+            return ents;
+        }
+        private static List<Entity> DrawVertCar()
+        {
+            int color1 = 30;
+            int colorgray = 8;
+            double CT = 1400;
+            var width = 2400;
+            var widthD = 300;
+            var thickness = 100;
+            var length = 5300;
             var doorlength = 1200;
             List<Entity> ents = new List<Entity>();
             var ori = Point3d.Origin;
@@ -238,6 +316,45 @@ namespace ThMEPArchitecture.PartitionLayout
                 return _VCar;
             }
         }
+        public static BlockReference _VBackCar = null;
+        public static BlockReference VBackCar
+        {
+            get
+            {
+                if (true)
+                {
+                    var blkname = VCARBLKNAMEDOUBLEBACK;
+                    using (AcadDatabase adb = AcadDatabase.Active())
+                    {
+                        if (!adb.Layers.Contains(VCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
+                        BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                        try
+                        {
+                            BlockTableRecord record = new BlockTableRecord();
+                            record.Name = blkname;
+                            var ents = DrawVertBackBackCar();
+                            ents.ForEach(e => record.AppendEntity(e));
+                            bt.UpgradeOpen();
+                            bt.Add(record);
+                            adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
+                            bt.DowngradeOpen();
+                        }
+                        catch { }
+                        BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
+                        BlockReference br = new BlockReference(Point3d.Origin, bt[blkname]);
+                        br.ScaleFactors = new Scale3d(1);
+                        br.Rotation = 0;
+                        br.Layer = CarLayerName;
+                        //space.AppendEntity(br);
+                        //adb.Database.TransactionManager.AddNewlyCreatedDBObject(br, true);
+                        space.DowngradeOpen();
+                        _VBackCar = br;
+                    }
+                }
+                return _VBackCar;
+            }
+        }
         public static BlockReference _PCar = null;
         public static BlockReference PCar
         {
@@ -318,6 +435,20 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, PCARBLKNAME, car.Point, new Scale3d(1), angle);
+                    var br = adb.Element<BlockReference>(brId);
+                }
+                foreach (var car in Cars.Where(e => e.CarLayoutMode == 2))
+                {
+                    var angle = 0.0;
+                    var vec = car.Vector;
+                    if (Math.Abs(vec.X) < 0.0001) vec = new Vector3d(0, vec.Y, 0);
+                    if (Math.Abs(vec.Y) < 0.0001) vec = new Vector3d(vec.X, 0, 0);
+                    vec = vec.GetNormal();
+                    if (vec.Equals(Vector3d.YAxis)) angle = 0;
+                    else if (vec.Equals(-Vector3d.YAxis)) angle = Math.PI;
+                    else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
+                    else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
+                    var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAMEDOUBLEBACK, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                 }
             }

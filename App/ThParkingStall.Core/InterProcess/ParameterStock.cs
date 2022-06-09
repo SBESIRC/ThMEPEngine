@@ -37,7 +37,7 @@ namespace ThParkingStall.Core.InterProcess
         }
 
         //垂直车位尺寸, 长度
-        private static int _VerticalSpotLength = 5100; //mm
+        private static int _VerticalSpotLength = 5300; //mm
 
         public static int VerticalSpotLength
         {

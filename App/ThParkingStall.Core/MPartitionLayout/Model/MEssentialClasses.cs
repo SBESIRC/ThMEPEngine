@@ -88,5 +88,6 @@ namespace ThParkingStall.Core.MPartitionLayout
     {
         VERT = 0,
         PARALLEL = 1,
+        VERTBACKBACK=2,
     }
 }
