@@ -114,6 +114,20 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             return breaker;
         }
 
+        /// <summary>
+        /// 创建二级断路器
+        /// </summary>
+        /// <param name="breaker"></param>
+        /// <returns></returns>
+        public Breaker CreatBreaker(Breaker primaryBreaker)
+        {
+            var maxCalculateCurrent = Math.Max(primaryBreaker.GetCascadeRatedCurrent(), _maxCalculateCurrent);
+            var breaker = new Breaker(maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
+            var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            breaker.SetRatedCurrent(ratedCurrent);
+            return breaker;
+        }
+
         public override Conductor CreatConductor()
         {
             if(_IsEmptyLoad)
@@ -159,6 +173,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public override IsolatingSwitch CreatIsolatingSwitch()
         {
             var isolatingSwitch =  new IsolatingSwitch(_calculateCurrent, _specialPolesNum);
+            var ratedCurrent = isolatingSwitch.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            isolatingSwitch.SetRatedCurrent(ratedCurrent);
+            return isolatingSwitch;
+        }
+
+        public IsolatingSwitch CreatOneWayIsolatingSwitch()
+        {
+            var isolatingSwitch = new IsolatingSwitch(_calculateCurrent, _polesNum);
             var ratedCurrent = isolatingSwitch.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
             isolatingSwitch.SetRatedCurrent(ratedCurrent);
             return isolatingSwitch;

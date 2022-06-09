@@ -199,7 +199,7 @@ namespace TianHua.Electrical.PDS.Project
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, CascadeCurrent);
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
-                    oneWayInCircuit.Component = componentFactory.CreatIsolatingSwitch();
+                    oneWayInCircuit.Component = componentFactory.CreatOneWayIsolatingSwitch();
                 }
                 else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
@@ -233,7 +233,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// Node元器件选型/指定元器件选型
         /// </summary>
-        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphNode node, Type type)
+        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphNode node, Type type, bool isOneWayInCircuit)
         {
             if (type.IsSubclassOf(typeof(PDSBaseComponent)))
             {
@@ -268,7 +268,14 @@ namespace TianHua.Electrical.PDS.Project
                 }
                 else if (type.Equals(typeof(IsolatingSwitch)))
                 {
-                    return componentFactory.CreatIsolatingSwitch();
+                    if (isOneWayInCircuit)
+                    {
+                        return componentFactory.CreatOneWayIsolatingSwitch();
+                    }
+                    else
+                    {
+                        return componentFactory.CreatIsolatingSwitch();
+                    }
                 }
                 else if (type.Equals(typeof(Breaker)))
                 {
@@ -647,7 +654,7 @@ namespace TianHua.Electrical.PDS.Project
         /// 回路元器件选型/指定元器件选型
         /// </summary>
         /// <returns></returns>
-        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge edge, Type type, CircuitFormOutType circuitFormOutType)
+        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge edge, Type type, CircuitFormOutType circuitFormOutType,Breaker breaker = null)
         {
             if (type.IsSubclassOf(typeof(PDSBaseComponent)))
             {
@@ -656,8 +663,10 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     if (circuitFormOutType == CircuitFormOutType.漏电)
                         return componentFactory.CreatResidualCurrentBreaker();
-                    else
+                    else if (breaker.IsNull())
                         return componentFactory.CreatBreaker();
+                    else 
+                        return componentFactory.CreatBreaker(breaker);
                 }
                 else if (type.Equals(typeof(ThermalRelay)))
                 {
@@ -1373,7 +1382,7 @@ namespace TianHua.Electrical.PDS.Project
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, cascadeCurrent);
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
-                    var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
+                    var isolatingSwitch = componentFactory.CreatOneWayIsolatingSwitch();
                     oneWayInCircuit.Component = oneWayInCircuit.Component.ComponentChange(isolatingSwitch);
                 }
                 else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
@@ -1451,7 +1460,7 @@ namespace TianHua.Electrical.PDS.Project
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, cascadeCurrent);
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
-                    var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
+                    var isolatingSwitch = componentFactory.CreatOneWayIsolatingSwitch();
                     oneWayInCircuit.Component = oneWayInCircuit.Component.ComponentChange(isolatingSwitch);
                 }
                 else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
