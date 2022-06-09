@@ -399,7 +399,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
             else
             {
-                var inputvaild = layoutData.ProcessSegLines(AutoSegLines,true);
+                var inputvaild = layoutData.ProcessSegLines(AutoSegLines);
                 if (!inputvaild) return;
             }
             var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
