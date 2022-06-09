@@ -43,6 +43,12 @@ namespace ThMEPArchitecture.MultiProcess
             VMStock.Init(dataWraper);
             dataWraper.UpdateInterParameter(layoutData);
             InterParameter.Init(dataWraper);
+            var newSegs = InterParameterEx.AddSegLines();
+            //newSegs.ForEach(l => l.ToDbLine(2,"添加分割线").AddToCurrentSpace());
+            newSegs.AddRange(layoutData.SegLines);
+            layoutData.ProcessSegLines(newSegs,false,true);
+            dataWraper.UpdateInterParameter(layoutData);
+            InterParameter.Init(dataWraper);
             return dataWraper;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, LayoutData layoutData)

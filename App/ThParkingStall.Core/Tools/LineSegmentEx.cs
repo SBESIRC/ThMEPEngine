@@ -256,7 +256,7 @@ namespace ThParkingStall.Core.Tools
             }
         }
 
-        public static List<LineSegment> Split(this LineSegment line,List<Coordinate> coordinates)
+        public static List<LineSegment> Split(this LineSegment line,List<Coordinate> coordinates,double tol = 5)
         {
             var coors = new List<Coordinate> { line.P0, line.P1 };
             var quryed = coordinates.Where(c => line.Distance(c) < 1);
@@ -279,7 +279,7 @@ namespace ThParkingStall.Core.Tools
                     result.Add(new LineSegment(coors[i].X, Y, coors[i+1].X, Y));
                 }
             }
-            return result;
+            return result.Where(l => l.Length > tol).ToList();
         }
         public static LineSegment Extend(this LineSegment line,double distance)
         {
@@ -304,13 +304,13 @@ namespace ThParkingStall.Core.Tools
             double distance;
             if (line.IsVertical())
             {
-                var ordered = lstr.Coordinates.OrderBy(c => c.X);
-                distance = ordered.Last().X - ordered.First().X;
+                var ordered = lstr.Coordinates.OrderBy(c => c.Y);
+                distance = ordered.Last().Y - ordered.First().Y;
             }
             else
             {
-                var ordered = lstr.Coordinates.OrderBy(c => c.Y);
-                distance = ordered.Last().Y - ordered.First().Y;
+                var ordered = lstr.Coordinates.OrderBy(c => c.X);
+                distance = ordered.Last().X - ordered.First().X;
             }
             distance +=  line.GetLineString().Distance(lstr) + 1;
             var extended = line.Extend(distance);
@@ -347,6 +347,11 @@ namespace ThParkingStall.Core.Tools
             {
                 return segLine.P0.Y;
             }
+        }
+
+        public static double Distance(this LineSegment segLine, IEnumerable<Coordinate> coordinates)
+        {
+            return coordinates.Min(c => segLine.Distance(c));
         }
     }
 }

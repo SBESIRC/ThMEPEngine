@@ -91,10 +91,11 @@ namespace ThParkingStall.Core.Tools
         {
             if (!seglineConnectToBound.Item1 && !seglineConnectToBound.Item2) return SegLine;
             var SegLineStr = SegLine.ToLineString();
-            if(!WallLine.Contains(SegLineStr.Centroid)) return SegLine;
-            List<Coordinate> LineIntSecPts = null;
             var IntSection = SegLineStr.Intersection(WallLine);
             var mid = IntSection.Centroid;
+            if (!WallLine.Contains(mid)) return SegLine;
+            List<Coordinate> LineIntSecPts = null;
+
             var IntSecPts = SegLineStr.Intersection(WallLine.Shell).Coordinates.OrderBy(c => c.X + c.Y);
             Coordinate P0;
             Coordinate P1;
@@ -111,14 +112,14 @@ namespace ThParkingStall.Core.Tools
             if (seglineConnectToBound.Item1 && !mid.Coordinate.ExistPtInDirection(IntSecPts, false))//负向需要连接，且未连接
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                var quryed = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y);
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y < P0.X + P0.Y);
                 if(quryed.Count() > 0) P0 = quryed.Last();
             }
             if (seglineConnectToBound.Item2&&!mid.Coordinate.ExistPtInDirection(IntSecPts,true))
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                var quryed = LineIntSecPts.Where(c => c.X + c.Y > mid.X + mid.Y);
-                if (quryed.Count() > 0) P0 = quryed.First();
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y > P1.X + P1.Y);
+                if (quryed.Count() > 0) P1 = quryed.First();
             }
             return new LineSegment(P0, P1);
         }

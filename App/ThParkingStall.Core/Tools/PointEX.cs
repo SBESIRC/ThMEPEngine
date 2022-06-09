@@ -22,25 +22,29 @@ namespace ThParkingStall.Core.Tools
         {
             return LineBuffer(point.Coordinate, Halfdistance, line.GetVector());
         }
-        public static Point Move(this Point point ,double distance,int flag)
+        public static Coordinate Move(this Coordinate coor, double distance, int flag)
         {
             if (flag == 0)//上
             {
-                return new Point(point.X, point.Y + distance);
+                return new Coordinate(coor.X, coor.Y + distance);
             }
             else if (flag == 1)//下
             {
-                return new Point(point.X, point.Y - distance);
+                return new Coordinate(coor.X, coor.Y - distance);
             }
             else if (flag == 2)//左
             {
-                return new Point(point.X - distance, point.Y);
+                return new Coordinate(coor.X - distance, coor.Y);
             }
             else if (flag == 3)//右
             {
-                return new Point(point.X + distance, point.Y);
+                return new Coordinate(coor.X + distance, coor.Y);
             }
-            else return point;
+            else return coor;
+        }
+        public static Point Move(this Point point ,double distance,int flag)
+        {
+            return new Point(point.Coordinate.Move(distance, flag));
         }
         public static Point ToPoint(this Coordinate coor)
         {
