@@ -336,7 +336,7 @@ namespace ThMEPWSS.Command
                             break;
                     }
                     var bId = string.IsNullOrEmpty(item.copyId) ? item.uid : item.copyId;
-                    var lines = createBasicElems.Where(c => c.belongBlockId.Contains(bId) && c.floorId == item.floorId).ToList();
+                    var lines = createBasicElems.Where(c => (c.belongBlockId.Contains(bId)|| c.belongBlockId.Contains(item.uid)) && c.floorId == item.floorId).ToList();
                     var texts = createTextElems.Where(c => c.belongBlockId.Contains(bId) && c.floorUid == item.floorId).ToList();
                     if ((null != lines && lines.Count > 0) && (texts != null && texts.Count > 0))
                     {
