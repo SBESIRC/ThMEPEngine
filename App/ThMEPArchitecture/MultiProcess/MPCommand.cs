@@ -45,12 +45,16 @@ namespace ThMEPArchitecture.MultiProcess
     {
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
 
+        public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
+
         
 
         //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
         //    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
 
         public Serilog.Core.Logger Logger = null;
+
+        public Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
@@ -75,6 +79,8 @@ namespace ThMEPArchitecture.MultiProcess
         }
         public override void SubExecute()
         {
+            System.IO.FileStream emptyStream = new System.IO.FileStream(DisplayLogFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+            emptyStream.Close();
             ParameterStock.Set(ParameterViewModel);
             var hp = HiddenParameter.ReadOrCreateDefault();
             ParameterViewModel.Set(hp);
@@ -82,6 +88,8 @@ namespace ThMEPArchitecture.MultiProcess
             {
                 Logger = new Serilog.LoggerConfiguration().WriteTo
                             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
             Logger?.Information($"############################################");
             Logger?.Information("LayoutScareFactor_Intergral:" + ParameterViewModel.LayoutScareFactor_Intergral.ToString());
@@ -108,6 +116,7 @@ namespace ThMEPArchitecture.MultiProcess
                     {
                         Logger?.Information($"无迭代速排");
                         Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+
                         using (var docLock = Active.Document.LockDocument())
                         using (AcadDatabase currentDb = AcadDatabase.Active())
                         {
@@ -139,7 +148,10 @@ namespace ThMEPArchitecture.MultiProcess
                         using (AcadDatabase currentDb = AcadDatabase.Active())
                             RunWithAutoSegLine(currentDb);
                     }
+                    DisplayLogger?.Information($"地库程序运行结束 \n");
+                    DisplayLogger?.Dispose();
                 }
+  
             }
             catch (Exception ex)
             {
@@ -181,7 +193,7 @@ namespace ThMEPArchitecture.MultiProcess
             //var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
             //if (!getouterBorderFlag) return;
             var layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(acadDatabase, Logger);
+            var inputvaild = layoutData.Init(acadDatabase, Logger, DisplayLogger);
             if (!inputvaild) return;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
             InterParameter.MultiThread = true;
@@ -217,6 +229,11 @@ namespace ThMEPArchitecture.MultiProcess
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
+            var displayPro = ProcessForDisplay.CreateSubProcess();
+            if (ParameterViewModel.ShowLogs)
+            {
+                displayPro.Start();
+            }
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
             int fileSize = 128; // 128Mb
             var nbytes = fileSize * 1024 * 1024;
@@ -225,8 +242,10 @@ namespace ThMEPArchitecture.MultiProcess
             //var dataWraper = Converter.GetDataWraper(outerBrder, ParameterViewModel);
 
             var layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(acadDatabase, Logger);
+            var inputvaild = layoutData.Init(acadDatabase, Logger, DisplayLogger);
             if (!inputvaild) return;
+
+            
             var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
 
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
@@ -240,6 +259,7 @@ namespace ThMEPArchitecture.MultiProcess
                 var GA = new MultiProcessGAGenerator(ParameterViewModel);
                 Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 GA.Logger = Logger;
+                GA.DisplayLogger = DisplayLogger;
                 List<SubArea> subAreas;
                 try
                 {
@@ -273,6 +293,7 @@ namespace ThMEPArchitecture.MultiProcess
                     subAreas.ForEach(area => area.ShowText());
                     SubAreaParkingCnt.Clear();
                     Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                    DisplayLogger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 }
                 catch (Exception ex)
                 {
@@ -281,13 +302,21 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information(ex.StackTrace);
                     Active.Editor.WriteMessage(ex.Message);
                 }
+
             }
+
         }
 
         public void RunWithMultiSelect(AcadDatabase acadDatabase)
         {
+            var displayPro = ProcessForDisplay.CreateSubProcess();
+            if (ParameterViewModel.ShowLogs)
+            {
+                displayPro.Start();
+            }
             var blks = InputData.SelectBlocks(acadDatabase);
-            foreach(var blk in blks)
+            DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
+            foreach (var blk in blks)
             {
                 try
                 {
@@ -297,10 +326,12 @@ namespace ThMEPArchitecture.MultiProcess
                     var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
                     Logger = new Serilog.LoggerConfiguration().WriteTo
                             .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    DisplayLogger?.Information("块名: " + blkName);
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     RunABlock(blk);
+
                 }
                 catch(Exception ex)
                 {
@@ -310,16 +341,22 @@ namespace ThMEPArchitecture.MultiProcess
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
+
         }
 
         public void RunWithAutoSegLine(AcadDatabase acadDatabase)
         {
+            var displayPro = ProcessForDisplay.CreateSubProcess();
+            if (ParameterViewModel.ShowLogs)
+            {
+                displayPro.Start();
+            }
             var blks = InputData.SelectBlocks(acadDatabase);
             var cutTol = 1000;
             var HorizontalFirst = true;
+            DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
             foreach (var blk in blks)
             {
-
                 try
                 {
                     var blkName = blk.GetEffectiveName();
@@ -328,6 +365,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
                     Logger = new Serilog.LoggerConfiguration().WriteTo
                             .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    DisplayLogger?.Information("块名: " + blkName);
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
@@ -342,6 +380,7 @@ namespace ThMEPArchitecture.MultiProcess
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
+
         }
         public void RunABlock(BlockReference blk,List<LineSegment> AutoSegLines = null, LayoutData layoutData = null)
         {
@@ -355,7 +394,7 @@ namespace ThMEPArchitecture.MultiProcess
             if(AutoSegLines == null)
             {
                 layoutData = new LayoutData();
-                var inputvaild = layoutData.Init(blk, Logger);
+                var inputvaild = layoutData.Init(blk, Logger, DisplayLogger);
                 if (!inputvaild) return;
             }
             else
@@ -376,6 +415,7 @@ namespace ThMEPArchitecture.MultiProcess
                 var GA = new MultiProcessGAGenerator(ParameterViewModel);
                 Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 GA.Logger = Logger;
+                GA.DisplayLogger = DisplayLogger;
                 List<SubArea> subAreas;
                 try
                 {
@@ -410,6 +450,7 @@ namespace ThMEPArchitecture.MultiProcess
                     SubAreaParkingCnt.Clear();
                     ReclaimMemory();
                     Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                    DisplayLogger?.Information($"总用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
 
                 }
                 catch (Exception ex)
@@ -434,7 +475,7 @@ namespace ThMEPArchitecture.MultiProcess
             stopWatch.Start();
             var t_pre = 0.0;
             layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(blk, Logger, false);
+            var inputvaild = layoutData.Init(blk, Logger, DisplayLogger, false);
             if (!inputvaild) return null;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
             var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);

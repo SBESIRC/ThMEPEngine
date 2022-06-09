@@ -1,0 +1,77 @@
+﻿<cus:ThCustomWindow x:Class="ThParkingStallProgramDisplay.UI.ProgramDisplay"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:s="clr-namespace:System;assembly=mscorlib"
+              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+              Title="运行显示" SizeToContent="Manual" Height="710"
+              Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
+              mc:Ignorable="d"
+                    >
+    <Grid  Margin="5" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Vertical">
+
+
+                <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <TextBlock Margin="5">地库总数量：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding BasementNums}" ></TextBox>
+                <TextBlock Margin="5">进程数：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding Process}" ></TextBox>
+                </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Margin="5">计算进度：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding ProgressRate}" ></TextBox>
+                <TextBlock Margin="5">用时：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding TimeCost}" ></TextBox>
+                <TextBlock Margin="5">秒</TextBlock>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Margin="5">计算中地库块名：</TextBlock>
+                <TextBox Width="150" Margin="5" Text="{Binding BlockName}" ></TextBox>
+
+            </StackPanel>
+
+
+
+            <Separator></Separator>
+
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Margin="5">预计代数：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding Iterations}" ></TextBox>
+                <TextBlock Margin="5">种群数量：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding Populations}" ></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Margin="5">当前代数：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding CurIterations}" ></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <TextBlock Margin="5">当前车位数：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding CurCars}" ></TextBox>
+                <TextBlock Margin="5">车均面积：</TextBlock>
+                <TextBox Width="75" Margin="5" Text="{Binding AveArea}" ></TextBox>
+                <TextBlock Margin="5">平方米/辆</TextBlock>
+            </StackPanel>
+                
+            <Separator></Separator>
+
+
+            <Grid Margin="10">
+                <TextBox x:Name="txtStatus" AcceptsReturn="True"  Text ="{Binding Results}"  TextWrapping="Wrap" IsReadOnly="True" />
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+    </cus:ThCustomWindow>

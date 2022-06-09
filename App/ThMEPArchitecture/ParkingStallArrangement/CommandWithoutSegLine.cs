@@ -37,9 +37,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
     public class WithoutSegLineCmd : ThMEPBaseCommand, IDisposable
     {
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "AutoSeglineLog.txt");
+        public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+
+        public Serilog.Core.Logger DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
+            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();//用于记录信息日志
+
+
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
 
@@ -150,7 +156,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             stopWatch.Start();
             var t_pre = 0.0;
             var layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(blk, Logger, false);
+            var inputvaild = layoutData.Init(blk, Logger, DisplayLogger, false);
             if (!inputvaild) return null;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
             var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);

@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.2)" SizeToContent="Manual" Height="710"
+              Title="车位自动排布(2.2)" SizeToContent="Manual" Height="745"
               Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -174,7 +174,7 @@
                     <Label></Label>
                     <Button Name="btnRun" Width="40" FontSize="16" FontWeight="Bold" Click="btnRun_Click">运行</Button>
                     <Label></Label>
-                    <Button Name="btnShowLog" Width="70" FontSize="16" FontWeight="Bold" Click="btnShowLog_Click">显示日志</Button>
+                    <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding ShowLogs}">显示日志</CheckBox>
                     <Label></Label>
                 </StackPanel>
             </StackPanel>

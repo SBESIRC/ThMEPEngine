@@ -51,6 +51,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         ParkingStallArrangementViewModel ParameterViewModel;
         public Serilog.Core.Logger Logger = null;
+        public Serilog.Core.Logger DisplayLogger = null;
 
         public int ProcessCount;
         //public List<Process> ProcList;//进程列表
@@ -248,6 +249,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
             Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
+
+            DisplayLogger?.Information($"预计代数: {IterationCount}\t");
+            DisplayLogger?.Information($"种群数量: {PopulationSize}\t");
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             List<MPChromosome> selected = new List<MPChromosome>();
@@ -269,6 +274,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 //MutexEndList.ForEach(mutex => mutex.ReleaseMutex());
                 Logger?.Information($"进程数: {ProcessCount }");
+                DisplayLogger?.Information($"进程数: {ProcessCount }\t");
                 Logger?.Information($"进程启动用时: {stopWatch.Elapsed.TotalSeconds }");
                 var t_pre = stopWatch.Elapsed.TotalSeconds;
                 var pop = CreateFirstPopulation();
@@ -287,6 +293,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var strCurIterIndex = $"迭代次数：{CurIteration}";
                     Logger?.Information(strCurIterIndex);
+                    DisplayLogger?.Information(strCurIterIndex+"\t");
                     System.Diagnostics.Debug.WriteLine(strCurIterIndex);
                     System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                     selected = Selection2(pop, out int CurNums);
@@ -309,6 +316,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var rstLM = temp_list[1];
                     MutationL(rstLM);
                     pop.AddRange(rstLM);
+                    
                     Logger?.Information($"当前代用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
                     t_pre = stopWatch.Elapsed.TotalSeconds;
                     if (CurIteration % 3 == 0)
@@ -320,6 +328,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 else strConverged = $"已收敛";
                 Active.Editor.WriteMessage(strConverged);
                 Logger?.Information(strConverged);
+                DisplayLogger?.Information("最终代数: " + CurIteration.ToString() + "\t");
+                DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
                 stopWatch.Stop();
                 var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
                 Logger?.Information(strTotalMins);
@@ -368,6 +378,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 strCnt += " ";
             }
             Logger?.Information(strCnt);
+            var maxCnt = sorted[0].ParkingStallCount;
+            DisplayLogger?.Information("当前车位数: " + maxCnt.ToString()+"\t");
+            var areaPerStall = (ParameterStock.TotalArea - ParameterStock.ObstacleArea) / maxCnt;
+            DisplayLogger?.Information("车均面积: " + areaPerStall.ToString() + "平方米/辆\t");
             System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<MPChromosome>();
             // SelectionSize 直接保留

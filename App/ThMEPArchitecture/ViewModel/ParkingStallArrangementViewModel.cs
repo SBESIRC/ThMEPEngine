@@ -477,6 +477,18 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("ThreadCount");
             }
         }
+
+        private bool _ShowLogs = false;//显示日志，默认为false
+
+        public bool ShowLogs
+        {
+            get { return _ShowLogs; }
+            set
+            {
+                _ShowLogs = value;
+                RaisePropertyChanged("ShowLogs");
+            }
+        }
         //横向优先_纵向车道计算长度调整_背靠背模块
         public double LayoutScareFactor_Intergral = 0.7;
         //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
@@ -599,6 +611,11 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
+
+        
+
+
+
         private static bool _UseMultiSelection = false;//是否多选
 
         public static bool UseMultiSelection
