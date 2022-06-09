@@ -123,6 +123,10 @@
       <Project>{0B67DA69-EE95-472C-8A4D-326BCB220621}</Project>
       <Name>ThParkingStall.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThParkingStallProgramDisplay\ThParkingStallProgramDisplay.csproj">
+      <Project>{b001f158-e231-4365-9743-a4f8bf67fe3b}</Project>
+      <Name>ThParkingStallProgramDisplay</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Accord.Math">
