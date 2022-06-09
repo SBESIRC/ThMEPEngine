@@ -52,17 +52,6 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("UseMultiProcess");
             }
         }
-        private bool _UseMultiSelection = false;//是否多选
-
-        public bool UseMultiSelection
-        {
-            get { return _UseMultiSelection; }
-            set
-            {
-                _UseMultiSelection = value;
-                RaisePropertyChanged("UseMultiSelection");
-            }
-        }
 
         //只生成分割线
         private bool _JustCreateSplittersChecked = true;
@@ -612,23 +601,11 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
-        
 
-
-
-        private static bool _UseMultiSelection = false;//是否多选
-
-        public static bool UseMultiSelection
-        {
-            get
-            {
-                if (Setted) return _UseMultiSelection;
-                else throw new ArgumentException("ParameterStock Unsetted");
-            }
-        }
-        public static double ObstacleArea;
-        public static double TotalArea;
+        public static double BuildingArea;//建筑面积（m^2)
+        public static double TotalArea;//地库面积（m^2)
         public static bool ReadHiddenParameter = false;
+        public static int CutTol = 995;//全自动分割线比车道多出的额外距离
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
@@ -640,7 +617,6 @@ namespace ThMEPArchitecture.ViewModel
             _BuildingTolerance = vm.BuildingTolerance;
             _ProcessCount = vm.ProcessCount;
             _ThreadCount = vm.ThreadCount;
-            _UseMultiSelection = vm.UseMultiSelection;
             Setted = true;
         }
     }
@@ -659,6 +635,8 @@ namespace ThMEPArchitecture.ViewModel
         public double LayoutScareFactor_SingleVert = 0.7;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public double SingleVertModulePlacementFactor = 1.0;
+        //全自动分割线比车道多出的额外距离
+        public int CutTol = 995;
         private void Save()
         {
             TextWriter writer = null;
@@ -681,7 +659,7 @@ namespace ThMEPArchitecture.ViewModel
             TextReader reader = null;
             var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var filePath = System.IO.Path.Combine(currentDllPath, "ThParkingStallConfig.json");
-            HiddenParameter hp;
+            HiddenParameter hp = new HiddenParameter();
             try
             {
                 if (ParameterStock.ReadHiddenParameter &&File.Exists(filePath))
@@ -692,7 +670,6 @@ namespace ThMEPArchitecture.ViewModel
                 }
                 else
                 {
-                    hp = new HiddenParameter();
                     if (!File.Exists(filePath))hp.Save();
                 }
                 ParameterStock.LogMainProcess = hp.LogMainProcess;
@@ -703,6 +680,7 @@ namespace ThMEPArchitecture.ViewModel
             {
                 if (reader != null)
                     reader.Close();
+                ParameterStock.CutTol = hp.CutTol;
             }
         }
     }

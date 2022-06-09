@@ -156,7 +156,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             stopWatch.Start();
             var t_pre = 0.0;
             var layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(blk, Logger, DisplayLogger, false);
+            var inputvaild = layoutData.Init(blk, Logger, false);
             if (!inputvaild) return null;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
             var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);

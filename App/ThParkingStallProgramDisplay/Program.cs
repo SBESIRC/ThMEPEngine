@@ -62,7 +62,7 @@ namespace ThParkingStallProgramDisplay
                                 logs.Add(line);
                                 System.Console.WriteLine(val);
                             }
-                            Thread.Sleep(2000);
+                            Thread.Sleep(100);
                         }
                     }
                 }

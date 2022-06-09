@@ -68,7 +68,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
         private double CloseTol = 5.0;
-        public bool Init(BlockReference block, Serilog.Core.Logger logger, Serilog.Core.Logger DisplayLogger, bool extractSegLine = true)
+        public bool Init(BlockReference block, Serilog.Core.Logger logger, bool extractSegLine = true)
         {
             Logger = logger;
 
@@ -106,30 +106,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 SegLineIntSecNode = SegLines.GetSegLineIntSecNode(CrossPts);
                 GetLowerUpperBound();
                 //ShowLowerUpperBound();
-            }
-            return true;
-        }
-
-        public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger, Serilog.Core.Logger DisplayLogger, bool extractSegLine = true)
-        {
-            var block = InputData.SelectBlock(acadDatabase);//提取地库对象
-            if (block is null)
-            {
-                return false;
-            }
-            Logger = logger;
-            Logger?.Information("块名：" + block.GetEffectiveName());
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-            string drawingName = Path.GetFileName(doc.Name);
-            Logger?.Information("文件名：" + drawingName);
-            DisplayLogger?.Information("地库总数量: 1\t");
-            DisplayLogger?.Information("块名: " + block.GetEffectiveName()+"\t");
-            Logger?.Information("用户名：" + Environment.UserName);
-            if (!TryInit(block, extractSegLine)) return false;
-            //Show();
-            if (SegLines.Count != 0)
-            {
-                ProcessSegLines();
             }
             return true;
         }
@@ -381,9 +357,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //ObstacleBoundaries = result.Get<Polygon>(true);
             var mmtoM = 0.001 * 0.001;
             ParameterStock.TotalArea = WallLine.Area*mmtoM;
-            ParameterStock.ObstacleArea = result.Area * mmtoM; 
+            ParameterStock.BuildingArea = result.Area * mmtoM; 
             Logger?.Information($"地库总面积:"+ string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2) );
-            Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.ObstacleArea) + "m" + Convert.ToChar(0x00b2) );
+            Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2) );
         }
         #endregion
         #region 分割线检查
