@@ -168,20 +168,20 @@ namespace ThMEPIFC
         }
         static public IfcWallStandardCase CreateWall(IfcStore model, ThTCHWall wall, Point3d floor_origin)
         {
-
-            //begin a transaction
             using (var txn = model.BeginTransaction("Create Wall"))
             {
                 var ret = model.Instances.New<IfcWallStandardCase>();
                 ret.Name = "A Standard rectangular wall";
 
-                //model as a swept area solid
-                var body = model.Instances.New<IfcExtrudedAreaSolid>();
-                body.Depth = wall.WallHeight;
-                body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                body.ExtrudedDirection.SetXYZ(wall.ExtrudedDirection.X, wall.ExtrudedDirection.Y, wall.ExtrudedDirection.Z);
+                //model as a swept area solid 
+                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = wall.WallHeight;
+                    s.ExtrudedDirection = model.ToIfcDirection(wall.ExtrudedDirection);
+                });
 
-                if (wall.Outline != null&& wall.Outline is Polyline pline)
+                
+                if (wall.Outline != null && wall.Outline is Polyline pline)
                 {
                     var ArbitraryClosedProfileDef = model.Instances.New<IfcArbitraryClosedProfileDef>();
                     ArbitraryClosedProfileDef.ProfileType = IfcProfileTypeEnum.AREA;
@@ -192,23 +192,18 @@ namespace ThMEPIFC
                 else
                 {
                     //represent wall as a rectangular profile
-                    var rectProf = model.Instances.New<IfcRectangleProfileDef>();
-                    rectProf.ProfileType = IfcProfileTypeEnum.AREA;
-                    rectProf.XDim = wall.WallLength;
-                    rectProf.YDim = wall.WallWidth;
-
-                    var insertPoint = model.Instances.New<IfcCartesianPoint>();
-                    insertPoint.SetXY(0, 0); //insert at arbitrary position
-                    rectProf.Position = model.Instances.New<IfcAxis2Placement2D>();
-                    rectProf.Position.Location = insertPoint;
+                    var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
+                    {
+                        p.YDim = wall.WallWidth;
+                        p.XDim = wall.WallLength;
+                        p.ProfileType = IfcProfileTypeEnum.AREA;
+                        p.Position = model.ToIfcAxis2Placement2D(default);
+                    });
                     body.SweptArea = rectProf;
                 }
 
                 //parameters to insert the geometry in the model
-                var origin = model.Instances.New<IfcCartesianPoint>();
-                origin.SetXYZ(0, 0, 0);
-                body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                body.Position.Location = origin;
+                body.Position = model.ToIfcAxis2Placement3D(default);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -331,28 +326,24 @@ namespace ThMEPIFC
                 ret.Name = "door";
 
                 //represent wall as a rectangular profile
-                var rectProf = model.Instances.New<IfcRectangleProfileDef>();
-                rectProf.ProfileType = IfcProfileTypeEnum.AREA;
-                rectProf.XDim = door.Width;
-                rectProf.YDim = door.Thickness - epsilon;
-
-                var insertPoint = model.Instances.New<IfcCartesianPoint>();
-                insertPoint.SetXY(0, 0); //insert at arbitrary position
-                rectProf.Position = model.Instances.New<IfcAxis2Placement2D>();
-                rectProf.Position.Location = insertPoint;
+                var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
+                {
+                    p.XDim = door.Width;
+                    p.YDim = door.Thickness - epsilon;
+                    p.ProfileType = IfcProfileTypeEnum.AREA;
+                    p.Position = model.ToIfcAxis2Placement2D(default);
+                });
 
                 //model as a swept area solid
-                var body = model.Instances.New<IfcExtrudedAreaSolid>();
-                body.Depth = door.Height;
-                body.SweptArea = rectProf;
-                body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                body.ExtrudedDirection.SetXYZ(door.ExtrudedDirection.X, door.ExtrudedDirection.Y, door.ExtrudedDirection.Z);
+                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = door.Height;
+                    s.SweptArea = rectProf;
+                    s.ExtrudedDirection = model.ToIfcDirection(door.ExtrudedDirection);
+                });
 
                 //parameters to insert the geometry in the model
-                var origin = model.Instances.New<IfcCartesianPoint>();
-                origin.SetXYZ(0, 0, 0);
-                body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                body.Position.Location = origin;
+                body.Position = model.ToIfcAxis2Placement3D(default);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -411,21 +402,21 @@ namespace ThMEPIFC
                 hole.Name = "hole";
                 //todo: describe hole's geometry
 
-                var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>();
-                hole_rectProf.ProfileType = IfcProfileTypeEnum.AREA;
-                hole_rectProf.XDim = door.Width;
-                hole_rectProf.YDim = thwall.WallWidth;//todo;
-                hole_rectProf.Position = model.Instances.New<IfcAxis2Placement2D>();
-                hole_rectProf.Position.Location = insertPoint;
+                var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
+                {
+                    p.XDim = door.Width;
+                    p.YDim = thwall.WallWidth;
+                    p.ProfileType = IfcProfileTypeEnum.AREA;
+                    p.Position = model.ToIfcAxis2Placement2D(default);
+                });
 
-                var hole_body = model.Instances.New<IfcExtrudedAreaSolid>();
-                hole_body.Depth = door.Height;
-                hole_body.SweptArea = hole_rectProf;
-                hole_body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                hole_body.ExtrudedDirection.SetXYZ(door.ExtrudedDirection.X, door.ExtrudedDirection.Y, door.ExtrudedDirection.Z);
-
-                hole_body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                hole_body.Position.Location = origin;
+                var hole_body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = door.Height;
+                    s.SweptArea = hole_rectProf;
+                    s.ExtrudedDirection = model.ToIfcDirection(door.ExtrudedDirection);
+                });
+                hole_body.Position = model.ToIfcAxis2Placement3D(default);
 
                 var hole_shape = model.Instances.New<IfcShapeRepresentation>();
                 var hole_modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
@@ -477,29 +468,26 @@ namespace ThMEPIFC
             {
                 var ret = model.Instances.New<IfcWindow>();
                 ret.Name = "window";
-                //represent wall as a rectangular profile
-                var rectProf = model.Instances.New<IfcRectangleProfileDef>();
-                rectProf.ProfileType = IfcProfileTypeEnum.AREA;
-                rectProf.XDim = window.Width;
-                rectProf.YDim = window.Thickness - epsilon;
 
-                var insertPoint = model.Instances.New<IfcCartesianPoint>();
-                insertPoint.SetXY(0, 0); //insert at arbitrary position
-                rectProf.Position = model.Instances.New<IfcAxis2Placement2D>();
-                rectProf.Position.Location = insertPoint;
+                //represent wall as a rectangular profile
+                var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
+                {
+                    p.XDim = window.Width;
+                    p.YDim = window.Thickness - epsilon;
+                    p.ProfileType = IfcProfileTypeEnum.AREA;
+                    p.Position = model.ToIfcAxis2Placement2D(default);
+                });
 
                 //model as a swept area solid
-                var body = model.Instances.New<IfcExtrudedAreaSolid>();
-                body.Depth = window.Height;
-                body.SweptArea = rectProf;
-                body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                body.ExtrudedDirection.SetXYZ(window.ExtrudedDirection.X, window.ExtrudedDirection.Y, window.ExtrudedDirection.Z);
+                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = window.Height;
+                    s.SweptArea = rectProf;
+                    s.ExtrudedDirection = model.ToIfcDirection(window.ExtrudedDirection);
+                });
 
                 //parameters to insert the geometry in the model
-                var origin = model.Instances.New<IfcCartesianPoint>();
-                origin.SetXYZ(0, 0, 0);
-                body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                body.Position.Location = origin;
+                body.Position = model.ToIfcAxis2Placement3D(default);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -548,21 +536,22 @@ namespace ThMEPIFC
                 hole.Name = "hole";
                 //todo: describe hole's geometry
 
-                var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>();
-                hole_rectProf.ProfileType = IfcProfileTypeEnum.AREA;
-                hole_rectProf.XDim = window.Width;
-                hole_rectProf.YDim = thwall.WallWidth;//todo;
-                hole_rectProf.Position = model.Instances.New<IfcAxis2Placement2D>();
-                hole_rectProf.Position.Location = insertPoint;
+                var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
+                {
+                    p.XDim = window.Width;
+                    p.YDim = thwall.WallWidth;//todo;
+                    p.ProfileType = IfcProfileTypeEnum.AREA;
+                    p.Position = model.ToIfcAxis2Placement2D(default);
+                });
 
-                var hole_body = model.Instances.New<IfcExtrudedAreaSolid>();
-                hole_body.Depth = window.Height;
-                hole_body.SweptArea = hole_rectProf;
-                hole_body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                hole_body.ExtrudedDirection.SetXYZ(window.ExtrudedDirection.X, window.ExtrudedDirection.Y, window.ExtrudedDirection.Z);
+                var hole_body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = window.Height;
+                    s.SweptArea = hole_rectProf;
+                    s.ExtrudedDirection = model.ToIfcDirection(window.ExtrudedDirection);
+                });
 
-                hole_body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                hole_body.Position.Location = origin;
+                hole_body.Position = model.ToIfcAxis2Placement3D(default);
 
                 var hole_shape = model.Instances.New<IfcShapeRepresentation>();
                 var hole_modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
@@ -615,28 +604,24 @@ namespace ThMEPIFC
                 var ret = model.Instances.New<IfcOpeningElement>();
                 ret.Name = "window";
                 //represent wall as a rectangular profile
-                var rectProf = model.Instances.New<IfcRectangleProfileDef>();
-                rectProf.ProfileType = IfcProfileTypeEnum.AREA;
-                rectProf.XDim = hole.Width;
-                rectProf.YDim = hole.Thickness - epsilon;
-
-                var insertPoint = model.Instances.New<IfcCartesianPoint>();
-                insertPoint.SetXY(0, 0); //insert at arbitrary position
-                rectProf.Position = model.Instances.New<IfcAxis2Placement2D>();
-                rectProf.Position.Location = insertPoint;
+                var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
+                {
+                    p.XDim = hole.Width;
+                    p.YDim = hole.Thickness - epsilon;
+                    p.ProfileType = IfcProfileTypeEnum.AREA;
+                    p.Position = model.ToIfcAxis2Placement2D(default);
+                });
 
                 //model as a swept area solid
-                var body = model.Instances.New<IfcExtrudedAreaSolid>();
-                body.Depth = hole.Height;
-                body.SweptArea = rectProf;
-                body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                body.ExtrudedDirection.SetXYZ(hole.ExtrudedDirection.X, hole.ExtrudedDirection.Y, hole.ExtrudedDirection.Z);
+                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = hole.Height;
+                    s.SweptArea = rectProf;
+                    s.ExtrudedDirection = model.ToIfcDirection(hole.ExtrudedDirection);
+                });
 
                 //parameters to insert the geometry in the model
-                var origin = model.Instances.New<IfcCartesianPoint>();
-                origin.SetXYZ(0, 0, 0);
-                body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                body.Position.Location = origin;
+                body.Position = model.ToIfcAxis2Placement3D(default);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -680,10 +665,11 @@ namespace ThMEPIFC
                 ret.Name = "Standard Slab";
 
                 // create extruded solid body 
-                var body = model.Instances.New<IfcExtrudedAreaSolid>();
-                body.Depth = slab.Thickness;
-                body.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                body.ExtrudedDirection.SetXYZ(slab.ExtrudedDirection.X, slab.ExtrudedDirection.Y, slab.ExtrudedDirection.Z);
+                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                {
+                    s.Depth = slab.Thickness;
+                    s.ExtrudedDirection = model.ToIfcDirection(slab.ExtrudedDirection);
+                });
 
                 if (slab.Outline != null)
                 {
@@ -707,10 +693,7 @@ namespace ThMEPIFC
                 }
 
                 //parameters to insert the geometry in the model
-                var origin = model.Instances.New<IfcCartesianPoint>();
-                origin.SetXYZ(0, 0, 0);
-                body.Position = model.Instances.New<IfcAxis2Placement3D>();
-                body.Position.Location = origin;
+                body.Position = model.ToIfcAxis2Placement3D(default);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -750,8 +733,7 @@ namespace ThMEPIFC
                         // create extruded solid body 
                         var holesbody = model.Instances.New<IfcExtrudedAreaSolid>();
                         holesbody.Depth = slab.Thickness;
-                        holesbody.ExtrudedDirection = model.Instances.New<IfcDirection>();
-                        holesbody.ExtrudedDirection.SetXYZ(slab.ExtrudedDirection.X, slab.ExtrudedDirection.Y, slab.ExtrudedDirection.Z);
+                        holesbody.ExtrudedDirection = model.ToIfcDirection(slab.ExtrudedDirection);
 
                         //build 2d area
                         var holesArbitraryClosedProfileDef = model.Instances.New<IfcArbitraryClosedProfileDef>();
@@ -761,8 +743,7 @@ namespace ThMEPIFC
                         holesbody.SweptArea = holesArbitraryClosedProfileDef;
 
                         //parameters to insert the geometry of holes in the model
-                        holesbody.Position = model.Instances.New<IfcAxis2Placement3D>();
-                        holesbody.Position.Location = origin;
+                        holesbody.Position = model.ToIfcAxis2Placement3D(default);
 
                         //Create a Definition shape to hold the geometry of holes
                         var holesshape = model.Instances.New<IfcShapeRepresentation>();

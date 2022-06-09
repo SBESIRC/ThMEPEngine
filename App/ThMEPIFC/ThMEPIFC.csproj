@@ -37,6 +37,7 @@
     <Compile Include="ThTGL2IFCFactory.cs" />
     <Compile Include="ThTGL2IFCGeExtension.cs" />
     <Compile Include="ThTGL2IFCService.cs" />
+    <Compile Include="ThTGL2IFCSolid3dExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Essentials">
