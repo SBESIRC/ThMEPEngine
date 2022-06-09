@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using Linq2Acad;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -16,6 +17,15 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThAXISLineExtractionVisitor();
             var extractor = new ThBuildingElementExtractor();
+            List<string> layerNames = new List<string>();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                layerNames = acadDatabase.Layers
+                    .Where(o => !(o.IsOff || o.IsFrozen))
+                    .Select(o => o.Name)
+                    .ToList();
+            };
+            visitor.LayerFilter = layerNames;
             extractor.Accept(visitor);
             extractor.Extract(database);
             Results = visitor.Results;

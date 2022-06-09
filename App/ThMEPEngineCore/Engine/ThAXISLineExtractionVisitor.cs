@@ -52,6 +52,9 @@ namespace ThMEPEngineCore.Engine
         public override bool CheckLayerValid(Entity entity)
         {
             var layer = entity.Layer;
+            if (null != LayerFilter && LayerFilter.Count > 0)
+                if (!LayerFilter.Contains(layer))
+                    return false;
             return layer.Contains("AXIS") &&
                 !layer.Contains("CRCL") &&
                 !layer.Contains("NUMB") &&
