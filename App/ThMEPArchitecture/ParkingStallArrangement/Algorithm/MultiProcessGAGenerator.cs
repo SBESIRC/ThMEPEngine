@@ -380,7 +380,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information(strCnt);
             var maxCnt = sorted[0].ParkingStallCount;
             DisplayLogger?.Information("当前车位数: " + maxCnt.ToString()+"\t");
-            var areaPerStall = (ParameterStock.TotalArea - ParameterStock.ObstacleArea) / maxCnt;
+            var areaPerStall = (ParameterStock.TotalArea - ParameterStock.BuildingArea) / maxCnt;
             DisplayLogger?.Information("车均面积: " + areaPerStall.ToString() + "平方米/辆\t");
             System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<MPChromosome>();
