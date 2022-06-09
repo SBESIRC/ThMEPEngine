@@ -479,6 +479,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         pointList[j].Item.Break.Used = true;
                         if (!hasFlushPoint)
                         {
+                            //20220609Fixed
+                            pointList[j].Item.Break.Used = false;
+                            //20220609Fixed
                             //isUnnececcsaryBreakDot = true;
                             //var iniloc = riserPoint;
                             //var floorlines = FloorLines.Where(e => e.GetCenter().Y > iniloc.Y).OrderBy(e => e.GetCenter().Y - iniloc.Y);
