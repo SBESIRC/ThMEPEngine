@@ -21,6 +21,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<FloorFramed> _maxRoofFloors;
         List<FloorFramed> _minRoofFloors;
         double _convertPipeDimLineLength = 2000;
+        string _convertPipeDimText = "接雨水斗";
         public RoofLayout(List<FloorFramed> roofFloors, List<RoofPointInfo> roofWaterBuckets, Dictionary<string, List<ThIfcRoom>> roofFloorRooms) 
         {
             _roofFloors = new List<FloorFramed>();
@@ -114,7 +115,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 item.tag = DrainSysAGCommon.NOTCOPYTAG;
                 retRes.Add(item);
                 var dimDir = (Vector3d.XAxis - Vector3d.YAxis).GetNormal();
-                var dimAddLines = PipeAddDim(livingFloor.floorUid, item.createPoint, dimDir, _convertPipeDimLineLength, "接雨水口", out List<CreateDBTextElement> dimAddTexts);
+                var dimAddLines = PipeAddDim(livingFloor.floorUid, item.createPoint, dimDir, _convertPipeDimLineLength, _convertPipeDimText, out List<CreateDBTextElement> dimAddTexts);
                 if (dimAddLines != null)
                     addLines.AddRange(dimAddLines);
                 if (null != dimAddTexts)
@@ -156,7 +157,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         continue;
                     retRes.Add(item);
                     var dimDir = (Vector3d.XAxis - Vector3d.YAxis).GetNormal();
-                    var dimAddLines = PipeAddDim(livingFloor.floorUid, maxY1L.createPoint, dimDir, _convertPipeDimLineLength, "接雨水口", out List<CreateDBTextElement> dimAddTexts);
+                    var dimAddLines = PipeAddDim(livingFloor.floorUid, maxY1L.createPoint, dimDir, _convertPipeDimLineLength, _convertPipeDimText, out List<CreateDBTextElement> dimAddTexts);
                     if (dimAddLines != null)
                         addLines.AddRange(dimAddLines);
                     if (null != dimAddTexts)
