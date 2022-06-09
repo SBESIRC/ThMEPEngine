@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPTCH.Model;
-using Xbim.Ifc;
 using Xbim.IO;
-using Xbim.Ifc4.ProductExtension;
+using Xbim.Ifc;
+using System.Collections.Generic;
 using Xbim.Ifc4.SharedBldgElements;
+using ThMEPTCH.Model;
 
 namespace ThMEPIFC
 {
@@ -17,19 +13,16 @@ namespace ThMEPIFC
         {
             if (Model != null)
             {
-                var Site = ThTGL2IFCFactory.CreateSite(Model, project.Site);
-                var thtchbuilding = project.Site.Building;
-                var Building = ThTGL2IFCFactory.CreateBuilding(Model, Site, thtchbuilding);
-                List<IfcBuildingStorey> storeys = new List<IfcBuildingStorey>();
-                List<IfcDoor> doors = new List<IfcDoor>();
-                List<IfcWindow> windows = new List<IfcWindow>();
-                List<IfcWallStandardCase> walls = new List<IfcWallStandardCase>();
-                List<IfcSlab> slabs = new List<IfcSlab>();
-                foreach (var thtchstorey in thtchbuilding.Storeys)
+                var site = ThTGL2IFCFactory.CreateSite(Model, project.Site);
+                var building = ThTGL2IFCFactory.CreateBuilding(Model, site, project.Site.Building);
+                foreach (var thtchstorey in project.Site.Building.Storeys)
                 {
-
+                    var walls = new List<IfcWall>();
+                    var slabs = new List<IfcSlab>();
+                    var doors = new List<IfcDoor>();
+                    var windows = new List<IfcWindow>();
                     var floor_origin = thtchstorey.FloorOrigin;
-                    var Storey = ThTGL2IFCFactory.CreateStorey(Model, Building, thtchstorey);
+                    var storey = ThTGL2IFCFactory.CreateStorey(Model, building, thtchstorey);
                     foreach (var thtchwall in thtchstorey.ThTCHWalls)
                     {
                         var wall = ThTGL2IFCFactory.CreateWall(Model, thtchwall, floor_origin);
@@ -44,33 +37,24 @@ namespace ThMEPIFC
                             var window = ThTGL2IFCFactory.CreateWindow(Model, thtchwindow, wall, thtchwall, floor_origin);
                             windows.Add(window);
                         }
-                        foreach(var thtchhole in thtchwall.Openings)
+                        foreach (var thtchhole in thtchwall.Openings)
                         {
                             var hole = ThTGL2IFCFactory.CreateHole(Model, thtchhole, wall, thtchwall, floor_origin);
                         }
                     }
-                    foreach(var thtchslab in thtchstorey.ThTCHSlabs)
+                    foreach (var thtchslab in thtchstorey.ThTCHSlabs)
                     {
                         var slab = ThTGL2IFCFactory.CreateSlab(Model, thtchslab, floor_origin);
                         slabs.Add(slab);
                     }
-                    ThTGL2IFCFactory.relContainWalls2Storey(Model, walls, Storey);
-                    ThTGL2IFCFactory.relContainDoors2Storey(Model, doors, Storey);
-                    ThTGL2IFCFactory.relContainWindows2Storey(Model, windows, Storey);
-                    ThTGL2IFCFactory.relContainSlabs2Storey(Model, slabs, Storey);
-                    walls.Clear();
-                    doors.Clear();
-                    windows.Clear();
-                    slabs.Clear();
+                    ThTGL2IFCFactory.relContainWalls2Storey(Model, walls, storey);
+                    ThTGL2IFCFactory.relContainDoors2Storey(Model, doors, storey);
+                    ThTGL2IFCFactory.relContainWindows2Storey(Model, windows, storey);
+                    ThTGL2IFCFactory.relContainSlabs2Storey(Model, slabs, storey);
                 }
             }
-            else
-            {
-                Console.WriteLine("ifcstore to build is empty!");
-                Console.ReadKey();
-            }
         }
-        static public void SaveIfcModel(IfcStore Model,string filepath)
+        static public void SaveIfcModel(IfcStore Model, string filepath)
         {
             if (Model != null)
             {
@@ -87,11 +71,6 @@ namespace ThMEPIFC
                     }
                     txn.Commit();
                 }
-            }
-            else
-            {
-                Console.WriteLine("ifcstore to save is empty!");
-                Console.ReadKey();
             }
         }
     }

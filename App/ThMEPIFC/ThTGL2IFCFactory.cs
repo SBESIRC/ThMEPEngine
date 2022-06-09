@@ -166,11 +166,11 @@ namespace ThMEPIFC
                 return ret;
             }
         }
-        static public IfcWallStandardCase CreateWall(IfcStore model, ThTCHWall wall, Point3d floor_origin)
+        static public IfcWall CreateWall(IfcStore model, ThTCHWall wall, Point3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Wall"))
             {
-                var ret = model.Instances.New<IfcWallStandardCase>();
+                var ret = model.Instances.New<IfcWall>();
                 ret.Name = "A Standard rectangular wall";
 
                 //model as a swept area solid 
@@ -301,7 +301,7 @@ namespace ThMEPIFC
                 return ret;
             }
         }
-        static public void relContainWalls2Storey(IfcStore model, List<IfcWallStandardCase> walls, IfcBuildingStorey Storey)
+        static public void relContainWalls2Storey(IfcStore model, List<IfcWall> walls, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainWalls2Storey"))
             {
