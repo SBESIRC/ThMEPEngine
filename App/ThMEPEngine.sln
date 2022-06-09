@@ -73,7 +73,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPTCH", "ThMEPTCH\ThMEPT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TianHua.Mep.UI", "TianHua.Mep.UI\TianHua.Mep.UI.csproj", "{0E2B7B5B-AC1E-4285-833B-65C0A957C100}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThParkingStallProgramDisplay", "ThParkingStallProgramDisplsy\ThParkingStallProgramDisplay.csproj", "{B001F158-E231-4365-9743-A4F8BF67FE3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThParkingStallProgramDisplay", "ThParkingStallProgramDisplay\ThParkingStallProgramDisplay.csproj", "{B001F158-E231-4365-9743-A4F8BF67FE3B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPIFC", "ThMEPIFC\ThMEPIFC.csproj", "{0B054B6C-A6D2-4B89-B19F-E12FC2B3CCD3}"
 EndProject
