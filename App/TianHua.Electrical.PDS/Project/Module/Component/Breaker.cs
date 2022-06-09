@@ -38,6 +38,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             CalculateCurrent = calculateCurrent;
             IsDomesticWaterPump = isDomesticWaterPump;
             IsSpecifiedSelection = false;
+            this.TripDevices = tripDevice;
             List<BreakerComponentInfo> breakers;
             BreakerComponentInfo breaker;
             if (hasLeakageProtection)
@@ -172,6 +173,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             IsSpecifiedSelection = true;
             List<Tuple<double, string>> configs = new List<Tuple<double, string>>();
             var appendix = AppendixType.无;
+            this.TripDevices = tripDevice;
             breakerConfig.ForEach(o =>
             {
                 //例：80A/2P/ST
@@ -259,6 +261,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             if (this.ComponentType == ComponentType.CB && componentType == ComponentType.组合式RCD)
             {
                 this.ComponentType = ComponentType.组合式RCD;
+                Appendix = AppendixType.RC;
                 //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
                 RCDType = RCDType.A;
                 if (IsDomesticWaterPump)
@@ -275,6 +278,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             else if (this.ComponentType == ComponentType.组合式RCD && componentType == ComponentType.CB)
             {
                 this.ComponentType = ComponentType.CB;
+                Appendix = AppendixType.无;
             }
             else
             {
@@ -288,7 +292,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         breakers = BreakerConfiguration.breakerComponentInfos.
                         Where(o => o.Amps > CalculateCurrent
                         && o.Amps >= 16
-                        && AlternativeTripDevice.Contains(o.TripDevice)
+                        && TripDevices.Contains(o.TripDevice)
                         && !o.ResidualCurrent.IsNullOrWhiteSpace()
                         && AlternativePolesNum.Contains(o.Poles)
                         && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))).ToList();
@@ -323,7 +327,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         breakers = BreakerConfiguration.breakerComponentInfos.
                             Where(o => o.Amps > CalculateCurrent
                             && o.Amps >= 16
-                            && AlternativeTripDevice.Contains(o.TripDevice)
+                            && TripDevices.Contains(o.TripDevice)
                             && AlternativePolesNum.Contains(o.Poles)
                             && o.ResidualCurrent.IsNullOrWhiteSpace()
                             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))).ToList();
@@ -374,7 +378,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
                     AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
                     AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
-                    AlternativeTripDevice = AlternativeTripDevice;
+                    AlternativeTripDevice = breakers.Select(o => o.TripDevice).Distinct().ToList();
                     AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
                     AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
                 }
@@ -676,6 +680,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 脱扣器类型
         /// </summary>
         private List<string> AlternativeTripDevice { get; set; }
+        
+        /// <summary>
+        /// 脱扣器类型
+        /// </summary>
+        private List<string> TripDevices { get; set; }
 
         /// <summary>
         /// 壳架规格
