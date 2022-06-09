@@ -88,7 +88,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                             {(int) TerminalType.MopSink , 1 },
                                                             {(int) TerminalType.Bathtub ,1.2 },
                                                             {(int) TerminalType.WaterHeater , 0},
-                                                            {(int) TerminalType.Unknow  , 0 },
+                                                            {(int) TerminalType.Unknow  , 0.75 },
                                                         };
 
         public static Dictionary<int, double> TerminalFixtureUnitCool = new Dictionary<int, double>()
@@ -101,7 +101,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                                 {(int) TerminalType.MopSink , 1 },
                                                                 {(int) TerminalType.Bathtub ,1},
                                                                 {(int) TerminalType.WaterHeater , 0},
-                                                                {(int) TerminalType.Unknow  , 0 },
+                                                                {(int) TerminalType.Unknow  , 0.5 },
                                                             };
 
         public static Dictionary<int, double> TerminalFixtureUnitHot = new Dictionary<int, double>()
@@ -114,7 +114,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                                 {(int) TerminalType.MopSink , 0 },
                                                                 {(int) TerminalType.Bathtub ,1},
                                                                 {(int) TerminalType.WaterHeater , 0},
-                                                                {(int) TerminalType.Unknow  , 0 },
+                                                                {(int) TerminalType.Unknow  , 0.5 },
                                                             };
 
         public static List<Tuple<double, double>> AlphaList = new List<Tuple<double, double>>()
