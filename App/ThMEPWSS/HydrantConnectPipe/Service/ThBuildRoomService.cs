@@ -17,7 +17,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             using (var database = AcadDatabase.Active())
             using (var roomEngine = new ThRoomBuilderEngine())
             {
-                var rooms = roomEngine.BuildFromMS(database.Database, selectArea);
+                var rooms = roomEngine.BuildFromMS(database.Database, selectArea, false);
                 List<ThBuildRoom> buildRooms = new List<ThBuildRoom>();
                 foreach (var room in rooms)
                 {

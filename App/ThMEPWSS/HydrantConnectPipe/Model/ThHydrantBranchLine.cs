@@ -295,22 +295,34 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
 
                 var position = line.GetCenter();
                 var vector = line.EndPoint.GetVectorTo(line.StartPoint).GetNormal();
-                var refVector = new Vector3d(0, 0, 1);
-                var basVector = new Vector3d(1, 0, 0);
-                double angle = basVector.GetAngleTo(vector, refVector);
-                if (angle > Math.PI / 2.0 && angle <= Math.PI)
+                if (vector.Y < 0)
                 {
-                    angle = angle + Math.PI;
+                    vector = -vector;
                 }
-                else if (angle > Math.PI && angle <= Math.PI * 3.0 / 2.0)
+                double angle = vector.GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis);
+                if (angle > Math.PI)
                 {
-                    angle = angle - Math.PI;
+                    angle = Math.PI * 2 - angle;
                 }
-                double tmpAngle = angle + Math.PI / 2.0;
-                var tmpVecotr = new Vector3d(Math.Cos(tmpAngle), Math.Sin(tmpAngle), 0.0);
+                var tmpVecotr = Vector3d.ZAxis.CrossProduct(vector);
+                var rotateAngle = vector.GetAngleTo(Vector3d.XAxis);
+                if (angle > 10 / 180.0 * Math.PI)
+                {
+                    if (tmpVecotr.Y < 0)
+                    {
+                        rotateAngle = rotateAngle - Math.PI;
+                        tmpVecotr = -tmpVecotr;
+                    }
+                }
+                else
+                {
+                    if (tmpVecotr.X > 0)
+                    {
+                        tmpVecotr = -tmpVecotr;
+                    }
+                }
                 position = position + 450 * tmpVecotr;
-
-                var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-DIMS", riserName, position, new Scale3d(1, 1, 1), angle);
+                var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-DIMS", riserName, position, new Scale3d(1, 1, 1), rotateAngle);
                 var blk = acadDatabase.Element<BlockReference>(blkId);
                 if (blk.IsDynamicBlock)
                 {
