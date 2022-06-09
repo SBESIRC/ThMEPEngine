@@ -444,6 +444,10 @@ namespace TianHua.Electrical.PDS.Project
                     newOUVP.SetRatedCurrent(oucp.RatedCurrent);
                 }
             }
+            else if (component.IsNull() && newComponent.IsNull())
+            {
+                //DO Nothing
+            }
             else
             {
                 throw new NotSupportedException();
