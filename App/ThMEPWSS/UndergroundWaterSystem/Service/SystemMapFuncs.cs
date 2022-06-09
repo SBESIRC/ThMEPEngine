@@ -254,7 +254,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 InsertValves(ValveLayerName, valves, valvePt, vector);
             }
         }
-        private void DrawBreakName(List<ThTreeNode<ThPointModel>> pointList, Point3d point,bool upward)
+        private void DrawBreakName(List<ThTreeNode<ThPointModel>> pointList, Point3d point,bool upward,ref int MarkDrawCount)
         {
             string dim = "";
             for (int i = 0; i < pointList.Count; i++)
@@ -270,10 +270,40 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var iniloc = point;
             var uploc = iniloc + Vector3d.YAxis * 400;
             if (!upward)
+            {
                 uploc = iniloc - Vector3d.YAxis * 1000;
+                MarkDrawCount++;
+                if (MarkDrawCount % 2 == 1)
+                {
+                    uploc = uploc - Vector3d.YAxis * 500;
+                }
+            }
             var leftuploc = uploc - Vector3d.XAxis * (GetMarkLength(dim) + 200);
             var vertline = new Line(iniloc, uploc);
             var horline = new Line(leftuploc, uploc);
+
+            //
+            var up_horline= new Line(leftuploc, uploc);
+            up_horline.TransformBy(Matrix3d.Displacement(Vector3d.YAxis * 400));
+            var buffer = CreatPolyFromLines(horline, up_horline);
+            var pipelines = PreLines.Where(e => e.LineType == 0).Select(e => e.Line);
+            bool intersected = false;
+            foreach (var ln in pipelines)
+            {
+                if (buffer.Intersects(ln))
+                {
+                    intersected = true;
+                    break;
+                }
+            }
+            if (intersected)
+            {
+                uploc = uploc - Vector3d.YAxis * 500;
+                leftuploc = uploc - Vector3d.XAxis * (GetMarkLength(dim) + 200);
+                vertline = new Line(iniloc, uploc);
+                horline = new Line(leftuploc, uploc);
+            }
+            //
             PreLines.Add(new PreLine(vertline, DIMLAYER));
             PreLines.Add(new PreLine(horline, DIMLAYER));
             DrawText(DIMLAYER, dim, leftuploc, 0.0);
