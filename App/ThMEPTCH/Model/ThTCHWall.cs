@@ -7,14 +7,30 @@ namespace ThMEPTCH.Model
 {
     public class ThTCHWall : ThIfcWall
     {
-        public Point3d WallStartPoint { get; set; }
-        public Point3d WallEndPoint { get; set; }
-        public double WallWidth { get; set; }
-        public double WallHeight { get; set; }
-        public double WallLength { get; }
+        /// <summary>
+        /// 宽度
+        /// </summary>
+        public double Width { get; set; }
+        /// <summary>
+        /// 高度
+        /// </summary>
+        public double Height { get; set; }
+        /// <summary>
+        /// 长度
+        /// </summary>
+        public double Length { get; }
+        /// <summary>
+        /// 拉伸方向
+        /// </summary>
         public Vector3d ExtrudedDirection { get; private set; }
+        /// <summary>
+        /// 中线方向
+        /// </summary>
         public Vector3d XVector { get; }
-        public Point3d IfcOrigin { get; }
+        /// <summary>
+        /// 中线中点
+        /// </summary>
+        public Point3d Origin { get; }
         /// <summary>
         /// 门
         /// </summary>
@@ -30,19 +46,17 @@ namespace ThMEPTCH.Model
         public ThTCHWall(Point3d startPt,Point3d endPt,double width,double height) 
         {
             Init();
-            WallStartPoint = startPt;
-            WallEndPoint = endPt;
-            WallHeight = height;
-            WallWidth = width;
+            Width = width;
+            Height = height;
+            Length = startPt.DistanceTo(endPt);
             XVector = (endPt - startPt).GetNormal();
-            WallLength = WallStartPoint.DistanceTo(WallEndPoint);
-            IfcOrigin = startPt + XVector.MultiplyBy(WallLength / 2);
+            Origin = startPt + XVector.MultiplyBy(Length / 2);
         }
         public ThTCHWall(Polyline outPline, double height) 
         {
             Init();
             Outline = outPline;
-            WallHeight = height;
+            Height = height;
         }
         void Init()
         {

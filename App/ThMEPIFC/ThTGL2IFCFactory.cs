@@ -176,7 +176,7 @@ namespace ThMEPIFC
                 //model as a swept area solid 
                 var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
                 {
-                    s.Depth = wall.WallHeight;
+                    s.Depth = wall.Height;
                     s.ExtrudedDirection = model.ToIfcDirection(wall.ExtrudedDirection);
                 });
 
@@ -194,8 +194,8 @@ namespace ThMEPIFC
                     //represent wall as a rectangular profile
                     var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                     {
-                        p.YDim = wall.WallWidth;
-                        p.XDim = wall.WallLength;
+                        p.YDim = wall.Width;
+                        p.XDim = wall.Length;
                         p.ProfileType = IfcProfileTypeEnum.AREA;
                         p.Position = model.ToIfcAxis2Placement2D(default);
                     });
@@ -220,13 +220,12 @@ namespace ThMEPIFC
 
                 //now place the wall into the model
                 var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>();
-                ax3D.Location = model.Instances.New<IfcCartesianPoint>();
-                ax3D.Location.SetXYZ(wall.IfcOrigin.X + floor_origin.X, wall.IfcOrigin.Y + floor_origin.Y, wall.IfcOrigin.Z + floor_origin.Z);
-                ax3D.RefDirection = model.Instances.New<IfcDirection>();
-                ax3D.RefDirection.SetXYZ(wall.XVector.X, wall.XVector.Y, wall.XVector.Z);
-                ax3D.Axis = model.Instances.New<IfcDirection>();
-                ax3D.Axis.SetXYZ(0, 0, 1);
+                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
+                {
+                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
+                    p.RefDirection = model.ToIfcDirection(wall.XVector);
+                    p.Location = model.ToIfcCartesianPoint(wall.Origin + floor_origin.GetAsVector());
+                });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;
 
@@ -360,13 +359,12 @@ namespace ThMEPIFC
 
                 //now place the wall into the model
                 var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>();
-                ax3D.Location = model.Instances.New<IfcCartesianPoint>();
-                ax3D.Location.SetXYZ(door.CenterPoint.X + floor_origin.X, door.CenterPoint.Y + floor_origin.Y, door.CenterPoint.Z + floor_origin.Z);
-                ax3D.RefDirection = model.Instances.New<IfcDirection>();
-                ax3D.RefDirection.SetXYZ(door.XVector.X, door.XVector.Y, door.XVector.Z);
-                ax3D.Axis = model.Instances.New<IfcDirection>();
-                ax3D.Axis.SetXYZ(0, 0, 1);
+                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
+                {
+                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
+                    p.RefDirection = model.ToIfcDirection(door.XVector);
+                    p.Location = model.ToIfcCartesianPoint(door.CenterPoint + floor_origin.GetAsVector());
+                });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;
 
@@ -405,7 +403,7 @@ namespace ThMEPIFC
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
                     p.XDim = door.Width;
-                    p.YDim = thwall.WallWidth;
+                    p.YDim = thwall.Width;
                     p.ProfileType = IfcProfileTypeEnum.AREA;
                     p.Position = model.ToIfcAxis2Placement2D(default);
                 });
@@ -504,13 +502,12 @@ namespace ThMEPIFC
 
                 //now place the wall into the model
                 var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>();
-                ax3D.Location = model.Instances.New<IfcCartesianPoint>();
-                ax3D.Location.SetXYZ(window.CenterPoint.X + floor_origin.X, window.CenterPoint.Y + floor_origin.Y, window.CenterPoint.Z + floor_origin.Z);
-                ax3D.RefDirection = model.Instances.New<IfcDirection>();
-                ax3D.RefDirection.SetXYZ(window.XVector.X, window.XVector.Y, window.XVector.Z);
-                ax3D.Axis = model.Instances.New<IfcDirection>();
-                ax3D.Axis.SetXYZ(0, 0, 1);
+                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
+                {
+                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
+                    p.RefDirection = model.ToIfcDirection(window.XVector);
+                    p.Location = model.ToIfcCartesianPoint(window.CenterPoint + floor_origin.GetAsVector());
+                });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;
 
@@ -539,7 +536,7 @@ namespace ThMEPIFC
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
                     p.XDim = window.Width;
-                    p.YDim = thwall.WallWidth;//todo;
+                    p.YDim = thwall.Width;//todo;
                     p.ProfileType = IfcProfileTypeEnum.AREA;
                     p.Position = model.ToIfcAxis2Placement2D(default);
                 });
@@ -638,13 +635,12 @@ namespace ThMEPIFC
 
                 //now place the wall into the model
                 var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>();
-                ax3D.Location = model.Instances.New<IfcCartesianPoint>();
-                ax3D.Location.SetXYZ(hole.CenterPoint.X + floor_origin.X, hole.CenterPoint.Y + floor_origin.Y, hole.CenterPoint.Z + floor_origin.Z);
-                ax3D.RefDirection = model.Instances.New<IfcDirection>();
-                ax3D.RefDirection.SetXYZ(hole.XVector.X, hole.XVector.Y, hole.XVector.Z);
-                ax3D.Axis = model.Instances.New<IfcDirection>();
-                ax3D.Axis.SetXYZ(0, 0, 1);
+                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
+                {
+                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
+                    p.RefDirection = model.ToIfcDirection(hole.XVector);
+                    p.Location = model.ToIfcCartesianPoint(hole.CenterPoint + floor_origin.GetAsVector());
+                });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;
 
