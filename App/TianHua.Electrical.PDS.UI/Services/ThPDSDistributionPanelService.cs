@@ -2305,7 +2305,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     var m = new MenuItem();
                                     menu.Items.Add(m);
-                                    m.Header = "删除";
+                                    m.Header = "删除回路";
                                     m.Command = new RelayCommand(() =>
                                     {
                                         var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
@@ -3147,9 +3147,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 var mi = new MenuItem();
                                 cmenu.Items.Add(mi);
-                                mi.Header = "删除";
+                                mi.Header = "删除小母排回路";
                                 mi.Command = new RelayCommand(() =>
                                 {
+                                    var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                                    if (r == MessageBoxResult.Cancel) return;
+                                    var c = ThPDSProjectGraphService.GetSmallBusbarCircuit(graph, vertice, mbb).Count;
+                                    ThPDSProjectGraphService.DeleteCircuit(graph, edge);
+                                    if (c == 1)
+                                    {
+                                        ThPDSProjectGraphService.DeleteSmallBusbar(vertice, mbb);
+                                    }
                                     UpdateCanvas();
                                 });
                             }
@@ -3251,7 +3259,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
-                            mi.Header = "删除";
+                            mi.Header = "删除小母排";
                             mi.Command = new RelayCommand(() =>
                             {
                                 ThPDSProjectGraphService.DeleteSmallBusbar(vertice, mbb);
@@ -3498,7 +3506,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 var mi = new MenuItem();
                                                 cmenu.Items.Add(mi);
-                                                mi.Header = "删除";
+                                                mi.Header = "删除控制回路";
                                                 mi.Command = new RelayCommand(() =>
                                                 {
                                                     ThPDSProjectGraphService.DeleteControlCircuit(vertice, sc);
