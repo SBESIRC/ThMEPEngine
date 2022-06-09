@@ -52,22 +52,17 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 
         public void BuildDraingeTree()
         {
-            ////找管线点位对应的线
-            //var pipes = new List<Line>();
-            //pipes.AddRange(DataPass.CoolPipeTopView);
-            //pipes.AddRange(DataPass.HotPipeTopView);
-            //pipes.AddRange(DataPass.VerticalPipe);
-            //var ptDict = ThDrainageADTreeService.GetPtDict(pipes);
-
             //找管线对应末端洁具和可能的起点
             Terminal.ForEach(x => x.Boundary = x.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First());
             ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, out var ptTerminalTemp, out var ptStart);
             this.PtTerminal = ptTerminalTemp;
-            ////利用给水角阀方向给末端洁具方向
-            //SetTerminalDir();
 
             //确定冷热水末端点位组
             this.TerminalPairDict = ThDrainageADTreeService.GetTerminalPairDict(PtTerminal);
+
+
+
+
             //确定冷热水起点
             var ptCoolHotStartDict = ThDrainageADTreeService.CheckCoolHotStartPt(ptStart, PtTerminal, PtCoolHotDict);
 

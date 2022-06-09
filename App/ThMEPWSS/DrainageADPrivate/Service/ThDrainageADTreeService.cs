@@ -59,6 +59,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
             return ptDict;
         }
+
         public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out List<Point3d> ptStart)
         {
             ptTerminal = new Dictionary<Point3d, ThSaniterayTerminal>();
