@@ -522,7 +522,7 @@ namespace ThParkingStall.Core.Tools
             {
                 if (IntSecPoints.Count != 0) BasePt = IntSecPoints.First();
                 var baseLine = BasePt.LineBuffer(VMStock.RoadWidth / 2, segline);
-                var buffer = baseLine.GetHalfBuffer(segline, false);
+                var buffer = baseLine.GetHalfBuffer(segline.Extend(1), false);
                 var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
                 var distance = baseLine.ToLineString().Distance(objs)-1;
                 if (VerticalDirection) Spt = BasePt.Move(distance, 1);
@@ -532,7 +532,7 @@ namespace ThParkingStall.Core.Tools
             {
                 if (IntSecPoints.Count != 0) BasePt = IntSecPoints.Last();
                 var baseLine = BasePt.LineBuffer(VMStock.RoadWidth  / 2, segline);
-                var buffer = baseLine.GetHalfBuffer(segline, true);
+                var buffer = baseLine.GetHalfBuffer(segline.Extend(1), true);
                 var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
                 var distance = baseLine.ToLineString().Distance(objs)-1;
                 if (VerticalDirection) Ept = BasePt.Move(distance, 0);
