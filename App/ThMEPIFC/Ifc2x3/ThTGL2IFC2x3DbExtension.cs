@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Linq;
 using GeometryExtensions;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Xbim.Ifc;
@@ -11,18 +12,31 @@ namespace ThMEPIFC.Ifc2x3
     {
         public static IfcCompositeCurve ToIfcCompositeCurve(IfcStore model, Polyline polyline)
         {
-            throw new NotImplementedException();
+            var compositeCurve = CreateIfcCompositeCurve(model);
+            var segments = new PolylineSegmentCollection(polyline);
+            segments.OfType<PolylineSegment>().ForEach(s =>
+            {
+                compositeCurve.Segments.Add(ToIfcCompositeCurveSegment(model, s));
+            });
+            return compositeCurve;
         }
 
-        public static IfcCompositeCurveSegment ToIfcCompositeCurveSegment(IfcStore model, PolylineSegment segment)
+        private static IfcCompositeCurve CreateIfcCompositeCurve(IfcStore model)
+        {
+            return model.Instances.New<IfcCompositeCurve>();
+        }
+
+        private static IfcCompositeCurveSegment ToIfcCompositeCurveSegment(IfcStore model, PolylineSegment segment)
         {
             var curveSegement = model.Instances.New<IfcCompositeCurveSegment>();
             if (segment.IsLinear)
             {
+                curveSegement.SameSense = true;
                 curveSegement.ParentCurve = ToIfcPolyline(model, segment.ToLineSegment());
             }
             else
             {
+                curveSegement.SameSense = false;
                 curveSegement.ParentCurve = ToIfcTrimmedCurve(model, segment.ToCircularArc());
             }
             return curveSegement;
@@ -49,13 +63,11 @@ namespace ThMEPIFC.Ifc2x3
         {
             var trimmedCurve = model.Instances.New<IfcTrimmedCurve>();
             trimmedCurve.BasisCurve = ToIfcCircle(model, circularArc);
-            trimmedCurve.SenseAgreement = true;
+            trimmedCurve.MasterRepresentation = IfcTrimmingPreference.CARTESIAN;
+            trimmedCurve.SenseAgreement = !circularArc.IsClockWise;
+            trimmedCurve.Trim1.Add(model.ToIfcCartesianPoint(circularArc.StartPoint));
+            trimmedCurve.Trim2.Add(model.ToIfcCartesianPoint(circularArc.EndPoint));
             return trimmedCurve;
-        }
-
-        private static double ConvertToAngle(double radians)
-        {
-            return radians * 180.0 / Math.PI;
         }
 
         private static IfcCartesianPoint ToIfcCartesianPoint(IfcStore model, Point2d point)

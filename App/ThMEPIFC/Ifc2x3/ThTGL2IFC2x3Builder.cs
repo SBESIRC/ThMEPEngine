@@ -42,11 +42,11 @@ namespace ThMEPIFC.Ifc2x3
                             var hole = ThTGL2IFC2x3Factory.CreateHole(Model, thtchhole, wall, thtchwall, floor_origin);
                         }
                     }
-                    //foreach (var thtchslab in thtchstorey.ThTCHSlabs)
-                    //{
-                    //    var slab = ThTGL2IFCFactory.CreateSlab(Model, thtchslab, floor_origin);
-                    //    slabs.Add(slab);
-                    //}
+                    foreach (var thtchslab in thtchstorey.ThTCHSlabs)
+                    {
+                        var slab = ThTGL2IFC2x3Factory.CreateSlab(Model, thtchslab, floor_origin);
+                        slabs.Add(slab);
+                    }
                     ThTGL2IFC2x3Factory.relContainWalls2Storey(Model, walls, storey);
                     ThTGL2IFC2x3Factory.relContainDoors2Storey(Model, doors, storey);
                     ThTGL2IFC2x3Factory.relContainWindows2Storey(Model, windows, storey);
