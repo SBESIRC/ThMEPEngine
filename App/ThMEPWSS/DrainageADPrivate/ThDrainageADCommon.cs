@@ -164,6 +164,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                             {(int) TerminalType.MopSink , "给水角阀" },
                                                             {(int) TerminalType.Bathtub ,"给水角阀" },
                                                             {(int) TerminalType.WaterHeater , "燃气热水器"},
+                                                            {(int)TerminalType .Unknow ,"给水角阀" },
                                                         };
         public static Dictionary<string, List<string>> EndValve_dir_name = new Dictionary<string, List<string>>  {
                                                             {"给水角阀",new List<string>() {"向右","向前","向左","向后"}},

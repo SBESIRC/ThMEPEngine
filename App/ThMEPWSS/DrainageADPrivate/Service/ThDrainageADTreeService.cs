@@ -60,20 +60,57 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return ptDict;
         }
 
-        public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out List<Point3d> ptStart)
+        //public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out List<Point3d> ptStart)
+        //{
+        //    ptTerminal = new Dictionary<Point3d, ThSaniterayTerminal>();
+        //    ptStart = new List<Point3d>();
+
+        //    var endPtList = ptDict.Where(x => x.Value.Count == 1).ToList();
+
+        //    foreach (var endPt in endPtList)
+        //    {
+        //        var vertical = IsVertical(endPt.Value[0]);
+        //        if (vertical == false)
+        //        {
+        //            ptStart.Add(endPt.Key);
+        //            continue;
+        //        }
+
+        //        var t = FindTerminal(endPt.Key, terminalList);
+        //        if (t != null)
+        //        {
+        //            ptTerminal.Add(endPt.Key, t);
+        //        }
+        //        else
+        //        {
+        //            ptStart.Add(endPt.Key);
+        //        }
+        //    }
+        //}
+
+        public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, List<ThValve> angleValve, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out Dictionary<Point3d, ThValve> ptValve, out List<Point3d> ptStart)
         {
+            var r = 50.0;
             ptTerminal = new Dictionary<Point3d, ThSaniterayTerminal>();
+            ptValve = new Dictionary<Point3d, ThValve>();
             ptStart = new List<Point3d>();
 
             var endPtList = ptDict.Where(x => x.Value.Count == 1).ToList();
 
             foreach (var endPt in endPtList)
             {
-                var vertical = IsVertical(endPt.Value[0]);
-                if (vertical == false)
+                var isVertical = IsVertical(endPt.Value[0]);
+                var hasAngleValve = HasAngleValve(endPt.Key, angleValve, out var valve);
+
+                if (isVertical == false && hasAngleValve == false)
                 {
                     ptStart.Add(endPt.Key);
                     continue;
+                }
+
+                if (hasAngleValve == true)
+                {
+                    ptValve.Add(endPt.Key, valve);
                 }
 
                 var t = FindTerminal(endPt.Key, terminalList);
@@ -83,7 +120,28 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 }
                 else
                 {
-                    ptStart.Add(endPt.Key);
+                    //找不到末端洁具的，造个虚拟洁具 type： unknow
+                    Polyline pl;
+                    if (valve != null)
+                    {
+                        //有角阀用角阀boundary
+                        pl = valve.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First();
+                    }
+                    else
+                    {
+                        //没有角阀用点位前后100直径的框（无视方向）
+                        pl = CreateSquare(endPt.Key, r);
+                    }
+
+                    var virtualTerminal = new ThSaniterayTerminal()
+                    {
+                        Boundary = pl,
+                        Name = "VirtualTerminal",
+                        Type = ThDrainageADCommon.TerminalType.Unknow,
+                    };
+
+                    ptTerminal.Add(endPt.Key, virtualTerminal);
+                    terminalList.Add(virtualTerminal);
                 }
             }
         }
@@ -109,6 +167,35 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         }
 
+        private static bool HasAngleValve(Point3d pt, List<ThValve> angleValveList, out ThValve valve)
+        {
+            var tol = new Tolerance(10, 10);
+            var hasAngleValve = false;
+            valve = null;
+            var projPt = new Point3d(pt.X, pt.Y, 0);
+
+            var endValve = angleValveList.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
+            if (endValve != null)
+            {
+                valve = endValve;
+                hasAngleValve = true;
+            }
+
+            return hasAngleValve;
+        }
+
+        private static Polyline CreateSquare(Point3d pt, double r)
+        {
+            var sq = new Polyline();
+
+            sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - r, pt.Y + r), 0, 0, 0);
+            sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + r, pt.Y + r), 0, 0, 0);
+            sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + r, pt.Y - r), 0, 0, 0);
+            sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - r, pt.Y - r), 0, 0, 0);
+            sq.Closed = true;
+
+            return sq;
+        }
         public static Dictionary<Point3d, Point3d> GetTerminalPairDict(Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
         {
             var disTol = 250;
@@ -185,7 +272,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         }
 
-        public static Point3d IsInDict(Point3d pt, Dictionary<Point3d, List<Line>> ptDict)
+        private static Point3d IsInDict(Point3d pt, Dictionary<Point3d, List<Line>> ptDict)
         {
             var key = new Point3d();
             var tol = new Tolerance(1, 1);
@@ -422,6 +509,20 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             }
 
             return rootListMerged;
+        }
+
+
+        public static void RemoveNotWaterHeaterHotTree(List<ThDrainageTreeNode> rootList)
+        {
+            var rootListRemove = new List<ThDrainageTreeNode>();
+            var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
+
+            var removeHotTree = rootListDict.Where(x => x.Key.IsCool == false &&
+                                                    (x.Key.Terminal == null || x.Key.Terminal.Type != ThDrainageADCommon.TerminalType.WaterHeater) &&
+                                                    x.Value.Where(l => l.Terminal != null && l.Terminal.Type == ThDrainageADCommon.TerminalType.WaterHeater).Any())
+                                .Select(x => x.Key);
+
+            rootList.RemoveAll(x => removeHotTree.Contains(x));
         }
 
         private static ThDrainageTreeNode CloneTree(ThDrainageTreeNode node)

@@ -20,10 +20,10 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 {
     internal class ThLayoutAngleValveService
     {
-        public static List<ThDrainageBlkOutput> LayoutAngleValve(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, List<ThValve> angleValve)
+        public static List<ThDrainageBlkOutput> LayoutAngleValve(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, ThValve> ptAngleValve)
         {
             var angleValveOutput = new List<ThDrainageBlkOutput>();
-            SetTerminalDir(rootList, angleValve, ptTerminal);
+            SetTerminalDir(rootList, ptTerminal, ptAngleValve);
 
             var allLeafs = rootList.SelectMany(x => x.GetLeaf()).ToList();
             allLeafs.AddRange(rootList);
@@ -180,7 +180,49 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
             return returnPt;
         }
-        private static void SetTerminalDir(List<ThDrainageTreeNode> rootList, List<ThValve> angleValve, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
+
+        //private static void SetTerminalDir(List<ThDrainageTreeNode> rootList, List<ThValve> angleValve, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
+        //{
+        //    var tol = new Tolerance(1, 1);
+        //    for (int i = 0; i < ptTerminal.Count(); i++)
+        //    {
+        //        var item = ptTerminal.ElementAt(i);
+        //        if (item.Value.Dir != default(Vector3d))
+        //        {
+        //            //冷热水同时有的已经做过一次的跳过
+        //            continue;
+        //        }
+        //        var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
+        //        var endValve = angleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
+        //        if (endValve != null)
+        //        {
+        //            //有角阀的根据角阀
+        //            item.Value.Dir = endValve.Dir;
+        //        }
+        //        else
+        //        {
+        //            //没有角阀的根据管线
+        //            var node = rootList.SelectMany(x => x.GetLeaf()).Where(x => item.Value != null && x.Terminal == item.Value).FirstOrDefault();
+
+        //            if (node != null)
+        //            {
+        //                while (node.Parent != null && Math.Abs(node.Pt.Z - node.Parent.Pt.Z) > 1)
+        //                {
+        //                    //立管
+        //                    node = node.Parent;
+        //                }
+        //                var dir = node.Parent.Pt - node.Pt;
+        //                if (Math.Abs(dir.Z) < 0.1)
+        //                {
+        //                    dir = (new Vector3d(dir.X, dir.Y, 0)).GetNormal();
+        //                    item.Value.Dir = dir;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        private static void SetTerminalDir(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, ThValve> ptAngleValve)
         {
             var tol = new Tolerance(1, 1);
             for (int i = 0; i < ptTerminal.Count(); i++)
@@ -191,8 +233,8 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                     //冷热水同时有的已经做过一次的跳过
                     continue;
                 }
-                var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
-                var endValve = angleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
+
+                ptAngleValve.TryGetValue(item.Key, out var endValve);
                 if (endValve != null)
                 {
                     //有角阀的根据角阀
