@@ -181,7 +181,7 @@ namespace ThMEPTCH.TCHXmlDataConvert.TCHEntityToThIfc
                     break;
                 }
                 targetCurves.Remove(currentLine);
-                bool isReverse = isReverse = currentLine.EndPoint.DistanceTo(currentSp) < 5;
+                bool isReverse = currentLine.EndPoint.DistanceTo(currentSp) < 5;
                 var sPoint = currentLine.StartPoint;
                 var ePoint = currentLine.EndPoint;
                 if (isReverse)
@@ -212,13 +212,8 @@ namespace ThMEPTCH.TCHXmlDataConvert.TCHEntityToThIfc
                     foreach (var newPl in innerPL)
                     {
                         newPLine = newPl as Polyline;
-                        newPLine.Closed = true;
                     }
                 }
-            }
-            if (!newPLine.Closed)
-            {
-                newPLine.Closed = true;
             }
             return newPLine;
         }
