@@ -260,9 +260,9 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             }
             if (endTerminal == null)
             {
-                //没有被包含的找500内距离最近的
+                //没有被包含的找500内距离最近的,且不是热水器
                 var orderTerminal = terminal.Where(x => x.Boundary.DistanceTo(projPt, false) < tol).OrderBy(x => x.Boundary.DistanceTo(projPt, false)).ToList();
-                if (orderTerminal.Count() > 0)
+                if (orderTerminal.Count() > 0 && orderTerminal.First ().Type != ThDrainageADCommon.TerminalType.WaterHeater)
                 {
                     endTerminal = orderTerminal.First();
                 }
