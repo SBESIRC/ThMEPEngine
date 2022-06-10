@@ -1,5 +1,6 @@
 ﻿using Xbim.Ifc;
 using ThMEPTCH.Model;
+using ThMEPIFC.Ifc2x3;
 
 namespace ThMEPIFC
 {
@@ -8,11 +9,11 @@ namespace ThMEPIFC
         public IfcStore Model { get; private set; }
         public void GenerateIfcModelAndSave(ThTCHProject project, string file)
         {
-            Model = ThTGL2IFCFactory.CreateAndInitModel("ThTGL2IFCProject");
+            Model = ThTGL2IFC2x3Factory.CreateAndInitModel("ThTGL2IFCProject");
             if (Model != null)
             {
-                ThTGL2IFCBuilder.BuildIfcModel(Model, project);
-                ThTGL2IFCBuilder.SaveIfcModel(Model, file);
+                ThTGL2IFC2x3Builder.BuildIfcModel(Model, project);
+                ThTGL2IFC2x3Builder.SaveIfcModel(Model, file);
             }
         }
     }

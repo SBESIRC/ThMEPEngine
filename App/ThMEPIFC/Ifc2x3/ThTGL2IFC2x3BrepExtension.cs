@@ -7,9 +7,9 @@ using Autodesk.AutoCAD.BoundaryRepresentation;
 using BrFace = Autodesk.AutoCAD.BoundaryRepresentation.Face;
 using BrShell = Autodesk.AutoCAD.BoundaryRepresentation.Shell;
 
-namespace ThMEPIFC
+namespace ThMEPIFC.Ifc2x3
 {
-    public static class ThTGL2IFCBrepExtension
+    public static class ThTGL2IFC2x3BrepExtension
     {
         /// <summary>
         /// CAD中的三维实体（Solid3d)到IFC Brep的表达转换

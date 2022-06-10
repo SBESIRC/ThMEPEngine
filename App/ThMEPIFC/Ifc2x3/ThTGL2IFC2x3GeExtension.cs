@@ -2,9 +2,9 @@
 using Xbim.Ifc2x3.GeometryResource;
 using Autodesk.AutoCAD.Geometry;
 
-namespace ThMEPIFC
+namespace ThMEPIFC.Ifc2x3
 {
-    public static class ThTGL2IFCGeExtension
+    public static class ThTGL2IFC2x3GeExtension
     {
         public static IfcCartesianPoint ToIfcCartesianPoint(this IfcStore model, Point3d point)
         {

@@ -19,11 +19,10 @@ using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.RepresentationResource;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using ThMEPTCH.Model;
-using ThMEPIFC.Ifc2x3;
 
-namespace ThMEPIFC
+namespace ThMEPIFC.Ifc2x3
 {
-    public class ThTGL2IFCFactory
+    public class ThTGL2IFC2x3Factory
     {
         static int epsilon = 0;
         static public IfcStore CreateAndInitModel(string projectName)
