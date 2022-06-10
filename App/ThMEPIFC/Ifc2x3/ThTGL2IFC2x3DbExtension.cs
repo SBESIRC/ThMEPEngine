@@ -36,10 +36,26 @@ namespace ThMEPIFC.Ifc2x3
             return poly;
         }
 
+        private static IfcCircle ToIfcCircle(IfcStore model, CircularArc2d circularArc)
+        {
+            return model.Instances.New<IfcCircle>(c =>
+            {
+                c.Radius = circularArc.Radius;
+                c.Position = model.ToIfcAxis2Placement2D(circularArc.Center, Vector2d.XAxis);
+            });
+        }
+
         private static IfcTrimmedCurve ToIfcTrimmedCurve(IfcStore model, CircularArc2d circularArc)
         {
             var trimmedCurve = model.Instances.New<IfcTrimmedCurve>();
+            trimmedCurve.BasisCurve = ToIfcCircle(model, circularArc);
+            trimmedCurve.SenseAgreement = true;
             return trimmedCurve;
+        }
+
+        private static double ConvertToAngle(double radians)
+        {
+            return radians * 180.0 / Math.PI;
         }
 
         private static IfcCartesianPoint ToIfcCartesianPoint(IfcStore model, Point2d point)
