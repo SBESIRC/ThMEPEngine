@@ -58,8 +58,7 @@ namespace TianHua.Hvac.UI.ViewModels
                 if (null != value && value.Value > -1)
                     fanDataModel.VentStyle = (EnumFanModelType)value.Value;
                 FanTypeChanged();
-                if (!IsChildFan)
-                    RefreshFanModel(null);
+                InputChangeRefreshModel();
                 this.RaisePropertyChanged();
             }
         }
@@ -103,8 +102,7 @@ namespace TianHua.Hvac.UI.ViewModels
                 if (null != value && value.Value > -1)
                     fanDataModel.Control = (EnumFanControl)value.Value;
                 FanControlTypeChanged();
-                if (!IsChildFan)
-                    RefreshFanModel(null);
+                InputChangeRefreshModel();
                 this.RaisePropertyChanged();
             }
         }
@@ -231,8 +229,7 @@ namespace TianHua.Hvac.UI.ViewModels
             set
             {
                 fanDataModel.AirVolume = value;
-                if (!IsChildFan)
-                    RefreshFanModel(null);
+                InputChangeRefreshModel();
                 this.RaisePropertyChanged();
             }
         }
@@ -245,8 +242,7 @@ namespace TianHua.Hvac.UI.ViewModels
             set
             {
                 fanDataModel.WindResis = value;
-                if (!IsChildFan)
-                    RefreshFanModel(null);
+                InputChangeRefreshModel();
                 this.RaisePropertyChanged();
             }
         }
@@ -282,22 +278,8 @@ namespace TianHua.Hvac.UI.ViewModels
             FanTypeItems = new ObservableCollection<UListItemData>();
             if (FanControlItem == null)
                 return;
-            switch (fanDataModel.Control)
-            {
-                case EnumFanControl.TwoSpeed:
-                    var enumHeightValues = CommonUtil.EnumDescriptionToList(typeof(EnumFanModelType), new List<int>
-                    {
-                        (int)EnumFanModelType.AxialFlow,
-                        (int)EnumFanModelType.ForwardTiltCentrifugation_Inner,
-                        (int)EnumFanModelType.ForwardTiltCentrifugation_Out,
-                    });
-                    enumHeightValues.ForEach(c => FanTypeItems.Add(c));
-                    break;
-                default:
-                    var enumValues = CommonUtil.EnumDescriptionToList(typeof(EnumFanModelType));
-                    enumValues.ForEach(c => FanTypeItems.Add(c));
-                    break;
-            }
+            var enumValues = CommonUtil.EnumDescriptionToList(typeof(EnumFanModelType));
+            enumValues.ForEach(c => FanTypeItems.Add(c));
             FanTypeItem = FanTypeItems.FirstOrDefault();
         }
         void FanTypeChanged()
@@ -330,7 +312,7 @@ namespace TianHua.Hvac.UI.ViewModels
         }
         public FanModelPicker BaseModelPicker { get; set; }
         public List<FanModelPicker> CanUseFanModelPickers { get; set; }
-        public void RefreshFanModel(FanDataModel pModel)
+        public void RefreshFanModel(FanDataModel pModel,bool isRead=false)
         {
             if (fanDataModel == null)
                 return;
@@ -344,7 +326,6 @@ namespace TianHua.Hvac.UI.ViewModels
             }
             CanUseFanModelPickers = new List<FanModelPicker>();
             fanDataModel.FanSelectionStateMsg = new FanSelectionStateInfo();
-            FanModelCCCF = "未知型号";
             fanDataModel.FanSelectionStateMsg.FanSelectionState = EnumFanSelectionState.HighNotFound;
             IsSelectFanError = fanDataModel.FanSelectionStateMsg.FanSelectionState != EnumFanSelectionState.HighAndLowBothSafe;
 
@@ -352,13 +333,25 @@ namespace TianHua.Hvac.UI.ViewModels
             fanDataModel.FanModelTypeCalcModel.FanModelPa = fanDataModel.WindResis.ToString();
 
             var points = new List<double>() { fanDataModel.AirVolume, fanDataModel.WindResis, 0 };
-            var ccfName = pModel == null ? "" : pModel.FanModelCCCF;
+            string ccfName = "";
+            if (pModel != null)
+            {
+                ccfName = pModel.FanModelCCCF;
+            }
+            else if (!string.IsNullOrEmpty(fanDataModel.FanModelCCCF) && !fanDataModel.FanModelCCCF.Contains("未知")) 
+            {
+                ccfName = fanDataModel.FanModelCCCF;
+            }
+            CanUseFanModelPickers = EQPMFanDataService.Instance.GetFanCanUseFanModels(fanDataModel, points, "");
+            BaseModelPicker = CanUseFanModelPickers.FirstOrDefault();
             CanUseFanModelPickers = EQPMFanDataService.Instance.GetFanCanUseFanModels(fanDataModel, points, ccfName);
-
+            if(null == CanUseFanModelPickers || CanUseFanModelPickers.Count<1)
+                CanUseFanModelPickers = EQPMFanDataService.Instance.GetFanCanUseFanModels(fanDataModel, points, "");
             if (CanUseFanModelPickers != null && CanUseFanModelPickers.Count > 0)
             {
-                BaseModelPicker = CanUseFanModelPickers.First();
-                SelectModelPicker = CanUseFanModelPickers.First();
+                if (null == BaseModelPicker)
+                    BaseModelPicker = CanUseFanModelPickers.First();
+                //SelectModelPicker = CanUseFanModelPickers.First();
                 var tempCanUsePickers = new List<FanModelPicker>();
                 switch (fanDataModel.VentStyle)
                 {
@@ -369,6 +362,10 @@ namespace TianHua.Hvac.UI.ViewModels
                         tempCanUsePickers = EQPMFanDataService.Instance.GetFanModelPickers(fanDataModel, BaseModelPicker);
                         break;
                 }
+                if(string.IsNullOrEmpty(ccfName))
+                    SelectModelPicker = CanUseFanModelPickers.First();
+                else
+                    SelectModelPicker = tempCanUsePickers.Where(c => c.Model == ccfName).FirstOrDefault();
                 if (tempCanUsePickers.Count > 0) 
                 {
                     CanUseFanModelPickers.Clear();
@@ -377,10 +374,13 @@ namespace TianHua.Hvac.UI.ViewModels
                 EQPMFanDataUtils.SetFanModelParameter(fanDataModel,BaseModelPicker, SelectModelPicker);
             }
             if (pModel != null)
-                EQPMFanDataService.Instance.CalcFanEfficiency(pModel.FanModelTypeCalcModel, pModel, fanDataModel);
-            else if (!fanDataModel.IsChildFan) 
             {
-                EQPMFanDataService.Instance.CalcFanEfficiency(fanDataModel.FanModelTypeCalcModel, fanDataModel, null);
+                EQPMFanDataService.Instance.FanCalaEfficiency(pModel, pModel);
+                EQPMFanDataService.Instance.FanCalaEfficiency(pModel,fanDataModel);
+            }
+            else if (!fanDataModel.IsChildFan)
+            {
+                EQPMFanDataService.Instance.FanCalaEfficiency(fanDataModel, fanDataModel);
             }
             IsSelectFanError = fanDataModel.FanSelectionStateMsg.FanSelectionState != EnumFanSelectionState.HighAndLowBothSafe;
             if (fanDataModel.FanModelTypeCalcModel.ValueSource == EnumValueSource.IsCalcValue)
@@ -401,9 +401,17 @@ namespace TianHua.Hvac.UI.ViewModels
             }
 
         }
-
+        void InputChangeRefreshModel() 
+        {
+            if (IsChildFan)
+                return;
+            FanModelCCCF = "未知型号";
+            RefreshFanModel(null);
+        }
         void RefreshFanModelByPicker()
         {
+            if (null == SelectModelPicker)
+                return;
             FanModelCCCF = SelectModelPicker.Model;
             if (!fanDataModel.IsPointSafe)
             {
@@ -421,7 +429,6 @@ namespace TianHua.Hvac.UI.ViewModels
         {
             if (string.IsNullOrEmpty(fanDataModel.VentNum))
             {
-                VentNum = "1";
                 return;
             }
             var calculator = new VentSNCalculator();

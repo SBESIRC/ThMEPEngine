@@ -26,6 +26,7 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
         private string HTFC_Parameters = "离心-前倾-单速.json";
         private string HTFC_Parameters_Double = "离心-前倾-双速.json";
         private string HTFC_Parameters_Single = "离心-后倾-单速.json";
+        private string HTFC_Parameters_BackDouble = "离心-后倾-双速.json";
         private string AXIAL_Selection = "轴流风机选型.json";
         private string AXIAL_Parameters = "轴流-单速.json";
         private string AXIAL_Parameters_Double = "轴流-双速.json";
@@ -52,6 +53,10 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
         /// 离心-后倾-单速
         /// </summary>
         public List<FanParameters> FanParametersBackwardS { get; private set; }
+        /// <summary>
+        /// 离心-后倾-双速
+        /// </summary>
+        public List<FanParameters> FanParametersBackwardD { get; private set; }
         /// <summary>
         /// 轴流-单速
         /// </summary>
@@ -93,6 +98,9 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
             //离心-后倾-单速
             var fanParamBSStr = ReadTxt(Path.Combine(ThCADCommon.SupportPath(), HTFC_Parameters_Single));
             FanParametersBackwardS = JsonHelper.DeserializeJsonToList<FanParameters>(fanParamBSStr);
+            //离心-后倾-双速
+            var fanParamBDStr = ReadTxt(Path.Combine(ThCADCommon.SupportPath(), HTFC_Parameters_BackDouble));
+            FanParametersBackwardD = JsonHelper.DeserializeJsonToList<FanParameters>(fanParamBDStr);
             //轴流-单速
             var axialFParamSStr = ReadTxt(Path.Combine(ThCADCommon.SupportPath(), AXIAL_Parameters));
             FanParametersAxialS = JsonHelper.DeserializeJsonToList<AxialFanParameters>(axialFParamSStr);
@@ -134,6 +142,7 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
             FanParametersForwardS.Clear();
             FanParametersForwardD.Clear();
             FanParametersBackwardS.Clear();
+            FanParametersBackwardD.Clear();
             FanParametersAxialS.Clear();
             FanParametersAxialD.Clear();
 
@@ -232,7 +241,10 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
             switch (fanData.Control)
             {
                 case EnumFanControl.TwoSpeed:
-                    models.AddRange(FanParametersForwardD);
+                    if (isBack)
+                        models.AddRange(FanParametersBackwardD);
+                    else
+                        models.AddRange(FanParametersForwardD);
                     break;
                 default:
                     if (isBack)
@@ -332,7 +344,10 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
             switch (fanData.Control)
             {
                 case EnumFanControl.TwoSpeed:
-                    models.AddRange(FanParametersForwardD);
+                    if (isBack)
+                        models.AddRange(FanParametersBackwardD);
+                    else
+                        models.AddRange(FanParametersForwardD);
                     break;
                 default:
                     if (isBack)
@@ -416,7 +431,14 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
             var retParameters = new List<FanParameters>();
             if (controlType == EnumFanControl.TwoSpeed)
             {
-                retParameters.AddRange(FanParametersForwardD);
+                if (modelType == EnumFanModelType.BackwardTiltCentrifugation_Inner || modelType == EnumFanModelType.BackwardTiltCentrifugation_Out)
+                {
+                    retParameters.AddRange(FanParametersBackwardD);
+                }
+                else
+                {
+                    retParameters.AddRange(FanParametersForwardD);
+                }
             }
             else
             {
@@ -431,36 +453,34 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
             }
             return retParameters;
         }
-
-        public void CalcFanEfficiency(CalcFanModel calcFanModel, FanDataModel mainFanModel, FanDataModel childFanModel)
+        public void FanCalaEfficiency(FanDataModel pModel,FanDataModel cModel) 
         {
-            if (null != childFanModel && childFanModel.PID == mainFanModel.ID)
-                calcFanModel.HaveChildFan = true;
-            else
-                calcFanModel.HaveChildFan = false;
-            var fanControl = mainFanModel.Control;
-            var ventStyle = mainFanModel.VentStyle;
-            if (string.IsNullOrEmpty(calcFanModel.FanModelName))
+            if(null == cModel)
+                return;
+            var fanControl = pModel.Control;
+            var ventStyle = pModel.VentStyle;
+            string fanName = pModel.FanModelCCCF;
+            if (string.IsNullOrEmpty(fanName))
                 return;
             //比转速	等于5.54*风机转速（查询）*比转数下的流量的0.5次方 /全压输入值的0.75次方		
             //轴功率    风量乘以全压除以风机内效率除以传动效率（0.855）除以1000					
             //电机容量安全系数 =IF(AZ6<=0.5,1.5, IF(AZ6<=1,1.4,IF(AZ6<=2,1.3,IF(AZ6<=5,1.2,IF(AZ6<=20,1.15,1.1)))))
-            var listMotors = GetListMotorPower(fanControl, ventStyle, calcFanModel.FanModelName);
-            var fanAirVolume = Convert.ToDouble(calcFanModel.FanAirVolume);
-            var fanWindResis = Convert.ToDouble(mainFanModel.WindResis);
+            var listMotors = GetListMotorPower(fanControl, ventStyle, fanName);
+            var fanAirVolume = Convert.ToDouble(cModel.AirVolume);
+            var fanWindResis = Convert.ToDouble(cModel.WindResis);
             //var fanModelSpeed = Convert.ToDouble(calcFanModel.FanModelFanSpeed);
-            double.TryParse(calcFanModel.FanModelFanSpeed, out double fanModelSpeed);
-            var fanEleLev = CommonUtil.GetEnumDescription(mainFanModel.EleLev);
-            var fanVentLev = CommonUtil.GetEnumDescription(mainFanModel.VentLev);
-            var fanMotorTempo = calcFanModel.MotorTempo.ToString();
-            int.TryParse(calcFanModel.FanModelNum, out int fanNum);
+            double.TryParse(pModel.FanModelTypeCalcModel.FanModelFanSpeed, out double fanModelSpeed);
+            var fanEleLev = CommonUtil.GetEnumDescription(pModel.EleLev);
+            var fanVentLev = CommonUtil.GetEnumDescription(pModel.VentLev);
+            var fanMotorTempo = pModel.FanModelTypeCalcModel.MotorTempo.ToString();
+            int.TryParse(pModel.FanModelTypeCalcModel.FanModelNum, out int fanNum);
             if (ventStyle == EnumFanModelType.AxialFlow)
             {
                 //轴流风机
                 double safetyFactor = 0;
                 double heightFlow = Math.Round(fanAirVolume / 3600, 5);
                 var specificSpeed = 5.54 * fanModelSpeed * Math.Pow(heightFlow, 0.5) / Math.Pow(fanWindResis, 0.75);
-                var noSplit = calcFanModel.FanModelName.Split('-');
+                var noSplit = fanName.Split('-');
                 double no = 0;
                 if (noSplit.Count() == 3)
                 {
@@ -512,6 +532,8 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
 
 
                 var listMotorPower = listMotors.FindAll(p => Convert.ToDouble(p.Power) >= tmp && p.MotorEfficiencyLevel == fanEleLev && p.Rpm == fanMotorTempo);
+                if (listMotorPower.Count < 1)
+                    return;
                 var motorPower = listMotorPower.OrderBy(p => Convert.ToDouble(p.Power)).First();
 
                 var estimatedMotorPower = shaftPower / Convert.ToDouble(motorPower.MotorEfficiency) / Convert.ToDouble(motorEfficiency.Value) * safetyFactor * 100;
@@ -520,10 +542,19 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
 
                 if (motorPower != null)
                 {
-                    calcFanModel.FanModelMotorPower = motorPower.Power;
-                    calcFanModel.FanInternalEfficiency = axialFanEfficiency.FanEfficiency.ToString();
+                    cModel.FanModelTypeCalcModel.FanModelMotorPower = motorPower.Power;
+                    cModel.FanModelTypeCalcModel.FanInternalEfficiency = axialFanEfficiency.FanEfficiency.ToString();
                 }
-                GetPower(calcFanModel, mainFanModel, childFanModel, axialFanEfficiency);
+                if (cModel.IsChildFan)
+                {
+                    pModel.FanModelTypeCalcModel.HaveChildFan = true;
+                    GetPower(pModel.FanModelTypeCalcModel, pModel, cModel, axialFanEfficiency);
+                }
+                else 
+                {
+                    pModel.FanModelTypeCalcModel.HaveChildFan = false;
+                    GetPower(pModel.FanModelTypeCalcModel, pModel, null, axialFanEfficiency);
+                }
             }
             else
             {
@@ -532,11 +563,9 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                 double flow = Math.Round(fanAirVolume / 3600, 5);
                 var specificSpeed = (int)(5.54 * fanModelSpeed * Math.Pow(flow, 0.5) / Math.Pow(fanWindResis, 0.75));
                 specificSpeed = specificSpeed < 0 ? 0 : specificSpeed;
-
                 var fanEfficiency = FanEfficiencies.Find(p =>
                 {
                     int.TryParse(p.No_Min, out int minNo);
-                    
                     int.TryParse(p.No_Max, out int maxNo);
                     int.TryParse(p.Rpm_Min, out int minRpm);
                     int.TryParse(p.Rpm_Max, out int maxRpm);
@@ -576,6 +605,8 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                 var motorEfficiency = EQPMFanCommon.ListMotorEfficiency.Where(p => p.Key == "皮带").First();
                 var tmp = shaftPower / 0.85;
                 var listMotorPower = listMotors.FindAll(p => Convert.ToDouble(p.Power) >= tmp && p.MotorEfficiencyLevel == fanEleLev && p.Rpm == fanMotorTempo);
+                if (listMotorPower.Count < 1)
+                    return;
                 var motorPower = listMotorPower.OrderBy(p => Convert.ToDouble(p.Power)).First();
 
                 var _EstimatedMotorPower = shaftPower / Convert.ToDouble(motorPower.MotorEfficiency) * 100 / Convert.ToDouble(motorEfficiency.Value) * safetyFactor;
@@ -584,35 +615,25 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
 
                 if (motorPower != null)
                 {
-                    calcFanModel.FanModelMotorPower = motorPower.Power;
-                    calcFanModel.FanInternalEfficiency = fanEfficiency.FanInternalEfficiency.ToString();
+                    cModel.FanModelTypeCalcModel.FanModelMotorPower = motorPower.Power;
+                    cModel.FanModelTypeCalcModel.FanInternalEfficiency = fanEfficiency.FanInternalEfficiency.ToString();
                 }
-                GetPower(calcFanModel, mainFanModel, childFanModel, fanEfficiency);
-
+                if (cModel.IsChildFan)
+                {
+                    pModel.FanModelTypeCalcModel.HaveChildFan = true;
+                    GetPower(pModel.FanModelTypeCalcModel, pModel, cModel, fanEfficiency);
+                }
+                else
+                {
+                    pModel.FanModelTypeCalcModel.HaveChildFan = false;
+                    GetPower(pModel.FanModelTypeCalcModel, pModel, null, fanEfficiency);
+                }
             }
-
-
         }
         private List<MotorPower> GetListMotorPower(EnumFanControl fanControl, EnumFanModelType ventStyle, string fanModelName)
         {
             if (fanControl == EnumFanControl.TwoSpeed)
             {
-                if (string.IsNullOrEmpty(fanModelName))
-                    return MotorPowersD;
-                if (ventStyle == EnumFanModelType.AxialFlow)
-                {
-                    if (fanModelName.Contains("II"))
-                        return MotorPowersD.Where(p => p.Axial2HighSpeed == "1").ToList();
-                    if (fanModelName.Contains("IV"))
-                        return MotorPowersD.Where(p => p.Axial4HighSpeed == "1").ToList();
-                }
-                else
-                {
-                    if (fanModelName.Contains("II"))
-                        return MotorPowersD.FindAll(p => p.Centrifuge2HighSpeed == "1");
-                    if (fanModelName.Contains("IV"))
-                        return MotorPowersD.FindAll(p => p.Centrifuge4HighSpeed == "1");
-                }
                 return MotorPowersD;
             }
             else
@@ -633,7 +654,6 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                 || scenario == EnumScenario.EmergencyExhaust
                 || scenario == EnumScenario.AccidentAirSupplement)
             {
-                calcFanModel.FanModelPower = "-";
                 calcFanModel.FanModelPower = "-";
                 return;
             }
@@ -674,22 +694,9 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                     var lowPower = fanLowWindowResis / (3600 * axialFanEfficiency.FanEfficiency * 0.855 * 0.98) * 100;
                     calcFanModel.FanModelPower = "-";
                     calcFanModel.FanModelPower = lowPower.ToString("0.##");
-                    //if (_FanDataModel.Use == "平时排风")
-                    //{
-                    //    //_FanDataModel.FanModelPower = FuncStr.NullToDouble(_FanModelPower).ToString("0.##") + "/" + FuncStr.NullToDouble(_SonPower).ToString("0.##");
-                    //    _FanDataModel.FanModelPower = "-/" + FuncStr.NullToDouble(_FanModelPower).ToString("0.##");
-                    //}
-                    //else
-                    //{
-                    //    //_FanDataModel.FanModelPower = FuncStr.NullToDouble(_SonPower).ToString("0.##") + "/" + FuncStr.NullToDouble(_FanModelPower).ToString("0.##");
-                    //    _FanDataModel.FanModelPower = "-/" + FuncStr.NullToDouble(_SonPower).ToString("0.##");
-                    //}
                 }
                 return;
-
             }
-
-
         }
 
         private void GetPower(CalcFanModel calcFanModel, FanDataModel mainFanModel, FanDataModel childFanModel, FanEfficiency fanEfficiency)
@@ -706,7 +713,6 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                 || scenario == EnumScenario.AccidentAirSupplement
                 || scenario == EnumScenario.EmergencyExhaust)
             {
-                calcFanModel.FanModelPower = "-";
                 calcFanModel.FanModelPower = "-";
                 return;
             }
@@ -797,20 +803,9 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
 
                     var childPower = childWindResis / (3600 * childEfficiency.FanInternalEfficiency * 0.855 * 0.98) * 100;
                     calcFanModel.FanModelPower = childPower.ToString("0.##");
-                    //if (_FanDataModel.Use == "平时排风")
-                    //{
-                    //    _FanDataModel.FanModelPower = "-/" + FuncStr.NullToDouble(_FanModelPower).ToString("0.##");
-                    //}
-                    //else
-                    //{
-                    //    _FanDataModel.FanModelPower = "-/" + FuncStr.NullToDouble(_SonPower).ToString("0.##");
-                    //}
-
                 }
                 return;
-
             }
-
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPHVAC.EQPMFanModelEnums;
 using ThMEPHVAC.EQPMFanSelect;
@@ -25,7 +26,6 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
 
                 fanDataModel.FanModelTypeCalcModel.FanModelFanSpeed = baseParameter.Rpm;
                 fanDataModel.FanModelTypeCalcModel.FanModelNoise = baseParameter.Noise;
-                fanDataModel.FanModelTypeCalcModel.FanModelMotorPower = baseParameter.Power;
                 fanDataModel.IsPointSafe = !basePick.IsOptimalModel;
 
                 fanDataModel.FanModelTypeCalcModel.FanModelLength = axialParameter.Length;
@@ -44,7 +44,6 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
 
                 fanDataModel.FanModelTypeCalcModel.FanModelFanSpeed = baseParameter.Rpm;
                 fanDataModel.FanModelTypeCalcModel.FanModelNoise = baseParameter.Noise;
-                fanDataModel.FanModelTypeCalcModel.FanModelMotorPower = baseParameter.Power;
                 fanDataModel.IsPointSafe = !basePick.IsOptimalModel;
 
                 fanDataModel.FanModelTypeCalcModel.FanModelLength = fanParameter.Length;
@@ -73,15 +72,13 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                     allPModels.Add(item);
             }
             //风机排序，先根据子项，楼层进行分组，最后再根据楼层中的最小楼层进行排序
-            var allChildStr = allPModels.Select(c => c.InstallSpace).Distinct().ToList().OrderBy(c=>c).ToList();
-            if(isDes)
-                allChildStr = allChildStr.OrderByDescending(c => c).ToList();
+            var allChildStr = OrderString(allPModels.Select(c => c.InstallSpace).ToList(), isDes);//allPModels.Select(c => c.InstallSpace).Distinct().ToList().OrderBy(c=>c).ToList();
+            //if(isDes)
+            //    allChildStr = allChildStr.OrderByDescending(c => c).ToList();
             foreach (var str in allChildStr) 
             {
                 var thisChildList = allPModels.Where(c => c.InstallSpace == str).ToList();
-                var allFloorStr = thisChildList.Select(c => c.InstallFloor).Distinct().ToList().OrderBy(c => c).ToList();
-                if (isDes)
-                    allFloorStr = allFloorStr.OrderByDescending(c => c).ToList();
+                var allFloorStr = OrderString(thisChildList.Select(c => c.InstallFloor).ToList(), isDes);//thisChildList.Select(c => c.InstallFloor).Distinct().ToList().OrderBy(c => c).ToList();
                 foreach (var floorStr in allFloorStr) 
                 {
                     var thisFans = thisChildList.Where(c => c.InstallFloor == floorStr).ToList();
@@ -110,6 +107,64 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                     fanDatas[i].fanDataModel.SortScenario = number * 2;
                 else
                     fanDatas[i].fanDataModel.SortID = number * 2;
+            }
+        }
+        private static List<string> OrderString(List<string> targetStrs,bool isDes) 
+        {
+            var orderRes = new List<string>();
+            var stringOrders = new List<StringOrderModel>();
+            foreach (var item in targetStrs) 
+            {
+                if (stringOrders.Any(c => c.StrValue == item))
+                    continue;
+                stringOrders.Add(new StringOrderModel(item));
+            }
+            //数字开头优先排序，后面在排字母开头
+            var numberStart = stringOrders.Where(c => c.IsNumberStart).ToList();
+            if (isDes)
+                numberStart = numberStart.OrderByDescending(c => c.Order).ToList();
+            else
+                numberStart = numberStart.OrderBy(c => c.Order).ToList();
+            orderRes.AddRange(numberStart.Select(c => c.StrValue).ToList());
+            //字母开头，按字符串排序后在按数字排序
+            var strStart = stringOrders.Where(c => !c.IsNumberStart).ToList();
+            if (isDes)
+                strStart = strStart.OrderByDescending(c => c.StrValue).OrderByDescending(c => c.Order).ToList();
+            else
+                strStart = strStart.OrderBy(c => c.StrValue).ThenBy(c => c.Order).ToList();
+            orderRes.AddRange(strStart.Select(c => c.StrValue).ToList());
+            return orderRes;
+        }
+    }
+    class StringOrderModel
+    {
+        public string StrValue { get; set; }
+        public bool IsNumberStart { get; set; }
+        public bool HaveNumber { get; set; }
+        public int Order { get; set; }
+        public StringOrderModel(string strValue)
+        {
+            if (string.IsNullOrEmpty(strValue)) 
+            {
+                strValue = "";
+                IsNumberStart = false;
+                HaveNumber = false;
+                Order = 0;
+                return;
+            }
+            StrValue = strValue;
+            IsNumberStart = Regex.IsMatch(strValue, "^\\d");
+            var strNum  = Regex.Replace(strValue, @"[^0-9]+", "");
+            if (!string.IsNullOrEmpty(strNum))
+            {
+                int.TryParse(strNum, out int num);
+                HaveNumber = true;
+                Order = num;
+            }
+            else 
+            {
+                HaveNumber = false;
+                Order = 0;
             }
         }
     }

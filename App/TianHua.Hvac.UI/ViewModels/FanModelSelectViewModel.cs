@@ -399,7 +399,6 @@ namespace TianHua.Hvac.UI.ViewModels
                 ChangeChildFanCalcModel();
             }
             MainCalcFan.FanModelCCCF = BaseModelPick.Model;
-            EQPMFanDataService.Instance.CalcFanEfficiency(MainCalcFan, MainFanModel, ChildFanModel);
             RaisePropertyChanged("FanModelHeightPower");
             RaisePropertyChanged("FanModelLowPower");
             RaisePropertyChanged("FanModelMotorHeightPower");
@@ -418,6 +417,12 @@ namespace TianHua.Hvac.UI.ViewModels
             FanModelFanSpeed = MainFanModel.FanModelTypeCalcModel.FanModelFanSpeed;
             FanModelNoise = MainFanModel.FanModelTypeCalcModel.FanModelNoise;
             FanModelHeightPower = MainFanModel.FanModelTypeCalcModel.FanModelPower;
+            if (HaveChildFan)
+            {
+                if (MainFanModel.FanPowerType == EnumFanPowerType.FireFightingPower)
+                    FanModelHeightPower = "-";
+            }
+            
             FanModelLength = MainFanModel.FanModelTypeCalcModel.FanModelLength;
             FanModelWidth = MainFanModel.FanModelTypeCalcModel.FanModelWidth;
             FanModelHeight = MainFanModel.FanModelTypeCalcModel.FanModelHeight;

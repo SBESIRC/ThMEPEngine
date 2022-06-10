@@ -45,14 +45,17 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power" Guid="{B87DC7C6-2B71-4BB8-8F0C-B13D82D7C557}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Equipment_Motor_Power" Source="$(var.AutoloaderContentsPath)\Support\电机功率.json" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" Guid="{4955B07D-0D16-454C-99EA-996F704DB3A3}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-单速.json" KeyPath="yes" />
+            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Forward_Single_Speed" Guid="{CD5BEE7C-CCA6-4D03-B739-FD3ABA65604C}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Forward_Single_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-单速.json" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" Guid="{4F368CF5-01C2-4660-9D47-0B8719B3D699}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-后倾-单速.json" KeyPath="yes" />
+            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Backward_Single_Speed" Guid="{1E7673B9-2447-41BF-BB94-648EB2A88859}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Backward_Single_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-后倾-单速.json" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" Guid="{75EDECE9-2E7F-436F-B61B-38CA8ABAEBFC}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-双速.json" KeyPath="yes" />
+            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Forward_Double_Speed" Guid="{827D8416-CB70-4B46-8A9F-1639EB3C8560}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Forward_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-双速.json" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Backward_Double_Speed" Guid="{3D429845-1B03-4460-A53C-914CC8ADCF17}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Backward_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-后倾-双速.json" KeyPath="yes" />
             </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" Guid="{6D973CE6-05A1-4C4D-B439-7E71AE88D0EF}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" Source="$(var.AutoloaderContentsPath)\Support\轴流-单速.json" KeyPath="yes" />
@@ -238,14 +241,15 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig_SH" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig_Common" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Forward_Single_Speed" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Forward_Double_Speed" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Backward_Single_Speed" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Backward_Double_Speed" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HRR" />
