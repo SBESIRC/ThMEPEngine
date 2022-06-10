@@ -131,8 +131,6 @@ namespace ThMEPArchitecture.MultiProcess
                         using (AcadDatabase currentDb = AcadDatabase.Active())
                             RunWithAutoSegLine(currentDb);
                     }
-                    DisplayLogger?.Information($"地库程序运行结束 \n");
-
                 }
   
             }
@@ -145,6 +143,8 @@ namespace ThMEPArchitecture.MultiProcess
             }
             finally
             {
+                DisplayLogger?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
+                DisplayLogger?.Information($"地库程序运行结束 \n");
                 DisplayLogger?.Dispose();
 
             }
@@ -165,16 +165,7 @@ namespace ThMEPArchitecture.MultiProcess
             VMStock.Init(dataWraper);
             InterParameter.Init(dataWraper);
             InterParameter.MultiThread = false;
-            var subAreas = InterParameter.GetSubAreas(chromosome);
-            for (int i = 0; i < subAreas.Count; i++)
-            {
-                var subArea = subAreas[i];
-                subArea.Display("MPDebug");
-            }
-            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-            CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
-            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+            ProcessAndDisplay(chromosome);
         }
         public void RunDirect(AcadDatabase acadDatabase)
         {
@@ -195,32 +186,18 @@ namespace ThMEPArchitecture.MultiProcess
                 genome.Add(gene);
             }
             orgSolution.Genome = genome;
-            var subAreas = InterParameter.GetSubAreas(orgSolution);
-#if DEBUG
-            for (int i = 0; i < subAreas.Count; i++)
-            {
-                var subArea = subAreas[i];
-                subArea.Display("MPDebug");
-            }
-#endif
-            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
-            var strBest = $"车位数{ParkingStallCount}\n";
-            Logger?.Information(strBest);
-            Active.Editor.WriteMessage(strBest);
-            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-            subAreas.ForEach(area => area.ShowText());
+            ProcessAndDisplay(orgSolution);
         }
 
         public void Run(AcadDatabase acadDatabase)
         {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            if (blks == null) return;
             var displayPro = ProcessForDisplay.CreateSubProcess();
             if (ParameterViewModel.ShowLogs)
             {
                 displayPro.Start();
             }
-            var blks = InputData.SelectBlocks(acadDatabase);
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
             foreach (var blk in blks)
             {
@@ -237,7 +214,6 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     RunABlock(blk);
-
                 }
                 catch(Exception ex)
                 {
@@ -247,17 +223,17 @@ namespace ThMEPArchitecture.MultiProcess
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
-
         }
 
         public void RunWithAutoSegLine(AcadDatabase acadDatabase)
         {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            if (blks == null) return;
             var displayPro = ProcessForDisplay.CreateSubProcess();
             if (ParameterViewModel.ShowLogs)
             {
                 displayPro.Start();
             }
-            var blks = InputData.SelectBlocks(acadDatabase);
             var cutTol = ParameterStock.CutTol + 5;
             var HorizontalFirst = true;
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
@@ -322,41 +298,11 @@ namespace ThMEPArchitecture.MultiProcess
                 Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 GA.Logger = Logger;
                 GA.DisplayLogger = DisplayLogger;
-                List<SubArea> subAreas;
                 try
                 {
                     var res = GA.Run2();
                     var best = res.First();
-                    subAreas = InterParameter.GetSubAreas(best);
-                    var finalSegLines = InterParameter.ProcessToSegLines(best).Item1;
-                    var layer = "最终分割线";
-                    using (AcadDatabase acad = AcadDatabase.Active())
-                    {
-                        if (!acad.Layers.Contains(layer))
-                            ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                        finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
-                        MPEX.HideLayer(layer);
-                    }
-#if DEBUG
-            for (int i = 0; i < subAreas.Count; i++)
-            {
-                var subArea = subAreas[i];
-                subArea.Display("MPDebug");
-            }
-#endif
-                    List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                    MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                    var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
-                    var strBest = $"最大车位数{ParkingStallCount}\n";
-                    Logger?.Information(strBest);
-                    Active.Editor.WriteMessage(strBest);
-                    MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-                    subAreas.ForEach(area => area.ShowText());
-                    SubAreaParkingCnt.Clear();
-                    ReclaimMemory();
-                    Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
-                    DisplayLogger?.Information($"总用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
-
+                    ProcessAndDisplay(best,stopWatch);
                 }
                 catch (Exception ex)
                 {
@@ -371,6 +317,45 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
         }
+
+        private void ProcessAndDisplay(MPChromosome solution,Stopwatch stopWatch = null)
+        {
+            var subAreas = InterParameter.GetSubAreas(solution);
+            var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
+            var layer = "最终分割线";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                MPEX.HideLayer(layer);
+            }
+#if DEBUG
+            for (int i = 0; i < subAreas.Count; i++)
+            {
+                var subArea = subAreas[i];
+                subArea.Display("MPDebug");
+            }
+#endif
+            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            var strBest = $"最大车位数{ParkingStallCount}\n";
+            Logger?.Information(strBest);
+            Active.Editor.WriteMessage(strBest);
+            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+            subAreas.ForEach(area => area.ShowText());
+            SubAreaParkingCnt.Clear();
+            ReclaimMemory();
+            if(stopWatch != null)
+            {
+                Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                DisplayLogger?.Information($"最大车位数: {ParkingStallCount} \n");
+                var areaPerStall = (ParameterStock.TotalArea - ParameterStock.BuildingArea) / ParkingStallCount;
+                DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
+                DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
+            }
+        }
         public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData,bool definePriority = true)
         {
             Logger?.Information("##################################");
@@ -382,7 +367,7 @@ namespace ThMEPArchitecture.MultiProcess
             layoutData = new LayoutData();
             var inputvaild = layoutData.Init(blk, Logger, false);
             if (!inputvaild) return null;
-            Converter.GetDataWraper(layoutData, ParameterViewModel);
+            Converter.GetDataWraper(layoutData, ParameterViewModel,false);
             var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
             Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre }");
             t_pre = stopWatch.Elapsed.TotalSeconds;
