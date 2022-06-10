@@ -911,7 +911,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -927,7 +927,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -1970,7 +1970,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     drawDomePipes(segs);
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE")); }
                         }
                     }
                     else
@@ -2682,7 +2682,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                    brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -2698,7 +2698,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                     var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                     vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                     {
@@ -3798,7 +3798,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 }
                             }
                         }
-                            foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
+                            foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE")); }
                     }
                 }
                 else if (vm.IsMultiPipe)
@@ -4552,7 +4552,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -4568,7 +4568,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -5851,7 +5851,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE")); }
                         }
                     }
                     else
@@ -6607,7 +6607,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -6623,7 +6623,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -7525,6 +7525,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                     else
                                                     {
+                                                        if (j == refugeCount - 1)
+                                                        {
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(getGeneralBsPt(i, j).OffsetXY(0, -610), getGeneralBsPt(i, 0).OffsetXY(0, -610)), "W-FRPT-HYDT-PIPE"));
+                                                        }
                                                         if (j != 0 && j != refugeCount - 1)
                                                         {
                                                             var px = getGeneralBsPt(i, j).OffsetXY(-510, -610);
@@ -7942,7 +7946,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE")); }
                         }
                     }
                 }
@@ -8683,7 +8687,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -8699,7 +8703,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -9793,7 +9797,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE")); }
                         }
                     }
                     else
@@ -10522,7 +10526,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                         brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                        brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                        brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -10538,7 +10542,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -11632,7 +11636,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5),"W-FRPT-HYDT-PIPE")); }
+                                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) { lineInfos.Add(new LineInfo(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE")); }
                         }
                     }
                 }
@@ -12361,7 +12365,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1220, -1125 + fixY)));
                                                     brInfos.Add(new BlockInfo("安全阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-845, -1125 + fixY)));
-                                                    brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620, -1125 + fixY)));
+                                                    brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-620 - 150, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(300, 0)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(900, 0), px.OffsetXY(900, -250)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(150, -250), px.OffsetXY(900, -250)));
@@ -12377,7 +12381,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470 - 60, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                     var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                     vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                     {
