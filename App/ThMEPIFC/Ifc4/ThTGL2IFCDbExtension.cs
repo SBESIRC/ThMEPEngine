@@ -1,11 +1,13 @@
-﻿using Xbim.Ifc;
+﻿using System;
 using System.Linq;
 using GeometryExtensions;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using Xbim.Ifc;
 using Xbim.Ifc4.MeasureResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.GeometricModelResource;
-using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPIFC
 {

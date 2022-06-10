@@ -1,5 +1,5 @@
 ﻿using Xbim.Ifc;
-using Xbim.Ifc4.GeometryResource;
+using Xbim.Ifc2x3.GeometryResource;
 using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPIFC

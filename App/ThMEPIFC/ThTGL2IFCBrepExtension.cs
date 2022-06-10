@@ -1,7 +1,7 @@
 ﻿using System;
 using Xbim.Ifc;
-using Xbim.Ifc4.TopologyResource;
-using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc2x3.TopologyResource;
+using Xbim.Ifc2x3.GeometricModelResource;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.BoundaryRepresentation;
 using BrFace = Autodesk.AutoCAD.BoundaryRepresentation.Face;

@@ -1,50 +1,25 @@
-﻿using System;
+﻿using System.Linq;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using Autodesk.AutoCAD.DatabaseServices;
+using Xbim.IO;
+using Xbim.Ifc;
 using Xbim.Common;
 using Xbim.Common.Step21;
-using Xbim.Ifc;
-using Xbim.IO;
+using Xbim.Ifc2x3.Kernel;
+using Xbim.Ifc2x3.Interfaces;
+using Xbim.Ifc2x3.ProductExtension;
+using Xbim.Ifc2x3.SharedBldgElements;
+using Xbim.Ifc2x3.MeasureResource;
+using Xbim.Ifc2x3.ProfileResource;
+using Xbim.Ifc2x3.PropertyResource;
+using Xbim.Ifc2x3.GeometryResource;
+using Xbim.Ifc2x3.GeometricModelResource;
+using Xbim.Ifc2x3.RepresentationResource;
+using Xbim.Ifc2x3.GeometricConstraintResource;
 using ThMEPTCH.Model;
-using ThCADExtension;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-//using Xbim.Ifc2x3.ExternalReferenceResource;
-//using Xbim.Ifc2x3.PresentationOrganizationResource;
-//using Xbim.Ifc2x3.GeometricConstraintResource;
-//using Xbim.Ifc2x3.GeometricModelResource;
-//using Xbim.Ifc2x3.GeometryResource;
-
-//using Xbim.Ifc2x3.Kernel;
-//using Xbim.Ifc2x3.MaterialResource;
-//using Xbim.Ifc2x3.MeasureResource;
-//using Xbim.Ifc2x3.ProductExtension;
-
-//using Xbim.Ifc2x3.ProfileResource;
-//using Xbim.Ifc2x3.PropertyResource;
-//using Xbim.Ifc2x3.QuantityResource;
-//using Xbim.Ifc2x3.RepresentationResource;
-//using Xbim.Ifc2x3.SharedBldgElements;
-
-using Xbim.Ifc4.ActorResource;
-using Xbim.Ifc4.DateTimeResource;
-using Xbim.Ifc4.ExternalReferenceResource;
-using Xbim.Ifc4.PresentationOrganizationResource;
-using Xbim.Ifc4.GeometricConstraintResource;
-using Xbim.Ifc4.GeometricModelResource;
-using Xbim.Ifc4.GeometryResource;
-using Xbim.Ifc4.Interfaces;
-using Xbim.Ifc4.Kernel;
-using Xbim.Ifc4.MaterialResource;
-using Xbim.Ifc4.MeasureResource;
-using Xbim.Ifc4.ProductExtension;
-using Xbim.Ifc4.ProfileResource;
-using Xbim.Ifc4.PropertyResource;
-using Xbim.Ifc4.QuantityResource;
-using Xbim.Ifc4.RepresentationResource;
-using Xbim.Ifc4.SharedBldgElements;
+using ThMEPIFC.Ifc2x3;
 
 namespace ThMEPIFC
 {
@@ -65,7 +40,7 @@ namespace ThMEPIFC
                 EditorsOrganisationName = "ThMEP developer"
             };
             //var model = IfcStore.Create(credentials, XbimSchemaVersion.Ifc2x3, XbimStoreType.InMemoryModel);
-            var model = IfcStore.Create(credentials, XbimSchemaVersion.Ifc4, XbimStoreType.InMemoryModel);
+            var model = IfcStore.Create(credentials, XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
 
             //Begin a transaction as all changes to a model are ACID
             using (var txn = model.BeginTransaction("Initialise Model"))
@@ -111,10 +86,12 @@ namespace ThMEPIFC
                 var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
                 project?.AddBuilding(ret);
                 // add properties
-                model.Instances.New<IfcRelDefinesByProperties>(rel => {
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
                     rel.Name = "THifc properties";
                     rel.RelatedObjects.Add(ret);
-                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset => {
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
                         pset.Name = "Basic set of THifc properties";
                         foreach (var item in building.Properties)
                         {
@@ -137,20 +114,23 @@ namespace ThMEPIFC
             {
                 var ret = model.Instances.New<IfcBuildingStorey>();
                 ret.Name = storey.FloorNum;
-                // for ifc2x3
-                //var relContainedIn = model.Instances.New<Xbim.Ifc2x3.ProductExtension.IfcRelContainedInSpatialStructure>();
-                //Building.ContainsElements.Append<Xbim.Ifc2x3.Interfaces.IIfcRelContainedInSpatialStructure>(relContainedIn);
-                //relContainedIn.RelatedElements.Add(ret);
-                //relContainedIn.RelatingStructure = Building;
-
-                // for ifc4
-                Building.AddElement(ret);
                 ret.Elevation = storey.FloorOrigin.Z;
+
+                // for ifc2x3
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                Building.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
+                relContainedIn.RelatedElements.Add(ret);
+                relContainedIn.RelatingStructure = Building;
+                // for ifc4
+                //Building.AddElement(ret);
+
                 // add properties
-                model.Instances.New<IfcRelDefinesByProperties>(rel => {
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
                     rel.Name = "THifc properties";
                     rel.RelatedObjects.Add(ret);
-                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset => {
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
                         pset.Name = "Basic set of THifc properties";
                         foreach (var item in storey.Properties)
                         {
@@ -180,13 +160,13 @@ namespace ThMEPIFC
                     s.ExtrudedDirection = model.ToIfcDirection(wall.ExtrudedDirection);
                 });
 
-                
+
                 if (wall.Outline != null && wall.Outline is Polyline pline)
                 {
                     var ArbitraryClosedProfileDef = model.Instances.New<IfcArbitraryClosedProfileDef>();
                     ArbitraryClosedProfileDef.ProfileType = IfcProfileTypeEnum.AREA;
                     // ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexPolyline(model, pline);
-                    ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexedPolyCurve(model, pline);
+                    ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, pline);
                     body.SweptArea = ArbitraryClosedProfileDef;
                 }
                 else
@@ -230,10 +210,12 @@ namespace ThMEPIFC
                 ret.ObjectPlacement = lp;
 
                 // add properties
-                model.Instances.New<IfcRelDefinesByProperties>(rel => {
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
                     rel.Name = "THifc properties";
                     rel.RelatedObjects.Add(ret);
-                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset => {
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
                         pset.Name = "Basic set of THifc properties";
                         //pset.HasProperties.AddRange(new[] {
                         //    model.Instances.New<IfcPropertySingleValue>(p=>{
@@ -306,18 +288,19 @@ namespace ThMEPIFC
             using (var txn = model.BeginTransaction("relContainWalls2Storey"))
             {
                 //for ifc2x3
-                //var relContainedIn = model.Instances.New<Xbim.Ifc2x3.ProductExtension.IfcRelContainedInSpatialStructure>();
-                //Storey.ContainsElements.Append<Xbim.Ifc2x3.Interfaces.IIfcRelContainedInSpatialStructure>(relContainedIn);
-                foreach(var wall in walls)
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                Storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
+                foreach (var wall in walls)
                 {
-                    //relContainedIn.RelatedElements.Add(wall);
-                    Storey.AddElement(wall);
+                    relContainedIn.RelatedElements.Add(wall);
+                    //Storey.AddElement(wall);
                 }
-                // relContainedIn.RelatingStructure = Storey;
+                relContainedIn.RelatingStructure = Storey;
+
                 txn.Commit();
             }
         }
-        static public IfcDoor CreateDoor(IfcStore model,ThTCHDoor door, IfcElement openedElement, ThTCHWall thwall, Point3d floor_origin)
+        static public IfcDoor CreateDoor(IfcStore model, ThTCHDoor door, IfcElement openedElement, ThTCHWall thwall, Point3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Door"))
             {
@@ -369,10 +352,12 @@ namespace ThMEPIFC
                 ret.ObjectPlacement = lp;
 
                 // add properties
-                model.Instances.New<IfcRelDefinesByProperties>(rel=> {
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
                     rel.Name = "THifc properties";
                     rel.RelatedObjects.Add(ret);
-                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset=>{
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
                         pset.Name = "Basic set of THifc properties";
                         //pset.HasProperties.AddRange(new[] {
                         //    model.Instances.New<IfcPropertySingleValue>(p=>{
@@ -449,14 +434,14 @@ namespace ThMEPIFC
             using (var txn = model.BeginTransaction("relContainDoors2Storey"))
             {
                 //for ifc2x3
-                //var relContainedIn = model.Instances.New<Xbim.Ifc2x3.ProductExtension.IfcRelContainedInSpatialStructure>();
-                //Storey.ContainsElements.Append<Xbim.Ifc2x3.Interfaces.IIfcRelContainedInSpatialStructure>(relContainedIn);
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                Storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
                 foreach (var door in doors)
                 {
-                    //relContainedIn.RelatedElements.Add(door);
-                    Storey.AddElement(door);
+                    relContainedIn.RelatedElements.Add(door);
+                    //Storey.AddElement(door);
                 }
-                //relContainedIn.RelatingStructure = Storey;
+                relContainedIn.RelatingStructure = Storey;
                 txn.Commit();
             }
         }
@@ -512,10 +497,12 @@ namespace ThMEPIFC
                 ret.ObjectPlacement = lp;
 
                 // add properties
-                model.Instances.New<IfcRelDefinesByProperties>(rel => {
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
                     rel.Name = "THifc properties";
                     rel.RelatedObjects.Add(ret);
-                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset => {
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
                         pset.Name = "Basic set of THifc properties";
                         foreach (var item in window.Properties)
                         {
@@ -583,14 +570,14 @@ namespace ThMEPIFC
             using (var txn = model.BeginTransaction("relContainWindows2Storey"))
             {
                 //for ifc2x3
-                //var relContainedIn = model.Instances.New<Xbim.Ifc2x3.ProductExtension.IfcRelContainedInSpatialStructure>();
-                //Storey.ContainsElements.Append<Xbim.Ifc2x3.Interfaces.IIfcRelContainedInSpatialStructure>(relContainedIn);
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                Storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
                 foreach (var window in windows)
                 {
-                    //relContainedIn.RelatedElements.Add(window);
-                    Storey.AddElement(window);
+                    relContainedIn.RelatedElements.Add(window);
+                    //Storey.AddElement(window);
                 }
-                //relContainedIn.RelatingStructure = Storey;
+                relContainedIn.RelatingStructure = Storey;
                 txn.Commit();
             }
         }
@@ -673,13 +660,12 @@ namespace ThMEPIFC
                     ArbitraryClosedProfileDef.ProfileType = IfcProfileTypeEnum.AREA;
                     if (slab.Outline is Polyline pline)
                     {
-                        // ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexPolyline(model, pline);
-                        ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexedPolyCurve(model, pline);
+                        ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, pline);
                     }
                     else if (slab.Outline is MPolygon polygon)
                     {
                         var shell = ThMPolygonExtension.Shell(polygon);
-                        ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexedPolyCurve(model, shell);
+                        ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, shell);
                     }
                     body.SweptArea = ArbitraryClosedProfileDef;
                 }
@@ -721,7 +707,7 @@ namespace ThMEPIFC
                 if (slab.Outline != null && slab.Outline is MPolygon mPolygon)
                 {
                     var holepolylines = ThMPolygonExtension.Holes(mPolygon);
-                    foreach(var holepolyline in holepolylines)
+                    foreach (var holepolyline in holepolylines)
                     {
                         var hole = model.Instances.New<IfcOpeningElement>();
                         hole.Name = "hole on the Slab";
@@ -734,7 +720,7 @@ namespace ThMEPIFC
                         //build 2d area
                         var holesArbitraryClosedProfileDef = model.Instances.New<IfcArbitraryClosedProfileDef>();
                         holesArbitraryClosedProfileDef.ProfileType = IfcProfileTypeEnum.AREA;
-                        holesArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexedPolyCurve(model, holepolyline);
+                        holesArbitraryClosedProfileDef.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, holepolyline);
 
                         holesbody.SweptArea = holesArbitraryClosedProfileDef;
 
@@ -764,10 +750,12 @@ namespace ThMEPIFC
                 }
 
                 // add properties
-                model.Instances.New<IfcRelDefinesByProperties>(rel => {
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
                     rel.Name = "THifc properties";
                     rel.RelatedObjects.Add(ret);
-                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset => {
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
                         pset.Name = "Basic set of THifc properties";
                         foreach (var item in slab.Properties)
                         {
@@ -789,14 +777,14 @@ namespace ThMEPIFC
             using (var txn = model.BeginTransaction("relContainSlabs2Storey"))
             {
                 //for ifc2x3
-                //var relContainedIn = model.Instances.New<Xbim.Ifc2x3.ProductExtension.IfcRelContainedInSpatialStructure>();
-                //Storey.ContainsElements.Append<Xbim.Ifc2x3.Interfaces.IIfcRelContainedInSpatialStructure>(relContainedIn);
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                Storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
                 foreach (var slab in slabs)
                 {
-                    //relContainedIn.RelatedElements.Add(window);
-                    Storey.AddElement(slab);
+                    relContainedIn.RelatedElements.Add(slab);
+                    //Storey.AddElement(slab);
                 }
-                //relContainedIn.RelatingStructure = Storey;
+                relContainedIn.RelatingStructure = Storey;
                 txn.Commit();
             }
         }
