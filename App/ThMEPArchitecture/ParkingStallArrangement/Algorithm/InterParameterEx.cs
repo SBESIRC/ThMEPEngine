@@ -414,12 +414,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var subAreas = SegLineStrings.GetSubAreas();
             foreach (var area in subAreas)
             {
-                var newSeg = area.GetNewSegLine();
+                var newSeg = area.GetNewSegLine(SegLineStrings);
                 if(newSeg != null) newSegs.Add(newSeg);
             }
             return newSegs;
         }
-        public static LineString GetNewSegLine(this SubArea subArea)
+        public static LineString GetNewSegLine(this SubArea subArea, List<LineString> SegLineStrings)
         {
             LineString newSeg = null;
             if(subArea.Buildings.Count == 0) return newSeg;
@@ -457,30 +457,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     bool NeedExtraSegLine = segLineSPIndex.SelectCrossingGeometry(Buffer).
                         Cast<LineString>().Where(l => l.IsVertical() == IsVerticle).Count() == 0;
-                    //// 判断是否有分割线范围覆盖
-                    //var centers = segLineSPIndex.SelectCrossingGeometry(Buffer).Cast<LineString>().
-                    //    Where(l => l.IsVertical() == IsVerticle).Select(l => l.Centroid.Coordinate);
-                    //bool NeedExtraSegLine = true;
-                    //if(centers.Count() > 0)
-                    //{
-                    //    var basePt = pt.Move(VMStock.RoadWidth / 2, extendFlag);
-                    //    double ptValue;
-                    //    if (IsVerticle) ptValue = basePt.X;
-                    //    else ptValue = basePt.Y;
-                    //    for (int i = 0; i < InterParameter.InitSegLines.Count; i++)
-                    //    {
-                    //        var initSeg = InterParameter.InitSegLines[i];
-                    //        if (initSeg.IsVertical() == IsVerticle && initSeg.Distance(centers) < 1)
-                    //        {
-                    //            var LU_Bound = InterParameter.LowerUpperBound[i];
-                    //            if(ptValue >(LU_Bound.Item1-100) && ptValue < (LU_Bound.Item2+100))
-                    //            {
-                    //                NeedExtraSegLine = false;
-                    //                break;
-                    //            }
-                    //        }
-                    //    }
-                    //}
                     if (NeedExtraSegLine)//需要补线
                     {
                         var baseLine = new LineSegment(pt, pt.Move(w1, extendFlag));
@@ -493,8 +469,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         }
                         if (rectVaild)
                         {
-                            if (positiveDir) return extended.Move(w1 / 2).ToLineString();
-                            else return extended.Move(-w1 / 2).ExtendToBound(subArea.Area, (true, true)).ToLineString();
+                            if (positiveDir) extended =  extended.Move(0.5 * (1+VMStock.RoadWidth));
+                            else extended = extended.Move(-0.5 * (1 + VMStock.RoadWidth));
+                            var newSegLine = extended.ExtendToBound(subArea.Area, (true, true));
+                            var newSegLines = SegLineStrings.ToLineSegments();
+                            newSegLines.Add(newSegLine);
+                            var IsVaild = SegLineIsVaild(newSegLines,newSegLines.Count-1);
+                            if(IsVaild) return extended.ToLineString();
                         }
 
                         baseLine = new LineSegment(pt, pt.Move(w2, extendFlag));
@@ -507,14 +488,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         }
                         if (rectVaild)
                         {
-                            if (positiveDir) return extended.Move(w2 / 2).ToLineString();
-                            else return extended.Move(-w2 / 2).ExtendToBound(subArea.Area, (true, true)).ToLineString();
+                            if (positiveDir) extended = extended.Move(0.5 * (1 + VMStock.RoadWidth));
+                            else extended = extended.Move(-0.5 * (1 + VMStock.RoadWidth));
+                            var newSegLine = extended.ExtendToBound(subArea.Area, (true, true));
+                            var newSegLines = SegLineStrings.ToLineSegments();
+                            newSegLines.Add(newSegLine);
+                            var IsVaild = SegLineIsVaild(newSegLines, newSegLines.Count - 1);
+                            if (IsVaild) return extended.ToLineString();
                         }
                     }
                     
                 }
             }
             return newSeg;
+        }
+
+        public static bool SegLineIsVaild(List<LineSegment> SegLines,int idx)
+        {
+            var validLane = SegLineEx.GetVaildLane(idx, SegLines, InterParameter.TotalArea, InterParameter.BoundaryObjectsSPIDX);
+            double tol = VMStock.RoadWidth - 0.1;// 5500 -0.1
+            if (validLane == null) return true;
+            var rect = validLane.GetRect(tol);
+            var rst = InterParameter.BoundarySpatialIndex.SelectCrossingGeometry(rect);
+            return rst.Count == 0;
         }
         #endregion
     }

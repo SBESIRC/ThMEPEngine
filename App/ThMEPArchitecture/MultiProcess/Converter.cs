@@ -21,6 +21,7 @@ using ThParkingStall.Core.MPartitionLayout;
 using Dreambuild.AutoCAD;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
+using Linq2Acad;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -46,7 +47,12 @@ namespace ThMEPArchitecture.MultiProcess
             if (AddSegLines)
             {
                 var newSegs = InterParameterEx.AddSegLines();
-                //newSegs.ForEach(l => l.ToDbLine(2,"添加分割线").AddToCurrentSpace());
+                using (AcadDatabase acad = AcadDatabase.Active())
+                {
+                    if (acad.Layers.Contains("添加分割线"))
+                        newSegs.ForEach(l => l.ToDbLine(2, "添加分割线").AddToCurrentSpace());
+                }
+                
                 newSegs.AddRange(layoutData.SegLines);
                 layoutData.ProcessSegLines(newSegs, false, true);
                 dataWraper.UpdateInterParameter(layoutData);
