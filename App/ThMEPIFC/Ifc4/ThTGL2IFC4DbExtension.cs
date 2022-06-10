@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using GeometryExtensions;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -7,11 +6,10 @@ using Xbim.Ifc;
 using Xbim.Ifc4.MeasureResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.GeometricModelResource;
-using Autodesk.AutoCAD.Geometry;
 
-namespace ThMEPIFC
+namespace ThMEPIFC.Ifc4
 {
-    public static class ThTGL2IFCDbExtension
+    public static class ThTGL2IFC4DbExtension
     {
         private static IfcIndexedPolyCurve CreateIfcIndexedPolyCurve(IfcStore model)
         {

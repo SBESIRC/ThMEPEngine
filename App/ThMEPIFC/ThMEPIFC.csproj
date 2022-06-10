@@ -34,7 +34,7 @@
     <Compile Include="Ifc2x3\ThTGL2IFC2x3DbExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3BrepExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3Builder.cs" />
-    <Compile Include="Ifc4\ThTGL2IFCDbExtension.cs" />
+    <Compile Include="Ifc4\ThTGL2IFC4DbExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3Factory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3GeExtension.cs" />
     <Compile Include="ThTGL2IFCService.cs" />
