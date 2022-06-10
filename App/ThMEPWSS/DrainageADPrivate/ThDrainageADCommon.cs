@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Autodesk.AutoCAD.Geometry;
+
 namespace ThMEPWSS.DrainageADPrivate
 {
     internal class ThDrainageADCommon
@@ -55,6 +57,14 @@ namespace ThMEPWSS.DrainageADPrivate
         public static double Th = 24.0; //用水时数（h） 等于24
         public static double TransEnlargeScale = 1.5;
         public static double BreakLineLength = 75.0;
+
+        public static double Tol_TerminalArea = 3000 * 3000; //洁具面积>3*3米过滤
+        public static double Tol_PipeToVerticalPipeCenter = 100;
+        public static int Tol_SamePoint = 1;
+        public static int Tol_AngleValveToPipe = 30;
+        public static double Tol_PipeEndPair = 250;
+        public static double Tol_PipeEndToTerminal = 500;
+
         public enum TerminalType
         {
             Toilet,  //坐便器

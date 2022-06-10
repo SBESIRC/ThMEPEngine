@@ -136,7 +136,6 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static void SetTerminalDir(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, ThValve> ptAngleValve)
         {
-            var tol = new Tolerance(1, 1);
             for (int i = 0; i < ptTerminal.Count(); i++)
             {
                 var item = ptTerminal.ElementAt(i);
@@ -165,7 +164,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                             node = node.Parent;
                         }
                         var dir = node.Parent.Pt - node.Pt;
-                        if (Math.Abs(dir.Z) < 0.1)
+                        if (Math.Abs(dir.Z) < ThDrainageADCommon.Tol_SamePoint)
                         {
                             dir = (new Vector3d(dir.X, dir.Y, 0)).GetNormal();
                             item.Value.Dir = dir;

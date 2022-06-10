@@ -143,7 +143,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         }
         private static List<Point3d> FindClosePipe(List<Line> allpipe, Point3d pt)
         {
-            var minDistTol = 100;
+            var minDistTol = ThDrainageADCommon.Tol_PipeToVerticalPipeCenter;
 
             var projpt = new Point3d(pt.X, pt.Y, 0);
             var nearpipe = allpipe.Where(x => new Point3d(x.StartPoint.X, x.StartPoint.Y, 0).DistanceTo(projpt) < minDistTol ||
@@ -300,6 +300,11 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 var pl = ThMEPWSSUtils.GetVisibleOBB(blk);
                 var type = ThDrainageADTermianlService.GetTerminalType(name, BlockNameDict);
 
+                if (pl.Area > ThDrainageADCommon.Tol_TerminalArea)
+                {
+                    continue;
+                }
+
                 if (type == ThDrainageADCommon.TerminalType.WaterHeater)
                 {
                     pl = CreateWaterHeater(blk);
@@ -323,7 +328,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         {
             var pl = new Polyline();
             pl.Closed = true;
-            var tol = new Tolerance(1, 1);
+            var tol = new Tolerance(ThDrainageADCommon.Tol_SamePoint, ThDrainageADCommon.Tol_SamePoint);
             var obj = new DBObjectCollection();
             blk.Explode(obj);
 

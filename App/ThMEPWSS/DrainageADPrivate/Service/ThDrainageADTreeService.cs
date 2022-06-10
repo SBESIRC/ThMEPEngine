@@ -60,34 +60,6 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return ptDict;
         }
 
-        //public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out List<Point3d> ptStart)
-        //{
-        //    ptTerminal = new Dictionary<Point3d, ThSaniterayTerminal>();
-        //    ptStart = new List<Point3d>();
-
-        //    var endPtList = ptDict.Where(x => x.Value.Count == 1).ToList();
-
-        //    foreach (var endPt in endPtList)
-        //    {
-        //        var vertical = IsVertical(endPt.Value[0]);
-        //        if (vertical == false)
-        //        {
-        //            ptStart.Add(endPt.Key);
-        //            continue;
-        //        }
-
-        //        var t = FindTerminal(endPt.Key, terminalList);
-        //        if (t != null)
-        //        {
-        //            ptTerminal.Add(endPt.Key, t);
-        //        }
-        //        else
-        //        {
-        //            ptStart.Add(endPt.Key);
-        //        }
-        //    }
-        //}
-
         public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, List<ThValve> angleValve, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out Dictionary<Point3d, ThValve> ptValve, out List<Point3d> ptStart)
         {
             var r = 50.0;
@@ -154,7 +126,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         public static bool IsVertical(Line l)
         {
             var bReturn = false;
-            var tol = 1;
+            var tol = ThDrainageADCommon.Tol_SamePoint;
             var zDelta = Math.Abs(l.StartPoint.Z - l.EndPoint.Z);
             var vertical = Math.Abs(zDelta - l.Length);
 
@@ -169,7 +141,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static bool HasAngleValve(Point3d pt, List<ThValve> angleValveList, out ThValve valve)
         {
-            var tol = new Tolerance(30, 30);
+            var tol = new Tolerance(ThDrainageADCommon.Tol_AngleValveToPipe, ThDrainageADCommon.Tol_AngleValveToPipe);
             var hasAngleValve = false;
             valve = null;
             var projPt = new Point3d(pt.X, pt.Y, 0);
@@ -198,7 +170,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         }
         public static Dictionary<Point3d, Point3d> GetTerminalPairDict(Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
         {
-            var disTol = 250;
+            var disTol = ThDrainageADCommon.Tol_PipeEndPair;
             var terminalPairDict = new Dictionary<Point3d, Point3d>();
 
             var allPointDict = ptTerminal.ToDictionary(x => x.Key, x => 0);
@@ -241,7 +213,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         private static ThSaniterayTerminal FindTerminal(Point3d pt, List<ThSaniterayTerminal> terminal)
         {
             ThSaniterayTerminal endTerminal = null;
-            var tol = 500;
+            var tol = ThDrainageADCommon.Tol_PipeEndToTerminal;
             var projPt = new Point3d(pt.X, pt.Y, 0);
 
             //先找是否有被包含的 热水器优先度高
@@ -262,7 +234,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             {
                 //没有被包含的找500内距离最近的,且不是热水器
                 var orderTerminal = terminal.Where(x => x.Boundary.DistanceTo(projPt, false) < tol).OrderBy(x => x.Boundary.DistanceTo(projPt, false)).ToList();
-                if (orderTerminal.Count() > 0 && orderTerminal.First ().Type != ThDrainageADCommon.TerminalType.WaterHeater)
+                if (orderTerminal.Count() > 0 && orderTerminal.First().Type != ThDrainageADCommon.TerminalType.WaterHeater)
                 {
                     endTerminal = orderTerminal.First();
                 }
@@ -275,7 +247,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         private static Point3d IsInDict(Point3d pt, Dictionary<Point3d, List<Line>> ptDict)
         {
             var key = new Point3d();
-            var tol = new Tolerance(1, 1);
+            var tol = new Tolerance(ThDrainageADCommon.Tol_SamePoint, ThDrainageADCommon.Tol_SamePoint);
             var dict = ptDict.Where(x => x.Key.IsEqualTo(pt, tol));
             if (dict.Count() > 0)
             {
@@ -319,81 +291,6 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return ptCoolHotDict;
         }
 
-        ///// <summary>
-        ///// 返回冷热起点
-        ///// </summary>
-        ///// <param name="ptStart"></param>
-        ///// <param name="ptTerminal"></param>
-        ///// <param name="ptDict"></param>
-        ///// <param name="datapass"></param>
-        ///// <returns></returns>
-        //public static Dictionary<Point3d, bool> CheckCoolHotStartPt(List<Point3d> ptStart, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, List<Line>> ptDict, ThDrainageADPDataPass datapass)
-        //{
-        //    var ptCoolHotDict = new Dictionary<Point3d, bool>();
-
-        //    foreach (var pt in ptStart)
-        //    {
-        //        var isCool = CheckCoolHotPt(pt, ptDict, datapass);
-        //        ptCoolHotDict.Add(pt, isCool);
-        //    }
-        //    foreach (var pt in ptTerminal)
-        //    {
-        //        if (pt.Value.Type == ThDrainageADCommon.TerminalType.WaterHeater)
-        //        {
-        //            var isCool = CheckCoolHotPt(pt.Key, ptDict, datapass);
-        //            if (isCool == false)
-        //            {
-        //                ptCoolHotDict.Add(pt.Key, isCool);
-        //            }
-        //        }
-        //    }
-
-        //    return ptCoolHotDict;
-        //}
-
-        //private static bool CheckCoolHotPt(Point3d pt, Dictionary<Point3d, List<Line>> ptDict, ThDrainageADPDataPass datapass)
-        //{
-        //    var isCool = false;
-        //    var tol = new Tolerance(1, 1);
-        //    ptDict.TryGetValue(pt, out var lines);
-
-        //    if (lines != null && lines.Count > 0)
-        //    {
-        //        if (lines.Where(x => datapass.CoolPipeTopView.Contains(x)).Any())
-        //        {
-        //            isCool = true;
-        //        }
-        //        else if (lines.Where(x => datapass.HotPipeTopView.Contains(x)).Any())
-        //        {
-        //            isCool = false;
-        //        }
-        //        else if (lines.Where(x => datapass.VerticalPipe.Contains(x)).Any())
-        //        {
-        //            var ptOther = lines[0].EndPoint;
-        //            if (pt.IsEqualTo(ptOther, tol))
-        //            {
-        //                ptOther = lines[0].StartPoint;
-        //            }
-        //            var ptKey = IsInDict(ptOther, ptDict);
-        //            if (ptKey != Point3d.Origin)
-        //            {
-        //                var connLine = ptDict[ptKey];
-        //                if (connLine.Where(x => datapass.CoolPipeTopView.Contains(x)).Any())
-        //                {
-        //                    isCool = true;
-        //                }
-        //                else if (connLine.Where(x => datapass.HotPipeTopView.Contains(x)).Any())
-        //                {
-        //                    isCool = false;
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return isCool;
-
-        //}
-
         public static ThDrainageTreeNode BuildTree(Point3d startPt, Dictionary<Point3d, List<Line>> ptDict)
         {
             var traversed = ptDict.SelectMany(x => x.Value).Distinct().ToDictionary(x => x, x => 0);
@@ -406,7 +303,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static void FindNextLeaf(ThDrainageTreeNode thisNode, Dictionary<Point3d, List<Line>> ptDict, Dictionary<Line, int> traversed)
         {
-            var tol = new Tolerance(1, 1);
+            var tol = new Tolerance(ThDrainageADCommon.Tol_SamePoint, ThDrainageADCommon.Tol_SamePoint);
             var thisNodePt = thisNode.Pt;
 
             var toLine = ptDict[thisNodePt].Where(x => traversed[x] == 0).ToList();
