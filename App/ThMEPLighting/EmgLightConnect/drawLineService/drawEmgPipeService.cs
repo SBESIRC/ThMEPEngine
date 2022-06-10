@@ -11,7 +11,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {

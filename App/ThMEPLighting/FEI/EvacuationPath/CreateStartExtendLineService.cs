@@ -9,7 +9,7 @@ using Linq2Acad;
 using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.Model;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 
 namespace ThMEPLighting.FEI.EvacuationPath
 {

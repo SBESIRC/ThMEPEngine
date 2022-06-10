@@ -10,7 +10,7 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThMEPLighting.EmgLightConnect.Model;
 using ThMEPEngineCore.Diagnostics;
-using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {

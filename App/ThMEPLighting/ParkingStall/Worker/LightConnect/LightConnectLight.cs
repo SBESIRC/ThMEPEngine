@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 
 namespace ThMEPLighting.ParkingStall.Worker.LightConnect
 {

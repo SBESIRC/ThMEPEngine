@@ -12,8 +12,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 {
     public class GlobleMap<T> : Map<T>
     {
+        public double avoidHoleDistance = 800;
         double step = 800;
-        double avoidHoleDistance = 800;
         double avoidFrameDistance = 200;
         public new GloblePoint startPt;
         public new GlobleMapHelper<T> mapHelper;
@@ -119,10 +119,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         /// <param name="holes"></param>
         public void SetObstacle(List<MPolygon> _holes, double Weight, double bufferDis)
         {
-            if (bufferDis == double.MaxValue)
-            {
-                bufferDis = avoidHoleDistance;
-            }
             foreach (var h in _holes)
             {
                 var mHole = h;
