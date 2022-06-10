@@ -271,7 +271,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void GenerateCarsOnRestLanes()
         {
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
+            var vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
             SortLaneByDirection(vertlanes, LayoutMode);
             foreach (var k in vertlanes)
             {
