@@ -1,6 +1,4 @@
-﻿#define IFC2X3
-//#define IFC4
-using System.IO;
+﻿using System.IO;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPTCH.Services;

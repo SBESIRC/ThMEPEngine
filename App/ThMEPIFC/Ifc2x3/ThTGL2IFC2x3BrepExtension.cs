@@ -1,15 +1,15 @@
 ﻿using System;
 using Xbim.Ifc;
-using Xbim.Ifc4.TopologyResource;
-using Xbim.Ifc4.GeometricModelResource;
+using Xbim.Ifc2x3.TopologyResource;
+using Xbim.Ifc2x3.GeometricModelResource;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.BoundaryRepresentation;
 using BrFace = Autodesk.AutoCAD.BoundaryRepresentation.Face;
 using BrShell = Autodesk.AutoCAD.BoundaryRepresentation.Shell;
 
-namespace ThMEPIFC
+namespace ThMEPIFC.Ifc2x3
 {
-    public static class ThTGL2IFCBrepExtension
+    public static class ThTGL2IFC2x3BrepExtension
     {
         /// <summary>
         /// CAD中的三维实体（Solid3d)到IFC Brep的表达转换
