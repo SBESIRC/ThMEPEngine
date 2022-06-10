@@ -328,7 +328,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 else strConverged = $"已收敛";
                 Active.Editor.WriteMessage(strConverged);
                 Logger?.Information(strConverged);
-                DisplayLogger?.Information("最终代数: " + CurIteration.ToString() + "\t");
+                DisplayLogger?.Information("最终代数: " + (CurIteration-1).ToString() + "\t");
                 DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
                 stopWatch.Stop();
                 var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
@@ -381,7 +381,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var maxCnt = sorted[0].ParkingStallCount;
             DisplayLogger?.Information("当前车位数: " + maxCnt.ToString()+"\t");
             var areaPerStall = (ParameterStock.TotalArea - ParameterStock.BuildingArea) / maxCnt;
-            DisplayLogger?.Information("车均面积: " + areaPerStall.ToString() + "平方米/辆\t");
+            DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
             System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<MPChromosome>();
             // SelectionSize 直接保留
