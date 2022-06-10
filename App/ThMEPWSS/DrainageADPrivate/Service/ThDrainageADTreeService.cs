@@ -169,7 +169,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static bool HasAngleValve(Point3d pt, List<ThValve> angleValveList, out ThValve valve)
         {
-            var tol = new Tolerance(10, 10);
+            var tol = new Tolerance(30, 30);
             var hasAngleValve = false;
             valve = null;
             var projPt = new Point3d(pt.X, pt.Y, 0);

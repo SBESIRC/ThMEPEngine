@@ -254,11 +254,11 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
         public void ProjectOntoXYPlane()
         {
-            //Terminal.ForEach(x => x.Outline.ProjectOntoXYPlane());
-            //Valve.ForEach(x => x.Outline.ProjectOntoXYPlane());
-            //AngleValve.ForEach(x => x.ProjectOntoXYPlane());
-            //Casing.ForEach(x => x.ProjectOntoXYPlane());
-           
+            Terminal.ForEach(x => x.ProjectOntoXYPlane());
+            Valve.ForEach(x => x.ProjectOntoXYPlane());
+            AngleValve.ForEach(x => x.ProjectOntoXYPlane());
+            Casing.ForEach(x => x.ProjectOntoXYPlane());
+
         }
 
         public void Reset(ThMEPOriginTransformer transformer)
