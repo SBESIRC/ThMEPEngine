@@ -112,7 +112,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
                 return false;
             };
-            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            var blkVisitor = new ThHydrantExtractionVisitor();
             blkVisitor.CheckQualifiedLayer = (e) => true;
             blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
 
@@ -161,12 +161,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
     }
 
-    public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThHydrantExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
         
-        public ThBlockReferenceExtractionVisitor()
+        public ThHydrantExtractionVisitor()
         {
             CheckQualifiedLayer = base.CheckLayerValid;
             CheckQualifiedBlockName = (Entity entity) => true;

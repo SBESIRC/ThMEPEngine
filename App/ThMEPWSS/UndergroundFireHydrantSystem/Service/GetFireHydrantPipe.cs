@@ -256,6 +256,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             {
                                 GetBranchAcross(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
                             }
+                            if(type.Equals(6))
+                            {
+                                GetBranchType6(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+                            }
                         }
                         else
                         {
@@ -593,6 +597,88 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var DN1 = ThTextSet.ThText(new Point3d(pt1.X, pt1.Y - 500, 0), 0, "DN100");
             fireHydrantSysOut.DNList.Add(DN1);
         }
+
+        /// <summary>
+        /// 绘制向下的单分支
+        /// </summary>
+        /// <param name="输出"></param>
+        /// <param name="起始点"></param>
+        /// <param name="分支路径"></param>
+        /// <param name="输入"></param>
+        private static void GetBranchType6(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
+            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
+        {
+            double floorHeight = fireHydrantSysIn.FloorHeight;
+
+            var textWidth = fireHydrantSysIn.TextWidth;
+            string pipeNumber1 = "";
+            string pipeNumber12 = "";
+            if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
+            {
+                pipeNumber1 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber;//立管标号
+                //pipeNumber12 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber2;//立管标号
+            }
+
+            var pt1 = stpt._pt;
+            double pipeWidth = 800;
+            var pt4 = pt1.OffsetX(pipeWidth);
+            var pt5 = pt1.OffsetXY(pipeWidth, -floorHeight * 0.1);
+            var pt6 = pt1.OffsetXY(pipeWidth, -floorHeight * 0.2);
+
+            //LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
+            var lineList = new List<Line>();
+            lineList.Add(new Line(pt4, pt5));
+            if (type == 2)
+            {
+                ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4);
+            }
+            foreach (var line in lineList)
+            {
+                fireHydrantSysOut.LoopLine.Add(line);
+            }
+            fireHydrantSysOut.PipeInterrupted.Add(pt5, Math.PI);
+            var textLine1 = ThTextSet.ThTextLine(pt5, pt6);
+            var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textWidth - 50));
+            var p2Flag = false;
+
+            if (pipeNumber1 is not null)
+            {
+                var text = ThTextSet.ThText(pt6.OffsetX(-textWidth), pipeNumber1.Trim());
+                if (!pipeNumber1.Trim().Equals(""))
+                {
+                    fireHydrantSysOut.TextLine.Add(textLine1);
+                    fireHydrantSysOut.TextList.Add(text);
+                    //if (!pipeNumber12?.Equals("") == true)
+                    //{
+                    //    text = ThTextSet.ThText(new Point3d(pt6.X, pt6.Y - 400, 0), pipeNumber12.Trim());
+                    //    double textLength = text.GeometricExtents.MaxPoint.X - text.GeometricExtents.MinPoint.X;
+                    //    if (textLength > textWidth)
+                    //    {
+                    //        var textLine3 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textLength));
+                    //        fireHydrantSysOut.TextLine.Add(textLine3);
+                    //        p2Flag = true;
+
+                    //    }
+
+                    //    fireHydrantSysOut.TextList.Add(text);
+                    //}
+                    //if (!p2Flag)
+                    //{
+                    //    fireHydrantSysOut.TextLine.Add(textLine2);
+                    //}
+                }
+            }
+
+            //var strDN = "DN100";
+            //if (fireHydrantSysIn.TermDnDic.ContainsKey(tpt))
+            //{
+            //    strDN = fireHydrantSysIn.TermDnDic[tpt];
+            //}
+            //var DN1 = ThTextSet.ThText(new Point3d(pt5.X + 350, pt4.Y + floorHeight * 0.2, 0), Math.PI / 2, strDN);
+            //fireHydrantSysOut.DNList.Add(DN1);
+        }
+
+
 
 
         /// <summary>

@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
         public string PipeNumber2 { get; set; }//标注
-        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器 ; 5 跨层点
+        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器 ; 5 跨层点; 6 无立管有标注
         private double Tolerance { get; set; }//容差
         public TermPoint(Point3dEx ptEx)
         {

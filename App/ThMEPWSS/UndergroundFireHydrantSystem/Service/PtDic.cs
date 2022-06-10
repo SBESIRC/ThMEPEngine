@@ -204,6 +204,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 try
                 {
+                    if(pt.DistanceToEx(new Point3dEx(1579516.1,230455.1,0))<10)
+                    {
+                        ;
+                    }
                     CreateTermPtDic2(pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
                 }
                 catch(Exception ex)
@@ -214,7 +218,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             foreach(var pt in fireHydrantSysIn.PtDic.Keys)
             {
-                if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
+                bool ignore = false;
+                foreach (var vpt in fireHydrantSysIn.VerticalPosition)
+                {
+                    if(pt.DistanceToEx(vpt)< 100)
+                    {
+                        ignore = true;
+                        break;
+                    }
+                }
+                if(ignore)
+                {
+                    continue;
+                }
+                    if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
                 {
                     if(!fireHydrantSysIn.TermPointDic.ContainsKey(pt))//且没有标记
                     {
@@ -224,7 +241,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             termPoint.SetPipeNumber(textSpatialIndex);
                         }
-                        termPoint.SetType(false);
+                        termPoint.Type = 6;
                         if(termPoint.PipeNumber != "")
                         {
                             fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
