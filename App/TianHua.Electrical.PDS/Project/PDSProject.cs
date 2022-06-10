@@ -18,6 +18,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Reflection;
+using ThMEPIO.SqlSugar;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -75,6 +76,10 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public void PushGraphData(DwgGraph graph)
         {
+            SQLiteSugarHelper helper = new SQLiteSugarHelper(@"D:\Code\AutoLoader\Contents\Support\TG20.db");
+            helper.CreatModel(@"D:\Code\App\TianHua.Electrical.PDS\Project\TestModel", "TianHua.Electrical.PDS.Project.TestModel");
+
+
             var ProjectGraph = new ProjectGraph();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
             graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
