@@ -133,7 +133,7 @@ namespace ThMEPArchitecture.ViewModel
         }
 
         //垂直车位尺寸, 长度
-        private int _VerticalSpotLength = 5100; //mm
+        private int _VerticalSpotLength = 5300; //mm
 
         public int VerticalSpotLength
         {

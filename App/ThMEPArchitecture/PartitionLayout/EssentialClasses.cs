@@ -88,6 +88,7 @@ namespace ThMEPArchitecture.PartitionLayout
     {
         VERT = 0,
         PARALLEL = 1,
+        VERTBACK = 2,
     }
 
     public class CarBoxPlus
