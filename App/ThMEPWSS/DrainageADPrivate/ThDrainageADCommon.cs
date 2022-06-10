@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Autodesk.AutoCAD.Geometry;
+
 namespace ThMEPWSS.DrainageADPrivate
 {
     internal class ThDrainageADCommon
@@ -55,6 +57,14 @@ namespace ThMEPWSS.DrainageADPrivate
         public static double Th = 24.0; //用水时数（h） 等于24
         public static double TransEnlargeScale = 1.5;
         public static double BreakLineLength = 75.0;
+
+        public static double Tol_TerminalArea = 3000 * 3000; //洁具面积>3*3米过滤
+        public static double Tol_PipeToVerticalPipeCenter = 100;
+        public static int Tol_SamePoint = 1;
+        public static int Tol_AngleValveToPipe = 30;
+        public static double Tol_PipeEndPair = 250;
+        public static double Tol_PipeEndToTerminal = 500;
+
         public enum TerminalType
         {
             Toilet,  //坐便器
@@ -88,7 +98,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                             {(int) TerminalType.MopSink , 1 },
                                                             {(int) TerminalType.Bathtub ,1.2 },
                                                             {(int) TerminalType.WaterHeater , 0},
-                                                            {(int) TerminalType.Unknow  , 0 },
+                                                            {(int) TerminalType.Unknow  , 0.75 },
                                                         };
 
         public static Dictionary<int, double> TerminalFixtureUnitCool = new Dictionary<int, double>()
@@ -101,7 +111,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                                 {(int) TerminalType.MopSink , 1 },
                                                                 {(int) TerminalType.Bathtub ,1},
                                                                 {(int) TerminalType.WaterHeater , 0},
-                                                                {(int) TerminalType.Unknow  , 0 },
+                                                                {(int) TerminalType.Unknow  , 0.5 },
                                                             };
 
         public static Dictionary<int, double> TerminalFixtureUnitHot = new Dictionary<int, double>()
@@ -114,7 +124,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                                 {(int) TerminalType.MopSink , 0 },
                                                                 {(int) TerminalType.Bathtub ,1},
                                                                 {(int) TerminalType.WaterHeater , 0},
-                                                                {(int) TerminalType.Unknow  , 0 },
+                                                                {(int) TerminalType.Unknow  , 0.5 },
                                                             };
 
         public static List<Tuple<double, double>> AlphaList = new List<Tuple<double, double>>()
@@ -164,6 +174,7 @@ namespace ThMEPWSS.DrainageADPrivate
                                                             {(int) TerminalType.MopSink , "给水角阀" },
                                                             {(int) TerminalType.Bathtub ,"给水角阀" },
                                                             {(int) TerminalType.WaterHeater , "燃气热水器"},
+                                                            {(int)TerminalType .Unknow ,"给水角阀" },
                                                         };
         public static Dictionary<string, List<string>> EndValve_dir_name = new Dictionary<string, List<string>>  {
                                                             {"给水角阀",new List<string>() {"向右","向前","向左","向后"}},

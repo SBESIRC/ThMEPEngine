@@ -84,7 +84,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static bool AdjustLineNearPt(Point3d pt, List<Line> pipes)
         {
-            var minDistTol = 100;
+            var minDistTol = ThDrainageADCommon.Tol_PipeToVerticalPipeCenter;
             var bIfAddVertical = false;
             var nearpipe = pipes.Where(x => x.StartPoint.DistanceTo(pt) < minDistTol ||
                                             x.EndPoint.DistanceTo(pt) < minDistTol).ToList();

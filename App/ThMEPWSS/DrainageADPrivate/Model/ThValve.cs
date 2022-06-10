@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.CAD;
 using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.DrainageADPrivate.Model
@@ -19,5 +20,12 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public Point3d TransInsertPt { get; set; }
         public ThDrainageTreeNode ConnectNode { get; set; } //与node => node.parent共线
         public double Scale { get; set; }
+
+        public void ProjectOntoXYPlane()
+        {
+            Boundary.ProjectOntoXYPlane();
+            InsertPt = new Point3d(InsertPt.X, InsertPt.Y, 0);
+        }
+
     }
 }
