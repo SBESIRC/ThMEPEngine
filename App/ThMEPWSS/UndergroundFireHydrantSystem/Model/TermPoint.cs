@@ -55,6 +55,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             {
                 return;
             }
+            if(!fireHydrantSysIn.LeadLineDic.ContainsKey(StartLine))
+            {
+                return;
+            }
             var adjs = fireHydrantSysIn.LeadLineDic[StartLine];
             if (adjs.Count > 1)
             {
