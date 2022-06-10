@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,17 +28,30 @@ namespace TianHua.Architecture.WPI.UI.UI
         static ParkingStallArrangementViewModel _ViewModel = null;
         public UiParkingStallArrangement()
         {
-            if(_ViewModel == null)
+            if (_ViewModel == null)
             {
                 _ViewModel = new ParkingStallArrangementViewModel();
             }
             DataContext = _ViewModel;
             InitializeComponent();
         }
+        //private void DoWork()
+        //{
+        //    ThMEPArchitecture.ParkingStallArrangement.Algorithm.
+        //    ProcessForDisplay.CreateSubProcess().Start();
+        //}
 
         private void btnRun_Click(object sender, RoutedEventArgs e)
         {
             if (_ViewModel == null) return;
+            //Dispatcher.Invoke(() =>
+            //                {
+            //                    Thread thread = new Thread(DoWork);
+            //                    thread.SetApartmentState(ApartmentState.STA);
+            //                    thread.IsBackground = true;
+            //                    thread.Start();
+            //                });
+
 
             if (_ViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
             {
@@ -56,7 +70,7 @@ namespace TianHua.Architecture.WPI.UI.UI
                     }
                 }
             }
-            else if(_ViewModel.CommandType == CommandTypeEnum.RunWithIteration)
+            else if (_ViewModel.CommandType == CommandTypeEnum.RunWithIteration)
             {
                 if (_ViewModel.UseMultiProcess)
                 {
@@ -75,6 +89,7 @@ namespace TianHua.Architecture.WPI.UI.UI
             }
             else
             {
+
                 if (_ViewModel.UseMultiProcess)
                 {
                     using (var cmd = new ThMPArrangementCmd(_ViewModel))

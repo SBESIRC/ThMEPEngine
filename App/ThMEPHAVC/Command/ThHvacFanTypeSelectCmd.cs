@@ -92,6 +92,7 @@ namespace ThMEPHVAC.Command
                         // 风机规格和型号变化
                         if (FanSelectCheck.IsModelNameChanged(block.Id, pFanModel))
                         {
+                            //需要更新xdata，将xdata中的风机型号名称改掉
                             ThFanSelectionEngine.ModifyModelNames(thisIdBlocks, pFanModel);
                         }
 
@@ -100,7 +101,7 @@ namespace ThMEPHVAC.Command
                         var numbers = blockPModel.ListVentQuan;
                         if (!Enumerable.SequenceEqual(numbers.OrderBy(t => t), pFanModel.ListVentQuan.OrderBy(t => t)))
                         {
-                            ThFanSelectionEngine.ModifyModelNumbers(pFanModel);
+                            ThFanSelectionEngine.ModifyModelNumbers(pFanModel, cFanModel);
                         }
 
                         // 风机楼层变化
@@ -109,7 +110,7 @@ namespace ThMEPHVAC.Command
                         var storeyNumber = block.Id.GetStoreyNumber();
                         if (storeyNumber != EQPMFanCommon.StoreyNumber(storey, modelNumber.ToString()))
                         {
-                            ThFanSelectionEngine.ModifyModelNumbers(pFanModel);
+                            ThFanSelectionEngine.ModifyModelNumbers(pFanModel, cFanModel);
                         }
 
                         // 参数变化

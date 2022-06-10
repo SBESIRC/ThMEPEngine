@@ -89,14 +89,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
         public static List<Breaker> GetCircuitBreakers(this PDSBaseOutCircuit circuit)
         {
             List<Breaker> result = new List<Breaker>();
-            foreach (PropertyInfo prop in circuit.GetType().GetProperties())
+            if (!circuit.IsNull())
             {
-                if (prop.PropertyType == typeof(Breaker))
+                foreach (PropertyInfo prop in circuit.GetType().GetProperties())
                 {
-                    object oValue = prop.GetValue(circuit);
-                    if (oValue.IsNull())
-                        continue;
-                    result.Add(oValue as Breaker);
+                    if (prop.PropertyType == typeof(Breaker))
+                    {
+                        object oValue = prop.GetValue(circuit);
+                        if (oValue.IsNull())
+                            continue;
+                        result.Add(oValue as Breaker);
+                    }
                 }
             }
             return result;

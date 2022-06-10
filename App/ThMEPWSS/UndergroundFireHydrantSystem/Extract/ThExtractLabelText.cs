@@ -83,12 +83,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-DRAI-DIMS" ||
                    layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
-                   layer.ToUpper() == "0" ||
                    layer.ToUpper() == "W-RAIN-NOTE"||
                    layer.ToUpper() == "W-NOTE" ||
+                   layer.ToUpper() == "W-SHET-PROF" ||
                    layer.ToUpper() == "TWT_TEXT";
         }
 
+
+        //特别耗时
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
         {
             if (ent is BlockReference br)
@@ -128,7 +130,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
                 if (!dbText.TextString.Contains("DN"))
                 {
-                    var tWidth = Math.Abs((ent as Entity).GeometricExtents.MaxPoint.X - (ent as Entity).GeometricExtents.MinPoint.X);
+                    var tWidth = Math.Abs(ent.GeometricExtents.MaxPoint.X - ent.GeometricExtents.MinPoint.X);
                     if (tWidth > textWidth && (ent as DBText).TextString.Contains("X") && !((ent as DBText).TextString.Contains("/")))
                     {
                         textWidth = tWidth;
@@ -172,7 +174,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     textWidth = tWidth;
                     textModel = dBText.TextString;
                 }
-                dBObjects.Add((DBObject)dBText);
+                dBObjects.Add(dBText);
                 return;
             }
             if(ent.IsTCHPipe())

@@ -469,6 +469,32 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 }
             }
         }
+        public static bool IsUpOnLine(Point3d point, Line line)
+        {
+            //在直线的上方或竖直直线左方
+            if (IsParallelLine(line, new Line(new Point3d(0, 0, 0), new Point3d(0, 1, 0))))
+            {
+                if (point.X <= line.GetMidpoint().X) return true;
+                else return false;
+            }
+            else
+            {
+                var p = line.GetClosestPointTo(point, true);
+                var vec = new Vector3d(point.X - p.X, point.Y - p.Y, 0);
+                if (vec.Y >= 0) return true;
+                else return false;
+            }
+        }
+                public static Polyline CreatPolyFromLines(Line a, Line b, bool closed = true)
+        {
+            Polyline p = new Polyline();
+            p.AddVertexAt(0, a.StartPoint.ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(1, a.EndPoint.ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(2, b.EndPoint.ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(3, b.StartPoint.ToPoint2d(), 0, 0, 0);
+            p.Closed = closed;
+            return p;
+        }
         public static string AnalysisLineList(List<Line> a)
         {
             string s = "";

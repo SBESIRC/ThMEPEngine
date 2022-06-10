@@ -20,68 +20,21 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 {
     internal class ThLayoutAngleValveService
     {
-        public static List<ThDrainageBlkOutput> LayoutAngleValve(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, List<ThValve> angleValve)
+        public static List<ThDrainageBlkOutput> LayoutAngleValve(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, ThValve> ptAngleValve)
         {
             var angleValveOutput = new List<ThDrainageBlkOutput>();
-            SetTerminalDir(rootList, angleValve, ptTerminal);
+            SetTerminalDir(rootList, ptTerminal, ptAngleValve);
 
             var allLeafs = rootList.SelectMany(x => x.GetLeaf()).ToList();
             allLeafs.AddRange(rootList);
 
-            angleValveOutput.AddRange(LayoutAngleValve(allLeafs, ptTerminal));
+            angleValveOutput.AddRange(LayoutAngleValve(allLeafs));
 
 
             return angleValveOutput;
         }
 
-        //private static List<ThDrainageBlkOutput> LayoutAngleValve(ThDrainageTreeNode root, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
-        //{
-        //    var angleValve = new List<ThDrainageBlkOutput>();
-        //    var leafs = root.GetLeaf();
-        //    leafs.Add(root);
-
-        //    foreach (var leaf in leafs)
-        //    {
-        //        if (leaf.Terminal == null)
-        //        {
-        //            continue;
-        //        }
-
-        //        ThDrainageADCommon.Terminal_end_name.TryGetValue((int)leaf.Terminal.Type, out var blk_name);
-        //        if (blk_name == null || blk_name == "")
-        //        {
-        //            blk_name = ThDrainageADCommon.BlkName_AngleValve_AD;
-        //        }
-        //        var visiDir = ThDrainageADCommon.EndValve_dir_name[blk_name][0];
-        //        var scale = ThDrainageADCommon.Blk_scale_end;
-        //        if ((blk_name == "淋浴器系统" || blk_name == "燃气热水器") && leaf.IsCool == true)
-        //            {
-        //            //跳过冷水
-        //                continue;
-        //            }
-        //        else
-        //        {
-        //            visiDir = CalculateVisibilityDir(leaf.Terminal.Dir, blk_name);
-        //        }
-        //        if (blk_name == "淋浴器系统" || blk_name == "燃气热水器")
-        //        {
-        //            scale = scale * ThDrainageADCommon.TransEnlargeScale;
-        //        }
-
-        //        var thModel = new ThDrainageBlkOutput(leaf.TransPt);
-        //        thModel.Name = blk_name;
-        //        thModel.Dir = new Vector3d(1, 0, 0);
-        //        thModel.Scale = scale;
-        //        thModel.Layer = ThDrainageADCommon.Layer_EQPM;
-        //        thModel.Visibility.Add(ThDrainageADCommon.VisiName_valve, visiDir);
-
-        //        angleValve.Add(thModel);
-        //    }
-
-        //    return angleValve;
-        //}
-
-        private static List<ThDrainageBlkOutput> LayoutAngleValve(List<ThDrainageTreeNode> allLeafs, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
+        private static List<ThDrainageBlkOutput> LayoutAngleValve(List<ThDrainageTreeNode> allLeafs)
         {
             var angleValve = new List<ThDrainageBlkOutput>();
             var didLeaf = new List<ThDrainageTreeNode>();
@@ -180,9 +133,9 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
             return returnPt;
         }
-        private static void SetTerminalDir(List<ThDrainageTreeNode> rootList, List<ThValve> angleValve, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal)
+
+        private static void SetTerminalDir(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, ThValve> ptAngleValve)
         {
-            var tol = new Tolerance(1, 1);
             for (int i = 0; i < ptTerminal.Count(); i++)
             {
                 var item = ptTerminal.ElementAt(i);
@@ -191,8 +144,8 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                     //冷热水同时有的已经做过一次的跳过
                     continue;
                 }
-                var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
-                var endValve = angleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
+
+                ptAngleValve.TryGetValue(item.Key, out var endValve);
                 if (endValve != null)
                 {
                     //有角阀的根据角阀
@@ -211,7 +164,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                             node = node.Parent;
                         }
                         var dir = node.Parent.Pt - node.Pt;
-                        if (Math.Abs(dir.Z) < 0.1)
+                        if (Math.Abs(dir.Z) < ThDrainageADCommon.Tol_SamePoint)
                         {
                             dir = (new Vector3d(dir.X, dir.Y, 0)).GetNormal();
                             item.Value.Dir = dir;

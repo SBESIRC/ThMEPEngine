@@ -1,16 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm.ArcAlgorithm;
+using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GridOperation.Model;
-using ThMEPEngineCore.GridOperation.Utils;
+using ThMEPEngineCore.Algorithm.ArcAlgorithm;
 
 namespace ThMEPEngineCore.GridOperation
 {
@@ -29,15 +26,10 @@ namespace ThMEPEngineCore.GridOperation
                 extendGrids.AddRange(dbCollec.Cast<Curve>());
             }
 
-            var regions = CetGridRegion(extendGrids, polyline).Where(x => x.Area > 10).ToList();
-            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            //{
-            //    foreach (var item in regions)
-            //    {
-            //        //item.ColorIndex = 3;
-            //        //db.ModelSpace.Add(item);
-            //    }
-            //}
+            var regions = GetGridRegion(extendGrids, polyline)
+                .SelectMany(o => o.MakeValid().OfType<Polyline>())
+                .Where(x => x.Area > 10)
+                .ToList();
             var mPolyDic = ToMPolygonCollection(regions);
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(mPolyDic.Keys.ToCollection());
             foreach (var poly in otherPolys)
@@ -114,7 +106,7 @@ namespace ThMEPEngineCore.GridOperation
         /// <param name="curves"></param>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<Polyline> CetGridRegion(List<Curve> curves, Polyline polyline)
+        private List<Polyline> GetGridRegion(List<Curve> curves, Polyline polyline)
         {
             var cutCurves = new List<Curve>(curves);
             return cutCurves.ArcPolygonize(polyline, 500);
@@ -156,7 +148,7 @@ namespace ThMEPEngineCore.GridOperation
                     }
                 }
             }
-            
+
 
             return startPt;
         }

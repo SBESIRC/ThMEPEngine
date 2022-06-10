@@ -255,5 +255,42 @@ namespace ThMEPWSS.HydrantLayout.Service
             // Data.Remove(x);
         }
 
+        public static Dictionary<string, List<bool>> RecordLayerStatus(List<string> layers)
+        {
+            var layerStatus = new Dictionary<string, List<bool>>();//list bool： isLocked, isFreeze, isVisibal
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var l in layers)
+                {
+                    var layerRecord = db.Layers.Element(l, false);
+                    if (layerRecord != null)
+                    {
+                        layerStatus.Add(l, new List<bool> { layerRecord.IsOff, layerRecord.IsFrozen, layerRecord.IsLocked });
+                    }
+                }
+            }
+
+            return layerStatus;
+        }
+
+        public static void ResetLayerStatus(Dictionary<string, List<bool>> layerStatus)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var pair in layerStatus)
+                {
+                    var layerRecord = db.Layers.Element(pair.Key, true);
+                    if (layerRecord != null)
+                    {
+                        layerRecord.UpgradeOpen();
+                        layerRecord.IsOff = pair.Value[0];
+                        layerRecord.IsFrozen = pair.Value[1];
+                        layerRecord.IsLocked = pair.Value[2];
+                        layerRecord.DowngradeOpen();
+                    }
+                }
+
+            }
+        }
     }
 }

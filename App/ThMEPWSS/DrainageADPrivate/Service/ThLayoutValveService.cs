@@ -65,7 +65,6 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
             foreach (var lineDict in orderLines)
             {
-                //if (lineDict.Value.StartPoint.IsEqualTo(lineDict.Value.EndPoint, tol))
                 if (ThDrainageADTreeService.IsVertical(lineDict.Value) == true)
                 {
                     //忽略立管

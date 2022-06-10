@@ -292,19 +292,19 @@
                                            Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type DataGridCell}}, Path=Foreground}"></Label>
                                     <Label Padding="0" VerticalContentAlignment="Center"  Content="-"
                                        Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type DataGridCell}}, Path=Foreground}"></Label>
-                                    <TextBox Width="20" Height="22" Text="{Binding InstallSpace,Mode=TwoWay,UpdateSourceTrigger=LostFocus,NotifyOnSourceUpdated=True}" ToolTip="子项"
+                                    <TextBox Width="20" Height="22" Text="{Binding InstallSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}" ToolTip="子项"
                                              BorderBrush="Black" BorderThickness="0,0,0,1" HorizontalContentAlignment="Center"
                                              AcceptsTab="False" TabIndex="0"
                                              Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type DataGridCell}}, Path=Foreground}"></TextBox>
                                     <Label Padding="0" VerticalContentAlignment="Center"   Content="-"
                                        Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type DataGridCell}}, Path=Foreground}"></Label>
-                                    <TextBox Width="20" Height="22" Text="{Binding InstallFloor,Mode=TwoWay,UpdateSourceTrigger=LostFocus,NotifyOnSourceUpdated=True}" ToolTip="楼层"
+                                    <TextBox Width="20" Height="22" Text="{Binding InstallFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}" ToolTip="楼层"
                                              BorderBrush="Black" BorderThickness="0,0,0,1" AcceptsTab="False" HorizontalContentAlignment="Center"
                                              TabIndex="1"
                                          Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type DataGridCell}}, Path=Foreground}"></TextBox>
                                     <Label Padding="0" VerticalContentAlignment="Center"  Content="-"
                                        Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type DataGridCell}}, Path=Foreground}"></Label>
-                                    <TextBox Width="40" Height="22" Text="{Binding VentNum,Mode=TwoWay,UpdateSourceTrigger=LostFocus,NotifyOnSourceUpdated=True}"
+                                    <TextBox Width="40" Height="22" Text="{Binding VentNum,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
                                              ToolTip="序号" BorderBrush="Black" BorderThickness="0,0,0,1" AcceptsTab="False"
                                              TabIndex="2"
                                              HorizontalContentAlignment="Center"

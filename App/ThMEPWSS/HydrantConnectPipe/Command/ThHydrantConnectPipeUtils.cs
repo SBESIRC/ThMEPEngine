@@ -24,10 +24,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         }
         public static bool PipeIsContainBranchLine(ThHydrantPipe pipe, List<Line> branchLines)
         {
-            foreach(var l in branchLines)
+            foreach (var l in branchLines)
             {
                 double dist = l.DistanceToPoint(pipe.PipePosition);
-                if(dist < 10.0)
+                if (dist < 10.0)
                 {
                     return true;
                 }
@@ -37,12 +37,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         public static bool HydrantIsContainPipe(ThHydrant fireHydrant, List<ThHydrantPipe> pipes)
         {
             double minDist = 9999.0;
-            foreach(var pipe in pipes)
+            foreach (var pipe in pipes)
             {
                 if (fireHydrant.IsContainsPipe(pipe, 500.0))
                 {
                     double tmpDist = GetDistFireHydrantToPipe(fireHydrant, pipe);
-                    if(minDist > tmpDist)
+                    if (minDist > tmpDist)
                     {
                         fireHydrant.FireHydrantPipe = pipe;
                         minDist = tmpDist;
@@ -66,7 +66,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     }
                 }
             }
-            if(fireHydrant.FireHydrantPipe == null)
+            if (fireHydrant.FireHydrantPipe == null)
             {
                 return false;
             }
@@ -122,11 +122,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
 
             return false;
         }
-        public static bool LineIntersctBySelect(List<Line> lines, Polyline pl)
+        public static bool LineIntersctBySelect(List<Polyline> lines, Polyline pl)
         {
-            foreach(var l in lines)
+            foreach (var l in lines)
             {
-                if(l.IsIntersects(pl))
+                if (l.IsIntersects(pl))
                 {
                     return true;
                 }
@@ -164,12 +164,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             var objcet = polyLine.BufferPL(expandLength)[0];
             return objcet as Polyline;
         }
-        public static Polyline CreateMapFrame(Point3d pt,double radius)
+        public static Polyline CreateMapFrame(Point3d pt, double radius)
         {
             Circle circle = new Circle(pt, new Vector3d(0, 0, 1), radius);
             return circle.ToRectangle();
         }
-        public static List<Line> GetNearbyLine(Point3d pt,List<Line> lines,int N = 3)
+        public static List<Line> GetNearbyLine(Point3d pt, List<Line> lines, int N = 3)
         {
             List<Line> returnLines = new List<Line>();
             if (lines.Count <= N)
@@ -178,7 +178,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             }
 
             lines = lines.OrderBy(o => o.DistanceToPoint(pt)).ToList();
-            for(int i = 0; i < N;i++)
+            for (int i = 0; i < N; i++)
             {
                 returnLines.Add(lines[i]);
             }
@@ -196,7 +196,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         }
         public static List<Line> CleanLines(List<Line> lines)
         {
-            if(lines.Count == 0)
+            if (lines.Count == 0)
             {
                 return lines;
             }
@@ -213,11 +213,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             retLines.ForEach(o => o.TransformBy(mt.Inverse()));
             return retLines;
         }
-        public static List<Line> FindInlineLines(Point3d pt,ref List<Line> targetLines, double tolerance)//差点关联线
+        public static List<Line> FindInlineLines(Point3d pt, ref List<Line> targetLines, double tolerance)//差点关联线
         {
             var retLines = new List<Line>();
-            var objectLine = FindLines(pt,ref targetLines,tolerance);
-            if(objectLine == null)
+            var objectLine = FindLines(pt, ref targetLines, tolerance);
+            if (objectLine == null)
             {
                 return retLines;
             }
@@ -257,9 +257,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         {
             var retLines = new List<Line>();
             var remLines = new List<Line>();
-            foreach(var line in targetLines)
+            foreach (var line in targetLines)
             {
-                if(IsInlineLine(objectLine,line, tolerance))
+                if (IsInlineLine(objectLine, line, tolerance))
                 {
                     retLines.Add(line);
                     remLines.Add(line);
@@ -268,17 +268,17 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             targetLines = targetLines.Except(remLines).ToList();
             return retLines;
         }
-        public static bool IsInlineLine(Line objectLine,Line targetLine, double tolerance)
+        public static bool IsInlineLine(Line objectLine, Line targetLine, double tolerance)
         {
             var objectPt1 = objectLine.StartPoint;
             var objectPt2 = objectLine.EndPoint;
             var targetPt1 = targetLine.StartPoint;
             var targetPt2 = targetLine.EndPoint;
-            if(targetLine.PointOnLine(objectPt1,false,tolerance) || targetLine.PointOnLine(objectPt2,false,tolerance))
+            if (targetLine.PointOnLine(objectPt1, false, tolerance) || targetLine.PointOnLine(objectPt2, false, tolerance))
             {
                 return true;
             }
-            else if(objectLine.PointOnLine(targetPt1, false, tolerance) || objectLine.PointOnLine(targetPt2, false, tolerance))
+            else if (objectLine.PointOnLine(targetPt1, false, tolerance) || objectLine.PointOnLine(targetPt2, false, tolerance))
             {
                 return true;
             }

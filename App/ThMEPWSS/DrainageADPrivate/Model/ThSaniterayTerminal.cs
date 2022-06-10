@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
+using ThMEPEngineCore.CAD;
 using ThMEPWSS.DrainageADPrivate;
 using ThMEPWSS.DrainageADPrivate.Service;
 
@@ -20,6 +20,10 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public ThDrainageADCommon.TerminalType Type { get; set; }
 
         public Vector3d Dir { get; set; }
-
+        
+        public void ProjectOntoXYPlane()
+        {
+            Boundary.ProjectOntoXYPlane();
+        }
     }
 }

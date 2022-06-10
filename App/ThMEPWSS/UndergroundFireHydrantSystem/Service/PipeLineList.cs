@@ -128,10 +128,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void ConnectWithVertical(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
+        public static void ConnectWithVertical(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine)
         {
             //基于竖管连接管线
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+            var labelLineSaptialIndex = new ThCADCoreNTSSpatialIndex(labelLine.ToCollection());
             var lines = new List<Line>();
             var connectVreticals = new List<Point3dEx>();
             var sePts = fireHydrantSysIn.StartEndPts;
@@ -146,8 +147,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
                 var rect = ver._pt.GetRect(120);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
-                var flag = fireHydrantSysIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
-                if (dbObjs.Count >= 2)
+                var labelLineObjs = labelLineSaptialIndex.SelectCrossingPolygon(rect);
+                var isMiddleRiser = (labelLineObjs.Count == 1 && dbObjs.Count == 2);//连接两段管线且有标注线穿过的立管
+
+                var flag = fireHydrantSysIn.AddNewPtDic(dbObjs, ver._pt, ref lines, isMiddleRiser);
+                if (dbObjs.Count >= 2 && !isMiddleRiser)
                 {
                     connectVreticals.Add(ver);
                 }
@@ -160,18 +164,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         lineList.Add(cl);
 #if DEBUG
-                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        {
-                            var layerNames = "立管和支管的单链接线";
-                            if (!acadDatabase.Layers.Contains(layerNames))
-                            {
-                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                            }
-                            cl.LayerId = DbHelper.GetLayerId(layerNames);
-                            cl.ColorIndex = (int)ColorIndex.Red;
-                            acadDatabase.CurrentSpace.Add(cl);
+                        //using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                        //{
+                        //    var layerNames = "立管和支管的单链接线";
+                        //    if (!acadDatabase.Layers.Contains(layerNames))
+                        //    {
+                        //        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                        //    }
+                        //    cl.LayerId = DbHelper.GetLayerId(layerNames);
+                        //    cl.ColorIndex = (int)ColorIndex.Red;
+                        //    acadDatabase.CurrentSpace.Add(cl);
 
-                        }
+                        //}
 #endif
                     }
 

@@ -402,7 +402,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             pModel.DragModel.SelectionFactor = SelectionFactor1;
             if (haveChild)
             {
-                double.TryParse(spliteLocRes[1], out double SelectionFactor2);
+                double.TryParse(spliteSelectionFactor[1], out double SelectionFactor2);
                 cModel.DragModel.SelectionFactor = SelectionFactor2;
             }
             var spliteInputMotorPower = xData.FanModelInputMotorPower.Split('/');

@@ -41,8 +41,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     var pt = rstPath[i];
                     if (usedPts.Contains(pt)) 
                         continue;
-                    if (pt._pt.DistanceTo(new Point3d(1605061.6, 891772, 0)) < 10)
-                        ;
                     var nextPt = rstPath[i + 1];
                     var line = new Line(pt._pt, nextPt._pt);
                     var lineEx = new LineSegEx(line);

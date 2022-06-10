@@ -59,7 +59,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         {
             var intersectPt = new Dictionary<Point3d, KeyValuePair<Line, Line>>();
 
-            var tol = new Tolerance(1, 1);
+            var tol = new Tolerance(ThDrainageADCommon.Tol_SamePoint, ThDrainageADCommon.Tol_SamePoint);
             for (int i = 0; i < allLine.Count; i++)
             {
                 for (int j = i + 1; j < allLine.Count; j++)

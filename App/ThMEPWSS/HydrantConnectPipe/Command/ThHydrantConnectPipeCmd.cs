@@ -155,6 +155,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     pathService.SetTermination(loopLines);
                     pathService.InitData();
 
+                    
                     if (ConfigInfo.isCoveredGraph)
                     {
                         //branchLines 包含所有的支路（需要删除和不需要删除的数据）
@@ -219,8 +220,16 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                                 var brLine = ThHydrantBranchLine.Create(path);
                                 brLines.Add(brLine);
 
-                                var objcets = path.BufferPL(200)[0]; 
-                                var obb = objcets as Polyline;
+                                var objcets = (path.BufferFlatPL(400)[0] as Polyline).Buffer(-200);
+                                if (objcets.Count <= 0)
+                                {
+                                    objcets = (path.BufferFlatPL(400)[0] as Polyline).Buffer(-50);
+                                }
+                                if (objcets.Count <= 0)
+                                {
+                                    objcets = path.BufferFlatPL(400);
+                                }
+                                var obb = objcets[0] as Polyline;
                                 pathService.AddObstacle(obb);
                                 path.Dispose();
                             }

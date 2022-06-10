@@ -59,18 +59,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (branchDic.ContainsKey(pt))
                     {
                         var tpts = branchDic[pt];
+                        for(int j = tpts.Count - 1; j >0; j--)
+                        {
+                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[j]))
+                            {
+                                branchDic[pt]?.Remove(tpts[j]);
+                            }
+                        }
                         if (tpts.Count == 2)
                         {
-                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
+                            var str1 = "";
+                            if(fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
                             {
-                                continue;
+                                str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
                             }
-                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[1]))
+                            var str2 = "";
+                            if (fireHydrantSysIn.TermPointDic.ContainsKey(tpts[1]))
                             {
-                                continue;
+                                str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
                             }
-                            var str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
-                            var str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
                             if (!str1.IsCurrentFloor() && !str2.IsCurrentFloor())
                             {
                                 pipeLength = 2 * fireHydrantSysIn.PipeWidth;
@@ -114,7 +121,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     ;
                 }
@@ -249,6 +256,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             {
                                 GetBranchAcross(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
                             }
+                            if(type.Equals(6))
+                            {
+                                GetBranchType6(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+                            }
                         }
                         else
                         {
@@ -365,7 +376,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         }
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     ;
                 }
@@ -373,242 +384,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void DrawPipeLabels(FireHydrantSystemIn fireHydrantSysIn, FireHydrantSystemOut fireHydrantSysOut)
-        {
-            var angleStep = 15;
-            var radiusStep = 200;
-            var radiusStart = 800;
-            var radiusEnd = 5000;
-            using (var adb = AcadDatabase.Active())
-            {
-                var results = adb.ModelSpace.OfType<Entity>().ToCollection();
-                var thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(results);
-                foreach (var pt in fireHydrantSysIn.TermPointDic.Values)
-                {
-                    var center = pt.PtEx._pt;
-                    {
-                        var radius = 800;
-                        var angle = 30.0.AngleFromDegree();
-                        var e = new MLeader { MText = new MText() { Contents = pt.PipeNumber, TextHeight = 100, ColorIndex = 40, } };
-                        e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
-                        adb.ModelSpace.Add(e);
-                    }
-                    var ok = false;
-                    for (double angleDegree = 0; angleDegree < 360; angleDegree += angleStep)
-                    {
-                        var angle = angleDegree.AngleFromDegree();
-                        for (double radius = radiusStart; radius <= radiusEnd; radius += radiusStep)
-                        {
-                            var areaObjs = thCADCoreNTSSpatialIndex.SelectCrossingWindow(center.OffsetXY(-radius, -radius), center.OffsetXY(radius, radius));
-                            var areaObjsSpatialIndex = new ThCADCoreNTSSpatialIndex(areaObjs);
-                            var e = new MLeader { MText = new MText() { Contents = pt.PipeNumber, TextHeight = 100, ColorIndex = 40, } };
-                            e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
-                            var rets = areaObjsSpatialIndex.SelectCrossingPolygon(e);
-                            if (rets.Count == 0)//没撞到别的东西
-                            {
-                                adb.ModelSpace.Add(e);
-                                ok = true;
-                                break;
-                            }
-                        }
-                        if (ok) break;
-                    }
-                    if (!ok)//躲不开了，就这样吧
-                    {
-                        var radius = 800;
-                        var angle = 30.0.AngleFromDegree();
-                        var e = new MLeader { MText = new MText() { Contents = pt.PipeNumber, TextHeight = 100, ColorIndex = 40, } };
-                        e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
-                        adb.ModelSpace.Add(e);
-                    }
-                }
-            }
-        }
-
-        private static void GetFireHydrantPipeTextElements(Point3dCollection selectArea, AcadDatabase adb, DBObjectCollection results)
-        {
-            RecogniseFireHydrantPipeLines(selectArea, adb);
-            RecogniseFireHydrantPipeElements(selectArea, adb);
-            GetOtherPipeLineList(selectArea, results);
-        }
-
-        private static void GetFireHydrantPipeMarkElements(Point3dCollection selectArea, AcadDatabase adb, DBObjectCollection results)
-        {
-            RecogniseFireHydrantLabelTexts(selectArea, adb);
-            ExtractFireHydrantMarks(adb, results);
-            RecogniseFireHydrantMarks(selectArea, adb);
-            ExtractFireEngines(adb, results);
-            ExtractFireEnginePipes(adb, results);
-        }
-
-        private static void GetFireHydrantPipeLableElements(Point3dCollection selectArea, AcadDatabase adb, DBObjectCollection results)
-        {
-            RecogniseFireHydrantButterValves(selectArea, adb);
-            ExtractFireHydrantButterValves(adb, results);
-            ExtractFires(adb, results);
-            RecogniseLabelLines(selectArea, adb);
-            ExtractFireLabelLines(adb, results);
-            ExtractFireHydrantLabelTexts(adb, results);
-        }
-
-        private static void GetFireHydrantPipeLineElements(Point3dCollection selectArea, AcadDatabase adb, DBObjectCollection results)
-        {
-            RecogniseFirePipes(selectArea, adb);
-            ExtractFirePipes(adb, results);
-            RecogniseFirePipeLines(selectArea, adb);
-            ExtractFirePipeLines(adb, results);
-        }
-
-        private static void GetFireHydrantPipeElements(Point3dCollection selectArea, AcadDatabase adb, DBObjectCollection results)
-        {
-            RecogniseFireHydrants(selectArea, adb);
-            ExtractFireHydrants(adb, results);
-            RecogniseFireHydrantValves(selectArea, adb);
-            ExtractFireHydrantValves(adb, results);
-        }
-
-        private static void GetOtherPipeLineList(Point3dCollection selectArea, DBObjectCollection results)
-        {
-            //接黄工的管线识别
-            new HydrantConnectPipe.Service.ThOtherPipeLineService().GetOtherPipeLineList(selectArea).ForEach(o => results.Add(o));
-        }
-
-        private static void RecogniseFireHydrantPipeElements(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantPipeRecognitionEngine = new ThFireHydrantPipeRecognitionEngine();
-            fireHydrantPipeRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void RecogniseFireHydrantPipeLines(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantPipeLineRecognitionEngine = new ThFireHydrantPipeLineRecognitionEngine();
-            fireHydrantPipeLineRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFireEnginePipes(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantPipeLineEngine = new ThFireHydrantPipeLineEngine();
-            fireHydrantPipeLineEngine.Extract(adb.Database);
-            fireHydrantPipeLineEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void ExtractFireEngines(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantPipeEngine = new ThFireHydrantPipeEngine();
-            fireHydrantPipeEngine.Extract(adb.Database);
-            fireHydrantPipeEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void RecogniseFireHydrantMarks(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantMarkRecognitionEngine = new ThFireHydrantMarkRecognitionEngine();
-            fireHydrantMarkRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFireHydrantMarks(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantMarkEngine = new ThFireHydrantMarkEngine();
-            fireHydrantMarkEngine.Extract(adb.Database);
-            fireHydrantMarkEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void RecogniseFireHydrantLabelTexts(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantLabelTextRecognitionEngine = new ThFireHydrantLabelTextRecognitionEngine();
-            fireHydrantLabelTextRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFireHydrantLabelTexts(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantLabelTextEngine = new ThFireHydrantLabelTextEngine();
-            fireHydrantLabelTextEngine.Extract(adb.Database);
-            fireHydrantLabelTextEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void RecogniseLabelLines(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantLabelLineRecognitionEngine = new ThFireHydrantLabelLineRecognitionEngine();
-            fireHydrantLabelLineRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFireLabelLines(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantLabelLineEngine = new ThFireHydrantLabelLineEngine();
-            fireHydrantLabelLineEngine.Extract(adb.Database);
-            fireHydrantLabelLineEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void ExtractFires(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantEngine = new ThFireHydrantEngine();
-            fireHydrantEngine.Extract(adb.Database);
-            fireHydrantEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void RecogniseFireHydrantButterValves(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantButterValveRecognitionEngine = new ThFireHydrantButterValveRecognitionEngine();
-            fireHydrantButterValveRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFireHydrantButterValves(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantButterValveEngine = new ThFireHydrantButterValveEngine();
-            fireHydrantButterValveEngine.Extract(adb.Database);
-            fireHydrantButterValveEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void RecogniseFirePipes(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var firePipeRecognitionEngine = new ThFirePipeRecognitionEngine();
-            firePipeRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void RecogniseFirePipeLines(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var firePipeLineRecognitionEngine = new ThFirePipeLineRecognitionEngine();
-            firePipeLineRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFirePipeLines(AcadDatabase adb, DBObjectCollection results)
-        {
-            var firePipeLineEngine = new ThFirePipeLineEngine();
-            firePipeLineEngine.Extract(adb.Database);
-            firePipeLineEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void ExtractFirePipes(AcadDatabase adb, DBObjectCollection results)
-        {
-            var firePipeEngine = new ThFirePipeEngine();
-            firePipeEngine.Extract(adb.Database);
-            firePipeEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void RecogniseFireHydrantValves(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantValveRecognitionEngine = new ThFireHydrantValveRecognitionEngine();
-            fireHydrantValveRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void RecogniseFireHydrants(Point3dCollection selectArea, AcadDatabase adb)
-        {
-            var fireHydrantValveGroupRecognitionEngine = new ThFireHydrantValveGroupRecognitionEngine();
-            fireHydrantValveGroupRecognitionEngine.Recognize(adb.Database, selectArea);
-        }
-
-        private static void ExtractFireHydrantValves(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantValveGroupEngine = new ThFireHydrantValveGroupEngine();
-            fireHydrantValveGroupEngine.Extract(adb.Database);
-            fireHydrantValveGroupEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
-
-        private static void ExtractFireHydrants(AcadDatabase adb, DBObjectCollection results)
-        {
-            var fireHydrantValveEngine = new ThFireHydrantValveEngine();
-            fireHydrantValveEngine.Extract(adb.Database);
-            fireHydrantValveEngine.Results.ForEach(o => results.Add(o.Geometry));
-        }
+     
 
         /// <summary>
         /// 绘制向下的单分支
@@ -822,6 +598,88 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysOut.DNList.Add(DN1);
         }
 
+        /// <summary>
+        /// 绘制向下的单分支
+        /// </summary>
+        /// <param name="输出"></param>
+        /// <param name="起始点"></param>
+        /// <param name="分支路径"></param>
+        /// <param name="输入"></param>
+        private static void GetBranchType6(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
+            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
+        {
+            double floorHeight = fireHydrantSysIn.FloorHeight;
+
+            var textWidth = fireHydrantSysIn.TextWidth;
+            string pipeNumber1 = "";
+            string pipeNumber12 = "";
+            if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
+            {
+                pipeNumber1 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber;//立管标号
+                //pipeNumber12 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber2;//立管标号
+            }
+
+            var pt1 = stpt._pt;
+            double pipeWidth = 800;
+            var pt4 = pt1.OffsetX(pipeWidth);
+            var pt5 = pt1.OffsetXY(pipeWidth, -floorHeight * 0.1);
+            var pt6 = pt1.OffsetXY(pipeWidth, -floorHeight * 0.2);
+
+            //LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
+            var lineList = new List<Line>();
+            lineList.Add(new Line(pt4, pt5));
+            if (type == 2)
+            {
+                ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4);
+            }
+            foreach (var line in lineList)
+            {
+                fireHydrantSysOut.LoopLine.Add(line);
+            }
+            fireHydrantSysOut.PipeInterrupted.Add(pt5, Math.PI);
+            var textLine1 = ThTextSet.ThTextLine(pt5, pt6);
+            var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textWidth - 50));
+            var p2Flag = false;
+
+            if (pipeNumber1 is not null)
+            {
+                var text = ThTextSet.ThText(pt6.OffsetX(-textWidth), pipeNumber1.Trim());
+                if (!pipeNumber1.Trim().Equals(""))
+                {
+                    fireHydrantSysOut.TextLine.Add(textLine1);
+                    fireHydrantSysOut.TextList.Add(text);
+                    //if (!pipeNumber12?.Equals("") == true)
+                    //{
+                    //    text = ThTextSet.ThText(new Point3d(pt6.X, pt6.Y - 400, 0), pipeNumber12.Trim());
+                    //    double textLength = text.GeometricExtents.MaxPoint.X - text.GeometricExtents.MinPoint.X;
+                    //    if (textLength > textWidth)
+                    //    {
+                    //        var textLine3 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textLength));
+                    //        fireHydrantSysOut.TextLine.Add(textLine3);
+                    //        p2Flag = true;
+
+                    //    }
+
+                    //    fireHydrantSysOut.TextList.Add(text);
+                    //}
+                    //if (!p2Flag)
+                    //{
+                    //    fireHydrantSysOut.TextLine.Add(textLine2);
+                    //}
+                }
+            }
+
+            //var strDN = "DN100";
+            //if (fireHydrantSysIn.TermDnDic.ContainsKey(tpt))
+            //{
+            //    strDN = fireHydrantSysIn.TermDnDic[tpt];
+            //}
+            //var DN1 = ThTextSet.ThText(new Point3d(pt5.X + 350, pt4.Y + floorHeight * 0.2, 0), Math.PI / 2, strDN);
+            //fireHydrantSysOut.DNList.Add(DN1);
+        }
+
+
+
 
         /// <summary>
         /// 绘制跨层主环
@@ -886,7 +744,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var stpt1 = new Point3dEx();
             if (fireHydrantSysIn.TermPointDic.ContainsKey(pt1))
             {
-                if (!fireHydrantSysIn.TermPointDic[pt1].PipeNumber?.Equals("") == true)
+                //if (fireHydrantSysIn.TermPointDic[pt1].PipeNumber?.Equals("") == true)
                 {
                     double XGap = 1600;
                     GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, pt1, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
@@ -901,7 +759,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             if (fireHydrantSysIn.TermPointDic.ContainsKey(pt2))
             {
-                if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber?.Equals("") == true)
+                //if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber?.Equals("") == true)
                 {
                     GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, pt2, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
 
@@ -973,14 +831,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, ptls[1], new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
         }
 
-        private static void CollectFireHydrantElements(Point3dCollection selectArea, AcadDatabase adb, DBObjectCollection results)
-        {
-            GetFireHydrantPipeElements(selectArea, adb, results);
-            GetFireHydrantPipeLineElements(selectArea, adb, results);
-            GetFireHydrantPipeLableElements(selectArea, adb, results);
-            GetFireHydrantPipeMarkElements(selectArea, adb, results);
-            GetFireHydrantPipeTextElements(selectArea, adb, results);
-        }
 
         /// <summary>
         /// 绘制一根供水管，两根立管

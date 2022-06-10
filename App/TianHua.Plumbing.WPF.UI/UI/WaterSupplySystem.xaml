@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
+        
         <StackPanel Orientation="Horizontal" Grid.Row="0">
             <WrapPanel Orientation="Vertical">
                 <cus:ImageButton Content="楼层框定" Name="btnSelectFloor" Height="24" Width="80" TabIndex="1" Click="btnSelectFloor_Click"></cus:ImageButton>

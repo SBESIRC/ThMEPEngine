@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     public class GetInput
     {
         public static bool GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
-            Point3dCollection selectArea, Point3d startPt)
+            Point3dCollection selectArea, Point3d startPt, Serilog.Core.Logger Logger = null)
         {
             var lineList = new List<Line>();//管段列表
             var pointList = new List<Point3dEx>();//点集
@@ -37,8 +37,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
             PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
-
-            //Tools.DrawLines(lineList,  "刚提取环管");
          
             if (PipeLine.HasSitong(fireHydrantSysIn))
             {
@@ -59,9 +57,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return false;
             }
 
+            var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
+            var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
+            var labelLine = labelEngine.CreateLabelLineList(labelDB);
+
             var stopEngine = new ThExtractStopLine();
             var stopPts = stopEngine.Extract(acadDatabase.Database, selectArea);
-            PipeLineList.ConnectWithVertical(ref lineList, fireHydrantSysIn);
+            PipeLineList.ConnectWithVertical(ref lineList, fireHydrantSysIn, labelLine);
             PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
             PipeLineList.PipeLineAutoConnect(ref lineList, ref fireHydrantSysIn);//管线自动连接
             PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.VerticalPosition);//删除两个点都是端点的线段
@@ -91,15 +93,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
             
-            var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
-            var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
-            var labelLine = labelEngine.CreateLabelLineList(labelDB);
-           
             double textWidth = 1300;
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
             var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textModel);
-          
+            ;
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
             var dbText = ThTextSet.ThText(new Point3d(), textModel);
             if(dbText.TextString.Trim().Count()!=0)

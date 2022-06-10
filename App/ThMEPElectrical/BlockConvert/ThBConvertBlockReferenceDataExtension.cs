@@ -25,6 +25,10 @@ namespace ThMEPElectrical.BlockConvert
             using (var acadDatabase = AcadDatabase.Use(data.Database))
             {
                 var name = ThMEPXRefService.OriginalFromXref(data.EffectiveName);
+                if (name.Contains("负载标注2"))
+                {
+                    name = name.Replace("2", "");
+                }
                 ThBlockConvertBlock convertRule;
                 if (isSourceBlock)
                 {

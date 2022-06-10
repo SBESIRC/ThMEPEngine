@@ -63,13 +63,29 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                         foreach (var obj in explodeResult)
                         {
                             var ent = obj as Entity;
+                            if (ent is Line l) tmplines.Add(l.GetProjectLine());
+                            else if (ent is Polyline pl) tmplines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
+                        }
+                        foreach (var obj in explodeResult)
+                        {
+                            var ent = obj as Entity;
                             if (ent is DBText t)
                             {
                                 if (ts.TextString.Length == 0) ts = t;
-                                else ts.TextString += t.TextString;
+                                else
+                                {
+                                    if (tmplines.Count > 0)
+                                    {
+                                        var locline = tmplines.First();
+                                        var pt = ((Extents3d)(t.Bounds)).CenterPoint();
+                                        locline = tmplines.OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
+                                        if (IsUpOnLine(((Extents3d)(t.Bounds)).CenterPoint(), locline))
+                                        {
+                                            ts.TextString += t.TextString;
+                                        }
+                                    }
+                                }
                             }
-                            else if (ent is Line l) tmplines.Add(l.GetProjectLine());
-                            else if (ent is Polyline pl) tmplines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
                         }
                         if (ts.TextString.Length > 0)
                         {
@@ -92,7 +108,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                         else if (entity is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
                     }
                 }
-                results.AddRange(CombMarkList(textList, textLines));
+                results.AddRange(CombMarkList(textList, textLines, true).Where(e => e.MarkText != ""));
                 startinfo = "";
                 foreach (var res in results)
                 {
@@ -229,7 +245,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             }
             return false;
         }
-        public List<ThMarkModel> CombMarkList(List<DBText> texts, List<Line> lines)
+        public List<ThMarkModel> CombMarkList(List<DBText> texts, List<Line> lines,bool judge_up_or_down = false)
         {
             var retList = new List<ThMarkModel>();
             foreach (var t in texts)
@@ -241,14 +257,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     if (a <= b) return a;
                     else return b;
                 }).Take(10).ToList();
-                var mark = CombMark(t, tplines);
+                var mark = CombMark(t, tplines, judge_up_or_down);
                 mark.Layer = t.Layer;
                 mark.TextStyle = t.TextStyleName;
                 retList.Add(mark);
             }
             return retList;
         }
-        public ThMarkModel CombMark(DBText text, List<Line> lines)
+        public ThMarkModel CombMark(DBText text, List<Line> lines,bool judge_up_or_down=false)
         {
             double tol = 1000;
             var retMark = new ThMarkModel();
@@ -267,6 +283,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             retMark.Poistion = textPt;
             if (tmpLine != null)
             {
+                if (judge_up_or_down)
+                {
+                    if (!IsUpOnLine(((Extents3d)(text.Bounds)).CenterPoint(), tmpLine))
+                    {
+                        return new ThMarkModel();
+                    }
+                }
                 var tmpPts = new List<Point3d>();
                 tmpPts.Add(tmpLine.StartPoint);
                 tmpPts.Add(tmpLine.EndPoint);

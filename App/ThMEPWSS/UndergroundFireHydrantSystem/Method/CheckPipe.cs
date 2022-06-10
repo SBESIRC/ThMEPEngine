@@ -36,6 +36,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
+
 #if DEBUG
             string layerName = "主环qsh";
             DbHelper.EnsureLayerOn(layerName);
@@ -76,6 +77,29 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
+#if DEBUG
+            string layerName = "次环qsh";
+            DbHelper.EnsureLayerOn(layerName);
+            foreach (var mainLoop in SubPathList)
+            {
+                for (int i = 0; i < mainLoop.Count - 1; i++)
+                {
+                    try
+                    {
+                        var spt2 = mainLoop[i]._pt;
+                        var ept2 = mainLoop[i + 1]._pt;
+                        var line2 = new Line(spt2, ept2);
+                        line2.Layer = layerName;
+                        acadDatabase.CurrentSpace.Add(line2);
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
+                    }
+
+                }
+            }
+#endif
         }
 
         public void DrawBranchLoop(AcadDatabase acadDatabase, FireHydrantSystemIn fireHydrantSysIn, Dictionary<Point3dEx, List<Point3dEx>> branchDic)
@@ -94,6 +118,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
+
         }
 
         private List<List<Point3dEx>> GetBranchLoop(FireHydrantSystemIn fireHydrantSysIn, Dictionary<Point3dEx, List<Point3dEx>> branchDic)

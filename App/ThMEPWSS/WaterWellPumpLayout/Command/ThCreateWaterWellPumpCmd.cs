@@ -171,7 +171,7 @@ namespace ThMEPWSS.Command
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump),true);
+                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump), true);
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser), true);
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150), true);
                 acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"), true);
@@ -194,6 +194,7 @@ namespace ThMEPWSS.Command
                     var input = new Point3dCollection();
                     //获取墙
                     List<Line> wallLine = GetWallColumnEdgesInRange(input);
+                    ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(wallLine, "l0wall");
                     //获取潜水泵
                     ThWaterWellPumpUtils.GetPumpIndex(out var pumpIndex, out var pumpDict);
 

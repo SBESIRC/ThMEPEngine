@@ -91,10 +91,11 @@ namespace ThParkingStall.Core.Tools
         {
             if (!seglineConnectToBound.Item1 && !seglineConnectToBound.Item2) return SegLine;
             var SegLineStr = SegLine.ToLineString();
-            if(!WallLine.Contains(SegLineStr.Centroid)) return SegLine;
-            List<Coordinate> LineIntSecPts = null;
             var IntSection = SegLineStr.Intersection(WallLine);
             var mid = IntSection.Centroid;
+            if (!WallLine.Contains(mid)) return SegLine;
+            List<Coordinate> LineIntSecPts = null;
+
             var IntSecPts = SegLineStr.Intersection(WallLine.Shell).Coordinates.OrderBy(c => c.X + c.Y);
             Coordinate P0;
             Coordinate P1;
@@ -111,14 +112,14 @@ namespace ThParkingStall.Core.Tools
             if (seglineConnectToBound.Item1 && !mid.Coordinate.ExistPtInDirection(IntSecPts, false))//负向需要连接，且未连接
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                var quryed = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y);
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y < P0.X + P0.Y);
                 if(quryed.Count() > 0) P0 = quryed.Last();
             }
             if (seglineConnectToBound.Item2&&!mid.Coordinate.ExistPtInDirection(IntSecPts,true))
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
-                var quryed = LineIntSecPts.Where(c => c.X + c.Y > mid.X + mid.Y);
-                if (quryed.Count() > 0) P0 = quryed.First();
+                var quryed = LineIntSecPts.Where(c => c.X + c.Y > P1.X + P1.Y);
+                if (quryed.Count() > 0) P1 = quryed.First();
             }
             return new LineSegment(P0, P1);
         }
@@ -508,7 +509,7 @@ namespace ThParkingStall.Core.Tools
             var VerticalDirection = segline.IsVertical();
             var pts = segline.GetIntSecPointWithWall(Area);
             var IntSecPoints = GetAllIntSecPs(idx, seglines);
-            var BasePt = new Point(seglines[idx].MidPoint);
+            var BasePt = seglines[idx].ToLineString().Intersection(Area).Get<LineString>().OrderBy(lstr => lstr.Length).Last().Centroid;
             Point Spt =null;
             Point Ept = null;
             LineSegment vaildLane;
@@ -520,20 +521,20 @@ namespace ThParkingStall.Core.Tools
             if (pts.Item1!= null)//坐标减少方向有区域交点
             {
                 if (IntSecPoints.Count != 0) BasePt = IntSecPoints.First();
-                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth-0.05) / 2, segline);
-                var buffer = baseLine.GetHalfBuffer(segline, false);
+                var baseLine = BasePt.LineBuffer(VMStock.RoadWidth / 2, segline);
+                var buffer = baseLine.GetHalfBuffer(segline.Extend(1), false);
                 var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
-                var distance = baseLine.ToLineString().Distance(objs)-0.1;
+                var distance = baseLine.ToLineString().Distance(objs)-1;
                 if (VerticalDirection) Spt = BasePt.Move(distance, 1);
                 else Spt = BasePt.Move(distance, 2);
             }
             if (pts.Item2 != null)//坐标增加方向有区域交点
             {
                 if (IntSecPoints.Count != 0) BasePt = IntSecPoints.Last();
-                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth - 0.05) / 2, segline);
-                var buffer = baseLine.GetHalfBuffer(segline, true);
+                var baseLine = BasePt.LineBuffer(VMStock.RoadWidth  / 2, segline);
+                var buffer = baseLine.GetHalfBuffer(segline.Extend(1), true);
                 var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
-                var distance = baseLine.ToLineString().Distance(objs)-0.1;
+                var distance = baseLine.ToLineString().Distance(objs)-1;
                 if (VerticalDirection) Ept = BasePt.Move(distance, 0);
                 else Ept = BasePt.Move(distance, 3);
             }

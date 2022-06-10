@@ -80,57 +80,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             return true;
         }
-        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null,bool autoAdjustPriority = false)
+        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null,bool checkVaild = true,bool UpdateRelationship = false)
         {
             if (AutoSegLines != null) SegLines = AutoSegLines.Select(l => l.Extend(1)).ToList();
             //SegLines = SegLines.RemoveDuplicated(10);
-            bool Isvaild = SegLineVaild();
-            //VaildLanes.ShowInitSegLine();
-            if (!Isvaild) return false;
-            if(autoAdjustPriority)
+            if (checkVaild)
+            {
+                bool Isvaild = SegLineVaild();
+                //VaildLanes.ShowInitSegLine();
+                if (!Isvaild) return false;
+            }
+            if(UpdateRelationship)
             {
                 var CrossPts = SegLines.GetCrossPoints(WallLine);
                 var BreakedSegLines = new List<LineSegment>();
                 var segLines_C = SegLines.Select(l => l.Clone()).ToList();
+                //基于交点打断
                 segLines_C.ForEach(l => 
                     BreakedSegLines.AddRange(l.Split(CrossPts.Select(c=>c.Coordinate).ToList())));
-                //基于交点打断
-                //var queryed = segLines_C.Where(l => CrossPts.Any(pt => l.Distance(pt.Coordinate) < 1)).ToList();
-                //queryed.ForEach(l => segLines_C.Remove(l));
-                ////获取新的分割线（延长）
-                //BreakedSegLines.AddRange(segLines_C);
                 SegLines = BreakedSegLines;
                 //获取连接关系
                 SeglineIndexList = SegLines.GetSegLineIntsecList();
                 SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
                 //获取交点关系
                 SegLineIntSecNode = SegLines.GetSegLineIntSecNode(CrossPts);
-            }
-            GetLowerUpperBound();
-            //ShowLowerUpperBound();
-            return true;
-        }
-
-        public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger,bool extractSegLine = true)
-        {
-            var block = InputData.SelectBlock(acadDatabase);//提取地库对象
-            if (block is null)
-            {
-                return false;
-            }
-            Logger = logger;
-            Logger?.Information("块名：" + block.GetEffectiveName());
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-            string drawingName = Path.GetFileName(doc.Name);
-            Logger?.Information("文件名：" + drawingName);
-            Logger?.Information("用户名：" + Environment.UserName);
-            if (!TryInit(block, extractSegLine)) return false;
-            //Show();
-            if (SegLines.Count != 0)
-            {
-                bool Isvaild = SegLineVaild();
-                //VaildLanes.ShowInitSegLine();
-                if (!Isvaild) return false;
                 GetLowerUpperBound();
                 //ShowLowerUpperBound();
             }
@@ -365,8 +338,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             InnerBuildings = BuildingSpatialIndex.SelectCrossingGeometry(wallBound).Cast<Polygon>().ToList();
             OuterBuildingIdxs = Buildings.Select((v, i) => new { v, i }).Where(x => !wallBound.Intersects(x.v)).Select(x => x.i).ToList();
                
-            var OuterTightBounds = TightBoundaries.Where(b => !wallBound.Contains(b));
-            InnerObs_OutterBoundSPIDX = new MNTSSpatialIndex(InnerBuildings.Concat(OuterTightBounds));
+            var outerBounds = RampSpatialIndex.SelectNOTCrossingGeometry(wallBound);//外部坡道
+            outerBounds.AddRange(TightBoundaries.Where(b => !wallBound.Contains(b)));//外部障碍物的tight边界
+            InnerObs_OutterBoundSPIDX = new MNTSSpatialIndex(InnerBuildings.Concat(outerBounds));
             var BoundaryObjects = new List<Geometry>();
             BoundaryObjects.AddRange(ignorableObstacles);
             BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
@@ -383,9 +357,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //ObstacleBoundaries = result.Get<Polygon>(true);
             var mmtoM = 0.001 * 0.001;
             ParameterStock.TotalArea = WallLine.Area*mmtoM;
-            ParameterStock.ObstacleArea = result.Area * mmtoM; 
+            ParameterStock.BuildingArea = result.Area * mmtoM; 
             Logger?.Information($"地库总面积:"+ string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2) );
-            Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.ObstacleArea) + "m" + Convert.ToChar(0x00b2) );
+            Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2) );
         }
         #endregion
         #region 分割线检查
@@ -486,7 +460,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private  bool LaneWidthSatisfied()
         {
             
-            double tol = VMStock.RoadWidth ;// 5500 -0.1
+            double tol = VMStock.RoadWidth -0.1;// 5500 -0.1
             for (int i = 0; i < VaildLanes.Count; i++)
             {
                 var vaildseg = VaildLanes[i];
@@ -661,9 +635,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             else
             {
                 var boundLineStrs = BoundLineSpatialIndex.SelectCrossingGeometry(posBuffer).Cast<LineString>();
+                var multiLstr = new MultiLineString(boundLineStrs.ToArray());
+                var pts = posBuffer.Intersection(multiLstr).Coordinates;
                 if (boundLineStrs.Count() > 0)
                 {
-                    maxVal = boundLineStrs.Max(lstr => vaildSegLineStr.Distance(lstr));//返回最大距离 
+                    //maxVal = boundLineStrs.Max(lstr => vaildSegLineStr.Distance(lstr));//返回最大距离 
+                    maxVal = pts.Max(pt => vaildSeg.Distance(pt)) + 500;//返回最大距离 
                 }
             }
             var negBuffer = vaildSeg.GetHalfBuffer(bufferSize, false);
@@ -676,9 +653,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             else
             {
                 var boundLineStrs = BoundLineSpatialIndex.SelectCrossingGeometry(negBuffer).Cast<LineString>();
+                var multiLstr = new MultiLineString(boundLineStrs.ToArray());
+                var pts = negBuffer.Intersection(multiLstr).Coordinates;
                 if (boundLineStrs.Count() > 0)
                 {
-                    minVal = -boundLineStrs.Max(lstr => vaildSegLineStr.Distance(lstr));//返回最大距离
+                    //minVal = -boundLineStrs.Max(lstr => vaildSegLineStr.Distance(lstr));//返回最大距离
+                    minVal = -pts.Max(pt => vaildSeg.Distance(pt)) - 500;//返回最大距离 
                 }
             }
             return (Math.Min(0, minVal), Math.Max(0, maxVal));
@@ -698,10 +678,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 if (!acad.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 3);
             }
-
-            for (int i = 0; i < VaildLanes.Count; i++)
+            var vaildSegs = SegLines.GetVaildSegLines(WallLine, 0);
+            for (int i = 0; i < vaildSegs.Count; i++)
             {
-                LineSegment SegLine = VaildLanes[i];
+                LineSegment SegLine = vaildSegs[i];
                 var lb = LowerUpperBound[i].Item1;
                 var ub = LowerUpperBound[i].Item2;
                 LinearRing shell;

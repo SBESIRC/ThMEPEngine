@@ -45,6 +45,7 @@ namespace ThMEPWSS.Command
         List<Polyline> _allWalls;
         List<Polyline> _allColumns;
         List<Polyline> _allRailings;
+        List<Polyline> _allBeams;
 
         List<CreateBlockInfo> createBlockInfos = new List<CreateBlockInfo>();
         List<CreateBasicElement> createBasicElems = new List<CreateBasicElement>();
@@ -215,7 +216,11 @@ namespace ThMEPWSS.Command
                         continue;
                     otherRooms.Add(room);
                 }
-                var balconyCorridorEqu = new BalconyCorridorEquPlatform(livingHighestFloor.floorUid, balconyRooms, corridorRooms, otherRooms, equpBlocks, _allWalls, _allColumns);
+                var parameters = new StruParameters();
+                parameters.Walls.AddRange(_allWalls);
+                parameters.Columns.AddRange(_allColumns);
+                parameters.Beams.AddRange(_allBeams);
+                var balconyCorridorEqu = new BalconyCorridorEquPlatform(livingHighestFloor.floorUid, balconyRooms, corridorRooms, otherRooms, equpBlocks, parameters);
                 balconyCorridorEqu.LayoutConnect(createBlockInfos,out List<string> changeY1ToFLIds,out List<string> changeDrainToFDrainIds);
                 if ((null != changeY1ToFLIds && changeY1ToFLIds.Count > 0) || (null != changeDrainToFDrainIds && changeDrainToFDrainIds.Count > 0)) 
                 {
@@ -331,7 +336,7 @@ namespace ThMEPWSS.Command
                             break;
                     }
                     var bId = string.IsNullOrEmpty(item.copyId) ? item.uid : item.copyId;
-                    var lines = createBasicElems.Where(c => c.belongBlockId.Contains(bId) && c.floorId == item.floorId).ToList();
+                    var lines = createBasicElems.Where(c => (c.belongBlockId.Contains(bId)|| c.belongBlockId.Contains(item.uid)) && c.floorId == item.floorId).ToList();
                     var texts = createTextElems.Where(c => c.belongBlockId.Contains(bId) && c.floorUid == item.floorId).ToList();
                     if ((null != lines && lines.Count > 0) && (texts != null && texts.Count > 0))
                     {
@@ -440,6 +445,7 @@ namespace ThMEPWSS.Command
             catch{ }
             _allColumns = new List<Polyline>();
             _allWalls = new List<Polyline>();
+            _allBeams = new List<Polyline>();
             //获取相应的数据，框线内的房间，烟道井，墙，柱
             try
             {
@@ -447,6 +453,17 @@ namespace ThMEPWSS.Command
                 _wallColumnsEngine.GetStructureInfo(livingHighestFloor.outPolyline, out _allColumns, out _allWalls);
             }
             catch{ }
+            try
+            {
+                var beamBuilder = new ThBeamBuilderEngine();
+                beamBuilder.Build(database, livingHighestFloor.blockOutPointCollection);
+                beamBuilder.Elements.ForEach(c =>
+                {
+                    if (c.Outline != null && c.Outline is Polyline polyline)
+                        _allBeams.Add(polyline);
+                });
+            }
+            catch { }
             _floorBlockEqums = InitFloorData(livingHighestFloor);
         }
         void RoofPipeLabelLayout() 

@@ -6,6 +6,9 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPEngineCore;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -16,12 +19,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
         public string PipeNumber2 { get; set; }//标注
-        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器; 5 跨层点
+        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器 ; 5 跨层点; 6 无立管有标注
         private double Tolerance { get; set; }//容差
         public TermPoint(Point3dEx ptEx)
         {
             PtEx = ptEx;
             Tolerance = 100;
+            PipeNumber = "";
         }
 
         public void SetLines(FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine)
@@ -48,6 +52,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 StartLine = distDic.Keys.First();
             }
             if(StartLine is null)
+            {
+                return;
+            }
+            if(!fireHydrantSysIn.LeadLineDic.ContainsKey(StartLine))
             {
                 return;
             }
@@ -88,7 +96,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             {
                 return;
             }
-            if(PipeNumber2.Contains("X") || PipeNumber2.Contains("-"))
+            if(PipeNumber2.Contains("X") || PipeNumber2.Contains("-") || PipeNumber2.Equals(PipeNumber))
             {
                 PipeNumber2 = "";
             }
@@ -96,10 +104,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            double offset = 200;
+            double offset = 300;
             var pt1 = TextLine.StartPoint.OffsetY(offset);
             var pt2 = TextLine.EndPoint.OffsetY(offset);
             var line = new Line(pt1,pt2);
+#if DEBUG
+
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                string layerName = "标注线获取文字";
+                try
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
+                }
+                catch { }
+                
+                line.LayerId = DbHelper.GetLayerId(layerName);
+                currentDb.CurrentSpace.Add(line);
+                
+            }
+#endif
             var midPt = General.GetMidPt(pt1,pt2);
             double tor = 1000;
             var DBObjs = spatialIndex.SelectFence(line);
@@ -109,7 +133,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 if (obj is DBText br)
                 {
                     var centerPt = General.GetMidPt(br);
-                    var dist = centerPt.DistanceTo(midPt);
+                    var dist = Math.Abs(centerPt.Y - midPt.Y);
                     if(dist<tor)
                     {
                         tor = dist;

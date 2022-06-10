@@ -1,7 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -49,11 +51,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         public void Draw(bool across)
         {
+            var u2wMat = Active.Editor.UCS2WCS();
             using (var acadDatabase = AcadDatabase.Active())
             {
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 foreach (var line in LoopLine)
                 {
+                    line.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(line);
                     line.Layer = "W-FRPT-HYDT-PIPE";
                     line.ColorIndex = (int)ColorIndex.BYLAYER;
@@ -61,18 +65,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                 foreach (var text in TextList)
                 {
+                    text.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(text);
                     text.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
 
                 foreach (var line in TextLine)
                 {
+                    line.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(line);
                     line.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
 
                 foreach (var line in StoreyLine)
                 {
+                    line.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(line);
                     line.LayerId = DbHelper.GetLayerId("W-NOTE");
                     line.ColorIndex = (int)ColorIndex.BYLAYER;
@@ -80,12 +87,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                 foreach (var pipeInt in PipeInterrupted.Keys)
                 {
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         "W-FRPT-HYDT-EQPM",
                         "水管中断",
                         pipeInt,
                         new Scale3d(-0.8, 0.8, 0.8),
                         PipeInterrupted[pipeInt]);
+                    var blk = acadDatabase.Element<BlockReference>(objID);
+                    blk.TransformBy(u2wMat);
                 }
 
                 foreach (var valve in Valve)
@@ -96,23 +105,27 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                         valveName = "闸阀";
                     }
 
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         "W-FRPT-HYDT-EQPM",
                         valveName,
                         valve,
                         new Scale3d(1, 1, 1),
                         0);
+                    var blk = acadDatabase.Element<BlockReference>(objID);
+                    blk.TransformBy(u2wMat);
                 }
 
                 foreach (var casing in IsCasing)
                 {
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        "W-FRPT-NOTE",
+                        "W-BUSH",
                         "套管系统",
                         casing,
                         new Scale3d(1, 1, 1),
                         0);
                     objID.SetDynBlockValue("可见性", "放水套管水平");
+                    var blk = acadDatabase.Element<BlockReference>(objID);
+                    blk.TransformBy(u2wMat);
                 }
 
                 int scaleX = -2 * Convert.ToInt32(HydrantWithReel) + 1;
@@ -132,10 +145,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     {
                         objID.SetDynBlockValue("可见性", "单栓");
                     }
+                    var blk = acadDatabase.Element<BlockReference>(objID);
+                    blk.TransformBy(u2wMat);
                 }
 
                 foreach (var text in DNList)
                 {
+                    text.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(text);
                     text.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
@@ -176,7 +192,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, Point3d> CrossMainPtDic { get; set; }//跨层主环的对应点位置
         public FireHydrantSystemIn(double floorHeight = 5000, StoreyRect storeyRect = null)
         {
-            if (!(storeyRect is null))
+            if(storeyRect is not null)
             {
                 HasStoreyRect = storeyRect.HasStoreyRect;
                 FloorRect = storeyRect.FloorRect;

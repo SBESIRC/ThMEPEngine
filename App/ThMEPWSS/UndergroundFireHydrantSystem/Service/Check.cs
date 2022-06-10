@@ -11,6 +11,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 return true;
             }
+            if(floor == "")
+            {
+                return true;
+            }
             var f =  floor?.Trim().ToUpper();
             if(!f.Contains('#'))//不包含'#'必然不是3号类型
             {

@@ -328,6 +328,7 @@ namespace ThMEPArchitecture.PartitionLayout
             LayoutOutput.LaneDisplayColorIndex=lanecolor;
             LayoutOutput.InitializeLayer();
             var vertcar = LayoutOutput.VCar;
+            var vertbackcar = LayoutOutput.VBackCar;
             var pcar = LayoutOutput.PCar;
             LayoutOutput layout = new LayoutOutput(Cars, Pillars, OutputLanes);
             layout.DisplayColumns();

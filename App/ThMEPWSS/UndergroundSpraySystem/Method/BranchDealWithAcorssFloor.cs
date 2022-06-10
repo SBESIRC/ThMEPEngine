@@ -77,8 +77,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 for (int i = 1; i < branchLoop.Count - 1; i++)
                 {
                     var pt = branchLoop[i];
-                    if (pt._pt.DistanceTo(new Point3d(58145.8544, 113217.1496, 0)) < 10)
-                        ;
                     if (sprayIn.PtTypeDic[branchLoop[i]].Contains("AlarmValve"))
                     {
                         alarmNums += 1;

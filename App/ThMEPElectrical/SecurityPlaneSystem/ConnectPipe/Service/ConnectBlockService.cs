@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,6 +105,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
             }
             var ePathNum = ePath.NumberOfVertices;
             var aPathNum = aPath.NumberOfVertices;
+            if(ePathNum < 2 || aPathNum < 2)
+            {
+                return ePath;
+            }
             var eLine = new Line(ePath.GetPoint3dAt(ePathNum - 2), ePath.GetPoint3dAt(ePathNum - 1));
             var aLine = new Line(aPath.GetPoint3dAt(aPathNum - 2), aPath.GetPoint3dAt(aPathNum - 1));
             var eDir = (eLine.EndPoint - eLine.StartPoint).GetNormal();
@@ -120,7 +125,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
                 var pt1 = eLine.StartPoint + dir * moveVal;
                 var pt2 = eLine.EndPoint + dir * moveVal;
                 var pts = new List<Point3d>() { pt1, pt2 };
-                return CreateConnectPoly(ePath, pts);
+                return CreateAjustPath(ePath, pts);
             }
 
             return ePath;
@@ -132,12 +137,39 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
         /// <param name="connectLine"></param>
         /// <param name="addPts"></param>
         /// <returns></returns>
-        private Polyline CreateConnectPoly(Polyline connectLine, List<Point3d> addPts)
+        private Polyline CreateAjustPath(Polyline connectLine, List<Point3d> addPts)
         {
             Polyline resPoly = new Polyline();
             for (int i = 0; i < connectLine.NumberOfVertices - addPts.Count; i++)
             {
                 resPoly.AddVertexAt(i, connectLine.GetPoint2dAt(i), 0, 0, 0);
+            }
+            var num = resPoly.NumberOfVertices;
+            for (int i = 0; i < addPts.Count; i++)
+            {
+                resPoly.AddVertexAt(num + i, addPts[i].ToPoint2D(), 0, 0, 0);
+            }
+
+            return resPoly;
+        }
+
+        /// <summary>
+        /// 创建连接线
+        /// </summary>
+        /// <param name="connectLine"></param>
+        /// <param name="addPts"></param>
+        /// <returns></returns>
+        private Polyline CreateConnectPoly(Polyline connectLine, List<Point3d> addPts)
+        {
+            Polyline resPoly = new Polyline();
+            var pt = addPts.First();
+            for (int i = 0; i < connectLine.NumberOfVertices - 1; i++)
+            {
+                resPoly.AddVertexAt(i, connectLine.GetPoint2dAt(i), 0, 0, 0);
+                if (connectLine.GetLineSegment2dAt(i).ToCurve().GetClosestPointTo(pt, false).DistanceTo(pt) < 5)
+                {
+                    break;
+                }
             }
             var num = resPoly.NumberOfVertices;
             for (int i = 0; i < addPts.Count; i++)

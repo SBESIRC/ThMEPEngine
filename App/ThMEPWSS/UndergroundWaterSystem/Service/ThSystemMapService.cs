@@ -38,6 +38,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public List<CrossedLayerDims> CrossedlayerDims = new List<CrossedLayerDims>();
         public List<Entity> HelpLines = new List<Entity>();
         public List<Polyline> RootPLHelpLines = new List<Polyline>();
+        public int MarkDrawCount = 0;
         public Matrix3d Mt { set; get; }
         public ThSystemMapService()
         {
@@ -178,7 +179,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         var break_angle = Math.PI / 2;
                         if (rootPt2.DistanceTo(basePt) < 1) break_angle = 0;
                         DrawBreakDot(rootPt2, rootNode.Item.PointNodeList.LastOrDefault().Item.Position, break_angle);
-                        DrawBreakName(_pointList, rootPt2, false);
+                        DrawBreakName(_pointList, rootPt2, false,ref MarkDrawCount);
                     }
                     //DrawBreakDot(rootPt2, Math.PI / 2);
                     if (dim.Point.X < rootPt2.X - 10)
@@ -192,7 +193,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         var break_angle = Math.PI / 2;
                         if (rLine.EndPoint.DistanceTo(basePt) < 1) break_angle = 0;
                         DrawBreakDot(rLine.EndPoint, rootNode.Item.PointNodeList.LastOrDefault().Item.Position, break_angle);
-                        DrawBreakName(_pointList, rLine.EndPoint, false);
+                        DrawBreakName(_pointList, rLine.EndPoint, false,ref MarkDrawCount);
                     }
                     if (dim.Point.X < endPoint.X - 10)
                         DrawDim(dim);
@@ -220,7 +221,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     {
                         DrawBreakDot(endPoint, rootNode.Item.PointNodeList.LastOrDefault().Item.Position, break_angle);
                     }
-                    DrawBreakName(_pointList, endPoint, false);
+                    DrawBreakName(_pointList, endPoint, false,ref MarkDrawCount);
                 }
                 PreLines.Add(new PreLine(rLine, PipeLayerName, 0));
                 if (dim.Point.X < endPoint.X - 10)
@@ -395,7 +396,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     DrawBreakDot(hLinePt2, subNode.Item.PointNodeList.LastOrDefault().Item.Position, Math.PI / 2);
                     if (hLinePt2.Y > basePt.Y) upward = true;
                 }
-                DrawBreakName(_pointList, hLinePt2, false);
+                DrawBreakName(_pointList, hLinePt2, false,ref MarkDrawCount);
             }
             PreLines.Add(new PreLine(line, PipeLayerName, 0));
             if (dim.Point.X < endPoint.X - 10)
@@ -479,6 +480,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         pointList[j].Item.Break.Used = true;
                         if (!hasFlushPoint)
                         {
+                            //20220609Fixed
+                            pointList[j].Item.Break.Used = false;
+                            //20220609Fixed
                             //isUnnececcsaryBreakDot = true;
                             //var iniloc = riserPoint;
                             //var floorlines = FloorLines.Where(e => e.GetCenter().Y > iniloc.Y).OrderBy(e => e.GetCenter().Y - iniloc.Y);

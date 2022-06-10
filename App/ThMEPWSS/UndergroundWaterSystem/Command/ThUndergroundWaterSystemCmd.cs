@@ -140,7 +140,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
             }
             catch (Exception ex)
             {
-                Active.Editor.WriteMessage(ex.Message);
+                 Active.Editor.WriteMessage(ex.Message);
             }
         }
     }

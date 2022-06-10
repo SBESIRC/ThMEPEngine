@@ -143,6 +143,7 @@ namespace ThMEPWSS
                 dataQuery.CreateVerticalPipe();
                 dataQuery.BuildTermianlMode();
                 dataQuery.BuildValve();
+                dataQuery.ProjectOntoXYPlane();
                 dataQuery.Print();
                 //dataQuery.Reset(transformer);
 

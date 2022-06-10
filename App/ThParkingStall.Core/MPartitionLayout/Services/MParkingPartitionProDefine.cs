@@ -22,7 +22,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             //viewmodel
             DisParallelCarLength = VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth;
             DisParallelCarWidth = VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength;
-            DisVertCarLength = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth;
+            //DisVertCarLength = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength + 200 : VMStock.VerticalSpotWidth + 200;
+            DisVertCarLength = 5300;
             DisVertCarWidth = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength;
             DisLaneWidth = VMStock.RoadWidth;
             PillarSpacing = VMStock.ColumnWidth;
@@ -41,11 +42,13 @@ namespace ThParkingStall.Core.MPartitionLayout
             DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
             CountPillarDist = (int)Math.Floor((PillarSpacing - PillarNetLength - ThicknessOfPillarConstruct * 2) / DisVertCarWidth);
             DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
+            DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
             DisModulus = DisCarAndHalfLane * 2;
+            DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
             LengthCanGIntegralModulesConnectSingle = 4 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength * 2;
             LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
             LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 4 + DisPillarLength * 2;
-            LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8 + DisPillarLength * 2;
+            LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth *7 + DisPillarLength * 2;
             GeneratePillars = gpillars;
             Walls = walls;
             Obstacles = obstacles;
@@ -98,32 +101,41 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double PillarNetDepth = 500;
         public static double ThicknessOfPillarConstruct = 50;
         public static double PillarSpacing = 7800;
-        public static double DisVertCarLength = 5100;
+        public static double DisVertCarLength = 5300;
+        public static double DisVertCarLengthBackBack = 5100;
         public static double DisVertCarWidth = 2400;
         public static double DisParallelCarLength = 6000;
         public static double DisParallelCarWidth = 2400;
         public static double DisLaneWidth = 5500;
-        public static double CollisionD = 300;
-        public static double CollisionTOP = 100;
+        public static double CollisionD = /*300;*/0;
+        public static double CollisionTOP = /*100;*/0;
         public static double CollisionCT = 1400;
         public static double CollisionCM = 1500;
         public static double DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
         public static double DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
         public static int CountPillarDist = (int)Math.Floor((PillarSpacing - PillarNetLength - ThicknessOfPillarConstruct * 2) / DisVertCarWidth);
         public static double DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
+        public static double DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
         public static double DisModulus = DisCarAndHalfLane * 2;
+        public static double DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
         public static double DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
         public static double DisPillarMoveDeeplyBackBack = 1000;
         public static double DisPillarMoveDeeplySingle = 550;
         public static double LengthCanGIntegralModulesConnectSingle = 3.5 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
         public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.5 + DisPillarLength;
-        public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8 + DisPillarLength * 2;
+        public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 7 + DisPillarLength * 2;
         public static double STRTreeCount = 10;
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();
         public List<LineSegment> OutUnsuredLanes = new List<LineSegment>();
         public static bool DisplayFinal = true;
         public static int LayoutMode = ((int)LayoutDirection.LENGTH);
+        public static double LayoutScareFactor_Intergral = 0.7;
+        public static double LayoutScareFactor_Adjacent = 0.7;
+        public static double LayoutScareFactor_betweenBuilds = 0.7;
+        public static double LayoutScareFactor_SingleVert = 0.7;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
+        public static double SingleVertModulePlacementFactor = 1.0;
         public enum LayoutDirection : int
         {
             LENGTH = 0,

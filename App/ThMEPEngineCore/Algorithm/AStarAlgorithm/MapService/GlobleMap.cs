@@ -12,8 +12,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 {
     public class GlobleMap<T> : Map<T>
     {
+        public double avoidHoleDistance = 800;
         double step = 800;
-        double avoidHoleDistance = 800;
         double avoidFrameDistance = 200;
         public new GloblePoint startPt;
         public new GlobleMapHelper<T> mapHelper;
@@ -117,15 +117,18 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         /// 设置障碍
         /// </summary>
         /// <param name="holes"></param>
-        public void SetObstacle(List<Polyline> _holes, double Weight)
+        public void SetObstacle(List<MPolygon> _holes, double Weight, double bufferDis)
         {
-            var holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
-
-            foreach (var h in holes)
+            foreach (var h in _holes)
             {
-                var MPolygon = h.ToNTSPolygon().ToDbMPolygon();
-                holeObjs.Add(MPolygon);
-                obstacleCast.Add(MPolygon, Weight);
+                var mHole = h;
+                if (bufferDis != 0)
+                {
+                    mHole = h.Buffer(bufferDis, true).Cast<MPolygon>().First();
+                }
+                
+                holeObjs.Add(mHole);
+                obstacleCast.Add(mHole, Weight);
             }
         }
 

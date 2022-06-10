@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
@@ -47,17 +50,6 @@ namespace ThMEPArchitecture.ViewModel
             {
                 _UseMultiProcess = value;
                 RaisePropertyChanged("UseMultiProcess");
-            }
-        }
-        private bool _UseMultiSelection = false;//是否多选
-
-        public bool UseMultiSelection
-        {
-            get { return _UseMultiSelection; }
-            set
-            {
-                _UseMultiSelection = value;
-                RaisePropertyChanged("UseMultiSelection");
             }
         }
 
@@ -141,7 +133,7 @@ namespace ThMEPArchitecture.ViewModel
         }
 
         //垂直车位尺寸, 长度
-        private int _VerticalSpotLength = 5100; //mm
+        private int _VerticalSpotLength = 5300; //mm
 
         public int VerticalSpotLength
         {
@@ -474,6 +466,36 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("ThreadCount");
             }
         }
+
+        private bool _ShowLogs = false;//显示日志，默认为false
+
+        public bool ShowLogs
+        {
+            get { return _ShowLogs; }
+            set
+            {
+                _ShowLogs = value;
+                RaisePropertyChanged("ShowLogs");
+            }
+        }
+        //横向优先_纵向车道计算长度调整_背靠背模块
+        public double LayoutScareFactor_Intergral = 0.7;
+        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+        public double LayoutScareFactor_Adjacent = 0.7;
+        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+        public double LayoutScareFactor_betweenBuilds = 0.7;
+        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+        public double LayoutScareFactor_SingleVert = 0.7;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+        public double SingleVertModulePlacementFactor = 1.0;
+        public void Set(HiddenParameter hp)
+        {
+            LayoutScareFactor_Intergral = hp.LayoutScareFactor_Intergral;
+            LayoutScareFactor_Adjacent = hp.LayoutScareFactor_Adjacent;
+            LayoutScareFactor_betweenBuilds = hp.LayoutScareFactor_betweenBuilds;
+            LayoutScareFactor_SingleVert = hp.LayoutScareFactor_SingleVert;
+            SingleVertModulePlacementFactor = hp.SingleVertModulePlacementFactor;
+        }
     }
 
     public static class ParameterStock
@@ -578,18 +600,12 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
-        private static bool _UseMultiSelection = false;//是否多选
 
-        public static bool UseMultiSelection
-        {
-            get
-            {
-                if (Setted) return _UseMultiSelection;
-                else throw new ArgumentException("ParameterStock Unsetted");
-            }
-        }
-        public static double ObstacleArea;
-        public static double TotalArea;
+
+        public static double BuildingArea;//建筑面积（m^2)
+        public static double TotalArea;//地库面积（m^2)
+        public static bool ReadHiddenParameter = false;
+        public static int CutTol = 995;//全自动分割线比车道多出的额外距离
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
@@ -601,8 +617,71 @@ namespace ThMEPArchitecture.ViewModel
             _BuildingTolerance = vm.BuildingTolerance;
             _ProcessCount = vm.ProcessCount;
             _ThreadCount = vm.ThreadCount;
-            _UseMultiSelection = vm.UseMultiSelection;
             Setted = true;
+        }
+    }
+
+    public class HiddenParameter
+    {
+        public bool LogMainProcess = true;
+        public bool LogSubProcess = false;
+        //横向优先_纵向车道计算长度调整_背靠背模块
+        public double LayoutScareFactor_Intergral = 0.7;
+        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+        public double LayoutScareFactor_Adjacent = 0.7;
+        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+        public double LayoutScareFactor_betweenBuilds = 0.7;
+        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+        public double LayoutScareFactor_SingleVert = 0.7;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+        public double SingleVertModulePlacementFactor = 1.0;
+        //全自动分割线比车道多出的额外距离
+        public int CutTol = 995;
+        private void Save()
+        {
+            TextWriter writer = null;
+            try
+            {
+                var contentsToWriteToFile = JsonConvert.SerializeObject(this);
+                var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var filePath = System.IO.Path.Combine(currentDllPath, "ThParkingStallConfig.json");
+                writer = new StreamWriter(filePath, false);
+                writer.Write(contentsToWriteToFile);
+            }
+            finally
+            {
+                if (writer != null)
+                    writer.Close();
+            }
+        }
+        public static HiddenParameter ReadOrCreateDefault() 
+        {
+            TextReader reader = null;
+            var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var filePath = System.IO.Path.Combine(currentDllPath, "ThParkingStallConfig.json");
+            HiddenParameter hp = new HiddenParameter();
+            try
+            {
+                if (ParameterStock.ReadHiddenParameter &&File.Exists(filePath))
+                {
+                    reader = new StreamReader(filePath);
+                    var fileContents = reader.ReadToEnd();
+                    hp = JsonConvert.DeserializeObject<HiddenParameter>(fileContents);
+                }
+                else
+                {
+                    if (!File.Exists(filePath))hp.Save();
+                }
+                ParameterStock.LogMainProcess = hp.LogMainProcess;
+                ParameterStock.LogSubProcess = hp.LogSubProcess;
+                return hp;
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+                ParameterStock.CutTol = hp.CutTol;
+            }
         }
     }
 }

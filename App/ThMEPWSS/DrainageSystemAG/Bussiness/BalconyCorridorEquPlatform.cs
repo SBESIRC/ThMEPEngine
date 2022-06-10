@@ -33,6 +33,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<PipeConnectRelation> _pipeConnectRelations = new List<PipeConnectRelation>();
         List<Polyline> _wallPolylines = new List<Polyline>();
         List<Polyline> _columnPolylines = new List<Polyline>();
+        List<Polyline> _beamPolylines = new List<Polyline>();
         List<CreateBlockInfo> _pipeConverters = new List<CreateBlockInfo>();
         List<CreateBlockInfo> _allDrains = new List<CreateBlockInfo>();
         List<Circle> _pipeDrainCircles = new List<Circle>();
@@ -42,7 +43,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         public List<CreateDBTextElement> createDBTextElements = new List<CreateDBTextElement>();
 
         private string _floorId;
-        public BalconyCorridorEquPlatform(string floorId,List<RoomModel> balconyRooms, List<RoomModel> corridorRooms, List<RoomModel> otherRooms, List<EquipmentBlockSpace> balcCoorEqus, List<Polyline> allWalls, List<Polyline> allColumns)
+        public BalconyCorridorEquPlatform(string floorId,List<RoomModel> balconyRooms, List<RoomModel> corridorRooms, List<RoomModel> otherRooms, List<EquipmentBlockSpace> balcCoorEqus, StruParameters parameters)
         {
             this._floorId = floorId;
             if (null != balconyRooms && balconyRooms.Count > 0)
@@ -82,13 +83,20 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     _otherRooms.Add(room);
                 }
             }
-            if (null != allWalls && allWalls.Count>0) 
+            if (null != parameters) 
             {
-                allWalls.ForEach(c => { if (c != null) { _wallPolylines.Add(c); } });
-            }
-            if (null != allColumns && allColumns.Count > 0) 
-            {
-                allColumns.ForEach(c => { if (c != null) { _columnPolylines.Add(c); } });
+                if (null != parameters.Walls && parameters.Walls.Count > 0)
+                {
+                    parameters.Walls.ForEach(c => { if (c != null) { _wallPolylines.Add(c); } });
+                }
+                if (null != parameters.Columns && parameters.Columns.Count > 0)
+                {
+                    parameters.Columns.ForEach(c => { if (c != null) { _columnPolylines.Add(c); } });
+                }
+                if (null != parameters.Beams && parameters.Beams.Count > 0) 
+                {
+                    parameters.Beams.ForEach(c => { if (c != null) { _beamPolylines.Add(c); } });
+                }
             }
         }
 
@@ -446,6 +454,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
 
                 Point3d crossPoint = new Point3d();
                 Vector3d outDir = new Vector3d();
+                double crossLength = _pipeCasingLength;
+                bool haveBeam = false;
                 if (nearLine == null)
                 {
                     //不能直接穿过，根据点位信息，进一步计算弯折信息
@@ -457,6 +467,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     crossPoint = nearPoint.PointToLine(roomNearLine);
                     points.Clear();
                     outDir = (crossPoint - nearPoint).GetNormal();
+                    crossLength = CalcCrossWidth(crossPoint, outDir,out haveBeam);
                     foreach (var point in tempPoints) 
                     {
                         var prjPoint = point.PointToLine(crossPoint, outDir);
@@ -474,7 +485,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (null != lines && lines.Count > 0)
                     {
                         pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                        var connectPipeOut = new PipeDrainConnect(null, crossPoint, _pipeCasingLength, ConnectNoBayDistance(new List<Point3d> { nearPipe.blockCenterPoint }));
+                        var connectPipeOut = new PipeDrainConnect(null, crossPoint, crossLength, ConnectNoBayDistance(new List<Point3d> { nearPipe.blockCenterPoint }));
                         var pipeLines = connectPipeOut.PipeDrainConnectByMainAxis(outDir);
                         if (null != pipeLines && pipeLines.Count > 0)
                             pipeRelation.pipeEquipmentConnectLines.AddRange(pipeLines);
@@ -486,6 +497,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     crossPoint = nearPipe.blockCenterPoint.PointToLine(nearLine);
                     outDir = (nearPipe.blockCenterPoint - crossPoint).GetNormal();
                     points.Clear();
+                    crossLength = CalcCrossWidth(crossPoint, outDir,out haveBeam);
                     foreach (var point in tempPoints)
                     {
                         var prjPoint = point.PointToLine(crossPoint, outDir);
@@ -507,40 +519,42 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         pipeRelation.pipeEquipmentConnectLines.Add(nLine);
                     }
                 }
-                //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
-                var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
-                var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
-                addBlock.rotateAngle = angle % (Math.PI * 2);
-                addBlock.dymBlockAttr.Add("可见性", "普通套管");
-                addBlock.dymBlockAttr.Add("距离", _pipeCasingLength);
-                createBlockInfos.Add(addBlock);
+                if (haveBeam) 
+                {
+                    //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
+                    var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
+                    var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
+                    addBlock.rotateAngle = angle % (Math.PI * 2);
+                    addBlock.dymBlockAttr.Add("可见性", "普通套管");
+                    addBlock.dymBlockAttr.Add("距离", crossLength);
+                    createBlockInfos.Add(addBlock);
 
-                //套管处增加标注
-                var lineDri = Vector3d.YAxis.Negate();
-                var lineSp = crossPoint + outDir.MultiplyBy(_pipeCasingLength / 2);
-                var lineEp = lineSp + lineDri.MultiplyBy(500);
-                var upText = DrainSysAGCommon.CreateDBText("DN100", lineEp, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle);
-                var btText = DrainSysAGCommon.CreateDBText("h1-0.30", lineEp, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle);
-                var upMaxPoint = upText.GeometricExtents.MaxPoint;
-                var upMinPoint = upText.GeometricExtents.MinPoint;
-                var btMaxPoint = btText.GeometricExtents.MaxPoint;
-                var btMinPoint = btText.GeometricExtents.MinPoint;
-                var upWidth = upMaxPoint.X - upMinPoint.X;
-                var upHeight = upMaxPoint.Y - upMinPoint.Y;
-                var btWidth = btMaxPoint.X - btMinPoint.X;
-                var btHeight = btMaxPoint.Y - btMinPoint.Y;
-                var maxWidth = Math.Max(upWidth, btWidth);
-                var leftDir = Vector3d.XAxis;
+                    //套管处增加标注
+                    var lineDri = Vector3d.YAxis.Negate();
+                    var lineSp = crossPoint + outDir.MultiplyBy(crossLength / 2);
+                    var lineEp = lineSp + lineDri.MultiplyBy(500);
+                    var upText = DrainSysAGCommon.CreateDBText("DN100", lineEp, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle);
+                    var btText = DrainSysAGCommon.CreateDBText("h1-0.30", lineEp, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle);
+                    var upMaxPoint = upText.GeometricExtents.MaxPoint;
+                    var upMinPoint = upText.GeometricExtents.MinPoint;
+                    var btMaxPoint = btText.GeometricExtents.MaxPoint;
+                    var btMinPoint = btText.GeometricExtents.MinPoint;
+                    var upWidth = upMaxPoint.X - upMinPoint.X;
+                    var upHeight = upMaxPoint.Y - upMinPoint.Y;
+                    var btWidth = btMaxPoint.X - btMinPoint.X;
+                    var btHeight = btMaxPoint.Y - btMinPoint.Y;
+                    var maxWidth = Math.Max(upWidth, btWidth);
+                    var leftDir = Vector3d.XAxis;
 
-                createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, "",""));
-                createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp+ leftDir.MultiplyBy(maxWidth+100)), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
-                var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(10);
-                upText.Position = upTextPt;
-                var btTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(btHeight + 30);
-                btText.Position = btTextPt;
-                createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
-                createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
-
+                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
+                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp + leftDir.MultiplyBy(maxWidth + 100)), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
+                    var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(10);
+                    upText.Position = upTextPt;
+                    var btTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(btHeight + 30);
+                    btText.Position = btTextPt;
+                    createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                    createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                }
                 tempPoints = tempPoints.Where(c => !points.Any(x => x.DistanceTo(c) < 5)).ToList();
             }
             
@@ -731,6 +745,30 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 dicDis.Add(item, dis);
             }
             return dicDis;
+        }
+
+        double CalcCrossWidth(Point3d point,Vector3d outDir,out bool haveBeam) 
+        {
+            haveBeam = false;
+            double crosLength = _pipeCasingLength;
+            if (null == _beamPolylines || _beamPolylines.Count < 1)
+                return crosLength;
+            var beamDis = new Dictionary<Polyline, double>();
+            foreach (var item in _beamPolylines) 
+            {
+                beamDis.Add(item, item.Distance(point));
+            }
+            var nearPLine = beamDis.OrderBy(c => c.Value).First().Key;
+            var nearDis = nearPLine.Distance(point);
+            if (nearDis < 5) 
+            {
+                haveBeam = true;
+                Line line = new Line(point - outDir.MultiplyBy(500), point + outDir.MultiplyBy(500));
+                var innerLine = nearPLine.Trim(line).OfType<Curve>().ToList().FirstOrDefault();
+                if (null != innerLine)
+                    crosLength = innerLine.GetLength();
+            }
+            return crosLength;
         }
     }
     class PipeConnectRelation 

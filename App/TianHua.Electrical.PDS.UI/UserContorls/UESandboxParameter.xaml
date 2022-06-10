@@ -66,10 +66,17 @@
                             <Label Content="默认导体材料"></Label>
                             <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label>消防配电干线及分支干线采用</Label>
-                            <ComboBox ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource,Mode=OneTime}"  SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
-                            <Label>矿物绝缘电力电缆</Label>
+                        <StackPanel Orientation="Vertical">
+                            <RadioButton IsChecked="{Binding MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label>消防配电干线及分支电缆采用</Label>
+                                    <ComboBox ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource,Mode=OneTime}"  SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
+                                    <Label>矿物绝缘电缆</Label>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton IsChecked="{Binding FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution}">
+                                <Label>消防配电干线及分支电缆采用阻燃耐火电力电缆【慎用】</Label>
+                            </RadioButton>
                         </StackPanel>
                         <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
                         <WrapPanel>

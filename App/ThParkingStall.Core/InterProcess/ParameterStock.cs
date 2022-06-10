@@ -37,7 +37,7 @@ namespace ThParkingStall.Core.InterProcess
         }
 
         //垂直车位尺寸, 长度
-        private static int _VerticalSpotLength = 5100; //mm
+        private static int _VerticalSpotLength = 5300; //mm
 
         public static int VerticalSpotLength
         {
@@ -165,6 +165,25 @@ namespace ThParkingStall.Core.InterProcess
                 return _D2;
             }
         }
+        private static double _LayoutScareFactor_Intergral;
+        //横向优先_纵向车道计算长度调整_背靠背模块
+        public static double LayoutScareFactor_Intergral { get { return _LayoutScareFactor_Intergral; } }
+
+        private static double _LayoutScareFactor_Adjacent;
+        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+        public static double LayoutScareFactor_Adjacent { get { return _LayoutScareFactor_Adjacent; } }
+
+        private static double _LayoutScareFactor_betweenBuilds;
+        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+        public static double LayoutScareFactor_betweenBuilds { get { return _LayoutScareFactor_betweenBuilds; } }
+
+        private static double _LayoutScareFactor_SingleVert;
+        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+        public static double LayoutScareFactor_SingleVert { get { return _LayoutScareFactor_SingleVert; } }
+
+        private static double _SingleVertModulePlacementFactor;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+        public static double SingleVertModulePlacementFactor { get { return _SingleVertModulePlacementFactor; } }
         public static void Init(DataWraper datawraper)
         {
             _RunMode = datawraper.RunMode;
@@ -198,6 +217,16 @@ namespace ThParkingStall.Core.InterProcess
             _D1 = datawraper.D1;
             //车位碰撞参数D2（尾部）
             _D2 = datawraper.D2;
-    }
+            //横向优先_纵向车道计算长度调整_背靠背模块
+            _LayoutScareFactor_Intergral = datawraper.LayoutScareFactor_Intergral;
+            //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+            _LayoutScareFactor_Adjacent = datawraper.LayoutScareFactor_Adjacent;
+            //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+            _LayoutScareFactor_betweenBuilds = datawraper.LayoutScareFactor_betweenBuilds;
+            //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+            _LayoutScareFactor_SingleVert = datawraper.LayoutScareFactor_SingleVert;
+            //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+            _SingleVertModulePlacementFactor = datawraper.SingleVertModulePlacementFactor;
+        }
     }
 }

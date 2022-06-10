@@ -14,6 +14,8 @@ using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPEngineCore;
+using DotNetARX;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -32,11 +34,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    .OfType<Circle>()
                    .Where(o => IsTargetLayer(o.Layer));
 
-            var Results2 = acadDatabase  //BlockRefrence
-                   .ModelSpace
-                   .OfType<BlockReference>()
-                   .Where(o => o.GetEffectiveName().Contains("定位立管"))
-                   .ToList();
+            var Results2 = ExtractBlocks(acadDatabase.Database, "定位立管"); 
 
             var DBObjs = Results.ToCollection();
 
@@ -60,7 +58,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             foreach (var db in Results2)
             {
-                ExplodeDWLG(db, DBobjsResults);//添加定位立管
+                ExplodeDWLG(db as BlockReference, DBobjsResults);//添加定位立管
             }
 
             var rstSpatialIndex = new ThCADCoreNTSSpatialIndex(DBobjsResults);
@@ -68,50 +66,44 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return rstSpatialIndex.SelectCrossingPolygon(polygon);
         }
 
-        private static bool IsPipeLayer(string layer)
+        private DBObjectCollection ExtractBlocks(Database db, string blockName)
         {
-            return layer.Contains("W-FRPT") && layer.Contains("HYDT") && layer.Contains("PIPE");
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
+            {
+                if (e is BlockReference br)
+                {
+                    return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
+                }
+                return false;
+            };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            extractor.Extract(db); // 提取块中块(包括外参)
+            extractor.ExtractFromMS(db); // 提取本地块
+
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                blkVisitor.Results.ForEach(e =>
+                {
+                    var attribute = e.Data;
+                });
+            }
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
-       
+
+
         private static bool IsTargetLayer(string layer)//立管图层
         {
             return layer.Equals("W-FRPT-HYDT-VPIPE")
                  || layer.Equals("W-FRPT-HYDT-EQPM")
-                 || layer.Equals("W-FRPT-HYDT");
+                 || layer.Equals("W-FRPT-HYDT")
+                 || layer.Equals("W-FRPT-EXTG");
         }
 
-        private static void ExplodeBlock(BlockReference br, DBObjectCollection DBobjsResults)
-        {
-            if (IsDWLGBlock(br))//如果是定位立管
-            {
-                return;
-            }
-            else
-            {
-                var objs = new DBObjectCollection();
-                br.Explode(objs);//把块炸开
-                foreach (var obj in objs)//遍历
-                {
-                    var ent = obj as Entity;
-                    if (!ent.Visible)
-                    {
-                        continue;
-                    }
-                    if (obj is Circle circle)//圆
-                    {
-                        if (IsTargetLayer(circle.Layer))
-                        {
-                            var dbPt = new DBPoint(circle.Center);
-                            DBobjsResults.Add(dbPt);
-                        }
-                    }
-                    if (obj is BlockReference)//块
-                    {
-                        ExplodeBlock(obj as BlockReference, DBobjsResults);//炸块
-                    }
-                }
-            }
-        }
         private static void ExplodeTZBlock(Entity ent, DBObjectCollection DBobjsResults)
         {
             try
@@ -123,21 +115,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     .Where(e => e is Circle)
                     .ForEach(e => DBobjsResults.Add(new DBPoint((e as Circle).Center)));
             }
-            catch
+            catch(Exception ex)
             {
+                ;
             }
         }
-        private static bool IsDWLGBlock(BlockReference br)
-        {
-            try
-            {
-                return br.GetEffectiveName().Contains("定位立管");
-            }
-            catch
-            {
-                return br.Name.Contains("定位立管");
-            }
-        }
+
         public static void ExplodeDWLG(BlockReference br, DBObjectCollection DBobjsResults)//炸定位立管
         {
             var objColl = new DBObjectCollection();
@@ -179,18 +162,113 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
             }
 #if DEBUG
-            using (AcadDatabase currentDb = AcadDatabase.Active())
+            var layer = "立管标记";
+            using (AcadDatabase acad = AcadDatabase.Active())
             {
-                foreach (var ptEx in VerticalPts)
+                if (!acad.Layers.Contains(layer))
                 {
-                    var pt = ptEx._pt;
-                    var c = new Circle(pt, new Vector3d(0, 0, 1), 200);
-                    c.LayerId = DbHelper.GetLayerId("立管圆圈图层");
-                    currentDb.CurrentSpace.Add(c);
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                }
+            }
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var pt in VerticalPts)
+                {
+                    var c = new Circle(pt._pt, new Vector3d(0, 0, 1), 200);
+                    c.LayerId = DbHelper.GetLayerId(layer);
+                    acadDatabase.CurrentSpace.Add(c);
                 }
             }
 #endif
             return VerticalPts;
+        }
+    }
+
+    public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
+    {
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+
+        public ThBlockReferenceExtractionVisitor()
+        {
+            CheckQualifiedLayer = base.CheckLayerValid;
+            CheckQualifiedBlockName = (Entity entity) => true;
+        }
+
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
+        {
+            if (dbObj is BlockReference br)
+            {
+                elements.AddRange(Handle(br, matrix));
+            }
+        }
+
+        public override void DoXClip(List<ThRawIfcDistributionElementData> elements,
+            BlockReference blockReference, Matrix3d matrix)
+        {
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            }
+        }
+
+        private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcDistributionElementData>();
+            if (IsDistributionElement(br) && CheckLayerValid(br))
+            {
+                var clone = br.Clone() as BlockReference;
+                if (clone != null)
+                {
+                    clone.TransformBy(matrix);
+                    results.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Geometry = clone,
+                        Data = br.ObjectId.GetDynBlockValue("可见性"),
+                    });
+                }
+            }
+            return results;
+        }
+
+        private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
+        {
+            if (ent is BlockReference br)
+            {
+                return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override bool IsDistributionElement(Entity entity)
+        {
+            return CheckQualifiedBlockName(entity);
+        }
+
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
+        }
+
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -43,10 +43,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void DfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
             ref List<List<Point3dEx>> rstPaths, SprayIn sprayIn, ref List<Point3dEx> extraNodes, HashSet<Point3dEx> neverVisited)
         {
-            if (cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1447111.1, 2755264.5, 0)) < 10)
-            {
-                ;
-            }
             if (cur.Equals(sprayIn.LoopEndPt))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
@@ -233,8 +229,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
-            if (cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1598961.3, 390022, 0)) < 10)
-                ;
             foreach (Point3dEx p in neighbors)
             {
                 if (cur.Equals(startPt) && p.Equals(targetPt)) continue;//起点和终点相邻

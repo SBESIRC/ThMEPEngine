@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new OneWayInCircuit()
                             {
-                                Component = componentFactory.CreatIsolatingSwitch(),
+                                Component = componentFactory.CreatOneWayIsolatingSwitch(),
                             };
                             break;
                         }
@@ -99,6 +99,19 @@ namespace TianHua.Electrical.PDS.Project.Module
             //删除回路只删除这个连接关系，前后节点都还保留
             //所以删除后，后面的负载会失去原有的回路,需要人再去分配
             graph.RemoveEdge(edge);
+            if (edge.Target.Type == PDSNodeType.Empty || edge.Target.Type == PDSNodeType.Unkown)
+            {
+                graph.RemoveVertex(edge.Target);
+            }
+            var minibar = edge.Source.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge)).Key;
+            if (!minibar.IsNull())
+            {
+                edge.Source.Details.MiniBusbars[minibar].Remove(edge);
+                if (edge.Source.Details.MiniBusbars[minibar].Count < 1)
+                {
+                    DeleteSmallBusbar(edge.Source, minibar);
+                }
+            }
         }
 
         /// <summary>
@@ -320,14 +333,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (component.ComponentType != componentType && node.Details.CircuitFormType.Contains(component))
             {
-                if(componentType == ComponentType.CB)
+                if (componentType == ComponentType.CB)
                 {
                     node.Details.AllowBreakerSwitch = true;
                 }
                 var Componenttype = componentType.GetComponentType();
                 if (component.GetType().BaseType.Equals(Componenttype.BaseType))
                 {
-                    node.Details.CircuitFormType.SetCircuitComponentValue(component, node.ComponentSelection(Componenttype));
+                    node.Details.CircuitFormType.SetCircuitComponentValue(component, node.ComponentSelection(Componenttype, node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.一路进线));
                 }
             }
         }
@@ -549,7 +562,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 获取未分配负载
+        /// 获取未分配的负载
         /// </summary>
         /// <param name="FilterEdged">是否过滤已分配回路的负载</param>
         /// <returns></returns>
@@ -581,7 +594,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     graph.RemoveVertex(oldLoad);
                 }
                 newEdge.ComponentSelection();
-                newEdge.Source.CheckCascadeWithNode();
+                newEdge.Source.CheckWithNode();
             }
         }
 

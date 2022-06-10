@@ -39,6 +39,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
             subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
             MParkingPartitionPro.LayoutMode = VMStock.RunMode;
+            MParkingPartitionPro.LayoutScareFactor_Intergral = VMStock.LayoutScareFactor_Intergral;
+            MParkingPartitionPro.LayoutScareFactor_Adjacent = VMStock.LayoutScareFactor_Adjacent;
+            MParkingPartitionPro.LayoutScareFactor_betweenBuilds = VMStock.LayoutScareFactor_betweenBuilds;
+            MParkingPartitionPro.LayoutScareFactor_SingleVert = VMStock.LayoutScareFactor_SingleVert;
+            MParkingPartitionPro.SingleVertModulePlacementFactor = VMStock.SingleVertModulePlacementFactor;
             if (InterParameter.MultiThread)
             {        
                 Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display));
@@ -109,6 +114,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
                 MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+                MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
                 MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
                 mParkingPartition = new MParkingPartitionPro();
                 mParkingPartition.Cars = cars;

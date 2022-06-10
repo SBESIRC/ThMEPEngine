@@ -24,8 +24,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             double floorHeight = sprayIn.FloorHeight;//楼层高度
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
-                if (pt._pt.DistanceTo(new Point3d(1376414.5, 2778762.7, 0)) < 10)
-                    ;
                 if(sprayIn.PtTypeDic.ContainsKey(pt))
                 {
                     if(sprayIn.PtTypeDic[pt].Contains("BranchLoop"))
@@ -92,10 +90,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                     bool signelBranch = true;//第一个 type 4 标志
                     var cnt = tpts.Count;
-                    if (cnt > 2)
-                    {
-                        ;
-                    }
                     bool firstFireAlarmVisited = false;
                     foreach (var tpt in tpts)// tpt 支路端点
                     {

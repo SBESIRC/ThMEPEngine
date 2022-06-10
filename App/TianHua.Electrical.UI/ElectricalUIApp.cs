@@ -8,8 +8,8 @@ using TianHua.Electrical.UI.Command;
 using TianHua.Electrical.UI.FireAlarm;
 using TianHua.Electrical.UI.ThBroadcast;
 using TianHua.Electrical.UI.EarthingGrid;
+using TianHua.Electrical.UI.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
-using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI
@@ -51,7 +51,7 @@ namespace TianHua.Electrical.UI
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var uiCapitalConverter = new CapitalConverterUI();
+                var uiCapitalConverter = new BlockConvertUI();
                 uiCapitalConverter.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
                 AcadApp.ShowModalWindow(uiCapitalConverter);
                 if (!uiCapitalConverter.GoOn)
@@ -63,6 +63,7 @@ namespace TianHua.Electrical.UI
                 {
                     Scale = uiCapitalConverter.Parameter.BlkScaleValue,
                     FrameStyle = uiCapitalConverter.Parameter.BlkFrameValue,
+                    ConvertManualActuator = uiCapitalConverter.Parameter.ManualActuatorOps,
                 };
                 if (uiCapitalConverter.Parameter.HavcOps &&
                     uiCapitalConverter.Parameter.WssOps)

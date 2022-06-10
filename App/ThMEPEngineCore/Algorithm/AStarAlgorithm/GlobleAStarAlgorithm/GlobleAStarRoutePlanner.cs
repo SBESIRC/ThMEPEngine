@@ -38,10 +38,14 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <summary>
         /// 设置障碍物
         /// </summary>
-        public void SetObstacle(List<Polyline> holes, double wieght)
+        public void SetObstacle(List<MPolygon> holes, double wieght, double bufferDis = double.MaxValue)
         {
+            if (bufferDis == double.MaxValue)
+            {
+                bufferDis = map.avoidHoleDistance;
+            }
             //设置障碍物
-            map.SetObstacle(holes, wieght);
+            map.SetObstacle(holes, wieght, bufferDis);
         }
 
         #region Plan

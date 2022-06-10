@@ -163,6 +163,14 @@ namespace ThMEPWSS.JsonExtensionsNs
         {
             return new GRect(extents3D.MinPoint, extents3D.MaxPoint);
         }
+        public static Envelope ToEnvelope(this Extents3d extents3D)
+        {
+            return new Envelope(extents3D.MinPoint.X, extents3D.MaxPoint.X, extents3D.MinPoint.Y, extents3D.MaxPoint.Y);
+        }
+        public static Envelope ToEnvolope(this GRect r)
+        {
+            return new Envelope(r.MinX, r.MaxX, r.MinY, r.MaxY);
+        }
         public static GRect ToGRect(this Extents3d? extents3D, double radius)
         {
             if (extents3D is Extents3d ext)

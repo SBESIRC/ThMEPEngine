@@ -404,8 +404,6 @@ namespace TianHua.Hvac.UI.ViewModels
                 FanInfos.Add(item);
             }
             var orderFans = EQPMFanDataUtils.OrderFanViewModels(FanInfos.ToList(), IsOrderUp == false);
-            if (IsOrderUp == null)
-                orderFans = orderFans.OrderBy(c => c.fanDataModel.SortID).ToList();
             FanInfos.Clear();
             foreach (var item in orderFans)
             {

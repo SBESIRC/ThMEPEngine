@@ -26,11 +26,11 @@ namespace ThMEPEngineCore.Service.Hvac
             var dynamicProperties = obj.GetDynProperties();
             if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT))
             {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT, 375.0);
+                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT, 300.0);
             }
             if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT))
             {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT, 375.0);
+                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT, 300.0);
             }
         }
 

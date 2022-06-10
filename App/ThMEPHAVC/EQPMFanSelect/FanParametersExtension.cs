@@ -108,6 +108,10 @@ namespace ThMEPHVAC.EQPMFanSelect
             var refLocator = new LocationIndexedLine(refModel);
             foreach (var modelPoint in model.IntersectionPoint(Point))
             {
+                if (double.IsNaN(modelPoint.Z)) 
+                {
+                    continue;
+                }
                 var location = locator.IndexOf(modelPoint.Coordinate);
                 var refModelPoint = refLocator.ExtractPoint(location);
                 refPoints.Add(ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(refModelPoint));

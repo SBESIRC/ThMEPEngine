@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Engine
         {            
         }
 
-        public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts)
+        public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts, bool isWithHole = true)
         {
             var roomEngine = new ThAIRoomOutlineRecognitionEngine();
             roomEngine.RecognizeMS(db, pts);
@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.Engine
             var markEngine = new ThAIRoomMarkRecognitionEngine();
             markEngine.RecognizeMS(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
-            Build(rooms, marks);            
+            Build(rooms, marks, isWithHole);            
             return rooms;
         }
 

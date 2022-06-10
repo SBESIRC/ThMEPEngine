@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.Model;
@@ -23,6 +24,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
             foreach (var L in lineList)
             {
+                if(L.Length > 149 && L.Length < 151)
+                {
+                    ;
+                }
                 var pt1 = new Point3dEx(L.StartPoint);
                 var pt2 = new Point3dEx(L.EndPoint);
 
@@ -195,37 +200,62 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
             ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
-            int indxx = 0;
             foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
                 try
                 {
-                    CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
+                    if(pt.DistanceToEx(new Point3dEx(1579516.1,230455.1,0))<10)
+                    {
+                        ;
+                    }
+                    CreateTermPtDic2(pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
                 }
                 catch(Exception ex)
                 {
                     ;
                 }
             }
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+
+            foreach(var pt in fireHydrantSysIn.PtDic.Keys)
             {
-                foreach (var tpt in fireHydrantSysIn.TermPointDic.Values)
+                bool ignore = false;
+                foreach (var vpt in fireHydrantSysIn.VerticalPosition)
                 {
-                    var dbText = new DBText()
+                    if(pt.DistanceToEx(vpt)< 100)
                     {
-                        Position = tpt.PtEx._pt,
-                        Height = 300,
-                        TextString = Convert.ToString(tpt.Type)
-                    };
-                    acadDatabase.CurrentSpace.Add(dbText);
+                        ignore = true;
+                        break;
+                    }
+                }
+                if(ignore)
+                {
+                    continue;
+                }
+                    if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
+                {
+                    if(!fireHydrantSysIn.TermPointDic.ContainsKey(pt))//且没有标记
+                    {
+                        var termPoint = new TermPoint(pt);
+                        termPoint.SetLines(fireHydrantSysIn, labelLine);
+                        if (termPoint.TextLine is not null)
+                        {
+                            termPoint.SetPipeNumber(textSpatialIndex);
+                        }
+                        termPoint.Type = 6;
+                        if(termPoint.PipeNumber != "")
+                        {
+                            fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
+                        }
+                    }
                 }
             }
         }
 
-        private static void CreateTermPtDic2(ref int indxx, Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+
+
+        private static void CreateTermPtDic2(Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
-            indxx += 1;
             var tpt = pt;
 
             fireHydrantSysIn.TermPtDic.Add(tpt);//把带立管的端点加入末端点列表
@@ -240,48 +270,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
             if (termPoint.StartLine is null)
             {
-                if (!fireHydrantSysIn.PtDic.ContainsKey(pt))
-                {
-                    return;
-                }
-                var pt1 = fireHydrantSysIn.PtDic[pt].First();//找这条线的邻接点
-                var termPoint1 = new TermPoint(pt1);
-                termPoint1.SetLines(fireHydrantSysIn, labelLine);
-                if (termPoint1.StartLine is null)
-                {
-                    var termPtEx = termPoint.PtEx;
-                    var OriginTermStartPtDic = GetOriginTermStartPtEx(fireHydrantSysIn, termPtEx, textSpatialIndex, labelLine);
-                    if (OriginTermStartPtDic.ContainsKey(pt))
-                    {
-                        termPoint.PipeNumber = OriginTermStartPtDic[pt].TextString;
-                        termPoint.Type = 2;
-                        if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
-                        {
-                            fireHydrantSysIn.TermPointDic.Remove(tpt);
-                            fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
-                        }
-                    }
-                    return;
-                }
-                if (termPoint1.TextLine is null)
-                {
-                    return;
-                }
-                termPoint1.SetPipeNumber(textSpatialIndex);
-                if (termPoint1.PipeNumber is null)
-                {
-                    return;
-                }
-                termPoint1.SetType(verticalHasHydrant);
-                if (fireHydrantSysIn.TermPointDic.ContainsKey(pt1))
-                {
-                    return;
-                }
-                else
-                {
-                    fireHydrantSysIn.TermPointDic.Add(pt, termPoint1);
-                    return;
-                }
+                return;
             }
 
             if (termPoint.TextLine is null)

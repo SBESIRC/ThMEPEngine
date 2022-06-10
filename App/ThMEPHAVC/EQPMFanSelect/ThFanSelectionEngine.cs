@@ -101,7 +101,10 @@ namespace ThMEPHVAC.EQPMFanSelect
                 {
                     // 提取原属性
                     var block = new ThBlockReferenceData(model.ObjectId);
-                    var number = model.ObjectId.GetModelNumber();
+                    var xData = model.ObjectId.ReadBlockFanXData(out FanBlockXDataBase xDataBase);
+                    if (null == xData || xDataBase == null)
+                        continue;
+                    var number = xDataBase.Number;
                     // 插入新的图块
                     var objId = Active.Database.InsertModel(blockName, layerName, new Dictionary<string, string>(block.Attributes));
                     var blockRef = acadDatabase.Element<BlockReference>(objId, true);
@@ -173,7 +176,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             blockReferences.ForEach(o => o.ObjectId.ModifyModelAttributes(Attributes));
         }
 
-        public static void ModifyModelNumbers(FanDataModel dataModel)
+        public static void ModifyModelNumbers(FanDataModel dataModel,FanDataModel cDataModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -185,7 +188,13 @@ namespace ThMEPHVAC.EQPMFanSelect
                 var numbers = dataModel.ListVentQuan.OrderBy(o => o).ToList();
                 for (int i = 0; i < models.Count; i++)
                 {
-                    SetModelNumber(models[i].ObjectId, dataModel.InstallFloor, numbers[i]);
+                    var blockId = models[i].ObjectId;
+                    var number = numbers[i];
+                    SetModelNumber(blockId, dataModel.InstallFloor, number);
+                    blockId.SetModelIdentifier(
+                        dataModel.XDataValueList(number, cDataModel, blockId.Handle.ToString()), 
+                        ThHvacCommon.RegAppName_FanSelectionEx
+                        );
                 }
             }
         }
@@ -196,6 +205,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             {
                 // 更新风机型号
                 UpdateModelName(model.value.ObjectId, dataModel);
+                UpdateModelXData(model.value.ObjectId, dataModel);
             }
         }
         private static void UpdateModelName(ObjectId model, FanDataModel dataModel)
@@ -213,6 +223,13 @@ namespace ThMEPHVAC.EQPMFanSelect
                 var typeName = dataModel.FanModelTypeCalcModel.FanModelNum;
                 model.SetModelName(EQPMFanCommon.HTFCModelName(strType, strIntakeForm, typeName));
             }
+        }
+        private static void UpdateModelXData(ObjectId blockId, FanDataModel dataModel) 
+        {
+            var xData = blockId.ReadBlockFanXData(out FanBlockXDataBase xDataBase);
+            if (null == xData || xDataBase == null)
+                return;
+            blockId.SetModelIdentifier(dataModel.XDataValueList(xDataBase.Number, dataModel, blockId.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
         }
     }
 }

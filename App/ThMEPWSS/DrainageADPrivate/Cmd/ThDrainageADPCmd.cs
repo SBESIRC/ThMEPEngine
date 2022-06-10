@@ -102,7 +102,8 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameOutputList, layerNameOutputList);
 
                 //转换器
-                var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
+                //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
+                var transformer = new ThMEPOriginTransformer(selectPtPrint);
                 //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
                 selectPtPrint = transformer.Transform(selectPtPrint);
 
@@ -140,6 +141,7 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 dataQuery.CreateVerticalPipe();
                 dataQuery.BuildTermianlMode();
                 dataQuery.BuildValve();
+                dataQuery.ProjectOntoXYPlane();
                 dataQuery.Print();
 
                 var dataPass = new ThDrainageADPDataPass();

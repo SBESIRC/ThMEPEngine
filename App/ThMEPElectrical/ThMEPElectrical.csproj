@@ -272,7 +272,7 @@
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
-    <Compile Include="Model\ThCapitalConverterModel.cs" />
+    <Compile Include="Model\ThBlockConvertModel.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
@@ -506,7 +506,7 @@
       <Version>2.3.0</Version>
     </PackageReference>
     <PackageReference Include="Serilog">
-      <Version>2.10.0</Version>
+      <Version>2.11.0</Version>
     </PackageReference>
     <PackageReference Include="Serilog.Sinks.File">
       <Version>5.0.0</Version>

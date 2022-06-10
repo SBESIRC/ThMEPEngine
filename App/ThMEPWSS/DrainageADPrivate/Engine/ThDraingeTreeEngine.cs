@@ -30,21 +30,23 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
     internal class ThDraingeTreeEngine
     {
         private List<ThSaniterayTerminal> Terminal { get; set; }
-        //private List<ThValve> AngleValve { get; set; }
+        private List<ThValve> AngleValve { get; set; }
         private Dictionary<Point3d, List<Line>> PtDict { get; set; }
         private Dictionary<Point3d, bool> PtCoolHotDict { get; set; }
         public Dictionary<Point3d, ThSaniterayTerminal> PtTerminal { get; set; }
+        public Dictionary<Point3d, ThValve> PtAngleValve { get; set; }
         public Dictionary<Point3d, Point3d> TerminalPairDict { get; set; }
         public List<ThDrainageTreeNode> OriRootList { get; set; }
         public List<ThDrainageTreeNode> MergedRootList { get; set; }
         public ThDraingeTreeEngine(ThDrainageADPDataPass dataPass, Dictionary<Point3d, List<Line>> ptDict, Dictionary<Point3d, bool> ptCoolHotDict)
         {
             Terminal = dataPass.Terminal;
-            //AngleValve = dataPass.AngleValve;
+            AngleValve = dataPass.AngleValve;
             PtDict = ptDict;
             PtCoolHotDict = ptCoolHotDict;
 
             PtTerminal = new Dictionary<Point3d, ThSaniterayTerminal>();
+            PtAngleValve = new Dictionary<Point3d, ThValve>();
             TerminalPairDict = new Dictionary<Point3d, Point3d>();
             OriRootList = new List<ThDrainageTreeNode>();
             MergedRootList = new List<ThDrainageTreeNode>();
@@ -52,26 +54,20 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 
         public void BuildDraingeTree()
         {
-            ////找管线点位对应的线
-            //var pipes = new List<Line>();
-            //pipes.AddRange(DataPass.CoolPipeTopView);
-            //pipes.AddRange(DataPass.HotPipeTopView);
-            //pipes.AddRange(DataPass.VerticalPipe);
-            //var ptDict = ThDrainageADTreeService.GetPtDict(pipes);
-
             //找管线对应末端洁具和可能的起点
             Terminal.ForEach(x => x.Boundary = x.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First());
-            ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, out var ptTerminalTemp, out var ptStart);
+            //ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, out var ptTerminalTemp, out var ptStart);
+            ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, AngleValve, out var ptTerminalTemp, out var ptValve, out var ptStart);
             this.PtTerminal = ptTerminalTemp;
-            ////利用给水角阀方向给末端洁具方向
-            //SetTerminalDir();
+            this.PtAngleValve = ptValve;
 
             //确定冷热水末端点位组
             this.TerminalPairDict = ThDrainageADTreeService.GetTerminalPairDict(PtTerminal);
+
             //确定冷热水起点
             var ptCoolHotStartDict = ThDrainageADTreeService.CheckCoolHotStartPt(ptStart, PtTerminal, PtCoolHotDict);
 
-            //造原始树:所有的冷水起点，多热水器每个热水器一个热水起点
+            //造原始树:所有的冷水起点，多热水器每个热水器一个热水起点,没有热水器的热水起点
             OriRootList = new List<ThDrainageTreeNode>();
             foreach (var startPt in ptCoolHotStartDict)
             {
@@ -84,6 +80,9 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //设置节点洁具
             ThDrainageADTreeService.SetTerminal(OriRootList, PtTerminal);
 
+            //删除不是热水器起点，且有热水器叶子的热树
+            ThDrainageADTreeService.RemoveNotWaterHeaterHotTree( OriRootList);
+
             //复制多情况冷热树
             MergedRootList = ThDrainageADTreeService.MergeCoolHotTree(OriRootList);
 
@@ -91,26 +90,5 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             ThDrainageADTreeService.SetTerminalPairSingleTree(MergedRootList, TerminalPairDict);
 
         }
-
-        //private void SetTerminalDir()
-        //{
-        //    var tol = new Tolerance(1, 1);
-        //    for (int i = 0; i < PtTerminal.Count(); i++)
-        //    {
-        //        var item = PtTerminal.ElementAt(i);
-        //        if (item.Value.Dir != default(Vector3d))
-        //        {
-        //            //冷热水同时有的已经做过一次的跳过
-        //            continue;
-        //        }
-        //        var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
-        //        var angleValve = AngleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
-        //        if (angleValve != null)
-        //        {
-        //            item.Value.Dir = angleValve.Dir;
-        //        }
-        //    }
-        //}
-
     }
 }

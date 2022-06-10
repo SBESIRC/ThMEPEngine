@@ -39,7 +39,7 @@ namespace ThParkingStall.Core.InterProcess
         private static MNTSSpatialIndex _BuildingSpatialIndex;//所有障碍物，包含坡道的spatialindex
         public static MNTSSpatialIndex BuildingSpatialIndex { get { return _BuildingSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
         private static MNTSSpatialIndex _BoundaryObjectsSPIDX;
-        private static MNTSSpatialIndex BoundaryObjectsSPIDX { get { return _BoundaryObjectsSPIDX; } }//边界打成断线+可忽略障碍物的spatialindex；
+        public static MNTSSpatialIndex BoundaryObjectsSPIDX { get { return _BoundaryObjectsSPIDX; } }//边界打成断线+可忽略障碍物的spatialindex；
         private static MNTSSpatialIndex _BoundingBoxSpatialIndex;//建筑物块的外包框的spatialindex
         public static MNTSSpatialIndex BoundingBoxSpatialIndex { get { return _BoundingBoxSpatialIndex; } }//建筑物块的外包框的spatialindex
 

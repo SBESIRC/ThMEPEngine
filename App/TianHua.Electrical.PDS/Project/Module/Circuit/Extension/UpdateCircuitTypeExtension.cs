@@ -14,31 +14,48 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
             if(NewType.EqualsGroup(circuit.GetType()))
             {
                 //仅同组的回路才可以来回切换
-                if(NewType.GetCircuitGroup() == CircuitGroup.Group1)
+                if (NewType.GetCircuitGroup() == CircuitGroup.Group1)
                 {
                     var newCircuit = (PDSBaseOutCircuit)System.Activator.CreateInstance(NewType);
-                    var OriginalComponents = circuit.GetType().GetProperties().Where(prop => prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent))).Select(prop => prop.GetValue(circuit)).Cast<PDSBaseComponent>().ToList();
+                    var OriginalComponents = circuit.GetType().GetProperties().Where(prop => prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent))).Select(prop => prop.GetValue(circuit)).Where(o => !o.IsNull()).Cast<PDSBaseComponent>().ToList();
                     //获取当前Type下所有的属性上标记的特性
                     var props = NewType.GetProperties();
+                    Breaker breaker2 = null;
                     for (int i = 0; i < props.Length; i++)
                     {
                         PropertyInfo prop = props[i];
                         //定义PDSBaseComponent本身就是预留的元器件，不做赋值处理
-                        if (prop.PropertyType == typeof(PDSBaseComponent) )
+                        if (prop.PropertyType == typeof(PDSBaseComponent))
                         {
                             object oValue = prop.GetValue(newCircuit);
                             oValue = null;
                             prop.SetValue(newCircuit, null);
                         }
-                        else if(prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent)))
+                        else if (prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent)))
                         {
-                            var MatchingComponent = OriginalComponents.Where(o => o.GetType() == prop.PropertyType).OrderBy(o => o.GetCascadeRatedCurrent()).FirstOrDefault();
-                            if(MatchingComponent.IsNull())
+                            if (prop.Name == "breaker1")
                             {
-                                prop.SetValue(newCircuit, edge.ComponentSelection(prop.PropertyType, circuitFormOutType));
+                                var Components = OriginalComponents.Where(o => o.GetType() == prop.PropertyType);
+                                if (Components.Count() == 2)
+                                {
+                                    prop.SetValue(newCircuit, Components.OrderByDescending(o => o.GetCascadeRatedCurrent()).FirstOrDefault());
+                                }
+                                else
+                                {
+                                    prop.SetValue(newCircuit, edge.ComponentSelection(prop.PropertyType, circuitFormOutType, breaker2));
+                                }
                             }
                             else
                             {
+                                var MatchingComponent = OriginalComponents.Where(o => o.GetType() == prop.PropertyType).OrderBy(o => o.GetCascadeRatedCurrent()).FirstOrDefault();
+                                if (MatchingComponent.IsNull())
+                                {
+                                    MatchingComponent = edge.ComponentSelection(prop.PropertyType, circuitFormOutType);
+                                }
+                                if (prop.Name == "breaker2")
+                                {
+                                    breaker2 =(Breaker)MatchingComponent;
+                                }
                                 prop.SetValue(newCircuit, MatchingComponent);
                             }
                         }

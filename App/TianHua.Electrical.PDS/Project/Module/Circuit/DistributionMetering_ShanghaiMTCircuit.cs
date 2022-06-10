@@ -17,11 +17,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         }
 
         /// <summary>
-        /// 坑位1: 断路器
-        /// </summary>
-        public Breaker breaker1 { get; set; }
-
-        /// <summary>
         /// 坑位2：电能表
         /// </summary>
         public Meter meter { get; set; }
@@ -30,6 +25,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位3：断路器
         /// </summary>
         public Breaker breaker2 { get; set; }
+
+        /// <summary>
+        /// 坑位1: 断路器
+        /// </summary>
+        public Breaker breaker1 { get; set; }
 
         /// <summary>
         /// 导体

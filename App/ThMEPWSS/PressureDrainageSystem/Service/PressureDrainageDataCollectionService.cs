@@ -619,7 +619,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         Circle ci = new Circle(ptlocPipe, Vector3d.ZAxis, 50);
                         ci.Layer = "W-DRAI-EQPM";
 
-                        double mindis = double.PositiveInfinity;
+                        double mindis = 3000;
                         int index = -1;
                         for (int i = 0; i < this.CollectedData.HorizontalPipes.Count; i++)
                         {
@@ -630,10 +630,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 index = i;
                             }
                         }
-                        Line line = new Line(this.CollectedData.HorizontalPipes[index].GetClosestPointTo(ci.Center, false), ci.Center);
-                        if (line.Length > 0)
+                        if (index != -1)
                         {
-                            this.CollectedData.HorizontalPipes.Add(line);
+                            Line line = new Line(this.CollectedData.HorizontalPipes[index].GetClosestPointTo(ci.Center, false), ci.Center);
+                            if (line.Length > 0)
+                            {
+                                this.CollectedData.HorizontalPipes.Add(line);
+                            }
                         }
                         adb.Database.CreateAILayer("AdditonPipe",(short)0);
                         ci.Layer = "AdditonPipe";
@@ -664,6 +667,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 double.TryParse(br.GetAttributesStrValue("扬程"), out pump.paraH);
                                 double.TryParse(br.GetAttributesStrValue("电量"), out pump.paraN);
                                 double.TryParse(br.GetAttributesStrValue("井深"), out pump.Depth);
+                                double length = 0;
+                                double width = 0;
+                                double depth = 0;
+                                double.TryParse(br.GetAttributesStrValue("长"), out length);
+                                double.TryParse(br.GetAttributesStrValue("宽"), out width);
+                                double.TryParse(br.GetAttributesStrValue("深"), out depth);
+                                pump.Length = length.ToString();
+                                pump.Width = width.ToString();
+                                if (depth > 0) pump.Depth = depth / 1000;
                             }
                         }
                     }

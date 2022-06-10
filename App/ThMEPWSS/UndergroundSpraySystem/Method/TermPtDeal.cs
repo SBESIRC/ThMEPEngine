@@ -23,10 +23,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach (var pt in sprayIn.PtDic.Keys)
             {
-                if(pt._pt.DistanceTo(new Point3d(51295.8556, 716075.6242,0))<10)
-                {
-                    ;
-                }
                 bool flag = false;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
@@ -95,8 +91,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach (var pt in sprayIn.PtDic.Keys)
             {
-                if (pt._pt.DistanceTo(new Point3d(96837.6752, -290132.8504, 0)) < 10)
-                    ;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
                     if (sprayIn.PtTextDic[pt].First() is null)

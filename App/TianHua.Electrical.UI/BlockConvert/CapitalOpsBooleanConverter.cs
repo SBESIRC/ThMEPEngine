@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using ThMEPElectrical.Model;
 
-namespace TianHua.Electrical.UI.CapitalConverter
+namespace TianHua.Electrical.UI.BlockConvert
 {
     public class CapitalOpsBooleanConverter : IValueConverter
     {

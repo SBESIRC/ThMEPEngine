@@ -19,27 +19,7 @@ namespace ThMEPArchitecture.ViewModel
         {
             try
             {
-                var msg = Active.Editor.GetInteger("\n 请选择要开启的log：0-都开启，1-仅主进程，2-都关闭:");
-                if (msg.Status != PromptStatus.OK) return;
-                if (msg.Value == 0)
-                {
-                    ParameterStock.LogMainProcess = true;
-                    ParameterStock.LogSubProcess = true;
-                }
-                else if (msg.Value == 1)
-                {
-                    ParameterStock.LogMainProcess = true;
-                    ParameterStock.LogSubProcess = false;
-                }
-                else if (msg.Value == 2)
-                {
-                    ParameterStock.LogMainProcess = false;
-                    ParameterStock.LogSubProcess = false;
-                }
-                else
-                {
-                    throw new Exception("无该选项!");
-                }
+                ParameterStock.ReadHiddenParameter = true;
             }
             catch (Exception ex)
             {

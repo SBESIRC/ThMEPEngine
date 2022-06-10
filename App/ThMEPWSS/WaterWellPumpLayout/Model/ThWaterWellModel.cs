@@ -43,7 +43,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             }
             return waterWell;
         }
-        private void VertexSort()
+        private void VertexSortOri()
         {
             if (Geometry != null)
             {
@@ -102,6 +102,30 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                 WellVertex.Add(vertex[index3]);
             }
         }
+
+        private void VertexSort()
+        {
+            if (Geometry != null)
+            {
+                if (WellObb.IsCCW() == true)
+                {
+                    WellObb.ReverseCurve();
+                }
+                var v1 = WellObb.GetPoint3dAt(1) - WellObb.GetPoint3dAt(0);
+                var v2 = WellObb.GetPoint3dAt(3) - WellObb.GetPoint3dAt(0);
+                var startI = 0;
+                if (v2.Length > v1.Length)
+                {
+                    startI = 1;
+                }
+
+                for (int i = startI; i < (4 + startI); i++)
+                {
+                    WellVertex.Add(WellObb.GetPoint3dAt(i % 4));
+                }
+            }
+        }
+
         private void EdgeSort()
         {
             //得到四条边顶点index,按照逆时针排序
@@ -542,6 +566,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         }
         public void InitWellData()
         {
+            //VertexSortOri();
             VertexSort();//将点进行顺时针排序
             EdgeSort();//将边进行逆时针编号
             Length = (int)(WellVertex[0].DistanceTo(WellVertex[1]) / 50.0 + 0.5) * 50;//获取长
@@ -582,7 +607,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         }
         public double GetAcreage()//获取集水井面积
         {
-            double acreage = (Length-100) / 1000.0 * ((Width-100) / 1000.0);
+            double acreage = (Length - 100) / 1000.0 * ((Width - 100) / 1000.0);
             return acreage;
         }
         public string GetWellSize()//获取集水井尺寸
@@ -590,6 +615,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             string strSize = (Length - 100).ToString() + "*" + (Width - 100).ToString();
             return strSize;
         }
+        
         //public void CheckHavePump(ThWaterPumpModel pump)
         //{
         //    if (IsHavePump)

@@ -17,7 +17,7 @@ namespace ThParkingStall.Core.Tools
             polygonizer.Add(geo);
             return polygonizer.GetPolygons().Cast<Polygon>();
         }
-        public static Polygon GetEnvelope(this List<Geometry> geos)
+        public static Polygon GetEnvelope(this IEnumerable<Geometry> geos)
         {
             var Envelope = new GeometryCollection(geos.ToArray()).Envelope;
             if (Envelope is Polygon polygon) return polygon;
