@@ -4,13 +4,14 @@ using System.Collections.ObjectModel;
 
 namespace ThMEPElectrical.Model
 {
-    public class ThCapitalConverterModel : INotifyPropertyChanged
+    public class ThBlockConvertModel : INotifyPropertyChanged
     {        
-        public ThCapitalConverterModel()
+        public ThBlockConvertModel()
         {
             blkScale = "1:100";
             blkFrame = "标注带边框";
             equipOps = CapitalOP.All;
+            manualActuatorOps = false;
             havcOps = true;
             wssOps = true;
             BlkScales = new ObservableCollection<string>(new List<string> { "1:100", "1:150" });
@@ -58,6 +59,20 @@ namespace ThMEPElectrical.Model
             {
                 equipOps = value;
                 RaisePropertyChanged("EquipOps");
+            }
+        }
+
+        private bool manualActuatorOps;
+        public bool ManualActuatorOps
+        {
+            get
+            {
+                return manualActuatorOps;
+            }
+            set
+            {
+                manualActuatorOps = value;
+                RaisePropertyChanged("ManualActuatorOps");
             }
         }
 

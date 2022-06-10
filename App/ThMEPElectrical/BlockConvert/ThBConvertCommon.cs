@@ -55,5 +55,6 @@
         public const string BLOCK_AI_SUBMERSIBLE_PUMP = "潜水泵-AI";
 
         public const string SINGLE_SUBMERSIBLE_PUMP = "单台潜水泵";
+        public const string MANUAL_ACTUATOR_OF_SMOKE_EXHAUST_VALVE = "手动执行机构";
     }
 }

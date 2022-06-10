@@ -48,6 +48,11 @@ namespace ThMEPElectrical.Command
         public string FrameStyle { get; set; }
 
         /// <summary>
+        /// 标注样式
+        /// </summary>
+        public bool ConvertManualActuator { get; set; }
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="mode"></param>
@@ -268,6 +273,11 @@ namespace ThMEPElectrical.Command
                                 {
                                     targetBlockName += "2";
                                 }
+                                if (targetBlockName.Equals(ThBConvertCommon.MANUAL_ACTUATOR_OF_SMOKE_EXHAUST_VALVE) && !ConvertManualActuator)
+                                {
+                                    return;
+                                }
+
                                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
                                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
 

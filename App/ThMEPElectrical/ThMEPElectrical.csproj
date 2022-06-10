@@ -272,7 +272,7 @@
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
-    <Compile Include="Model\ThCapitalConverterModel.cs" />
+    <Compile Include="Model\ThBlockConvertModel.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
