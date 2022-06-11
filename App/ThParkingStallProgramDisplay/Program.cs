@@ -35,6 +35,7 @@ namespace ThParkingStallProgramDisplay
         static void Run(Logger Logger)
         {
             string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
+            string LogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
             Logger?.Information(LogFileName);
             var logs = new List<string>();
             bool process = true;
@@ -73,6 +74,42 @@ namespace ThParkingStallProgramDisplay
                 finally
                 {
                     fs.Close();
+                }
+            }
+            process = true;
+            while (process)
+            {
+                var fs2 = new FileStream(LogFileName2, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                try
+                {
+                    using (var sr = new StreamReader(fs2))
+                    {
+                        while (!sr.EndOfStream)
+                        {
+                            var line = sr.ReadLine();
+                            Logger?.Information(line);
+                            var val = line.Split('[', ']').Last();
+
+                            //If met end of computation, break;
+                            if (line.Contains("地库程序运行结束"))
+                            {
+                                process = false;
+                                break;
+                            }
+
+                            logs.Add(line);
+                            System.Console.WriteLine(val);
+                            Thread.Sleep(100);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                }
+                finally
+                {
+                    fs2.Close();
                 }
             }
             System.Console.ReadKey();

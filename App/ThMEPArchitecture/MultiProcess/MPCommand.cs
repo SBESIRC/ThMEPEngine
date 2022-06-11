@@ -46,9 +46,11 @@ namespace ThMEPArchitecture.MultiProcess
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
 
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
+        public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
 
         public Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
+        public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
@@ -75,6 +77,8 @@ namespace ThMEPArchitecture.MultiProcess
         {
             System.IO.FileStream emptyStream = new System.IO.FileStream(DisplayLogFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream.Close();
+            System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+            emptyStream2.Close();
             ParameterStock.Set(ParameterViewModel);
             var hp = HiddenParameter.ReadOrCreateDefault();
             if (ParameterStock.LogMainProcess)
@@ -83,6 +87,8 @@ namespace ThMEPArchitecture.MultiProcess
                             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
                 DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
                             .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+                DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
+            .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
             Logger?.Information($"############################################");
             ParameterViewModel.Set(hp);
@@ -146,7 +152,7 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
                 DisplayLogger?.Information($"地库程序运行结束 \n");
                 DisplayLogger?.Dispose();
-
+                DisplayLogger2?.Dispose();
             }
         }
 
@@ -191,6 +197,7 @@ namespace ThMEPArchitecture.MultiProcess
 
         public void Run(AcadDatabase acadDatabase)
         {
+
             var blks = InputData.SelectBlocks(acadDatabase);
             if (blks == null) return;
             var displayPro = ProcessForDisplay.CreateSubProcess();
@@ -199,11 +206,13 @@ namespace ThMEPArchitecture.MultiProcess
                 displayPro.Start();
             }
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
+            var displayInfos = new List<DisplayInfo>();
             foreach (var blk in blks)
             {
                 try
                 {
                     var blkName = blk.GetEffectiveName();
+                    var displayInfo = new DisplayInfo(blkName);
                     Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
                     var drawingName = Path.GetFileName(doc.Name);
                     var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
@@ -213,7 +222,8 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
-                    RunABlock(blk);
+                    RunABlock(blk, displayInfo);
+                    displayInfos.Add(displayInfo);
                 }
                 catch(Exception ex)
                 {
@@ -223,6 +233,24 @@ namespace ThMEPArchitecture.MultiProcess
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------");
+            DisplayLogger2?.Information("地库总数：" + blks.Count);
+            DisplayLogger2?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分");
+            DisplayLogger2?.Information("----------------------");
+            foreach (var displayInfo in displayInfos)
+            {
+                DisplayLogger2?.Information(displayInfo.BlockName);
+                DisplayLogger2?.Information(displayInfo.FinalIterations);
+                DisplayLogger2?.Information(displayInfo.FinalStalls);
+                DisplayLogger2?.Information(displayInfo.FinalAveAreas);
+                DisplayLogger2?.Information(displayInfo.CostTime);
+                DisplayLogger2?.Information("----------------------");
+            }
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("地库程序运行结束");
         }
 
         public void RunWithAutoSegLine(AcadDatabase acadDatabase)
@@ -237,11 +265,13 @@ namespace ThMEPArchitecture.MultiProcess
             var cutTol = ParameterStock.CutTol + 5;
             var HorizontalFirst = true;
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
+            var displayInfos = new List<DisplayInfo>();
             foreach (var blk in blks)
             {
                 try
                 {
                     var blkName = blk.GetEffectiveName();
+                    var displayInfo = new DisplayInfo(blkName);
                     Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
                     var drawingName = Path.GetFileName(doc.Name);
                     var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
@@ -252,7 +282,8 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData,false);
-                    if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, autoSegLines, layoutData);
+                    if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, displayInfo, autoSegLines, layoutData);
+                    displayInfos.Add(displayInfo);
                 }
                 catch (Exception ex)
                 {
@@ -262,9 +293,27 @@ namespace ThMEPArchitecture.MultiProcess
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------");
+            DisplayLogger2?.Information("地库总数：" + blks.Count);
+            DisplayLogger2?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
+            DisplayLogger2?.Information("----------------------");
+            foreach (var displayInfo in displayInfos)
+            {
+                DisplayLogger2?.Information(displayInfo.BlockName);
+                DisplayLogger2?.Information(displayInfo.FinalIterations);
+                DisplayLogger2?.Information(displayInfo.FinalStalls);
+                DisplayLogger2?.Information(displayInfo.FinalAveAreas);
+                DisplayLogger2?.Information(displayInfo.CostTime);
+                DisplayLogger2?.Information("----------------------");
+            }
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("地库程序运行结束");
 
         }
-        public void RunABlock(BlockReference blk,List<LineSegment> AutoSegLines = null, LayoutData layoutData = null)
+        public void RunABlock(BlockReference blk,DisplayInfo displayInfo,List<LineSegment> AutoSegLines = null, LayoutData layoutData = null)
         {
             Logger?.Information("##################################");
             Logger?.Information("迭代模式：");
@@ -300,9 +349,9 @@ namespace ThMEPArchitecture.MultiProcess
                 GA.DisplayLogger = DisplayLogger;
                 try
                 {
-                    var res = GA.Run2();
+                    var res = GA.Run2(displayInfo);
                     var best = res.First();
-                    ProcessAndDisplay(best,stopWatch);
+                    ProcessAndDisplay(best,stopWatch,displayInfo);
                 }
                 catch (Exception ex)
                 {
@@ -318,7 +367,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
         }
 
-        private void ProcessAndDisplay(MPChromosome solution,Stopwatch stopWatch = null)
+        private void ProcessAndDisplay(MPChromosome solution,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
         {
             var subAreas = InterParameter.GetSubAreas(solution);
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
@@ -350,10 +399,17 @@ namespace ThMEPArchitecture.MultiProcess
             if(stopWatch != null)
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
-                DisplayLogger?.Information($"最大车位数: {ParkingStallCount} \n");
+                DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");
                 var areaPerStall = (ParameterStock.TotalArea - ParameterStock.BuildingArea) / ParkingStallCount;
-                DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
+                DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
+                if(displayInfo!=null)
+                {
+                    displayInfo.FinalStalls = $"最大车位数: {ParkingStallCount} ";
+                    displayInfo.FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
+                    displayInfo.CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
+                }
+       
             }
         }
         public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData,bool definePriority = true)
