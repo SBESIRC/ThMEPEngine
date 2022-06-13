@@ -34,10 +34,10 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 //分别判断两个边，判断接近4300和5300的，取最接近的作为单个车位的长边
                 Dictionary<Line, double> lengthNear4300 = new Dictionary<Line, double>();
                 Dictionary<Line, double> lengthNear5300 = new Dictionary<Line, double>();
-                lengthNear4300.Add(lightInfo.LongDirLength, Math.Abs(lightInfo.LongDirLength.Length - m_langLength_4300));
-                lengthNear4300.Add(lightInfo.ShortDirLength, Math.Abs(lightInfo.ShortDirLength.Length - m_langLength_4300));
-                lengthNear5300.Add(lightInfo.LongDirLength, Math.Abs(lightInfo.LongDirLength.Length - m_langLength_5300));
-                lengthNear5300.Add(lightInfo.ShortDirLength, Math.Abs(lightInfo.ShortDirLength.Length - m_langLength_5300));
+                lengthNear4300.Add(lightInfo.LongDirLength, Math.Abs(lightInfo.LongDirLength.Length % m_langLength_4300));
+                lengthNear4300.Add(lightInfo.ShortDirLength, Math.Abs(lightInfo.ShortDirLength.Length % m_langLength_4300));
+                lengthNear5300.Add(lightInfo.LongDirLength, Math.Abs(lightInfo.LongDirLength.Length % m_langLength_5300));
+                lengthNear5300.Add(lightInfo.ShortDirLength, Math.Abs(lightInfo.ShortDirLength.Length % m_langLength_5300));
 
                 Line longLine = null;
                 Line shortLine = null;
