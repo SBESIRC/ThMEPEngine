@@ -400,7 +400,7 @@ namespace ThMEPArchitecture.MultiProcess
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");
-                var areaPerStall = (ParameterStock.TotalArea - ParameterStock.BuildingArea) / ParkingStallCount;
+                var areaPerStall = ParameterStock.TotalArea  / ParkingStallCount;
                 DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
                 if(displayInfo!=null)
