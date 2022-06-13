@@ -87,6 +87,21 @@ namespace TianHua.Mep.UI.ViewModel
         {
             return LayerInfos.Select(o => o.Layer).ToList();
         }
+        private List<string> GetAWallLayers()
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                return acdb.Layers
+                    .Where(o => IsAWallLayer(o.Name))
+                    .Select(o => o.Name)
+                    .ToList();
+            }
+        }
+        private bool IsAWallLayer(string layer)
+        {
+            //以A-WALL结尾的所有图层
+            return layer.ToUpper().EndsWith("A-WALL");
+        }
         private bool IsExisted(string layer)
         {
             return LayerInfos.Where(o => o.Layer == layer).Any();
@@ -137,10 +152,13 @@ namespace TianHua.Mep.UI.ViewModel
                     return;
                 }
                 acadDb.Database.OpenAILayer(layer);
-                acadDb.ModelSpace
+                var objs = acadDb.ModelSpace
                     .OfType<Entity>()
                     .Where(c => c.Layer == layer)
-                    .ForEach(c =>
+                    .ToCollection();
+                var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(objs, true);
+                objs = spatialIndex.SelectCrossingPolygon(pts);
+                objs.OfType<Entity>().ForEach(c =>
                 {
                     var entity = acadDb.Element<Entity>(c.ObjectId, true);
                     entity.Erase();
@@ -160,10 +178,23 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
         private List<ThLayerInfo> LoadLayers()
-        {
+        {            
+            // 优先获取以A_WALL结尾的梁
+            var aWallLayers = GetAWallLayers().Select(o => new ThLayerInfo()
+            {
+                Layer = o,
+                IsSelected = true,
+            }).ToList();
+            
             // 存在于DB中的
-            var results = FilterLayers(ThExtratRoomOutlineConfig.Instance.LayerInfos);
-            results = Sort(results);
+            var storeInfos = FilterLayers(ThExtratRoomOutlineConfig.Instance.LayerInfos);
+            storeInfos = storeInfos.Where(o => !aWallLayers.Select(s => s.Layer).Contains(o.Layer)).ToList();
+
+            var results = new List<ThLayerInfo>();
+            results.AddRange(aWallLayers);
+            results.AddRange(storeInfos);
+
+            //results = Sort(results);
             return results;
         }
         private List<ThLayerInfo> Sort(List<ThLayerInfo> infos)
