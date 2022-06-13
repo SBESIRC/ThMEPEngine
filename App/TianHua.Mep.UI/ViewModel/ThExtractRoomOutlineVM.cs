@@ -19,7 +19,7 @@ namespace TianHua.Mep.UI.ViewModel
 {
     public class ThExtractRoomOutlineVM
     {
-        private readonly string AIWallLayer = "AI-DB墙线";
+        private readonly string AIWallLayer = "AI-墙线";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
         public ThExtractRoomOutlineVM()
         {
@@ -73,6 +73,17 @@ namespace TianHua.Mep.UI.ViewModel
             if(!IsExisted(layer))
             {
                 AddLayer(layer);
+            }
+        }
+        public void RemoveLayers(List<string> layers)
+        {
+            if (layers.Count > 0)
+            {
+                var layerInfos = LayerInfos
+                .OfType<ThLayerInfo>()
+                .Where(o => !layers.Contains(o.Layer))
+                .ToList();
+                LayerInfos = new ObservableCollection<ThLayerInfo>(layerInfos);
             }
         }
         private void AddLayer(string layer)

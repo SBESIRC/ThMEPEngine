@@ -1,5 +1,7 @@
-﻿using ThControlLibraryWPF.CustomControl;
+﻿using System.Collections.Generic;
+using ThControlLibraryWPF.CustomControl;
 using TianHua.Mep.UI.ViewModel;
+using ThMEPEngineCore.Model.Common;
 
 namespace TianHua.Mep.UI.UI
 {
@@ -43,6 +45,18 @@ namespace TianHua.Mep.UI.UI
         private void btnSelectLayer_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             RoomOutlineVM.SelectLayer();
+        }
+
+        private void btnDeleteLayer_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var layers = new List<string>();
+            for (int i = 0; i < listBox.SelectedItems.Count; i++)
+            {
+                layers.Add((listBox.SelectedItems[i] as ThLayerInfo).Layer);
+            }
+            RoomOutlineVM.RemoveLayers(layers);
+            this.listBox.ItemsSource = null;
+            this.listBox.ItemsSource = RoomOutlineVM.LayerInfos;
         }
     }
 }
