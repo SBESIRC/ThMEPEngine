@@ -24,10 +24,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
             foreach (var L in lineList)
             {
-                if(L.Length > 149 && L.Length < 151)
-                {
-                    ;
-                }
                 var pt1 = new Point3dEx(L.StartPoint);
                 var pt2 = new Point3dEx(L.EndPoint);
 
@@ -241,8 +237,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             termPoint.SetPipeNumber(textSpatialIndex);
                         }
-                        termPoint.Type = 6;
-                        if(termPoint.PipeNumber != "")
+                        if(termPoint.PipeNumber.Contains("水泵接合器"))
+                        {
+                            termPoint.Type = 4;
+                        }
+                        else
+                        {
+                            termPoint.Type = 6;
+                        }
+                        if (termPoint.PipeNumber != "")
                         {
                             fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
                         }
@@ -650,9 +653,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             return text;
         }
-
         public static void CreateBranchDic(ref Dictionary<Point3dEx, List<Point3dEx>> branchDic, ref Dictionary<Point3dEx, List<Point3dEx>> ValveDic,
-            List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
+    List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
         {
             foreach (var rstPath in mainPathList)
             {
@@ -677,6 +679,92 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         while (q.Count > 0)
                         {
                             var curPt = q.Dequeue();
+                            if (fireHydrantSysIn.TermPtDic.Contains(curPt))//当前点是末端点
+                            {
+                                termPts.Add(curPt);
+                                continue;
+                            }
+                            if (fireHydrantSysIn.PtTypeDic.ContainsKey(curPt))
+                            {
+                                var type = fireHydrantSysIn.PtTypeDic[curPt];
+                                if (type.Contains("DieValve"))
+                                {
+                                    valvePts.Add(curPt);
+                                }
+                                if (type.Contains("GateValve"))
+                                {
+                                    valvePts.Add(curPt);
+                                }
+                                if (type.Contains("Casing"))
+                                {
+                                    valvePts.Add(curPt);
+                                }
+                            }
+
+                            var adjs = fireHydrantSysIn.PtDic[curPt];
+                            if (adjs.Count == 1)
+                            {
+                                termPts.Add(curPt);
+                                continue;
+                            }
+
+                            foreach (var adj in adjs)
+                            {
+                                if (rstPath.Contains(adj))
+                                    continue;
+
+                                if (visited2.Contains(adj))
+                                {
+                                    continue;
+                                }
+
+                                visited2.Add(adj);
+                                q.Enqueue(adj);
+                            }
+                        }
+                        if (termPts.Count != 0)
+                        {
+                            if (branchDic.ContainsKey(pt))
+                            {
+                                continue;
+                            }
+                            branchDic.Add(pt, termPts);
+                            if (valvePts.Count != 0)
+                            {
+                                ValveDic.Add(pt, valvePts);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void CreateBranchDic(ref Dictionary<Point3dEx, List<Point3dEx>> branchDic, ref Dictionary<Point3dEx, List<ValveCasing>> ValveDic,
+            List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
+        {
+            foreach (var rstPath in mainPathList)
+            {
+                int i = 0;
+                foreach (var pt in rstPath)//遍历主环路的点
+                {
+                    i++;
+                    if (!fireHydrantSysIn.PtTypeDic.ContainsKey(pt))
+                    {
+                        continue;
+                    }
+
+                    if (fireHydrantSysIn.PtTypeDic[pt].Equals("Branch"))//是支点
+                    {
+                        var termPts = new List<Point3dEx>();
+                        var valvePts = new List<ValveCasing>();
+
+                        Queue<Point3dEx> q = new Queue<Point3dEx>();
+                        q.Enqueue(pt);
+                        HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
+                        visited.Add(pt);
+                        while (q.Count > 0)
+                        {
+                            var curPt = q.Dequeue();
                             if(fireHydrantSysIn.TermPtDic.Contains(curPt))//当前点是末端点
                             {
                                 termPts.Add(curPt);
@@ -684,9 +772,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             }
                             if (fireHydrantSysIn.PtTypeDic.ContainsKey(curPt))
                             {
-                                if (fireHydrantSysIn.PtTypeDic[curPt].Contains("Valve"))
+                                var type = fireHydrantSysIn.PtTypeDic[curPt];
+                                if(type.Contains("DieValve"))
                                 {
-                                    valvePts.Add(pt);
+                                    valvePts.Add(new ValveCasing(curPt,1));
+                                }
+                                if (type.Contains("GateValve"))
+                                {
+                                    valvePts.Add(new ValveCasing(curPt, 2));
+                                }
+                                if(type.Contains("Casing"))
+                                {
+                                    valvePts.Add(new ValveCasing(curPt, 0));
                                 }
                             }
 

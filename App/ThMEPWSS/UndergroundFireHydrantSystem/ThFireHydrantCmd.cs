@@ -119,7 +119,7 @@ namespace ThMEPWSS.Command
             visited.AddVisit(subPathList);
 
             var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 端点
-            var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
+            var ValveDic = new Dictionary<Point3dEx, List<ValveCasing>>();//支点 + 阀门点
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited);
 

@@ -370,6 +370,7 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\ValveCasing.cs" />
     <Compile Include="UndergroundSpraySystem\Command\FireHydrantAcross.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />

@@ -22,9 +22,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<DBText> TextList { get; set; }
         public Dictionary<Point3d, double> PipeInterrupted { get; set; }
         public List<Point3d> GateValve { get; set; }
-        public List<Point3d> Valve { get; set; }
-        public HashSet<Point3d> IsGateValve { get; set; }
-        public List<Point3d> IsCasing { get; set; }
+        public List<Point3d> DieValve { get; set; }
+        public List<Point3d> Casing { get; set; }
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
@@ -40,10 +39,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             StoreyLine = new List<Line>();
             TextList = new List<DBText>();
             PipeInterrupted = new Dictionary<Point3d, double>();
-            Valve = new List<Point3d>();
-            IsGateValve = new HashSet<Point3d>();
-            IsCasing = new List<Point3d>();
+            DieValve = new List<Point3d>();
             GateValve = new List<Point3d>();
+            Casing = new List<Point3d>();
             FireHydrant = new List<Point3d>();
             DNList = new List<DBText>();
             ExtraTextDic = new Dictionary<Point3dEx, DBText>();
@@ -97,33 +95,28 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     blk.TransformBy(u2wMat);
                 }
 
-                foreach (var valve in Valve)
+                foreach (var valve in DieValve)
                 {
                     string valveName = "蝶阀";
-                    if (IsGateValve.Contains(valve))
-                    {
-                        valveName = "闸阀";
-                    }
-
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        "W-FRPT-HYDT-EQPM",
-                        valveName,
-                        valve,
-                        new Scale3d(1, 1, 1),
-                        0);
+                        "W-FRPT-HYDT-EQPM",valveName,valve,new Scale3d(1, 1, 1),0);
                     var blk = acadDatabase.Element<BlockReference>(objID);
                     blk.TransformBy(u2wMat);
                 }
-
-                foreach (var casing in IsCasing)
+                foreach (var valve in GateValve)
                 {
+                    string valveName = "闸阀";
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        "W-BUSH",
-                        "套管系统",
-                        casing,
-                        new Scale3d(1, 1, 1),
-                        0);
-                    objID.SetDynBlockValue("可见性", "放水套管水平");
+                        "W-FRPT-HYDT-EQPM", valveName, valve, new Scale3d(1, 1, 1), 0);
+                    var blk = acadDatabase.Element<BlockReference>(objID);
+                    blk.TransformBy(u2wMat);
+                }
+                foreach (var valve in Casing)
+                {
+                    string valveName = "套管系统";
+
+                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                        "W-BUSH", valveName, valve, new Scale3d(1, 1, 1), 0);
                     var blk = acadDatabase.Element<BlockReference>(objID);
                     blk.TransformBy(u2wMat);
                 }

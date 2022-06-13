@@ -85,7 +85,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var casingPts = casingEngine.Extract(acadDatabase.Database, selectArea);
             var casingSpatialIndex = new ThCADCoreNTSSpatialIndex(casingPts);
 
-            PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList, casingSpatialIndex);
+            PipeLine.AddValveLine2(valveDB, fireHydrantSysIn, pointList, lineList, valveList, casingPts);
             
             var nodeEngine = new ThExtractNodeTag();//提取消火栓环管节点标记
             var nodeDB = nodeEngine.Extract(acadDatabase.Database, selectArea);

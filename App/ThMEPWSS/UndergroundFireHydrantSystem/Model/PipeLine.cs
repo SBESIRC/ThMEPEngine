@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using GeometryExtensions;
+using NFox.Cad;
 using System.Collections.Generic;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -162,6 +163,57 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             PipeLineSplit(ref lineList, valveList);
         }
 
+        public static void AddValveLine2(DBObjectCollection valveDB,
+        FireHydrantSystemIn fireHydrantSysIn,  List<Point3dEx> pointList,  List<Line> lineList,
+        List<Line> valveList, DBObjectCollection casingPts)
+        {
+            var valvePts = new List<Point3dEx>();
+            foreach (var v in valveDB)
+            {
+                Point3dEx valvePt;
+                if (v is BlockReference br)
+                {
+                    valvePt = new Point3dEx(br.GetRect().GetCentroidPoint());
+                }
+                else
+                {
+                    var objs = new DBObjectCollection();
+
+                    (v as Entity).Explode(objs);
+                    var bkr = objs[0] as BlockReference;
+                    valvePt = new Point3dEx(bkr.GetRect().GetCentroidPoint());
+                }
+                valvePts.Add(valvePt);
+            }
+            var newPts = PipeLineSplit(lineList, valvePts);
+            foreach(var pt in newPts)
+            {
+                fireHydrantSysIn.PtTypeDic.Add(pt, "DieValve");
+            }
+
+            newPts.Clear();
+            newPts = PipeLineSplit(lineList, fireHydrantSysIn.GateValves);
+            foreach (var pt in newPts)
+            {
+                fireHydrantSysIn.PtTypeDic.Add(pt, "GateValve");
+            }
+
+            valvePts.Clear();
+            newPts.Clear();
+            foreach (var casing in casingPts)
+            {
+                var pt = new Point3dEx((casing as BlockReference).GetRect().GetCentroidPoint());
+                valvePts.Add(pt);
+            }
+            newPts = PipeLineSplit(lineList, valvePts);
+            foreach (var pt in newPts)
+            {
+                fireHydrantSysIn.PtTypeDic.Add(pt, "Casing");
+            }
+            ;
+        }
+
+
         public static Point3dCollection GetRect(Point3d pt1, Point3d pt2)
         {
             double gap = 300;
@@ -194,6 +246,51 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
         }
+
+        public static List<Point3dEx> PipeLineSplit(List<Line> lines, List<Point3dEx> pts)//阀门点分割线段
+        {
+            var newPts = new List<Point3dEx>();
+            foreach(var pt in pts)
+            {
+                var line = PointCompute.PointInLine2(pt._pt, lines);
+                if(line is not null)
+                {
+                    lines.Remove(line);//删除该直线
+                    var newPt = line.GetClosestPointTo(pt._pt, false);//找到线上最近点
+                    var lList = PointCompute.CreateNewLine(newPt, line);//利用最近点对线进行打断
+
+                    newPts.Add(new Point3dEx(newPt));//新生成的点加入点集
+                    foreach (var l in lList)
+                    {
+                        lines.Add(l);//新生成的直线添加至列表
+                    }
+                }
+            }
+            return newPts;
+        }
+
+        public static List<Point3dEx> PipeLineSplit(List<Line> lines, List<Point3d> pts)//阀门点分割线段
+        {
+            var newPts = new List<Point3dEx>();
+            foreach (var pt in pts)
+            {
+                var line = PointCompute.PointInLine2(pt, lines);
+                if (line is not null)
+                {
+                    lines.Remove(line);//删除该直线
+                    var newPt = line.GetClosestPointTo(pt, false);//找到线上最近点
+                    var lList = PointCompute.CreateNewLine(newPt, line);//利用最近点对线进行打断
+
+                    newPts.Add(new Point3dEx(newPt));//新生成的点加入点集
+                    foreach (var l in lList)
+                    {
+                        lines.Add(l);//新生成的直线添加至列表
+                    }
+                }
+            }
+            return newPts;
+        }
+
 
         public static void PipeLineSplit(ref List<Line> pipeLineList, List<Line> valveLineList)
         {

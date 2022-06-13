@@ -5,6 +5,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -21,18 +22,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 
                 if (i != 0)//对于多主环点的情况，我们只需要绘制第一对即可
                 {
-                    if(fireHydrantSysIn.PtTypeDic[rstPath[i-1]].Equals("MainLoop") || fireHydrantSysIn.PtTypeDic[rstPath[i - 1]].Equals("Branch"))
+                    var type = fireHydrantSysIn.PtTypeDic[rstPath[i - 1]];
+                    if (type.Equals("MainLoop") || type.Equals("Branch"))
                     {
                         return stPt;
                     }
-                    if(fireHydrantSysIn.PtTypeDic[rstPath[i - 1]].Contains("Valve"))
+                    if(type.Contains("Valve") || type.Contains("Casing"))
                     {
                         return stPt;
                     }
                 }
                 pt2 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
-                
-                if(fireHydrantSysIn.PtTypeDic[rstPath[i + 1]].Contains("Valve"))
+
+                var nextType = fireHydrantSysIn.PtTypeDic[rstPath[i + 1]];
+                if (nextType.Contains("Valve") || nextType.Contains("Casing"))
                 {
                     pt2 = new Point3d(stPt.X + pipeLength - 640, stPt.Y, 0);
                 }
@@ -54,7 +57,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var pt3 = new Point3d(pt2.X + pipeLength / 2, pt2.Y, 0);
 
                 var pt4 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
-                if (fireHydrantSysIn.PtTypeDic[rstPath[i + 1]].Contains("Valve"))
+                var nextType = fireHydrantSysIn.PtTypeDic[rstPath[i + 1]];
+
+                if (nextType.Contains("Valve") || nextType.Contains("Casing"))
                 {
                     pt4 = new Point3d(stPt.X + pipeLength - 640, stPt.Y, 0);
                 }
@@ -82,7 +87,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var pt1 = stPt;
                 var pt2 = new Point3d(stPt.X, stPt.Y - pipeGap, 0);
                 var pt4 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
-                if (fireHydrantSysIn.PtTypeDic[rstPath[i + 1]].Contains("Valve"))
+
+                var nextType = fireHydrantSysIn.PtTypeDic[rstPath[i + 1]];
+                if (nextType.Contains("Valve") || nextType.Contains("Casing"))
                 {
                     pt4 = new Point3d(stPt.X + pipeLength - 640, stPt.Y, 0);
                 }
@@ -101,52 +108,47 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }  
         }
 
-        public static Point3d GetValvePoint(Point3dEx valve, ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, ref bool valveCheck,
-            FireHydrantSystemIn fireHydrantSysIn)
+        public static Point3d GetDieValvePoint(FireHydrantSystemOut fireHydrantSysOut, Point3d stPt)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                if(fireHydrantSysIn.PtTypeDic[valve].Contains("casing"))
-                {
-                    fireHydrantSysOut.IsCasing.Add(new Point3d(stPt.X + 100, stPt.Y, 0));
-                }
-                if (valveCheck)
-                {
-                    var flag = false;
-                    fireHydrantSysOut.Valve.Add(stPt);
-                    foreach(var pt in fireHydrantSysIn.GateValves)
-                    {
-                        if(valve._pt.DistanceTo(pt) < 250)
-                        {
-                            fireHydrantSysOut.IsGateValve.Add(stPt);
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if(flag)
-                    {
-                        stPt = new Point3d(stPt.X + 300, stPt.Y, 0);
-                    }
-                    else
-                    {
-                        stPt = new Point3d(stPt.X + 240, stPt.Y, 0);
-
-                    }
-                    valveCheck = false;
-                }
-                else
-                {
-                    var pt1 = stPt;
-                    var pt2 = new Point3d(stPt.X + 400, stPt.Y, 0);
-                    fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
-                    stPt = pt2;
-                    valveCheck = true;
-                }
-                return stPt;
+                fireHydrantSysOut.DieValve.Add(stPt);
+                var pt1 = new Point3d(stPt.X + 240, stPt.Y, 0);
+                var pt2 = pt1.OffsetX(400);
+                fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
+                return pt2;
             } 
         }
 
-        public static void AddDN(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3d pt1, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> rstPath)
+        public static Point3d GetGateValvePoint(FireHydrantSystemOut fireHydrantSysOut, Point3d stPt)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                fireHydrantSysOut.GateValve.Add(stPt);
+                var pt1 = new Point3d(stPt.X + 300, stPt.Y, 0);
+                var pt2 = pt1.OffsetX(400);
+                fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
+                return pt2;
+            }
+        }
+
+
+        public static Point3d GetCasingPoint(FireHydrantSystemOut fireHydrantSysOut, Point3d stPt)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                fireHydrantSysOut.Casing.Add(stPt);
+                var pt1 = new Point3d(stPt.X + 200, stPt.Y, 0);
+                var pt2 = pt1.OffsetX(400);
+                fireHydrantSysOut.LoopLine.Add(new Line(stPt, pt2));
+                return pt2;
+            }
+        }
+
+
+
+        public static void AddDN(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3d pt1, 
+            FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> rstPath)
         {
             var pipeLine = new LineSegEx(rstPath[i]._pt, rstPath[i + 1]._pt);
             var position = new Point3d(pt1.X + 350, pt1.Y + 100, 0);
@@ -170,6 +172,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
         }
+
         public static void GetMainLoopDetial(ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, Point3d ptStart)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -196,7 +199,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void GetSubLoopDetial(ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, Point3d ptStart, List<Point3dEx> rstPath, Dictionary<Point3dEx, string> markList)
+        public static void GetSubLoopDetial(ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, Point3d ptStart, 
+            List<Point3dEx> rstPath, Dictionary<Point3dEx, string> markList)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

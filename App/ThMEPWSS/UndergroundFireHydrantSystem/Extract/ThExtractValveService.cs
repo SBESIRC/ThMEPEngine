@@ -9,7 +9,7 @@ using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
-    public class ThExtractValveService//提取阀门
+    public class ThExtractValveService//提取普通阀门
     {
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
@@ -42,7 +42,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         private bool IsValveBlock(BlockReference blockReference)
         {
             var blkName = blockReference.GetEffectiveName().ToUpper();
-            return blkName.Contains("阀") || blkName.Contains("VALVE");
+            return blkName.Contains("蝶阀") || (blkName.Contains("VALVE") && blkName.Contains("316"));
         }
     }
 }

@@ -115,9 +115,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         stPt = GetPipePart.GetBranchPoint(ref fireHydrantSysOut, i, pt, stPt, rstPath, pipeGap, pipeLength, fireHydrantSysIn);
                         continue;
                     }
-                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("Valve"))
+                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("DieValve"))
                     {
-                        stPt = GetPipePart.GetValvePoint(pt, ref fireHydrantSysOut, stPt, ref valveCheck, fireHydrantSysIn);
+                        stPt = GetPipePart.GetDieValvePoint(fireHydrantSysOut, stPt);
+                        continue;
+                    }
+                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("GateValve"))
+                    {
+                        stPt = GetPipePart.GetGateValvePoint(fireHydrantSysOut, stPt);
+                        continue;
+                    }
+                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("Casing"))
+                    {
+                        stPt = GetPipePart.GetCasingPoint(fireHydrantSysOut, stPt);
                         continue;
                     }
                 }
@@ -197,9 +207,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
 
-                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("Valve"))
+                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("DieValve"))
                     {
-                        stPt = GetPipePart.GetValvePoint(pt, ref fireHydrantSysOut, stPt, ref valveCheck, fireHydrantSysIn);
+                        stPt = GetPipePart.GetDieValvePoint(fireHydrantSysOut, stPt);
+                        continue;
+                    }
+                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("GateValve"))
+                    {
+                        stPt = GetPipePart.GetGateValvePoint(fireHydrantSysOut, stPt);
+                        continue;
+                    }
+                    if (fireHydrantSysIn.PtTypeDic[pt].Contains("Casing"))
+                    {
+                        stPt = GetPipePart.GetCasingPoint(fireHydrantSysOut, stPt);
                         continue;
                     }
                 }
@@ -208,7 +228,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
         public static void GetBranch(ref FireHydrantSystemOut fireHydrantSysOut, Dictionary<Point3dEx, List<Point3dEx>> branchDic,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             var list = new List<Point3d>();
             foreach (var pt in fireHydrantSysIn.TermPointDic.Keys)
@@ -384,7 +404,185 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-     
+        public static void GetBranch(ref FireHydrantSystemOut fireHydrantSysOut, Dictionary<Point3dEx, List<Point3dEx>> branchDic,
+               Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+        {
+            var valveDic = new Dictionary<Point3dEx, List<ValveCasing>>();
+            var list = new List<Point3d>();
+            foreach (var pt in fireHydrantSysIn.TermPointDic.Keys)
+            {
+                list.Add(pt._pt);
+            }
+            foreach (var pt in branchDic.Keys)//对于支路的每一个起始点
+            {
+                try
+                {
+                    if (!fireHydrantSysOut.BranchDrawDic.ContainsKey(pt))
+                    {
+                        continue;
+                    }
+
+                    if (branchDic[pt].Count == 1)//单支路
+                    {
+                        var stPt = fireHydrantSysOut.BranchDrawDic[pt];
+                        var x = branchDic[pt];
+
+                        if (fireHydrantSysIn.TermPointDic.ContainsKey(branchDic[pt][0]))
+                        {
+                            var type = fireHydrantSysIn.TermPointDic[branchDic[pt].First()].Type;
+                            if (type.Equals(1))//终点是类型1，消火栓
+                            {
+                                string pipeNumber = fireHydrantSysIn.TermPointDic[branchDic[pt][0]].PipeNumber;//立管标号
+                                if (pipeNumber.IsCurrentFloor())//消火栓
+                                {
+                                    GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                                }
+                            }
+                            if (type.Equals(2))//终点是类型2，其他区域
+                            {
+                                GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                            }
+                            if (type.Equals(3))//终点是类型3，消火栓和其他楼层共用支管
+                            {
+                                GetBranchType4(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                            }
+                            if (type.Equals(4))//终点是类型4，消火栓和其他楼层共用支管
+                            {
+                                GetBranchType5(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                            }
+                            if (type.Equals(5))//终点是类型5，跨层主环点
+                            {
+                                GetBranchAcross(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                            }
+                            if (type.Equals(6))
+                            {
+                                GetBranchType6(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                            }
+                        }
+                        else
+                        {
+                            var vpt = new Point3dEx();
+                            foreach (var tpt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
+                            {
+                                if (tpt._pt.DistanceTo(branchDic[pt][0]._pt) < 150)
+                                {
+                                    vpt = tpt;
+                                    break;
+                                }
+                            }
+                            if (fireHydrantSysIn.TermPointDic.ContainsKey(vpt))
+                            {
+                                if (fireHydrantSysIn.TermPointDic[vpt].Type.Equals(1))//终点是类型1，消火栓
+                                {
+                                    string pipeNumber = fireHydrantSysIn.TermPointDic[vpt].PipeNumber;//立管标号
+                                    if (pipeNumber.IsCurrentFloor())//消火栓
+                                    {
+                                        GetBranchType1(pt, ref fireHydrantSysOut, stPt, vpt, valveDic, fireHydrantSysIn);
+                                    }
+                                }
+                                if (fireHydrantSysIn.TermPointDic[vpt].Type.Equals(2))//终点是类型2，其他区域
+                                {
+                                    GetBranchType2(pt, ref fireHydrantSysOut, stPt, vpt, valveDic, fireHydrantSysIn);
+                                }
+                                if (fireHydrantSysIn.TermPointDic[vpt].Type.Equals(3))//终点是类型3，消火栓和其他楼层共用支管
+                                {
+                                    GetBranchType4(pt, ref fireHydrantSysOut, stPt, vpt, valveDic, fireHydrantSysIn);
+                                }
+                                if (fireHydrantSysIn.TermPointDic[vpt].Type.Equals(4))//终点是类型4，消火栓和其他楼层共用支管
+                                {
+                                    GetBranchType5(pt, ref fireHydrantSysOut, stPt, vpt, valveDic, fireHydrantSysIn);
+                                }
+                            }
+                            else
+                            {
+                                var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(branchDic[pt][0]);
+                                if (verticalHasHydrant)
+                                {
+                                    GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+
+                                }
+                                else
+                                {
+                                    GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], valveDic, fireHydrantSysIn);
+                                }
+                            }
+
+                        }
+                    }
+                    if (branchDic[pt].Count == 2)//两个支路
+                    {
+                        int type1Nums = 0;
+                        foreach (var tpt in branchDic[pt])
+                        {
+                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
+                            {
+                                continue;
+                            }
+                            if (fireHydrantSysIn.TermPointDic[tpt].Type.Equals(1))
+                            {
+                                type1Nums += 1;
+                            }
+                        }
+                        var stPt = fireHydrantSysOut.BranchDrawDic[pt];
+                        if (type1Nums == 1)
+                        {
+                            if (branchDic[pt].Count != 0)
+                            {
+                                GetBranchType3(pt, ref fireHydrantSysOut, stPt, branchDic[pt], valveDic, fireHydrantSysIn);
+                            }
+                        }
+                        else
+                        {
+                            GetBranchType02(pt, ref fireHydrantSysOut, stPt, branchDic[pt], valveDic, fireHydrantSysIn);
+                        }
+                    }
+                    if (branchDic[pt].Count == 3)//三个支路
+                    {
+                        if (!fireHydrantSysOut.BranchDrawDic.ContainsKey(pt))
+                        {
+                            continue;
+                        }
+                        var stPt = fireHydrantSysOut.BranchDrawDic[pt];
+
+                        int type1Nums = 0;
+                        foreach (var tpt in branchDic[pt])
+                        {
+                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
+                            {
+                                continue;
+                            }
+                            if (fireHydrantSysIn.TermPointDic[tpt].Type.Equals(1))
+                            {
+                                type1Nums += 1;
+                            }
+                        }
+                        if (type1Nums == 0)
+                        {
+                            GetBranchType03(pt, ref fireHydrantSysOut, stPt, branchDic[pt], valveDic, fireHydrantSysIn);
+                        }
+                        if (type1Nums == 1)
+                        {
+                            GetBranchType12(pt, ref fireHydrantSysOut, stPt, branchDic[pt], valveDic, fireHydrantSysIn);
+                        }
+                        if (type1Nums == 2)
+                        {
+                            GetBranchType21(pt, ref fireHydrantSysOut, stPt, branchDic[pt], valveDic, fireHydrantSysIn);
+                        }
+                        if (type1Nums == 3)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ;
+                }
+
+            }
+        }
+
+
 
         /// <summary>
         /// 绘制向下的单分支
@@ -394,7 +592,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType1(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt,
-            Point3dEx tpt, Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, bool flag3 = false)
+            Point3dEx tpt, Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, bool flag3 = false)
         {
             var pt1 = stpt._pt;
             var pt4 = pt1.OffsetX(800);
@@ -422,7 +620,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType2(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
         {
             double floorHeight = fireHydrantSysIn.FloorHeight;
 
@@ -506,7 +704,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType3(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, List<Point3dEx> tpts,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             string pipeNumber1 = "";
             if (fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
@@ -539,7 +737,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType4(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             GetBranchType1(branchPt, ref fireHydrantSysOut, stpt, tpt, ValveDic, fireHydrantSysIn);
             GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpt, ValveDic, fireHydrantSysIn, 4);
@@ -553,7 +751,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType5(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             double XGap = 800;
             var floorHeight = fireHydrantSysIn.FloorHeight;
@@ -606,7 +804,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType6(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
         {
             double floorHeight = fireHydrantSysIn.FloorHeight;
 
@@ -689,7 +887,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchAcross(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt,
-            Point3dEx tpt, Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, bool flag3 = false)
+            Point3dEx tpt, Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, bool flag3 = false)
         {
             var cpt = new Point3dEx();//跨层主环起始终止点
             foreach(var pt in fireHydrantSysIn.PtDic[branchPt])
@@ -725,7 +923,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType02(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, List<Point3dEx> tpts,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             var pt1 = tpts[0];
             var pt2 = tpts[1];
@@ -747,7 +945,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 //if (fireHydrantSysIn.TermPointDic[pt1].PipeNumber?.Equals("") == true)
                 {
                     double XGap = 1600;
-                    GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, pt1, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+                    GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, pt1, new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
                     var pt4 = new Point3dEx(stpt._pt.X + 800, stpt._pt.Y, 0);
                     stpt1 = new Point3dEx(stpt._pt.X + XGap, stpt._pt.Y, 0);
                     fireHydrantSysOut.LoopLine.Add(new Line(pt4._pt, stpt1._pt));
@@ -761,7 +959,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 //if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber?.Equals("") == true)
                 {
-                    GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, pt2, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+                    GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, pt2, new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
 
                 }
             }
@@ -775,7 +973,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType21(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, List<Point3dEx> tpts,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             var newPt = new Point3dEx(0, 0, 0);
             foreach (var pt in tpts)
@@ -796,7 +994,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt4 = new Point3dEx(stpt._pt.X + 800, stpt._pt.Y, 0);
             var stpt1 = new Point3dEx(stpt._pt.X + XGap, stpt._pt.Y, 0);
             fireHydrantSysOut.LoopLine.Add(new Line(pt4._pt, stpt1._pt));
-            GetBranchType1(branchPt, ref fireHydrantSysOut, stpt1, newPt, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+            GetBranchType1(branchPt, ref fireHydrantSysOut, stpt1, newPt, new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
         }
 
         /// <summary>
@@ -807,7 +1005,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType03(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, List<Point3dEx> tpts,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             var ptls = new List<Point3dEx>(tpts);
             var pt1 = new Point3dEx(0, 0, 0);
@@ -819,16 +1017,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     ptls.Remove(pt1);
                 }
             }
-            GetBranchType5(branchPt, ref fireHydrantSysOut, stpt, pt1, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+            GetBranchType5(branchPt, ref fireHydrantSysOut, stpt, pt1, new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
             double XGap = 1600;
             var pt4 = new Point3dEx(stpt._pt.X + 800, stpt._pt.Y, 0);
             var stpt1 = new Point3dEx(stpt._pt.X + XGap, stpt._pt.Y, 0);
             fireHydrantSysOut.LoopLine.Add(new Line(pt4._pt, stpt1._pt));
-            GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, ptls[0], new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+            GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, ptls[0], new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
             pt4 = new Point3dEx(stpt1._pt.X + 800, stpt1._pt.Y, 0);
             stpt1 = new Point3dEx(stpt1._pt.X + XGap, stpt1._pt.Y, 0);
             fireHydrantSysOut.LoopLine.Add(new Line(pt4._pt, stpt1._pt));
-            GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, ptls[1], new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+            GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, ptls[1], new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
         }
 
 
@@ -840,7 +1038,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <param name="分支路径"></param>
         /// <param name="输入"></param>
         private static void GetBranchType12(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, List<Point3dEx> tpts,
-            Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
+            Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             var newPt = new Point3dEx(0, 0, 0);
             foreach (var pt in tpts)
@@ -863,7 +1061,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt4 = new Point3dEx(stpt._pt.X + 800, stpt._pt.Y, 0);
             var stpt1 = new Point3dEx(stpt._pt.X + XGap, stpt._pt.Y, 0);
             fireHydrantSysOut.LoopLine.Add(new Line(pt4._pt, stpt1._pt));
-            GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, newPt, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
+            GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, newPt, new Dictionary<Point3dEx, List<ValveCasing>>(), fireHydrantSysIn);
         }
     }
 }
