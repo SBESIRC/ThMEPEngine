@@ -112,6 +112,8 @@ namespace ThMEPStructure.StructPlane.Service
                  .MinPoint.Y).OrderBy(o => o).FirstOrDefault();
             var elevationTblBasePt = new Point3d(maxX+1000.0, minY,0);
             var elevationInfos = GetElevationInfos();
+            elevationInfos = elevationInfos.OrderBy(o => int.Parse(o.FloorNo)).ToList(); // 按自然层编号排序
+
             PrintElevationTable(db, elevationTblBasePt, elevationInfos);
 
             // 打印楼板填充

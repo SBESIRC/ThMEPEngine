@@ -27,6 +27,7 @@ namespace ThMEPStructure.StructPlane.Service
         public static string HeadTextDownLineLayerName = "S_PLAN_TOPC";
         public static string StairSlabCornerLineLayerName = "S_STAR_TEXT";
         public static string StairSlabCornerTextLayerName = "S_STAR_TEXT";
+        public static string DefpointsLayerName = "Defpoints";
         public static List<string> AllLayers
         {
             get
@@ -37,7 +38,7 @@ namespace ThMEPStructure.StructPlane.Service
                     BelowShearWallHatchLayerName,SlabLayerName,SlabHatchLayerName,BeamTextLayName,
                     SlabTextLayerName,ElevationTableLineLayerName,ElevationTableTextLayerName,
                     SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName,
-                StairSlabCornerLineLayerName,StairSlabCornerTextLayerName};
+                StairSlabCornerLineLayerName,StairSlabCornerTextLayerName,DefpointsLayerName};
                 return layers.Distinct().ToList();
             }
         }
@@ -62,13 +63,14 @@ namespace ThMEPStructure.StructPlane.Service
     }
     internal class ThPrintBlockManager
     {
+        public static string BasePointBlkName = "BASEPOINT";
         public static string BthBlkName = "B-th";
         public static string SDemoH2BlkName = "S-demo-H2";
         public static List<string> AllBlockNames
         {
             get
             {
-                return new List<string> { BthBlkName, SDemoH2BlkName };
+                return new List<string> { BthBlkName, SDemoH2BlkName , BasePointBlkName };
             }
         }
     }

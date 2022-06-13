@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using AcHelper;
+using DotNetARX;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -23,6 +24,7 @@ namespace ThMEPStructure.StructPlane.Service
         {
             var printers = PrintToCad();
             Layout(printers.Select(o=>o.ObjIds).ToList());
+            InsertBasePoint();
         }
 
         private void Layout(List<ObjectIdCollection> floorObjIds)
@@ -44,6 +46,24 @@ namespace ThMEPStructure.StructPlane.Service
                     });
                 }
             } 
+        }
+
+        private void InsertBasePoint()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                if(acadDb.Blocks.Contains(ThPrintBlockManager.BasePointBlkName) &&
+                    acadDb.Layers.Contains(ThPrintLayerManager.DefpointsLayerName))
+                {
+                    DbHelper.EnsureLayerOn(ThPrintLayerManager.DefpointsLayerName);
+                    acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                                       ThPrintLayerManager.DefpointsLayerName,
+                                       ThPrintBlockManager.BasePointBlkName,
+                                       Point3d.Origin,
+                                       new Scale3d(1.0),
+                                       0.0);
+                }
+            }
         }
 
         private Extents2d ToExtents2d(ObjectIdCollection objIds)
