@@ -25,64 +25,64 @@ namespace ThMEPIFC.Ifc2x3
     public class ThTGL2IFC2x3Factory
     {
         static int epsilon = 0;
+
         static public IfcStore CreateAndInitModel(string projectName)
         {
-            //first we need to set up some credentials for ownership of data in the new model
-            var credentials = new XbimEditorCredentials
+            var model = CreateModel();
+            using (var txn = model.BeginTransaction("Initialize Model"))
             {
-                ApplicationDevelopersName = "ThProject developer",
-                ApplicationFullName = "Simple Application",
-                ApplicationIdentifier = "ThMEPIfc.exe",
-                ApplicationVersion = "0.1",
-                EditorsFamilyName = "ThMEP Team",
-                EditorsGivenName = "ThMEP",
-                EditorsOrganisationName = "ThMEP developer"
-            };
-            var model = IfcStore.Create(credentials, XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
-
-            //Begin a transaction as all changes to a model are ACID
-            using (var txn = model.BeginTransaction("Initialise Model"))
-            {
-                //create a project
-                var project = model.Instances.New<IfcProject>();
+                //there should always be one project in the model
+                var project = model.Instances.New<IfcProject>(p => p.Name = projectName);
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
-                project.Name = projectName;
+                //set GeometricRepresentationContext
+                project.RepresentationContexts.Add(CreateGeometricRepresentationContext(model));
                 //now commit the changes, else they will be rolled back at the end of the scope of the using statement
                 txn.Commit();
             }
             return model;
         }
 
-        static public IfcSite CreateSite(IfcStore model, ThTCHSite site)
+        private static IfcStore CreateModel()
+        {
+            return IfcStore.Create(XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+        }
+
+        private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
+        {
+            return model.Instances.New<IfcGeometricRepresentationContext>(c =>
+            {
+                c.Precision = 1E-5;
+                c.CoordinateSpaceDimension = new IfcDimensionCount(3);
+                c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(Point3d.Origin);
+            });
+        }
+
+        public static void CreateSite(IfcStore model, ThTCHSite site)
         {
             using (var txn = model.BeginTransaction("Initialise Site"))
             {
-                //create a Site
                 var ret = model.Instances.New<IfcSite>();
+                //get the project there should only be one and it should exist
+                var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
+                project.AddSite(ret);
                 txn.Commit();
-                return ret;
             }
         }
 
-        static public IfcBuilding CreateBuilding(IfcStore model, IfcSite site, ThTCHBuilding building)
+        public static IfcBuilding CreateBuilding(IfcStore model, ThTCHBuilding building)
         {
             using (var txn = model.BeginTransaction("Initialise Building"))
             {
-                //create a Site
+                //create a building
                 var ret = model.Instances.New<IfcBuilding>();
                 ret.Name = building.BuildingName;
-
                 ret.CompositionType = IfcElementCompositionEnum.ELEMENT;
                 var localPlacement = model.Instances.New<IfcLocalPlacement>();
                 ret.ObjectPlacement = localPlacement;
                 var placement = model.Instances.New<IfcAxis2Placement3D>();
                 localPlacement.RelativePlacement = placement;
                 placement.Location = model.Instances.New<IfcCartesianPoint>(p => p.SetXYZ(0, 0, 0));
-                //get the project there should only be one and it should exist
-                var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
-                project?.AddBuilding(ret);
-                // add properties
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
                 {
                     rel.Name = "THifc properties";
@@ -100,6 +100,11 @@ namespace ThMEPIFC.Ifc2x3
                         }
                     });
                 });
+
+                //get the site there should only be one and it should exist
+                var site = model.Instances.OfType<IfcSite>().FirstOrDefault();
+                site?.AddBuilding(ret);
+
                 txn.Commit();
                 return ret;
             }
