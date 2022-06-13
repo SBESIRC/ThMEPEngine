@@ -51,9 +51,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
             return false;
         }
-        private void RemovePipeLines(ref List<Line> pipeLines,ref FireHydrantSystemIn fireHydrantSysIn,List<ThHydrantPipeMark> marks)
+        private void RemovePipeLines(ref List<Line> pipeLines, ref FireHydrantSystemIn fireHydrantSysIn, List<ThHydrantPipeMark> marks)
         {
-            //便历邻接点为1的线
+            //遍历邻接点为1的线
             List<Line> tmpLine = new List<Line>();
             foreach (var l in pipeLines)
             {

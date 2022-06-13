@@ -110,6 +110,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
                     var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓
                     var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
+                    
                     if(hydrantPipes.Count == 0 || hydrants.Count == 0)
                     {
                         Active.Editor.WriteMessage("找不到立管或者消火栓！\n");
@@ -155,7 +156,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     pathService.SetTermination(loopLines);
                     pathService.InitData();
 
-                    
                     if (ConfigInfo.isCoveredGraph)
                     {
                         //branchLines 包含所有的支路（需要删除和不需要删除的数据）

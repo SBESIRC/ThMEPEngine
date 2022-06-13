@@ -138,5 +138,8 @@ namespace ThMEPEngineCore
         /// 圆形柱细化弧长
         /// </summary>
         public const double CircularColumnTessellateArcLength = 100.0;
+
+        //ucs分割
+        public const string UCS_COMPASS_LAYER_NAME = "AI-UCS";      //UCS块名
     }
 }
