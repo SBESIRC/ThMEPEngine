@@ -84,7 +84,8 @@ namespace ThMEPWSS.HydrantLayout.Command
                 var recordLayerStatus = new List<string> { ThHydrantCommon.Layer_Hydrant, ThHydrantCommon.Layer_Hydrant_Extinguisher };
                 var layerStatusDict = InsertBlkService.RecordLayerStatus(recordLayerStatus);
 
-                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
+                //var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
+                var blkList = new List<string> { ThHydrantCommon.BlkName_Vertical };
                 var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
                 InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
