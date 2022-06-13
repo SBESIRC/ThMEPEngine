@@ -33,7 +33,6 @@ namespace TianHua.Mep.UI.UI
         private void btnOk_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             RoomOutlineVM.Confirm();
-            this.Close();
         }
 
         private void btnCancel_Click(object sender, System.Windows.RoutedEventArgs e)
