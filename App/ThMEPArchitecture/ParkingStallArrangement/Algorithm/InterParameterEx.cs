@@ -475,7 +475,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             var newSegLines = SegLineStrings.ToLineSegments();
                             newSegLines.Add(newSegLine);
                             var IsVaild = SegLineIsVaild(newSegLines,newSegLines.Count-1);
-                            if(IsVaild) return extended.ToLineString();
+                            if(IsVaild) return newSegLine.ToLineString();
                         }
 
                         baseLine = new LineSegment(pt, pt.Move(w2, extendFlag));
@@ -494,7 +494,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             var newSegLines = SegLineStrings.ToLineSegments();
                             newSegLines.Add(newSegLine);
                             var IsVaild = SegLineIsVaild(newSegLines, newSegLines.Count - 1);
-                            if (IsVaild) return extended.ToLineString();
+                            if (IsVaild) return newSegLine.ToLineString();
                         }
                     }
                     
