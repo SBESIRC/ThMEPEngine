@@ -79,7 +79,7 @@
                              x:Name="btnUcsCompass" Height="24" 
                              Margin="10,0,10,5" 
                              ImageTextLocation="TextOnly"
-                             Click="btnConnectWiring_Click">
+                             Click="btnUcsCompass_Click">
             </cus:ImageButton>
         </StackPanel>
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2">

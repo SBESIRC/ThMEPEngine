@@ -68,7 +68,12 @@ namespace ThMEPEngineCore.ConnectWiring
                     thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
                 }
                 var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull && !(x.Database is null)).ToList();
-                var data = GetData(holes, outFrame, power, !wall, !column);
+                var dir = frameInfo.dir;
+                if (frameInfo.UcsPolys.Count > 0)
+                {
+                    dir = frameInfo.UcsPolys.First().dir;
+                }
+                var data = GetData(holes, outFrame, dir, power, !wall, !column);
                 var CenterLine = new List<ThGeometry>();
                 if (Convert.ToInt16(Application.GetSystemVariable("USERR3")) == 1)
                 {
@@ -183,12 +188,12 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取数据
         /// </summary>
         /// <returns></returns>
-        public List<ThGeometry> GetData(List<Polyline> holes, Polyline outFrame, BlockReference block, bool wall, bool column)
+        public List<ThGeometry> GetData(List<Polyline> holes, Polyline outFrame, Vector3d dir, BlockReference block, bool wall, bool column)
         {
             List<ThGeometry> geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory(wall, column);
+                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory(dir, wall, column);
                 factory.holes = holes;
                 factory.powerBlock = block;
                 var data = factory.Create(acadDatabase.Database, outFrame.Vertices());

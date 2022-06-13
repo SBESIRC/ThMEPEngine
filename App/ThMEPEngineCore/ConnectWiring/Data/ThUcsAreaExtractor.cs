@@ -280,7 +280,8 @@ namespace ThMEPEngineCore.ConnectWiring.Data
             };
             var dxfNames = new string[]
             {
-                    RXClass.GetClass(typeof(Curve)).DxfName,
+                 RXClass.GetClass(typeof(Polyline)).DxfName,
+                 RXClass.GetClass(typeof(Line)).DxfName,
             };
             var filter = ThSelectionFilterTool.Build(dxfNames);
             var result = Active.Editor.GetSelection(options, filter);

@@ -33,11 +33,13 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         private List<ThGeometry> Geos { get; set; }
         bool hasWall;
         bool hasColumn;
-        public ThFireAlarmWiringDateSetFactory(bool wall, bool column)
+        Vector3d dir;
+        public ThFireAlarmWiringDateSetFactory(Vector3d polyDir, bool wall, bool column)
         {
             Geos = new List<ThGeometry>();
             hasWall = wall;
             hasColumn = column;
+            dir = polyDir;
         }
         protected override ThMEPDataSet BuildDataSet()
         {
@@ -96,6 +98,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
             var geos = new List<ThGeometry>();
             var geometry = new ThGeometry();
             geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.FireApart.ToString());
+            geometry.Properties.Add(ThExtractorPropertyNameManager.VectorName, dir.ToString());
             geometry.Boundary = frame;
             geos.Add(geometry);
 
