@@ -14,16 +14,18 @@ namespace ThParkingStall.Core.MPartitionLayout
     {
         public static void SortLaneByDirection(List<Lane> lanes, int mode)
         {
-            var comparer = new LaneComparer(mode);
+            var comparer = new LaneComparer(mode,DisCarAndHalfLaneBackBack);
             lanes.Sort(comparer);
         }
         private class LaneComparer : IComparer<Lane>
         {
-            public LaneComparer(int mode)
+            public LaneComparer(int mode,double filterLength)
             {
                 Mode = mode;
+                FilterLength = filterLength;
             }
             private int Mode;
+            private double FilterLength;
             public int Compare(Lane a, Lane b)
             {
                 if (Mode == 0)
@@ -32,8 +34,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 else if (Mode == 1)
                 {
-                    if (IsHorizontalLine(a.Line) && !IsHorizontalLine(b.Line)) return -1;
-                    else if (!IsHorizontalLine(a.Line) && IsHorizontalLine(b.Line)) return 1;
+                    if (IsHorizontalLine(a.Line) && a.Line.Length > FilterLength && !IsHorizontalLine(b.Line)) return -1;
+                    else if (!IsHorizontalLine(a.Line) && IsHorizontalLine(b.Line) && b.Line.Length > FilterLength) return 1;
                     else
                     {
                         return CompareLength(a.Line, b.Line);
@@ -41,8 +43,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 else if (Mode == 2)
                 {
-                    if (IsVerticalLine(a.Line) && !IsVerticalLine(b.Line)) return -1;
-                    else if (!IsVerticalLine(a.Line) && IsVerticalLine(b.Line)) return 1;
+                    if (IsVerticalLine(a.Line) && a.Line.Length > FilterLength && !IsVerticalLine(b.Line)) return -1;
+                    else if (!IsVerticalLine(a.Line) && IsVerticalLine(b.Line) && b.Line.Length > FilterLength) return 1;
                     else
                     {
                         return CompareLength(a.Line, b.Line);
@@ -1352,6 +1354,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                         else cond=false;
                     }
                 }
+                if (judge_in_obstacles)
+                    if (ObstaclesSpatialIndex.SelectCrossingGeometry(carsc).Count > 0) cond = false;
                 if (cond)
                 {
                     if (add_to_car_spacialindex)
