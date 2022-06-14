@@ -427,6 +427,10 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             if (HasFlushFaucet) //有冲洗龙头
             {
                 double pt19Y = pt3.Y + Dist;
+                if (Households[AreaIndex] == 0)
+                {
+                    pt19Y = pt3.Y;
+                }
 
                 var pt19 = new Point3d(pt3.X, pt19Y, 0);
                 var pt19204 = BranchPts.Get(pt19, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
