@@ -93,7 +93,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             var tol = new Tolerance(10, 10);
             var shortDir = dir.GetNormal();
             var longDir = new Vector3d(-shortDir.Y, shortDir.X, 0); //270
-            var DoorOffset = longSide * 0.25;
+            var DoorOffset = longSide * 1/6;
             //if (shortSide.StartPoint.IsEqualTo(basePt, tol))
             //{
             //    shortDir = -shortDir;
