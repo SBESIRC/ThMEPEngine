@@ -39,6 +39,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 }
             }
             fireHydrantSysOut.FireHydrant.Add(pt6);
+            if(fireHydrantSysIn.VerticalHasReelHydrant.Contains(tpt))
+            {
+                fireHydrantSysOut.VerticalHasReelHydrant.Add(pt6);
+            }
             var strDN = "DN65";
             if(fireHydrantSysIn.TermDnDic.ContainsKey(tpt))
             {

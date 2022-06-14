@@ -195,7 +195,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             newPts = PipeLineSplit(lineList, fireHydrantSysIn.GateValves);
             foreach (var pt in newPts)
             {
-                fireHydrantSysIn.PtTypeDic.Add(pt, "GateValve");
+                if(fireHydrantSysIn.PtTypeDic.ContainsKey(pt))
+                {
+                    fireHydrantSysIn.PtTypeDic[pt] = "GateValve";
+                }
+                else
+                {
+                    fireHydrantSysIn.PtTypeDic.Add(pt, "GateValve");
+                }
             }
 
             valvePts.Clear();
@@ -286,6 +293,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     {
                         lines.Add(l);//新生成的直线添加至列表
                     }
+                }
+                else
+                {
+                    newPts.Add(new Point3dEx(pt));
                 }
             }
             return newPts;

@@ -605,6 +605,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 new Line(pt5, pt6)
             };
             TextGet.GetText(tpt, fireHydrantSysIn, ref fireHydrantSysOut, pt4, pt6);
+            fireHydrantSysOut.AidLines.Add(new Line(pt6, tpt._pt));
             ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4, flag3);
             foreach (var line in lineList)
             {
@@ -643,6 +644,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt5 = pt1.OffsetXY(pipeWidth, floorHeight * 0.4);
             var pt6 = pt1.OffsetXY(pipeWidth, floorHeight * 0.5);
 
+            fireHydrantSysOut.AidLines.Add(new Line(pt5, tpt._pt));
             LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
             lineList.Add(new Line(pt4, pt5));
@@ -766,6 +768,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt51 = new Point3d(pt5.X + 900, pt5.Y, 0);
             var pt6 = new Point3d(pt51.X, pt4.Y + floorHeight * 0.5 + 800, 0);
             var pt7 = new Point3d(pt6.X + floorHeight * 0.3500, pt6.Y, 0);
+            fireHydrantSysOut.AidLines.Add(new Line(pt51, tpt._pt));
             LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
             lineList.Add(new Line(pt4, pt5));
@@ -822,7 +825,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt4 = pt1.OffsetX(pipeWidth);
             var pt5 = pt1.OffsetXY(pipeWidth, -floorHeight * 0.1);
             var pt6 = pt1.OffsetXY(pipeWidth, -floorHeight * 0.2);
-
+            fireHydrantSysOut.AidLines.Add(new Line(pt5, tpt._pt));
             //LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
             lineList.Add(new Line(pt4, pt5));

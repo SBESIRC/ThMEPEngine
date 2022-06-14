@@ -28,8 +28,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
 
-        public bool HydrantWithReel { get; set; }
+        public HashSet<Point3d> VerticalHasReelHydrant { get; set; }
         public Dictionary<Point3dEx, DBText> ExtraTextDic { get; set; }
+        public List<Line> AidLines { get; set; }
 
         public FireHydrantSystemOut()
         {
@@ -45,6 +46,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             FireHydrant = new List<Point3d>();
             DNList = new List<DBText>();
             ExtraTextDic = new Dictionary<Point3dEx, DBText>();
+            VerticalHasReelHydrant = new HashSet<Point3d>();
+            AidLines = new List<Line>();
         }
 
         public void Draw(bool across)
@@ -121,9 +124,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     blk.TransformBy(u2wMat);
                 }
 
-                int scaleX = -2 * Convert.ToInt32(HydrantWithReel) + 1;
+                
                 foreach (var fh in FireHydrant)
                 {
+                    var HydrantWithReel = false;
+                    if (VerticalHasReelHydrant.Contains(fh))
+                    {
+                        HydrantWithReel = true;
+                    }
+                    int scaleX = -2 * Convert.ToInt32(HydrantWithReel) + 1;
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         "W-FRPT-HYDT-PIPE",
                         "室内消火栓系统1",
@@ -147,6 +156,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     text.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(text);
                     text.ColorIndex = (int)ColorIndex.BYLAYER;
+                }
+
+                foreach(var line in AidLines)
+                {
+                    line.TransformBy(u2wMat);
+                    acadDatabase.CurrentSpace.Add(line);
+                    line.Layer = "W-辅助";
+                    line.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
             }
         }
@@ -177,10 +194,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, string> TermDnDic { get; set; }
         public List<Point3dEx> StartEndPts { get; set; }
         public HashSet<Point3dEx> VerticalHasHydrant { get; set; }
+        public HashSet<Point3dEx> VerticalHasReelHydrant { get; set; }
         public HashSet<Point3dEx> TermPtDic { get; set; }
         public List<Point3dEx> ThroughPt { get; set; }
 
-        public bool HydrantWithReel { get; set; }
+        public HashSet<BlockReference> HydrantWithReel { get; set; }
 
         public Dictionary<Point3dEx, Point3d> CrossMainPtDic { get; set; }//跨层主环的对应点位置
         public FireHydrantSystemIn(double floorHeight = 5000, StoreyRect storeyRect = null)
@@ -208,9 +226,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             TermDnDic = new Dictionary<Point3dEx, string>();//端点的标注
             StartEndPts = new List<Point3dEx>();//环管的起始终结点
             VerticalHasHydrant = new HashSet<Point3dEx>();//立管有消火栓设备
+            VerticalHasReelHydrant = new HashSet<Point3dEx>(); //立管有带卷盘消火栓设备
             TermPtDic = new HashSet<Point3dEx>();//是立管的管道末端
             ThroughPt = new List<Point3dEx>();
             CrossMainPtDic = new Dictionary<Point3dEx, Point3d>();
+            HydrantWithReel = new HashSet<BlockReference>();
         }
     }
 }

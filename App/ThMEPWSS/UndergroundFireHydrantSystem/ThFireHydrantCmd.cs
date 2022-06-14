@@ -102,7 +102,6 @@ namespace ThMEPWSS.Command
             }
             var inputFlag = GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt, Logger);//提取输入参数
 
-            fireHydrantSysOut.HydrantWithReel = fireHydrantSysIn.HydrantWithReel;
             if (!inputFlag)
             {
                 return null;
