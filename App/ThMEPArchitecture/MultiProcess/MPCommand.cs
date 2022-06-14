@@ -179,7 +179,7 @@ namespace ThMEPArchitecture.MultiProcess
             var layoutData = new LayoutData();
             var inputvaild = layoutData.Init(block, Logger);
             if (!inputvaild) return;
-            Converter.GetDataWraper(layoutData, ParameterViewModel);
+            Converter.GetDataWraper(layoutData, ParameterViewModel,false);
             InterParameter.MultiThread = true;
 #if DEBUG
             InterParameter.MultiThread = false;

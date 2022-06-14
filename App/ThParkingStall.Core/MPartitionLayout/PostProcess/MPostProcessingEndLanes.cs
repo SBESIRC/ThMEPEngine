@@ -173,6 +173,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     }
                 }
             }
+            //删除背靠背两边均是转角的情况
             if (removed_cars_group.Count > 1)
             {
                 for (int i = 0; i < removed_cars_group.Count - 1; i++)
@@ -216,6 +217,34 @@ namespace ThParkingStall.Core.MPartitionLayout
                             break;
                         }
                     }
+                }
+            }
+            //背靠背单边转角的情况
+            for (int i = 0; i < removed_cars_group.Count; i++)
+            {
+                bool isbackbackmodule = true;
+                foreach (var pl in removed_cars_group[i])
+                {
+                    if (Math.Abs(pl.Area - MParkingPartitionPro.DisVertCarWidth * MParkingPartitionPro.DisVertCarLengthBackBack) > 1)
+                    {
+                        isbackbackmodule = false;
+                        break;
+                    }
+                }
+                if (isbackbackmodule)
+                {
+                    cars.AddRange(removed_infocar_group[i]);
+                    foreach (var car in added_infocar_group[i])
+                        cars.Add(car);
+                    removed_cars_group.RemoveAt(i);
+                    removed_infocar_group.RemoveAt(i);
+                    added_infocar_group.RemoveAt(i);
+                    car_lanes.RemoveAt(i);
+                    succeed_lanes.RemoveAt(i);
+                    lanes_index.RemoveAt(i);
+                    endpoints.RemoveAt(i);
+                    vecs.RemoveAt(i);
+                    i--;
                 }
             }
             for (int i = 0; i < removed_cars_group.Count; i++)
@@ -853,6 +882,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     tmpcars = tmpro.Cars.Where(e => boundary.Contains(e.Polyline.Centroid.Coordinate))
                         .Where(e => laneboxpacialindex.SelectCrossingGeometry(e.Polyline.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck)).Count == 0)
                         .ToList();
+                    tmpcars = tmpcars.Where(e => carspacialindex.SelectCrossingGeometry(e.Polyline).Count == 0).ToList();
+                    carspacialindex.Update(tmpcars.Select(e => e.Polyline), new List<Polygon>());
                     if (tmpcars.Count > 0)
                         cars.AddRange(tmpcars);
                 }
