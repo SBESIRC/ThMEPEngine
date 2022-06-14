@@ -127,11 +127,11 @@ namespace ThMEPWSS.Command
             checkPipe.DrawSubLoop(curDb);
             checkPipe.DrawBranchLoop(curDb, fireHydrantSysIn, branchDic);
 
-            var pepeLen = GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic);//主环路获取
+            var pepeLen = GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic,false, ValveDic);//主环路获取
 
             var across = FireHydrantAcross.Cmd(curDb, fireHydrantSysIn, fireHydrantSysOut, pepeLen, subPathLsCnt);
 
-            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, across);//次环路获取
+            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, across,0,ValveDic);//次环路获取
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
 
             fireHydrantSysOut.Draw(across);//绘制系统图
