@@ -198,7 +198,6 @@ namespace ThMEPHVAC.EQPMFanSelect
             if (pModel.VentStyle == EnumFanModelType.AxialFlow)
             {
                 pModel.IntakeForm = EnumFanAirflowDirection.StraightInAndStraightOut;
-                pModel.FanModelCCCF = fanBlock.Id.GetDynBlockValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL);
                 haveValue = true;
             }
             else 
