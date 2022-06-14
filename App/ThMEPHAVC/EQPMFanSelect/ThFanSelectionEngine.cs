@@ -112,7 +112,6 @@ namespace ThMEPHVAC.EQPMFanSelect
 
                     // 写入原图元XData
                     objId.SetModelIdentifier(dataModel.XDataValueList(number, cFanModel, objId.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
-                    objId.SetModelXDataFrom(model.ObjectId, ThHvacCommon.RegAppName_FanSelectionEx);
 
                     // 写入原图元属性
                     blockRef.SetPropertiesFrom(model);

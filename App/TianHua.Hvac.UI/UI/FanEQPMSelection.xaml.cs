@@ -601,28 +601,51 @@ namespace TianHua.Hvac.UI.UI
                         return;
                 }
             }
-            var clonePModel = ModelCloneUtil.Copy(pModel);
-            clonePModel.fanDataModel.ID = System.Guid.NewGuid().ToString();
-            clonePModel.IsChildFan = false;
-            clonePModel.FanEnergyItem = fanViewModel.EnergyItems.Where(c => c.Value == pModel.FanEnergyItem.Value).FirstOrDefault();
-            clonePModel.MotorEnergyItem = fanViewModel.EnergyItems.Where(c => c.Value == pModel.MotorEnergyItem.Value).FirstOrDefault();
-            clonePModel.FanControlItem = fanViewModel.FanControlItems.Where(c => c.Value == pModel.FanControlItem.Value).FirstOrDefault();
-            clonePModel.FanMountTypeItem = fanViewModel.FanMountTypeItems.Where(c => c.Value == pModel.FanMountTypeItem.Value).FirstOrDefault();
-            clonePModel.VibrationModeItem = fanViewModel.VibrationModeItems.Where(c => c.Value == pModel.VibrationModeItem.Value).FirstOrDefault();
-            clonePModel.FanTypeItem = clonePModel.FanTypeItems.Where(c => c.Value == pModel.FanTypeItem.Value).FirstOrDefault();
-            clonePModel.AirflowDirectionItem = clonePModel.AirflowDirectionItems.Where(c => c.Value == pModel.AirflowDirectionItem.Value).FirstOrDefault();
-            clonePModel.FanModelCCCF = pModel.FanModelCCCF;
-            fanViewModel.allFanDataMoedels.Add(clonePModel);
-            fanViewModel.FanInfos.Add(clonePModel);
+            var addPModel = new FanDataModel(pModel.fanDataModel.Scenario);
+            var addPItem = new FanDataViewModel(addPModel);
+            addPModel.IsChildFan = false;
+            addPModel.InstallFloor = pModel.fanDataModel.InstallFloor;
+            addPModel.InstallSpace = pModel.fanDataModel.InstallSpace;
+            addPModel.ServiceArea = pModel.fanDataModel.ServiceArea;
+            addPModel.VentNum = pModel.fanDataModel.VentNum;
+            addPItem.fanDataModel.VolumeCalcModel = pModel.fanDataModel.VolumeCalcModel;
+            addPItem.fanDataModel.DragModel = pModel.fanDataModel.DragModel;
+            addPItem.FanEnergyItem = fanViewModel.EnergyItems.Where(c => c.Value == pModel.FanEnergyItem.Value).FirstOrDefault();
+            addPItem.MotorEnergyItem = fanViewModel.EnergyItems.Where(c => c.Value == pModel.MotorEnergyItem.Value).FirstOrDefault();
+            addPItem.FanControlItem = fanViewModel.FanControlItems.Where(c => c.Value == pModel.FanControlItem.Value).FirstOrDefault();
+            if (null != pModel.FanMountTypeItem)
+                addPItem.FanMountTypeItem = fanViewModel.FanMountTypeItems.Where(c => c.Value == pModel.FanMountTypeItem.Value).FirstOrDefault();
+            else
+                addPItem.FanMountTypeItem = fanViewModel.FanMountTypeItems.FirstOrDefault();
+            if (null != pModel.VibrationModeItem)
+                addPItem.VibrationModeItem = fanViewModel.VibrationModeItems.Where(c => c.Value == pModel.VibrationModeItem.Value).FirstOrDefault();
+            else
+                addPItem.VibrationModeItem = fanViewModel.VibrationModeItems.FirstOrDefault();
+            addPItem.FanTypeItem = addPItem.FanTypeItems.Where(c => c.Value == pModel.FanTypeItem.Value).FirstOrDefault();
+            addPItem.AirflowDirectionItem = addPItem.AirflowDirectionItems.Where(c => c.Value == pModel.AirflowDirectionItem.Value).FirstOrDefault();
+            addPItem.FanModelCCCF = pModel.FanModelCCCF;
+            fanViewModel.allFanDataMoedels.Add(addPItem);
+            fanViewModel.FanInfos.Add(addPItem);
             if (null != cModel)
             {
-                var cloneCModel = ModelCloneUtil.Copy(cModel);
-                cloneCModel.fanDataModel.ID = System.Guid.NewGuid().ToString();
-                cloneCModel.fanDataModel.PID = clonePModel.fanDataModel.ID;
-                cloneCModel.IsChildFan = true;
-                fanViewModel.allFanDataMoedels.Add(cloneCModel);
-                fanViewModel.FanInfos.Add(cloneCModel);
+                var addCItem = fanViewModel.allFanDataMoedels.Where(c => c.IsChildFan && c.fanDataModel.PID == addPModel.ID).FirstOrDefault();
+                if (null == addCItem)
+                {
+                    var addCModel = new FanDataModel(pModel.fanDataModel.Scenario);
+                    addCItem = new FanDataViewModel(addCModel);
+                    addCItem.fanDataModel.PID = addPModel.ID;
+                    addCItem.IsChildFan = true;
+                }
+                addCItem.fanDataModel.VolumeCalcModel = cModel.fanDataModel.VolumeCalcModel;
+                addCItem.fanDataModel.DragModel = cModel.fanDataModel.DragModel;
+                addCItem.WindResis = cModel.WindResis;
+                addCItem.AirVolume = cModel.AirVolume;
+                fanViewModel.allFanDataMoedels.Add(addCItem);
+                fanViewModel.FanInfos.Add(addCItem);
             }
+            addPItem.AirVolume = pModel.AirVolume;
+            addPItem.WindResis = pModel.WindResis;
+            RefreshFanModel(addPItem);
             fanViewModel.CheckShowFanNumberIsRepeat();
         }
         private FanDataViewModel GetChildFanViewModel(string id)
