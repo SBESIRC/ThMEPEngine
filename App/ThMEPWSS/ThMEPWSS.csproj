@@ -783,8 +783,6 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\PipeLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PointCompute.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\TermPoint.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\Casing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Check.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />

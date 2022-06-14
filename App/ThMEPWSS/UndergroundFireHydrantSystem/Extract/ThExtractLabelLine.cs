@@ -63,7 +63,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-SHET-PROF" ||
                    layer.ToUpper() == "TWT_TEXT";
         }
-
         private static bool IsTargetObject(Entity ent)
         {
             var type = ent.GetType().Name;
@@ -72,7 +71,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 || type.Equals("ImpCurve")
                 || type.Equals("Line");
         }
-
         public List<Line> CreateLabelLineList(DBObjectCollection labelLines)
         {
             var LabelPosition = new List<Line>();
@@ -111,7 +109,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 #endif
             return LabelPosition;
         }
-
         private void ExplodeLabelLine(Entity ent, DBObjectCollection dBObjects)
         {
             if (NotNeedDeal(ent))//炸出不需要关注对象就退出
@@ -142,7 +139,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
             }
         }
-
         private bool NotNeedExplode(BlockReference bkr)
         {
             var blockName = bkr.GetEffectiveName();
@@ -154,7 +150,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return false;
         }
-
         private bool NotNeedDeal(Entity ent)//
         {
             if (ent == null ||

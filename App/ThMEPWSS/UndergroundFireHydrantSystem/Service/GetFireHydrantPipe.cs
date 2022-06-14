@@ -32,7 +32,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return new Point3d(fireHydrantSysOut.InsertPoint.X, fireHydrantSysOut.InsertPoint.Y, 0);
             }
         }
-        public static double GetMainLoop(ref FireHydrantSystemOut fireHydrantSysOut, List<Point3dEx> rstPath,
+        public static double GetMainLoop(FireHydrantSystemOut fireHydrantSysOut, List<Point3dEx> rstPath,
             FireHydrantSystemIn fireHydrantSysIn, Dictionary<Point3dEx, List<Point3dEx>> branchDic,bool across = false,
             Dictionary<Point3dEx, List<ValveCasing>> ValveDic = null)
         {
@@ -102,13 +102,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                     if (fireHydrantSysIn.PtTypeDic[pt].Equals("MainLoop"))
                     {
-                        stPt = GetPipePart.GetMainLoopPoint(ref fireHydrantSysOut, i, stPt, rstPath, fireHydrantSysIn, valveWidth, pipeLength);
+                        stPt = GetPipePart.GetMainLoopPoint(fireHydrantSysOut, i, stPt, rstPath, fireHydrantSysIn, valveWidth, pipeLength);
                         continue;
                     }
                     if (fireHydrantSysIn.PtTypeDic[pt].Equals("SubLoop"))
                     {
                         bool isSubLoop = false;
-                        stPt = GetPipePart.GetSubLoopPoint(ref fireHydrantSysOut, isSubLoop, i, pt, stPt, rstPath, fireHydrantSysIn, pipeGap, pipeLength);
+                        stPt = GetPipePart.GetSubLoopPoint(fireHydrantSysOut, isSubLoop, i, pt, stPt, rstPath, fireHydrantSysIn, pipeGap, pipeLength);
                         continue;
                     }
                     if (fireHydrantSysIn.PtTypeDic[pt].Equals("Branch"))
@@ -130,7 +130,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 }
                             }
                         }
-                        stPt = GetPipePart.GetBranchPoint(ref fireHydrantSysOut, i, pt, stPt, rstPath, pipeGap, pipeLength, fireHydrantSysIn);
+                        stPt = GetPipePart.GetBranchPoint(fireHydrantSysOut, i, pt, stPt, rstPath, pipeGap, pipeLength, fireHydrantSysIn);
                         continue;
                     }
                     if (fireHydrantSysIn.PtTypeDic[pt].Contains("DieValve"))
@@ -157,7 +157,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             
             if(!across)
             {
-                GetPipePart.GetMainLoopDetial(ref fireHydrantSysOut, stPt, ptStart);
+                GetPipePart.GetMainLoopDetial(fireHydrantSysOut, stPt, ptStart);
                 fireHydrantSysOut.InsertPoint = ptStart.OffsetY(-fireHydrantSysIn.FloorHeight);
             }
 
@@ -177,7 +177,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return new Point3d(stPt1.X, stPt1.Y - (fireHydrantSysIn.FloorHeight + 3000) * index - 3000, 0);
             }
         }
-        public static void GetSubLoop(ref FireHydrantSystemOut fireHydrantSysOut, List<List<Point3dEx>> subPathList, FireHydrantSystemIn fireHydrantSysIn,
+        public static void GetSubLoop(FireHydrantSystemOut fireHydrantSysOut, List<List<Point3dEx>> subPathList, FireHydrantSystemIn fireHydrantSysIn,
             Dictionary<Point3dEx, List<Point3dEx>> branchDic, bool across = false, int subPathLsCnt=0, Dictionary<Point3dEx, List<ValveCasing>> ValveDic = null)
         {
             var index = 0;
@@ -207,14 +207,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                     if (fireHydrantSysIn.PtTypeDic[pt].Equals("MainLoop"))
                     {
-                        stPt = GetPipePart.GetMainLoopPoint(ref fireHydrantSysOut, i, stPt, rstPath, fireHydrantSysIn, valveWidth, pipeLength);
+                        stPt = GetPipePart.GetMainLoopPoint(fireHydrantSysOut, i, stPt, rstPath, fireHydrantSysIn, valveWidth, pipeLength);
                         continue;
                     }
 
                     if (fireHydrantSysIn.PtTypeDic[pt].Equals("SubLoop"))
                     {
                         bool isSubLoop = true;
-                        stPt = GetPipePart.GetSubLoopPoint(ref fireHydrantSysOut, isSubLoop, i, pt, stPt, rstPath, fireHydrantSysIn, pipeGap, pipeLength);
+                        stPt = GetPipePart.GetSubLoopPoint(fireHydrantSysOut, isSubLoop, i, pt, stPt, rstPath, fireHydrantSysIn, pipeGap, pipeLength);
                         continue;
                     }
 
@@ -237,7 +237,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 }
                             }
                         }
-                        stPt = GetPipePart.GetBranchPoint(ref fireHydrantSysOut, i, pt, stPt, rstPath, pipeGap, pipeLength, fireHydrantSysIn);
+                        stPt = GetPipePart.GetBranchPoint(fireHydrantSysOut, i, pt, stPt, rstPath, pipeGap, pipeLength, fireHydrantSysIn);
                         continue;
                     }
 
@@ -261,7 +261,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void GetBranch(ref FireHydrantSystemOut fireHydrantSysOut, Dictionary<Point3dEx, List<Point3dEx>> branchDic,
+        public static void GetBranch(FireHydrantSystemOut fireHydrantSysOut, Dictionary<Point3dEx, List<Point3dEx>> branchDic,
             Dictionary<Point3dEx, List<ValveCasing>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             var list = new List<Point3d>();
@@ -659,7 +659,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             };
             TextGet.GetText(tpt, fireHydrantSysIn, ref fireHydrantSysOut, pt4, pt6);
             fireHydrantSysOut.AidLines.Add(new Line(pt6, tpt._pt));
-            ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4, flag3);
+            ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, lineList, fireHydrantSysOut, pt1, pt4, flag3);
             foreach (var line in lineList)
             {
                 fireHydrantSysOut.LoopLine.Add(line);
@@ -698,12 +698,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt6 = pt1.OffsetXY(pipeWidth, floorHeight * 0.5);
 
             fireHydrantSysOut.AidLines.Add(new Line(pt5, tpt._pt));
-            LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
+            LoopLine.Split(fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
             lineList.Add(new Line(pt4, pt5));
             if (type == 2)
             {
-                ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4);
+                ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn,  lineList,  fireHydrantSysOut, pt1, pt4);
             }
             foreach (var line in lineList)
             {
@@ -822,11 +822,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt6 = new Point3d(pt51.X, pt4.Y + floorHeight * 0.5 + 800, 0);
             var pt7 = new Point3d(pt6.X + floorHeight * 0.3500, pt6.Y, 0);
             fireHydrantSysOut.AidLines.Add(new Line(pt51, tpt._pt));
-            LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
+            LoopLine.Split(fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
             lineList.Add(new Line(pt4, pt5));
             lineList.Add(new Line(pt5, pt51));
-            ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4);
+            ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, lineList, fireHydrantSysOut, pt1, pt4);
             foreach (var line in lineList)
             {
                 fireHydrantSysOut.LoopLine.Add(line);
@@ -881,7 +881,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             lineList.Add(new Line(pt4, pt5));
             if (type == 2)
             {
-                ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, ref lineList, ref fireHydrantSysOut, pt1, pt4);
+                ValveGet.GetValve(branchPt, ValveDic, fireHydrantSysIn, lineList, fireHydrantSysOut, pt1, pt4);
             }
             foreach (var line in lineList)
             {

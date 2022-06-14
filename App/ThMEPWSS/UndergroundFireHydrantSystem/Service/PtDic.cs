@@ -18,7 +18,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public static class PtDic
     {
-        public static void CreatePtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
+        public static void CreatePtDic(FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
         {
             //管线添加
             fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
@@ -76,7 +76,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateLeadPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
+        public static void CreateLeadPtDic(FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
         {
             double tolerance = 30;
             //管线添加
@@ -130,7 +130,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateDNDic(ref FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection PipeDN, List<Line> lineList)
+        public static void CreateDNDic(FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection PipeDN, List<Line> lineList)
         {
             foreach (var dn in PipeDN)//创建DN字典对
             {
@@ -192,7 +192,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateTermPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+        public static void CreateTermPtDic(FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
             ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
@@ -204,7 +204,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         ;
                     }
-                    CreateTermPtDic2(pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
+                    CreateTermPtDic2(pt, fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
                 }
                 catch(Exception ex)
                 {
@@ -256,7 +256,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
 
 
-        private static void CreateTermPtDic2(Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+        private static void CreateTermPtDic2(Point3dEx pt, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
             var tpt = pt;
@@ -739,7 +739,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateBranchDic(ref Dictionary<Point3dEx, List<Point3dEx>> branchDic, ref Dictionary<Point3dEx, List<ValveCasing>> ValveDic,
+        public static void CreateBranchDic(Dictionary<Point3dEx, List<Point3dEx>> branchDic, Dictionary<Point3dEx, List<ValveCasing>> ValveDic,
             List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
         {
             foreach (var rstPath in mainPathList)
@@ -825,7 +825,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateBranchDNDic(ref FireHydrantSystemIn fireHydrantSysIn, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
+        public static void CreateBranchDNDic(FireHydrantSystemIn fireHydrantSysIn, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
             foreach (var pt in fireHydrantSysIn.PtDic.Keys)
             {

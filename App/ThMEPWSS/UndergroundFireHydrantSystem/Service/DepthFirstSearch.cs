@@ -91,7 +91,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
         //主环遍历时忽略掉的点
-        private static bool IsOmitPt(Point3dEx p, Point3dEx cur, Point3dEx target, bool subLoopPoint, HashSet<Point3dEx> visited, FireHydrantSystemIn fireHydrantSysIn)
+        private static bool IsOmitPt(Point3dEx p, Point3dEx cur, Point3dEx target, bool subLoopPoint, 
+            HashSet<Point3dEx> visited, FireHydrantSystemIn fireHydrantSysIn)
         {
             if (fireHydrantSysIn.ThroughPt.Contains(p))
             {

@@ -7,7 +7,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public static class MarkLine
     {
-        public static void GetPipeMark(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3d>> pipeMarkSite, Point3d startPt, double tor = 30)
+        public static void GetPipeMark(FireHydrantSystemIn fireHydrantSysIn, List<List<Point3d>> pipeMarkSite, 
+            Point3d startPt, double tor = 30)
         {
             foreach(var pts in pipeMarkSite)
             {

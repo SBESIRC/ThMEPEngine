@@ -12,7 +12,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class GetPipePart
     {
-        public static Point3d GetMainLoopPoint(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3d stPt, 
+        public static Point3d GetMainLoopPoint(FireHydrantSystemOut fireHydrantSysOut, int i, Point3d stPt, 
             List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn, double valveWidth, double pipeLength)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -47,7 +47,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static Point3d GetSubLoopPoint(ref FireHydrantSystemOut fireHydrantSysOut, bool IsSubLoop, int i,
+        public static Point3d GetSubLoopPoint(FireHydrantSystemOut fireHydrantSysOut, bool IsSubLoop, int i,
             Point3dEx pt, Point3d stPt, List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn, double pipeGap, double pipeLength)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -79,7 +79,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }   
         }
 
-        public static Point3d GetBranchPoint(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3dEx pt, Point3d stPt,
+        public static Point3d GetBranchPoint(FireHydrantSystemOut fireHydrantSysOut, int i, Point3dEx pt, Point3d stPt,
             List<Point3dEx> rstPath, double pipeGap, double pipeLength, FireHydrantSystemIn fireHydrantSysIn)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -145,8 +145,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-
-
         public static void AddDN(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3d pt1, 
             FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> rstPath)
         {
@@ -173,7 +171,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void GetMainLoopDetial(ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, Point3d ptStart)
+        public static void GetMainLoopDetial(FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, Point3d ptStart)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

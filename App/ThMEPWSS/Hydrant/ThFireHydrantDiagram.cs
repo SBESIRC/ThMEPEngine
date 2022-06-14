@@ -695,21 +695,21 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 using (DocLock)
                 using (var adb = AcadDatabase.Active())
                 {
-                    var ok = GetInput.GetFireHydrantSysInput(adb, ref fireHydrantSysIn, _selectArea, loopStartPt);
+                    var ok = GetInput.GetFireHydrantSysInput(adb, fireHydrantSysIn, _selectArea, loopStartPt);
                     if (!ok) return null;
-                    var _mainPathList = MainLoop.Get(ref fireHydrantSysIn);
+                    var _mainPathList = MainLoop.Get(fireHydrantSysIn);
                     if (_mainPathList.Count == THESAURUSSTAMPEDE)
                     {
                         throw new Exception(TELECOMMUNICATIONS);
                     }
-                    var _subPathList = SubLoop.Get(ref fireHydrantSysIn, _mainPathList);
+                    var _subPathList = SubLoop.Get(fireHydrantSysIn, _mainPathList);
                     var visited = new HashSet<Point3dEx>();
                     visited.AddVisit(_mainPathList);
                     visited.AddVisit(_subPathList);
                     PtDic.CreateBranchDic(ref branchDic, ref valveDic, _mainPathList, fireHydrantSysIn, visited);
                     PtDic.CreateBranchDic(ref branchDic, ref valveDic, _subPathList, fireHydrantSysIn, visited);
-                    GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, _mainPathList[THESAURUSSTAMPEDE], fireHydrantSysIn, branchDic);
-                    GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, _subPathList, fireHydrantSysIn, branchDic);
+                    GetFireHydrantPipe.GetMainLoop(fireHydrantSysOut, _mainPathList[THESAURUSSTAMPEDE], fireHydrantSysIn, branchDic);
+                    GetFireHydrantPipe.GetSubLoop(fireHydrantSysOut, _subPathList, fireHydrantSysIn, branchDic);
                     GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, valveDic, fireHydrantSysIn);
                     mainPathList = _mainPathList;
                     subPathList = _subPathList;
