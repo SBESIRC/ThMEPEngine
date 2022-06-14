@@ -31,18 +31,22 @@ namespace ThCADExtension
 
             p = new Point(screenPt.X - pSize, screenPt.Y - pSize);
             pt = ed.PointToWorld(p, 1);
+            pt = pt.TransformBy(ed.WCS2UCS());
             points.Add(pt);
 
             p = new Point(screenPt.X + pSize, screenPt.Y - pSize);
             pt = ed.PointToWorld(p, 1);
+            pt = pt.TransformBy(ed.WCS2UCS());
             points.Add(pt);
 
             p = new Point(screenPt.X + pSize, screenPt.Y + pSize);
             pt = ed.PointToWorld(p, 1);
+            pt = pt.TransformBy(ed.WCS2UCS());
             points.Add(pt);
 
             p = new Point(screenPt.X - pSize, screenPt.Y + pSize);
             pt = ed.PointToWorld(p, 1);
+            pt = pt.TransformBy(ed.WCS2UCS());
             points.Add(pt);
 
             return ed.SelectCrossingPolygon(points);
