@@ -7729,44 +7729,29 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                 var gVPipes = gcircles.Select(x => new GCircle(x.GetCenter(), x.ToGRect().InnerRadius)).Where(x => x.Radius > THESAURUSDRAGOON).Select(x => x.ToCirclePolygon(SUPERLATIVENESS)).Where(x => storeyst(x.EnvelopeInternal)).ToList();
                 var gcps = gcircles.Select(x => new GCircle(x.GetCenter(), x.ToGRect().InnerRadius)).Where(x => x.Radius <= THESAURUSDRAGOON).Select(x => x.ToCirclePolygon(SUPERLATIVENESS)).Where(x => storeyst(x.EnvelopeInternal)).ToList();
                     {
-                        var ctsf = GeoFac.CreateIntersectsSelector(gcts.Select(x => x.ToPolygon()).ToList());
-                        foreach (var grp in GeoFac.GroupGeometries(glabelLines.Select(x => x.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Square).Tag(x)).ToList()))
+                        var lines = glabelLines;
+                        var segs = new HashSet<GLineSegment>();
+                        foreach (var lns in GeoFac.GroupGeometries(lines))
                         {
-                            var lines = grp.Select(x => x.UserData).OfType<Geometry>().ToList();
-                            var segs = GeoFac.GetManyLines(lines).ToList();
-                            var hsegs = segs.Where(x => x.IsHorizontal(THESAURUSCOMMUNICATION)).ToList();
-                            if (hsegs.Count is THESAURUSPERMUTATION)
+                            var _segs = GeoFac.GetManyLines(lns).Select(x => x.Extend(-THESAURUSCOMMUNICATION)).ToList();
+                            if (_segs.Count == QUOTATIONEDIBLE)
                             {
-                                var pts = segs.YieldPoints().Distinct().Select(x => x.ToNTSPoint()).ToList();
-                                var ptsdf = GeoFac.CreateDisjointSelector(pts);
-                                pts = ptsdf(GeoFac.CreateGeometryEx(hsegs.Select(x => x.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Flat)).ToList()));
-                                var labels = hsegs.SelectMany(seg =>
+                                if (_segs.Where(x => x.IsHorizontal(THESAURUSCOMMUNICATION)).Count() == THESAURUSPERMUTATION)
                                 {
-                                    static bool IsWantedText(string text)
+                                    var pts = _segs.YieldPoints().Select(x => x.ToNTSPoint()).ToList();
+                                    pts = GeoFac.CreateDisjointSelector(pts)(GeoFac.CreateGeometryEx(_segs.Where(x => x.IsHorizontal(THESAURUSCOMMUNICATION)).Select(x => x.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Square)).ToList()));
+                                    if (pts.Select(x => x.ToPoint3d()).Distinct(new Point3dComparer(THESAURUSCOMMUNICATION)).Count() >= THESAURUSHOUSING)
                                     {
-                                        if (text is null) return INTRAVASCULARLY;
-                                        return IsDrainageLabel(text) || text.Contains(THESAURUSLECHER);
-                                    }
-                                    var p = seg.Center;
-                                    var dy = THESAURUSARRIVE;
-                                    var pls = ctsf(new GLineSegment(p, p.OffsetY(dy)).ToLineString()).Where(x => IsWantedText(x.UserData as string)).ToList();
-                                    for (int i = THESAURUSHOUSING; i <= DISPENSABLENESS; i++)
-                                    {
-                                        if (pls.Count > THESAURUSSTAMPEDE) break;
-                                        dy = HYPERDISYLLABLE + i * THESAURUSACRIMONIOUS;
-                                        pls = ctsf(new GLineSegment(p, p.OffsetY(dy)).ToLineString()).Where(x => IsDrainageLabel(x.UserData as string)).ToList();
-                                    }
-                                    return pls.Select(x => x.UserData).OfType<string>();
-                                }).Distinct().ToList();
-                                foreach (var pt in pts.Select(x => x.ToPoint3d()).Distinct(new Point3dComparer(THESAURUSACRIMONIOUS)))
-                                {
-                                    foreach (var label in labels)
-                                    {
-                                        gmultileaderdrainageshooters.Add(pt.ToNTSPoint().Tag(label));
+                                        segs.AddRange(GeoFac.GetLines(new MultiLineString(GeoFac.GetManyLines(lns).Select(x => x.ToLineString()).ToArray()).Difference(new MultiPoint(pts.ToArray()).GetCenter().ToGRect(SUPERLATIVENESS).ToPolygon())).Where(x => x.Length > THESAURUSHOUSING));
                                     }
                                 }
                             }
+                            else
+                            {
+                                segs.AddRange(GeoFac.GetManyLines(lns).Select(x => x.Extend(-THESAURUSCOMMUNICATION)).Where(x => x.Length > THESAURUSHOUSING));
+                            }
                         }
+                        glabelLines = segs.Select(x => x.ToLineString()).OfType<Geometry>().ToList();
                     }
                 {
                     var pipesf = GeoFac.CreateIntersectsSelector(gVPipes);
