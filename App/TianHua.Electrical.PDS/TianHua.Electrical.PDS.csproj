@@ -236,10 +236,6 @@
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThMEPIO\ThMEPIO.csproj">
-      <Project>{81ca0abb-8e13-4e53-99b6-56baaf2f7bd9}</Project>
-      <Name>ThMEPIO</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -255,9 +251,7 @@
       <Name>ThCADExtension</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Project\TestModel\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
