@@ -254,6 +254,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 if (node.Item.Riser == null) continue;
                 if (node.Item.Riser.RiserPts.Count == 0)
                 {
+                    //20220614modified
+                    return true;
+                    //20220614modified
                     if (node.Item.Break != null && node.Item.Break.BreakName != "")
                     {
                         if (!hasFlushPoint)
@@ -542,7 +545,37 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                             DrawText(DIMLAYER, riser_dim, leftloc, 0.0);
                         }
                     }
-                    else continue;
+                    else
+                    {
+                        //continue;
+                        //此else部分为0614修改代码，解决只有立管没标注不画立管的case，原代码此处用以上continue跳过
+                        if (!hasFlushPoint)
+                        {
+                            isUnnececcsaryBreakDot = true;
+                            var iniloc = riserPoint;
+                            var floorlines = FloorLines.Where(e => e.GetCenter().Y > iniloc.Y).OrderBy(e => e.GetCenter().Y - iniloc.Y);
+                            double distance = 1600;
+                            if (floorlines.Count() > 0) distance = floorlines.First().GetClosestPointTo(iniloc, true).DistanceTo(iniloc) - 200;
+                            var uploc = iniloc + Vector3d.YAxis * distance;
+                            var vertline = new Line(iniloc, uploc);
+                            //var leftuploc = vertline.GetCenter() - Vector3d.XAxis * (GetMarkLength(riser_dim) + 200);
+                            //var horline = new Line(leftuploc, vertline.GetCenter());
+                            PreLines.Add(new PreLine(vertline, PipeLayerName, 1));
+                            //PreLines.Add(new PreLine(horline, DIMLAYER));
+                            //DrawText(DIMLAYER, riser_dim, leftuploc, 0.0);
+                            DrawBreakDot(uploc, node.Item.Position);
+                            continue;
+                        }
+                        else
+                        {
+                            var iniloc = markloc;
+                            var leftloc = markloc - Vector3d.XAxis * (GetMarkLength(riser_dim) + 200);
+                            var flushline = new Line(leftloc, iniloc);
+                            PreLines.Add(new PreLine(flushline, DIMLAYER));
+                            DrawText(DIMLAYER, riser_dim, leftloc, 0.0);
+                        }
+                        continue;
+                    }
                 }
                 //if (node.Item.Riser == null) continue;
                 double curRiserLength = 0;
