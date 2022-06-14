@@ -65,7 +65,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     var frameUcs = ucsInfos.Where(x => model.OriginFrame.Contains(x.ucsInsertPoint)).FirstOrDefault();
                     if (frameUcs != null)
                     {
-                        model.dir = frameUcs.ucsMatrix.CoordinateSystem3d.Xaxis;
+                        model.dir = frameUcs.OriginMatrix.CoordinateSystem3d.Xaxis;
                     }
                 }
             }
