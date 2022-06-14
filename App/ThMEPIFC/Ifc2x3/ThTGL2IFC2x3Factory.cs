@@ -110,7 +110,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public IfcBuildingStorey CreateStorey(IfcStore model, IfcBuilding Building, ThTCHBuildingStorey storey)
+        static public IfcBuildingStorey CreateStorey(IfcStore model, IfcBuilding building, ThTCHBuildingStorey storey)
         {
             using (var txn = model.BeginTransaction("Create Storey"))
             {
@@ -118,13 +118,10 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Name = storey.FloorNum;
                 ret.Elevation = storey.FloorOrigin.Z;
 
-                // for ifc2x3
-                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
-                Building.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
-                relContainedIn.RelatedElements.Add(ret);
-                relContainedIn.RelatingStructure = Building;
-                // for ifc4
-                //Building.AddElement(ret);
+                // setup aggregation relationship
+                var ifcRel = model.Instances.New<IfcRelAggregates>();
+                ifcRel.RelatingObject = building;
+                ifcRel.RelatedObjects.Add(ret);
 
                 // add properties
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
