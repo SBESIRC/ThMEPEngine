@@ -1295,7 +1295,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (crossedcarsc.Count == 0) cond = true;
                     else
                     {
-                        if (crossedcarsc.Count == 1)
+                        if (crossedcarsc.Count == 1 && ScareEnabledForBackBackModule)
                         {
                             var crossed_back_car=crossedcarsc[0];
                             var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
