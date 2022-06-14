@@ -1493,7 +1493,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 {
                     var p = Pillars[i].Clone();
                     double dist = DisVertCarLength - DisPillarMoveDeeplyBackBack;
-                    p=p.Translation(vec.Normalize() * dist);
+                    if(ScareEnabledForBackBackModule) dist = DisVertCarLengthBackBack - DisPillarMoveDeeplyBackBack;
+                    p =p.Translation(vec.Normalize() * dist);
                     var pp = p.Clone();
                     pp = pp.Translation(vec.Normalize() * DisPillarDepth);
                     var pisegs = pp.GetEdges();
