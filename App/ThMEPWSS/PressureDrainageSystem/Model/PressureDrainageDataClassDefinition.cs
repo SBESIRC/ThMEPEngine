@@ -28,6 +28,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<Line> HorizontalPipe;//横管
         public List<SubmergedPumpClass> SubmergedPumps;//潜水泵
         public List<DrainWellClass> DrainWells;//排水井
+        public List<Extents3d> Wrappipes;//套管
     }
     public class PressureDrainageGeoData
     {
@@ -137,11 +138,23 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
             {
                 this.HorizontalPipes = new List<Line>();
             }
+            if (this.WrapPipes == null)
+            {
+                this.WrapPipes = new List<Polyline>();
+            }
         }
         public List<VerticalPipeClass> VerticalPipes { get; set; }
         public List<Line> HorizontalPipes { get; set; }
+        public List<Polyline> WrapPipes { get; set; }
         public int[,] VertPipeConnectedArr { get; set; }
         public int DrainWellPipeIndex { get; set; }
         public int DrainMode { get; set; }
+        public enum UnitDrainMode : int
+        {
+            CROSSROOFAndINTOWELL = 1,//穿顶板进水井-丢弃
+            CROSSROOF = 2,//穿顶板
+            CROSSOUTDOOR = 3,//穿外墙
+            CROSSINDOOR = 4//穿侧墙
+        }
     }
 }
