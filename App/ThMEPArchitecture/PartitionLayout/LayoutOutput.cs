@@ -109,6 +109,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = colorgray;
             pl.Layer = PCarLayerName;
+            pl.Linetype = "DASHED";
             ents.Add(pl);
             //
             pt = ori;
@@ -118,12 +119,14 @@ namespace ThMEPArchitecture.PartitionLayout
             vec = vec.RotateBy(Math.PI / 6, Vector3d.ZAxis);
             var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
             door.ColorIndex = colorgray;
+            door.Linetype = "DASHED";
             var dr = door.Clone() as Line;
             door.TransformBy(Matrix3d.Displacement(y * (width - widthDd)));
             door.Layer = PCarLayerName;
             ents.Add(door);
             dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(1, 0, 0))));
             dr.Layer = PCarLayerName;
+            dr.Linetype = "DASHED";
             ents.Add(dr);
 
             return ents;
@@ -171,6 +174,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = colorgray;
+            pl.Linetype = "DASHED";
             pl.Layer = BACKVCarLayerName;
             ents.Add(pl);
             //
@@ -200,11 +204,13 @@ namespace ThMEPArchitecture.PartitionLayout
             vec = vec.RotateBy(Math.PI / 3, Vector3d.ZAxis);
             var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
             door.ColorIndex = colorgray;
+            door.Linetype = "DASHED";
             door.Layer = BACKVCarLayerName;
             ents.Add(door);
             var dr = door.Clone() as Line;
             dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(0, 1, 0))));
             dr.Layer = BACKVCarLayerName;
+            dr.Linetype = "DASHED";
             ents.Add(dr);
             return ents;
         }
@@ -251,6 +257,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = colorgray;
+            pl.Linetype = "DASHED";
             pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
@@ -280,11 +287,13 @@ namespace ThMEPArchitecture.PartitionLayout
             vec = vec.RotateBy(Math.PI / 3, Vector3d.ZAxis);
             var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
             door.ColorIndex = colorgray;
+            door.Linetype = "DASHED";
             door.Layer = VCarLayerName;
             ents.Add(door);
             var dr = door.Clone() as Line;
             dr.Layer = VCarLayerName;
             dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(0, 1, 0))));
+            dr.Linetype = "DASHED";
             ents.Add(dr);
             return ents;
         }
