@@ -193,14 +193,19 @@ namespace ThMEPArchitecture.MultiProcess
                     genome.Add(gene);
                 }
                 orgSolution.Genome = genome;
-                ProcessAndDisplay(orgSolution, block, i);
+                DisplayParkingStall.Clear();
+                if (i != 0)
+                {
+                    var blk_C = block.Clone() as BlockReference;
+                    blk_C.AddToCurrentSpace();
+                    DisplayParkingStall.Add(blk_C);
+                }
+                ProcessAndDisplay(orgSolution, i);
             }
-            
         }
 
         public void Run(AcadDatabase acadDatabase)
         {
-
             var blks = InputData.SelectBlocks(acadDatabase);
             if (blks == null) return;
             var displayPro = ProcessForDisplay.CreateSubProcess();
@@ -357,7 +362,15 @@ namespace ThMEPArchitecture.MultiProcess
                     {
                         var res = GA.Run2(displayInfo);
                         var best = res.First();
-                        ProcessAndDisplay(best, blk, i, stopWatch, displayInfo);
+
+                        DisplayParkingStall.Clear();
+                        if(i!= 0)
+                        {
+                            var blk_C = blk.Clone() as BlockReference;
+                            blk_C.AddToCurrentSpace();
+                            DisplayParkingStall.Add(blk_C);
+                        }
+                        ProcessAndDisplay(best, i, stopWatch, displayInfo);
                     }
                     catch (Exception ex)
                     {
@@ -374,16 +387,10 @@ namespace ThMEPArchitecture.MultiProcess
             }
         }
 
-        private void ProcessAndDisplay(MPChromosome solution,BlockReference orgBlk=null,int SolutionID = 0 ,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
+        private void ProcessAndDisplay(MPChromosome solution,int SolutionID = 0 ,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
         {
-            var moveDistance = 0.0;
-            if (orgBlk != null && SolutionID!=0)
-            {
-                var blk_C = orgBlk.Clone() as BlockReference;
-                blk_C.AddToCurrentSpace();
-                DisplayParkingStall.Add(blk_C);
-                moveDistance = SolutionID*2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) - InterParameter.TotalArea.Coordinates.Min(c => c.X));
-            }
+            var moveDistance = SolutionID*2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) - 
+                                                InterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = InterParameter.GetSubAreas(solution);
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
             var layer = "最终分割线";
@@ -409,7 +416,7 @@ namespace ThMEPArchitecture.MultiProcess
             Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
             subAreas.ForEach(area => area.ShowText());
-            DisplayParkingStall.Display(moveDistance);
+            DisplayParkingStall.MoveAddedEntities(moveDistance);
             SubAreaParkingCnt.Clear();
             ReclaimMemory();
             if(stopWatch != null)

@@ -266,7 +266,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             segLines = CombineEmptyToNoneEmptyArea(segLines, true, HorizontalFirst);
             segLines = CombineEmptyToEmptyArea(segLines, true, HorizontalFirst, out subAreaCnt_new);
             var grouped = segLines.GroupSegLines().OrderBy(g => g.Count).Last();
-            grouped.CleanLineWithOneIntSecPt(InterParameter.TotalArea);
+            grouped = grouped.CleanLineWithOneIntSecPt(InterParameter.TotalArea);
             return grouped;
         }
         public static List<LineSegment> DefineSegLinePriority(this List<LineSegment> segLines)

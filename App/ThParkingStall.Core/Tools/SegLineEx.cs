@@ -79,15 +79,17 @@ namespace ThParkingStall.Core.Tools
             }
             return seglineConnectToBound;
         }
-        public static void ExtendToBound(this List<LineSegment> SegLines, Polygon WallLine, List<(bool, bool)> seglineConnectToBound)
+        public static void ExtendToBound(this List<LineSegment> SegLines, Polygon WallLine, List<(bool, bool)> seglineConnectToBound, 
+            MNTSSpatialIndex InnerObjectSpatialIndex)
         {
             for (int i = 0; i < SegLines.Count; i++)
             {
                 var segLine = SegLines[i];
-                SegLines[i] = segLine.ExtendToBound(WallLine, seglineConnectToBound[i]);
+                SegLines[i] = segLine.ExtendToBound(WallLine, seglineConnectToBound[i], InnerObjectSpatialIndex);
             }
         }
-        public static LineSegment ExtendToBound(this LineSegment SegLine, Polygon WallLine, (bool, bool) seglineConnectToBound)
+        public static LineSegment ExtendToBound(this LineSegment SegLine, Polygon WallLine, (bool, bool) seglineConnectToBound, 
+            MNTSSpatialIndex InnerObjectSpatialIndex = null)
         {
             if (!seglineConnectToBound.Item1 && !seglineConnectToBound.Item2) return SegLine;
             var SegLineStr = SegLine.ToLineString();
@@ -95,7 +97,6 @@ namespace ThParkingStall.Core.Tools
             var mid = IntSection.Centroid;
             if (!WallLine.Contains(mid)) return SegLine;
             List<Coordinate> LineIntSecPts = null;
-
             var IntSecPts = SegLineStr.Intersection(WallLine.Shell).Coordinates.OrderBy(c => c.X + c.Y);
             Coordinate P0;
             Coordinate P1;
@@ -113,13 +114,31 @@ namespace ThParkingStall.Core.Tools
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
                 var quryed = LineIntSecPts.Where(c => c.X + c.Y < P0.X + P0.Y);
-                if(quryed.Count() > 0) P0 = quryed.Last();
+                if(quryed.Count() > 0)
+                {
+                    if(InnerObjectSpatialIndex != null)
+                    {
+                        var newLine = new LineSegment(P0, quryed.Last());
+                        var rect = newLine.GetRect(VMStock.RoadWidth - 1);
+                        if(InnerObjectSpatialIndex.SelectCrossingGeometry(rect).Count==0) P0 = quryed.Last();
+                    }
+                    else P0 = quryed.Last();
+                }
             }
             if (seglineConnectToBound.Item2&&!mid.Coordinate.ExistPtInDirection(IntSecPts,true))
             {
                 if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
                 var quryed = LineIntSecPts.Where(c => c.X + c.Y > P1.X + P1.Y);
-                if (quryed.Count() > 0) P1 = quryed.First();
+                if (quryed.Count() > 0)
+                {
+                    if (InnerObjectSpatialIndex != null)
+                    {
+                        var newLine = new LineSegment(P1, quryed.First());
+                        var rect = newLine.GetRect(VMStock.RoadWidth - 1);
+                        if (InnerObjectSpatialIndex.SelectCrossingGeometry(rect).Count == 0) P1 = quryed.First();
+                    }
+                    else P1 = quryed.First();
+                }
             }
             return new LineSegment(P0, P1).Extend(0.1);
         }
@@ -317,14 +336,17 @@ namespace ThParkingStall.Core.Tools
                 }
             }
         }
-        public static void CleanLineWithOneIntSecPt(this List<LineSegment> SegLines, Polygon Area)
+        public static List<LineSegment> CleanLineWithOneIntSecPt(this List<LineSegment> SegLines, Polygon Area)
         {
+            var newSegLines = new List<LineSegment>();
             for (int i = SegLines.Count - 1; i >= 0; i--)
             {
-                var segLine = SegLines[i];
-                if (GetAllIntSecPs(i, SegLines, Area).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
-
+                if (GetAllIntSecPs(i, SegLines, Area).Count > 1)
+                {
+                    newSegLines.Add(SegLines[i]);
+                }
             }
+            return newSegLines;
         }
         //判断分割线是否全部相连
         public static bool Allconnected(this List<LineSegment> SegLines)
@@ -482,6 +504,7 @@ namespace ThParkingStall.Core.Tools
             {
                 if (i == idx) continue;
                 var line2 = segline[i];
+                if (line1.IsVertical() == line2.IsVertical()) continue;
                 var pt = line1.Intersection(line2);
                 if (pt != null) IntSecPoints.Add(new Point(pt));
             }

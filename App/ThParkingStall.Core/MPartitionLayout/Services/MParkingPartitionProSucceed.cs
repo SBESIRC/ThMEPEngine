@@ -492,6 +492,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private bool CloseToWall(Coordinate point,LineSegment line)
         {
+            if (Walls.Count == 0) return false;
             double tol = 10;
             if (/*Walls.Count == 0*/false)
             {

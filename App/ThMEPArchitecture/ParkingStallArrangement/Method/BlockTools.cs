@@ -133,11 +133,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             Entities.Add(entity);
         }
-        public static void Display(double distance)
+        public static void MoveAddedEntities(double distance)
         {
-            var vector = new Vector3d(distance, 0,0);
-            //Entities.ShowBlock(blockTag, LayerName, vector);
-            Entities.ForEach(entity => entity.TransformBy(Matrix3d.Displacement(vector)));
+            if(distance != 0)
+            {
+                var vector = new Vector3d(distance, 0, 0);
+                Entities.ForEach(entity => entity.TransformBy(Matrix3d.Displacement(vector)));
+            }
             Clear();
         }
         public static void Dispose()

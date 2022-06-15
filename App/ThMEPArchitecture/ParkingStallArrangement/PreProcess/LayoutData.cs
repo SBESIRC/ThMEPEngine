@@ -103,7 +103,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 //基于交点打断
                 segLines_C.ForEach(l => 
                     BreakedSegLines.AddRange(l.Split(CrossPts.Select(c=>c.Coordinate).ToList())));
-                SegLines = BreakedSegLines;
+                SegLines = BreakedSegLines.CleanLineWithOneIntSecPt(WallLine);
                 //获取连接关系
                 SeglineIndexList = SegLines.GetSegLineIntsecList();
                 SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);

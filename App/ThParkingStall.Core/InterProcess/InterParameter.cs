@@ -46,7 +46,8 @@ namespace ThParkingStall.Core.InterProcess
         private static MNTSSpatialIndex _BoundarySpatialIndex;// 所有边界，包含边界线，坡道，以及障碍物
         public static MNTSSpatialIndex BoundarySpatialIndex { get { return _BoundarySpatialIndex; } }// 所有边界，包含边界线，坡道，以及障碍物
 
-
+        private static MNTSSpatialIndex _InnerObjectSpatialIndex;
+        public static MNTSSpatialIndex InnerObjectSpatialIndex { get { return _InnerObjectSpatialIndex; } }//不可穿障碍物的spatialindex
         private static List<(double, double)> _LowerUpperBound;
         public static List<(double, double)> LowerUpperBound { get { return _LowerUpperBound; } } // 基因的上下边界，绝对值
 
@@ -71,6 +72,13 @@ namespace ThParkingStall.Core.InterProcess
             foreach (int idx in OuterBuildingIdxs) ignorableBuildings.Add(Buildings[idx]);
             ignorableBuildings.AddRange(TotalArea.Shell.ToLineStrings().ToList());
             _BoundaryObjectsSPIDX = new MNTSSpatialIndex(ignorableBuildings);
+            var outerIdx = OuterBuildingIdxs.ToHashSet();
+            var InnerObject = new List<Geometry>();
+            for (int i = 0; i < Buildings.Count; i++)
+            {
+                if (!outerIdx.Contains(i)) InnerObject.Add(Buildings[i]);
+            }
+            _InnerObjectSpatialIndex = new MNTSSpatialIndex(InnerObject);
             _SegLineIntsecList = dataWraper.SeglineIndexList;
             _SeglineConnectToBound = dataWraper.SeglineConnectToBound;
             _LowerUpperBound = dataWraper.LowerUpperBound;
@@ -141,15 +149,21 @@ namespace ThParkingStall.Core.InterProcess
                 newSegLines.Add(gene.ToLineSegment());
             }
             newSegLines = MergeSegLines(newSegLines, out List<List<int>> seglineIndexListNew, out List<(bool, bool)> seglineToBoundNew);
-            newSegLines.ExtendToBound(TotalArea, seglineToBoundNew);
+            newSegLines.ExtendToBound(TotalArea, seglineToBoundNew, InnerObjectSpatialIndex);
             newSegLines.ExtendAndIntSect(seglineIndexListNew);//延展
             newSegLines.SeglinePrecut(TotalArea);//预切割
             newSegLines.Clean();//过滤孤立的线
-            if (!newSegLines.Allconnected()) return (null,null);//判断是否全部相连
+            newSegLines = newSegLines.GroupSegLines().OrderBy(g => g.Count).Last();//用最大的全连接组
+            //if (!newSegLines.Allconnected()) return (null,null);//判断是否全部相连
             //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
-            var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
-            if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return (null, null);//判断是否满足车道宽
-            return (newSegLines, vaildSeg);
+            var vaildLanes = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
+            if (!vaildLanes.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return (null, null);//判断是否满足车道宽
+            var Splitters = new List<LineSegment>();
+            for(int i = 0; i < newSegLines.Count; i++)
+            {
+                if(vaildLanes[i] != null) Splitters.Add(newSegLines[i]);
+            }
+            return (newSegLines, vaildLanes);
         }
         private static List<LineSegment> MergeSegLines(List<LineSegment> SegLines,out List<List<int>> seglineIndexListNew,out List<(bool, bool)> seglineToBoundNew)
         {

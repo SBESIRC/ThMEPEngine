@@ -40,8 +40,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                 if (crossed.Count() < 2)
                 {
                     var index=cars_poly.IndexOf(car);
-                    cars[index].Polyline = car_transform;
-                    cars[index].CarLayoutMode = 0;
+                    if (index >= 0)
+                    {
+                        cars[index].Polyline = car_transform;
+                        cars[index].CarLayoutMode = 0;
+                    }
                 }
             }
         }
