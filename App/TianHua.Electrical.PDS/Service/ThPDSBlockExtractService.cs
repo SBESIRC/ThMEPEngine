@@ -50,7 +50,7 @@ namespace TianHua.Electrical.PDS.Service
                 engine.Results.Select(o => o.Data as ThPDSBlockReferenceData)
                     .ForEach(blockData =>
                     {
-                        var block = acad.Element<BlockReference>(blockData.ObjId, true);
+                        var block = acad.Element<BlockReference>(blockData.ObjId, true).Clone() as BlockReference;
                         if (blockData.EffectiveName.IndexOf(ThPDSCommon.LOAD_LABELS) == 0
                             || blockData.EffectiveName.Contains(ThPDSCommon.PUMP_LABELS)
                             || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_DETAILS))

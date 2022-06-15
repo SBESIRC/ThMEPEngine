@@ -134,7 +134,7 @@ namespace TianHua.Electrical.PDS.Service
             thPDSLoad.SetLocation(new ThPDSLocation
             {
                 ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position.TransformBy(loadData.OwnerSpace2WCS)),
             });
 
             if (loadData.FireLoad == ThPDSFireLoad.FireLoad)

@@ -4,7 +4,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
-using Linq2Acad;
 
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
@@ -56,10 +55,18 @@ namespace TianHua.Electrical.PDS.Engine
                 results.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = new ThPDSBlockReferenceData(br.Id, matrix),
-                    Geometry = br.GeometricExtents.ToRectangle(),
                 });
             }
             return results;
+        }
+
+        public override bool IsBuildElementBlockReference(BlockReference blockReference)
+        {
+            if (!base.IsBuildElementBlockReference(blockReference))
+            {
+                return false;
+            }
+            return !NameFilter.Contains(ThMEPXRefService.OriginalFromXref(blockReference.GetEffectiveName()));
         }
 
         public override bool IsDistributionElement(Entity entity)
@@ -109,7 +116,7 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override bool CheckLayerValid(Entity entity)
         {
-            if(!entity.LayerId.IsValid)
+            if (!entity.LayerId.IsValid)
             {
                 return false;
             }

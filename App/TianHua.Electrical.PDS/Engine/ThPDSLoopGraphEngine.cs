@@ -100,8 +100,8 @@ namespace TianHua.Electrical.PDS.Engine
         public static Dictionary<Entity, Entity> GeometryMap;
 
         public ThPDSLoopGraphEngine(Database database, List<Entity> distBoxes,
-            List<Entity> loads, List<Curve> cabletrays, List<Curve> cables, ThMarkService markService,
-            List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode,
+            List<KeyValuePair<Entity, ThPDSBlockReferenceData>> loads, List<Curve> cabletrays, List<Curve> cables,
+            ThMarkService markService, List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode,
             Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> nodeMap,
             Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap,
             List<Polyline> distBoxFrames, bool isStandardStorey)
@@ -115,7 +115,7 @@ namespace TianHua.Electrical.PDS.Engine
             using (var acad = AcadDatabase.Use(this.Database))
             {
                 DistBoxes = distBoxes;
-                Loads = loads;
+                Loads = loads.Select(x => x.Key).ToList();
                 GeometryMap = new Dictionary<Entity, Entity>();
                 CacheDistBoxes = new Dictionary<Entity, ThPDSCircuitGraphNode>();
                 CacheDistBoxesInFrame = new List<Entity>();
@@ -128,18 +128,19 @@ namespace TianHua.Electrical.PDS.Engine
                 CableIndex = new ThCADCoreNTSSpatialIndex(Cables.ToCollection());
                 CableTrayIndex = new ThCADCoreNTSSpatialIndex(CableTrays.ToCollection());
 
-                this.Loads.ForEach(x =>
+                loads.ForEach(x =>
                 {
-                    if (x is BlockReference block)
+                    if (x.Key is BlockReference block)
                     {
-                        if (block.Id.GetBlockName().Contains(ThPDSCommon.MOTOR_AND_LOAD_LABELS))
+                        var blockName = x.Value.ObjId.GetBlockName();
+                        if (blockName.Contains(ThPDSCommon.MOTOR_AND_LOAD_LABELS))
                         {
                             var objs = new DBObjectCollection();
                             block.Explode(objs);
                             var motor = objs.OfType<BlockReference>().First();
                             GeometryMap.Add(block, motor);
                         }
-                        else if (block.Id.GetBlockName().Equals("E-BDB054"))
+                        else if (blockName.Equals("E-BDB054"))
                         {
                             var objs = new DBObjectCollection();
                             block.Explode(objs);
@@ -161,7 +162,7 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                     else
                     {
-                        GeometryMap.Add(x, x);
+                        GeometryMap.Add(x.Key, x.Key);
                     }
                 });
                 LoadIndex = new ThCADCoreNTSSpatialIndex(GeometryMap.Values.ToCollection());
