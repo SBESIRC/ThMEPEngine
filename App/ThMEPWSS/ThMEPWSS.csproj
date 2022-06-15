@@ -372,6 +372,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\ValveCasing.cs" />
     <Compile Include="UndergroundSpraySystem\Command\FireHydrantAcross.cs" />
+    <Compile Include="UndergroundSpraySystem\Service\MainLoop3.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemUtils.cs" />

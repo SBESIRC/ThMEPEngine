@@ -43,7 +43,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var propPtRes = Active.Editor.GetPoint(opt);
             if (propPtRes.Status == PromptStatus.OK)
             {
-                insertPt = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
+                insertPt = propPtRes.Value;//.TransformBy(Active.Editor.UCS2WCS());
                 return true;
             }
             return false;
@@ -51,7 +51,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
         public static bool GetInput(AcadDatabase acadDatabase, SprayIn sprayIn, Point3dCollection selectArea, Point3d startPt)
         {
-            var endpt = new Point3dEx(1062056.9, 555638.7,0);
             var database = acadDatabase.Database;
 
             var pipe = new SprayPipe();
@@ -59,9 +58,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var pipeLines = pipe.CreateSprayLines();//生成管道线
             pipeLines = LineMerge.CleanLaneLines(pipeLines);
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
-            var vertical = new Verticalpipe();
-            vertical.Extract(database, sprayIn);//提取竖管
-            //var verticalSpatialIndex = vertical.CreateVerticalSpatialIndex();
+            var vertical = new VerticalPipeNew();
+            vertical.Extract(database, selectArea, sprayIn);//提取竖管
 
             var leadLine = new LeadLine();
             leadLine.Extract(database, sprayIn);//3,283ms
@@ -126,8 +124,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);
             DicTools.CreatFlowBlocks(objs, sprayIn);
 
-            
-
 
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
             DNLineEngine.Extract(database, selectArea);
@@ -173,7 +169,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             return true;
         }
        
-        public static bool Processing(AcadDatabase acadDatabase, SprayIn sprayIn, SpraySystem spraySystem)
+        public static int Processing(AcadDatabase acadDatabase, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
             var extraNodes = new List<Point3dEx>();//主环路连通阀点集
@@ -204,22 +200,37 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     BranchDeal2.Get(ref visited, sprayIn, spraySystem);
 
                     BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
-                    return false;
+                    return 2;
                 }
             }
             mainPathList.Add(mainPath);
+            spraySystem.MainLoop.AddRange(mainPathList[0]);
+            DicTools.SetPointType(sprayIn, mainPathList);
             Draw.MainLoop(acadDatabase, mainPathList);
-            SubLoopDeal.Get(ref visited, mainPathList, sprayIn, spraySystem);
-            Draw.SubLoop(acadDatabase, spraySystem);
-            BranchLoopDeal.Get(ref visited, sprayIn, spraySystem);
-            Draw.BranchLoop(acadDatabase, spraySystem);
-            SubLoopDeal.SetType(sprayIn, spraySystem);
-            BranchDeal.Get(ref visited, sprayIn, spraySystem);
-            BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
-            return true;
+            var hasSubLoop = SubLoopDeal.Get(ref visited, mainPathList, sprayIn, spraySystem);
+            if(hasSubLoop)
+            {
+                Draw.SubLoop(acadDatabase, spraySystem);
+                BranchLoopDeal.Get(ref visited, sprayIn, spraySystem);
+                Draw.BranchLoop(acadDatabase, spraySystem);
+                SubLoopDeal.SetType(sprayIn, spraySystem);
+                BranchDeal.Get(ref visited, sprayIn, spraySystem);
+                BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
+                return 1;
+            }
+            else
+            {
+                BranchLoopDeal.GetOnMainLoop(visited, sprayIn, spraySystem);
+                Draw.BranchLoop(acadDatabase, spraySystem);
+                BranchDeal.Get(ref visited, sprayIn, spraySystem);
+                BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
+                return 3;
+            }
             
         }
 
+
+        //主环-次环-支环-支路
         public static void GetOutput(SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
         {
             StoreyLine.Get(sprayOut, spraySystem, sprayIn);
@@ -230,12 +241,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             PipeLine.Split(sprayOut);
         }
 
+        //主环上面直接连支路
         public static void GetOutput2(SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
         {
             StoreyLine.Get(sprayOut, spraySystem, sprayIn);
             MainLoop2.Get(sprayOut, spraySystem, sprayIn);
             Branch.Get(sprayOut, spraySystem, sprayIn);
             StoreyLine.Get2(sprayOut, spraySystem, sprayIn);
+            PipeLine.Split(sprayOut);
+        }
+
+        //无次环
+        public static void GetOutput3(SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
+        {
+            StoreyLine.Get(sprayOut, spraySystem, sprayIn);
+            MainLoop3.Get(sprayOut, spraySystem, sprayIn);
+            BranchLoop.Get(sprayOut, spraySystem, sprayIn);
+            Branch.Get(sprayOut, spraySystem, sprayIn);
             PipeLine.Split(sprayOut);
         }
     }

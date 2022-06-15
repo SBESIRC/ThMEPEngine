@@ -49,8 +49,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var currentSpace = acadDatabase.CurrentSpace;
             var modelID = acadDatabase.ModelSpace.ObjectId;
             BlocksImport.ImportElementsFromStdDwg();
-            foreach(var line in PipeLine)
+            var u2wMat = Active.Editor.UCS2WCS();
+            foreach (var line in PipeLine)
             {
+                line.TransformBy(u2wMat);
                 line.LayerId = DbHelper.GetLayerId("W-FRPT-SPRL-PIPE");
                 line.ColorIndex = (int)ColorIndex.BYLAYER;
                 currentSpace.Add(line);
@@ -58,23 +60,28 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
             foreach (var line in NoteLine)
             {
+                line.TransformBy(u2wMat);
                 line.LayerId = DbHelper.GetLayerId("W-FRPT-SPRL-DIMS");
                 line.ColorIndex = (int)ColorIndex.BYLAYER;
                 currentSpace.Add(line);
             }
             foreach(var line in FloorLine)
             {
+                line.TransformBy(u2wMat);
                 line.LayerId = DbHelper.GetLayerId("W-NOTE");
                 line.ColorIndex = (int)ColorIndex.BYLAYER;
                 currentSpace.Add(line);
             }
             foreach(var text in Texts)
             {
-                currentSpace.Add(text.DbText);
+                var dbText = text.DbText;
+                dbText.TransformBy(u2wMat);
+                currentSpace.Add(dbText);
             }
             foreach (SprayBlock block in SprayBlocks)
             {
-                block.Insert(acadDatabase);
+                var blk = block.Insert(acadDatabase);
+                blk.TransformBy(u2wMat);
             }
             foreach(var alarmValve in AlarmValves)
             {

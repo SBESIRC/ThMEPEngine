@@ -100,7 +100,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     first = false;
                 }
             }
-            if (!textStr.Contains("水泵接合器"))
+            if (!textStr.Contains("水泵接合器") && textStr.Contains("防火分区"))
             {
                 textStr = textStr.Split('喷')[0];
             }

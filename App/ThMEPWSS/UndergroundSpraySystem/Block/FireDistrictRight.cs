@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using AcHelper;
+using GeometryExtensions;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -19,6 +21,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public TermPoint2 TermPt { get; set; }
         private string PipeDN { get; set; }
         public bool hasFlow { get; set; }
+        private Matrix3d U2WMat { get; set; }
         public FireDistrictRight(Point3d stPt, TermPoint2 termPoint, string DN, bool hasflow)
         {
             StPt = stPt;
@@ -26,6 +29,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             TermPt = termPoint;
             PipeDN = DN;
             hasFlow = hasflow;
+            U2WMat = Active.Editor.UCS2WCS();
         }
 
         public void InsertBlock(AcadDatabase acadDatabase)
@@ -38,8 +42,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             
             if (hasFlow)
             {
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "信号阀＋水流指示器",
+                var objID2 = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "信号阀＋水流指示器",
                     StPt.OffsetXY(300-57592, 11322), new Scale3d(1, 1, 1), 0);
+                var blk2 = acadDatabase.Element<BlockReference>(objID2);
+                blk2.TransformBy(U2WMat);
             }
             else
             {
@@ -51,6 +57,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "减压孔板",
                     StPt.OffsetX(1190), new Scale3d(1, 1, 1), 0);
             objID.SetDynBlockValue("可见性","水平");
+            var blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             InsertLine(acadDatabase, StPt.OffsetX(1290), StPt.OffsetX(2140), "W-FRPT-SPRL-PIPE");
             InsertLine(acadDatabase, StPt.OffsetX(2140), StPt.OffsetX(2740), "W-FRPT-SPRL-EQPM", "DASH");
@@ -58,24 +66,36 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "喷头系统",
                     StPt.OffsetX(1790), new Scale3d(1, 1, 1), 0);
             objID.SetDynBlockValue("可见性", "上喷闭式");
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "喷头系统",
                     StPt.OffsetX(3090), new Scale3d(1, 1, 1), 0);
             objID.SetDynBlockValue("可见性", "上喷闭式");
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "水管中断",
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "水管中断",
                     StPt.OffsetX(2140), new Scale3d(-1.2, 1.2, 1.2), Math.PI);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "水管中断",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "水管中断",
                     StPt.OffsetX(2740), new Scale3d(-1.2, 1.2, 1.2), Math.PI);
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             InsertLine(acadDatabase, StPt.OffsetX(2740), StPt.OffsetX(3690), "W-FRPT-SPRL-PIPE");
             InsertLine(acadDatabase, StPt.OffsetX(3690), StPt.OffsetXY(3690, -1350), "W-FRPT-SPRL-PIPE");
             InsertLine(acadDatabase, StPt.OffsetXY(3690, -1200), StPt.OffsetXY(3940, -1200), "W-FRPT-SPRL-PIPE");
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "压力表",
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "压力表",
                     StPt.OffsetXY(3940, -1200), new Scale3d(1.5, 1.5, 1.5), 0);
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "截止阀",
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "截止阀",
                     StPt.OffsetXY(3690, -1500), new Scale3d(1, 1, 1), Math.PI/2);
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             InsertLine(acadDatabase, StPt.OffsetXY(3690, -1650), StPt.OffsetXY(3690, -1800), "W-FRPT-SPRL-PIPE");
             InsertLine(acadDatabase, StPt.OffsetXY(3540, -1800), StPt.OffsetXY(3840, -1800), "W-FRPT-SPRL-EQPM");
@@ -85,6 +105,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
 
             var arc = new Arc(StPt.OffsetXY(3690, -2200), new Vector3d(0, 0, 1), 200, Math.PI, Math.PI * 2);
             arc.LayerId = DbHelper.GetLayerId("W-DRAI-EQPM");
+            arc.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(arc);
 
             InsertLine(acadDatabase, StPt.OffsetXY(3690, -2400), StPt.OffsetXY(3690, -4500), "W-FRPT-DRAI-PIPE");
@@ -92,8 +113,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt.OffsetXY(690, -410), StPt.OffsetXY(690, -4500), "W-FRPT-DRAI-PIPE");
             InsertLine(acadDatabase, StPt.OffsetXY(690, -410), StPt.OffsetXY(1140, -410), "W-FRPT-DRAI-PIPE");
 
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "截止阀",
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "截止阀",
                     StPt.OffsetXY(1290, -410), new Scale3d(1, 1, 1), Math.PI);
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             InsertLine(acadDatabase, StPt.OffsetXY(1440, -410), StPt.OffsetXY(1640, -410), "W-FRPT-DRAI-PIPE");
 
@@ -102,27 +125,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXY(3690, -1500),
                 new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "标高", "h+1.50" } });
             SetDynBlockValue(objID, "翻转状态2", 1);
-            //var data = new ThBlockReferenceData(objID);
-            //data.CustomProperties.SetValue("翻转状态2", 1);
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             InsertLine(acadDatabase, StPt.OffsetXY(1346,-114), StPt.OffsetXY(1753, -690), "W-FRPT-SPRL-DIMS");
             InsertLine(acadDatabase, StPt.OffsetXY(1753, -690), StPt.OffsetXY(3640, -690), "W-FRPT-SPRL-DIMS");
 
-            //InsertLine(acadDatabase, StPt.OffsetXY(1440, -510), StPt.OffsetXY(1917, -1250), "W-FRPT-SPRL-DIMS");
-            //InsertLine(acadDatabase, StPt.OffsetXY(1917, -1250), StPt.OffsetXY(2660, -1250), "W-FRPT-SPRL-DIMS");
 
             InsertLine(acadDatabase, StPt.OffsetXY(2977, -1965), StPt.OffsetXY(3340, -1670), "W-FRPT-NOTE");
             InsertLine(acadDatabase, StPt.OffsetXY(3100, -2630), StPt.OffsetXY(3496, -2088), "W-FRPT-NOTE");
 
             InsertText(acadDatabase, StPt.OffsetXY(1780, -640), "减压孔板XXmm");
-            //InsertText(acadDatabase, StPt.OffsetXY(1940, -1180), "泄水阀");
             InsertText(acadDatabase, StPt.OffsetXY(1350, -3910), FloorNum);
             InsertText(acadDatabase, StPt.OffsetXY(1000, -4400), "排至地下一层集水坑");
 
             InsertText(acadDatabase, StPt.OffsetXY(2350, -2380), "截止阀", "W-FRPT-NOTE");
             InsertText(acadDatabase, StPt.OffsetXY(2340, -3000), "K=80", "W-FRPT-NOTE");
             InsertText(acadDatabase, StPt.OffsetXY(2310, -3450), "试水接头", "W-FRPT-NOTE");
-            //InsertText(acadDatabase, StPt.OffsetXY(740, -840), "DN50");
             InsertText(acadDatabase, StPt.OffsetXY(1040, -3950), "DN50", "W-FRPT-SPRL-DIMS", Math.PI / 2);
             InsertText(acadDatabase, StPt.OffsetXY(4060, -3950), "DN80", "W-FRPT-SPRL-DIMS", Math.PI / 2);
             InsertSolid(acadDatabase, StPt.OffsetXY(3497, -1546), StPt.OffsetXY(3320, -1646), StPt.OffsetXY(3362, -1698));
@@ -165,6 +184,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 LayerId = DbHelper.GetLayerId(layer),
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
+            line.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(line);
         }
         private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer, string linetype)
@@ -175,6 +195,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 ColorIndex = (int)ColorIndex.BYLAYER,
                 Linetype = linetype
             };
+            line.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(line);
         }
         private void InsertSolid(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, Point3d pt3, string layer = "W-FRPT-NOTE")
@@ -184,6 +205,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 LayerId = DbHelper.GetLayerId(layer),
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
+            solid.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(solid);
         }
        
@@ -200,7 +222,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 WidthFactor = 0.7,
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
-
+            dbText.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(dbText);
         }
     }

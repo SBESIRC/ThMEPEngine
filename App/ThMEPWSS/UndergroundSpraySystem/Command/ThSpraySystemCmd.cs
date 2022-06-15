@@ -101,13 +101,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
         {
             var loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
 
-            if (loopFlag)
+            if (loopFlag == 1)
             {
                 SpraySys.GetOutput(sprayIn, spraySystem, sprayOut);
             }
-            else
+            else if(loopFlag == 2)
             {
                 SpraySys.GetOutput2(sprayIn, spraySystem, sprayOut);
+            }
+            else
+            {
+                SpraySys.GetOutput3(sprayIn, spraySystem, sprayOut);
             }
         }
 
