@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NFox.Cad;
@@ -288,52 +289,66 @@ namespace ThMEPStructure.Reinforcement.Service
 
         private List<double> Parse(string reinforceText)
         {
-            // 格式1:2000.0(1.00%)-0.92%
-            // 格式2:4C12(0.57%)-G(6@200)
+            // 备注：如果是4C12,返回0.0；如果是G(6@200)返回0.0
+            // reinforceText里的数值不是接受负数的
+            // 格式1:2000.0(1.00%)-0.92% -> (2000.0,1.0,0.92)
+            // 格式2:4C12(0.57%)-G(6@200) -> (0.0,0.57,0.0)
+            // 格式3:4C12(0.57%)-1.53% -> (0,0.57,1.53)
+
+            // 文字格式处理
+            var newReinforce = reinforceText.Replace(" ", ""); // 去掉空格
+            newReinforce = reinforceText.Replace("（", "("); // 把中文括号->英文括号
+            newReinforce = newReinforce.Replace("）", ")");  // 把中文括号->英文括号       
+            newReinforce = ReplaceReinforceSpecialChars(newReinforce);// 把%%130-%%139替换掉            
+            newReinforce = RemoveContinuousPercentChar(newReinforce); // 把%%%->%
+
+            // 开始转换
             var results = new List<double>();
-            var newReinforce = reinforceText.Replace("（", "(");
-            newReinforce = newReinforce.Replace("）", ")");
-            newReinforce = newReinforce.Trim();
             var firstIndex = newReinforce.IndexOf('-');
             var lastIndex = newReinforce.LastIndexOf('-');
-            if(firstIndex==-1 || firstIndex != lastIndex)
+            if(firstIndex==-1 || firstIndex != lastIndex) // 有且只有一个‘-’
             {
                 return  results;
             }
-            var preStr = newReinforce.Substring(0, firstIndex).Trim();
-            var prePattern1 = @"^\S+\s*[(]{1}\s*\d+([.]{1}\d+)?\s*[%]+\s*[)]{1}$";
+            var preStr = newReinforce.Substring(0, firstIndex);
+            var prePattern1 = @"^\S+[(]{1}\S+[)]{1}$";
             if(!Regex.IsMatch(preStr, prePattern1))
             {
                 return results;
             }
             var preIndex = preStr.IndexOf('(');
             var preStrA = preStr.Substring(0, preIndex).Trim();
-            var preStrB = preStr.Substring(preIndex).Trim();
-            var prePattern2 = @"^\d+(.\d+)?$";
+            var preStrB = preStr.Substring(preIndex).Trim();            
             // 全部纵筋面积As = ?
-            if (Regex.IsMatch(preStrA, prePattern2))
-            {
-                results.Add(double.Parse(preStrA));
+            if (preStrA.IsPureNumber())
+            { 
+                var preStrAValues = ThReinforcementUtils.GetDoubles(preStrA);
+                if(preStrAValues.Count==1)
+                {
+                    results.Add(preStrAValues[0]);
+                }                
             }
             else
             {
                 results.Add(0.0);
             }
-            // 配筋率            
-            var reinforceRatios = ThReinforcementUtils.GetDoubles(preStrB);
-            if(reinforceRatios.Count==1)
+            // 配筋率
+            if(IsReinforceRatioFormat(preStrB))
             {
-                results.Add(reinforceRatios.First());
+                var reinforceRatios = ThReinforcementUtils.GetDoubles(preStrB);
+                if (reinforceRatios.Count == 1)
+                {
+                    results.Add(reinforceRatios.First());
+                }
             }
             else
             {
                 return results;
             }
+            
             // 配箍率
             var nextStr = newReinforce.Substring(firstIndex + 1).Trim();
-            var nextPattern1 = @"^\d+(.\d+)?\s*[%]{1}$";
-            var nextPattern2 = @"\d+\s*[@]{1}\s*\d+";
-            if (Regex.IsMatch(nextStr, nextPattern1))
+            if (IsStirrupRatioFormat(nextStr))
             {
                 var stirupRatios = ThReinforcementUtils.GetDoubles(nextStr);
                 if(stirupRatios.Count==1)
@@ -341,11 +356,54 @@ namespace ThMEPStructure.Reinforcement.Service
                     results.Add(stirupRatios.First());
                 }                
             }   
-            else if(Regex.IsMatch(nextStr, nextPattern2))
+            else
             {
                 results.Add(0.0);
             }
             return results;
+        }
+
+        private bool IsReinforceRatioFormat(string content)
+        {
+            //(0.57%)
+            var pattern = @"^[(]{1}([+-]?((\d*\.\d+)|\d+|(\d+\.\d*)))([eE][+-]?\d+)?[%]{1}[)]{1}$";
+            return Regex.IsMatch(content, pattern);
+        }
+
+        private bool IsStirrupRatioFormat(string content)
+        {
+            //0.57%
+            var pattern = @"^([+-]?((\d*\.\d+)|\d+|(\d+\.\d*)))([eE][+-]?\d+)?[%]{1}$";
+            return Regex.IsMatch(content, pattern);
+        }
+
+        private string ReplaceReinforceSpecialChars(string content)
+        {
+            // 把%%130-%%139替换掉
+            string pattern = @"%%13[0-9]";
+            return Regex.Replace(content, pattern, "C");
+        }
+
+        private string RemoveContinuousPercentChar(string content)
+        {
+            var sb = new StringBuilder();
+            for(int i=0;i<content.Length;i++)
+            {
+                sb.Append(content[i]);
+                if(content[i]=='%')
+                {
+                    int j = i + 1;
+                    for (; j < content.Length; j++)
+                    {
+                        if(content[j] != content[i])
+                        {
+                            break;
+                        }
+                    }
+                    i = j-1;
+                }
+            }
+            return sb.ToString();
         }
 
         private Polyline CreateOutline(Point3d pt,double length)
