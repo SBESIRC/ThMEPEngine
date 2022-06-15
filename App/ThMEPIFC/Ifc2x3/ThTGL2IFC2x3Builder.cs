@@ -13,8 +13,8 @@ namespace ThMEPIFC.Ifc2x3
         {
             if (Model != null)
             {
-                ThTGL2IFC2x3Factory.CreateSite(Model, project.Site);
-                var building = ThTGL2IFC2x3Factory.CreateBuilding(Model, project.Site.Building);
+                var site = ThTGL2IFC2x3Factory.CreateSite(Model, project.Site);
+                var building = ThTGL2IFC2x3Factory.CreateBuilding(Model, site, project.Site.Building);
                 foreach (var thtchstorey in project.Site.Building.Storeys)
                 {
                     var walls = new List<IfcWall>();

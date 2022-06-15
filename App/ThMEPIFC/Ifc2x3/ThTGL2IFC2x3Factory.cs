@@ -58,31 +58,37 @@ namespace ThMEPIFC.Ifc2x3
             });
         }
 
-        public static void CreateSite(IfcStore model, ThTCHSite site)
+        public static IfcSite CreateSite(IfcStore model, ThTCHSite site)
         {
             using (var txn = model.BeginTransaction("Initialise Site"))
             {
-                var ret = model.Instances.New<IfcSite>();
+                var ret = model.Instances.New<IfcSite>(s =>
+                {
+                    s.ObjectPlacement = model.ToIfcLocalPlacement(WCS());
+                });
                 //get the project there should only be one and it should exist
                 var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
                 project.AddSite(ret);
                 txn.Commit();
+                return ret;
             }
         }
 
-        public static IfcBuilding CreateBuilding(IfcStore model, ThTCHBuilding building)
+        private static CoordinateSystem3d WCS()
+        {
+            return Matrix3d.Identity.CoordinateSystem3d;
+        }
+
+        public static IfcBuilding CreateBuilding(IfcStore model, IfcSite site, ThTCHBuilding building)
         {
             using (var txn = model.BeginTransaction("Initialise Building"))
             {
-                //create a building
-                var ret = model.Instances.New<IfcBuilding>();
-                ret.Name = building.BuildingName;
-                ret.CompositionType = IfcElementCompositionEnum.ELEMENT;
-                var localPlacement = model.Instances.New<IfcLocalPlacement>();
-                ret.ObjectPlacement = localPlacement;
-                var placement = model.Instances.New<IfcAxis2Placement3D>();
-                localPlacement.RelativePlacement = placement;
-                placement.Location = model.Instances.New<IfcCartesianPoint>(p => p.SetXYZ(0, 0, 0));
+                var ret = model.Instances.New<IfcBuilding>(b =>
+                {
+                    b.Name = building.BuildingName;
+                    b.CompositionType = IfcElementCompositionEnum.ELEMENT;
+                    b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
+                });
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
                 {
                     rel.Name = "THifc properties";
@@ -100,11 +106,7 @@ namespace ThMEPIFC.Ifc2x3
                         }
                     });
                 });
-
-                //get the site there should only be one and it should exist
-                var site = model.Instances.OfType<IfcSite>().FirstOrDefault();
-                site?.AddBuilding(ret);
-
+                site.AddBuilding(ret);
                 txn.Commit();
                 return ret;
             }
@@ -114,9 +116,11 @@ namespace ThMEPIFC.Ifc2x3
         {
             using (var txn = model.BeginTransaction("Create Storey"))
             {
-                var ret = model.Instances.New<IfcBuildingStorey>();
-                ret.Name = storey.FloorNum;
-                ret.Elevation = storey.FloorOrigin.Z;
+                var ret = model.Instances.New<IfcBuildingStorey>(s =>
+                {
+                    s.Name = storey.FloorNum;
+                    s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
+                });
 
                 // setup aggregation relationship
                 var ifcRel = model.Instances.New<IfcRelAggregates>();
