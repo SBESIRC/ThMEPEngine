@@ -6,6 +6,7 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ThCADCore.NTS;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
@@ -90,6 +91,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
 
 
+        /// <summary>
+        /// 判断字符串中是否包含中文
+        /// </summary>
+        /// <param name="str">需要判断的字符串</param>
+        /// <returns>判断结果</returns>
+        public bool HasChinese(string str)
+        {
+            return Regex.IsMatch(str, @"[\u4e00-\u9fa5]");
+        }
+
+
+
         //特别耗时
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
         {
@@ -124,21 +137,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             if (ent is DBText dbText)//DBText直接添加
             {
-                if (dbText.TextString.Contains("De"))
+                var str = dbText.TextString;
+                if (str.Contains("De") || str.Contains("DN"))
                 {
                     return;
                 }
-                if (!dbText.TextString.Contains("DN"))
+                if(HasChinese(str))
                 {
-                    var tWidth = Math.Abs(ent.GeometricExtents.MaxPoint.X - ent.GeometricExtents.MinPoint.X);
-                    if (tWidth > textWidth && (ent as DBText).TextString.Contains("X") && !((ent as DBText).TextString.Contains("/")))
-                    {
-                        textWidth = tWidth;
-                        textModel = (ent as DBText).TextString;
-                    }
-
-                    dBObjects.Add(ent);
+                    return;
                 }
+                var tWidth = Math.Abs(ent.GeometricExtents.MaxPoint.X - ent.GeometricExtents.MinPoint.X);
+                if (tWidth > textWidth && str.Contains("X") && !(str.Contains("/")))
+                {
+                    textWidth = tWidth;
+                    textModel = str;
+                }
+
+                dBObjects.Add(ent);
+                
                 return;
             }
             if (ent is AlignedDimension || 
@@ -154,22 +170,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             if (ent.IsTCHText())//天正单行文字,先炸后添加
             {
                 var texts = ent.ExplodeTCHText();
-                var noteText = "";
+                var str = "";
                 var insertPt = new Point3d();//文字插入点
                 foreach(var text in texts)
                 {
                     if(text is DBText db)
                     {
-                        noteText += db.TextString;
+                        str += db.TextString;
                         if(insertPt.Equals(new Point3d()))
                         {
                             insertPt = new Point3d(db.Position.X, db.Position.Y, 0);
                         }
                     }
                 }
-                var dBText = CreateText(insertPt, noteText);//创建成标准文字
+                if (str.Contains("De") || str.Contains("DN"))
+                {
+                    return;
+                }
+                if (HasChinese(str))
+                {
+                    return;
+                }
+                var dBText = CreateText(insertPt, str);//创建成标准文字
                 var tWidth = Math.Abs(dBText.GeometricExtents.MaxPoint.X - dBText.GeometricExtents.MinPoint.X);
-                if (tWidth > textWidth && noteText.Trim().Contains("X") && (!noteText.Trim().Contains("/")))
+                if (tWidth > textWidth && str.Trim().Contains("X") && (!str.Trim().Contains("/")))
                 {
                     textWidth = tWidth;
                     textModel = dBText.TextString;

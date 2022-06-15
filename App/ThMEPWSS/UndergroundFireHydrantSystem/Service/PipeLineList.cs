@@ -195,18 +195,66 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     pts.Add(pt);
                 }
             }
+            var usedPts = new HashSet<int>();
             for(int i = 0; i < pts.Count - 1; i++)
             {
+                if(usedPts.Contains(i))
+                {
+                    continue;
+                }
                 for(int j = i + 1; j < pts.Count; j++)
                 {
+                    if (usedPts.Contains(j))
+                    {
+                        continue;
+                    }
                     var dist = pts[i].DistanceToEx(pts[j]);
 
                     if (dist < 20)
                     {
+                        usedPts.Add(i);
+                        usedPts.Add(j);
                         lineList.Add(new Line(pts[i]._pt, pts[j]._pt));
                     }
                 }
             }
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+            for(int i = 0; i < pts.Count; i++)
+            {
+                
+                if(usedPts.Contains(i))
+                {
+                    continue;
+                }
+                var pt = pts[i];
+                var rect = pt._pt.GetRect(10);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                var line = GetNeighborLine(rst,pt._pt, out Point3d closedPt);
+                if(line is not null)
+                {
+                    //var closedPt = line.GetClosestPointTo(pt._pt, false);
+                    lineList.Remove(line);
+                    lineList.Add(new Line(closedPt, pt._pt));
+                    lineList.Add(new Line(line.StartPoint, closedPt));
+                    lineList.Add(new Line(line.EndPoint, closedPt));
+                }
+            }
+        }
+
+        private static Line GetNeighborLine(DBObjectCollection objs, Point3d pt, out Point3d closedPt)
+        {
+            foreach(var obj in objs)
+            {
+                var line = obj as Line;
+                closedPt = line.GetClosestPointTo(pt, false);
+                var dist = closedPt.DistanceTo(pt);
+                if(dist<10 && dist >1)
+                {
+                    return line;
+                }
+            }
+            closedPt = new Point3d();
+            return null;
         }
 
         public static void ConnectBreakLineWithoutPtdic(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn,
