@@ -34,10 +34,10 @@ namespace ThMEPTCH.Services
             foreach (var floor in tchXmlRootModel.Floors) 
             {
                 var buildingStorey = new ThTCHBuildingStorey();
-                buildingStorey.FloorNum = floor.Floor_Num.value;
-                buildingStorey.FloorHeight = floor.Floor_Height.GetDoubleValue();
-                buildingStorey.FloorElevation = floor.Floor_Elevation.GetDoubleValue();
-                buildingStorey.FloorOrigin = new Point3d(0, 0, buildingStorey.FloorElevation);
+                buildingStorey.Number = floor.Floor_Num.value;
+                buildingStorey.Height = floor.Floor_Height.GetDoubleValue();
+                buildingStorey.Elevation = floor.Floor_Elevation.GetDoubleValue();
+                buildingStorey.Origin = new Point3d(0, 0, buildingStorey.Elevation);
 
                 var floorEntitys = tchXmlRootModel.FloorEntitys.Where(c => c.Collection_Index.GetIntValue() == floor.Entities_Index.GetIntValue()).FirstOrDefault();
                 if (null != floorEntitys && floorEntitys.contents != null)
@@ -78,13 +78,13 @@ namespace ThMEPTCH.Services
                     if (resData != null && resData.Count > 0)
                     {
                         var thWalls = resData.OfType<ThTCHWall>().ToList();
-                        buildingStorey.ThTCHWalls.AddRange(thWalls);
+                        buildingStorey.Walls.AddRange(thWalls);
                         var thDoors = resData.OfType<ThTCHDoor>().ToList();
-                        buildingStorey.ThTCHDoors.AddRange(thDoors);
+                        buildingStorey.Doors.AddRange(thDoors);
                         var thWindows = resData.OfType<ThTCHWindow>().ToList();
-                        buildingStorey.ThTCHWindows.AddRange(thWindows);
+                        buildingStorey.Windows.AddRange(thWindows);
                         var slabs = resData.OfType<ThTCHSlab>().ToList();
-                        buildingStorey.ThTCHSlabs.AddRange(slabs);
+                        buildingStorey.Slabs.AddRange(slabs);
                     }
                 }
                 thBuilding.Storeys.Add(buildingStorey);

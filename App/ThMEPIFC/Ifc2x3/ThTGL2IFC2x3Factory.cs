@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using ThCADCore.NTS;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -118,7 +119,7 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcBuildingStorey>(s =>
                 {
-                    s.Name = storey.FloorNum;
+                    s.Name = storey.Number;
                     s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
                 });
 
@@ -149,6 +150,57 @@ namespace ThMEPIFC.Ifc2x3
                 return ret;
             }
         }
+
+        private static IfcProductDefinitionShape CreateProductDefinitionShape(IfcStore model, IfcExtrudedAreaSolid solid)
+        {
+            using (var txn = model.BeginTransaction("Create SweptSolid Shape"))
+            {
+                //Create a Definition shape to hold the geometry
+                var shape = model.Instances.New<IfcShapeRepresentation>();
+                var modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
+                shape.ContextOfItems = modelContext;
+                shape.RepresentationType = "SweptSolid";
+                shape.RepresentationIdentifier = "Body";
+                shape.Items.Add(solid);
+
+                //Create a Product Definition and add the model geometry to the wall
+                var rep = model.Instances.New<IfcProductDefinitionShape>();
+                rep.Representations.Add(shape);
+
+                txn.Commit();
+                return rep;
+            }
+        }
+
+        public static IfcRailing CreateRailing(IfcStore model, ThTCHRailing railing, Point3d floor_origin)
+        {
+            using (var txn = model.BeginTransaction("Create Railing"))
+            {
+                var ret = model.Instances.New<IfcRailing>();
+
+                //geometry representation
+                var centerline = railing.Outline as Polyline;
+                var outlines = centerline.BufferFlatPL(railing.Thickness / 2.0);
+                var profile = model.ToIfcArbitraryClosedProfileDef(outlines[0] as Entity);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, railing.ExtrudedDirection, railing.Depth);
+                ret.Representation = CreateProductDefinitionShape(model, solid);
+
+                //object placement
+                var lp = model.Instances.New<IfcLocalPlacement>();
+                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
+                {
+                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
+                    p.RefDirection = model.ToIfcDirection(Vector3d.XAxis);
+                    p.Location = model.ToIfcCartesianPoint(floor_origin);
+                });
+                lp.RelativePlacement = ax3D;
+                ret.ObjectPlacement = lp;
+
+                txn.Commit();
+                return ret;
+            }
+        }
+
         static public IfcWall CreateWall(IfcStore model, ThTCHWall wall, Point3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Wall"))
@@ -743,15 +795,28 @@ namespace ThMEPIFC.Ifc2x3
         {
             using (var txn = model.BeginTransaction("relContainSlabs2Storey"))
             {
-                //for ifc2x3
                 var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
                 Storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
                 foreach (var slab in slabs)
                 {
                     relContainedIn.RelatedElements.Add(slab);
-                    //Storey.AddElement(slab);
                 }
                 relContainedIn.RelatingStructure = Storey;
+                txn.Commit();
+            }
+        }
+
+        static public void relContainsRailings2Storey(IfcStore model, List<IfcRailing> railings, IfcBuildingStorey storey)
+        {
+            using (var txn = model.BeginTransaction("relContainsRailings2Storey"))
+            {
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
+                foreach (var railing in railings)
+                {
+                    relContainedIn.RelatedElements.Add(railing);
+                }
+                relContainedIn.RelatingStructure = storey;
                 txn.Commit();
             }
         }
