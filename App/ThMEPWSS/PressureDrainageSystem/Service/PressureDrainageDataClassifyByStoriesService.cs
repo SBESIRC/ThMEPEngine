@@ -72,7 +72,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 for (int i = 0; i < floorNumber; i++)
                 {
-                    if (Algorithms.IsPointIn(extendList[i], horLine.GetMidpoint()))
+                    if (Algorithms.IsPointIn(extendList[i], horLine.Line.GetMidpoint()))
                     {
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].HorizontalPipe.Add(horLine);
                         break;

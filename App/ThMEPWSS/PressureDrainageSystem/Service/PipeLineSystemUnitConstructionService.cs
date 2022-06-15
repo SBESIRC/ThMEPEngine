@@ -57,7 +57,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="layer"></param>
         private void ProcessPipeLineUnitLayer(int layer)
         {
-            List<Line> horizontalLines = new List<Line>();
+            
+            List<Horizontal> horizontalLines = new List<Horizontal>();
             List<VerticalPipeClass> verticalPipes = new List<VerticalPipeClass>();
             List<SubmergedPumpClass> submergedPumps = new List<SubmergedPumpClass>();
             List<Extents3d> wrappipes = new List<Extents3d>();
@@ -79,15 +80,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// 通过排水横管的位置关系建立部分排水单元组
         /// </summary>
         /// <param name="horizontalLines"></param>
-        private void GroupPipeLineUnitByGroupedHorizontalPipe(List<Line> horizontalLines, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps, int layer)
+        private void GroupPipeLineUnitByGroupedHorizontalPipe(List<Horizontal> horizontalLines, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps, int layer)
         {
-            List<List<Line>> groupedlines = new ();
-            List<Line> lines = new ();
+            List<List<Horizontal>> groupedlines = new ();
+            List<Horizontal> lines = new ();
             horizontalLines.ForEach(o => lines.Add(o));
             while (lines.Count > 0)
             {
-                List<Line> linesOri = new ();
-                List<Line> linesTest = new ();
+                List<Horizontal> linesOri = new ();
+                List<Horizontal> linesTest = new ();
                 lines.ForEach(o => linesTest.Add(o));
                 linesTest.RemoveAt(0);
                 linesOri.Add(lines[0]);
@@ -123,13 +124,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     for (int j = 0; j < verticalPipes.Count; j++)
                     {
-                        if (verticalPipes[j].Circle.ToRectangle().Contains(horLine.StartPoint) || verticalPipes[j].Circle.ToRectangle().Contains(horLine.EndPoint))
+                        if (verticalPipes[j].Circle.ToRectangle().Contains(horLine.Line.StartPoint) || verticalPipes[j].Circle.ToRectangle().Contains(horLine.Line.EndPoint))
                         {
                             _totalPipeLineUnitsByLayerByUnit[layer][i].VerticalPipes.Add(verticalPipes[j]);
                             verticalPipes.RemoveAt(j);
                             j--;
                         }
-                        else if (horLine.GetClosestPointTo(verticalPipes[j].Circle.Center, false).DistanceTo(verticalPipes[j].Circle.Center) < tolPipeToLine)
+                        else if (horLine.Line.GetClosestPointTo(verticalPipes[j].Circle.Center, false).DistanceTo(verticalPipes[j].Circle.Center) < tolPipeToLine)
                         {
                             _totalPipeLineUnitsByLayerByUnit[layer][i].VerticalPipes.Add(verticalPipes[j]);
                             verticalPipes.RemoveAt(j);
@@ -148,10 +149,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     List<Polyline> polylines = new ();
                     verticalPipes.ForEach(o => dbObjs.Add(o.Circle.Center.CreateSquare(o.Circle.Radius)));
                     verticalPipes.ForEach(o => polylines.Add(o.Circle.Center.CreateSquare(o.Circle.Radius)));
-                    var vecStart = new Vector3d(horLine.StartPoint.X - horLine.EndPoint.X, horLine.StartPoint.Y - horLine.EndPoint.Y, 0).GetNormal().MultiplyBy(disExtendedhorLine);
-                    var vecEnd = new Vector3d(horLine.EndPoint.X - horLine.StartPoint.X, horLine.EndPoint.Y - horLine.StartPoint.Y, 0).GetNormal().MultiplyBy(disExtendedhorLine);
-                    var ptStart = horLine.StartPoint;
-                    var ptEnd = horLine.EndPoint;
+                    var vecStart = new Vector3d(horLine.Line.StartPoint.X - horLine.Line.EndPoint.X, horLine.Line.StartPoint.Y - horLine.Line.EndPoint.Y, 0).GetNormal().MultiplyBy(disExtendedhorLine);
+                    var vecEnd = new Vector3d(horLine.Line.EndPoint.X - horLine.Line.StartPoint.X, horLine.Line.EndPoint.Y - horLine.Line.StartPoint.Y, 0).GetNormal().MultiplyBy(disExtendedhorLine);
+                    var ptStart = horLine.Line.StartPoint;
+                    var ptEnd = horLine.Line.EndPoint;
                     ptStart = ptStart.TransformBy(Matrix3d.Displacement(vecStart));
                     ptEnd = ptEnd.TransformBy(Matrix3d.Displacement(vecEnd));
                     var rec = ThDrawTool.ToRectangle(ptStart, ptEnd, 5);
@@ -186,7 +187,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 var crossed = new List<Polyline>();
                 foreach (var hor in horlines)
                 {
-                    crossed.AddRange(wrappipes_spacial_index.SelectCrossingPolygon(hor.Buffer(1)).Cast<Polyline>());
+                    crossed.AddRange(wrappipes_spacial_index.SelectCrossingPolygon(hor.Line.Buffer(1)).Cast<Polyline>());
                 }
                 if (crossed.Count > 0)
                 {
@@ -205,7 +206,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
                 {
-                    var connectedLines = unit.HorizontalPipes.Select(e => e.Clone() as Line).ToList();
+                    var connectedLines = unit.HorizontalPipes.Select(e => e.Line.Clone() as Line).ToList();
                     var walls = Modeldatas.WallLines;
                     var boundaries = Modeldatas.Boundaries;
                     foreach (var line in connectedLines)
@@ -337,10 +338,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
             {
                 var objs = new DBObjectCollection();
-                unit.HorizontalPipes.ForEach(o => objs.Add(o));
+                unit.HorizontalPipes.ForEach(o => objs.Add(o.Line));
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
+                unit.OriginalHorizontalPipes = unit.HorizontalPipes.Select(e => e).ToList();
                 unit.HorizontalPipes.Clear();
-                processedLines.ForEach(o => unit.HorizontalPipes.Add(o));
+                processedLines.ForEach(o => unit.HorizontalPipes.Add(new Horizontal(o,false)));
             }
             foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
             {
@@ -417,18 +419,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         var ptscoll = pump.Extents.ToRectangle().Vertices();
                         DBObjectCollection objs = new ();
-                        objs.Add(hor);
-                        if (pump.Extents.IsPointIn(hor.EndPoint) || pump.Extents.IsPointIn(hor.StartPoint))
+                        objs.Add(hor.Line);
+                        if (pump.Extents.IsPointIn(hor.Line.EndPoint) || pump.Extents.IsPointIn(hor.Line.StartPoint))
                         {
-                            hors.Add(hor);
+                            hors.Add(hor.Line);
                         }
                         //else if (GetCrossObjsByPtCollection(ptscoll, objs).Count > 0)
                         //{
                         //    hors.Add(hor);
                         //}
-                        else if (pump.Extents.ToRectangle().Intersects(hor))
+                        else if (pump.Extents.ToRectangle().Intersects(hor.Line))
                         {
-                            hors.Add(hor);
+                            hors.Add(hor.Line);
                         }
                     }
                     if (hors.Count > 0)//如果有横管穿过
@@ -490,7 +492,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     foreach (var hor in unit.HorizontalPipes)
                     {
-                        if (pump.Extents.IsPointIn(hor.EndPoint) || pump.Extents.IsPointIn(hor.StartPoint))
+                        if (pump.Extents.IsPointIn(hor.Line.EndPoint) || pump.Extents.IsPointIn(hor.Line.StartPoint))
                         {
                             cond_QuitCycle += 1;
                             break;
@@ -539,7 +541,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             List<DrainWellClass> drainWells = new ();
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells.ForEach(e => drainWells.Add(e));
             List<Line> horLines = new();
-            Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].HorizontalPipe.ForEach(e => horLines.Add(e));
+            Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].HorizontalPipe.ForEach(e => horLines.Add(e.Line));
             List<DrainWellClass> addedDrainWells = new();
             DBObjectCollection objs = new();
             horLines.ForEach(o => objs.Add(o));
@@ -569,11 +571,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     double mindisinunit = double.PositiveInfinity;
                     foreach (var horLine in _totalPipeLineUnitsByLayerByUnit[0][i].HorizontalPipes)
                     {
-                        double dis = horLine.GetClosestPointTo(well.Extents.CenterPoint(), false).DistanceTo(well.Extents.CenterPoint());
+                        double dis = horLine.Line.GetClosestPointTo(well.Extents.CenterPoint(), false).DistanceTo(well.Extents.CenterPoint());
                         if (dis < mindisinunit)
                         {
                             mindisinunit = dis;
-                            hor = horLine;
+                            hor = horLine.Line;
                         }
                     }
                     if (mindisinunit < mindis && !indexes.Contains(i))
@@ -661,8 +663,30 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                         cond_Search = true;
                                     }
                                 }
+                                foreach (var ppe in unit.VerticalPipes)
+                                {
+                                    var p = ppe.Circle.Center;
+                                    if (p.DistanceTo(new Point3d(611313.5, 341095.9, 0)) < 10)
+                                    {
+                                        ;
+                                    }
+                                }
+                                var hors = unit.HorizontalPipes;
+                                var ohors = unit.OriginalHorizontalPipes;
+                                foreach (var curPipe in unit.VerticalPipes)
+                                {
+                                    
+                                }
                                 if (cond_Search)
                                 {
+                                    foreach (var ppe in unit.VerticalPipes)
+                                    {
+                                        var p = ppe.Circle.Center;
+                                        if (p.DistanceTo(new Point3d(611313.5, 341095.9, 0)) < 10)
+                                        {
+                                            ;
+                                        }
+                                    }
                                     foreach (var curPipe in unit.VerticalPipes)
                                     {
                                         foreach (var parPipe in _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes)
@@ -788,7 +812,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             foreach (var bound in boundaries)
                             {
-                                if (line.IntersectWithEx(bound).Count>0)
+                                if (line.Line.IntersectWithEx(bound).Count>0)
                                 {
                                     unit.DrainageMode = 3;
                                     break;
@@ -802,7 +826,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             {
                                 foreach (var bound in walls)
                                 {
-                                    if (line.IntersectWithEx(bound).Count > 0)
+                                    if (line.Line.IntersectWithEx(bound).Count > 0)
                                     {
                                         unit.DrainageMode = 4;
                                         break;
@@ -983,7 +1007,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 for (int i = 0; i < pipeLineUnit.HorizontalPipes.Count; i++)
                 {
                     var j = pipeLineUnit.HorizontalPipes[i];
-                    double dis = j.GetClosestPointTo(pipe.Circle.Center, false).DistanceTo(pipe.Circle.Center);
+                    double dis = j.Line.GetClosestPointTo(pipe.Circle.Center, false).DistanceTo(pipe.Circle.Center);
                     if (dis < mindis)
                     {
                         mindis = dis;
@@ -991,12 +1015,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                 }
                 var horLine = pipeLineUnit.HorizontalPipes[index];
-                if (!(horLine.GetClosestPointTo(pipe.Circle.Center, false).DistanceTo(horLine.StartPoint) < 10 || horLine.GetClosestPointTo(pipe.Circle.Center, false).DistanceTo(horLine.EndPoint) < 10))
+                if (!(horLine.Line.GetClosestPointTo(pipe.Circle.Center, false).DistanceTo(horLine.Line.StartPoint) < 10 || horLine.Line.GetClosestPointTo(pipe.Circle.Center, false).DistanceTo(horLine.Line.EndPoint) < 10))
                 {
-                    Point3d ptmp = horLine.GetClosestPointTo(pipe.Circle.Center, false);
+                    Point3d ptmp = horLine.Line.GetClosestPointTo(pipe.Circle.Center, false);
                     pipeLineUnit.HorizontalPipes.RemoveAt(index);
-                    pipeLineUnit.HorizontalPipes.Add(new Line(horLine.StartPoint, ptmp));
-                    pipeLineUnit.HorizontalPipes.Add(new Line(ptmp, horLine.EndPoint));
+                    pipeLineUnit.HorizontalPipes.Add(new Horizontal(new Line(horLine.Line.StartPoint, ptmp),false));
+                    pipeLineUnit.HorizontalPipes.Add(new Horizontal(new Line(ptmp, horLine.Line.EndPoint),false));
                 }
             }
         }
@@ -1010,7 +1034,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             string layer = "0";
             foreach (var line in pipelineUnit.HorizontalPipes)
             {
-                if (line.Layer == "W-DRAI-DOME-PIPE") layer = "W-DRAI-DOME-PIPE";
+                if (line.Line.Layer == "W-DRAI-DOME-PIPE") layer = "W-DRAI-DOME-PIPE";
             }
             double tol = 100;//两横管直线具有相同端点的容差
             List<Point3d> ptsVtcalPipe = new List<Point3d>();
@@ -1021,7 +1045,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             foreach (var horLine in pipelineUnit.HorizontalPipes)
             {
-                lines.Add(horLine);
+                lines.Add(horLine.Line);
             }
             double cond_QuitCycle = 0;
             do
@@ -1105,7 +1129,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             foreach (var line in lines)
             {
-                pipelineUnit.HorizontalPipes.Add(line);
+                pipelineUnit.HorizontalPipes.Add(new Horizontal(line,false));
             }
         }
        
@@ -1339,18 +1363,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="linesOri"></param>
         /// <param name="linesTest"></param>
         /// <returns></returns>
-        private List<Line> AppendIntersectedLinesToSelf(List<Line> linesOri, List<Line> linesTest, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps)
+        private List<Horizontal> AppendIntersectedLinesToSelf(List<Horizontal> linesOri, List<Horizontal> linesTest, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps)
         {
-            List<Line> result = new ();
+            List<Horizontal> result = new ();
             while (true)
             {
                 int cond_QuitCycle = 0;
-                List<Line> linesToAdd = new List<Line>();
+                List<Horizontal> linesToAdd = new List<Horizontal>();
                 for (int i = 0; i < linesOri.Count; i++)
                 {
                     for (int j = 0; j < linesTest.Count; j++)
                     {
-                        if (IsIntersected(linesOri[i], linesTest[j], 200, verticalPipes,submergedPumps))
+                        if (IsIntersected(linesOri[i].Line, linesTest[j].Line, 200, verticalPipes,submergedPumps))
                         {
                             cond_QuitCycle += 1;
                             linesToAdd.Add(linesTest[j]);
