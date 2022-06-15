@@ -117,7 +117,13 @@ namespace ThParkingStall.Core.InterProcess
                 return _ColumnWidth;
             }
         }
+        //背靠背模块：缩进200
+        private static bool _DoubleRowModularDecrease200 = true;
 
+        public static bool DoubleRowModularDecrease200
+        {
+            get { return _DoubleRowModularDecrease200; }
+        }
         //背靠背模块：柱子沿车道法向偏移距离
         private static int _ColumnShiftDistanceOfDoubleRowModular = 550; //mm
 
@@ -207,6 +213,8 @@ namespace ThParkingStall.Core.InterProcess
             _ColumnAdditionalInfluenceLaneWidth = datawraper.ColumnAdditionalInfluenceLaneWidth;
             //最大柱间距,需要改成柱间距
             _ColumnWidth = datawraper.ColumnWidth; //mm
+            //背靠背模块：缩进200
+            _DoubleRowModularDecrease200 = datawraper.DoubleRowModularDecrease200;
             //背靠背模块：柱子沿车道法向偏移距离
             _ColumnShiftDistanceOfDoubleRowModular = datawraper.ColumnShiftDistanceOfDoubleRowModular; //mm
             //背靠背模块是否使用中柱

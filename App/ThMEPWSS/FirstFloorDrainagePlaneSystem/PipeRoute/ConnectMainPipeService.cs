@@ -103,6 +103,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         private List<RouteModel> ConnectToEndPipeLines(Dictionary<VerticalPipeModel, Polyline> frameConnectLines, List<Line> outFrameLines, Dictionary<Vector3d, List<Line>> gridInfo, List<Polyline> rooms)
         {
             var resRoutes = new List<RouteModel>();
+            if (frameConnectLines.Count <= 0)
+            {
+                return resRoutes;
+            }
             var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             GetClosetLineInfo(sewageLines, rainLines, frameConnectLines, out Line swageClosetLine, out Line rainClosetLine);

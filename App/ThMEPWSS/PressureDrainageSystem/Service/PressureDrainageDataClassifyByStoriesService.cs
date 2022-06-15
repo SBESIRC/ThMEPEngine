@@ -56,7 +56,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         }
        
         /// <summary>
-        /// 将排水横管、集水井、潜水泵等添加进modeldatas
+        /// 将排水横管、集水井、潜水泵、套管等添加进modeldatas
         /// </summary>
         private void AppendOtherDataToModeldates()
         {
@@ -66,6 +66,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].HorizontalPipe = new ();
                 Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].SubmergedPumps = new ();
+                Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].Wrappipes = new();
             }
             foreach (var horLine in CollectDataService.CollectedData.HorizontalPipes)
             {
@@ -88,6 +89,17 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         cond_QuitCycle += 1;
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[j]].SubmergedPumps.Add(pump);
+                        break;
+                    }
+                }
+            }
+            foreach (var wrappipe in CollectDataService.CollectedData.WrappingPipes)
+            {
+                for (int i = 0; i < floorNumber; i++)
+                {
+                    if (Algorithms.IsPointIn(extendList[i], wrappipe.CenterPoint()))
+                    {
+                        Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].Wrappipes.Add(wrappipe);
                         break;
                     }
                 }

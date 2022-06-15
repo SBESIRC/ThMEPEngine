@@ -18,16 +18,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public static class PtDic
     {
-        public static void CreatePtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
+        public static void CreatePtDic(FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
         {
             //管线添加
             fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
             foreach (var L in lineList)
             {
-                if(L.Length > 149 && L.Length < 151)
-                {
-                    ;
-                }
                 var pt1 = new Point3dEx(L.StartPoint);
                 var pt2 = new Point3dEx(L.EndPoint);
 
@@ -80,7 +76,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateLeadPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
+        public static void CreateLeadPtDic(FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
         {
             double tolerance = 30;
             //管线添加
@@ -134,7 +130,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateDNDic(ref FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection PipeDN, List<Line> lineList)
+        public static void CreateDNDic(FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection PipeDN, List<Line> lineList)
         {
             foreach (var dn in PipeDN)//创建DN字典对
             {
@@ -196,7 +192,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateTermPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+        public static void CreateTermPtDic(FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
             ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
@@ -208,7 +204,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         ;
                     }
-                    CreateTermPtDic2(pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
+                    CreateTermPtDic2(pt, fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
                 }
                 catch(Exception ex)
                 {
@@ -241,8 +237,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             termPoint.SetPipeNumber(textSpatialIndex);
                         }
-                        termPoint.Type = 6;
-                        if(termPoint.PipeNumber != "")
+                        if(termPoint.PipeNumber.Contains("水泵接合器"))
+                        {
+                            termPoint.Type = 4;
+                        }
+                        else
+                        {
+                            termPoint.Type = 6;
+                        }
+                        if (termPoint.PipeNumber != "")
                         {
                             fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
                         }
@@ -253,7 +256,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
 
 
-        private static void CreateTermPtDic2(Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+        private static void CreateTermPtDic2(Point3dEx pt, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
             var tpt = pt;
@@ -650,9 +653,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             return text;
         }
-
         public static void CreateBranchDic(ref Dictionary<Point3dEx, List<Point3dEx>> branchDic, ref Dictionary<Point3dEx, List<Point3dEx>> ValveDic,
-            List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
+    List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
         {
             foreach (var rstPath in mainPathList)
             {
@@ -677,16 +679,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         while (q.Count > 0)
                         {
                             var curPt = q.Dequeue();
-                            if(fireHydrantSysIn.TermPtDic.Contains(curPt))//当前点是末端点
+                            if (fireHydrantSysIn.TermPtDic.Contains(curPt))//当前点是末端点
                             {
                                 termPts.Add(curPt);
                                 continue;
                             }
                             if (fireHydrantSysIn.PtTypeDic.ContainsKey(curPt))
                             {
-                                if (fireHydrantSysIn.PtTypeDic[curPt].Contains("Valve"))
+                                var type = fireHydrantSysIn.PtTypeDic[curPt];
+                                if (type.Contains("DieValve"))
                                 {
-                                    valvePts.Add(pt);
+                                    valvePts.Add(curPt);
+                                }
+                                if (type.Contains("GateValve"))
+                                {
+                                    valvePts.Add(curPt);
+                                }
+                                if (type.Contains("Casing"))
+                                {
+                                    valvePts.Add(curPt);
                                 }
                             }
 
@@ -728,7 +739,93 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void CreateBranchDNDic(ref FireHydrantSystemIn fireHydrantSysIn, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
+        public static void CreateBranchDic(Dictionary<Point3dEx, List<Point3dEx>> branchDic, Dictionary<Point3dEx, List<ValveCasing>> ValveDic,
+            List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited)
+        {
+            foreach (var rstPath in mainPathList)
+            {
+                int i = 0;
+                foreach (var pt in rstPath)//遍历主环路的点
+                {
+                    i++;
+                    if (!fireHydrantSysIn.PtTypeDic.ContainsKey(pt))
+                    {
+                        continue;
+                    }
+
+                    if (fireHydrantSysIn.PtTypeDic[pt].Equals("Branch"))//是支点
+                    {
+                        var termPts = new List<Point3dEx>();
+                        var valvePts = new List<ValveCasing>();
+
+                        Queue<Point3dEx> q = new Queue<Point3dEx>();
+                        q.Enqueue(pt);
+                        HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
+                        visited.Add(pt);
+                        while (q.Count > 0)
+                        {
+                            var curPt = q.Dequeue();
+                            if(fireHydrantSysIn.TermPtDic.Contains(curPt))//当前点是末端点
+                            {
+                                termPts.Add(curPt);
+                                continue;
+                            }
+                            if (fireHydrantSysIn.PtTypeDic.ContainsKey(curPt))
+                            {
+                                var type = fireHydrantSysIn.PtTypeDic[curPt];
+                                if(type.Contains("DieValve"))
+                                {
+                                    valvePts.Add(new ValveCasing(curPt,1));
+                                }
+                                if (type.Contains("GateValve"))
+                                {
+                                    valvePts.Add(new ValveCasing(curPt, 2));
+                                }
+                                if(type.Contains("Casing"))
+                                {
+                                    valvePts.Add(new ValveCasing(curPt, 0));
+                                }
+                            }
+
+                            var adjs = fireHydrantSysIn.PtDic[curPt];
+                            if (adjs.Count == 1)
+                            {
+                                termPts.Add(curPt);
+                                continue;
+                            }
+
+                            foreach (var adj in adjs)
+                            {
+                                if (rstPath.Contains(adj))
+                                    continue;
+
+                                if (visited2.Contains(adj))
+                                {
+                                    continue;
+                                }
+
+                                visited2.Add(adj);
+                                q.Enqueue(adj);
+                            }
+                        }
+                        if (termPts.Count != 0)
+                        {
+                            if (branchDic.ContainsKey(pt))
+                            {
+                                continue;
+                            }
+                            branchDic.Add(pt, termPts);
+                            if (valvePts.Count != 0)
+                            {
+                                ValveDic.Add(pt, valvePts);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void CreateBranchDNDic(FireHydrantSystemIn fireHydrantSysIn, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
             foreach (var pt in fireHydrantSysIn.PtDic.Keys)
             {

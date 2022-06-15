@@ -18,8 +18,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public class GetInput
     {
-        public static bool GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
-            Point3dCollection selectArea, Point3d startPt, Serilog.Core.Logger Logger = null)
+        public static bool GetFireHydrantSysInput(AcadDatabase acadDatabase, FireHydrantSystemIn fireHydrantSysIn, 
+            Point3dCollection selectArea, Point3d startPt)
         {
             var lineList = new List<Line>();//管段列表
             var pointList = new List<Point3dEx>();//点集
@@ -36,7 +36,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
-            PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
+            PipeLine.AddPipeLine(dbObjs, fireHydrantSysIn, pointList, lineList);
          
             if (PipeLine.HasSitong(fireHydrantSysIn))
             {
@@ -48,7 +48,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var mark = markEngine.Extract(acadDatabase.Database, selectArea);
             var markAngleDic = new Dictionary<Point3dEx, double>();
             var pipeMarkSite = markEngine.GetPipeMarkPoisition(ref markAngleDic);
-            MarkLine.GetPipeMark(ref fireHydrantSysIn, pipeMarkSite, startPt);
+            MarkLine.GetPipeMark(fireHydrantSysIn, pipeMarkSite, startPt);
             var markBool = fireHydrantSysIn.GetMarkLineList(lineList, markAngleDic);
 
             if (!markBool)
@@ -63,13 +63,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var stopEngine = new ThExtractStopLine();
             var stopPts = stopEngine.Extract(acadDatabase.Database, selectArea);
-            PipeLineList.ConnectWithVertical(ref lineList, fireHydrantSysIn, labelLine);
-            PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
-            PipeLineList.PipeLineAutoConnect(ref lineList, ref fireHydrantSysIn);//管线自动连接
-            PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.VerticalPosition);//删除两个点都是端点的线段
-            PipeLineList.ConnectBreakLineWithoutPtdic(ref lineList, fireHydrantSysIn, ref pointList, stopPts);//连接没画好的线段
-            PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断                                                                           
-            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
+            PipeLineList.ConnectWithVertical(lineList, fireHydrantSysIn, labelLine);
+            PipeLineList.ConnectClosedPt(lineList, fireHydrantSysIn);
+            PipeLineList.PipeLineAutoConnect(lineList, fireHydrantSysIn);//管线自动连接
+            PipeLineList.RemoveFalsePipe(lineList, fireHydrantSysIn.VerticalPosition);//删除两个点都是端点的线段
+            PipeLineList.ConnectBreakLineWithoutPtdic(lineList, fireHydrantSysIn, pointList, stopPts);//连接没画好的线段
+            PipeLine.PipeLineSplit(lineList, pointList);//管线打断                                                                           
+            PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新
 
             var valveEngine = new ThExtractValveService();//提取阀
             var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
@@ -85,19 +85,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var casingPts = casingEngine.Extract(acadDatabase.Database, selectArea);
             var casingSpatialIndex = new ThCADCoreNTSSpatialIndex(casingPts);
 
-            PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList, casingSpatialIndex);
+            PipeLine.AddValveLine(valveDB, fireHydrantSysIn, lineList, valveList, casingPts);
             
             var nodeEngine = new ThExtractNodeTag();//提取消火栓环管节点标记
             var nodeDB = nodeEngine.Extract(acadDatabase.Database, selectArea);
-            nodeEngine.GetPointList(ref fireHydrantSysIn);
+            nodeEngine.GetPointList(fireHydrantSysIn);
             
-            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
+            PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新
             
             double textWidth = 1300;
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
             var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textModel);
-            ;
+            
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
             var dbText = ThTextSet.ThText(new Point3d(), textModel);
             if(dbText.TextString.Trim().Count()!=0)
@@ -114,18 +114,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var DNPipeEngine = new ThExtractPipeDN();//提取管径标注
             var PipeDN = DNPipeEngine.Extract(acadDatabase.Database, selectArea);
             var pipeDNSpatialIndex = new ThCADCoreNTSSpatialIndex(PipeDN);
-            PtDic.CreateBranchDNDic(ref fireHydrantSysIn, pipeDNSpatialIndex);
+            PtDic.CreateBranchDNDic(fireHydrantSysIn, pipeDNSpatialIndex);
 
             fireHydrantSysIn.SlashDic = DNPipeEngine.GetSlashDic(leadLineDic, segLineDic);//斜点标注对
-            PtDic.CreateDNDic(ref fireHydrantSysIn, PipeDN, lineList);//创建DN字典对
+            PtDic.CreateDNDic(fireHydrantSysIn, PipeDN, lineList);//创建DN字典对
 
             var labelPtDic = PtDic.CreateLabelPtDic(fireHydrantSysIn.VerticalPosition, labelLine);//把在同一条标记线上的点聚集
             var labelLineDic = PtDic.CreateLabelLineDic(labelPtDic, labelLine);//找到标注线
-            PtDic.CreateLeadPtDic(ref fireHydrantSysIn, labelLine);//引线添加----20s----
+            PtDic.CreateLeadPtDic(fireHydrantSysIn, labelLine);//引线添加----20s----
 
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
 
-            PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
+            PtDic.CreateTermPtDic(fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             fireHydrantSysIn.TextWidth = textWidth + 100;
             fireHydrantSysIn.PipeWidth = textWidth + 300;
 

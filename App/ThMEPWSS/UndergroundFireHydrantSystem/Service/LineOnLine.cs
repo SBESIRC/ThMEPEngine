@@ -4,7 +4,7 @@ using ThMEPWSS.CADExtensionsNs;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class LineOnLine
+    public class LineOnLine
     {
         public static Line LineIsOnLine(Line valve, List<Line> pipeLineList)
         {
@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return new Line();
         }
 
-        public static void LineSplit(Line valve, Line pipe, ref List<Line> pipeLineList)
+        public static void LineSplit(Line valve, Line pipe, List<Line> pipeLineList)
         {
             pipeLineList.Remove(pipe);
             pipeLineList.Add(valve);

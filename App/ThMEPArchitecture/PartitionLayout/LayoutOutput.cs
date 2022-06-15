@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPEngineCore;
 
 namespace ThMEPArchitecture.PartitionLayout
@@ -23,8 +24,9 @@ namespace ThMEPArchitecture.PartitionLayout
         public static string CarLayerName;
         public static string ColumnLayerName;
         public static string LaneLayerName;
-        public static string PCarLayerName = "平行式";
-        public static string VCarLayerName = "C-标准车位-背靠背";
+        public static string PCarLayerName = "C-平行式";
+        public static string BACKVCarLayerName = "C-标准车位-背靠背";
+        public static string VCarLayerName = "C-标准车位";
         public static string PCARBLKNAME = "AI-平行式2460";
         public static string VCARBLKNAME = "AI-垂直式车位5324";
         public static string VCARBLKNAMEDOUBLEBACK = "AI-背靠背垂直式车位5124";
@@ -45,7 +47,7 @@ namespace ThMEPArchitecture.PartitionLayout
         }
         private static List<Entity> DrawParallelCar()
         {
-            int color1 = 30;
+            int color_dark_yellow = 47;
             int colorgray = 8;
             double CT = 1400;
             var width = 2400;
@@ -74,7 +76,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pt = pt.TransformBy(Matrix3d.Displacement(-y * width));
             pts.Add(pt);
             var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
-            pl.ColorIndex = color1;
+            pl.ColorIndex = color_dark_yellow;
             pl.Layer = PCarLayerName;
             ents.Add(pl);
             //
@@ -89,7 +91,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.TransformBy(Matrix3d.Displacement(x * (length / 2 - widthDb - widthDc - thickness)));
-            pl.ColorIndex = color1;
+            pl.ColorIndex = color_dark_yellow;
             pl.Layer = PCarLayerName;
             ents.Add(pl);
             //
@@ -106,6 +108,8 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = colorgray;
+            pl.Layer = PCarLayerName;
+            pl.Linetype = "DASHED";
             ents.Add(pl);
             //
             pt = ori;
@@ -115,17 +119,21 @@ namespace ThMEPArchitecture.PartitionLayout
             vec = vec.RotateBy(Math.PI / 6, Vector3d.ZAxis);
             var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
             door.ColorIndex = colorgray;
+            door.Linetype = "DASHED";
             var dr = door.Clone() as Line;
             door.TransformBy(Matrix3d.Displacement(y * (width - widthDd)));
+            door.Layer = PCarLayerName;
             ents.Add(door);
             dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(1, 0, 0))));
+            dr.Layer = PCarLayerName;
+            dr.Linetype = "DASHED";
             ents.Add(dr);
 
             return ents;
         }
         private static List<Entity> DrawVertBackBackCar()
         {
-            int color1 = 30;
+            int color_cyan = 4;
             int colorgray = 8;
             double CT = 1400;
             var width = 2400;
@@ -149,8 +157,8 @@ namespace ThMEPArchitecture.PartitionLayout
             pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(0, 1, 0) * length));
             pts.Add(pt);
             var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
-            pl.ColorIndex = color1;
-            pl.Layer = VCarLayerName;
+            pl.ColorIndex = color_cyan;
+            pl.Layer = BACKVCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -166,6 +174,8 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = colorgray;
+            pl.Linetype = "DASHED";
+            pl.Layer = BACKVCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -181,8 +191,8 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * (length - 1150)));
-            pl.ColorIndex = color1;
-            pl.Layer = VCarLayerName;
+            pl.ColorIndex = color_cyan;
+            pl.Layer = BACKVCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -194,15 +204,19 @@ namespace ThMEPArchitecture.PartitionLayout
             vec = vec.RotateBy(Math.PI / 3, Vector3d.ZAxis);
             var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
             door.ColorIndex = colorgray;
+            door.Linetype = "DASHED";
+            door.Layer = BACKVCarLayerName;
             ents.Add(door);
             var dr = door.Clone() as Line;
             dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(0, 1, 0))));
+            dr.Layer = BACKVCarLayerName;
+            dr.Linetype = "DASHED";
             ents.Add(dr);
             return ents;
         }
         private static List<Entity> DrawVertCar()
         {
-            int color1 = 30;
+            int color_darkgreen = 74;
             int colorgray = 8;
             double CT = 1400;
             var width = 2400;
@@ -226,7 +240,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(0, 1, 0) * length));
             pts.Add(pt);
             var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
-            pl.ColorIndex = color1;
+            pl.ColorIndex = color_darkgreen;
             pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
@@ -243,6 +257,8 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = colorgray;
+            pl.Linetype = "DASHED";
+            pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -258,7 +274,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * (length - 1150)));
-            pl.ColorIndex = color1;
+            pl.ColorIndex = color_darkgreen;
             pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
@@ -271,9 +287,13 @@ namespace ThMEPArchitecture.PartitionLayout
             vec = vec.RotateBy(Math.PI / 3, Vector3d.ZAxis);
             var door = GeoUtilities.CreateLineFromStartPtAndVector(pt, vec, doorlength);
             door.ColorIndex = colorgray;
+            door.Linetype = "DASHED";
+            door.Layer = VCarLayerName;
             ents.Add(door);
             var dr = door.Clone() as Line;
+            dr.Layer = VCarLayerName;
             dr.TransformBy(Matrix3d.Mirroring(new Line3d(ori, new Point3d(0, 1, 0))));
+            dr.Linetype = "DASHED";
             ents.Add(dr);
             return ents;
         }
@@ -326,8 +346,8 @@ namespace ThMEPArchitecture.PartitionLayout
                     var blkname = VCARBLKNAMEDOUBLEBACK;
                     using (AcadDatabase adb = AcadDatabase.Active())
                     {
-                        if (!adb.Layers.Contains(VCarLayerName))
-                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
+                        if (!adb.Layers.Contains(BACKVCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, BACKVCarLayerName, 0);
                         BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
                         try
                         {
@@ -402,6 +422,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (ColumnDisplayColorIndex < 0)
                     e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
                 else e.ColorIndex = ColumnDisplayColorIndex;
+                DisplayParkingStall.Add(e);
                 return e;
             }).AddToCurrentSpace();
         }
@@ -422,6 +443,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
+                    DisplayParkingStall.Add(br);
                 }
                 foreach (var car in Cars.Where(e => e.CarLayoutMode == 1))
                 {
@@ -436,6 +458,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, PCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
+                    DisplayParkingStall.Add(br);
                 }
                 foreach (var car in Cars.Where(e => e.CarLayoutMode == 2))
                 {
@@ -450,6 +473,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAMEDOUBLEBACK, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
+                    DisplayParkingStall.Add(br);
                 }
             }
         }
@@ -462,6 +486,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 Lanes.Select(e =>
                 {
                     e.Layer = LaneLayerName;
+                    DisplayParkingStall.Add(e);
                     return e;
                 }).AddToCurrentSpace();
             }

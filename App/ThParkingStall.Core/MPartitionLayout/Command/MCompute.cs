@@ -44,6 +44,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             MParkingPartitionPro.LayoutScareFactor_betweenBuilds = VMStock.LayoutScareFactor_betweenBuilds;
             MParkingPartitionPro.LayoutScareFactor_SingleVert = VMStock.LayoutScareFactor_SingleVert;
             MParkingPartitionPro.SingleVertModulePlacementFactor = VMStock.SingleVertModulePlacementFactor;
+            MParkingPartitionPro.ScareEnabledForBackBackModule = VMStock.DoubleRowModularDecrease200;
             if (InterParameter.MultiThread)
             {        
                 Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display));

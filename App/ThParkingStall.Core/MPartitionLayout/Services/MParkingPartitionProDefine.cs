@@ -64,6 +64,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             //boundcoords = boundcoords.Append(boundcoords.First()).ToArray();
             //Boundary = new Polygon(new LinearRing(boundcoords));
             DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
+            if (!ScareEnabledForBackBackModule)
+            {
+                DisBackBackModulus = DisModulus;
+                DisVertCarLengthBackBack = DisVertCarLength;
+                DisCarAndHalfLaneBackBack = DisCarAndHalfLane;
+            }
         }
         public List<LineString> Walls;
         public List<Polygon> Obstacles;
@@ -93,6 +99,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<Polygon> IniPillar = new List<Polygon>();
 
         public static double ScareFactorForCollisionCheck = 0.999999;
+        public static bool ScareEnabledForBackBackModule = true;
         public static bool GeneratePillars = true;
         public static bool GenerateMiddlePillars = true;
         public static bool HasImpactOnDepthForPillarConstruct = true;

@@ -105,7 +105,6 @@ namespace ThMEPHVAC.EQPMFanSelect
             var retModel = new FanBlockXDataModel();
             retModel.ElvLev = strElvEng;
             retModel.VentLev = strFanEng;
-            retModel.Remark = model.Remark;
             retModel.VibrationMode = strVirType;
             retModel.FanModelCCCF = model.FanModelCCCF;
             retModel.FanModelMotorPowerSource = strSource;
@@ -171,7 +170,43 @@ namespace ThMEPHVAC.EQPMFanSelect
                             fanBlockXData.FanControlString = strData;
                             break;
                         case 6:
-                            retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                            try 
+                            {
+                                retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                            }
+                            catch
+                            {
+                                var tempModel = new FanBlockXDataModel();
+                                //历史数据中有丢数据的问题，如果数据有丢失，进行将错误数据移除，再进行获取数据
+                                foreach (var item in tempModel.GetType().GetProperties(System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Public)) 
+                                {
+                                    var index =strData.IndexOf(item.Name);
+                                    if (index < 0)
+                                        continue;
+                                    var tempStr = strData.Substring(index);
+                                    index = tempStr.IndexOf(":");
+                                    if (index < 0)
+                                        continue;
+                                    tempStr = tempStr.Substring(index+1);
+                                    var endIndex = tempStr.IndexOf(",");
+                                    var value = "";
+                                    if (endIndex < 0)
+                                    {
+                                        value = tempStr;
+                                    }
+                                    else 
+                                    {
+                                        value = tempStr.Substring(0, endIndex);
+                                    }
+                                    value = value.Replace("\"", "");
+                                    item.SetValue(tempModel, value);
+                                }
+                                if (!string.IsNullOrEmpty(tempModel.AirCalcFactor))
+                                    retModel = tempModel;
+                                //strData = strData.Substring(0, strData.LastIndexOf(","));
+                                //strData += "}";
+                                //retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                            }
                             break;
                         case 7:
                             fanBlockXData.HandleString = strData;
@@ -186,6 +221,29 @@ namespace ThMEPHVAC.EQPMFanSelect
             {
                 return null;
             }
+            if (string.IsNullOrEmpty(retModel.FanModelMotorPowerSource))
+            {
+                retModel.FanModelMotorPowerSource = CommonUtil.GetEnumDescription(EnumValueSource.IsCalcValue);
+            }
+            if (string.IsNullOrEmpty(retModel.FanModelCCCF))
+            {
+                var name = blockId.GetDynBlockValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL);
+                if (!name.Contains("倾"))
+                {
+                    name = Regex.Replace(name, @"[\u4e00-\u9fa5]", ""); //去除汉字
+                    if (name.Contains("（"))
+                        name = name.Substring(0, name.IndexOf("（"));
+                    retModel.FanModelCCCF = name;
+                }
+                else 
+                {
+                
+                }
+            }
+            if (string.IsNullOrEmpty(retModel.VibrationMode)) 
+            {
+                retModel.VibrationMode = CommonUtil.GetEnumDescription(EnumDampingType.RDamping);
+            }
             return retModel;
         }
         public static FanDataModel ReadBlockAllFanData(BlockReference fanBlock,out FanDataModel cModel,out bool isCopy) 
@@ -198,7 +256,6 @@ namespace ThMEPHVAC.EQPMFanSelect
             if (pModel.VentStyle == EnumFanModelType.AxialFlow)
             {
                 pModel.IntakeForm = EnumFanAirflowDirection.StraightInAndStraightOut;
-                pModel.FanModelCCCF = fanBlock.Id.GetDynBlockValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL);
                 haveValue = true;
             }
             else 
@@ -405,11 +462,14 @@ namespace ThMEPHVAC.EQPMFanSelect
                 double.TryParse(spliteSelectionFactor[1], out double SelectionFactor2);
                 cModel.DragModel.SelectionFactor = SelectionFactor2;
             }
-            var spliteInputMotorPower = xData.FanModelInputMotorPower.Split('/');
-            pModel.FanModelTypeCalcModel.FanModelInputMotorPower = spliteInputMotorPower[0];
-            if (haveChild)
+            if (!string.IsNullOrEmpty(xData.FanModelInputMotorPower)) 
             {
-                cModel.FanModelTypeCalcModel.FanModelInputMotorPower = spliteInputMotorPower[1];
+                var spliteInputMotorPower = xData.FanModelInputMotorPower.Split('/');
+                pModel.FanModelTypeCalcModel.FanModelInputMotorPower = spliteInputMotorPower[0];
+                if (haveChild)
+                {
+                    cModel.FanModelTypeCalcModel.FanModelInputMotorPower = spliteInputMotorPower[1];
+                }
             }
             pModel.FanModelCCCF = xData.FanModelCCCF;
             return pModel;
@@ -506,10 +566,6 @@ namespace ThMEPHVAC.EQPMFanSelect
         /// 风机型号
         /// </summary>
         public string FanModelCCCF { get; set; }
-        /// <summary>
-        /// 备注
-        /// </summary>
-        public string Remark { get; set; }
         /// <summary>
         /// 风机选型中标识功率来运的信息
         /// </summary>

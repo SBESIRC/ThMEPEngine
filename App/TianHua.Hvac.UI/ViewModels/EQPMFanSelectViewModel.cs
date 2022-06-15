@@ -428,9 +428,9 @@ namespace TianHua.Hvac.UI.ViewModels
                 var current = FanInfos[i];
                 if (current.IsChildFan || current.IsRepetitions)
                     continue;
-                if (string.IsNullOrEmpty(current.InstallSpace) || string.IsNullOrEmpty(current.InstallFloor) || string.IsNullOrEmpty(current.VentNum))
+                var fanNum = GetCheckStr(current);
+                if (string.IsNullOrEmpty(fanNum))
                     continue;
-                var fanNum = string.Format("{0}-{1}-{2}-{3}", current.Name, current.InstallSpace, current.InstallFloor, current.VentNum);
                 for (int j = 0; j < fanCount; j++) 
                 {
                     if (i == j)
@@ -438,11 +438,11 @@ namespace TianHua.Hvac.UI.ViewModels
                     var check = FanInfos[j];
                     if (check.IsChildFan || current.IsRepetitions)
                         continue;
-                    if (string.IsNullOrEmpty(current.InstallSpace) || string.IsNullOrEmpty(current.InstallFloor) || string.IsNullOrEmpty(current.VentNum))
-                        continue;
                     if (current.ScenarioString != check.ScenarioString)
                         continue;
-                    var checkNum = string.Format("{0}-{1}-{2}-{3}", check.Name, check.InstallSpace, check.InstallFloor, check.VentNum);
+                    var checkNum = GetCheckStr(check);
+                    if (string.IsNullOrEmpty(checkNum))
+                        continue;
                     if (fanNum == checkNum)
                     {
                         current.IsRepetitions = true;
@@ -450,6 +450,18 @@ namespace TianHua.Hvac.UI.ViewModels
                     }
                 }
             }
+        }
+        string GetCheckStr(FanDataViewModel current) 
+        {
+            string fanNum = "";
+            if (null == current)
+                return fanNum;
+            fanNum = string.Format("{0}-{1}-{2}-{3}",
+                string.IsNullOrEmpty(current.Name) ? "" : current.Name,
+                string.IsNullOrEmpty(current.InstallSpace) ? "" : current.InstallSpace,
+                string.IsNullOrEmpty(current.InstallFloor) ? "" : current.InstallFloor,
+                string.IsNullOrEmpty(current.VentNum) ? "" : current.VentNum);
+            return fanNum;
         }
     }
 }

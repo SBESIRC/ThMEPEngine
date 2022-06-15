@@ -17,20 +17,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     {
         public static string GetBlockName(this Database db, string blockTag)
         {
-            string blockName;
-            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
-            int i = 0;
-            while (true)
+            using (var acadDb = AcadDatabase.Use(db))
             {
-                blockName = blockTag + i.ToString();
-                if (!bt.Has(blockName)) break;
-                i += 1;
+                string blockName;
+                int i = 0;
+                while (true)
+                {
+                    blockName = blockTag + i.ToString();
+                    if (acadDb.Blocks.Contains(blockName))
+                    {
+                        i += 1;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return blockName;
             }
-            return blockName;
         }
-        public static Point3d AddToBlockTableRecord(this Database db, string blockName, List<Entity> ents)
+
+        public static ObjectId AddToBlockTableRecord(this Database db, string blockName, List<Entity> ents,Point3d position)
         {
-            var center = ents.GetCenter();//取中心点作为插入点
             //打开块表
             BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
             if (!bt.Has(blockName)) //判断是否存在名为blockName的块
@@ -40,14 +48,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 btr.Name = blockName;//设置块名                
                 //将列表中的实体加入到新建的BlockTableRecord对象
                 ents.ForEach(ent => btr.AppendEntity(ent));
-                btr.Origin = center;
+                btr.Origin = position;
                 bt.UpgradeOpen();//切换块表为写的状态
                 bt.Add(btr);//在块表中加入blockName块
                 db.TransactionManager.AddNewlyCreatedDBObject(btr, true);//通知事务处理
                 bt.DowngradeOpen();//为了安全，将块表状态改为读
             }
-            return center;//返回块表记录的Id
+            return bt[blockName]; //返回块表记录的Id
         }
+
         public static ObjectId InsertBlockReference(this ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle,int colorIndex)
         {
             ObjectId blockRefId;//存储要插入的块参照的Id
@@ -85,16 +94,62 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 if (!acad.Layers.Contains(LayerName))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, LayerName, 0);
                 var blockName = acad.Database.GetBlockName(blockTag);
-                Point3d InsertPoint;
-                    // 创建块，并且插入到原位
-                InsertPoint = acad.Database.AddToBlockTableRecord(blockName, entities);
-
+                var center = entities.GetCenter();
+                Point3d InsertPoint = center;
+                // 创建块，并且插入到原位
+                
+                acad.Database.AddToBlockTableRecord(blockName, entities, center);
                 if(!double.IsNaN(InsertX) && !double.IsNaN(InsertY))
                 {
                     InsertPoint = new Point3d(InsertX, InsertY, 0);
                 }
-                acad.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, InsertPoint, new Scale3d(1), 0,0);
+                var blkId = acad.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, InsertPoint, new Scale3d(1), 0,0);
+                var blk = acad.Element<BlockReference>(blkId, true);
+                DisplayParkingStall.Add(blk);
             }
+        }
+        public static void ShowBlock(this List<Entity> entities, string blockTag, string LayerName, Vector3d vector )
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(LayerName))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, LayerName, 0);
+                var blockName = acad.Database.GetBlockName(blockTag);
+                // 创建块，并且插入到原位
+
+                var center = entities.GetCenter();
+                acad.Database.AddToBlockTableRecord(blockName, entities.Select(o=>o.Clone() as Entity).ToList(), center);
+                var blkId = acad.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, center, new Scale3d(1), 0, 0);
+                var blk = acad.Element<BlockReference>(blkId, true);
+                blk.TransformBy(Matrix3d.Displacement(vector));
+            }
+        }
+    }
+
+    public static class DisplayParkingStall
+    {
+        public static List<Entity> Entities = new List<Entity>();
+        public static void Add(Entity entity)
+        {
+            Entities.Add(entity);
+        }
+        public static void Display(double distance)
+        {
+            var vector = new Vector3d(distance, 0,0);
+            //Entities.ShowBlock(blockTag, LayerName, vector);
+            Entities.ForEach(entity => entity.TransformBy(Matrix3d.Displacement(vector)));
+            Clear();
+        }
+        public static void Dispose()
+        {
+
+        }
+
+        public static void Clear()
+        {
+            //Entities.ForEach(x => x.Erase());
+            //Entities.ForEach(x => x.Dispose());
+            Entities.Clear();
         }
     }
 }

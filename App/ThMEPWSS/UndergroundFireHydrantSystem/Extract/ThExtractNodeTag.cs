@@ -52,7 +52,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
         }
 
-        public void GetPointList(ref FireHydrantSystemIn fireHydrantSysIn)
+        public void GetPointList(FireHydrantSystemIn fireHydrantSysIn)
         {
             if (DBobj is null) return;
             var PointList = new List<List<Point3dEx>>();

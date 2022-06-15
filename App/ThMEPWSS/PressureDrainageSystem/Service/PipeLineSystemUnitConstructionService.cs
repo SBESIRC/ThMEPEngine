@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -59,11 +60,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             List<Line> horizontalLines = new List<Line>();
             List<VerticalPipeClass> verticalPipes = new List<VerticalPipeClass>();
             List<SubmergedPumpClass> submergedPumps = new List<SubmergedPumpClass>();
+            List<Extents3d> wrappipes = new List<Extents3d>();
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].HorizontalPipe.ForEach(e => horizontalLines.Add(e));
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].VerticalPipes.ForEach(e => verticalPipes.Add(e));
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].SubmergedPumps.ForEach(e => submergedPumps.Add(e));
+            Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].Wrappipes.ForEach(e => wrappipes.Add(e));
             GroupPipeLineUnitByGroupedHorizontalPipe(horizontalLines, verticalPipes, submergedPumps, layer);
             CompletePipeLineUnitInfoConstructedBasedOnHorizontalPipe(verticalPipes, layer);
+            CollectWrapPipeIntoEachUnit(wrappipes,layer);
             ConfirmDrainageModeBeforeReGenerateHorizontals(layer);
             ReGenerateHorizontalPipeInPipeUnit(layer);
             ConstructPipeLineUnitForUniqueVerticalPipe(verticalPipes, layer);
@@ -173,6 +177,24 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
         }
 
+        private void CollectWrapPipeIntoEachUnit(List<Extents3d> wrappipes, int layer)
+        {
+            var wrappipes_spacial_index = new ThCADCoreNTSSpatialIndex(wrappipes.Select(e => e.ToRectangle()).ToCollection());
+            foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
+            {
+                var horlines = unit.HorizontalPipes;
+                var crossed = new List<Polyline>();
+                foreach (var hor in horlines)
+                {
+                    crossed.AddRange(wrappipes_spacial_index.SelectCrossingPolygon(hor.Buffer(1)).Cast<Polyline>());
+                }
+                if (crossed.Count > 0)
+                {
+                    unit.WrapPipes.AddRange(crossed);
+                }
+            }
+        }
+
         /// <summary>
         /// 在重生成横管连线之前确认排水系统单元的排水方式
         /// </summary>
@@ -183,100 +205,128 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
                 {
-                    foreach (var pipe in unit.VerticalPipes)
+                    var connectedLines = unit.HorizontalPipes.Select(e => e.Clone() as Line).ToList();
+                    var walls = Modeldatas.WallLines;
+                    var boundaries = Modeldatas.Boundaries;
+                    foreach (var line in connectedLines)
                     {
-                        if (pipe.Label != null && pipe.Label.Contains(RoofCrossedId))
+                        foreach (var bound in boundaries)
                         {
-                            pipe.isUnitStart = true;
-                            double cond_QuitCycle = 0;
-                            foreach (var k in unit.VerticalPipes)
+                            if (line.IntersectWithEx(bound).Count > 0)
                             {
-                                if (k.AppendedDrainWell != null)
-                                {
-                                    unit.DrainMode = 2;//穿顶板进水井
-                                    cond_QuitCycle += 1;
-                                    break;
-                                }
+                                unit.DrainMode = 3;//穿外墙
+                                break;
                             }
-                            if (cond_QuitCycle == 0)
-                            {
-                                unit.DrainMode = 1;//穿顶板
-                            }
-                            break;
                         }
+                        if (unit.DrainMode == 3) break;
                     }
-                    if (unit.DrainMode != 1 && unit.DrainMode != 2)
+                    if (unit.DrainMode != 3)
                     {
-                        var connectedLines = unit.HorizontalPipes.Select(e => e.Clone() as Line).ToList();
-                        var walls = Modeldatas.WallLines;
-                        var boundaries = Modeldatas.Boundaries;
-                        foreach (var line in connectedLines)
-                        {
-                            foreach (var bound in boundaries)
-                            {
-                                if (line.IntersectWithEx(bound).Count > 0)
-                                {
-                                    unit.DrainMode = 3;//穿外墙
-                                    break;
-                                }
-                            }
-                            if (unit.DrainMode == 3) break;
-                        }
-                        if (unit.DrainMode != 3 && connectedLines.Count > 0)
-                        {
-                            if (unit.VerticalPipes.Count > 0)
-                            {
-                                double tol_extend = 200000;
-                                Line far_line = connectedLines[0];
-                                double max_dis = connectedLines[0].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
-                                if (connectedLines.Count > 1)
-                                {
-                                    for (int i = 1; i < connectedLines.Count; i++)
-                                    {
-                                        double dis = connectedLines[i].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
-                                        if (dis > max_dis)
-                                        {
-                                            max_dis = dis;
-                                            far_line = connectedLines[i];
-                                        }
-                                    }
-                                }
-                                if (far_line.StartPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center) > far_line.EndPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center))
-                                {
-                                    far_line = new Line(far_line.EndPoint, far_line.StartPoint);
-                                }
-                                Point3d far_ptstart = far_line.EndPoint;
-                                far_line.Extend(false, tol_extend);
-                                far_line = new Line(far_ptstart, far_line.EndPoint);
-                                bool crossed_inner_wall = false;
-                                foreach (var bound in walls)
-                                {
-                                    if (far_line.IntersectWithEx(bound).Count > 0)
-                                    {
-                                        crossed_inner_wall = true;
-                                        break;
-                                    }
-                                }
-                                if (crossed_inner_wall) unit.DrainMode = 4;
-                                else unit.DrainMode = 3;
-                            }                         
-                            //foreach (var line in connectedLines)
-                            //{
-                            //    foreach (var bound in walls)
-                            //    {
-                            //        if (line.IntersectWithEx(bound).Count > 0)
-                            //        {
-                            //            unit.DrainMode = 4;//穿侧墙
-                            //            break;
-                            //        }
-                            //    }
-                            //    if (unit.DrainMode == 4) break;
-                            //}
-                        }
+                        if (unit.WrapPipes.Count > 0) unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSINDOOR);//穿侧墙
+                        else unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSROOF);//穿顶板
                     }
-                    unit.DrainMode = unit.DrainMode == 0 ? 4 : unit.DrainMode;//暂时默认其它方式均为穿外墙
                 }
             }
+            return;
+            //以下为老代码-20220615
+            //if (layer == 0)
+            //{
+            //    foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
+            //    {
+            //        foreach (var pipe in unit.VerticalPipes)
+            //        {
+            //            if (pipe.Label != null && pipe.Label.Contains(RoofCrossedId))
+            //            {
+            //                pipe.isUnitStart = true;
+            //                double cond_QuitCycle = 0;
+            //                foreach (var k in unit.VerticalPipes)
+            //                {
+            //                    if (k.AppendedDrainWell != null)
+            //                    {
+            //                        unit.DrainMode = 2;//穿顶板进水井
+            //                        cond_QuitCycle += 1;
+            //                        break;
+            //                    }
+            //                }
+            //                if (cond_QuitCycle == 0)
+            //                {
+            //                    unit.DrainMode = 1;//穿顶板
+            //                }
+            //                break;
+            //            }
+            //        }
+            //        if (unit.DrainMode != 1 && unit.DrainMode != 2)
+            //        {
+            //            var connectedLines = unit.HorizontalPipes.Select(e => e.Clone() as Line).ToList();
+            //            var walls = Modeldatas.WallLines;
+            //            var boundaries = Modeldatas.Boundaries;
+            //            foreach (var line in connectedLines)
+            //            {
+            //                foreach (var bound in boundaries)
+            //                {
+            //                    if (line.IntersectWithEx(bound).Count > 0)
+            //                    {
+            //                        unit.DrainMode = 3;//穿外墙
+            //                        break;
+            //                    }
+            //                }
+            //                if (unit.DrainMode == 3) break;
+            //            }
+            //            if (unit.DrainMode != 3 && connectedLines.Count > 0)
+            //            {
+            //                if (unit.VerticalPipes.Count > 0)
+            //                {
+            //                    double tol_extend = 200000;
+            //                    Line far_line = connectedLines[0];
+            //                    double max_dis = connectedLines[0].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
+            //                    if (connectedLines.Count > 1)
+            //                    {
+            //                        for (int i = 1; i < connectedLines.Count; i++)
+            //                        {
+            //                            double dis = connectedLines[i].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
+            //                            if (dis > max_dis)
+            //                            {
+            //                                max_dis = dis;
+            //                                far_line = connectedLines[i];
+            //                            }
+            //                        }
+            //                    }
+            //                    if (far_line.StartPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center) > far_line.EndPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center))
+            //                    {
+            //                        far_line = new Line(far_line.EndPoint, far_line.StartPoint);
+            //                    }
+            //                    Point3d far_ptstart = far_line.EndPoint;
+            //                    far_line.Extend(false, tol_extend);
+            //                    far_line = new Line(far_ptstart, far_line.EndPoint);
+            //                    bool crossed_inner_wall = false;
+            //                    foreach (var bound in walls)
+            //                    {
+            //                        if (far_line.IntersectWithEx(bound).Count > 0)
+            //                        {
+            //                            crossed_inner_wall = true;
+            //                            break;
+            //                        }
+            //                    }
+            //                    if (crossed_inner_wall) unit.DrainMode = 4;
+            //                    else unit.DrainMode = 3;
+            //                }                         
+            //                //foreach (var line in connectedLines)
+            //                //{
+            //                //    foreach (var bound in walls)
+            //                //    {
+            //                //        if (line.IntersectWithEx(bound).Count > 0)
+            //                //        {
+            //                //            unit.DrainMode = 4;//穿侧墙
+            //                //            break;
+            //                //        }
+            //                //    }
+            //                //    if (unit.DrainMode == 4) break;
+            //                //}
+            //            }
+            //        }
+            //        unit.DrainMode = unit.DrainMode == 0 ? 4 : unit.DrainMode;//暂时默认其它方式均为穿外墙
+            //    }
+            //}
         }
 
         /// <summary>

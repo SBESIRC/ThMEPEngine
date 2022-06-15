@@ -370,6 +370,7 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\ValveCasing.cs" />
     <Compile Include="UndergroundSpraySystem\Command\FireHydrantAcross.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />
@@ -782,8 +783,6 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\PipeLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PointCompute.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\TermPoint.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\Casing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Check.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />

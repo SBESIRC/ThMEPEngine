@@ -34,13 +34,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             result = result.Buffer(-distance, bufferParameters);
             result = result.Intersection(subArea.Area);
 #if DEBUG
-            foreach (var obj in result.ToDbObjects(true))
-            {
-                if (obj is Entity ent)
-                {
-                    ent.AddToCurrentSpace();
-                }
-            }
+            //foreach (var obj in result.ToDbObjects(true))
+            //{
+            //    if (obj is Entity ent)
+            //    {
+            //        ent.AddToCurrentSpace();
+            //    }
+            //}
 #endif
             return result.Area;
         }

@@ -52,7 +52,6 @@ namespace ThMEPArchitecture.MultiProcess
                     if (acad.Layers.Contains("添加分割线"))
                         newSegs.ForEach(l => l.ToDbLine(2, "添加分割线").AddToCurrentSpace());
                 }
-                
                 newSegs.AddRange(layoutData.SegLines);
                 layoutData.ProcessSegLines(newSegs, false, true);
                 dataWraper.UpdateInterParameter(layoutData);
@@ -123,6 +122,8 @@ namespace ThMEPArchitecture.MultiProcess
             datawraper.ColumnAdditionalInfluenceLaneWidth = vm.ColumnAdditionalInfluenceLaneWidth;
             //最大柱间距,需要改成柱间距
             datawraper.ColumnWidth = vm.ColumnWidth; //mm
+            //背靠背模块：缩进200
+            datawraper.DoubleRowModularDecrease200 = vm.DoubleRowModularDecrease200;
             //背靠背模块：柱子沿车道法向偏移距离
             datawraper.ColumnShiftDistanceOfDoubleRowModular = vm.ColumnShiftDistanceOfDoubleRowModular; //mm
             //背靠背模块是否使用中柱
@@ -136,17 +137,18 @@ namespace ThMEPArchitecture.MultiProcess
             //datawraper.D2;
             //迭代次数
             datawraper.IterationCount = vm.IterationCount;
-            datawraper.RunMode = ((int)vm.RunMode);
+            //排布模式
+            datawraper.RunMode = ParameterStock.RunMode;
             //横向优先_纵向车道计算长度调整_背靠背模块
-            datawraper.LayoutScareFactor_Intergral = vm.LayoutScareFactor_Intergral;
+            datawraper.LayoutScareFactor_Intergral = ParameterStock.LayoutScareFactor_Intergral;
             //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
-            datawraper.LayoutScareFactor_Adjacent = vm.LayoutScareFactor_Adjacent;
+            datawraper.LayoutScareFactor_Adjacent = ParameterStock.LayoutScareFactor_Adjacent;
             //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
-            datawraper.LayoutScareFactor_betweenBuilds = vm.LayoutScareFactor_betweenBuilds;
+            datawraper.LayoutScareFactor_betweenBuilds = ParameterStock.LayoutScareFactor_betweenBuilds;
             //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
-            datawraper.LayoutScareFactor_SingleVert = vm.LayoutScareFactor_SingleVert;
+            datawraper.LayoutScareFactor_SingleVert = ParameterStock.LayoutScareFactor_SingleVert;
             //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
-            datawraper.SingleVertModulePlacementFactor = vm.SingleVertModulePlacementFactor;
+            datawraper.SingleVertModulePlacementFactor = ParameterStock.SingleVertModulePlacementFactor;
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {

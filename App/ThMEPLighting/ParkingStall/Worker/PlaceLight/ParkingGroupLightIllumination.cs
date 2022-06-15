@@ -32,10 +32,10 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
 
         public void Do()
         {
-            foreach (var item in LightPlaceInfos) 
+            foreach (var item in LightPlaceInfos)
             {
                 var groupNeedLightCount = AreaNearLightCount(item.BigGroupInfo.BigGroupPoly);
-                if (groupNeedLightCount == 1) 
+                if (groupNeedLightCount == 1)
                 {
                     item.InsertLightPosisions.Add(item.Position);
                     continue;
@@ -45,30 +45,29 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 var longDir = item.LongDirLength.LineDirection();
                 var line = item.BigGroupInfo.BigGroupLongLine;
                 var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                if (Math.Abs(lineDir.DotProduct(shortDir))<0.1) 
+                if (Math.Abs(lineDir.DotProduct(shortDir)) < 0.1)
                 {
                     line = item.BigGroupInfo.BigGroupShortLine;
                     lineDir = (line.EndPoint - line.StartPoint).GetNormal();
                 }
-                var spaceLength = line.Length / (groupNeedLightCount + 1);
-                var lineSp = line.StartPoint;
-                
-                for (int i = 1; i < groupNeedLightCount + 1; i++) 
+                var spaceLength = line.Length / groupNeedLightCount;
+                var lineSp = line.StartPoint + lineDir.MultiplyBy(spaceLength / 2);
+                for (int i = 0; i < groupNeedLightCount; i++)
                 {
-                    var pt = lineSp + lineDir.MultiplyBy(spaceLength*i);
+                    var pt = lineSp + lineDir.MultiplyBy(spaceLength * i);
                     var prjPt = ThPointVectorUtil.PointToFace(pt, item.Position, longDir);
                     item.InsertLightPosisions.Add(prjPt);
                 }
             }
         }
-        private int AreaNearLightCount(Polyline polyline) 
+        private int AreaNearLightCount(Polyline polyline)
         {
             var area = polyline.Area;
             area = area / (1000.0 * 1000.0);
-            var needCount = (parkingillumination.MastIllumination * area)/(parkingillumination.LightRatedIllumination * parkingillumination.UtilizationCoefficient * parkingillumination.MaintenanceFactor);
+            var needCount = (parkingillumination.MastIllumination * area) / (parkingillumination.LightRatedIllumination * parkingillumination.UtilizationCoefficient * parkingillumination.MaintenanceFactor);
             int count = (int)Math.Ceiling(needCount);
             var temp = needCount % 1;
-            if (temp>0 && temp <0.1)
+            if (temp > 0 && temp < 0.1)
                 count = (int)Math.Floor(needCount);
             count = count < 1 ? 1 : count;
             return count;

@@ -22,15 +22,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<DBText> TextList { get; set; }
         public Dictionary<Point3d, double> PipeInterrupted { get; set; }
         public List<Point3d> GateValve { get; set; }
-        public List<Point3d> Valve { get; set; }
-        public HashSet<Point3d> IsGateValve { get; set; }
-        public List<Point3d> IsCasing { get; set; }
+        public List<Point3d> DieValve { get; set; }
+        public List<Point3d> Casing { get; set; }
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
 
-        public bool HydrantWithReel { get; set; }
+        public HashSet<Point3d> VerticalHasReelHydrant { get; set; }
         public Dictionary<Point3dEx, DBText> ExtraTextDic { get; set; }
+        public List<Line> AidLines { get; set; }
 
         public FireHydrantSystemOut()
         {
@@ -40,13 +40,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             StoreyLine = new List<Line>();
             TextList = new List<DBText>();
             PipeInterrupted = new Dictionary<Point3d, double>();
-            Valve = new List<Point3d>();
-            IsGateValve = new HashSet<Point3d>();
-            IsCasing = new List<Point3d>();
+            DieValve = new List<Point3d>();
             GateValve = new List<Point3d>();
+            Casing = new List<Point3d>();
             FireHydrant = new List<Point3d>();
             DNList = new List<DBText>();
             ExtraTextDic = new Dictionary<Point3dEx, DBText>();
+            VerticalHasReelHydrant = new HashSet<Point3d>();
+            AidLines = new List<Line>();
         }
 
         public void Draw(bool across)
@@ -97,40 +98,41 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     blk.TransformBy(u2wMat);
                 }
 
-                foreach (var valve in Valve)
+                foreach (var valve in DieValve)
                 {
                     string valveName = "蝶阀";
-                    if (IsGateValve.Contains(valve))
-                    {
-                        valveName = "闸阀";
-                    }
-
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        "W-FRPT-HYDT-EQPM",
-                        valveName,
-                        valve,
-                        new Scale3d(1, 1, 1),
-                        0);
+                        "W-FRPT-HYDT-EQPM",valveName,valve,new Scale3d(1, 1, 1),0);
                     var blk = acadDatabase.Element<BlockReference>(objID);
                     blk.TransformBy(u2wMat);
                 }
-
-                foreach (var casing in IsCasing)
+                foreach (var valve in GateValve)
                 {
+                    string valveName = "闸阀";
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        "W-BUSH",
-                        "套管系统",
-                        casing,
-                        new Scale3d(1, 1, 1),
-                        0);
-                    objID.SetDynBlockValue("可见性", "放水套管水平");
+                        "W-FRPT-HYDT-EQPM", valveName, valve, new Scale3d(1, 1, 1), 0);
+                    var blk = acadDatabase.Element<BlockReference>(objID);
+                    blk.TransformBy(u2wMat);
+                }
+                foreach (var valve in Casing)
+                {
+                    string valveName = "套管系统";
+
+                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                        "W-BUSH", valveName, valve, new Scale3d(1, 1, 1), 0);
                     var blk = acadDatabase.Element<BlockReference>(objID);
                     blk.TransformBy(u2wMat);
                 }
 
-                int scaleX = -2 * Convert.ToInt32(HydrantWithReel) + 1;
+                
                 foreach (var fh in FireHydrant)
                 {
+                    var HydrantWithReel = false;
+                    if (VerticalHasReelHydrant.Contains(fh))
+                    {
+                        HydrantWithReel = true;
+                    }
+                    int scaleX = -2 * Convert.ToInt32(HydrantWithReel) + 1;
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         "W-FRPT-HYDT-PIPE",
                         "室内消火栓系统1",
@@ -154,6 +156,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     text.TransformBy(u2wMat);
                     acadDatabase.CurrentSpace.Add(text);
                     text.ColorIndex = (int)ColorIndex.BYLAYER;
+                }
+
+                foreach(var line in AidLines)
+                {
+                    line.TransformBy(u2wMat);
+                    acadDatabase.CurrentSpace.Add(line);
+                    line.Layer = "W-辅助";
+                    line.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
             }
         }
@@ -184,10 +194,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, string> TermDnDic { get; set; }
         public List<Point3dEx> StartEndPts { get; set; }
         public HashSet<Point3dEx> VerticalHasHydrant { get; set; }
+        public HashSet<Point3dEx> VerticalHasReelHydrant { get; set; }
         public HashSet<Point3dEx> TermPtDic { get; set; }
         public List<Point3dEx> ThroughPt { get; set; }
 
-        public bool HydrantWithReel { get; set; }
+        public HashSet<BlockReference> HydrantWithReel { get; set; }
 
         public Dictionary<Point3dEx, Point3d> CrossMainPtDic { get; set; }//跨层主环的对应点位置
         public FireHydrantSystemIn(double floorHeight = 5000, StoreyRect storeyRect = null)
@@ -215,9 +226,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             TermDnDic = new Dictionary<Point3dEx, string>();//端点的标注
             StartEndPts = new List<Point3dEx>();//环管的起始终结点
             VerticalHasHydrant = new HashSet<Point3dEx>();//立管有消火栓设备
+            VerticalHasReelHydrant = new HashSet<Point3dEx>(); //立管有带卷盘消火栓设备
             TermPtDic = new HashSet<Point3dEx>();//是立管的管道末端
             ThroughPt = new List<Point3dEx>();
             CrossMainPtDic = new Dictionary<Point3dEx, Point3d>();
+            HydrantWithReel = new HashSet<BlockReference>();
         }
     }
 }

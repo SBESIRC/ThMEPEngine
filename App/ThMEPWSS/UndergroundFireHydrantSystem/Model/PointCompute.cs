@@ -30,6 +30,22 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return new Line();
         }
 
+        public static Line PointInLine2(Point3d pt, List<Line> lineList)
+        {
+            foreach (var line in lineList)
+            {
+                var isOnLine = line.PointOnLine(pt, false, 10);//判断点是否在线上
+                if (isOnLine)//点在线上
+                {
+                    if (!PointIsLineTerm(pt, line, 10))//点不是线的端点
+                    {
+                        return line;//直接返回
+                    }
+                }
+            }
+            return null;
+        }
+
         public static Point3dEx PointOnLine(this Point3d pt, List<Line> lineList, double angle, double Tolerance = 10.0)
         {
             double disTorlerance = 100;

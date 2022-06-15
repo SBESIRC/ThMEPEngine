@@ -439,22 +439,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 }
                 return ThMPolygonTool.CreateMPolygon(outRoom);
             }).ToList();
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (var item in mPolygonRooms)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-                foreach (var item in holes.Select(x => x.ToNTSPolygon().ToDbMPolygon()).ToList())
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                //db.ModelSpace.Add(frame);
-                //db.ModelSpace.Add(closetLane.Clone() as Line);
-            }
+            
             aStarRoute.SetObstacle(mPolygonRooms, 100, 0);
 
             //----计算路径

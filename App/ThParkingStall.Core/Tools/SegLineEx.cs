@@ -121,7 +121,7 @@ namespace ThParkingStall.Core.Tools
                 var quryed = LineIntSecPts.Where(c => c.X + c.Y > P1.X + P1.Y);
                 if (quryed.Count() > 0) P1 = quryed.First();
             }
-            return new LineSegment(P0, P1);
+            return new LineSegment(P0, P1).Extend(0.1);
         }
 
         public static List<(int, int, int, int)> GetSegLineIntSecNode(this List<LineSegment> SegLines,List<Point> nodes)

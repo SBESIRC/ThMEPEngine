@@ -11,7 +11,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
 {
     public class MainLoop
     {
-        public static List<List<Point3dEx>> Get(ref FireHydrantSystemIn fireHydrantSysIn)
+        public static List<List<Point3dEx>> Get(FireHydrantSystemIn fireHydrantSysIn)
         {
             var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
             var visited = new HashSet<Point3dEx>();//访问标志

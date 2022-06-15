@@ -74,9 +74,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
             if (!TryInit(block, extractSegLine)) return false;
             //Show();
-            if (SegLines.Count != 0)
+            if (extractSegLine)
             {
-                ProcessSegLines();
+                return ProcessSegLines();
             }
             return true;
         }
@@ -86,6 +86,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //SegLines = SegLines.RemoveDuplicated(10);
             if (checkVaild)
             {
+                if (SegLines.Count == 0)
+                {
+                    Active.Editor.WriteLine("未提取到分割线，请检查图层以及线的类型（直线）");
+                    return false;
+                }
                 bool Isvaild = SegLineVaild();
                 //VaildLanes.ShowInitSegLine();
                 if (!Isvaild) return false;
@@ -310,8 +315,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             else
             {
                 ObstacleSpatialIndex = new MNTSSpatialIndex(Obstacles);
-                if (Ramps.Count != 0) BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
-                else BuildingSpatialIndex = ObstacleSpatialIndex;
+                BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
                 UpdateObstacleBoundaries();
                 GetSegLineBoundary();
                 BoundLineSpatialIndex = new MNTSSpatialIndex(WallLine.Shell.ToLineStrings());

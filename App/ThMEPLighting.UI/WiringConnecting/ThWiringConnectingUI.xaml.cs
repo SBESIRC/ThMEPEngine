@@ -65,6 +65,13 @@ namespace ThMEPLighting.UI.WiringConnecting
             }
         }
 
+        private void btnUcsCompass_Click(object sender, RoutedEventArgs e)
+        {
+            // 发送命令
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THLXUCS");
+        }
+
         /// <summary>
         /// 聚焦到CAD
         /// </summary>

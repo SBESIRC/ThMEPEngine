@@ -21,11 +21,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
     public class ThExtractFireHydrant//室内消火栓平面
     {
         public DBObjectCollection DBobjs { get; private set; }
-        public bool Extract(Database database, Point3dCollection polygon)
+        public HashSet<BlockReference> Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面", out bool hydrantWithReel);
+                var hydrantWithReel = new HashSet<BlockReference>();
+                DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面", out hydrantWithReel);
                 return hydrantWithReel;
             }
         }
@@ -38,8 +39,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 try
                 {
-                    var obj = dbObjs[i];
-                    var pt = GetCenter((obj as BlockReference).GeometricExtents);
+                    var block = dbObjs[i] as BlockReference;
+
+                    var pt = GetCenter(block.GeometricExtents);
 
                     var pline = CreatePolyline(pt, 1000);
                     var res = verticalSpatialIndex.SelectCrossingPolygon(pline).ToArray();
@@ -50,6 +52,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     var closedObj = res.OrderBy(e => (e as Polyline).GetCentroidPoint().DistanceTo(pt)).First();
                     var closedPt = (closedObj as Polyline).GetCentroidPoint();
                     fireHydrantSysIn.VerticalHasHydrant.Add(new Point3dEx(closedPt));
+                    if (fireHydrantSysIn.HydrantWithReel.Contains(block))
+                    {
+                        fireHydrantSysIn.VerticalHasReelHydrant.Add(new Point3dEx(closedPt));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -102,7 +108,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return pl;
         }
 
-        private DBObjectCollection ExtractBlocks(Database db, string blockName, out bool hydrantWithReel)
+        private DBObjectCollection ExtractBlocks(Database db, string blockName, out HashSet<BlockReference> hydrantWithReel)
         {
             Func<Entity, bool> IsBlkNameQualified = (e) =>
             {
@@ -121,17 +127,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             extractor.Extract(db); // 提取块中块(包括外参)
             extractor.ExtractFromMS(db); // 提取本地块
 
-            bool _hydrantWithReel = false;
-            bool hasCheckedHydrant = false;
+            var _hydrantWithReel = new HashSet<BlockReference>(); 
             using (var acadDb = AcadDatabase.Use(db))
             {
                 blkVisitor.Results.ForEach(e =>
                 {
                     var attribute = e.Data;
-                    if(!(attribute is null) && !hasCheckedHydrant)
+                    if(!(attribute is null))
                     {
-                        _hydrantWithReel = attribute.ToString().Contains("卷盘");
-                        hasCheckedHydrant = true;
+                        var reel = attribute.ToString().Contains("卷盘");
+                        if(reel)
+                        {
+                            _hydrantWithReel.Add(e.Geometry as BlockReference);
+                        }
                     }
                 });
             }

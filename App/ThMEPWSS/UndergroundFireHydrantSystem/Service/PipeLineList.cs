@@ -19,11 +19,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public static class PipeLineList
     {
-        public static void PipeLineAutoConnect(ref List<Line> lineList, ref FireHydrantSystemIn fireHydrantSysIn)
+        public static void PipeLineAutoConnect(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
-            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  
+            PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新  
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
@@ -89,7 +89,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             //lineList = CleanLaneLines3(lineList);
         }
 
-         public static void PipeLineAutoConnect(ref List<Line> lineList)
+        public static void PipeLineAutoConnect(List<Line> lineList)
          {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
@@ -117,7 +117,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             lineList = CleanLaneLines3(tmpLines);
         }
 
-        public static void RemoveFalsePipe(ref List<Line> lineList, List<Point3dEx> hydrantPosition)
+        public static void RemoveFalsePipe(List<Line> lineList, List<Point3dEx> hydrantPosition)
         {
             foreach (var line in lineList.ToArray())//删除两个点都是端点的线段
             {
@@ -128,7 +128,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void ConnectWithVertical(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine)
+        public static void ConnectWithVertical(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine)
         {
             //基于竖管连接管线
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
@@ -185,7 +185,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             lineList.AddRange(lines);
         }
 
-        public static void ConnectClosedPt(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
+        public static void ConnectClosedPt(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
         {
             var pts = new List<Point3dEx>();
             foreach(var pt in fireHydrantSysIn.PtDic.Keys)
@@ -195,22 +195,70 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     pts.Add(pt);
                 }
             }
+            var usedPts = new HashSet<int>();
             for(int i = 0; i < pts.Count - 1; i++)
             {
+                if(usedPts.Contains(i))
+                {
+                    continue;
+                }
                 for(int j = i + 1; j < pts.Count; j++)
                 {
+                    if (usedPts.Contains(j))
+                    {
+                        continue;
+                    }
                     var dist = pts[i].DistanceToEx(pts[j]);
 
                     if (dist < 20)
                     {
+                        usedPts.Add(i);
+                        usedPts.Add(j);
                         lineList.Add(new Line(pts[i]._pt, pts[j]._pt));
                     }
                 }
             }
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+            for(int i = 0; i < pts.Count; i++)
+            {
+                
+                if(usedPts.Contains(i))
+                {
+                    continue;
+                }
+                var pt = pts[i];
+                var rect = pt._pt.GetRect(10);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                var line = GetNeighborLine(rst,pt._pt, out Point3d closedPt);
+                if(line is not null)
+                {
+                    //var closedPt = line.GetClosestPointTo(pt._pt, false);
+                    lineList.Remove(line);
+                    lineList.Add(new Line(closedPt, pt._pt));
+                    lineList.Add(new Line(line.StartPoint, closedPt));
+                    lineList.Add(new Line(line.EndPoint, closedPt));
+                }
+            }
         }
 
-        public static void ConnectBreakLineWithoutPtdic(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn,
-            ref List<Point3dEx> pointList, List<Point3dEx> stopPts)
+        private static Line GetNeighborLine(DBObjectCollection objs, Point3d pt, out Point3d closedPt)
+        {
+            foreach(var obj in objs)
+            {
+                var line = obj as Line;
+                closedPt = line.GetClosestPointTo(pt, false);
+                var dist = closedPt.DistanceTo(pt);
+                if(dist<10 && dist >1)
+                {
+                    return line;
+                }
+            }
+            closedPt = new Point3d();
+            return null;
+        }
+
+        public static void ConnectBreakLineWithoutPtdic(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn,
+            List<Point3dEx> pointList, List<Point3dEx> stopPts)
         {
             double tor = 10.0;//断开阈值
             //连接不是端点的孤立线段
@@ -249,7 +297,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             lineList = CleanLaneLines3(lineList);
 
-            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新 
+            PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新 
         }
 
         private static void CreateNewConnectLine(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, double tor, List<Line> connectLine, Line line, Point3dEx pt1, bool flag1)

@@ -7,7 +7,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
 {
     public class LoopLine
     {
-        public static void Split(ref FireHydrantSystemOut fireHydrantSysOut, Point3d pt4, Point3d pt5)//横向管线打断
+        public static void Split(FireHydrantSystemOut fireHydrantSysOut, Point3d pt4, Point3d pt5)//横向管线打断
         {
             foreach (var line in fireHydrantSysOut.LoopLine.ToList())
             {

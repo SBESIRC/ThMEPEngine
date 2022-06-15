@@ -100,40 +100,39 @@ namespace ThMEPWSS.Command
                 if (exArea.Count == 0) return null;
                 return exArea;
             }
-            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt, Logger);//提取输入参数
+            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
 
-            fireHydrantSysOut.HydrantWithReel = fireHydrantSysIn.HydrantWithReel;
             if (!inputFlag)
             {
                 return null;
             }
-            var mainPathList = MainLoop.Get(ref fireHydrantSysIn);//主环提取
+            var mainPathList = MainLoop.Get(fireHydrantSysIn);//主环提取
             if (mainPathList.Count == 0)
             {
                 return null;
             }
-            var subPathList = SubLoop.Get(ref fireHydrantSysIn, mainPathList);//支环提取
+            var subPathList = SubLoop.Get(fireHydrantSysIn, mainPathList);//支环提取
             var subPathLsCnt = subPathList.Count;
             var visited = new HashSet<Point3dEx>();//访问标志
             visited.AddVisit(mainPathList);
             visited.AddVisit(subPathList);
 
             var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 端点
-            var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
-            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);
-            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited);
+            var ValveDic = new Dictionary<Point3dEx, List<ValveCasing>>();//支点 + 阀门点
+            PtDic.CreateBranchDic(branchDic, ValveDic, mainPathList, fireHydrantSysIn, visited);
+            PtDic.CreateBranchDic(branchDic, ValveDic, subPathList, fireHydrantSysIn, visited);
 
             var checkPipe = new CheckPipe(mainPathList, subPathList);
             checkPipe.DrawMainLoop(curDb);
             checkPipe.DrawSubLoop(curDb);
             checkPipe.DrawBranchLoop(curDb, fireHydrantSysIn, branchDic);
 
-            var pepeLen = GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic);//主环路获取
+            var pepeLen = GetFireHydrantPipe.GetMainLoop(fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic,false, ValveDic);//主环路获取
 
             var across = FireHydrantAcross.Cmd(curDb, fireHydrantSysIn, fireHydrantSysOut, pepeLen, subPathLsCnt);
 
-            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, across);//次环路获取
-            GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
+            GetFireHydrantPipe.GetSubLoop(fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, across,0,ValveDic);//次环路获取
+            GetFireHydrantPipe.GetBranch(fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
 
             fireHydrantSysOut.Draw(across);//绘制系统图
 

@@ -177,7 +177,10 @@
     <Compile Include="ConnectWiring\Data\ThFaRoomExtractor.cs" />
     <Compile Include="ConnectWiring\Data\ThFireAlarmWiringDateSetFactory.cs" />
     <Compile Include="ConnectWiring\Data\ThLaneLineExtractor.cs" />
+    <Compile Include="ConnectWiring\Data\ThUcsAreaExtractor.cs" />
     <Compile Include="ConnectWiring\Model\BlockConfigModel.cs" />
+    <Compile Include="ConnectWiring\Model\FrameModel.cs" />
+    <Compile Include="ConnectWiring\Model\UcsInfo.cs" />
     <Compile Include="ConnectWiring\Service\BlockConfigSrervice.cs" />
     <Compile Include="ConnectWiring\Service\ConnectFactory\BranchConnectingFactory.cs" />
     <Compile Include="ConnectWiring\Service\BranchConnectingService.cs" />

@@ -243,7 +243,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         // 后代生成逻辑增强，保留之前最优解直接保留，不做变异的逻辑。新增精英种群逻辑，保留精英种群，并且参与小变异。
         // 变异逻辑增强，增加小变异（用于局部最优化搜索），保留之前的变异逻辑（目前称之为大变异）。
         // 对精英种群和一部分交叉产生的后代使用小变异，对一部分后代使用大变异，对剩下的后代不做变异。
-        public List<MPChromosome> Run2()
+        public List<MPChromosome> Run2(DisplayInfo displayInfo)
         {
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
@@ -328,6 +328,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 else strConverged = $"已收敛";
                 Active.Editor.WriteMessage(strConverged);
                 Logger?.Information(strConverged);
+                displayInfo.FinalIterations = "最终代数: " + (CurIteration - 1).ToString() + "(" +strConverged+ ")";
                 DisplayLogger?.Information("最终代数: " + (CurIteration-1).ToString() + "\t");
                 DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
                 stopWatch.Stop();
@@ -380,7 +381,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information(strCnt);
             var maxCnt = sorted[0].ParkingStallCount;
             DisplayLogger?.Information("当前车位数: " + maxCnt.ToString()+"\t");
-            var areaPerStall = (ParameterStock.TotalArea - ParameterStock.BuildingArea) / maxCnt;
+            var areaPerStall = ParameterStock.TotalArea  / maxCnt;
             DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
             System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<MPChromosome>();

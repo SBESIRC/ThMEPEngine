@@ -8,7 +8,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
 {
     public class SubLoop
     {
-        public static List<List<Point3dEx>> Get(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3dEx>> mainPathList)
+        public static List<List<Point3dEx>> Get(FireHydrantSystemIn fireHydrantSysIn, List<List<Point3dEx>> mainPathList)
         {
             var subPathList = new List<List<Point3dEx>>();//次环路最终路径 List
             var visited = new HashSet<Point3dEx>();//访问标志

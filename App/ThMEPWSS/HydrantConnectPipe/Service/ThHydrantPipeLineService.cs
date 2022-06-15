@@ -51,9 +51,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
             return false;
         }
-        private void RemovePipeLines(ref List<Line> pipeLines,ref FireHydrantSystemIn fireHydrantSysIn,List<ThHydrantPipeMark> marks)
+        private void RemovePipeLines(ref List<Line> pipeLines, ref FireHydrantSystemIn fireHydrantSysIn, List<ThHydrantPipeMark> marks)
         {
-            //便历邻接点为1的线
+            //遍历邻接点为1的线
             List<Line> tmpLine = new List<Line>();
             foreach (var l in pipeLines)
             {
@@ -157,9 +157,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
                 var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
 
-                PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
+                PipeLine.AddPipeLine(dbObjs, fireHydrantSysIn, pointList, lineList);
 
-                PipeLineList.PipeLineAutoConnect(ref lineList);
+                PipeLineList.PipeLineAutoConnect(lineList);
                 var tmpLines = ThHydrantConnectPipeUtils.FindInlineLines(startPt, ref lineList, 10);
                 pointList.Clear();
                 var starPts = tmpLines.Select(l=> new Point3dEx(l.StartPoint)).ToList();
@@ -167,7 +167,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 pointList.AddRange(starPts);
                 pointList.AddRange(endPts);
 
-                PipeLine.PipeLineSplit(ref tmpLines, pointList,1.0,2.0);//管线打断
+                PipeLine.PipeLineSplit(tmpLines, pointList,1.0,2.0);//管线打断
 
                 fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
                 foreach (var L in tmpLines)

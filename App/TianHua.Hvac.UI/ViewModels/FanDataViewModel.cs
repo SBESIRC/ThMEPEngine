@@ -362,10 +362,22 @@ namespace TianHua.Hvac.UI.ViewModels
                         tempCanUsePickers = EQPMFanDataService.Instance.GetFanModelPickers(fanDataModel, BaseModelPicker);
                         break;
                 }
-                if(string.IsNullOrEmpty(ccfName))
+                if (string.IsNullOrEmpty(ccfName))
+                {
                     SelectModelPicker = CanUseFanModelPickers.First();
+                    if (pModel != null)
+                    {
+                        pModel.FanModelCCCF = SelectModelPicker.Model;
+                    }
+                    else 
+                    {
+                        fanDataModel.FanModelCCCF = selectPicker.Model;
+                    }
+                }
                 else
                     SelectModelPicker = tempCanUsePickers.Where(c => c.Model == ccfName).FirstOrDefault();
+                if (SelectModelPicker == null)
+                    SelectModelPicker = tempCanUsePickers.Where(c => c.Model == BaseModelPicker.Model).FirstOrDefault();
                 if (tempCanUsePickers.Count > 0) 
                 {
                     CanUseFanModelPickers.Clear();

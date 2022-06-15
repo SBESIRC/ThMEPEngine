@@ -7,7 +7,7 @@
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
               Title="车位自动排布(2.3)" SizeToContent="Manual" Height="745"
-              Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
+              Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
     <Window.Resources>
@@ -24,12 +24,15 @@
                 </StackPanel >
                 <StackPanel Orientation="Vertical">
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
-                    <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
+                        <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding AddBoundSegLines}">补充边界分区线</CheckBox>
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}" Width="210">
-                        <CheckBox Margin="5,8,5,5" Height="15" FontWeight="Bold" IsChecked="{Binding JustCreateSplittersChecked}">仅生成分区线</CheckBox>
+                        <CheckBox Margin="5,5,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">仅生成分区线</CheckBox>
                         <!--<Label Margin="0,2,0,0">方案数：</Label>
                         <TextBox Width="25" Height="15" Margin="0,5,0,5" Text="{Binding LayoutCount}"></TextBox>-->
                     </StackPanel>
@@ -56,6 +59,7 @@
                         <Label>X</Label>
                         <TextBox Width="40" Margin="5,5,5,5" Text="{Binding VerticalSpotWidth}"></TextBox>
                         <Label>mm</Label>
+                        <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding DoubleRowModularDecrease200}">背靠背缩进200</CheckBox>
                     </StackPanel>
                     <StackPanel  Orientation="Horizontal">
                         <Label>车道宽度：</Label>
@@ -117,23 +121,20 @@
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
+            <StackPanel >
+                <Label FontSize="16" FontWeight="Bold">多方案：</Label>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding AutoSolution}">自动</CheckBox>
+                    <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding HorizontalSolution}">优先横向</CheckBox>
+                    <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding VerticalSolution}">优先纵向</CheckBox>
+                </StackPanel>
+            </StackPanel>
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <Label FontSize="16" FontWeight="Bold">运算参数设置：</Label>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Vertical" >
-                <StackPanel>
-                    <StackPanel >
-                        <Label>方向：</Label>
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">自动</RadioButton>
-                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">优先横向</RadioButton>
-                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">优先纵向</RadioButton>
-                        </StackPanel>
-                    </StackPanel>
-                    <Label></Label>
-                </StackPanel>
                 <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
                     <StackPanel>
                         <StackPanel >
@@ -173,7 +174,7 @@
                     <Label></Label>
                     <Button Name="btnRun" Width="40" FontSize="16" FontWeight="Bold" Click="btnRun_Click">运行</Button>
                     <Label></Label>
-                    <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding ShowLogs}">显示日志</CheckBox>
+                    <CheckBox Margin="5,8,5,5" FontSize="16" IsChecked="{Binding ShowLogs}">显示日志</CheckBox>
                     <Label></Label>
                 </StackPanel>
             </StackPanel>

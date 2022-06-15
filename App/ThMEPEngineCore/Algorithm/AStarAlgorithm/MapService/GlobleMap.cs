@@ -121,14 +121,17 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         {
             foreach (var h in _holes)
             {
-                var mHole = h;
-                if (bufferDis != 0)
+                if (h.Area > 0)
                 {
-                    mHole = h.Buffer(bufferDis, true).Cast<MPolygon>().First();
+                    var mHole = h;
+                    if (bufferDis != 0)
+                    {
+                        mHole = h.Buffer(bufferDis, true).Cast<MPolygon>().First();
+                    }
+
+                    holeObjs.Add(mHole);
+                    obstacleCast.Add(mHole, Weight);
                 }
-                
-                holeObjs.Add(mHole);
-                obstacleCast.Add(mHole, Weight);
             }
         }
 
