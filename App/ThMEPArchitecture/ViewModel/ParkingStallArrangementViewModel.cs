@@ -12,7 +12,7 @@ namespace ThMEPArchitecture.ViewModel
 {
     public enum CommandMode { WithUI, WithoutUI}
     public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically}//directly, with splitters, without splitters
-    public enum CommandRunModeEnum { Auto, Horizental, Vertical }
+    //public enum CommandRunModeEnum { Auto, Horizental, Vertical }
     public enum CommandRunSpeedEnum { Fast, General, Slow, Advanced }
     public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
@@ -52,9 +52,19 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("UseMultiProcess");
             }
         }
-
+        //补充分区线
+        private bool _AddBoundSegLines = true;
+        public bool AddBoundSegLines
+        {
+            get { return _AddBoundSegLines; }
+            set
+            {
+                _AddBoundSegLines = value;
+                RaisePropertyChanged("AddBoundSegLines");
+            }
+        }
         //只生成分割线
-        private bool _JustCreateSplittersChecked = true;
+        private bool _JustCreateSplittersChecked = false;
 
         public bool JustCreateSplittersChecked
         {
@@ -164,6 +174,17 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
+        private bool _DoubleRowModularDecrease200 = true;
+
+        public bool DoubleRowModularDecrease200
+        {
+            get { return _DoubleRowModularDecrease200; }
+            set
+            {
+                _DoubleRowModularDecrease200 = value;
+                RaisePropertyChanged("BackToBackDecrease200");
+            }
+        }
         private int _RoadWidth  = 5500; //mm
 
         public int RoadWidth
@@ -351,16 +372,38 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("ColumnShiftDistanceOfSingleRowModular");
             }
         }
+        private bool _AutoSolution = true;
 
-        private CommandRunModeEnum _RunMode = CommandRunModeEnum.Auto;
-        public CommandRunModeEnum RunMode
+        public bool AutoSolution
         {
-            get
-            { return _RunMode; }
+            get { return _AutoSolution; }
             set
             {
-                _RunMode = value;
-                RaisePropertyChanged("RunMode");
+                _AutoSolution = value;
+                RaisePropertyChanged("AutoSolution");
+            }
+        }
+
+        private bool _HorizentalSolution = false;
+
+        public bool HorizontalSolution
+        {
+            get { return _HorizentalSolution; }
+            set
+            {
+                _HorizentalSolution = value;
+                RaisePropertyChanged("HorizontalSolution");
+            }
+        }
+        private bool _VerticalSolution = false;
+
+        public bool VerticalSolution
+        {
+            get { return _VerticalSolution; }
+            set
+            {
+                _VerticalSolution = value;
+                RaisePropertyChanged("VerticalSolution");
             }
         }
 
@@ -478,23 +521,13 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("ShowLogs");
             }
         }
-        //横向优先_纵向车道计算长度调整_背靠背模块
-        public double LayoutScareFactor_Intergral = 0.7;
-        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
-        public double LayoutScareFactor_Adjacent = 0.7;
-        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
-        public double LayoutScareFactor_betweenBuilds = 0.7;
-        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
-        public double LayoutScareFactor_SingleVert = 0.7;
-        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
-        public double SingleVertModulePlacementFactor = 1.0;
-        public void Set(HiddenParameter hp)
+        public List<int> GetMultiSolutionList()
         {
-            LayoutScareFactor_Intergral = hp.LayoutScareFactor_Intergral;
-            LayoutScareFactor_Adjacent = hp.LayoutScareFactor_Adjacent;
-            LayoutScareFactor_betweenBuilds = hp.LayoutScareFactor_betweenBuilds;
-            LayoutScareFactor_SingleVert = hp.LayoutScareFactor_SingleVert;
-            SingleVertModulePlacementFactor = hp.SingleVertModulePlacementFactor;
+            var list = new List<int>();
+            if(AutoSolution) list.Add(0);
+            if(HorizontalSolution) list.Add(1);
+            if(VerticalSolution) list.Add(2);
+            return list;
         }
     }
 
@@ -601,12 +634,58 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
+        private static int _RunMode = 0; //fast mode
+        public static int RunMode
+        {
+            get
+            {
+                return _RunMode;
+            }
+            set
+            {
+                _RunMode = value;
+                if (!ReadHiddenParameter)
+                {
+                    if (value == 0)//自动
+                    {
+                        LayoutScareFactor_Intergral = 1.0;
+                        LayoutScareFactor_Adjacent = 1.0;
+                        LayoutScareFactor_betweenBuilds = 1.0;
+                    }
+                    else if (value == 1)//横向
+                    {
+                        LayoutScareFactor_Intergral = 0.5;
+                        LayoutScareFactor_Adjacent = 0.5;
+                        LayoutScareFactor_betweenBuilds = 0.5;
+                    }
+                    else if (value == 2)//纵向
+                    {
+                        LayoutScareFactor_Intergral = 0.5;
+                        LayoutScareFactor_Adjacent = 0.5;
+                        LayoutScareFactor_betweenBuilds = 0.5;
+                    }
+                }
+            }
+        }
 
+        public static bool AddBoundSegLines;
         public static double BuildingArea;//建筑面积（m^2)
         public static double TotalArea;//地库面积（m^2)
         public static bool ReadHiddenParameter = false;
         public static int CutTol = 995;//全自动分割线比车道多出的额外距离
         private static bool Setted = false;
+
+        //横向优先_纵向车道计算长度调整_背靠背模块
+        public static double LayoutScareFactor_Intergral = 1.0;
+        //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
+        public static double LayoutScareFactor_Adjacent = 1.0;
+        //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
+        public static double LayoutScareFactor_betweenBuilds = 1.0;
+        //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
+        public static double LayoutScareFactor_SingleVert = 1.0;
+        //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
+        public static double SingleVertModulePlacementFactor = 1.0;
+
         public static void Set(ParkingStallArrangementViewModel vm)
         {
             _RoadWidth = vm.RoadWidth;
@@ -617,6 +696,16 @@ namespace ThMEPArchitecture.ViewModel
             _BuildingTolerance = vm.BuildingTolerance;
             _ProcessCount = vm.ProcessCount;
             _ThreadCount = vm.ThreadCount;
+            AddBoundSegLines = vm.AddBoundSegLines;
+            var hp = HiddenParameter.ReadOrCreateDefault();
+            if (ReadHiddenParameter)
+            {
+                LayoutScareFactor_Intergral = hp.LayoutScareFactor_Intergral;
+                LayoutScareFactor_Adjacent = hp.LayoutScareFactor_Adjacent;
+                LayoutScareFactor_betweenBuilds = hp.LayoutScareFactor_betweenBuilds;
+                LayoutScareFactor_SingleVert = hp.LayoutScareFactor_SingleVert;
+                SingleVertModulePlacementFactor = hp.SingleVertModulePlacementFactor;
+            }
             Setted = true;
         }
     }
@@ -626,13 +715,13 @@ namespace ThMEPArchitecture.ViewModel
         public bool LogMainProcess = true;
         public bool LogSubProcess = false;
         //横向优先_纵向车道计算长度调整_背靠背模块
-        public double LayoutScareFactor_Intergral = 0.7;
+        public double LayoutScareFactor_Intergral = 1.0;
         //横向优先_纵向车道计算长度调整_车道近段垂直生成相邻车道模块
-        public double LayoutScareFactor_Adjacent = 0.7;
+        public double LayoutScareFactor_Adjacent = 1.0;
         //横向优先_纵向车道计算长度调整_建筑物之间的车道生成模块
-        public double LayoutScareFactor_betweenBuilds = 0.7;
+        public double LayoutScareFactor_betweenBuilds = 1.0;
         //横向优先_纵向车道计算长度调整_孤立的单排垂直式模块
-        public double LayoutScareFactor_SingleVert = 0.7;
+        public double LayoutScareFactor_SingleVert = 1.0;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public double SingleVertModulePlacementFactor = 1.0;
         //全自动分割线比车道多出的额外距离
@@ -674,13 +763,13 @@ namespace ThMEPArchitecture.ViewModel
                 }
                 ParameterStock.LogMainProcess = hp.LogMainProcess;
                 ParameterStock.LogSubProcess = hp.LogSubProcess;
+                ParameterStock.CutTol = hp.CutTol;
                 return hp;
             }
             finally
             {
                 if (reader != null)
                     reader.Close();
-                ParameterStock.CutTol = hp.CutTol;
             }
         }
     }

@@ -80,7 +80,7 @@ namespace ThMEPArchitecture.MultiProcess
             System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream2.Close();
             ParameterStock.Set(ParameterViewModel);
-            var hp = HiddenParameter.ReadOrCreateDefault();
+            
             if (ParameterStock.LogMainProcess)
             {
                 Logger = new Serilog.LoggerConfiguration().WriteTo
@@ -91,12 +91,11 @@ namespace ThMEPArchitecture.MultiProcess
             .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
             Logger?.Information($"############################################");
-            ParameterViewModel.Set(hp);
-            Logger?.Information("LayoutScareFactor_Intergral:" + ParameterViewModel.LayoutScareFactor_Intergral.ToString());
-            Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterViewModel.LayoutScareFactor_Adjacent.ToString());
-            Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterViewModel.LayoutScareFactor_betweenBuilds.ToString());
-            Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterViewModel.LayoutScareFactor_SingleVert.ToString());
-            Logger?.Information("SingleVertModulePlacementFactor:" + ParameterViewModel.SingleVertModulePlacementFactor.ToString());
+            Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
+            Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
+            Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
+            Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
+            Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
             Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
             Utils.SetSeed();
             try
@@ -104,7 +103,6 @@ namespace ThMEPArchitecture.MultiProcess
                 if(_CommandMode == CommandMode.WithoutUI)
                 {
                     Logger?.Information($"DEbug--读取复现");
-                    //RunDebug();
                     using (var docLock = Active.Document.LockDocument())
                     using (AcadDatabase currentDb = AcadDatabase.Active())
                     {
@@ -138,7 +136,6 @@ namespace ThMEPArchitecture.MultiProcess
                             RunWithAutoSegLine(currentDb);
                     }
                 }
-  
             }
             catch (Exception ex)
             {
@@ -176,23 +173,29 @@ namespace ThMEPArchitecture.MultiProcess
         public void RunDirect(AcadDatabase acadDatabase)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
+            var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             var layoutData = new LayoutData();
             var inputvaild = layoutData.Init(block, Logger);
             if (!inputvaild) return;
-            Converter.GetDataWraper(layoutData, ParameterViewModel,false);
-            InterParameter.MultiThread = true;
-#if DEBUG
-            InterParameter.MultiThread = false;
-#endif
-            var orgSolution = new MPChromosome();
-            var genome = new List<MPGene>();
-            foreach (var lineSeg in InterParameter.InitSegLines)
+            for (int i = 0; i < MultiSolutionList.Count; i++)
             {
-                MPGene gene = new MPGene(lineSeg);
-                genome.Add(gene);
+                ParameterStock.RunMode = MultiSolutionList[i];
+                Converter.GetDataWraper(layoutData, ParameterViewModel, false);
+                InterParameter.MultiThread = true;
+#if DEBUG
+                InterParameter.MultiThread = false;
+#endif
+                var orgSolution = new MPChromosome();
+                var genome = new List<MPGene>();
+                foreach (var lineSeg in InterParameter.InitSegLines)
+                {
+                    MPGene gene = new MPGene(lineSeg);
+                    genome.Add(gene);
+                }
+                orgSolution.Genome = genome;
+                ProcessAndDisplay(orgSolution, block, i);
             }
-            orgSolution.Genome = genome;
-            ProcessAndDisplay(orgSolution);
+            
         }
 
         public void Run(AcadDatabase acadDatabase)
@@ -222,7 +225,7 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
-                    RunABlock(blk, displayInfo);
+                    RunABlock(blk, displayInfo,ParameterViewModel.AddBoundSegLines);
                     displayInfos.Add(displayInfo);
                 }
                 catch(Exception ex)
@@ -282,7 +285,7 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData,false);
-                    if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, displayInfo, autoSegLines, layoutData);
+                    if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, displayInfo,true, autoSegLines, layoutData);
                     displayInfos.Add(displayInfo);
                 }
                 catch (Exception ex)
@@ -313,16 +316,16 @@ namespace ThMEPArchitecture.MultiProcess
             DisplayLogger2?.Information("地库程序运行结束");
 
         }
-        public void RunABlock(BlockReference blk,DisplayInfo displayInfo,List<LineSegment> AutoSegLines = null, LayoutData layoutData = null)
+        public void RunABlock(BlockReference blk, DisplayInfo displayInfo, bool AddBoundSegLines = true, List<LineSegment> AutoSegLines = null, LayoutData layoutData = null)
         {
             Logger?.Information("##################################");
             Logger?.Information("迭代模式：");
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            int fileSize = 128; // 128Mb
+            int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
-
-            if(AutoSegLines == null)
+            DisplayParkingStall.Add(blk.Clone() as BlockReference);
+            if (AutoSegLines == null)
             {
                 layoutData = new LayoutData();
                 var inputvaild = layoutData.Init(blk, Logger);
@@ -333,42 +336,54 @@ namespace ThMEPArchitecture.MultiProcess
                 var inputvaild = layoutData.ProcessSegLines(AutoSegLines);
                 if (!inputvaild) return;
             }
-            var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
-
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
+            var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            for (int i = 0; i < MultiSolutionList.Count; i++)
             {
-                using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                ParameterStock.RunMode = MultiSolutionList[i];
+                var addBoundSegLines = AddBoundSegLines && i == 0;
+                var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel, addBoundSegLines);
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
                 {
-                    IFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(stream, dataWraper);
-                }
-                ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
-                var GA = new MultiProcessGAGenerator(ParameterViewModel);
-                Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
-                GA.Logger = Logger;
-                GA.DisplayLogger = DisplayLogger;
-                try
-                {
-                    var res = GA.Run2(displayInfo);
-                    var best = res.First();
-                    ProcessAndDisplay(best,stopWatch,displayInfo);
-                }
-                catch (Exception ex)
-                {
-                    Logger?.Information(ex.Message);
-                    Logger?.Information("##################################");
-                    Logger?.Information(ex.StackTrace);
-                    Active.Editor.WriteMessage(ex.Message);
-                }
-                finally
-                {
+                    using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                    {
+                        IFormatter formatter = new BinaryFormatter();
+                        formatter.Serialize(stream, dataWraper);
+                    }
+                    var GA = new MultiProcessGAGenerator(ParameterViewModel);
+                    Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                    GA.Logger = Logger;
+                    GA.DisplayLogger = DisplayLogger;
+                    try
+                    {
+                        var res = GA.Run2(displayInfo);
+                        var best = res.First();
+                        ProcessAndDisplay(best, blk, i, stopWatch, displayInfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger?.Information(ex.Message);
+                        Logger?.Information("##################################");
+                        Logger?.Information(ex.StackTrace);
+                        Active.Editor.WriteMessage(ex.Message);
+                    }
+                    finally
+                    {
 
+                    }
                 }
             }
         }
 
-        private void ProcessAndDisplay(MPChromosome solution,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
+        private void ProcessAndDisplay(MPChromosome solution,BlockReference orgBlk=null,int SolutionID = 0 ,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
         {
+            var moveDistance = 0.0;
+            if (orgBlk != null && SolutionID!=0)
+            {
+                var blk_C = orgBlk.Clone() as BlockReference;
+                blk_C.AddToCurrentSpace();
+                DisplayParkingStall.Add(blk_C);
+                moveDistance = SolutionID*2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) - InterParameter.TotalArea.Coordinates.Min(c => c.X));
+            }
             var subAreas = InterParameter.GetSubAreas(solution);
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
             var layer = "最终分割线";
@@ -394,6 +409,7 @@ namespace ThMEPArchitecture.MultiProcess
             Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
             subAreas.ForEach(area => area.ShowText());
+            DisplayParkingStall.Display(moveDistance);
             SubAreaParkingCnt.Clear();
             ReclaimMemory();
             if(stopWatch != null)
@@ -409,7 +425,6 @@ namespace ThMEPArchitecture.MultiProcess
                     displayInfo.FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
                     displayInfo.CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
                 }
-       
             }
         }
         public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData,bool definePriority = true)

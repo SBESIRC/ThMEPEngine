@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPEngineCore;
 
 namespace ThMEPArchitecture.PartitionLayout
@@ -412,6 +413,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (ColumnDisplayColorIndex < 0)
                     e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
                 else e.ColorIndex = ColumnDisplayColorIndex;
+                DisplayParkingStall.Add(e);
                 return e;
             }).AddToCurrentSpace();
         }
@@ -432,6 +434,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
+                    DisplayParkingStall.Add(br);
                 }
                 foreach (var car in Cars.Where(e => e.CarLayoutMode == 1))
                 {
@@ -446,6 +449,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, PCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
+                    DisplayParkingStall.Add(br);
                 }
                 foreach (var car in Cars.Where(e => e.CarLayoutMode == 2))
                 {
@@ -460,6 +464,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAMEDOUBLEBACK, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
+                    DisplayParkingStall.Add(br);
                 }
             }
         }
@@ -472,6 +477,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 Lanes.Select(e =>
                 {
                     e.Layer = LaneLayerName;
+                    DisplayParkingStall.Add(e);
                     return e;
                 }).AddToCurrentSpace();
             }

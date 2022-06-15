@@ -36,7 +36,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 PillarNetLength = vm.ColumnSizeOfParalleToRoad;
                 PillarNetDepth = vm.ColumnSizeOfPerpendicularToRoad;
                 ThicknessOfPillarConstruct = vm.ColumnAdditionalSize;
-                LayoutMode = ((int)vm.RunMode);
+                LayoutMode = (ParameterStock.RunMode);
                 HasImpactOnDepthForPillarConstruct = vm.ColumnAdditionalInfluenceLaneWidth;
             }
             GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;

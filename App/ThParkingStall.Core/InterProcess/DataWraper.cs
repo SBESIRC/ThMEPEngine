@@ -48,6 +48,8 @@ namespace ThParkingStall.Core.InterProcess
         public bool ColumnAdditionalInfluenceLaneWidth = true;
         //最大柱间距,需要改成柱间距
         public int ColumnWidth = 7800; //mm
+        //背靠背模块：缩进200
+        public bool DoubleRowModularDecrease200 = true;
         //背靠背模块：柱子沿车道法向偏移距离
         public int ColumnShiftDistanceOfDoubleRowModular = 550; //mm
         //背靠背模块是否使用中柱
