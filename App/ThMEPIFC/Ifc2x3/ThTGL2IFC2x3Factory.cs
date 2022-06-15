@@ -152,37 +152,17 @@ namespace ThMEPIFC.Ifc2x3
                 var ret = model.Instances.New<IfcWall>();
                 ret.Name = "A Standard rectangular wall";
 
-                //model as a swept area solid 
-                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
+                //model as a swept area solid
+                IfcProfileDef profile = null;
+                if (wall.Outline is Polyline pline)
                 {
-                    s.Depth = wall.Height;
-                    s.ExtrudedDirection = model.ToIfcDirection(wall.ExtrudedDirection);
-                });
-
-
-                if (wall.Outline != null && wall.Outline is Polyline pline)
-                {
-                    var ArbitraryClosedProfileDef = model.Instances.New<IfcArbitraryClosedProfileDef>();
-                    ArbitraryClosedProfileDef.ProfileType = IfcProfileTypeEnum.AREA;
-                    // ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFCDbExtension.ToIfcIndexPolyline(model, pline);
-                    ArbitraryClosedProfileDef.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, pline);
-                    body.SweptArea = ArbitraryClosedProfileDef;
+                    profile = model.ToIfcArbitraryClosedProfileDef(pline);
                 }
                 else
                 {
-                    //represent wall as a rectangular profile
-                    var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
-                    {
-                        p.YDim = wall.Width;
-                        p.XDim = wall.Length;
-                        p.ProfileType = IfcProfileTypeEnum.AREA;
-                        p.Position = model.ToIfcAxis2Placement2D(default);
-                    });
-                    body.SweptArea = rectProf;
+                    profile = model.ToIfcRectangleProfileDef(wall.Length, wall.Width);
                 }
-
-                //parameters to insert the geometry in the model
-                body.Position = model.ToIfcAxis2Placement3D(default);
+                var body = model.ToIfcExtrudedAreaSolid(profile, wall.ExtrudedDirection, wall.Height);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -306,25 +286,9 @@ namespace ThMEPIFC.Ifc2x3
                 var ret = model.Instances.New<IfcDoor>();
                 ret.Name = "door";
 
-                //represent wall as a rectangular profile
-                var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
-                {
-                    p.XDim = door.Width;
-                    p.YDim = door.Thickness - epsilon;
-                    p.ProfileType = IfcProfileTypeEnum.AREA;
-                    p.Position = model.ToIfcAxis2Placement2D(default);
-                });
-
                 //model as a swept area solid
-                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
-                {
-                    s.Depth = door.Height;
-                    s.SweptArea = rectProf;
-                    s.ExtrudedDirection = model.ToIfcDirection(door.ExtrudedDirection);
-                });
-
-                //parameters to insert the geometry in the model
-                body.Position = model.ToIfcAxis2Placement3D(default);
+                var profile = model.ToIfcRectangleProfileDef(door.Width, door.Thickness - epsilon);
+                var body = model.ToIfcExtrudedAreaSolid(profile, door.ExtrudedDirection, door.Height);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -398,7 +362,7 @@ namespace ThMEPIFC.Ifc2x3
                     s.SweptArea = hole_rectProf;
                     s.ExtrudedDirection = model.ToIfcDirection(door.ExtrudedDirection);
                 });
-                hole_body.Position = model.ToIfcAxis2Placement3D(default);
+                hole_body.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
 
                 var hole_shape = model.Instances.New<IfcShapeRepresentation>();
                 var hole_modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
@@ -469,7 +433,7 @@ namespace ThMEPIFC.Ifc2x3
                 });
 
                 //parameters to insert the geometry in the model
-                body.Position = model.ToIfcAxis2Placement3D(default);
+                body.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -534,7 +498,7 @@ namespace ThMEPIFC.Ifc2x3
                     s.ExtrudedDirection = model.ToIfcDirection(window.ExtrudedDirection);
                 });
 
-                hole_body.Position = model.ToIfcAxis2Placement3D(default);
+                hole_body.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
 
                 var hole_shape = model.Instances.New<IfcShapeRepresentation>();
                 var hole_modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
@@ -604,7 +568,7 @@ namespace ThMEPIFC.Ifc2x3
                 });
 
                 //parameters to insert the geometry in the model
-                body.Position = model.ToIfcAxis2Placement3D(default);
+                body.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -674,7 +638,7 @@ namespace ThMEPIFC.Ifc2x3
                 }
 
                 //parameters to insert the geometry in the model
-                body.Position = model.ToIfcAxis2Placement3D(default);
+                body.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
 
                 //Create a Definition shape to hold the geometry
                 var shape = model.Instances.New<IfcShapeRepresentation>();
@@ -724,7 +688,7 @@ namespace ThMEPIFC.Ifc2x3
                         holesbody.SweptArea = holesArbitraryClosedProfileDef;
 
                         //parameters to insert the geometry of holes in the model
-                        holesbody.Position = model.ToIfcAxis2Placement3D(default);
+                        holesbody.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
 
                         //Create a Definition shape to hold the geometry of holes
                         var holesshape = model.Instances.New<IfcShapeRepresentation>();

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using ThCADExtension;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -19,6 +20,11 @@ namespace ThMEPIFC.Ifc2x3
                 compositeCurve.Segments.Add(ToIfcCompositeCurveSegment(model, s));
             });
             return compositeCurve;
+        }
+
+        public static IfcCompositeCurve ToIfcCompositeCurve(IfcStore model, MPolygon mp)
+        {
+            return ToIfcCompositeCurve(model, ThMPolygonExtension.Shell(mp));
         }
 
         private static IfcCompositeCurve CreateIfcCompositeCurve(IfcStore model)
