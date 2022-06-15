@@ -31,7 +31,8 @@ namespace ThMEPStructure.Reinforcement.Service
         protected bool IsBiggerThanStirrupRatio(double pvcal)
         {
             //表中pvcal = 0.915，yjk提取值=0.92,即满足yjk提取值 <= 实配值
-            return ThReinforcementUtils.IsBiggerThan(pvcal, StirrupRatio, 2);
+            // 传入的StirrupRatio->1.53% 取到的是1.53，
+            return ThReinforcementUtils.IsBiggerThan(pvcal, StirrupRatio/100.0, 2);
         }
         protected string EnlargeStirrupDiameter(string stirrup)
         {

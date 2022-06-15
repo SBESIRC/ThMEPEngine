@@ -45,70 +45,97 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             // 实现增强逻辑
             // Step1：先取墙第一端的两根放大
-            var firstDiameters = EnhanceFirstPort(diameters);            
-            if(firstDiameters.Count==0)
+            var firstDiameters = EnhanceFirstPort(diameters);
+            if (firstDiameters.Count == 0)
             {
-                return;
+                // 未能找到向上放大一级的钢筋规格
+                firstDiameters = diameters;
             }
-            else if(IsBiggThanCalculationArea(GetAllReinforceAreas(firstDiameters)))
+            else
             {
                 EnhancedReinforce = ToReinforceSpec(firstDiameters);
-                return;
+                if (IsBiggThanCalculationArea(GetAllReinforceAreas(firstDiameters)))
+                {
+                    return;
+                }
             }
 
             // Step2：在Step1的基础上，再取墙第二端的两根放大
             var secondDiameters = EnhanceSecondPort(firstDiameters);
             if (secondDiameters.Count == 0)
             {
-                return;
+                secondDiameters = firstDiameters;
             }
-            else if(IsBiggThanCalculationArea(GetAllReinforceAreas(secondDiameters)))
+            else
             {
                 EnhancedReinforce = ToReinforceSpec(secondDiameters);
-                return;
+                if (IsBiggThanCalculationArea(GetAllReinforceAreas(secondDiameters)))
+                {
+                    return;
+                }
             }
 
             // Step3：在Step2的基础上，再取墙第一端的两根放大
             var thirdDiameters = EnhanceFirstPort(secondDiameters);
-            if (thirdDiameters.Count == 0)
+            if(thirdDiameters.Count==0)
             {
-                return;
+                thirdDiameters = secondDiameters;
             }
-            else if (IsBiggThanCalculationArea(GetAllReinforceAreas(thirdDiameters)))
+            else
             {
                 EnhancedReinforce = ToReinforceSpec(thirdDiameters);
-                return;
-            }
+                if (IsBiggThanCalculationArea(GetAllReinforceAreas(thirdDiameters)))
+                {
+                    return;
+                }
+            }           
 
             // Step4：在Step3的基础上，再取墙另一端的两根放大
             var fourthDiameters = EnhanceSecondPort(thirdDiameters);
-            if (fourthDiameters.Count == 0)
+            if(fourthDiameters.Count==0)
             {
-                return;
+                fourthDiameters = thirdDiameters;
             }
-            else if (IsBiggThanCalculationArea(GetAllReinforceAreas(fourthDiameters)))
+            else
             {
                 EnhancedReinforce = ToReinforceSpec(fourthDiameters);
-                return;
+                if (IsBiggThanCalculationArea(GetAllReinforceAreas(fourthDiameters)))
+                {
+                    return;
+                }
             }
-
+            
             // Step5：为墙的第一端增加并筋(两根)
-            var fifthDiameters = AddFirstPort(diameters);
-            if (IsBiggThanCalculationArea(GetAllReinforceAreas(fifthDiameters)))
+            var fifthDiameters = AddFirstPort(fourthDiameters);
+            if(fifthDiameters.Count==0)
+            {
+                fifthDiameters = fourthDiameters;
+            }
+            else
             {
                 EnhancedReinforce = ToReinforceSpec(fifthDiameters);
-                return;
+                if (IsBiggThanCalculationArea(GetAllReinforceAreas(fifthDiameters)))
+                {
+                    return;
+                }
             }
-
+            
             // Step6：在Step5的基础上，为墙的第二端再增加并筋(两根)
             var sixthDiameters = AddSecondPort(fifthDiameters);
-            if (IsBiggThanCalculationArea(GetAllReinforceAreas(sixthDiameters)))
+            if(sixthDiameters.Count==0)
+            {
+                sixthDiameters = fifthDiameters;
+            }
+            else
             {
                 EnhancedReinforce = ToReinforceSpec(sixthDiameters);
-                return;
+                if (IsBiggThanCalculationArea(GetAllReinforceAreas(sixthDiameters)))
+                {
+                    return;
+                }
             }
 
-            //
+            // StepX
         }
 
         private bool IsBiggThanCalculationArea(double allReinforceArea)

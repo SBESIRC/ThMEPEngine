@@ -309,7 +309,7 @@ namespace ThMEPStructure.Reinforcement.Command
                                 ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
                             if(edgeComponent!=null)
                             {
-                                SetValueToEdgeComponent(edgeComponent, o, query.IsFind);
+                                SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
                                 results.Add(Tuple.Create(o,edgeComponent));
                             }                            
                         }
@@ -320,7 +320,7 @@ namespace ThMEPStructure.Reinforcement.Command
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade);
                             if (edgeComponent != null)
                             {
-                                SetValueToEdgeComponent(edgeComponent, o, query.IsFind);
+                                SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
                                 results.Add(Tuple.Create(o, edgeComponent));
                             }                            
                         }
@@ -330,7 +330,7 @@ namespace ThMEPStructure.Reinforcement.Command
             }            
         }
         private void SetValueToEdgeComponent(ThEdgeComponent edgeComponent,
-            EdgeComponentExtractInfo info,bool isFind)
+            EdgeComponentExtractInfo info,ComponentType componentType)
         {
             // isFind 根据Cad计算书中的箍筋体积配箍率，在内置表中确实找到符合条件的列
             if (edgeComponent ==null || info == null)
@@ -379,12 +379,13 @@ namespace ThMEPStructure.Reinforcement.Command
             edgeComponent.StirrupLineWeight = ThWallColumnReinforceConfig.Instance.StirrupLineWeight;
             if(info.IsCalculation)
             {
-                // 放大纵筋
+                // YBZ和GBZ均放大纵筋
                 edgeComponent.EnhancedReinforce = GetEnhancedReinforce(
                     edgeComponent.Reinforce, info.AllReinforceArea);
-                // 放大箍筋
-                if(!isFind)
+
+                if (componentType == ComponentType.YBZ)
                 {
+                    // For YBZ, 放大箍筋和拉筋
                     GetEnhancedStirrupAndLinks(edgeComponent, info.StirrupRatio);
                 }
             }            
