@@ -199,7 +199,6 @@ namespace ThMEPElectrical.BlockConvert
                         labelPoint = new Point3d(label_x + (srcPosition.X - targetBlockData.Position.X) * srcBlockData.ScaleFactors.X,
                             label_y + (srcPosition.Y - targetBlockData.Position.Y) * srcBlockData.ScaleFactors.Y, 0);
                     }
-                    var rotation = srcBlockData.Rotation;
                     if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {

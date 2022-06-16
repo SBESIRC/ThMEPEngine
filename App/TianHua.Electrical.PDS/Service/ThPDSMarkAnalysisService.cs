@@ -246,19 +246,26 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
-            if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Fan)
+            if (thPDSLoad.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
             {
                 var cat3 = MatchFanIDCat3(thPDSLoad.ID.LoadID, thPDSLoad.ID.Description);
-                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
-                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
+                if (cat3.Item1 != ThPDSLoadTypeCat_3.None)
+                {
+                    thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                    thPDSLoad.ID.DefaultDescription = cat3.Item1.GetDescription();
+                    thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
+                }
+                if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
+                {
+                    cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                    if (cat3.Item1 != ThPDSLoadTypeCat_3.None)
+                    {
+                        thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                        thPDSLoad.ID.DefaultDescription = cat3.Item1.GetDescription();
+                        thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
+                    }
+                }
             }
-            else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
-            {
-                var cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
-                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
-                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
-            }
-
             return thPDSLoad;
         }
 
@@ -317,13 +324,21 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             var cat3 = MatchFanIDCat3(thPDSLoad.ID.LoadID, thPDSLoad.ID.Description);
-            thPDSLoad.LoadTypeCat_3 = cat3.Item1;
-            thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
-            if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
+            if (cat3.Item1 != ThPDSLoadTypeCat_3.None)
+            {
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.ID.DefaultDescription = cat3.Item1.GetDescription();
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
+            }
+            else
             {
                 cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
-                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
-                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
+                if (cat3.Item1 != ThPDSLoadTypeCat_3.None)
+                {
+                    thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                    thPDSLoad.ID.DefaultDescription = cat3.Item1.GetDescription();
+                    thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
+                }
             }
 
             return thPDSLoad;
@@ -846,16 +861,21 @@ namespace TianHua.Electrical.PDS.Service
         private string StringClean(string str)
         {
             str = str.Replace(" ", "");
-            if (str.IndexOf("（") == 0 && str.IndexOf("）") == str.Count() - 1)
-            {
-                str = str.Remove(str.Count() - 1);
-                str = str.Remove(0, 1);
-            }
-            else if (str.IndexOf("(") == 0 && str.IndexOf(")") == str.Count() - 1)
-            {
-                str = str.Remove(str.Count() - 1);
-                str = str.Remove(0, 1);
-            }
+            str = str.Replace("(", "");
+            str = str.Replace("（", "");
+            str = str.Replace(")", "");
+            str = str.Replace("）", "");
+            // 严格清理
+            //if (str.IndexOf("（") == 0 && str.LastIndexOf("）") == str.Count() - 1)
+            //{
+            //    str = str.Remove(str.Count() - 1);
+            //    str = str.Remove(0, 1);
+            //}
+            //else if (str.IndexOf("(") == 0 && str.LastIndexOf(")") == str.Count() - 1)
+            //{
+            //    str = str.Remove(str.Count() - 1);
+            //    str = str.Remove(0, 1);
+            //}
             return str;
         }
 
