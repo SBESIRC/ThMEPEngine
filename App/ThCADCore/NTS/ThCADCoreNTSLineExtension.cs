@@ -84,12 +84,12 @@ namespace ThCADCore.NTS
 
         public static Polyline Buffer(this Line line, double distance)
         {
-            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjectsEx()[0] as Polyline;
+            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
         }
 
         public static Polyline BufferSquare(this Line line, double distance)
         {
-            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Square).ToDbObjectsEx()[0] as Polyline;
+            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Square).ToDbObjects()[0] as Polyline;
         }
     }
 }
