@@ -193,22 +193,18 @@ namespace ThMEPElectrical.BlockConvert
                         label_y = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y);
                     }
 
-                    var labelPoint = new Point3d(label_x + srcPosition.X - targetBlockData.Position.X,
-                        label_y + srcPosition.Y - targetBlockData.Position.Y, 0);
+                    var labelPoint = new Point3d(label_x, label_y, 0);
+                    if (srcPosition.DistanceTo(targetBlockData.Position) > 1000.0)
+                    {
+                        labelPoint = new Point3d(label_x + (srcPosition.X - targetBlockData.Position.X) * srcBlockData.ScaleFactors.X,
+                            label_y + (srcPosition.Y - targetBlockData.Position.Y) * srcBlockData.ScaleFactors.Y, 0);
+                    }
                     var rotation = srcBlockData.Rotation;
                     if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {
-                        if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
-                        {
-                            targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, -labelPoint.X);
-                            targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, -labelPoint.Y);
-                        }
-                        else
-                        {
-                            targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, labelPoint.X);
-                            targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, labelPoint.Y);
-                        }
+                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, labelPoint.X);
+                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, labelPoint.Y);
                     }
                 }
                 // 部分风机
@@ -413,10 +409,16 @@ namespace ThMEPElectrical.BlockConvert
                 target.Attributes[ThBConvertCommon.PROPERTY_LOAD_NUMBER] = ThBConvertUtils.LoadSN(source);
             }
 
-            // 电量：“电量”
-            if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_POWER_QUANTITY))
+            //// 电量：“电量”
+            //if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_POWER_QUANTITY))
+            //{
+            //    target.Attributes[ThBConvertCommon.PROPERTY_POWER_QUANTITY] = ThBConvertUtils.LoadPowerFromTHModel(source);
+            //}
+
+            // 负载电量：“负载电量”
+            if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_POWER_QUANTITY))
             {
-                target.Attributes[ThBConvertCommon.PROPERTY_POWER_QUANTITY] = ThBConvertUtils.LoadPowerFromTHModel(source);
+                target.Attributes[ThBConvertCommon.PROPERTY_LOAD_POWER_QUANTITY] = ThBConvertUtils.LoadPowerFromTHModel(source);
             }
 
             // 负载用途：“负载用途”
@@ -427,12 +429,12 @@ namespace ThMEPElectrical.BlockConvert
 
             // 由于翻转会造成文字居中显示异常，故暂不支持负载标注的翻转
             // 翻转状态
-            //if (target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
-            //    && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
-            //{
-            //    target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP,
-            //        source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
-            //}
+            if (!target.CustomProperties.IsNull() && target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
+                && !source.CustomProperties.IsNull() && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
+            {
+                target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP,
+                    source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
+            }
         }
     }
 }

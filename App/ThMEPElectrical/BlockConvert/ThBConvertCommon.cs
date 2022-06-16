@@ -16,6 +16,7 @@
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER = "外形图层";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT = "旋转矫正";
 
+        public const string PROPERTY_LOAD_FILP = "翻转状态1";
         public const string PROPERTY_POWER_VOLTAGE = "电压";
         public const string PROPERTY_LOAD_USAGE = "负载用途";
         public const string PROPERTY_POWER_QUANTITY = "电量";
@@ -28,6 +29,7 @@
         public const string PROPERTY_EQUIPMENT_SYMBOL = "设备符号";
         public const string PROPERTY_FIRE_POWER_SUPPLY = "消防电源";
         public const string PROPERTY_STOREY_AND_NUMBER = "楼层-编号";
+        public const string PROPERTY_LOAD_POWER_QUANTITY = "负载电量";
         public const string PROPERTY_ALL_FREQUENCY = "变频、双速或定频";
         public const string PROPERTY_FIRE_POWER_SUPPLY2 = "消防电源或非消防电源";
 
