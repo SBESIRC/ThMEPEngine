@@ -108,22 +108,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var pt1 = TextLine.StartPoint.OffsetY(offset);
             var pt2 = TextLine.EndPoint.OffsetY(offset);
             var line = new Line(pt1,pt2);
-#if DEBUG
 
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                string layerName = "标注线获取文字";
-                try
-                {
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
-                }
-                catch { }
-                
-                line.LayerId = DbHelper.GetLayerId(layerName);
-                currentDb.CurrentSpace.Add(line);
-                
-            }
-#endif
             var midPt = General.GetMidPt(pt1,pt2);
             double tor = 1000;
             var DBObjs = spatialIndex.SelectFence(line);

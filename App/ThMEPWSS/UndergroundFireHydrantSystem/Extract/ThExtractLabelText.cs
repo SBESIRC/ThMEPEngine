@@ -51,25 +51,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                     
                 }
-#if DEBUG
-
-                using (AcadDatabase currentDb = AcadDatabase.Active())
-                {
-                    string layerName = "文字图层";
-                    try
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
-                    }
-                    catch { }
-                    foreach (var line in dbTextCollection)
-                    {
-                        var dbtext = line as DBText;
-                        var rect = dbtext.GetRect();
-                        rect.LayerId = DbHelper.GetLayerId(layerName);
-                        currentDb.CurrentSpace.Add(rect);
-                    }
-                }
-#endif
                 return dbTextCollection;
             }
         }
@@ -100,8 +81,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         {
             return Regex.IsMatch(str, @"[\u4e00-\u9fa5]");
         }
-
-
 
         //特别耗时
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)

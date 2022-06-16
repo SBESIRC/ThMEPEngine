@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
     {
         public IEnumerable<BlockReference> Results { get; private set; }
         public DBObjectCollection DBobj { get; private set; }
-        public DBObjectCollection Extract(Database database, Point3dCollection polygon)
+        public void Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -32,7 +32,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 DBobj = spatialIndex.SelectCrossingPolygon(polygon);
-                return DBobj;
             }
         }
         private bool IsTargetBlock(BlockReference block)

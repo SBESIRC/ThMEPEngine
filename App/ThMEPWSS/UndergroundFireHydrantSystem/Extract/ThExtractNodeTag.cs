@@ -16,7 +16,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
     {
         public IEnumerable<BlockReference> Results { get; private set; }
         public DBObjectCollection DBobj { get; private set; }
-        public DBObjectCollection Extract(Database database, Point3dCollection polygon)
+        public void Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -28,12 +28,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    .Where(o => IsTargetBlock(o));
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                     DBobj = spatialIndex.SelectCrossingPolygon(polygon);
-
-                    return DBobj;
                 }
                 catch (Exception ex)
                 {
-                    return new DBObjectCollection();
+                    ;                
                 }
             }
         }
@@ -55,7 +53,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         public void GetPointList(FireHydrantSystemIn fireHydrantSysIn)
         {
             if (DBobj is null) return;
-            var PointList = new List<List<Point3dEx>>();
             double tolerance = 65;
             foreach (var db in DBobj)
             {

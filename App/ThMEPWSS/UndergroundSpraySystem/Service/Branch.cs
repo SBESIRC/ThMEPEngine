@@ -205,6 +205,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             var pt3 = pt2.OffsetX(1200);
                             var pt4 = pt3.OffsetY(-1200);
                             var pt5 = pt4.OffsetX(-length);
+                            sprayOut.PipeLine.Add(new Line(stPt, pt1));
                             sprayOut.PipeLine.Add(new Line(pt1, pt2));
                             sprayOut.PipeLine.Add(new Line(pt2, pt3));
                             sprayOut.NoteLine.Add(new Line(pt3, pt4));
