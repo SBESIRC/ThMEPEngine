@@ -56,7 +56,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                         var frameUcs = ucsInfos.Where(x => ucsPoly.Frame.Contains(x.ucsInsertPoint)).FirstOrDefault();
                         if (frameUcs != null)
                         {
-                            ucsPoly.dir = frameUcs.ucsMatrix.CoordinateSystem3d.Xaxis;
+                            ucsPoly.dir = frameUcs.BlockXAxis;
                         }
                     }
                 }
