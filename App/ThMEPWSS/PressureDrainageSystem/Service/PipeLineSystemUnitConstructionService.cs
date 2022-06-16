@@ -129,9 +129,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             _totalPipeLineUnitsByLayerByUnit[layer][i].VerticalPipes.Add(verticalPipes[j]);
                             verticalPipes.RemoveAt(j);
                             j--;
-                        }
-                        else if (horLine.Line.GetClosestPointTo(verticalPipes[j].Circle.Center, false).DistanceTo(verticalPipes[j].Circle.Center) < tolPipeToLine)
+                        }                      
+                        else if (horLine.Line.IsIntersects(verticalPipes[j].Circle.Center.CreateSquare(verticalPipes[j].Circle.Diameter)))
                         {
+                            var old_condition = horLine.Line.GetClosestPointTo(verticalPipes[j].Circle.Center, false).DistanceTo(verticalPipes[j].Circle.Center) < tolPipeToLine;
                             _totalPipeLineUnitsByLayerByUnit[layer][i].VerticalPipes.Add(verticalPipes[j]);
                             verticalPipes.RemoveAt(j);
                             j--;
@@ -639,7 +640,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             if (layerNumber > 1)
             {
                 double disSearchRange = 10000;//给一个潜水泵立管的搜索范围
-                double tolSearchVertPipe = 200;
+                double tolSearchVertPipe = 100;
                 for (int i = 1; i < layerNumber; i++)
                 {
                     Point3d pt0 = Modeldatas.FloorLocPoints[i - 1];
@@ -651,33 +652,112 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         double cond_QuitCycle = 0;
                         var unit = _totalPipeLineUnitsByLayerByUnit[i][j];
+                        var originalHors = unit.OriginalHorizontalPipes;
+                        var originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(originalHors.Select(e => e.Line.Buffer(1)).ToCollection());
                         for (int k = 0; k < _pipeLineSystemUnits.Count; k++)
                         {
                             if (unit.VerticalPipes.Count > 0 && _pipeLineSystemUnits[k].PipeLineUnits.Count >= i && _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes.Count > 0)
                             {
-                                bool cond_Search = false;
-                                foreach (var pipe in _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes)
-                                {
-                                    if (unit.VerticalPipes[0].Circle.Center.TransformBy(mat).DistanceTo(pipe.Circle.Center) < disSearchRange)
-                                    {
-                                        cond_Search = true;
-                                    }
-                                }
-                                foreach (var ppe in unit.VerticalPipes)
-                                {
-                                    var p = ppe.Circle.Center;
-                                    if (p.DistanceTo(new Point3d(611313.5, 341095.9, 0)) < 10)
-                                    {
-                                        ;
-                                    }
-                                }
-                                var hors = unit.HorizontalPipes;
-                                var ohors = unit.OriginalHorizontalPipes;
+                                //bool cond_Search = false;
+                                //foreach (var pipe in _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes)
+                                //{
+                                //    if (unit.VerticalPipes[0].Circle.Center.TransformBy(mat).DistanceTo(pipe.Circle.Center) < disSearchRange)
+                                //    {
+                                //        cond_Search = true;
+                                //    }
+                                //}
+                                var pump = new SubmergedPumpClass();
                                 foreach (var curPipe in unit.VerticalPipes)
                                 {
-                                    
+                                    if (curPipe.AppendedSubmergedPump != null) pump = curPipe.AppendedSubmergedPump;
                                 }
-                                if (cond_Search)
+                                var pumpline = new Line();
+                                foreach (var line in originalHors.Select(e => e.Line))
+                                {
+                                    var rec = pump.Extents.ToRectangle();
+                                    if (rec.Contains(line.StartPoint) && rec.Contains(line.EndPoint))
+                                    {
+                                        pumpline = line;
+                                    }
+                                }
+                                if (pumpline.Length > 0)
+                                {
+                                    var connectedLines = FindSeriesLine(pumpline.StartPoint, originalHors.Select(e => e.Line).ToList());
+                                    connectedLines.AddRange(FindSeriesLine(pumpline.EndPoint, originalHors.Select(e => e.Line).ToList()));
+                                    var connectedLinesSpacialIndex = new ThCADCoreNTSSpatialIndex(connectedLines.Select(e => e.Buffer(1)).ToCollection());
+                                    foreach (var curPipe in unit.VerticalPipes)
+                                    {
+                                        if (connectedLinesSpacialIndex.SelectCrossingPolygon(curPipe.Circle.Center.CreateSquare(curPipe.Circle.Diameter * 2)).Cast<Polyline>().Count() == 0)
+                                        {
+                                            curPipe.CanUsedToJudgeCrossLayer = false;
+                                        }
+                                    }
+                                }
+                                foreach (var curPipe in unit.VerticalPipes)
+                                {
+                                    if (!curPipe.CanUsedToJudgeCrossLayer) continue;
+                                    var piperec = curPipe.Circle.Center.CreateSquare(curPipe.Circle.Diameter * 2);
+                                    if (originalHorsSpacialIndex.SelectCrossingPolygon(piperec).Count > 0)
+                                    {
+                                        foreach (var parPipe in _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes)
+                                        {
+                                            var cond_distance = curPipe.Circle.Center.TransformBy(mat).DistanceTo(parPipe.Circle.Center) < tolSearchVertPipe;
+                                            var id_curpipe = curPipe.Identifier == null ? "" : curPipe.Identifier;
+                                            var id_parpipe = parPipe.Identifier == null ? "" : parPipe.Identifier;
+                                            var cond_match_mark = id_curpipe.Equals(id_parpipe);
+                                            if (cond_distance && cond_match_mark)
+                                            {
+                                                cond_QuitCycle += 1;
+                                                if (_pipeLineSystemUnits[k].PipeLineUnits.Count == i)
+                                                {
+                                                    _pipeLineSystemUnits[k].PipeLineUnits.Add(unit);
+                                                }
+                                                else
+                                                {
+                                                    int num_a = unit.HorizontalPipes.Count;
+                                                    for (int w = 0; w < num_a; w++)
+                                                    {
+                                                        _pipeLineSystemUnits[k].PipeLineUnits[i].HorizontalPipes.Add(unit.HorizontalPipes[w]);
+                                                    }
+                                                    int num_b = unit.VerticalPipes.Count;
+                                                    for (int w = 0; w < num_b; w++)
+                                                    {
+                                                        _pipeLineSystemUnits[k].PipeLineUnits[i].VerticalPipes.Add(unit.VerticalPipes[w]);
+                                                    }
+                                                    int[,] arr1 = _pipeLineSystemUnits[k].PipeLineUnits[i].VertPipeConnectedArr;
+                                                    int[,] arr2 = unit.VertPipeConnectedArr;
+                                                    int num = arr1.GetLength(0) + arr2.GetLength(0);
+                                                    int[,] arr = new int[num, num];
+                                                    for (int w = 0; w < arr1.GetLength(0); w++)
+                                                    {
+                                                        for (int m = 0; m < arr1.GetLength(0); m++)
+                                                        {
+                                                            if (arr1[w, m] == 1)
+                                                            {
+                                                                arr[w, m] = 1;
+                                                            }
+                                                        }
+                                                    }
+                                                    for (int w = 0; w < arr2.GetLength(0); w++)
+                                                    {
+                                                        for (int m = 0; m < arr2.GetLength(0); m++)
+                                                        {
+                                                            if (arr2[w, m] == 1)
+                                                            {
+                                                                arr[w + arr1.GetLength(0), m + arr1.GetLength(0)] = 1;
+                                                            }
+                                                        }
+                                                    }
+                                                    _pipeLineSystemUnits[k].PipeLineUnits[i].VertPipeConnectedArr = arr;
+                                                }
+                                                break;
+                                            }
+                                            if (cond_QuitCycle > 0) { break; }
+                                        }
+                                        if (cond_QuitCycle > 0) { break; }
+                                    }
+                                }
+                                if (/*cond_Search*/false)
                                 {
                                     foreach (var ppe in unit.VerticalPipes)
                                     {

@@ -2,7 +2,9 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -852,5 +854,600 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             }
             return res;
         }
+        private static void TraverseConnectedLinesWithHinderpts(
+    ref List<Line> emilinatedSelfLines, Point3d point, double tolBrokenLine, Vector3d SelfLine,
+    ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines)
+        {
+            for (int j = 0; j < emilinatedSelfLines.Count; j++)
+            {
+                Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
+                Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
+                Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
+                if (point.DistanceTo(ptmp1) < tolBrokenLine)
+                {
+                    Vector3d vector = new Vector3d(point.X - ptmp1.X, point.Y - ptmp1.Y, 0);
+                    double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+                    double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+                    bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+                    bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+                    if (bool1 && bool2)
+                    {
+                        Line line = new Line(point, ptmp1);
+                        connectedLines.Add(line);
+                        emilinatedSelfLines.Insert(i, lines[i]);
+                        break;
+                    }
+                }
+                else if (point.DistanceTo(ptmp2) < tolBrokenLine)
+                {
+                    Vector3d vector = new Vector3d(point.X - ptmp2.X, point.Y - ptmp2.Y, 0);
+                    double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+                    double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+                    bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+                    bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+                    if (bool1 && bool2)
+                    {
+                        Line line = new Line(point, ptmp2);
+                        connectedLines.Add(line);
+                        emilinatedSelfLines.Insert(i, lines[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        private static void TraverseConnectedLinesWithJoinedPoints(
+         ref List<Line> emilinatedSelfLines, Point3d point, double tolBrokenLine, Vector3d SelfLine,
+         ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines, List<Polyline> crossedplys)
+        {
+            for (int j = 0; j < emilinatedSelfLines.Count; j++)
+            {
+                Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
+                Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
+                var p = lines[i].GetClosestPointTo(ptmp1, false).DistanceTo(ptmp1) <
+                    lines[i].GetClosestPointTo(ptmp2, false).DistanceTo(ptmp2) ? ptmp1 : ptmp2;
+                Polyline crossed = new Polyline();
+                foreach (var ply in crossedplys)
+                {
+                    if (ply.Contains(point)) crossed = ply;
+                }
+                if (crossed.Area < 1) continue;
+                if (!crossed.Contains(p)) continue;
+                //if (!IsInAnyPolys(p, crossedplys, true)) continue;
+                if (lines[i].GetClosestPointTo(p, false).DistanceTo(p) == 0) continue;
+                //Vector3d vector = new Vector3d(point.X - ptmp1.X, point.Y - ptmp1.Y, 0);
+                //Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
+                //double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+                //double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+                //bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+                //bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+                //if (bool1 && bool2) continue;
+                var vec_j = CreateVector(emilinatedSelfLines[j]);
+                double angle = vec_j.GetAngleTo(SelfLine);
+                var angle_cond = Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < 1;
+                if (angle_cond) continue;
+                int count_on_line = 0;
+                foreach (var lin in lines)
+                {
+                    if (lin.GetClosestPointTo(point, false).DistanceTo(point) < 10)
+                        count_on_line++;
+                }
+                if (count_on_line > 1) continue;
+                count_on_line = 0;
+                foreach (var lin in lines)
+                {
+                    if (lin.GetClosestPointTo(p, false).DistanceTo(p) < 10)
+                        count_on_line++;
+                }
+                if (count_on_line > 1) continue;
+                Line line = new Line(point, p);
+                connectedLines.Add(line);
+                emilinatedSelfLines.Insert(i, lines[i]);
+                break;
+            }
+        }
+        public static Vector3d CreateVector(Point3d ps, Point3d pe)
+        {
+            return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
+        }
+        public static Vector3d CreateVector(Line line)
+        {
+            return CreateVector(line.StartPoint, line.EndPoint);
+        }
+        public static double ClosestPointInVertLines(Point3d pt, Line line, IEnumerable<Line> lines, bool returninfinity = true)
+        {
+            var ls = lines.Where(e => IsPerpLine(line, e));
+            if (!returninfinity)
+                if (ls.Count() == 0) return -1;
+            var res = double.PositiveInfinity;
+            foreach (var l in ls)
+            {
+                var dis = l.GetClosestPointTo(pt, false).DistanceTo(pt);
+                if (res > dis) res = dis;
+            }
+            return res;
+        }
+        public static bool IsPerpLine(Line a, Line b, double degreetol = 1)
+        {
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
+        }
+        public static void RemoveDuplicatedLines(List<Line> lines)
+        {
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if ((lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < 1)
+                        || (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < 1))
+                    {
+                        lines.RemoveAt(j);
+                        j--;
+                    }
+                }
+            }
+        }
+        public static bool IsParallelLine(Line a, Line b, double degreetol = 1)
+        {
+            double angle = Math.Abs(CreateVector(a).GetAngleTo(CreateVector(b)));
+            return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
+        }
+        public static void RemoveDuplicatedAndInvalidLanes(ref List<Line> lines)
+        {
+            if (lines.Count < 2) return;
+            //删除部分共线的直线只保留一份
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (IsParallelLine(lines[i], lines[j]) && lines[j].GetClosestPointTo(lines[i].GetMidpoint(), true).DistanceTo(lines[i].GetMidpoint()) < 0.001)
+                    {
+                        if (lines[j].GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint) < 0.001
+                            && lines[j].GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint) > 0.001)
+                        {
+                            var p = lines[j].StartPoint.DistanceTo(lines[i].EndPoint) <= lines[j].EndPoint.DistanceTo(lines[i].EndPoint) ?
+                                lines[j].StartPoint : lines[j].EndPoint;
+                            lines[i] = new Line(p, lines[i].EndPoint);
+                        }
+                        if (lines[j].GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint) < 0.001
+                            && lines[j].GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint) > 0.001)
+                        {
+                            var p = lines[j].StartPoint.DistanceTo(lines[i].StartPoint) <= lines[j].EndPoint.DistanceTo(lines[i].StartPoint) ?
+                                lines[j].StartPoint : lines[j].EndPoint;
+                            lines[i] = new Line(lines[i].StartPoint, p);
+                        }
+                    }
+                }
+            }
+            //删除重复的子线
+            lines = lines.OrderBy(e => e.Length).ToList();
+            double tol = 10;//近似重复
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (IsSubLine(lines[i], lines[j]))
+                    {
+                        lines.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+            //合并车道线
+            JoinLines(lines);
+            //删除近似重复的子线
+            lines = lines.OrderBy(e => e.Length).ToList();
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    bool isSimilarDuplicated = IsParallelLine(lines[i], lines[j]) && lines[j].GetClosestPointTo(lines[i].GetMidpoint(), false).DistanceTo(lines[i].GetMidpoint()) < tol
+                        && Math.Abs(lines[j].GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint) - lines[j].GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint)) < 1;
+                    if (isSimilarDuplicated)
+                    {
+                        lines.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+        }
+        public static void JoinLines(List<Line> lines)
+        {
+            double tol = 0.001;
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (IsParallelLine(lines[i], lines[j]) && !IsSubLine(lines[i], lines[j]))
+                    {
+                        if (lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].EndPoint, lines[j].EndPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].EndPoint, lines[j].StartPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].StartPoint, lines[j].EndPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].StartPoint, lines[j].StartPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        public static bool IsSubLine(Line a, Line b)
+        {
+            if (b.GetClosestPointTo(a.StartPoint, false).DistanceTo(a.StartPoint) < 0.001
+                && b.GetClosestPointTo(a.EndPoint, false).DistanceTo(a.EndPoint) < 0.001)
+                return true;
+            return false;
+        }
+        public static void InterrptLineByPoints(List<Line> lines, List<Point3d> points)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                var pts = points.Where(p => line.GetClosestPointTo(p, false).DistanceTo(p) < 10)
+                    .Select(p => line.GetClosestPointTo(p, false))
+                    .Where(p => p.DistanceTo(line.StartPoint) > 10 && p.DistanceTo(line.EndPoint) > 10).ToList();
+                if (pts.Count == 0) continue;
+                else
+                {
+                    var res = SplitLine(line, pts);
+                    lines.AddRange(res);
+                    lines.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+        public static double GetDisOnPolyLine(Point3d pt, Polyline poly)
+        {
+            if (poly.GetClosestPointTo(pt, false).DistanceTo(pt) > 0.1)
+                return -1;
+            double distance = 0.0;
+            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+            {
+                var lineSeg = poly.GetLineSegmentAt(i);
+                if (lineSeg.IsOn(pt, new Tolerance(1.0, 1.0)))
+                {
+                    var newPt = pt.GetProjectPtOnLine(lineSeg.StartPoint, lineSeg.EndPoint);
+                    distance += lineSeg.StartPoint.DistanceTo(newPt);
+                    break;
+                }
+                else
+                    distance += lineSeg.Length;
+                lineSeg.Dispose();
+            }
+            return distance;
+        }
+        public static List<Point3d> RemoveDuplicatePts(List<Point3d> points, double tol = 0, bool preserve_order = true)
+        {
+            if (points.Count < 2) return points;
+            List<Point3d> results = new List<Point3d>(points);
+            if (preserve_order)
+            {
+                for (int i = 1; i < results.Count; i++)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (results[i].DistanceTo(results[j]) <= tol)
+                        {
+                            results.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+                return results;
+            }
+            else
+            {
+                results = results.OrderBy(e => e.X).ToList();
+                for (int i = 1; i < results.Count; i++)
+                {
+                    if (results[i].DistanceTo(results[i - 1]) <= tol)
+                    {
+                        results.RemoveAt(i);
+                        i--;
+                        continue;
+                    }
+                }
+                return results;
+            }
+        }
+        public static void SortAlongCurve(List<Point3d> points, Curve curve)
+        {
+            var comparer = new PointAlongCurveComparer(curve);
+            points.Sort(comparer);
+            return;
+        }
+
+        private class PointAlongCurveComparer : IComparer<Point3d>
+        {
+            public PointAlongCurveComparer(Curve curve)
+            {
+                Curve = curve;
+            }
+            private Curve Curve;
+            public int Compare(Point3d a, Point3d b)
+            {
+                var param_a = 0.0;
+                var param_b = 0.0;
+                if (Curve is Line)
+                {
+                    var line = (Line)Curve;
+                    var pa = line.GetClosestPointTo(a, false);
+                    var pb = line.GetClosestPointTo(b, false);
+                    param_a = pa.DistanceTo(line.StartPoint);
+                    param_b = pb.DistanceTo(line.StartPoint);
+                }
+                else if (Curve is Polyline)
+                {
+                    var pl = (Polyline)Curve;
+                    param_a = GetDisOnPolyLine(a, pl);
+                    param_b = GetDisOnPolyLine(b, pl);
+                }
+                else
+                {
+                    try
+                    {
+                        param_a = Curve.GetDistAtPointX(a);
+                        param_b = Curve.GetDistAtPointX(b);
+                    }
+                    catch
+                    {
+                        //The func of GetDistAtPointX is unstable.
+                    }
+                }
+                if (param_a == param_b) return 0;
+                else if (param_a < param_b) return -1;
+                else return 1;
+            }
+        }
+        public static List<Line> SplitLine(Line line, List<Point3d> points)
+        {
+            points.Insert(0, line.StartPoint);
+            points.Add(line.EndPoint);
+            points = RemoveDuplicatePts(points);
+            points = points.Where(e => line.GetClosestPointTo(e, false).DistanceTo(e) < 0.1).ToList();
+            SortAlongCurve(points, line);
+            List<Line> results = new List<Line>();
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                Line r = new Line(points[i], points[i + 1]);
+                results.Add(r);
+            }
+            return results;
+        }
+        public static List<Line> ConnectPerpLineInTolerance(List<Line> lines, double tol)
+        {
+            RemoveDuplicatedLines(lines);
+            if (lines.Count < 2) return lines;
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var tplines = new List<Line>(lines);
+                tplines.RemoveAt(i);
+                var addlines = new List<Line>();
+                if (ClosestPointInCurves(lines[i].StartPoint, tplines) > 1)
+                {
+                    var vertlines = tplines.Where(e => IsPerpLine(e, lines[i])).OrderBy(e => e.GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint));
+                    if (vertlines.Count() > 0)
+                    {
+                        var vertline=vertlines.First();
+                        var dis=vertline.GetClosestPointTo(lines[i].StartPoint,false).DistanceTo(lines[i].StartPoint);
+                        if (dis > 0 && dis <= tol)
+                        {
+                            var p = vertline.GetClosestPointTo(lines[i].StartPoint, true);
+                            var ad_line = new Line(lines[i].StartPoint, p);
+                            addlines.Add(ad_line);
+                        }
+                    }
+                }
+                if (ClosestPointInCurves(lines[i].EndPoint, tplines) > 1)
+                {
+                    var vertlines = tplines.Where(e => IsPerpLine(e, lines[i])).OrderBy(e => e.GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint));
+                    if (vertlines.Count() > 0)
+                    {
+                        var vertline = vertlines.First();
+                        var dis = vertline.GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint);
+                        if (dis > 0 && dis <= tol)
+                        {
+                            var p = vertline.GetClosestPointTo(lines[i].EndPoint, true);
+                            var ad_line = new Line(lines[i].EndPoint, p);
+                            addlines.Add(ad_line);
+                        }
+                    }
+                }
+                tplines.Clear();
+                lines.AddRange(addlines);
+            }
+            RemoveDuplicatedLines(lines);
+            return lines;
+        }
+        /// <summary>
+        /// 连接认为是一条直线的存在间距的两条直线
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="hinderpts"></param>
+        /// <returns></returns>
+        public static List<Line> ConnectBrokenLine(List<Line> lines, List<Point3d> hinderpts, List<Point3d> joinedpts)
+        {
+            List<Line> connectedLines = new List<Line>();
+            List<Line> emilinatedSelfLines = new List<Line>();
+            lines.ForEach(o => emilinatedSelfLines.Add(o));
+            double tolHinderpts = 300;
+            double tolOriHinder = 300;
+            double tolBrokenLine = 2000;
+            double toldegree = 3;
+            List<Polyline> plylist = new List<Polyline>();
+            List<Polyline> plylist_joined = new List<Polyline>();
+            hinderpts.ForEach(o => plylist.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
+            joinedpts.ForEach(o => plylist_joined.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
+            DBObjectCollection dbObjsOriStart = plylist.ToCollection();
+            DBObjectCollection dbObjsOriJoined = plylist_joined.ToCollection();
+            //plylist.ForEach(o => dbObjsOriStart.Add(o));
+            for (int i = 0; i < lines.Count; i++)
+            {
+                emilinatedSelfLines.RemoveAt(i);
+                Point3d ptStart = lines[i].StartPoint;
+                Point3d ptEnd = lines[i].EndPoint;
+                Vector3d SelfLine = new Vector3d(ptEnd.X - ptStart.X, ptEnd.Y - ptStart.Y, 0);
+                if (GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0
+                    && ClosestPointInVertLines(ptStart, lines[i], lines) > 1)
+                {
+                    TraverseConnectedLinesWithHinderpts(ref emilinatedSelfLines, ptStart, tolBrokenLine, SelfLine, ref lines,
+                        i, toldegree, ref connectedLines);
+                }
+                if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0
+                    && ClosestPointInVertLines(ptEnd, lines[i], lines) > 1)
+                {
+                    TraverseConnectedLinesWithHinderpts(ref emilinatedSelfLines, ptEnd, tolBrokenLine, SelfLine, ref lines,
+                        i, toldegree, ref connectedLines);
+                }
+                var crossedStart = GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriJoined).Cast<Polyline>().ToList();
+                if (crossedStart.Count > 0
+                    && ClosestPointInVertLines(ptStart, lines[i], lines) > 1)
+                {
+                    TraverseConnectedLinesWithJoinedPoints(ref emilinatedSelfLines, ptStart, tolBrokenLine, SelfLine, ref lines,
+                        i, toldegree, ref connectedLines, crossedStart);
+                }
+                var crossedEnd = GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriJoined).Cast<Polyline>().ToList();
+                if (crossedEnd.Count > 0
+                    && ClosestPointInVertLines(ptEnd, lines[i], lines) > 1)
+                {
+                    TraverseConnectedLinesWithJoinedPoints(ref emilinatedSelfLines, ptEnd, tolBrokenLine, SelfLine, ref lines,
+                        i, toldegree, ref connectedLines, crossedEnd);
+                }
+                emilinatedSelfLines.Insert(i, lines[i]);
+            }
+            return connectedLines;
+        }
+        public static List<Line> FindSeriesLine(Point3d startPt, List<Line> allLines)
+        {
+            //查找到与起点相连的线
+            var startLine = FindStartLine(startPt, allLines);
+            if (startLine == null)
+            {
+                return null;
+            }
+            //查找到与startLine相连的一系列线
+            var retLines = FindSeriesLine(startLine, ref allLines);
+            return retLines;
+        }
+        public static Line FindStartLine(Point3d startPt, List<Line> lines)
+        {
+            var reslines = new List<Line>();
+            double tol = 100;
+            foreach (var l in lines)
+            {
+                if (l.StartPoint.DistanceTo(startPt) <= tol)
+                {
+                    reslines.Add(l);
+                }
+                else if (l.EndPoint.DistanceTo(startPt) <= tol)
+                {
+                    var tmpPt = l.StartPoint;
+                    l.StartPoint = l.EndPoint;
+                    l.EndPoint = tmpPt;
+                    reslines.Add(l);
+                }
+            }
+            if (reslines.Count > 0) return reslines.OrderBy(e => e.GetClosestPointTo(startPt, false).DistanceTo(startPt)).First();
+            else return null;
+        }
+        private static List<Line> FindSeriesLine(Line objectLine, ref List<Line> allLines)
+        {
+            var retLines = new List<Line>();
+            var conLines = FindConnectLine(objectLine, ref allLines);
+            retLines.AddRange(conLines);
+            foreach (var line in conLines)
+            {
+                var tlines = FindSeriesLine(line, ref allLines);
+                retLines.AddRange(tlines);
+            }
+            return retLines;
+        }
+        private static List<Line> FindConnectLine(Line objectLine, ref List<Line> lines)
+        {
+            var retLines = new List<Line>();
+            retLines.AddRange(FindDirectLine(objectLine, ref lines));
+            retLines.AddRange(FindNearLine(objectLine, ref lines));
+            return retLines;
+        }
+        private static bool IsDirectLine(Line objectLine, Line targetLine)
+        {
+            Point3d objectPt1 = objectLine.StartPoint;
+            Point3d objectPt2 = objectLine.EndPoint;
+            double distance1 = targetLine.GetClosestPointTo(objectPt1, false).DistanceTo(objectPt1);
+            double distance2 = targetLine.GetClosestPointTo(objectPt2, false).DistanceTo(objectPt2);
+            if (distance1 < 10.0 || distance2 < 10.0)
+            {
+                return true;
+            }
+            return false;
+        }
+        private static bool IsNearLine(Line objectLine, Line targetLine)
+        {
+            Point3d targetPt1 = targetLine.StartPoint;
+            Point3d targetPt2 = targetLine.EndPoint;
+            double distance1 = objectLine.GetClosestPointTo(targetPt1, false).DistanceTo(targetPt1);
+            double distance2 = objectLine.GetClosestPointTo(targetPt2, false).DistanceTo(targetPt2);
+            if (distance1 < 10.0 || distance2 < 10.0)
+            {
+                return true;
+            }
+            return false;
+        }
+        private static List<Line> FindDirectLine(Line objectLine, ref List<Line> lines)
+        {
+            var remLines = new List<Line>();
+            var retLines = new List<Line>();
+            foreach (var target in lines)
+            {
+                if (IsDirectLine(objectLine, target))
+                {
+                    remLines.Add(target);
+                    retLines.Add(target);
+                }
+            }
+            lines = lines.Except(remLines).ToList();
+            return retLines;
+        }
+        private static List<Line> FindNearLine(Line objectLine, ref List<Line> lines)
+        {
+            var remLines = new List<Line>();
+            var retLines = new List<Line>();
+            foreach (var target in lines)
+            {
+                if (IsNearLine(objectLine, target))
+                {
+                    retLines.Add(target);
+                    remLines.Add(target);
+                }
+            }
+            lines = lines.Except(remLines).ToList();
+            return retLines;
+        }
+
     }
 }

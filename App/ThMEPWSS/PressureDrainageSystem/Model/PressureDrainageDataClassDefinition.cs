@@ -96,6 +96,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public bool IsInitialDrainWell = false;
         public bool IsAdditionPipe = false;
         public int IsBridgePipe = 0;//用于绘图，判断是否为连接立管
+        public bool CanUsedToJudgeCrossLayer = true;
     }
     public class HorizontalLabelClass
     {

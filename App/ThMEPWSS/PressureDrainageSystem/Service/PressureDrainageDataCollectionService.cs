@@ -572,10 +572,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 this.CollectedData.SubmergedPumps.ForEach(o => pts.Add(o.Extents.CenterPoint()));
                 List<Line> mergedLines = new();
                 lines.ForEach(o => mergedLines.Add(o));
-                ConnectBrokenLine(lines, pts).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
+                ConnectBrokenLine(lines,new List<Point3d>() { }, pts).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
                 var objs = new DBObjectCollection();
                 mergedLines.ForEach(o => objs.Add(o));
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
+                RemoveDuplicatedAndInvalidLanes(ref processedLines);
+                processedLines = ConnectPerpLineInTolerance(processedLines, 100);
+                JoinLines(processedLines);
+                InterrptLineByPoints(processedLines, pts);
                 this.CollectedData.HorizontalPipes.Clear();
                 processedLines.ForEach(o => this.CollectedData.HorizontalPipes.Add(new Horizontal(o)));
             }
