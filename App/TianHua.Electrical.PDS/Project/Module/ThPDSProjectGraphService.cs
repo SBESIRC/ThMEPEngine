@@ -1,21 +1,21 @@
 ﻿using System;
 using QuikGraph;
 using System.Linq;
+using Dreambuild.AutoCAD;
+using QuikGraph.Algorithms;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
-using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
-using Dreambuild.AutoCAD;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
-using TianHua.Electrical.PDS.Project.PDSProjectException;
-using QuikGraph.Algorithms;
-using TianHua.Electrical.PDS.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -1284,7 +1284,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void ExportProject(string filePath, string fileName)
         {
-            PDSProject.Instance.ExportProject(filePath, fileName);
+            PDSProjectManagement.ExportProject(filePath, fileName);
         }
 
         /// <summary>
@@ -1300,7 +1300,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void ExportGlobalConfiguration(string filePath, string fileName)
         {
-            PDSProject.Instance.ExportGlobalConfiguration(filePath, fileName);
+            PDSProjectManagement.ExportGlobalConfiguration(filePath, fileName);
         }
 
         /// <summary>
@@ -1308,7 +1308,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void ImportGlobalConfiguration(string filePath)
         {
-            PDSProject.Instance.ImportGlobalConfiguration(filePath);
+            PDSProjectManagement.ImportGlobalConfiguration(filePath);
         }
 
         /// <summary>

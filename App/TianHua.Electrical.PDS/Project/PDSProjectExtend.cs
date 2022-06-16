@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Project
         /// 创建PDSProjectGraph
         /// </summary>
         /// <param name="Graph"></param>
-        public static ThPDSProjectGraph CreatPDSProjectGraph(this BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
+        public static ThPDSProjectGraph CreatPDSProjectGraph(this ProjectGraph graph)
         {
             var ProjectGraph = new ThPDSProjectGraph(graph);
             //ProjectGraph.CalculateSecondaryCircuit();
