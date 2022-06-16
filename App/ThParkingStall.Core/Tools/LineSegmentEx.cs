@@ -101,7 +101,7 @@ namespace ThParkingStall.Core.Tools
         {
             foreach (var l2 in otherLines)
             {
-                if (line.Intersection(l2) != null) return true;
+                if (line.IsVertical()!=l2.IsVertical() &&line.Intersection(l2) != null) return true;
             }
             return false;
         }
