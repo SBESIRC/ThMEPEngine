@@ -53,7 +53,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     hasAutoValve = false;//没有自动排气阀
                     break;
                 }
+                bool hasFireArea = false;
+                bool hasRiser = false;
+                foreach (var tpt in tpts)
+                {
+                    var type = sprayIn.TermPtDic[tpt].Type;
+                    if (type == 1)//防火分区
+                    {
+                        hasFireArea = true;
+                    }
+                    if (type == 4)//立管
+                    {
+                        hasRiser = true;
+                    }
+                }
+                tpts.Reverse();
 
+                var needNewDrawings = hasFireArea && hasRiser;//同时存在采用新的画法
                 if (hasAutoValve)
                 {
                     sprayOut.SprayBlocks.Add(new SprayBlock("自动排气阀系统1", stPt));
@@ -72,6 +88,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                 bool signelBranch = true;//第一个 type 4 标志
                 var cnt = tpts.Count;
+
+                int type4Nums = 0;//类型为4的数目
                 foreach (var tpt in tpts)// tpt 支路端点
                 {
                     if (!sprayIn.TermPtDic.ContainsKey(tpt))
@@ -92,6 +110,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                     if (termPt.Type == 1)//防火分区
                     {
+                        type4Nums = 0;
                         if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))
                         {
                             continue;
@@ -165,67 +184,100 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                     if (termPt.Type == 4)
                     {
-                        bool needEvade = true;//默认需要躲避
-                        var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 400, 0);
-                        var pt2 = pt1.OffsetX(650);
-                        var pt3 = pt2.OffsetY(1300);
                         double length = GetLength(termPt.PipeNumber) + 100;
-                        double stepSize = 450;
-                        int indx = 0;
-                        while (needEvade)
+                        if (needNewDrawings)
                         {
-                            var textPt = pt3.OffsetXY(-length, 900 + stepSize * indx);
-                            var text2 = new Text(termPt.PipeNumber, textPt);
-                            var texts = new List<DBText>() { text2.DbText };
-                            var line34 = new Line(pt3, pt3.OffsetY(900 + stepSize * indx));
-                            var lines = new List<Line>() { line34 };
-                            if (spraySystem.BlockExtents.SelectAll().Count == 0)//外包框数目为0
+                            var fireStpt = spraySystem.FireAreaStPtDic[pt];
+                            if (lastFirePt.DistanceTo(new Point3d()) > 10)//前一个点不为空
                             {
-                                spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
-                                spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
-                                break;
+                                if (lastFirePt.DistanceTo(fireStpt) > 10)//起始点变了，说明支环变了
+                                {
+                                    branchNums = 0;
+                                    throughIndex = 0;
+                                    index = 0;
+                                }
                             }
-                            else
+
+                            var firePt = fireStpt.OffsetX((fireNums - branchNums - 1) * 5500);
+                            var pt1 = new Point3d(firePt.X + type4Nums * (length + 500) +  1000, stPt.Y, 0);
+                            type4Nums++;
+                            var pt2 = pt1.OffsetY(-600);
+                            var pt3 = pt2.OffsetX(1200);
+                            var pt4 = pt3.OffsetY(-1200);
+                            var pt5 = pt4.OffsetX(-length);
+                            sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                            sprayOut.PipeLine.Add(new Line(pt2, pt3));
+                            sprayOut.NoteLine.Add(new Line(pt3, pt4));
+                            sprayOut.NoteLine.Add(new Line(pt4, pt5));
+                            sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, 0));
+                            var text = new Text(termPt.PipeNumber, pt5);
+                            sprayOut.Texts.Add(text);
+
+                        }
+                        else
+                        {
+                            bool needEvade = true;//默认需要躲避
+                            var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 400, 0);
+                            var pt2 = pt1.OffsetX(650);
+                            var pt3 = pt2.OffsetY(1300);
+                            double stepSize = 450;
+                            int indx = 0;
+                            while (needEvade)
                             {
-                                var rect = GetRect(text2.DbText);//提框
-                                var dbObjs = spraySystem.BlockExtents.SelectCrossingPolygon(rect);
-                                if (dbObjs.Count == 0)
+                                var textPt = pt3.OffsetXY(-length, 900 + stepSize * indx);
+                                var text2 = new Text(termPt.PipeNumber, textPt);
+                                var texts = new List<DBText>() { text2.DbText };
+                                var line34 = new Line(pt3, pt3.OffsetY(900 + stepSize * indx));
+                                var lines = new List<Line>() { line34 };
+                                if (spraySystem.BlockExtents.SelectAll().Count == 0)//外包框数目为0
                                 {
                                     spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
                                     spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
                                     break;
                                 }
+                                else
+                                {
+                                    var rect = GetRect(text2.DbText);//提框
+                                    var dbObjs = spraySystem.BlockExtents.SelectCrossingPolygon(rect);
+                                    if (dbObjs.Count == 0)
+                                    {
+                                        spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
+                                        spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
+                                        break;
+                                    }
+                                }
+                                indx++;
                             }
-                            indx++;
-                        }
-                        var pt4 = pt3.OffsetY(900 + stepSize * indx);
-                        var pt5 = pt4.OffsetX(-length);
-                        if (signelBranch)
-                        {
-                            sprayOut.PipeLine.Add(new Line(stPt4, pt1));
+                            var pt4 = pt3.OffsetY(900 + stepSize * indx);
+                            var pt5 = pt4.OffsetX(-length);
+                            if (signelBranch)
+                            {
+                                sprayOut.PipeLine.Add(new Line(stPt4, pt1));
 
-                        }
-                        sprayOut.PipeLine.Add(new Line(pt1, pt2));
-                        if (spraySystem.ValveDic.Contains(tpt))
-                        {
-                            sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetY(50)));
-                            sprayOut.PipeLine.Add(new Line(pt2.OffsetY(350), pt3));
-                            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt2.OffsetY(50), Math.PI / 2));
-                        }
-                        else
-                        {
-                            sprayOut.PipeLine.Add(new Line(pt2, pt3));
+                            }
+                            sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                            if (spraySystem.ValveDic.Contains(tpt))
+                            {
+                                sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetY(50)));
+                                sprayOut.PipeLine.Add(new Line(pt2.OffsetY(350), pt3));
+                                sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt2.OffsetY(50), Math.PI / 2));
+                            }
+                            else
+                            {
+                                sprayOut.PipeLine.Add(new Line(pt2, pt3));
+                            }
+
+                            sprayOut.NoteLine.Add(new Line(pt3, pt4));
+                            sprayOut.NoteLine.Add(new Line(pt4, pt5));
+                            sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
+                            var text = new Text(termPt.PipeNumber.Split('喷')[0], pt5);
+                            var dn = new Text(DN, pt5.OffsetXY(150, -400));
+                            sprayOut.Texts.Add(text);
+                            sprayOut.Texts.Add(dn);
+                            stPt4 = stPt4.OffsetX(600);
+                            signelBranch = false;
                         }
 
-                        sprayOut.NoteLine.Add(new Line(pt3, pt4));
-                        sprayOut.NoteLine.Add(new Line(pt4, pt5));
-                        sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
-                        var text = new Text(termPt.PipeNumber.Split('喷')[0], pt5);
-                        var dn = new Text(DN, pt5.OffsetXY(150, -400));
-                        sprayOut.Texts.Add(text);
-                        sprayOut.Texts.Add(dn);
-                        stPt4 = stPt4.OffsetX(600);
-                        signelBranch = false;
                     }
                 }
             }
