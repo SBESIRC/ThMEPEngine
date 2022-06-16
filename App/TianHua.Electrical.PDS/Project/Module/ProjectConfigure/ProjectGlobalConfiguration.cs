@@ -111,7 +111,7 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         public double NormalMotorPower = 45;//kw
         public FireStartType NormalStartType = FireStartType.星三角启动;//
         public MeterBoxCircuitType MeterBoxCircuitType = MeterBoxCircuitType.国标_表在断路器前;//电表箱出线回路类型
-        public FireEmergencyLightingModel fireEmergencyLightingModel = FireEmergencyLightingModel.A型;
+        public FireEmergencyLightingModel fireEmergencyLightingModel = FireEmergencyLightingModel.A型; 
         public FireEmergencyLightingType fireEmergencyLightingType = FireEmergencyLightingType.集中电源;
         public CircuitSystem circuitSystem = CircuitSystem.两线制;
 
@@ -224,7 +224,7 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         {
             get
             {
-                return (HalogenFree ? "W" : "") + (LowSmoke ? "D" : "") + (LowToxicity ? "U" : "") + (FlameRetardant ? "Z" : "") + Level.ToString() + (Refractory ? "N" : "");
+                return (HalogenFree ? "W" : "") + (LowSmoke ? "D" : "") + (LowToxicity ? "U" : "") + (FlameRetardant ? "Z" : "") + Level.GetDescription() + (Refractory ? "N" : "");
             }
         }
 
@@ -258,7 +258,10 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         {
             get
             {
-                return $"{ConductorMaterial}-{OuterSheathMaterial.GetDescription()}";
+                var result = $"{ConductorMaterial}-{OuterSheathMaterial.GetDescription()}";
+                if(result[0].Equals('-'))
+                    result = result.Substring(1);
+                return result;
             }
         }
 

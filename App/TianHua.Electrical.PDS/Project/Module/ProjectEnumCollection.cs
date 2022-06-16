@@ -218,10 +218,16 @@ namespace TianHua.Electrical.PDS.Project.Module
 
     public enum ConductorLevel
     {
+        [Description("A")]
         A,
+        [Description("B")]
         B,
+        [Description("C")]
         C,
+        [Description("D")]
         D,
+        [Description("")]
+        不指定,
     }
 
     /// <summary>

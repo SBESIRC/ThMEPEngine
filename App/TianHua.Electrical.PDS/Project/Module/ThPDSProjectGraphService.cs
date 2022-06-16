@@ -607,7 +607,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="defaultPower">设备功率</param>
         /// <param name="defaultDescription">描述信息</param>
         /// <param name="defaultFireLoad">是否消防</param>
-        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "备用", bool defaultFireLoad = false, ImageLoadType imageLoadType = ImageLoadType.None)
+        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "备用", bool defaultFireLoad = false, ImageLoadType imageLoadType = ImageLoadType.None ,string floorNumber = "1F")
         {
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
@@ -618,7 +618,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             node.Details.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
             node.Load.SetFireLoad(defaultFireLoad);
-
+            node.Load.SetLocation(new ThPDSLocation() { FloorNumber = floorNumber });
             switch (imageLoadType)
             {
                 case ImageLoadType.None:
@@ -804,7 +804,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
+            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence, floorNumber:node.Load.Location.FloorNumber);
             if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 target.Load.Phase = ThPDSPhase.一相;
@@ -831,7 +831,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
+            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence, floorNumber: node.Load.Location.FloorNumber);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:获取对应的CircuitFormOutType
@@ -1151,24 +1151,98 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
                 {
-                    if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    //消防
+                    if (edge.Target.Load.FireLoad)
                     {
-                        return CircuitFormOutType.电动机_分立元件;
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        {
+                            return CircuitFormOutType.电动机_分立元件;
+                        }
+                        else
+                        {
+                            switch(PDSProject.Instance.projectGlobalConfiguration.FireStartType)
+                            {
+                                case FireStartType.星三角启动:
+                                    {
+                                        return CircuitFormOutType.电动机_分立元件星三角启动;
+                                    }
+                                default:
+                                    {
+                                        //等后续扩展
+                                        return CircuitFormOutType.电动机_分立元件星三角启动;
+                                    }
+                            }
+                        }
                     }
                     else
                     {
-                        return CircuitFormOutType.电动机_分立元件星三角启动;
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        {
+                            return CircuitFormOutType.电动机_分立元件;
+                        }
+                        else
+                        {
+                            switch (PDSProject.Instance.projectGlobalConfiguration.NormalStartType)
+                            {
+                                case FireStartType.星三角启动:
+                                    {
+                                        return CircuitFormOutType.电动机_分立元件星三角启动;
+                                    }
+                                default:
+                                    {
+                                        //等后续扩展
+                                        return CircuitFormOutType.电动机_分立元件星三角启动;
+                                    }
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    //消防
+                    if (edge.Target.Load.FireLoad)
                     {
-                        return CircuitFormOutType.电动机_CPS;
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        {
+                            return CircuitFormOutType.电动机_CPS;
+                        }
+                        else
+                        {
+                            switch (PDSProject.Instance.projectGlobalConfiguration.FireStartType)
+                            {
+                                case FireStartType.星三角启动:
+                                    {
+                                        return CircuitFormOutType.电动机_CPS星三角启动;
+                                    }
+                                default:
+                                    {
+                                        //等后续扩展
+                                        return CircuitFormOutType.电动机_CPS星三角启动;
+                                    }
+                            }
+                        }
                     }
                     else
                     {
-                        return CircuitFormOutType.电动机_CPS星三角启动;
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        {
+                            return CircuitFormOutType.电动机_CPS;
+                        }
+                        else
+                        {
+                            switch (PDSProject.Instance.projectGlobalConfiguration.NormalStartType)
+                            {
+                                case FireStartType.星三角启动:
+                                    {
+                                        return CircuitFormOutType.电动机_CPS星三角启动;
+                                    }
+                                default:
+                                    {
+                                        //等后续扩展
+                                        return CircuitFormOutType.电动机_CPS星三角启动;
+                                    }
+                            }
+                        }
                     }
                 }
             }
