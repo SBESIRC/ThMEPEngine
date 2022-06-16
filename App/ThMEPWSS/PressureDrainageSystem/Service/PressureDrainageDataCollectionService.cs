@@ -503,7 +503,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                this.CollectedData.HorizontalPipes = new List<Line>();
+                this.CollectedData.HorizontalPipes = new List<Horizontal>();
                 foreach (var e in Entities.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE"))
                 || (e.Layer.Contains("W") && e.Layer.Contains("RAIN") && e.Layer.Contains("PIPE"))))
                 {
@@ -512,7 +512,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         var li = new Line(line.StartPoint.ToPoint2d().ToPoint3d(), line.EndPoint.ToPoint2d().ToPoint3d());
                         li.Layer = layer;
-                        this.CollectedData.HorizontalPipes.Add(li);
+                        this.CollectedData.HorizontalPipes.Add(new Horizontal(li));
                     }
                     else if (PressureDrainageUtils.IsTianZhengElement(e) && PressureDrainageUtils.TryConvertToLineSegment(e, out Line convertedLine) && convertedLine.Length > 0)
                     {
@@ -521,20 +521,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             var li = (new Line(explodedLine[0].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[0].EndPoint.ToPoint2d().ToPoint3d()));
                             li.Layer = layer;
-                            this.CollectedData.HorizontalPipes.Add(li);
+                            this.CollectedData.HorizontalPipes.Add(new Horizontal(li));
                         }
                         else if (explodedLine.Count > 1)
                         {
                             var li = new Line(explodedLine[0].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[0].EndPoint.ToPoint2d().ToPoint3d());
                             li.Layer = layer;
-                            this.CollectedData.HorizontalPipes.Add(li);
+                            this.CollectedData.HorizontalPipes.Add(new Horizontal(li));
                             Point3d pt1 = default, pt2 = default;
                             var tmpLineList = new List<Line>();
                             for (int i = 1; i < explodedLine.Count; i++)
                             {
                                 var p = new Line(explodedLine[i].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[i].EndPoint.ToPoint2d().ToPoint3d());
                                 p.Layer = layer;
-                                this.CollectedData.HorizontalPipes.Add(p);
+                                this.CollectedData.HorizontalPipes.Add(new Horizontal(p));
                                 pt1 = explodedLine[i - 1].EndPoint.ToPoint2d().ToPoint3d();
                                 pt2 = explodedLine[i].StartPoint.ToPoint2d().ToPoint3d();
                                 var tmpLine = new Line(pt1, pt2);
@@ -544,7 +544,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                     tmpLineList.Add(tmpLine);
                                 }
                             }
-                            this.CollectedData.HorizontalPipes.AddRange(tmpLineList);
+                            this.CollectedData.HorizontalPipes.AddRange(tmpLineList.Select(e => new Horizontal(e)));
                         }
                     }
                 }
@@ -561,23 +561,27 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             Line lin = new Line(vertices[i - 1], vertices[i]);
                             lin.Layer = layer;
-                            this.CollectedData.HorizontalPipes.Add(lin);
+                            this.CollectedData.HorizontalPipes.Add(new Horizontal(lin));
                         }
                     }
                 }
                 List<Line> lines = new List<Line>();
-                this.CollectedData.HorizontalPipes.ForEach(o => lines.Add(o));
+                this.CollectedData.HorizontalPipes.ForEach(o => lines.Add(o.Line));
                 List<Point3d> pts = new List<Point3d>();
                 this.CollectedData.VerticalPipes.ForEach(o => pts.Add(o.Center));
                 this.CollectedData.SubmergedPumps.ForEach(o => pts.Add(o.Extents.CenterPoint()));
                 List<Line> mergedLines = new();
                 lines.ForEach(o => mergedLines.Add(o));
-                ConnectBrokenLine(lines, pts).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
+                ConnectBrokenLine(lines,new List<Point3d>() { }, pts).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
                 var objs = new DBObjectCollection();
                 mergedLines.ForEach(o => objs.Add(o));
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
+                RemoveDuplicatedAndInvalidLanes(ref processedLines);
+                processedLines = ConnectPerpLineInTolerance(processedLines, 100);
+                JoinLines(processedLines);
+                InterrptLineByPoints(processedLines, pts);
                 this.CollectedData.HorizontalPipes.Clear();
-                processedLines.ForEach(o => this.CollectedData.HorizontalPipes.Add(o));
+                processedLines.ForEach(o => this.CollectedData.HorizontalPipes.Add(new Horizontal(o)));
             }
         }
         /// <summary>
@@ -605,14 +609,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         Point3d ptlocPipe = j.Extents.CenterPoint();
                         foreach (var lin in this.CollectedData.HorizontalPipes)
                         {
-                            if (j.Extents.IsPointIn(lin.StartPoint) || j.Extents.ToRectangle().GetClosePoint(lin.StartPoint).DistanceTo(lin.StartPoint) < toldis)
+                            if (j.Extents.IsPointIn(lin.Line.StartPoint) || j.Extents.ToRectangle().GetClosePoint(lin.Line.StartPoint).DistanceTo(lin.Line.StartPoint) < toldis)
                             {
-                                ptlocPipe = lin.StartPoint;
+                                ptlocPipe = lin.Line.StartPoint;
                                 break;
                             }
-                            else if (j.Extents.IsPointIn(lin.EndPoint) || j.Extents.ToRectangle().GetClosePoint(lin.EndPoint).DistanceTo(lin.EndPoint) < toldis)
+                            else if (j.Extents.IsPointIn(lin.Line.EndPoint) || j.Extents.ToRectangle().GetClosePoint(lin.Line.EndPoint).DistanceTo(lin.Line.EndPoint) < toldis)
                             {
-                                ptlocPipe = lin.EndPoint;
+                                ptlocPipe = lin.Line.EndPoint;
                                 break;
                             }
                         }
@@ -623,7 +627,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         int index = -1;
                         for (int i = 0; i < this.CollectedData.HorizontalPipes.Count; i++)
                         {
-                            double curdis = this.CollectedData.HorizontalPipes[i].GetClosestPointTo(ci.Center, false).DistanceTo(ci.Center);
+                            double curdis = this.CollectedData.HorizontalPipes[i].Line.GetClosestPointTo(ci.Center, false).DistanceTo(ci.Center);
                             if (curdis < mindis)
                             {
                                 mindis = curdis;
@@ -632,10 +636,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                         if (index != -1)
                         {
-                            Line line = new Line(this.CollectedData.HorizontalPipes[index].GetClosestPointTo(ci.Center, false), ci.Center);
+                            Line line = new Line(this.CollectedData.HorizontalPipes[index].Line.GetClosestPointTo(ci.Center, false), ci.Center);
                             if (line.Length > 0)
                             {
-                                this.CollectedData.HorizontalPipes.Add(line);
+                                this.CollectedData.HorizontalPipes.Add(new Horizontal(line,false));
                             }
                         }
                         adb.Database.CreateAILayer("AdditonPipe",(short)0);

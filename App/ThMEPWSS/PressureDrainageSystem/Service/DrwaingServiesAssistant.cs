@@ -108,7 +108,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     atts.Add("-", str);
                     ObjectId brId3;
                     var horpipe = pipeLineSystemUnit.PipeLineUnits[0].HorizontalPipes;
-                    if (horpipe.Count > 0 && horpipe[0].Layer == "W-DRAI-DOME-PIPE")
+                    if (horpipe.Count > 0 && horpipe[0].Line.Layer == "W-DRAI-DOME-PIPE")
                     {
                         brId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "污水井编号", brlocPt3, new Scale3d(0), 0, atts);
                     }
