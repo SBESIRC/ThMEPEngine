@@ -83,8 +83,9 @@ namespace ThMEPTCH.Services
                         buildingStorey.Doors.AddRange(thDoors);
                         var thWindows = resData.OfType<ThTCHWindow>().ToList();
                         buildingStorey.Windows.AddRange(thWindows);
-                        var slabs = resData.OfType<ThTCHSlab>().ToList();
-                        buildingStorey.Slabs.AddRange(slabs);
+                        //暂时不从TGL中拿楼板信息
+                        //var slabs = resData.OfType<ThTCHSlab>().ToList();
+                        //buildingStorey.Slabs.AddRange(slabs);
                     }
                 }
                 thBuilding.Storeys.Add(buildingStorey);
