@@ -160,10 +160,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                 foreach(var line in AidLines)
                 {
-                    line.TransformBy(u2wMat);
-                    acadDatabase.CurrentSpace.Add(line);
-                    line.Layer = "W-辅助";
-                    line.ColorIndex = (int)ColorIndex.BYLAYER;
+                    var newline = new Line(line.StartPoint.TransformBy(u2wMat), line.EndPoint);
+                    acadDatabase.CurrentSpace.Add(newline);
+                    newline.Layer = "W-辅助";
+                    newline.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
             }
         }
@@ -189,7 +189,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, string> SlashDic { get; set; }
         public double TextWidth { get; set; }
         public double PipeWidth { get; set; }
-        public bool ValveIsBkReference { get; set; }
         public List<Point3d> GateValves { get; set; }
         public Dictionary<Point3dEx, string> TermDnDic { get; set; }
         public List<Point3dEx> StartEndPts { get; set; }

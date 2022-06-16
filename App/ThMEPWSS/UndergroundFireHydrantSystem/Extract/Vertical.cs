@@ -23,7 +23,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
     {
         public DBObjectCollection DBobjsResults { get; private set; }
         public List<Point3dEx> VerticalPts { get; private set; }
-        public DBObjectCollection Extract(AcadDatabase acadDatabase, Point3dCollection polygon)
+        public void Extract(AcadDatabase acadDatabase, Point3dCollection polygon)
         {
             var Results = acadDatabase.ModelSpace //TCH_PIPE
                .OfType<Entity>()
@@ -60,10 +60,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 ExplodeDWLG(db as BlockReference, DBobjsResults);//添加定位立管
             }
-
-            var rstSpatialIndex = new ThCADCoreNTSSpatialIndex(DBobjsResults);
-
-            return rstSpatialIndex.SelectCrossingPolygon(polygon);
         }
 
         private DBObjectCollection ExtractBlocks(Database db, string blockName)

@@ -48,8 +48,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
         }
 
-        public List<List<Point3d>> GetPipeMarkPoisition(ref Dictionary<Point3dEx, double> markAngleDic)
+        public List<List<Point3d>> GetPipeMarkPoisition(out Dictionary<Point3dEx, double> markAngleDic)
         {
+            markAngleDic = new Dictionary<Point3dEx, double>();
             var poisition = new List<List<Point3d>>();
             foreach (var db in DBobj)
             {

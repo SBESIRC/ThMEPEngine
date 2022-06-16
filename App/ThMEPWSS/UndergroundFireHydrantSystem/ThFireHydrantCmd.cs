@@ -14,16 +14,12 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundSpraySystem.Command;
-using Serilog;
-using System.IO;
 
 namespace ThMEPWSS.Command
 {
     public class ThFireHydrantCmd : ThMEPBaseCommand, IDisposable
     {
         readonly FireHydrantSystemViewModel _UiConfigs;
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "FireHydrantLog.txt");
-        public Serilog.Core.Logger Logger = null;
 
         public ThFireHydrantCmd(FireHydrantSystemViewModel uiConfigs)
         {
@@ -42,14 +38,11 @@ namespace ThMEPWSS.Command
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Logger = new LoggerConfiguration().WriteTo.File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), 
-                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
                     CreateFireHydrantSystem(currentDb);
                 }
             }
             catch (Exception ex)
             {
-                Logger?.Information(ex.Message);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
@@ -74,8 +67,8 @@ namespace ThMEPWSS.Command
                 loopStartPt = propPtRes.TransformBy(Active.Editor.UCS2WCS());
             }
 
-            var selectArea = ThMEPWSS.Assistant.DrawUtils.TrySelectRangeEx();
-            if (selectArea.Count == 0)
+            var selectArea = Assistant.DrawUtils.TrySelectRangeEx();
+            if (selectArea is null)
             {
                 return null;
             }
@@ -86,31 +79,33 @@ namespace ThMEPWSS.Command
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
             {
                 var opt = Active.Editor.GetPoint("\n指定消火栓系统图插入点");
-                
-
                 if (opt.Status != PromptStatus.OK)
                 {
                     return null;
                 }
                 fireHydrantSysOut.InsertPoint = opt.Value;
             }
+
             if (hasExtraSelection)
             {
                 Point3dCollection exArea = Common.Utils.SelectAreas();
                 if (exArea.Count == 0) return null;
                 return exArea;
             }
+
             var inputFlag = GetInput.GetFireHydrantSysInput(curDb, fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
 
             if (!inputFlag)
             {
                 return null;
             }
+
             var mainPathList = MainLoop.Get(fireHydrantSysIn);//主环提取
             if (mainPathList.Count == 0)
             {
                 return null;
             }
+
             var subPathList = SubLoop.Get(fireHydrantSysIn, mainPathList);//支环提取
             var subPathLsCnt = subPathList.Count;
             var visited = new HashSet<Point3dEx>();//访问标志

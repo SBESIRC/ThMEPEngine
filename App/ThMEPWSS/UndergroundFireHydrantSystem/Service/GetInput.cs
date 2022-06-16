@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var ptVisit = new Dictionary<Point3dEx, bool>();//访问标志
 
             var verticalEngine = new Vertical();//提取立管
-            var hydrantDB = verticalEngine.Extract(acadDatabase, selectArea);
+            verticalEngine.Extract(acadDatabase, selectArea);
             fireHydrantSysIn.VerticalPosition = verticalEngine.CreatePointList();
 
             var fireHydrantEngine = new ThExtractFireHydrant();//提取室内消火栓平面
@@ -46,11 +46,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
 
             var mark = markEngine.Extract(acadDatabase.Database, selectArea);
-            var markAngleDic = new Dictionary<Point3dEx, double>();
-            var pipeMarkSite = markEngine.GetPipeMarkPoisition(ref markAngleDic);
+            var pipeMarkSite = markEngine.GetPipeMarkPoisition(out Dictionary<Point3dEx, double> markAngleDic);
             MarkLine.GetPipeMark(fireHydrantSysIn, pipeMarkSite, startPt);
             var markBool = fireHydrantSysIn.GetMarkLineList(lineList, markAngleDic);
-
             if (!markBool)
             {
                 MessageBox.Show("找不到环管标记所在直线");
@@ -73,8 +71,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var valveEngine = new ThExtractValveService();//提取阀
             var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
-            //假定同一图纸只存在一种类型的阀
-            fireHydrantSysIn.ValveIsBkReference = valveDB.Cast<Entity>().Where(e => e is BlockReference).Any();
             var valveList = new List<Line>();
 
             var gateValveEngine = new ThExtractGateValveService();//提取闸阀
