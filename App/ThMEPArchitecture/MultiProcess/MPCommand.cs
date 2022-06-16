@@ -333,7 +333,8 @@ namespace ThMEPArchitecture.MultiProcess
             if (AutoSegLines == null)
             {
                 layoutData = new LayoutData();
-                var inputvaild = layoutData.Init(blk, Logger);
+                var updateRelationship = !AddBoundSegLines;
+                var inputvaild = layoutData.Init(blk, Logger, true,updateRelationship);
                 if (!inputvaild) return;
             }
             else

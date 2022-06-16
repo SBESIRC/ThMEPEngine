@@ -154,8 +154,6 @@ namespace ThParkingStall.Core.InterProcess
             newSegLines.SeglinePrecut(TotalArea);//预切割
             newSegLines.Clean();//过滤孤立的线
             newSegLines = newSegLines.GroupSegLines().OrderBy(g => g.Count).Last();//用最大的全连接组
-            //if (!newSegLines.Allconnected()) return (null,null);//判断是否全部相连
-            //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
             var vaildLanes = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
             if (!vaildLanes.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return (null, null);//判断是否满足车道宽
             var Splitters = new List<LineSegment>();
@@ -203,13 +201,15 @@ namespace ThParkingStall.Core.InterProcess
             seglineToBoundNew = new List<(bool, bool)>();
             foreach (var idxs in NewIdxToOrg)//合并需要合并的
             {
-                var lineToMerge = new List<LineSegment>();
+                //var lineToMerge = new List<LineSegment>();
+                var idxToMerge = new List<int>();
                 foreach (var idx in idxs)
                 {
-                    lineToMerge.Add(SegLines[idx]);
+                    idxToMerge.Add(idx);
+                    //lineToMerge.Add(SegLines[idx]);
                     addedIdxs.Add(idx);
                 }  
-                newSegLines.Add(lineToMerge.MergeLinesToMid());
+                newSegLines.Add(MergeLines(SegLines,idxToMerge));
             }
             for (int i = 0; i < SegLines.Count; i++)//添加剩余的
             {
@@ -276,6 +276,30 @@ namespace ThParkingStall.Core.InterProcess
             }
             var center = area.GetCenter();
             return new SubAreaKey(centers, center);
+        }
+        public static LineSegment MergeLines(List<LineSegment> SegLines,List<int> idxs)
+        {
+            //平均值在范围内则取平均值，不然则取边界值
+            var lines = SegLines.Slice(idxs);
+            var vert = lines.First().IsVertical();
+            if (lines.Any(l => l.IsVertical() != vert)) return null;
+            var values = new List<double>();
+            var valueMid = lines.Average(l => l.GetValue());
+            var lowerUpperBounds = LowerUpperBound.Slice(idxs);
+            var lb = lowerUpperBounds.Max(b =>b.Item1);
+            var ub = lowerUpperBounds.Min(b =>b.Item2);
+            if(valueMid < lb ) valueMid = lb;
+            else if(valueMid > ub) valueMid = ub;
+            if (vert)
+            {
+                lines.ForEach(l => { values.Add(l.P0.Y); values.Add(l.P1.Y); });
+                return new LineSegment(valueMid, values.Min(), valueMid, values.Max());
+            }
+            else
+            {
+                lines.ForEach(l => { values.Add(l.P0.X); values.Add(l.P1.X); });
+                return new LineSegment(values.Min(), valueMid, values.Max(), valueMid);
+            }
         }
     }
 }

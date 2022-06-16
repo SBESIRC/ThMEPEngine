@@ -234,7 +234,6 @@ namespace ThParkingStall.Core.Tools
                 lines.ForEach(l => { values.Add(l.P0.X); values.Add(l.P1.X); });
                 return new LineSegment( values.Min(), valueMid,  values.Max(),valueMid);
             }
-
         }
         public static (LineSegment, LineSegment) Split(this LineSegment line,Coordinate coordinate)
         {
