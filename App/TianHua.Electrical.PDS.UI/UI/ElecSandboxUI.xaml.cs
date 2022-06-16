@@ -1,20 +1,14 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using Newtonsoft.Json;
-using QuikGraph;
-using QuikGraph.Serialization;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
+﻿using System;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Forms;
+using System.ComponentModel;
 using ThControlLibraryWPF.CustomControl;
 using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Project;
-using TianHua.Electrical.PDS.UI.UserContorls;
 using TianHua.Electrical.PDS.UI.ViewModels;
+using TianHua.Electrical.PDS.UI.UserContorls;
 
 namespace TianHua.Electrical.PDS.UI.UI
 {
@@ -23,31 +17,12 @@ namespace TianHua.Electrical.PDS.UI.UI
     /// </summary>
     public partial class ElecSandboxUI : ThCustomWindow
     {
-        public static ElecSandboxUI singleton;
-        SandBoxTableItemViewModel topTableItemViewModel;
+        private SandBoxTableItemViewModel topTableItemViewModel;
         public ElecSandboxUI()
         {
             InitializeComponent();
             this.Loaded += ElecSandboxUI_Loaded;
-        }
-        public static ElecSandboxUI TryGetCurrentWindow()
-        {
-            return singleton;
-        }
-        public static ElecSandboxUI TryCreateSingleton()
-        {
-            if (singleton == null)
-            {
-                singleton = new ElecSandboxUI();
-                singleton.Closed += Singleton_Closed;
-                return singleton;
-            }
-            return null;
-        }
-
-        private static void Singleton_Closed(object sender, EventArgs e)
-        {
-            singleton = null;
+            this.Closing += ElecSandboxUI_Closing;
         }
 
         private void ElecSandboxUI_Loaded(object sender, RoutedEventArgs e)
@@ -55,34 +30,25 @@ namespace TianHua.Electrical.PDS.UI.UI
             InitTopTableItem();
         }
 
-        static bool hasInited;
-
-        /// <summary>
-        /// 初始化数据，只执行一次！
-        /// </summary>
-        public static void InitPDSProjectData()
+        private void ElecSandboxUI_Closing(object sender, CancelEventArgs e)
         {
-            if (hasInited) return;
-            LoadProject();
-            hasInited = true;
+            e.Cancel = true;
+            this.Hide();
         }
 
         /// <summary>
         /// 加载项目文件
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
-        private static void LoadProject(string url = null)
+        public void LoadProject(string url = null)
         {
-            PDSProject.Instance.DataChanged -= PDSProjectVM.Instance.ProjectDataChanged;
             //订阅Project数据改变事件
             PDSProject.Instance.DataChanged += PDSProjectVM.Instance.ProjectDataChanged;
 
-            //Setp 1
             //加载项目
             PDSProject.Instance.Load(url);
-            //Setp 2
-            //刷新所有UI的DataContext
         }
+
         #region 初始化信息
         private void InitTopTableItem()
         {
@@ -156,11 +122,9 @@ namespace TianHua.Electrical.PDS.UI.UI
         private void btnOpenHelp_Click(object sender, RoutedEventArgs e)
         {
         }
-        #endregion
-
-        private void btnSaveProject_Click(object sender, System.Windows.Input.ExecutedRoutedEventArgs e)
+        private void btnSaveProject_Click(object sender, ExecutedRoutedEventArgs e)
         {
-
         }
+        #endregion
     }
 }

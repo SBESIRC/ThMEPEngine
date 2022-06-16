@@ -3,7 +3,6 @@ using QuikGraph;
 using System.IO;
 using System.Linq;
 using Dreambuild.AutoCAD;
-using System.IO.Compression;
 using QuikGraph.Serialization;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
@@ -16,8 +15,6 @@ using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Reflection;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -27,12 +24,16 @@ namespace TianHua.Electrical.PDS.Project
     [Serializable]
     public class PDSProject
     {
+        //==============SINGLETON============
+        //fourth version from:
+        //http://csharpindepth.com/Articles/General/Singleton.aspx
         private static PDSProject instance = new PDSProject();
         // Explicit static constructor to tell C# compiler
         // not to mark type as beforefieldinit    
         static PDSProject() { }
         internal PDSProject() { }
         public static PDSProject Instance { get { return instance; } }
+        //-------------SINGLETON-----------------
 
         public ThPDSProjectGraph graphData;
 
@@ -182,7 +183,7 @@ namespace TianHua.Electrical.PDS.Project
                 ConfigFiles[1] = GlobalConfigurationFile;
                 using (ZipOutputStream outStream = new ZipOutputStream(File.Create(path)))
                 {
-                    Zip(ConfigFiles, outStream,"PDSProjectKey");
+                    Zip(ConfigFiles, outStream, "PDSProjectKey");
                 }
             }
             catch (Exception ex)
@@ -211,7 +212,7 @@ namespace TianHua.Electrical.PDS.Project
                 string data = bf.Deserialize(GlobalConfigurationFileBuffer).ToString();
                 this.projectGlobalConfiguration = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
             }
         }
@@ -238,7 +239,7 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
-        private string ExportGraph(string filePath,string fileName = "Graph.Config")
+        private string ExportGraph(string filePath, string fileName = "Graph.Config")
         {
             var path = Path.Combine(filePath, fileName);
             using (var stream = File.Open(path, FileMode.Create))
@@ -297,7 +298,7 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
-        public Dictionary<string , MemoryStream> UnZip(string zipFile, string pwd)
+        public Dictionary<string, MemoryStream> UnZip(string zipFile, string pwd)
         {
             Dictionary<string, MemoryStream> result = new Dictionary<string, MemoryStream>();
             try
