@@ -300,7 +300,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// 凸包在整90度有bug不稳
         /// </summary>
         /// <param name="net"></param>
-        public static void FilterGroupNetByConvexHull(ref List<ThSprinklerNetGroup> netList)
+        public static List<Polyline> FilterGroupNetByConvexHull(ref List<ThSprinklerNetGroup> netList)
         {
             var newNetList = new List<ThSprinklerNetGroup>();
             netList = netList.OrderByDescending(x => x.Pts.Count).ToList();
@@ -344,6 +344,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
             netList = newNetList;
 
+            return convexList;
         }
 
         private static Polyline GraphConvexHull(ThSprinklerNetGroup net, int graphIdx)

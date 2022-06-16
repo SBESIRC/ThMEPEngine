@@ -111,7 +111,7 @@ namespace ThMEPWSS.Common
                 };
                 var dxfNames = new string[]
                 {
-                Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
+                    Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
                 var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);

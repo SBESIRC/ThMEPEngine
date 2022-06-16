@@ -310,58 +310,5 @@ namespace ThMEPWSS
 
             return pl;
         }
-
-
-        [CommandMethod("TIANHUACAD", "ThCleanDebugDraw", CommandFlags.Modal)]
-        public void ThCleanDebugDraw()
-        {
-
-            var frame = new Polyline();
-            var transFrame = new Polyline();
-            ThMEPOriginTransformer transformer = null;
-
-            //frame = selectFrame();
-
-            //if (frame != null && frame.NumberOfVertices > 0)
-            //{
-            //    transFrame = transPoly(frame, ref transformer);
-            //}
-
-
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                CleanDebugDrawings.ClearDebugDrawing(transFrame, transformer);
-            }
-
-        }
-
-        [CommandMethod("TIANHUACAD", "ThCleanDYFinalDraw", CommandFlags.Modal)]
-        public void ThCleanDYFinalDraw()
-        {
-
-            //Polyline frame = selectFrame();
-            var transFrame = new Polyline();
-            ThMEPOriginTransformer transformer = null;
-            //if (frame != null && frame.NumberOfVertices > 0)
-            //{
-            //    transFrame = transPoly(frame, ref transformer);
-            //}
-
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                var sLayerName = new List<string>();
-                sLayerName.Add(ThDrainageSDCommon.Layer_CoolPipe);
-                sLayerName.Add(ThDrainageSDCommon.Layer_Stack);
-                sLayerName.Add(ThDrainageSDCommon.Layer_Valves);
-                sLayerName.Add(ThDrainageSDCommon.Layer_Dim);
-
-                CleanDebugDrawings.ClearFinalDrawing(sLayerName, transFrame, transformer);
-            }
-
-        }
     }
 }

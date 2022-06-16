@@ -13,6 +13,23 @@ namespace ThMEPWSS.SprinklerConnect.Service
     public class ThSprinklerNetGraphService
     {
         /// <summary>
+        /// 组转图
+        /// </summary>
+        /// <param name="groupList"></param>
+        /// <returns></returns>
+        public static List<ThSprinklerNetGroup> ConvertToNet(List<KeyValuePair<double, List<Line>>> groupList)
+        {
+            var netList = new List<ThSprinklerNetGroup>();
+            for (int i = 0; i < groupList.Count; i++)
+            {
+                var net = ThSprinklerNetGraphService.CreateNetwork(groupList[i].Key, groupList[i].Value);
+                netList.Add(net);
+            }
+
+            return netList;
+        }
+
+        /// <summary>
         /// 一组线转成图组
         /// </summary>
         /// <param name="angle"></param>
