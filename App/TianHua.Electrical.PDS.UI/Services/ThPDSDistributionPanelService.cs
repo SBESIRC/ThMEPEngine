@@ -11,7 +11,6 @@ using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
-using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Models;
@@ -142,12 +141,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dfs(tree);
                 if (nodes.Count == 0) return;
 
-                // 切回CAD画布
-                ThPDSCADService.FocusToCAD();
+                var window = Window.GetWindow(panel);
+                using (var vo = new ThPDSWindowVisibleOverride(window))
+                {
+                    // 切回CAD画布
+                    ThPDSCADService.FocusToCAD();
 
-                // 绘制到图纸上
-                var drawEngine = new ThPDSSystemDiagramService();
-                drawEngine.Draw(graph, nodes);
+                    // 绘制到图纸上
+                    var drawEngine = new ThPDSSystemDiagramService();
+                    drawEngine.Draw(graph, nodes);
+                }
             });
             Action autoNumbering = null;
             var autoNumberingCmd = new RelayCommand(() =>
@@ -446,7 +449,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                     else if (GetInputMeter() != null)
                     {
-                        item = PDSItemInfo.Create(left.Contains("进线") ? left + $"（带{   (GetInputMeter() is CurrentTransformer ? "间接表" : "电表")}）" : left, default);
+                        item = PDSItemInfo.Create(left.Contains("进线") ? left + $"（带{(GetInputMeter() is CurrentTransformer ? "间接表" : "电表")}）" : left, default);
                     }
                     else
                     {
@@ -983,7 +986,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                         }
                                         {
-                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string is  "CT");
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string is "CT");
                                             if (m != null)
                                             {
                                                 var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
@@ -1107,7 +1110,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             if (meter is CurrentTransformer currentTransformer)
                             {
                                 edgeName = edgeName.Replace("直接表", "CT表").Replace("上海CT表", "上海CT");
-                            }else
+                            }
+                            else
                             {
                                 if (edgeName.Contains("CT表"))
                                 {

@@ -102,6 +102,7 @@
     <Compile Include="Services\ThPDSDistributionPanelService.cs" />
     <Compile Include="Services\ThPDSInfoCompareService.cs" />
     <Compile Include="Services\ThPDSLoadIdService.cs" />
+    <Compile Include="Services\ThPDSWindowVisibleOverride.cs" />
     <Compile Include="ThElectricalPDSUIApp.cs" />
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
