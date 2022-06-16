@@ -41,12 +41,12 @@ namespace TianHua.Electrical.PDS.Engine
 
             // 读取配置表信息
             var fileService = new ThConfigurationFileService();
-            var tableInfo = fileService.Acquire(ThCADCommon.PDSComponentsPath());
+            fileService.Acquire(ThCADCommon.PDSComponentsPath());
             var distBoxKey = new List<string>();
             var nameFilter = new List<string>();
             var propertyFilter = new List<string>();
             var tableAnalysis = new ThPDSTableAnalysisService();
-            tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
+            tableAnalysis.Analysis(fileService.TableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
 
             //加载数据
             foreach (Database database in databases)
@@ -112,10 +112,13 @@ namespace TianHua.Electrical.PDS.Engine
 
                         // 根据块名提取负载及标注块
                         var loadExtractService = new ThPDSBlockExtractService();
-                        loadExtractService.Extract(acad.Database, tableInfo, nameFilter, propertyFilter, distBoxKey);
+                        loadExtractService.Extract(acad.Database, fileService.TableInfo, nameFilter, propertyFilter, distBoxKey, fileService.FilterBlockInfo);
                         BlockTransform(transformer, loadExtractService.MarkBlocks);
                         BlockTransform(transformer, loadExtractService.DistBoxBlocks);
                         BlockTransform(transformer, loadExtractService.LoadBlocks);
+                        EntitiesTransform(transformer, loadExtractService.Ignore.ToCollection());
+                        EntitiesTransform(transformer, loadExtractService.Attached.ToCollection());
+                        EntitiesTransform(transformer, loadExtractService.Terminal.ToCollection());
 
                         // 提取配电箱框线
                         var allDistBoxFrame = ThPDSDistBoxFrameExtraction.GetDistBoxFrame(acad.Database).ToCollection();
@@ -173,7 +176,8 @@ namespace TianHua.Electrical.PDS.Engine
 
                             var isStandardStorey = storey.StoreyTypeString.Equals("标准层");
                             var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loadsData, cableTrays, cables, markService,
-                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames, isStandardStorey);
+                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames, isStandardStorey,
+                                loadExtractService.Ignore, loadExtractService.Attached, loadExtractService.Terminal);
 
                             graphEngine.MultiDistBoxAnalysis(acad.Database);
                             graphEngine.CreatGraph();
@@ -235,8 +239,7 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
-        private void BlockTransform(ThMEPOriginTransformer transformer,
-            Dictionary<Entity, ThPDSBlockReferenceData> blockData)
+        private void BlockTransform(ThMEPOriginTransformer transformer, Dictionary<Entity, ThPDSBlockReferenceData> blockData)
         {
             blockData.ForEach(o =>
             {
@@ -246,8 +249,7 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
-        private void EntitiesReset(ThMEPOriginTransformer transformer,
-            Dictionary<Entity, ThPDSBlockReferenceData> blockData)
+        private void EntitiesReset(ThMEPOriginTransformer transformer, Dictionary<Entity, ThPDSBlockReferenceData> blockData)
         {
             blockData.ForEach(o =>
             {

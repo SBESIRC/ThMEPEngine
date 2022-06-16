@@ -89,10 +89,28 @@ namespace TianHua.Electrical.PDS.Engine
         /// </summary>
         public bool IsStandardStorey { get; set; }
 
+        /// <summary>
+        /// 忽略块
+        /// </summary>
+        private List<Polyline> Ignore;
+
+        /// <summary>
+        /// 附着块
+        /// </summary>
+        private List<Polyline> Attached;
+
+        /// <summary>
+        /// 末端块
+        /// </summary>
+        private List<Polyline> Terminal;
+
         private ThCADCoreNTSSpatialIndex DistBoxIndex;
         private ThCADCoreNTSSpatialIndex LoadIndex;
         private ThCADCoreNTSSpatialIndex CableIndex;
         private ThCADCoreNTSSpatialIndex CableTrayIndex;
+        private ThCADCoreNTSSpatialIndex IgnoreIndex;
+        private ThCADCoreNTSSpatialIndex AttachedIndex;
+        private ThCADCoreNTSSpatialIndex TerminalIndex;
         public ThPDSCircuitGraphNode CableTrayNode;//桥架节点
         private ThMarkService MarkService;
         private Database Database;
@@ -104,7 +122,7 @@ namespace TianHua.Electrical.PDS.Engine
             ThMarkService markService, List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode,
             Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> nodeMap,
             Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap,
-            List<Polyline> distBoxFrames, bool isStandardStorey)
+            List<Polyline> distBoxFrames, bool isStandardStorey, List<Polyline> ignore, List<Polyline> attached, List<Polyline> terminal)
         {
             Database = database;
             MarkService = markService;
@@ -112,6 +130,10 @@ namespace TianHua.Electrical.PDS.Engine
             NodeMap = nodeMap;
             EdgeMap = edgeMap;
             IsStandardStorey = isStandardStorey;
+            Ignore = ignore;
+            Attached = attached;
+            Terminal = terminal;
+
             using (var acad = AcadDatabase.Use(this.Database))
             {
                 DistBoxes = distBoxes;
@@ -127,6 +149,10 @@ namespace TianHua.Electrical.PDS.Engine
                 DistBoxIndex = new ThCADCoreNTSSpatialIndex(DistBoxes.ToCollection());
                 CableIndex = new ThCADCoreNTSSpatialIndex(Cables.ToCollection());
                 CableTrayIndex = new ThCADCoreNTSSpatialIndex(CableTrays.ToCollection());
+
+                IgnoreIndex = new ThCADCoreNTSSpatialIndex(Ignore.ToCollection());
+                AttachedIndex = new ThCADCoreNTSSpatialIndex(Attached.ToCollection());
+                TerminalIndex = new ThCADCoreNTSSpatialIndex(Terminal.ToCollection());
 
                 loads.ForEach(x =>
                 {
@@ -661,7 +687,11 @@ namespace TianHua.Electrical.PDS.Engine
                             }
                             if (newLoads.Count > 0 && nextLoops.Count == 0)
                             {
-                                Navigate(node, newLoads, onLightingCableTray, logos, nextEntity);
+                                newLoads = RemoveIgnoreAndTerminal(newLoads);
+                                if (newLoads.Count > 0)
+                                {
+                                    Navigate(node, newLoads, onLightingCableTray, logos, nextEntity);
+                                }
                             }
                         }
                     }
@@ -706,7 +736,12 @@ namespace TianHua.Electrical.PDS.Engine
                         });
                     }
 
-                    var navigate = Navigate(node, tuple.Item4, onLightingCableTray, tuple.Item3, nextEntity);
+                    var newLoads = RemoveIgnoreAndTerminal(tuple.Item4);
+                    if (newLoads.Count == 0)
+                    {
+                        return;
+                    }
+                    var navigate = Navigate(node, newLoads, onLightingCableTray, tuple.Item3, nextEntity);
                     if (!navigate.Item1)
                     {
                         return;
@@ -1276,7 +1311,7 @@ namespace TianHua.Electrical.PDS.Engine
         public List<Entity> FindNext(Entity existingEntity, Polyline space)
         {
             var results = CableIndex.SelectCrossingPolygon(space);
-            results = results.Union(GeometriesMap(LoadIndex.SelectCrossingPolygon(space)));
+            results = results.Union(FindNextAndAttachedBlock(space));
             results = results.Union(DistBoxIndex.SelectCrossingPolygon(space));
             results.Remove(existingEntity);
             return results.OfType<Entity>().ToList();
@@ -1292,7 +1327,7 @@ namespace TianHua.Electrical.PDS.Engine
         public List<Entity> FindNext(Entity existingEntity, BlockReference block, Polyline space, Polyline lineFrame)
         {
             var results = CableIndex.SelectCrossingPolygon(space);
-            results = results.Union(GeometriesMap(LoadIndex.SelectCrossingPolygon(lineFrame)));
+            results = results.Union(FindNextAndAttachedBlock(lineFrame));
             results = results.Union(DistBoxIndex.SelectCrossingPolygon(space));
             results.Remove(existingEntity);
             results.Remove(block);
@@ -1302,10 +1337,46 @@ namespace TianHua.Electrical.PDS.Engine
         public List<Entity> FindNext(Entity existingEntity, Polyline space, Polyline lineFrame)
         {
             var results = CableIndex.SelectCrossingPolygon(space);
-            results = results.Union(GeometriesMap(LoadIndex.SelectCrossingPolygon(lineFrame)));
+            results = results.Union(FindNextAndAttachedBlock(lineFrame));
             results = results.Union(DistBoxIndex.SelectCrossingPolygon(space));
             results.Remove(existingEntity);
             return results.OfType<Entity>().ToList();
+        }
+
+        private DBObjectCollection FindNextAndAttachedBlock(Polyline space)
+        {
+            var results = GeometriesMap(LoadIndex.SelectCrossingPolygon(space));
+            var attachedBlock = AttachedIndex.SelectCrossingPolygon(space).OfType<Polyline>();
+            attachedBlock.ForEach(o =>
+            {
+                results = results.Union(GeometriesMap(LoadIndex.SelectCrossingPolygon(o)));
+            });
+            return results;
+        }
+
+        private List<Entity> RemoveIgnoreAndTerminal(List<Entity> entities)
+        {
+            var lines = entities.OfType<Line>().ToList();
+            if (lines.Count == 0)
+            {
+                return entities;
+            }
+
+            foreach (var l in lines)
+            {
+                var ignore = IgnoreIndex.SelectCrossingPolygon(l.BufferSquare(10.0));
+                if (ignore.Count > 0)
+                {
+                    return new List<Entity>();
+                }
+
+                var terminal = TerminalIndex.SelectCrossingPolygon(l.BufferSquare(10.0));
+                if (terminal.Count > 0)
+                {
+                    entities.Remove(l);
+                }
+            }
+            return entities;
         }
 
         /// <summary>

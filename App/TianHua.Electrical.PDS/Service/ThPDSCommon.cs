@@ -5,6 +5,7 @@ namespace TianHua.Electrical.PDS.Service
     public class ThPDSCommon
     {
         public const string BLOCK = "Block";
+        public const string FILTER = "Filter";
         public const string DISTRIBUTION_BOX = "配电箱";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_NAME = "块名";
         public const string LOAD_ID = "负载编号";
