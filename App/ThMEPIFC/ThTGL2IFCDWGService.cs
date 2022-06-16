@@ -1,9 +1,11 @@
 ﻿using System;
 using Linq2Acad;
 using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.Model;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPIFC
 {
@@ -13,34 +15,51 @@ namespace ThMEPIFC
         {
             using (var db = AcadDatabase.Use(database))
             {
+                var texts = new DBObjectCollection();
                 var slabs = new DBObjectCollection();
                 var railings = new DBObjectCollection();
 
                 db.ModelSpace
-                    .OfType<Polyline>()
-                    .ForEachDbObject(p =>
+                    .OfType<Entity>()
+                    .ForEachDbObject(e =>
                     {
-                        if (p.Layer == "栏杆")
+                        if (e is Polyline p)
                         {
-                            railings.Add(p);
+                            if (p.Layer == "栏杆")
+                            {
+                                railings.Add(p);
+                            }
+                            else if (p.Layer == "楼板")
+                            {
+                                slabs.Add(p);
+                            }
+                            else if (p.Layer == "降板")
+                            {
+                                slabs.Add(p);
+                            }
                         }
-                        else if (p.Layer == "楼板")
+                        else if (e is DBText t)
                         {
-                            slabs.Add(p);
-                        }
-                        else if (p.Layer == "降板")
-                        {
-                            slabs.Add(p);
+                            if (t.Layer == "降板")
+                            {
+                                texts.Add(t);
+                            }
                         }
                     });
 
                 // 指定楼层
+                var sp = new ThCADCoreNTSSpatialIndex(texts);
                 var storey = project.Site.Building.Storeys.Where(s => s.Number.Contains("3")).FirstOrDefault();
                 if (storey != null)
                 {
                     foreach(Polyline railing in railings)
                     {
                         storey.Railings.Add(CreateRailing(railing));
+                    }
+
+                    foreach (Entity e in slabs.BuildArea())
+                    {
+                        storey.Slabs.Add(CreateSlab(e, sp));
                     }
                 }
             }
@@ -55,6 +74,51 @@ namespace ThMEPIFC
                 Outline = pline,
                 ExtrudedDirection = Vector3d.ZAxis,
             };
+        }
+
+        private ThTCHSlab CreateSlab(Entity e, ThCADCoreNTSSpatialIndex sp)
+        {
+            if (e is Polyline p)
+            {
+                return new ThTCHSlab(p, 50.0, Vector3d.ZAxis);
+            }
+            else if (e is MPolygon mp)
+            {
+                var slab = new ThTCHSlab(mp.Shell(), 50.0, Vector3d.ZAxis);
+                foreach(Polyline pline in mp.Holes())
+                {
+                    if (GetDescendingHeight(pline, sp, out double height))
+                    {
+                        slab.Descendings.Add(new ThTCHSlabDescendingData()
+                        {
+                            IsDescending = true,
+                            DescendingHeight = height,
+                            DescendingThickness = 0,
+                            DescendingWrapThickness = 0,
+                        });
+                    }
+                    else
+                    {
+                        slab.Descendings.Add(new ThTCHSlabDescendingData());
+                    }
+                }
+                return slab;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private bool GetDescendingHeight(Entity e, ThCADCoreNTSSpatialIndex sp, out double height)
+        {
+            var results = sp.SelectCrossingPolygon(e);
+            if (results.Count == 1 && results[0] is DBText text)
+            {
+                return double.TryParse(text.TextString, out height);
+            }
+            height = 0;
+            return false;
         }
     }
 }

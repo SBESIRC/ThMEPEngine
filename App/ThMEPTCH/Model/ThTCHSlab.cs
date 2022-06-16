@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
@@ -7,19 +8,9 @@ namespace ThMEPTCH.Model
     public class ThTCHSlab: ThIfcSlab
     {
         /// <summary>
-        /// 降板高度
+        /// 降板信息
         /// </summary>
-        public double DescendingHeight { get; set; }
-
-        /// <summary>
-        /// 降板厚度
-        /// </summary>
-        public double DescendingThickness { get; set; }
-        
-        /// <summary>
-        /// 降板包围厚度
-        /// </summary>
-        public double DescendingWrapThickness { get; set; }
+        public List<ThTCHSlabDescendingData> Descendings { get; set; }
 
         /// <summary>
         /// 拉伸方向
@@ -35,6 +26,13 @@ namespace ThMEPTCH.Model
         public ThTCHSlab(MPolygon polygon, double thickness, Vector3d extVector)
         {
             Outline = polygon;
+            Thickness = thickness;
+            ExtrudedDirection = extVector;
+        }
+
+        public ThTCHSlab(Polyline pline, double thickness, Vector3d extVector)
+        {
+            Outline = pline;
             Thickness = thickness;
             ExtrudedDirection = extVector;
         }
