@@ -153,23 +153,18 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IfcProductDefinitionShape CreateProductDefinitionShape(IfcStore model, IfcExtrudedAreaSolid solid)
         {
-            using (var txn = model.BeginTransaction("Create SweptSolid Shape"))
-            {
-                //Create a Definition shape to hold the geometry
-                var shape = model.Instances.New<IfcShapeRepresentation>();
-                var modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
-                shape.ContextOfItems = modelContext;
-                shape.RepresentationType = "SweptSolid";
-                shape.RepresentationIdentifier = "Body";
-                shape.Items.Add(solid);
+            //Create a Definition shape to hold the geometry
+            var shape = model.Instances.New<IfcShapeRepresentation>();
+            var modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
+            shape.ContextOfItems = modelContext;
+            shape.RepresentationType = "SweptSolid";
+            shape.RepresentationIdentifier = "Body";
+            shape.Items.Add(solid);
 
-                //Create a Product Definition and add the model geometry to the wall
-                var rep = model.Instances.New<IfcProductDefinitionShape>();
-                rep.Representations.Add(shape);
-
-                txn.Commit();
-                return rep;
-            }
+            //Create a Product Definition and add the model geometry to the wall
+            var rep = model.Instances.New<IfcProductDefinitionShape>();
+            rep.Representations.Add(shape);
+            return rep;
         }
 
         public static IfcRailing CreateRailing(IfcStore model, ThTCHRailing railing, Point3d floor_origin)

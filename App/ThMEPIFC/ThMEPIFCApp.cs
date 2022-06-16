@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Windows.Forms;
+using AcHelper;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPTCH.Services;
 
@@ -45,6 +46,10 @@ namespace ThMEPIFC
             {
                 return;
             }
+
+            // 读入DWG数据
+            var dwgService = new ThTGL2IFCDWGService();
+            dwgService.LoadDWG(Active.Database, project);
 
             // 转换并保存IFC数据
             ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();

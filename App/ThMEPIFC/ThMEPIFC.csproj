@@ -40,6 +40,7 @@
     <Compile Include="ThTGL2IFCCommon.cs" />
     <Compile Include="ThTGL2IFCService.cs" />
     <Compile Include="ThTGL2IFCSolid3dExtension.cs" />
+    <Compile Include="ThTGL2IFCDWGService.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Essentials">
