@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Data;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.LaneLine;
 using ThMEPWSS.PressureDrainageSystem.Model;
@@ -68,12 +70,96 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].Wrappipes.ForEach(e => wrappipes.Add(e));
             GroupPipeLineUnitByGroupedHorizontalPipe(horizontalLines, verticalPipes, submergedPumps, layer);
             CompletePipeLineUnitInfoConstructedBasedOnHorizontalPipe(verticalPipes, layer);
+            GenerateSupplementaryVertPipeForSubmergePump(submergedPumps,layer);
             CollectWrapPipeIntoEachUnit(wrappipes,layer);
             ConfirmDrainageModeBeforeReGenerateHorizontals(layer);
             ReGenerateHorizontalPipeInPipeUnit(layer);
             ConstructPipeLineUnitForUniqueVerticalPipe(verticalPipes, layer);
             ConstructConnectedArrToStoryRecordVerticalPipeRelationshipInPipeUnit(layer);
             AppendSubmergePumpToVerticalPipe(submergedPumps, layer);
+        }
+        private void GenerateSupplementaryVertPipeForSubmergePump(List<SubmergedPumpClass> submergedPumps,int layer)
+        {
+            //在潜水泵旁生成立管时，前面600的容差判断中找到的立管是别的系统的立管，此时在该系统重新生成
+            foreach (var pump in submergedPumps)
+            {
+                var rec = pump.Extents.ToRectangle();
+                bool generated = false;
+                for (int i = 0; i < _totalPipeLineUnitsByLayerByUnit[layer].Count; i++)
+                {
+                    var unit = _totalPipeLineUnitsByLayerByUnit[layer][i];
+                    foreach (var horLine in unit.HorizontalPipes.Select(e => e.Line))
+                    {
+                        if (rec.Contains(horLine.StartPoint) && rec.Contains(horLine.EndPoint))
+                        {
+                            double tol = 600;
+                            var pipes = unit.VerticalPipes;
+                            int dd = 0;
+                            foreach (var k in pipes.Select(e => e.Circle))
+                            {
+                                if (rec.GetClosePoint(k.Center).DistanceTo(k.Center) < tol || rec.Contains(k.Center))
+                                {
+                                    dd = 1;
+                                    break;
+                                }
+                            }
+                            if (dd == 0)
+                            {
+                                using (AcadDatabase adb = AcadDatabase.Active())
+                                {
+                                    double toldis = 50;
+                                    Point3d ptlocPipe = rec.GetCenter();
+                                    foreach (var lin in unit.HorizontalPipes)
+                                    {
+                                        if (rec.Contains(lin.Line.StartPoint) || rec.GetClosePoint(lin.Line.StartPoint).DistanceTo(lin.Line.StartPoint) < toldis)
+                                        {
+                                            ptlocPipe = lin.Line.StartPoint;
+                                            break;
+                                        }
+                                        else if (rec.Contains(lin.Line.EndPoint) || rec.GetClosePoint(lin.Line.EndPoint).DistanceTo(lin.Line.EndPoint) < toldis)
+                                        {
+                                            ptlocPipe = lin.Line.EndPoint;
+                                            break;
+                                        }
+                                    }
+                                    Circle ci = new Circle(ptlocPipe, Vector3d.ZAxis, 50);
+                                    ci.Layer = "W-DRAI-EQPM";
+
+                                    double mindis = 3000;
+                                    int index = -1;
+                                    for (int t = 0; t < unit.HorizontalPipes.Count; t++)
+                                    {
+                                        double curdis = unit.HorizontalPipes[t].Line.GetClosestPointTo(ci.Center, false).DistanceTo(ci.Center);
+                                        if (curdis < mindis)
+                                        {
+                                            mindis = curdis;
+                                            index = t;
+                                        }
+                                    }
+                                    if (index != -1)
+                                    {
+                                        Line line = new Line(unit.HorizontalPipes[index].Line.GetClosestPointTo(ci.Center, false), ci.Center);
+                                        if (line.Length > 0)
+                                        {
+                                            unit.HorizontalPipes.Add(new Horizontal(line, false));
+                                        }
+                                    }
+                                    if (!adb.Layers.Contains("AdditonPipe"))
+                                        adb.Database.CreateAILayer("AdditonPipe", (short)0);
+                                    ci.Layer = "AdditonPipe";
+                                    var pipe = new VerticalPipeClass();
+                                    pipe.Circle = ci;
+                                    pipe.SameTypeIdentifiers = new List<string>();
+                                    unit.VerticalPipes.Add(pipe);
+                                    generated = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (generated) break;
+                }
+            }
         }
 
         /// <summary>

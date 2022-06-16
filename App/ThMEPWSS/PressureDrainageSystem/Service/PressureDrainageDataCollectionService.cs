@@ -642,7 +642,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 this.CollectedData.HorizontalPipes.Add(new Horizontal(line,false));
                             }
                         }
-                        adb.Database.CreateAILayer("AdditonPipe",(short)0);
+                        if(!adb.Layers.Contains("AdditonPipe"))
+                            adb.Database.CreateAILayer("AdditonPipe",(short)0);
                         ci.Layer = "AdditonPipe";
                         this.CollectedData.VerticalPipes.Add(ci);
                     }
