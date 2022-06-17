@@ -38,6 +38,8 @@ namespace TianHua.Electrical.PDS.Service
             {
                 BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
             });
+
+            var descriptionAssign = true;
             foreach (var str in marks)
             {
                 if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
@@ -80,9 +82,10 @@ namespace TianHua.Electrical.PDS.Service
                             }
                         }
                     }
-                    else if (!string.IsNullOrEmpty(strClean))
+                    else if (!string.IsNullOrEmpty(strClean) && descriptionAssign)
                     {
                         thPDSDistBox.ID.Description = strClean;
+                        descriptionAssign = false;
                     }
                 }
             }
@@ -209,6 +212,7 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             var r = new Regex(@"[\u4e00-\u9fa5]");
+            var descriptionAssign = true;
             foreach (var str in markStrings.Except(searchedString))
             {
                 if (!r.Match(str).Success)
@@ -240,9 +244,10 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     }
                 }
-                else
+                else if(!string.IsNullOrEmpty(str) && descriptionAssign)
                 {
                     thPDSLoad.ID.Description = str;
+                    descriptionAssign = false;
                 }
             }
 

@@ -213,8 +213,9 @@ namespace TianHua.Electrical.PDS.Engine
             }
 
             var unionEngine = new ThPDSGraphUnionEngine(EdgeMapList);
-            var circuitGraph = unionEngine.GraphUnion(graphList, cableTrayNode);
-            return circuitGraph;
+            unionEngine.GraphUnion(graphList, cableTrayNode);
+            unionEngine.SplitSeriesConnection();
+            return unionEngine.UnionGraph;
         }
 
         public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> Execute()

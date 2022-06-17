@@ -211,14 +211,14 @@ namespace TianHua.Electrical.PDS.Service
                     edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                     reversible = false;
                 }
-                else if (IsTerminalDistributuinPanel(edge.Source.Loads[0].LoadTypeCat_2)
-                    && !IsTerminalDistributuinPanel(edge.Target.Loads[0].LoadTypeCat_2))
+                else if (ThPDSTerminalPanelService.IsTerminalPanel(edge.Source.Loads[0].LoadTypeCat_2)
+                    && !ThPDSTerminalPanelService.IsTerminalPanel(edge.Target.Loads[0].LoadTypeCat_2))
                 {
                     edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                     reversible = false;
                 }
-                else if (!IsTerminalDistributuinPanel(edge.Source.Loads[0].LoadTypeCat_2)
-                    && IsTerminalDistributuinPanel(edge.Target.Loads[0].LoadTypeCat_2))
+                else if (!ThPDSTerminalPanelService.IsTerminalPanel(edge.Source.Loads[0].LoadTypeCat_2)
+                    && ThPDSTerminalPanelService.IsTerminalPanel(edge.Target.Loads[0].LoadTypeCat_2))
                 {
                     reversible = false;
                 }
@@ -283,14 +283,6 @@ namespace TianHua.Electrical.PDS.Service
                 ThPDSLayerService.Assign(edge.Target.Loads[0]);
             }
             return edge;
-        }
-
-        private static bool IsTerminalDistributuinPanel(ThPDSLoadTypeCat_2 load)
-        {
-            return load.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
-                || load.Equals(ThPDSLoadTypeCat_2.ElectricalControlPanel)
-                || load.Equals(ThPDSLoadTypeCat_2.IsolationSwitchPanel)
-                || load.Equals(ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel);
         }
 
         private static void AssignCircuitNumber(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge, bool circuitAssign)
