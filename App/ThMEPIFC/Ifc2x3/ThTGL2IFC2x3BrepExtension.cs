@@ -24,35 +24,36 @@ namespace ThMEPIFC.Ifc2x3
             // https://through-the-interface.typepad.com/through_the_interface/2008/09/traversing-a-3d.html
 
             // Build the BRep topology object to traverse
-            var brep = new Brep(solid);
-
-            // Get all the Complexes which are primary BRep
-            // elements and represent a conceptual topological
-            // entity of connected shell boundaries.
-            var facetedBrepWithVoids = model.Instances.New<IfcFacetedBrepWithVoids>();
-            foreach (var complex in brep.Complexes)
+            using (var brep = new Brep(solid))
             {
-                // Get all the shells within a complex. Shells
-                // are secondary BRep entities that correspond
-                // to a collection of neighboring surfaces on a
-                // solid
-                foreach (var shell in complex.Shells)
+                // Get all the Complexes which are primary BRep
+                // elements and represent a conceptual topological
+                // entity of connected shell boundaries.
+                var facetedBrepWithVoids = model.Instances.New<IfcFacetedBrepWithVoids>();
+                foreach (var complex in brep.Complexes)
                 {
-                    if (shell.ShellType == ShellType.ShellExterior)
+                    // Get all the shells within a complex. Shells
+                    // are secondary BRep entities that correspond
+                    // to a collection of neighboring surfaces on a
+                    // solid
+                    foreach (var shell in complex.Shells)
                     {
-                        facetedBrepWithVoids.Outer = model.ToIfcClosedShell(shell);
-                    }
-                    else if (shell.ShellType == ShellType.ShellInterior)
-                    {
-                        facetedBrepWithVoids.Voids.Add(model.ToIfcClosedShell(shell));
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
+                        if (shell.ShellType == ShellType.ShellExterior)
+                        {
+                            facetedBrepWithVoids.Outer = model.ToIfcClosedShell(shell);
+                        }
+                        else if (shell.ShellType == ShellType.ShellInterior)
+                        {
+                            facetedBrepWithVoids.Voids.Add(model.ToIfcClosedShell(shell));
+                        }
+                        else
+                        {
+                            throw new NotSupportedException();
+                        }
                     }
                 }
+                return facetedBrepWithVoids;
             }
-            return facetedBrepWithVoids;
         }
 
         private static IfcPolyLoop ToIfcPolyLoop(this IfcStore model, BoundaryLoop boundaryLoop)
