@@ -310,8 +310,53 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     if (unit.DrainMode != 3)
                     {
-                        if (unit.WrapPipes.Count > 0) unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSINDOOR);//穿侧墙
-                        else unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSROOF);//穿顶板
+                        if (unit.VerticalPipes.Count > 0 && connectedLines.Count > 0)
+                        {
+                            double tol_extend = 200000;
+                            Line far_line = connectedLines[0];
+                            double max_dis = connectedLines[0].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
+                            if (connectedLines.Count > 1)
+                            {
+                                for (int i = 1; i < connectedLines.Count; i++)
+                                {
+                                    double dis = connectedLines[i].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
+                                    if (dis > max_dis)
+                                    {
+                                        max_dis = dis;
+                                        far_line = connectedLines[i];
+                                    }
+                                }
+                            }
+                            if (far_line.StartPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center) > far_line.EndPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center))
+                            {
+                                far_line = new Line(far_line.EndPoint, far_line.StartPoint);
+                            }
+                            Point3d far_ptstart = far_line.EndPoint;
+                            far_line.Extend(false, tol_extend);
+                            far_line = new Line(far_ptstart, far_line.EndPoint);
+                            bool crossed_inner_wall = false;
+                            foreach (var inner_wall in walls)
+                            {
+                                if (far_line.IntersectWithEx(inner_wall).Count > 0)
+                                {
+                                    crossed_inner_wall = true;
+                                    break;
+                                }
+                            }
+                            if (!crossed_inner_wall)
+                            {
+                                unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSOUTDOOR);//穿外墙
+                            }
+                            else
+                            {
+                                if (unit.WrapPipes.Count > 0) unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSINDOOR);//穿侧墙
+                                else unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSROOF);//穿顶板
+                            }
+
+                            ////0617
+                            //if (unit.WrapPipes.Count > 0) unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSINDOOR);//穿侧墙
+                            //else unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSROOF);//穿顶板
+                        }
                     }
                 }
             }
@@ -397,7 +442,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             //                    }
             //                    if (crossed_inner_wall) unit.DrainMode = 4;
             //                    else unit.DrainMode = 3;
-            //                }                         
+            //                }
             //                //foreach (var line in connectedLines)
             //                //{
             //                //    foreach (var bound in walls)
