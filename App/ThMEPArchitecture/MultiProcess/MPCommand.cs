@@ -139,6 +139,8 @@ namespace ThMEPArchitecture.MultiProcess
             }
             catch (Exception ex)
             {
+                DisplayLogger2?.Information(ex.Message);
+                DisplayLogger2?.Information("程序出错！");
                 Logger?.Information(ex.Message);
                 Logger?.Information("##################################");
                 Logger?.Information(ex.StackTrace);
@@ -235,6 +237,8 @@ namespace ThMEPArchitecture.MultiProcess
                 }
                 catch(Exception ex)
                 {
+                    DisplayLogger?.Information(ex.Message);
+                    DisplayLogger?.Information("程序出错！");
                     Logger?.Information(ex.Message);
                     Logger?.Information("##################################");
                     Logger?.Information(ex.StackTrace);
@@ -295,6 +299,8 @@ namespace ThMEPArchitecture.MultiProcess
                 }
                 catch (Exception ex)
                 {
+                    DisplayLogger?.Information(ex.Message);
+                    DisplayLogger?.Information("程序出错！");
                     Logger?.Information(ex.Message);
                     Logger?.Information("##################################");
                     Logger?.Information(ex.StackTrace);
@@ -375,6 +381,8 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     catch (Exception ex)
                     {
+                        DisplayLogger?.Information(ex.Message);
+                        DisplayLogger?.Information("程序出错！");
                         Logger?.Information(ex.Message);
                         Logger?.Information("##################################");
                         Logger?.Information(ex.StackTrace);
