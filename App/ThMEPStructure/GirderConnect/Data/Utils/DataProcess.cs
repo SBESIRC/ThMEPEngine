@@ -5,6 +5,10 @@ using AcHelper;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
+using System;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils
 {
@@ -152,6 +156,69 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                     }
                 }
             }
+        }
+
+        // 将多个mpolyline中存在的回字变成一个多边形
+        public static List<Polyline> MPL2PL(List<MPolygon> mPolygons)
+        {
+            List<Polyline> polylines = new List<Polyline>();
+            foreach(var mPolygon in mPolygons)
+            {
+                if(mPolygon.Holes().Count > 0)
+                {
+                    polylines.Add(SplitADonut(mPolygon));
+                }
+                else
+                {
+                    polylines.Add(mPolygon.Shell());
+                }
+            }
+            return polylines;
+        }
+
+        //分割一个回字形区域
+        public static Polyline SplitADonut(MPolygon mPolygon)
+        {
+            var plA = mPolygon.Shell();
+            var plB = mPolygon.Holes()[0]; // 此处所取得的不准确，应该是所有holes中面积最大的一个
+            var splitPtA = plA.GetPoint3dAt(0);
+            var splitPtB = plB.GetClosestPointTo(splitPtA, false);
+            var tuples = new List<Tuple<Point3d, Point3d>>();
+            int numA = plA.NumberOfVertices;
+
+            for (int i = 0; i < numA; ++i)
+            {
+                tuples.Add(new Tuple<Point3d, Point3d>(plA.GetPoint3dAt(i), plA.GetPoint3dAt((i + 1) % numA)));
+            }
+
+            tuples.Add(new Tuple<Point3d, Point3d>(splitPtA, splitPtB));
+            tuples.Add(new Tuple<Point3d, Point3d>(splitPtB, splitPtA));
+
+            int numB = plB.NumberOfVertices;
+            bool skipFlag = false;
+            for (int i = 0; i < numB; ++i)
+            {
+                if(skipFlag == false)
+                {
+                    var stPt = plB.GetPoint3dAt(i);
+                    var edPt = plB.GetPoint3dAt((i + 1) % numB);
+                    if (LineContainsPt(stPt, edPt, splitPtB))
+                    {
+                        skipFlag = true;
+                        tuples.Add(new Tuple<Point3d, Point3d>(stPt, splitPtB));
+                        tuples.Add(new Tuple<Point3d, Point3d>(splitPtB, edPt));
+                    }
+                }
+                tuples.Add(new Tuple<Point3d, Point3d>(plB.GetPoint3dAt(i), plB.GetPoint3dAt((i + 1) % numB)));
+            }
+            return TypeConvertor.Tuples2Polyline(tuples);
+        }
+
+        //判断一个点是否在两个点组成的线上
+        public static bool LineContainsPt(Point3d stPt, Point3d edPt, Point3d midPt)
+        {
+            var minus = midPt.DistanceTo(stPt) + midPt.DistanceTo(edPt) - stPt.DistanceTo(edPt);
+            return minus > -1.0 && minus < 1.0;
         }
     }
 }
