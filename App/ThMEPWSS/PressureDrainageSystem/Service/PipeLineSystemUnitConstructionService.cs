@@ -1401,6 +1401,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 pipe.Diameter = CalculatePipeDiameter(pump.paraQ);
                             }
                             pipe.totalQ = pipe.AppendusedpumpCount * pump.paraQ;
+                            pipe.totalUsedPump = pipe.AppendusedpumpCount;
                         }
                     }
                 }
