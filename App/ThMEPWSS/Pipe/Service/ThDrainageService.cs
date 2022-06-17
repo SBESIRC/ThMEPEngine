@@ -814,7 +814,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           return PipeType.Unknown;
         }
         var MaxToiletToFloordrainDistance2 = new HashSet<string>();
-        foreach (var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE in MaxToiletToCondensepipeDistance)
+        foreach (var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE in MaxToiletToCondensepipeDistance.Where(TolLightRangeSingleSideMax => !IsTL(TolLightRangeSingleSideMax)))
         {
           if (MaxToiletToFloordrainDistance2.Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) continue;
           var MaxBalconyToBalconyDistance = new PipeLine();
