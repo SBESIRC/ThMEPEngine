@@ -95,7 +95,32 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
-
+        private bool _YS = true;
+        public bool YS
+        {
+            get
+            {
+                return _YS;
+            }
+            set
+            {
+                _YS = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool _WFS = true;
+        public bool WFS
+        {
+            get
+            {
+                return _WFS;
+            }
+            set
+            {
+                _WFS = value;
+                this.RaisePropertyChanged();
+            }
+        }
         private string _WashingMachineFloorDrainDN = "DN50";
         public string WashingMachineFloorDrainDN
         {
@@ -212,6 +237,128 @@ namespace ThMEPWSS.Pipe.Model
             set
             {
                 _BasinDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private string _BalconyFloorDrainDN = "DN50";
+        public string BalconyFloorDrainDN
+        {
+            get
+            {
+                return _BalconyFloorDrainDN;
+            }
+            set
+            {
+                _BalconyFloorDrainDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private string _WaterWellPipeVerticalDN = "DN75";
+        public string WaterWellPipeVerticalDN
+        {
+            get
+            {
+                return _WaterWellPipeVerticalDN;
+            }
+            set
+            {
+                _WaterWellPipeVerticalDN = value;
+                RaisePropertyChanged();
+            }
+        }
+        private string _CondensePipeDN = "DN50";
+        public string CondensePipeVerticalDN
+        {
+            get
+            {
+                return _CondensePipeDN;
+            }
+            set
+            {
+                _CondensePipeDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private string _CondenseFloorDrainDN = "DN50";
+        public string CondenseFloorDrainDN
+        {
+            get
+            {
+                return _CondenseFloorDrainDN;
+            }
+            set
+            {
+                _CondenseFloorDrainDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private string _CondensePipeHorizontalDN = "DN25";
+        public string CondensePipeHorizontalDN
+        {
+            get
+            {
+                return _CondensePipeHorizontalDN;
+            }
+            set
+            {
+                _CondensePipeHorizontalDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private string _BalconyRainPipeDN = "DN100";
+        public string BalconyRainPipeDN
+        {
+            get
+            {
+                return _BalconyRainPipeDN;
+            }
+            set
+            {
+                _BalconyRainPipeDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private string _WaterWellFloorDrainDN = "DN50";
+        public string WaterWellFloorDrainDN
+        {
+            get
+            {
+                return _WaterWellFloorDrainDN;
+            }
+            set
+            {
+                _WaterWellFloorDrainDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool _HasAirConditionerFloorDrain = false;
+        public bool HasAirConditionerFloorDrain
+        {
+            get
+            {
+                return _HasAirConditionerFloorDrain;
+            }
+            set
+            {
+                _HasAirConditionerFloorDrain = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private bool _HasAiringForCondensePipe = false;
+        public bool HasAiringForCondensePipe
+        {
+            get
+            {
+                return _HasAiringForCondensePipe;
+            }
+
+            set
+            {
+                _HasAiringForCondensePipe = value;
                 this.RaisePropertyChanged();
             }
         }

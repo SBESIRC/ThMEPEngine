@@ -38,6 +38,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.vm = vm;
             this.DataContext = vm;
             this.Topmost = true;
+            this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             Loaded += (s, e) =>
             {
                 ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext = new ThMEPWSS.ReleaseNs.DrainageSystemNs.CommandContext()
@@ -59,6 +60,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             var uiParams = new DrainageSystemParamsUI(vm.Params);
             uiParams.Topmost = true;
+            uiParams.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiParams.ShowDialog();
         }
 
@@ -132,7 +134,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     CadCache.HideAllWindows();
                     FocusMainWindow();
-                    ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawDrainageFlatDiagram(vm);
+                    ThMEPWSS.ReleaseNs.DrainageSystemNs.THDrainageService.DrawDrainageFlatDiagram(vm);
                 }
                 catch (System.Exception ex)
                 {

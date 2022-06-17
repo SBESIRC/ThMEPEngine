@@ -31,7 +31,9 @@
                 <Label Content="楼层线间距"></Label>
                 <Button Click="btnSetHeights">层高设置</Button>
             </StackPanel>
+            <Rectangle Height="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
             <StackPanel Orientation="Horizontal">
+                <Rectangle Width="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
                 <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding StoreySpan,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
                 <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
             </StackPanel>
@@ -60,26 +62,63 @@
             <!--<Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" Margin="-5,0,-5,0"  SnapsToDevicePixels="True"/>-->
             <!--<CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>-->
             <StackPanel Orientation="Vertical">
-                <CheckBox Margin="5" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
-                <CheckBox Margin="5" Checked="CheckBox_Checked" IsChecked="{Binding CanHaveDownboard,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">卫生间降板</CheckBox>
-                <CheckBox Margin="5" Checked="CheckBox_Checked" IsChecked="{Binding H,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">通气H件隔层布置</CheckBox>
+                <CheckBox IsChecked="{Binding WFS}">污废水</CheckBox>
+                
+                <CheckBox Margin="5"  IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
+                <CheckBox Margin="5"  IsChecked="{Binding CanHaveDownboard,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">卫生间降板</CheckBox>
+                <CheckBox Margin="5"  IsChecked="{Binding H,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">通气H件隔层布置</CheckBox>
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="35"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Label Grid.Row="0"  Margin="0,5,0,5" Grid.Column="0" Content="洗衣地漏："></Label>
-                    <ComboBox Grid.Row="0"  Margin="0,5,0,5" Grid.Column="1" x:Name="cbxFloorDrain" Width="80" SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
-                    <Label Grid.Row="1"  Margin="0,0,0,5" Grid.Column="0" Content="厨房洗涤盆："></Label>
-                    <ComboBox Grid.Row="1" Margin="0,0,0,5" Grid.Column="1" x:Name="Basin" Width="80" Text="{Binding Basin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
-                    <Label Grid.Row="2"  Margin="0,0,0,5" Grid.Column="0" Content="厨房洗涤盆管径："></Label>
-                    <ComboBox Grid.Row="2"  Margin="0,0,0,5" Grid.Column="1" x:Name="cbxBasinDn" Width="80" Text="{Binding BasinDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <Label Grid.Row="0"  Grid.Column="0" Content="洗衣地漏："></Label>
+                    <ComboBox Grid.Row="0"  Grid.Column="1" x:Name="cbxFloorDrain"  SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <Label Grid.Row="1"   Grid.Column="0" Content="厨房洗涤盆："></Label>
+                    <ComboBox Grid.Row="1"  Grid.Column="1" x:Name="Basin"  Text="{Binding Basin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <Label Grid.Row="2"   Grid.Column="0" Content="厨房洗涤盆管径："></Label>
+                    <ComboBox Grid.Row="2"   Grid.Column="1" x:Name="cbxBasinDn"  Text="{Binding BasinDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
                 </Grid>
+                <CheckBox IsChecked="{Binding YS}">雨水</CheckBox>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="阳台地漏：" Grid.Row="0" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxBalFD" Width="100" SelectedIndex="0" Text="{Binding BalconyFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="0" Grid.Column="1"/>
+                    <Label Content="冷凝地漏：" Grid.Row="1" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxCndFD" Width="100" SelectedIndex="0" Text="{Binding CondenseFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="1" Grid.Column="1"/>
+                    <Label Content="水井地漏：" Grid.Row="2" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxWellFD" Width="100" SelectedIndex="0" Text="{Binding WaterWellFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="2" Grid.Column="1"/>
+                    <Label Content="冷凝横管：" Grid.Row="3" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxLNHG" Width="100" Text="{Binding CondensePipeHorizontalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="3" Grid.Column="1"/>
+                    <Label Content="水井立管：" Grid.Row="4" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxSJLG" Width="100" Text="{Binding WaterWellPipeVerticalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="4" Grid.Column="1"/>
+                    <Label Content="冷凝立管：" Grid.Row="5" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxLNLG" Width="100" Text="{Binding CondensePipeVerticalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Content="阳台雨水：" Grid.Row="6" Grid.Column="0"/>
+                    <ComboBox x:Name="cbxYTYS" Width="100" Text="{Binding BalconyRainPipeDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" Grid.Row="6" Grid.Column="1"/>
+
+                </Grid>
+                <Rectangle Height="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
+                <CheckBox IsChecked="{Binding HasAirConditionerFloorDrain,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">空调夹板地漏</CheckBox>
+                <Rectangle Height="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
+                <CheckBox IsChecked="{Binding HasAiringForCondensePipe,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">冷凝立管设通气</CheckBox>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,5">
