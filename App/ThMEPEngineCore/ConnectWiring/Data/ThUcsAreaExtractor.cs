@@ -275,7 +275,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
-                MessageForAdding = "选择区域",
+                MessageForAdding = "选择区域、UCS分割线（非必需）",
                 RejectObjectsOnLockedLayers = true,
             };
             var dxfNames = new string[]

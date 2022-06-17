@@ -57,7 +57,7 @@ namespace ThMEPLighting
                 }
 
                 var pt = frameLst.First().StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(new Point3d(0,0,0));
                 frameLst = frameLst.Select(x =>
                 {
                     originTransformer.Transform(x);
@@ -93,7 +93,10 @@ namespace ThMEPLighting
                     //规划路径
                     ExtendLinesService extendLines = new ExtendLinesService();
                     var paths = extendLines.CreateExtendLines(xLanes, yLines, enterBlcok, pline.Key, holes);
-
+                    foreach (var item in holes)
+                    {
+                        //acdb.ModelSpace.Add(item);
+                    }
                     //打印路径
                     PrintService printService = new PrintService();
                     var allLanes = xLanes.SelectMany(x => x.Select(y => y)).ToList();
