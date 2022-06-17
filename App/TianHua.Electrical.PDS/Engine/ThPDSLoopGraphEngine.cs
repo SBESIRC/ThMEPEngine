@@ -207,6 +207,7 @@ namespace TianHua.Electrical.PDS.Engine
             DistBoxFrames.ForEach(frame =>
             {
                 // 搜索框线中的配电箱
+                var cacheNodes = new List<ThPDSCircuitGraphNode>();
                 var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame);
 
                 var bufferFrame = ThPDSBufferService.Buffer(frame);
@@ -339,6 +340,7 @@ namespace TianHua.Electrical.PDS.Engine
                             thisMark.ObjectIds.AddRange(thisCircuitMark.ObjectIds);
                             var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey, buffer);
                             newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
+                            cacheNodes.Add(newNode);
                             cacheDistBoxes.Add(distBox);
                             if (!CacheDistBoxes.ContainsKey(distBox))
                             {
@@ -367,6 +369,30 @@ namespace TianHua.Electrical.PDS.Engine
                                 }
                             });
                         });
+                    });
+                }
+
+                var emergencyLightings = cacheNodes.Where(node => node.Loads[0].LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.EmergencyLightingDistributionPanel)).ToList();
+                var fireEmergencyLightings = cacheNodes.Where(node => node.Loads[0].LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)).ToList();
+                if (emergencyLightings.Count > 0 && fireEmergencyLightings.Count > 0)
+                {
+                    fireEmergencyLightings.ForEach(target =>
+                    {
+                        var source = emergencyLightings[0];
+                        if (emergencyLightings.Count > 0)
+                        {
+                            source = ThPDSLoadIDMatchService.Match(target, emergencyLightings);
+                        }
+                        var newEdge = ThPDSGraphService.CreateEdge(emergencyLightings[0], target, new List<string>(), DistBoxKey, true);
+                        PDSGraph.Graph.AddEdge(newEdge);
+                        if (EdgeMap.ContainsKey(newEdge))
+                        {
+                            EdgeMap[newEdge].AddRange(NodeMap[target]);
+                        }
+                        else
+                        {
+                            EdgeMap.Add(newEdge, NodeMap[target]);
+                        }
                     });
                 }
             });
@@ -935,7 +961,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 newEdge.Circuit.ViaCableTray = true;
                             }
                         }
-                        if (!ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
+                        if (!ThPDSEdgeContainsService.EdgeContainsAndInstand(newEdge, PDSGraph.Graph, EdgeMap, logos.ObjectIds))
                         {
                             PDSGraph.Graph.AddEdge(newEdge);
                             EdgeMap.Add(newEdge, logos.ObjectIds);

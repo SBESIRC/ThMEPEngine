@@ -559,6 +559,10 @@ namespace TianHua.Electrical.PDS.Service
                 var regex2 = new Regex(@check2);
                 infos.ForEach(str =>
                 {
+                    if (str.Contains(tarPanelID))
+                    {
+                        return;
+                    }
                     var match1 = regex1.Match(str);
                     var match2 = regex2.Match(str);
                     if (match1.Success)

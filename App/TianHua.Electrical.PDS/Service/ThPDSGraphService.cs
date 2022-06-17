@@ -200,14 +200,36 @@ namespace TianHua.Electrical.PDS.Service
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
             ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey, bool circuitAssign = false)
         {
-            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
+            var reversible = true;
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
+            if (source.NodeType == PDSNodeType.DistributionBox && target.NodeType == PDSNodeType.DistributionBox)
+            {
+                // 限制一相配电箱成为三相配电箱的上级
+                if (edge.Source.Loads[0].Phase == ThPDSPhase.一相 && edge.Target.Loads[0].Phase == ThPDSPhase.三相)
+                {
+                    edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
+                    reversible = false;
+                }
+                else if (IsTerminalDistributuinPanel(edge.Source.Loads[0].LoadTypeCat_2)
+                    && !IsTerminalDistributuinPanel(edge.Target.Loads[0].LoadTypeCat_2))
+                {
+                    edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
+                    reversible = false;
+                }
+                else if (!IsTerminalDistributuinPanel(edge.Source.Loads[0].LoadTypeCat_2)
+                    && IsTerminalDistributuinPanel(edge.Target.Loads[0].LoadTypeCat_2))
+                {
+                    reversible = false;
+                }
+            }
+
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
             var tarPanelID = edge.Target.Loads.Count > 0 ? edge.Target.Loads[0].ID.LoadID : "";
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, tarPanelID, infos, distBoxKey);
             AssignCircuitNumber(edge, circuitAssign);
 
-            if (source.NodeType != PDSNodeType.CableCarrier
+            if (reversible && source.NodeType != PDSNodeType.CableCarrier
                 && target.NodeType != PDSNodeType.Load
                 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber))
             {
@@ -223,19 +245,6 @@ namespace TianHua.Electrical.PDS.Service
                         edge = anotherEdge;
                     }
                 }
-            }
-
-            // 限制一相配电箱成为三相配电箱的上级
-            if (edge.Source.Loads.Count > 0 && edge.Source.Loads[0].Phase == ThPDSPhase.一相
-                && edge.Target.Loads.Count > 0 && edge.Target.Loads[0].Phase == ThPDSPhase.三相
-                && edge.Target.NodeType == PDSNodeType.DistributionBox && edge.Source.NodeType == PDSNodeType.DistributionBox)
-            {
-                var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
-                var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
-                var anotherTarPanelID = anotherEdge.Target.Loads.Count > 0 ? anotherEdge.Target.Loads[0].ID.LoadID : "";
-                anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, infos, distBoxKey);
-                AssignCircuitNumber(anotherEdge, circuitAssign);
-                edge = anotherEdge;
             }
 
             if (edge.Source.NodeType == PDSNodeType.CableCarrier)
@@ -276,6 +285,14 @@ namespace TianHua.Electrical.PDS.Service
             return edge;
         }
 
+        private static bool IsTerminalDistributuinPanel(ThPDSLoadTypeCat_2 load)
+        {
+            return load.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+                || load.Equals(ThPDSLoadTypeCat_2.ElectricalControlPanel)
+                || load.Equals(ThPDSLoadTypeCat_2.IsolationSwitchPanel)
+                || load.Equals(ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel);
+        }
+
         private static void AssignCircuitNumber(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge, bool circuitAssign)
         {
             // 仅当回路编号有效个数为1时，添加至回路的回路编号中
@@ -291,8 +308,8 @@ namespace TianHua.Electrical.PDS.Service
                 sourcePanelIDs = sourcePanelIDs.Distinct().ToList();
                 if (circuitIDs.Count == 1 && sourcePanelIDs.Count == 1)
                 {
-                    if (edge.Source.Loads.Count == 0 
-                        || string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID) 
+                    if (edge.Source.Loads.Count == 0
+                        || string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID)
                         || edge.Source.Loads[0].ID.LoadID.Equals(sourcePanelIDs[0]))
                     {
                         edge.Circuit.ID.SourcePanelIDList.Add(sourcePanelIDs.First());

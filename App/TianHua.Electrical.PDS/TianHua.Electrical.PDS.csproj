@@ -36,6 +36,7 @@
     <Compile Include="Project\Module\THPDSSubstation.cs" />
     <Compile Include="Project\PDSProjectManagement.cs" />
     <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
+    <Compile Include="Service\ThPDSLoadIDMatchService.cs" />
     <Compile Include="Service\ThPDSMotorInfo.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
     <Compile Include="Engine\ThPDSBlcokObbEngine.cs" />
