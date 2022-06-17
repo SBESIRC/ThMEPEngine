@@ -50,6 +50,15 @@ namespace ThMEPIFC.Ifc2x3
             });
         }
 
+        public static IfcLocalPlacement ToIfcLocalPlacement(this IfcStore model, Point3d origin, IfcObjectPlacement relative_to = null)
+        {
+            return model.Instances.New<IfcLocalPlacement>(l =>
+            {
+                l.PlacementRelTo = relative_to;
+                l.RelativePlacement = model.ToIfcAxis2Placement3D(origin);
+            });
+        }
+
         public static IfcArbitraryClosedProfileDef ToIfcArbitraryClosedProfileDef(this IfcStore model, Entity e)
         {
             if (e is Polyline p)

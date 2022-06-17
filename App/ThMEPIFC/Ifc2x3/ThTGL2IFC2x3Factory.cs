@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -165,35 +163,6 @@ namespace ThMEPIFC.Ifc2x3
             var rep = model.Instances.New<IfcProductDefinitionShape>();
             rep.Representations.Add(shape);
             return rep;
-        }
-
-        public static IfcRailing CreateRailing(IfcStore model, ThTCHRailing railing, Point3d floor_origin)
-        {
-            using (var txn = model.BeginTransaction("Create Railing"))
-            {
-                var ret = model.Instances.New<IfcRailing>();
-
-                //geometry representation
-                var centerline = railing.Outline as Polyline;
-                var outlines = centerline.BufferFlatPL(railing.Thickness / 2.0);
-                var profile = model.ToIfcArbitraryClosedProfileDef(outlines[0] as Entity);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, railing.ExtrudedDirection, railing.Depth);
-                ret.Representation = CreateProductDefinitionShape(model, solid);
-
-                //object placement
-                var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
-                {
-                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
-                    p.RefDirection = model.ToIfcDirection(Vector3d.XAxis);
-                    p.Location = model.ToIfcCartesianPoint(floor_origin);
-                });
-                lp.RelativePlacement = ax3D;
-                ret.ObjectPlacement = lp;
-
-                txn.Commit();
-                return ret;
-            }
         }
 
         static public IfcWall CreateWall(IfcStore model, ThTCHWall wall, Point3d floor_origin)

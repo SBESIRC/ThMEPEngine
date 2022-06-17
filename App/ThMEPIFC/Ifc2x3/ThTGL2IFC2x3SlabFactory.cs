@@ -24,25 +24,16 @@ namespace ThMEPIFC.Ifc2x3
             using (var txn = model.BeginTransaction("Create Slab"))
             {
                 var ret = model.Instances.New<IfcSlab>();
-                ret.Name = "Standard Slab";
+                ret.Name = "TH Slab";
 
-                // create representation
+                //create representation
                 var solid = slab.CreateSlabSolid();
                 var brep = model.ToIfcFacetedBrep(solid);
                 var shape = CreateBrepBody(model, brep);
                 ret.Representation = CreateProductDefinitionShape(model, shape);
 
-                //now place the slab into the model
-                var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>();
-                ax3D.Location = model.Instances.New<IfcCartesianPoint>();
-                ax3D.Location.SetXYZ(floor_origin.X, floor_origin.Y, floor_origin.Z);
-                ax3D.RefDirection = model.Instances.New<IfcDirection>();
-                ax3D.RefDirection.SetXYZ(1, 0, 0);//todo
-                ax3D.Axis = model.Instances.New<IfcDirection>();
-                ax3D.Axis.SetXYZ(0, 0, 1);
-                lp.RelativePlacement = ax3D;
-                ret.ObjectPlacement = lp;
+                //object placement
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
 
                 txn.Commit();
                 return ret;
