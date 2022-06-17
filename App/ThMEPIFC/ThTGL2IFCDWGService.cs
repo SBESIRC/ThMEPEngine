@@ -91,15 +91,19 @@ namespace ThMEPIFC
                     {
                         slab.Descendings.Add(new ThTCHSlabDescendingData()
                         {
+                            Outline = pline,
                             IsDescending = true,
-                            DescendingHeight = height,
-                            DescendingThickness = 0,
-                            DescendingWrapThickness = 0,
+                            DescendingHeight = Math.Abs(height),
+                            DescendingThickness = 50,
+                            DescendingWrapThickness = 50,
                         });
                     }
                     else
                     {
-                        slab.Descendings.Add(new ThTCHSlabDescendingData());
+                        slab.Descendings.Add(new ThTCHSlabDescendingData()
+                        {
+                            Outline = pline,
+                        });
                     }
                 }
                 return slab;

@@ -28,6 +28,7 @@ namespace ThMEPTCH.Model
             Outline = polygon;
             Thickness = thickness;
             ExtrudedDirection = extVector;
+            Descendings = new List<ThTCHSlabDescendingData>();
         }
 
         public ThTCHSlab(Polyline pline, double thickness, Vector3d extVector)
@@ -35,6 +36,7 @@ namespace ThMEPTCH.Model
             Outline = pline;
             Thickness = thickness;
             ExtrudedDirection = extVector;
+            Descendings = new List<ThTCHSlabDescendingData>();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using AcHelper;
 using Autodesk.AutoCAD.Runtime;
+using Linq2Acad;
 using ThMEPTCH.Services;
 
 namespace ThMEPIFC
@@ -54,6 +55,42 @@ namespace ThMEPIFC
             // 转换并保存IFC数据
             ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
             Tgl2IfcService.GenerateIfcModelAndSave(project, Path.ChangeExtension(tgl, "ifc"));
+        }
+
+        [CommandMethod("TIANHUACAD", "THTGL2DWG", CommandFlags.Modal)]
+        public void THTGL2DWG()
+        {
+            // 拾取TGL XML文件
+            var tgl = OpenTGLXMLFile();
+            if (string.IsNullOrEmpty(tgl))
+            {
+                return;
+            }
+
+            // 读入并解析TGL XML文件
+            var service = new ThTGLXMLService();
+            var project = service.LoadXML(tgl);
+            if (project == null)
+            {
+                return;
+            }
+
+            // 读入DWG数据
+            var dwgService = new ThTGL2IFCDWGService();
+            dwgService.LoadDWG(Active.Database, project);
+
+            // 输出三维实体
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var storey in project.Site.Building.Storeys)
+                {
+                    foreach (var slab in storey.Slabs)
+                    {
+                        acadDatabase.ModelSpace.Add(slab.CreateSlabSolid());
+                    }
+
+                }
+            }
         }
 
         private string OpenTGLXMLFile()
