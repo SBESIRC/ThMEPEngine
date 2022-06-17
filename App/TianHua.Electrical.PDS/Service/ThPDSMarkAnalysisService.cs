@@ -92,10 +92,36 @@ namespace TianHua.Electrical.PDS.Service
 
             thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
 
-            if (thPDSDistBox.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel
-                && thPDSDistBox.InstalledCapacity.HighPower == 0.0)
+            // 对用户配电箱的特殊处理
+            if (thPDSDistBox.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
             {
-                thPDSDistBox.InstalledCapacity.HighPower = AnalyseResidentialPower(marks);
+                if (thPDSDistBox.InstalledCapacity.HighPower == 0.0)
+                {
+                    thPDSDistBox.InstalledCapacity.HighPower = AnalyseResidentialPower(marks);
+                }
+                var option = "";
+                if (option.Equals("上海住宅") || option.Equals("国标（表在前）") || option.Equals("国标（表在后）"))
+                {
+                    if (thPDSDistBox.InstalledCapacity.HighPower < 12.0)
+                    {
+                        thPDSDistBox.Phase = ThPDSPhase.一相;
+                    }
+                    else
+                    {
+                        thPDSDistBox.Phase = ThPDSPhase.三相;
+                    }
+                }
+                else if (option.Equals("江苏住宅"))
+                {
+                    if (thPDSDistBox.InstalledCapacity.HighPower <= 20.0)
+                    {
+                        thPDSDistBox.Phase = ThPDSPhase.一相;
+                    }
+                    else
+                    {
+                        thPDSDistBox.Phase = ThPDSPhase.三相;
+                    }
+                }
             }
 
             // 处理无标注时识别ACa不准确的情况
@@ -244,7 +270,7 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     }
                 }
-                else if(!string.IsNullOrEmpty(str) && descriptionAssign)
+                else if (!string.IsNullOrEmpty(str) && descriptionAssign)
                 {
                     thPDSLoad.ID.Description = str;
                     descriptionAssign = false;
