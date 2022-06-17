@@ -8,6 +8,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Debug" Guid="{9C4C8506-3BDD-4ED1-A899-54226274ACF8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_YDB2IFC_Debug" Guid="{760CD358-1093-4705-8CD2-0A93F7CDA38F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_YDB2IFC_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Debug" Guid="{85A113F1-7339-47FF-AB00-4CF04A03DFE0}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
             </Component>
@@ -26,6 +29,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Debug" Guid="{BBF8DF32-B96D-4AF8-A0EF-3D94C0FC783C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YDB2IFC_Debug" Guid="{8266B693-5C69-4F64-A2D5-0839E3E807F7}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_YDB2IFC_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Debug" Guid="{FB1020BE-5596-4DD4-9093-C7DCD7AA7138}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
             </Component>
@@ -43,6 +49,9 @@
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Debug" Guid="{3D04C23F-F363-4B7B-A01D-6C029E768B34}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YDB2IFC_Debug" Guid="{7C918060-3E73-4B13-BD36-BED284EE47CB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_YDB2IFC_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Debug" Guid="{6D50992B-7A97-40A5-95FF-95ED0FCFE86C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
@@ -63,6 +72,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Release" Guid="{9BFFAF8F-1CB9-42EA-8483-69AE304826E9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_YDB2IFC_Release" Guid="{F062ED98-17E3-46C9-B1E0-397FA9F2A57A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_YDB2IFC_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Release" Guid="{C5616E03-2BB7-4A87-BB74-C70AEB50D5EB}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
             </Component>
@@ -81,6 +93,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Release" Guid="{BD8E617D-992F-4CC3-A3F8-0C94715A309E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YDB2IFC_Release" Guid="{D3E0B6A3-E421-44AC-91B3-F3D81CB05109}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_YDB2IFC_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Release" Guid="{379E7268-F100-4971-9C0F-13ED2AD73F0D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
             </Component>
@@ -98,6 +113,9 @@
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Release" Guid="{0004EED4-FCEE-461F-AA33-97CB528AB6D2}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YDB2IFC_Release" Guid="{CCF348B5-2495-467E-B047-CFC2F3CCEBCF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_YDB2IFC_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Release" Guid="{9504F634-E822-4D66-B515-B7D39FCAC971}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
@@ -132,6 +150,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_JsonCpp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Config_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Color_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YDB2IFC_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YDB2IFC_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YDB2IFC_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Release" />
@@ -148,6 +169,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_JsonCpp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Config_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Color_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YDB2IFC_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YDB2IFC_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YDB2IFC_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
