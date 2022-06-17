@@ -149,6 +149,7 @@
     <Compile Include="StructPlane\Service\ThSvgEntityPrintService.cs" />
     <Compile Include="StructPlane\Service\ThStructurePlaneConfig.cs" />
     <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
+    <Compile Include="StructPlane\Service\ThYdbToIfcConvertService.cs" />
     <Compile Include="ThMEPStructureApp.cs" />
   </ItemGroup>
   <ItemGroup>
