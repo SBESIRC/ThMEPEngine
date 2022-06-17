@@ -128,7 +128,7 @@ namespace ThMEPStructure.StructPlane.Service
             var ifcFileName = Config.IfcFileName.ToUpper();
             // 0407-1-Floor_1-Floor_2
             var fileName = Path.GetFileNameWithoutExtension(svgFilePath); 
-            if(!fileName.StartsWith(ifcFileName))
+            if(!fileName.ToUpper().StartsWith(ifcFileName))
             {
                 return false;
             }
