@@ -38,6 +38,22 @@ namespace ThMEPIFC.Ifc2x3
             return null;
         }
 
+        public static IfcShapeRepresentation CreateFaceBasedSurfaceBody(IfcStore model, IfcRepresentationItem item)
+        {
+            var context = GetGeometricRepresentationContext(model);
+            if (context != null)
+            {
+                return model.Instances.New<IfcShapeRepresentation>(s =>
+                {
+                    s.Items.Add(item);
+                    s.ContextOfItems = context;
+                    s.RepresentationType = "SurfaceModel";
+                    s.RepresentationIdentifier = "Body";
+                });
+            }
+            return null;
+        }
+
         public static IfcProductDefinitionShape CreateProductDefinitionShape(IfcStore model, IfcShapeRepresentation representation)
         {
             return model.Instances.New<IfcProductDefinitionShape>(s =>

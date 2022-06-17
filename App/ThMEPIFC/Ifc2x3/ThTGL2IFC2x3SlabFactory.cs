@@ -40,6 +40,27 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
+        public static IfcSlab CreateMeshSlab(IfcStore model, ThTCHSlab slab, Point3d floor_origin)
+        {
+            using (var txn = model.BeginTransaction("Create Slab"))
+            {
+                var ret = model.Instances.New<IfcSlab>();
+                ret.Name = "TH Slab";
+
+                //create representation
+                var solid = slab.CreateSlabSolid();
+                var mesh = model.ToIfcFaceBasedSurface(solid);
+                var shape = CreateFaceBasedSurfaceBody(model, mesh);
+                ret.Representation = CreateProductDefinitionShape(model, shape);
+
+                //object placement
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
+
+                txn.Commit();
+                return ret;
+            }
+        }
+
         public static IfcSlab CreateSlab(IfcStore model, ThTCHSlab slab, Point3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Slab"))
