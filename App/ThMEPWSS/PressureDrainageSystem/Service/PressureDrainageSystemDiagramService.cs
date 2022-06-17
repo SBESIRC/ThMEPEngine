@@ -273,7 +273,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             //管径分类计算：穿外墙 套管之后的管径
                             ptloctotalQ = ptloctotalQ.TransformBy(Matrix3d.Displacement(new Vector3d(0, 100, 0)));
-                            var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloctotalQ, new Scale3d(1), 0);
+                            //var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloctotalQ, new Scale3d(1), 0);
                             var total_diameter = CalculateMergePipeDiameter(totalQ);
                             if (totalUsedQ < 2)
                                 total_diameter = CalculatePipeDiameter(totalQ);
