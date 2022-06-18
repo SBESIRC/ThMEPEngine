@@ -56,13 +56,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         public List<bool> Incycles = new List<bool>();
         public Point3d ptloctotalQ;//系统图中标注总流量的定位点
         public double totalQ = 0;//当前排水系统图的总流量
+        public int totalUsedQ = 0;//当前排水系统图的总潜水泵使用量
         const double pumpUnitSpacing = 7500;//排水系统图中并列潜水泵间距
         const double pumpUnitSpecialSpacing = 9500;//排水系统图中并列特殊用途潜水泵间距
         public double real_pumpSpacing = 7500;//实际的排水系统图中并列潜水泵间距
         public bool IsSpecialParPump = false;//记录上一个潜水泵是否为特殊用途
         const double widthDisTofloorLineStartPt = 50000;//第一个排水系统单元到楼层线起点的距离
         double diameter_horizontalpipe = 0;
+        int diameter_pump_used_horizontalpipe = 0;
         List<double> total_diameter_horizontalpipe = new List<double>();
+        List<int> total_used_pump_horizontalpipe = new List<int>();
         List<Point3d> ptloc_diameter_horizontalpipe = new List<Point3d>();
         private class DrawUnit
         {
@@ -243,6 +246,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         int curLayer = 0;
                         int curIndex = indexCurPoint;
                         totalQ = 0;
+                        totalUsedQ = 0;
                         for (int j = 0; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
                         {
                             if (j < PipeLineSystemUnits[i].PipeLineUnits.Count - 1)
@@ -267,12 +271,23 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         identiferDict.Add(iDict);
                         if (ptloctotalQ.X != double.PositiveInfinity)
                         {
+                            //管径分类计算：穿外墙 套管之后的管径
                             ptloctotalQ = ptloctotalQ.TransformBy(Matrix3d.Displacement(new Vector3d(0, 100, 0)));
-                            var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloctotalQ, new Scale3d(1), 0);
-                            brId1.SetDynBlockValue("可见性", "DN" + CalculateMergePipeDiameter(totalQ).ToString());
-                            var br1 = adb.Element<BlockReference>(brId1);
-                            DefinePropertiesOfCADObjects(br1, "W-NOTE");
-                            blocks.Add(br1);
+                            //var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloctotalQ, new Scale3d(1), 0);
+                            var total_diameter = CalculateMergePipeDiameter(totalQ);
+                            if (totalUsedQ < 2)
+                                total_diameter = CalculatePipeDiameter(totalQ);
+                            //brId1.SetDynBlockValue("可见性", "DN" + total_diameter.ToString());
+                            //if (totalQ == 0)
+                            //    brId1.SetDynBlockValue("可见性", "DN-XX");
+                            //var br1 = adb.Element<BlockReference>(brId1);
+                            //DefinePropertiesOfCADObjects(br1, "W-NOTE");
+                            //blocks.Add(br1);
+                            DBText mark = new DBText();
+                            var text = totalQ > 0 ? total_diameter.ToString() : "XX";
+                            DefinePropertiesOfCADDBTexts(mark, "W-NOTE", "DN" + text, ptloctotalQ, textHeight);
+                            mark.TransformBy(Matrix3d.Displacement(Vector3d.YAxis * 200));
+                            entities.Add(mark);
                         }
 
                         entities.ForEach(o => comparedEntity.Add(o));
@@ -625,15 +640,27 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     if (pipe.AppendedSubmergedPump != null)
                     {
                         pipe.totalQ += CalculateUsedPump(pipe.AppendedSubmergedPump.Allocation) * CalculatePipeDiameter(pipe.AppendedSubmergedPump.paraQ);
+                        pipe.totalUsedPump += CalculateUsedPump(pipe.AppendedSubmergedPump.Allocation);
                     }
+                    //管径分类计算：跨层的立管管径标注
                     int diameter = CalculateMergePipeDiameter(pipe.totalQ);
+                    if(pipe.totalUsedPump<2)
+                        diameter = CalculatePipeDiameter(pipe.totalQ);
                     diameter = diameter > 50 ? diameter : 50;
                     Point3d ptlocelv = new Line(point, curPoint).GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(-100, 0, 0)));
-                    var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv, new Scale3d(1), Math.PI / 2);
-                    brId1.SetDynBlockValue("可见性", "DN" + diameter.ToString());
-                    var br1 = adb.Element<BlockReference>(brId1);
-                    DefinePropertiesOfCADObjects(br1, "W-NOTE");
-                    blocks.Add(br1);
+                    //var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv, new Scale3d(1), Math.PI / 2);
+                    //brId1.SetDynBlockValue("可见性", "DN" + diameter.ToString());
+                    //if (pipe.totalQ == 0)
+                    //    brId1.SetDynBlockValue("可见性", "DN-XX");
+                    //var br1 = adb.Element<BlockReference>(brId1);
+                    //DefinePropertiesOfCADObjects(br1, "W-NOTE");
+                    //blocks.Add(br1);
+                    DBText mark = new DBText();
+                    var text = pipe.totalQ > 0 ? diameter.ToString() : "XX";
+                    DefinePropertiesOfCADDBTexts(mark, "W-NOTE", "DN" + text, ptlocelv, textHeight);
+                    mark.Rotate(ptlocelv, Math.PI / 2);
+                    mark.TransformBy(Matrix3d.Displacement(-Vector3d.XAxis * 200));
+                    entities.Add(mark);
                 }
                 {
                     //如果是水泵立管
@@ -644,7 +671,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         var pump = pipeLineSystemUnit.PipeLineUnits[curLayer].VerticalPipes[curIndex].AppendedSubmergedPump;
                         Point3d ptlocelv_pump = curPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-100, -dis_offset_elv, 0)));
                         int diameter = CalculatePipeDiameter(pump.paraQ * CalculateUsedPump(pump.Allocation));
+                        if (CalculateUsedPump(pump.Allocation) >= 2)
+                        {
+                            diameter = CalculateMergePipeDiameter(pump.paraQ * CalculateUsedPump(pump.Allocation));
+                        }
                         diameter_horizontalpipe += pump.paraQ * CalculateUsedPump(pump.Allocation);
+                        diameter_pump_used_horizontalpipe = CalculateUsedPump(pump.Allocation);
                         Point3d ptLocPumpRec = floorLines[curLayer + 1].GetClosestPointTo(curPoint, false);
                         double frameHeigth = pump.PumpCount >= 3 ? 2150 : 1650;
                         double frameWidth = 1500 + Math.Max(0, pump.PumpCount - 2) * 800;//水泵框宽度
@@ -663,11 +695,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             CompletePumpVerticalPipeForSpecialUse(pump, ptLocPumpRec, frameRec, frameHeigth, frameWidth);
                         }
                         IsSpecialParPump = contains_cond ? true : false;
-                        var brId_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv_pump, new Scale3d(1), Math.PI / 2);
-                        brId_elv.SetDynBlockValue("可见性", "DN" + diameter.ToString());
-                        var br_elv = adb.Element<BlockReference>(brId_elv);
-                        DefinePropertiesOfCADObjects(br_elv, "W-NOTE");
-                        blocks.Add(br_elv);
+                        //管径分类计算：接潜水泵上去的立管管径标注
+                        //var brId_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv_pump, new Scale3d(1), Math.PI / 2);
+                        //brId_elv.SetDynBlockValue("可见性", "DN" + diameter.ToString());
+                        //if(pump.paraQ * CalculateUsedPump(pump.Allocation)==0)
+                        //    brId_elv.SetDynBlockValue("可见性", "DN-XX");
+                        //var br_elv = adb.Element<BlockReference>(brId_elv);
+                        //DefinePropertiesOfCADObjects(br_elv, "W-NOTE");
+                        //blocks.Add(br_elv);
+                        DBText mark = new DBText();
+                        var text = pump.paraQ * CalculateUsedPump(pump.Allocation) > 0 ? diameter.ToString() : "XX";
+                        DefinePropertiesOfCADDBTexts(mark, "W-NOTE", "DN" + text, ptlocelv_pump, textHeight);
+                        mark.Rotate(ptlocelv_pump, Math.PI / 2);
+                        mark.TransformBy(Matrix3d.Displacement(-Vector3d.XAxis * 200));
+                        entities.Add(mark);
                     }
                     //如果不是潜水泵立管
                     {
@@ -1104,16 +1145,28 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 tmpBlocksCopied.Add(adb.Element<BlockReference>(blkId_pump));
                 adb.Element<BlockReference>(blkId_pump).Visible = false;
                 Point3d ptlocbr1 = line3.GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(-100, -450, 0)));
-                var blkId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocbr1, new Scale3d(1), Math.PI / 2);
+                //管径分类计算：潜水泵旁边的管径标注
+                //var blkId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocbr1, new Scale3d(1), Math.PI / 2);
                 int diameter = CalculatePipeDiameter(pump.paraQ);
-                string allo = "DN" + diameter.ToString();
-                blkId1.SetDynBlockValue("可见性", allo);
-                tmpBlocksCopied.Add(adb.Element<BlockReference>(blkId1));
-                adb.Element<BlockReference>(blkId1).Visible = false;
+                var text = pump.paraQ > 0 ? diameter.ToString() : "XX";
+                string allo = "DN" + text;
+                //blkId1.SetDynBlockValue("可见性", allo);
+                //if(pump.paraQ==0)
+                //    blkId1.SetDynBlockValue("可见性", "DN-XX");
+                //tmpBlocksCopied.Add(adb.Element<BlockReference>(blkId1));
+                //adb.Element<BlockReference>(blkId1).Visible = false;
+                DBText mark = new DBText();
+                DefinePropertiesOfCADDBTexts(mark, "W-NOTE", allo, ptlocbr1, textHeight);
+                mark.Rotate(ptlocbr1, Math.PI / 2);
+                mark.TransformBy(Matrix3d.Displacement(-Vector3d.XAxis * 200));
+                tmpEntitiesCopied.Add(mark);
+
                 totalQ += CalculateUsedPump(pump.Allocation) * pump.paraQ;
+                totalUsedQ += CalculateUsedPump(pump.Allocation);
                 if (curLayer > 0)
                 {
                     pipeLineSystemUnit.PipeLineUnits[parLayers[parLayers.Count - 1]].VerticalPipes[parIndexes[parIndexes.Count - 1]].totalQ += pump.paraQ * CalculateUsedPump(pump.Allocation);
+                    pipeLineSystemUnit.PipeLineUnits[parLayers[parLayers.Count - 1]].VerticalPipes[parIndexes[parIndexes.Count - 1]].totalUsedPump += CalculateUsedPump(pump.Allocation);
                 }
                 Point3d ptlocbr2 = new Point3d(line2.EndPoint.X, line2.EndPoint.Y - dim5, 0);
                 var blkId2 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "潜水泵出水管阀组-AI", ptlocbr2, new Scale3d(1), 0);
@@ -1139,8 +1192,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     foreach (var ent in tmpEntitiesCopied)
                     {
                         ent.TransformBy(mat);
-                        var line = (Line)ent;
-                        tmpEntitiesUnique.Add(new Line(line.StartPoint, line.EndPoint));
+                        if (ent is Line)
+                        {
+                            var line = (Line)ent;
+                            tmpEntitiesUnique.Add(new Line(line.StartPoint, line.EndPoint));
+                        }
+                        else if (ent is DBText)
+                        {
+                            tmpEntitiesUniqueNOTE.Add(ent.Clone() as DBText);
+                        }
                     }
                     foreach (var br in tmpBlocksCopied)
                     {
@@ -1329,10 +1389,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 ids.Remove(pipeLineSystemUnit.PipeLineUnits[curLayer].VerticalPipes[curIndex].Id);
                 int num = layers.Count;
                 total_diameter_horizontalpipe = new List<double>();
+                total_used_pump_horizontalpipe = new List<int>();
                 ptloc_diameter_horizontalpipe = new List<Point3d>();
                 for (int k = 0; k < num; k++)
                 {
                     diameter_horizontalpipe = 0;
+                    diameter_pump_used_horizontalpipe = 0;
                     Point3d ptloc_elv_hor = new Point3d(0, 0, 0);
                     real_pumpSpacing = IsSpecialParPump ? pumpUnitSpecialSpacing : pumpUnitSpacing;
                     dis5 = real_pumpSpacing;
@@ -1444,22 +1506,39 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         ptloc_elv_hor = ptloc_elv_hor.TransformBy(Matrix3d.Displacement(new Vector3d(dis_offset_elv, 0, 0)));
                         total_diameter_horizontalpipe.Add(diameter_horizontalpipe);
+                        total_used_pump_horizontalpipe.Add(diameter_pump_used_horizontalpipe);
                         ptloc_diameter_horizontalpipe.Add(new Point3d(ptloc_elv_hor.X, ptloc_elv_hor.Y + 100, 0));
                     }
                 }
                 double totaldiameter = 0;
+                int total_used_pump = 0;
                 for (int i = total_diameter_horizontalpipe.Count - 1; i >= 0; i--)
                 {
                     double tmpdiameter = total_diameter_horizontalpipe[i];
                     total_diameter_horizontalpipe[i] += totaldiameter;
                     totaldiameter += tmpdiameter;
-                    var br_hor_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloc_diameter_horizontalpipe[i], new Scale3d(1), 0);
-                    br_hor_elv.SetDynBlockValue("可见性", "DN" + CalculateMergePipeDiameter(total_diameter_horizontalpipe[i]));
-                    var br_hor = adb.Element<BlockReference>(br_hor_elv);
-                    DefinePropertiesOfCADObjects(br_hor, "W-NOTE");
-                    blocks.Add(br_hor);
+                    int tmp_used_pump = total_used_pump_horizontalpipe[i];
+                    total_used_pump_horizontalpipe[i] += total_used_pump;
+                    total_used_pump += tmp_used_pump;
+                    //管径分类计算：横管连管上的管径标注
+                    //var br_hor_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloc_diameter_horizontalpipe[i], new Scale3d(1), 0);
+                    var hor_diameter = CalculateMergePipeDiameter(total_diameter_horizontalpipe[i]);
+                    if(total_used_pump_horizontalpipe[i]<2)
+                        hor_diameter = CalculatePipeDiameter(total_diameter_horizontalpipe[i]);
+                    //br_hor_elv.SetDynBlockValue("可见性", "DN" + hor_diameter);
+                    //if (total_diameter_horizontalpipe[i] == 0)
+                    //    br_hor_elv.SetDynBlockValue("可见性", "DN-XX");
+                    //var br_hor = adb.Element<BlockReference>(br_hor_elv);
+                    //DefinePropertiesOfCADObjects(br_hor, "W-NOTE");
+                    //blocks.Add(br_hor);
+                    DBText mark = new DBText();
+                    var text = total_diameter_horizontalpipe[i] > 0 ? hor_diameter.ToString() : "XX";
+                    DefinePropertiesOfCADDBTexts(mark, "W-NOTE", "DN" + text, ptloc_diameter_horizontalpipe[i], textHeight);
+                    mark.TransformBy(Matrix3d.Displacement(Vector3d.YAxis * 200));
+                    entities.Add(mark);
                 }
                 total_diameter_horizontalpipe.Clear();
+                total_used_pump_horizontalpipe.Clear();
                 ptloc_diameter_horizontalpipe.Clear();
                 if (Incycles.Count > 0) Incycles.RemoveAt(Incycles.Count - 1);
             }

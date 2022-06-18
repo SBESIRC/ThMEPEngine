@@ -486,32 +486,15 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
+                // 排水系统
                 var subRow = subPanel.AddNewRibbonRow();
-                {
-                    var splitButton = subRow.AddNewSplitButton(
-                        "排水系统",
-                        RibbonSplitButtonBehavior.DropDownNoFollow,
-                        RibbonSplitButtonListStyle.IconText,
-                        RibbonButtonStyle.SmallWithText);
-
-                    // 污水系统
-                    splitButton.AddNewButton("污水系统",
-                        "天华地上污水系统图",
-                        "THPSXTT",
-                        "天华地上污水系统图",
-                        "IDI_THCAD_THPSXTT_SMALL",
-                        "IDI_THCAD_THPSXTT_LARGE",
-                        RibbonButtonStyle.SmallWithText);
-
-                    // 雨水系统
-                    splitButton.AddNewButton("雨水系统",
-                        "天华地上雨水系统图",
-                        "THYSXTT",
-                        "天华地上雨水系统图",
-                        "IDI_THCAD_THYSXTT_SMALL",
-                        "IDI_THCAD_THYSXTT_LARGE",
-                        RibbonButtonStyle.SmallWithText);
-                }
+                subRow.AddNewButton("排水系统",
+                    "天华地上排水系统",
+                    "THPSXTT",
+                    "天华地上排水系统",
+                    "IDI_THCAD_THPSXTT_SMALL",
+                    "IDI_THCAD_THPSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
 
                 // 给水系统
                 subRow = subPanel.AddNewRibbonRow();

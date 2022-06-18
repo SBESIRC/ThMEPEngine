@@ -188,43 +188,39 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 #endif
             }
 
-
             //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-            ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
-            var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
-            var tmpLines = new List<Line>();
-            foreach (var l in lineColl)
+            if(GLineConnectList.Count() > 0)
             {
-                tmpLines.Add(l as Line);
-            }
-            var cleanLines = LineMerge.CleanLaneLines(tmpLines);
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
+                var cleanLines = LineMerge.CleanLaneLines(tmpLines);
 
-            ;
-
-            //var cleanLine = PipeLineList.CleanLaneLines3(lineList);//merge
 #if DEBUG
 
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var layerNames = "自动连接并合并的线";
-                if (!acadDatabase.Layers.Contains(layerNames))
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 {
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                    var layerNames = "自动连接并合并的线";
+                    if (!acadDatabase.Layers.Contains(layerNames))
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                    }
+                    foreach (var line in cleanLines)
+                    {
+                        line.LayerId = DbHelper.GetLayerId(layerNames);
+                        line.ColorIndex = (int)ColorIndex.Red;
+                        acadDatabase.CurrentSpace.Add(line);
+                    }
                 }
-                foreach (var line in cleanLines)
-                {
-                    line.LayerId = DbHelper.GetLayerId(layerNames);
-                    line.ColorIndex = (int)ColorIndex.Red;
-                    acadDatabase.CurrentSpace.Add(line);
-                }
-
-
-            }
 #endif
+                return cleanLines;
+            }
 
-
-            return cleanLines;
-            //return lineList;//merge
+            return lineList;//merge
         }
 
         public static void PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)

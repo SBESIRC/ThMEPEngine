@@ -25,7 +25,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     public class PressureDrainageSystemDiagramStorey//楼层类
     {
         public List<VerticalPipeClass> VerticalPipes;//立管
-        public List<Line> HorizontalPipe;//横管
+        public List<Horizontal> HorizontalPipe;//横管
         public List<SubmergedPumpClass> SubmergedPumps;//潜水泵
         public List<DrainWellClass> DrainWells;//排水井
         public List<Extents3d> Wrappipes;//套管
@@ -34,7 +34,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     {
         public List<Extents3d> Storeys;//楼层框
         public List<Line> LabelLines;//标注线引线
-        public List<Line> HorizontalPipes;
+        public List<Horizontal> HorizontalPipes;
         public List<DBText> Labels;
         public List<Circle> VerticalPipes;
         public List<DrainWellClass> DrainWells;
@@ -56,6 +56,21 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     {
         public DBText DBText;
     }
+    public class Horizontal
+    {
+        public Horizontal(Line line, bool isInitialLine = true)
+        {
+            Line = line;
+            IsInitialLine = isInitialLine;
+        }
+        public Horizontal()
+        {
+
+        }
+        public Line Line = new Line();
+        public bool IsInitialLine = true;
+    }
+
     public class WellInfo
     {
         public Point3d Location;
@@ -77,10 +92,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<string> SameTypeIdentifiers;
         public int Diameter = 0;//立管管径
         public double totalQ = 0;//总流量
+        public int totalUsedPump = 0;//总使用潜水泵
         public int AppendusedpumpCount = 0;
         public bool IsInitialDrainWell = false;
         public bool IsAdditionPipe = false;
         public int IsBridgePipe = 0;//用于绘图，判断是否为连接立管
+        public bool CanUsedToJudgeCrossLayer = true;
     }
     public class HorizontalLabelClass
     {
@@ -136,7 +153,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
             }
             if(this.HorizontalPipes==null)
             {
-                this.HorizontalPipes = new List<Line>();
+                this.HorizontalPipes = new List<Horizontal>();
+            }
+            if (this.HorizontalPipes == null)
+            {
+                this.OriginalHorizontalPipes = new List<Horizontal>();
             }
             if (this.WrapPipes == null)
             {
@@ -144,7 +165,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
             }
         }
         public List<VerticalPipeClass> VerticalPipes { get; set; }
-        public List<Line> HorizontalPipes { get; set; }
+        public List<Horizontal> HorizontalPipes { get; set; }
+        public List<Horizontal> OriginalHorizontalPipes { get; set; }
         public List<Polyline> WrapPipes { get; set; }
         public int[,] VertPipeConnectedArr { get; set; }
         public int DrainWellPipeIndex { get; set; }

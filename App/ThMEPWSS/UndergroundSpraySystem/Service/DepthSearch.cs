@@ -12,11 +12,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void DfsMainLoopWithoutAlarmValve(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited,
            ref List<Point3dEx> rstPath, SprayIn sprayIn, Stopwatch stopwatch)
         {
-            if (stopwatch.Elapsed.TotalSeconds > 10)//
-            {
-                stopwatch.Stop();
-                return;
-            }
+            //if (stopwatch.Elapsed.TotalSeconds > 10)//
+            //{
+            //    stopwatch.Stop();
+            //    return;
+            //}
             if (cur.Equals(sprayIn.LoopEndPt))//找到目标点，返回最终路径
             {
                 rstPath.AddRange(new List<Point3dEx>(tempPath));//把当前路径加入

@@ -12,14 +12,14 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            PDSProject.Instance.PushGraphData(unionGraph);
+            PDSProjectManagement.PushGraphData(unionGraph);
         }
 
         public void Push(List<Database> databases)
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute(databases);
-            PDSProject.Instance.PushGraphData(unionGraph);
+            PDSProjectManagement.PushGraphData(unionGraph);
         }
     }
 }

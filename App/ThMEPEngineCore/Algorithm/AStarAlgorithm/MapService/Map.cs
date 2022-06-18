@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         double avoidHoleDistance = 800;
         double avoidFrameDistance = 200;
         public Polyline polyline = null; //外包框
-        List<Polyline> holes = null;
+        List<Entity> holes = null;
         List<Line> rooms = null;
         int columns = 0;
         int rows = 0;
@@ -71,15 +71,22 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         /// <param name="holes"></param>
         public void SetObstacle(List<Polyline> _holes)
         {
-            holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
+            holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance, true).Cast<Entity>()).ToList();
 
             DBObjectCollection dbObjColl = new DBObjectCollection();
             foreach(var h in holes)
             {
-                var MPolygon = h.ToNTSPolygon().ToDbMPolygon();
-                dbObjColl.Add(MPolygon);
+                if (h is Polyline polyline)
+                {
+                    var MPolygon = polyline.ToNTSPolygon().ToDbMPolygon();
+                    dbObjColl.Add(MPolygon);
+                }
+                else if (h is MPolygon mPolygon)
+                {
+                    dbObjColl.Add(mPolygon);
+                }
             }
-
+           
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjColl);
         }
 

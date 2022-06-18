@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
 using Linq2Acad;
 
@@ -20,9 +21,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             Scale = new Scale3d(scale, scale, scale);
             Layer = "W-FRPT-SPRL-EQPM";
         }
-        public void Insert(AcadDatabase acadDatabase)
+        public BlockReference Insert(AcadDatabase acadDatabase)
         {
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference(Layer, BlockName, Pt, Scale, Angle);
+            var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(Layer, BlockName, Pt, Scale, Angle);
+            var blk = acadDatabase.Element<BlockReference>(objID);
+            return blk;
         }
     }
 }

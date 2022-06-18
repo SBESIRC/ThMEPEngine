@@ -47,7 +47,23 @@ namespace ThMEPEngineCore.Engine
 
             return true;
         }
+        
+        /// <summary>
+        /// 对外层块进行过滤
+        /// </summary>
+        /// <param name="blockReference"></param>
+        /// <returns></returns>
         public virtual bool IsBuildElementBlockReference(BlockReference blockReference)
+        {
+            return blockReference.BlockTableRecord.IsValid;
+        }
+
+        /// <summary>
+        /// 对内层块进行过滤
+        /// </summary>
+        /// <param name="blockReference"></param>
+        /// <returns></returns>
+        public virtual bool IsBuildElementInnerBlockReference(BlockReference blockReference)
         {
             return blockReference.BlockTableRecord.IsValid;
         }

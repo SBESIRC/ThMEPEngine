@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.Service
             var unionGraph = engine.Execute();
             var nodeMapList = engine.GetNodeMapList();
             var edgeMapList = engine.GetEdgeMapList();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             var updateService = new ThPDSInfoModifyEngine(nodeMapList, edgeMapList, projectGraph);
             updateService.InfoModify();
             updateService.GenerateRevcloud();
@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Service
             var unionGraph = engine.Execute();
             var nodeMapList = engine.GetNodeMapList();
             var edgeMapList = engine.GetEdgeMapList();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             var updateService = new ThPDSInfoModifyEngine(nodeMapList, edgeMapList, projectGraph, projectNode);
             updateService.InfoModify();
             updateService.GenerateRevcloud();
@@ -37,7 +37,7 @@ namespace TianHua.Electrical.PDS.Service
             var unionGraph = engine.Execute();
             var nodeMapList = engine.GetNodeMapList();
             var edgeMapList = engine.GetEdgeMapList();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             var updateService = new ThPDSInfoModifyEngine(nodeMapList, edgeMapList, projectGraph, projectEdge);
             updateService.InfoModify();
             updateService.GenerateRevcloud();
@@ -47,7 +47,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             var zoomEngine = new ThPDSZoomService();
             zoomEngine.Zoom(node, projectGraph);
         }
@@ -57,7 +57,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             if (projectGraph.Vertices.Count() > 0)
             {
                 var zoomEngine = new ThPDSZoomService();
@@ -75,7 +75,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             var addDimensionEngine = new ThPDSAddDimensionEngine();
             addDimensionEngine.AddDimension(node, projectGraph);
         }
@@ -85,7 +85,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             if (projectGraph.Vertices.Count() > 0)
             {
                 var addDimensionEngine = new ThPDSAddDimensionEngine();
@@ -97,7 +97,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             var addDimensionEngine = new ThPDSAddDimensionEngine();
             addDimensionEngine.AddDimension(edge, projectGraph);
         }
@@ -107,7 +107,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
+            var projectGraph = PDSProjectManagement.ProjectUpdateToDwg(unionGraph);
             if (projectGraph.Edges.Count() > 0)
             {
                 var addDimensionEngine = new ThPDSAddDimensionEngine();

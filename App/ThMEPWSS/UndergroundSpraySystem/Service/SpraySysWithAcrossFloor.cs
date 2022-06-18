@@ -29,7 +29,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var vertical = new VerticalPipeNew();
             vertical.Extract(database, selectArea, sprayIn);//提取竖管
             ;
-            var leadLine = new LeadLineNew();
+            var leadLine = new LeadLineNew();//提取引线
             leadLine.Extract(database, selectArea);//3,283ms
             sprayIn.LeadLines = leadLine.GetLines();
             PipeLineTool.PipeLineDeal(sprayIn, vertical, ref pipeLines);//管线自动连接，节点打断以及短线删除等操作

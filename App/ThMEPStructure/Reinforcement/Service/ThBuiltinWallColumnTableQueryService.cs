@@ -25,10 +25,6 @@ namespace ThMEPStructure.Reinforcement.Service
         private readonly int ContinuousRowCount = 5;
         private readonly int ContinuousColumnCount = 5;
         private ExcelPackage Package { get; set; }
-        /// <summary>
-        /// 在内置表中是否找到数据
-        /// </summary>
-        public bool IsFind { get; private set; } 
         public ThBuiltinWallColumnTableQueryService()
         {
             Load();
@@ -43,7 +39,6 @@ namespace ThMEPStructure.Reinforcement.Service
         public ThEdgeComponent Query(ShapeCode shape, int bwOrhc2, Dictionary<string,int> specDict,
             double stirrupRatio, string antiSeismicGrade,string concreteStrengthGrade)
         {
-            IsFind = false;
             var sheetName = GetSheetName(ComponentType.YBZ, antiSeismicGrade);
             var sheet = GetWorkSheet(sheetName);
             var shapeStr = GetShape(shape);
@@ -73,7 +68,6 @@ namespace ThMEPStructure.Reinforcement.Service
         public ThEdgeComponent Query(ShapeCode shape, int bwOrhc2, Dictionary<string, int> specDict,
             string position,string antiSeismicGrade)
         {
-            IsFind = false;
             var sheetName = GetSheetName(ComponentType.GBZ, antiSeismicGrade);
             var sheet = GetWorkSheet(sheetName);
             var shapeStr = GetShape(shape);
@@ -91,10 +85,6 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             // 第二步查找 按照sizeKword和bwOrhc2查找
             var result = FindGBZDatas(sheet, specArea, bwOrhc2, areaKword);
-            if(result.Count>0)
-            {
-                IsFind = true;
-            }
             return ParseGBZ(shape, result);
         }
         private ThEdgeComponent ParseYBZ(ShapeCode shape, List<Tuple<string, string>> values)
@@ -589,7 +579,6 @@ namespace ThMEPStructure.Reinforcement.Service
                     if (dValues.Count == 1 &&
                         ThReinforcementUtils.IsBiggerThan(dValues[0], stirrupRatio, 2))
                     {
-                        IsFind = true;
                         dataIndex = i;
                         break;
                     }

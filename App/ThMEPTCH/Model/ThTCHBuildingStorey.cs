@@ -6,20 +6,34 @@ namespace ThMEPTCH.Model
 {
     public class ThTCHBuildingStorey : ThIfcBuildingStorey
     {
-        public string FloorNum { get; set; }
-        public double FloorElevation { get; set; }
-        public double FloorHeight { get; set; }
-        public Point3d FloorOrigin { get; set; }
+        /// <summary>
+        /// 编号
+        /// </summary>
+        public string Number { get; set; }
+        /// <summary>
+        /// 标高
+        /// </summary>
+        public double Elevation { get; set; }
+        /// <summary>
+        /// 层高
+        /// </summary>
+        public double Height { get; set; }
+        /// <summary>
+        /// 基点
+        /// </summary>
+        public Point3d Origin { get; set; }
         public ThTCHBuildingStorey()
         {
-            ThTCHWalls = new List<ThTCHWall>();
-            ThTCHWindows = new List<ThTCHWindow>();
-            ThTCHDoors = new List<ThTCHDoor>();
-            ThTCHSlabs = new List<ThTCHSlab>();
+            Walls = new List<ThTCHWall>();
+            Doors = new List<ThTCHDoor>();
+            Slabs = new List<ThTCHSlab>();
+            Windows = new List<ThTCHWindow>();
+            Railings = new List<ThTCHRailing>();
         }
-        public List<ThTCHWall> ThTCHWalls { get; set; }
-        public List<ThTCHWindow> ThTCHWindows { get; set; }
-        public List<ThTCHDoor> ThTCHDoors { get; set; }
-        public List<ThTCHSlab> ThTCHSlabs { get; set; }
+        public List<ThTCHWall> Walls { get; set; }
+        public List<ThTCHWindow> Windows { get; set; }
+        public List<ThTCHDoor> Doors { get; set; }
+        public List<ThTCHSlab> Slabs { get; set; }
+        public List<ThTCHRailing> Railings { get; set; }
     }
 }

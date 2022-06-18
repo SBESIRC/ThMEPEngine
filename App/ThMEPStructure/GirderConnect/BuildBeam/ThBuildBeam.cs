@@ -34,6 +34,8 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
         public Dictionary<Tuple<Line, Line>, DBText> build(int Switch)
         {
             Dictionary<Tuple<Line, Line>, DBText> results = new Dictionary<Tuple<Line, Line>, DBText>();
+            // 设置文字样式
+            var textStyleId = DbHelper.GetTextStyleId(BeamConfig.BeamTextStyleName);
             //構建单梁线和高度的字典
             Dictionary<Line, int> LineDic = new Dictionary<Line, int>();
             var code = new DBText();
@@ -42,7 +44,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 var MainBeamsInfo = CalculateMainBeams(o, Switch);
                 int B = MainBeamsInfo.Item1;
                 int H = MainBeamsInfo.Item2;
-                code = AddText(o, B, H);
+                code = AddText(o, textStyleId, B, H);
                 var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
@@ -76,7 +78,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                         B = (int)Math.Floor(1.0 * H / 4 / 50) * 50;
                     }
                 }
-                code = AddText(o, B, H);
+                code = AddText(o, textStyleId, B, H);
                 var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
@@ -111,7 +113,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             });
             SecondaryBeams.ForEach(o =>
             {
-                code = AddText(o, SecondaryBeamsData[o].Item1, SecondaryBeamsData[o].Item2);
+                code = AddText(o, textStyleId, SecondaryBeamsData[o].Item1, SecondaryBeamsData[o].Item2);
                 var outline = BuildLinearBeam(o, SecondaryBeamsData[o].Item1);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
@@ -177,72 +179,47 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             return (line.GetOffsetCurves(B / 2).OfType<Line>().First(),
                     line.GetOffsetCurves(-B / 2).OfType<Line>().First()).ToTuple();
         }
-        private DBText AddText(Line line, int B, int H)
+        private DBText AddText(Line line, ObjectId textStyleId, int B, int H)
         {
-            var newLine = line.Normalize();
+            var newLine = line.Clone() as Line;
             DBText code = new DBText();
             code.TextString = B + "×" + H;
             var basePt = newLine.StartPoint.GetMidPt(newLine.EndPoint);
-            double angle = newLine.Angle / Math.PI * 180.0; //rad->ang
-            var alignPt = new Point3d();
-            if (Math.Abs(angle - 90) <= 1.0 || Math.Abs(angle - 270) <= 1.0)
+            if (newLine.Angle < 0.625 * Math.PI || newLine.Angle > 1.625 * Math.PI)
             {
-                if (newLine.StartPoint.Y < newLine.EndPoint.Y)
-                {
-                    alignPt = basePt + newLine.StartPoint.GetVectorTo(newLine.EndPoint)
-                    .GetPerpendicularVector()
-                    .GetNormal()
-                    .MultiplyBy(B / 2 + 50 + 375 / 2.0);
-                }
-                else
-                {
-                    alignPt = basePt + newLine.EndPoint.GetVectorTo(newLine.StartPoint)
-                    .GetPerpendicularVector()
-                    .GetNormal()
-                    .MultiplyBy(B / 2 + 50 + 375 / 2.0);
-                }
+                newLine.ReverseCurve();
             }
-            else
-            {
-                alignPt = basePt + newLine.StartPoint.GetVectorTo(newLine.EndPoint)
-                .GetPerpendicularVector()
-                .GetNormal()
-                .MultiplyBy(B / 2 + 50 + 375 / 2.0);
-            }
+            var angle = newLine.Angle + Math.PI;
+            if (angle > 2 * Math.PI)
+                angle -= 2 * Math.PI;
             code.Height = 375;
             code.WidthFactor = 0.65;
-            code.Position = alignPt;
-            angle = AdjustAngle(angle);
-            angle = angle / 180.0 * Math.PI;
+            code.Position = basePt;
             code.Rotation = angle;
             code.HorizontalMode = TextHorizontalMode.TextCenter;
             code.VerticalMode = TextVerticalMode.TextVerticalMid;
             code.AlignmentPoint = code.Position;
+            code.TextStyleId = textStyleId;
 
+            var codeHeight = DBTextHeight(code);
+            var alignPt = basePt + newLine.StartPoint.GetVectorTo(newLine.EndPoint)
+                .GetPerpendicularVector()
+                .GetNormal()
+                .MultiplyBy(B / 2 + 70 + codeHeight / 2.0);
+            code.Position = alignPt;
+            code.AlignmentPoint = code.Position;
             return code;
         }
-        private double AdjustAngle(double angle)
+
+        private double DBTextHeight(DBText text)
         {
-            var result = angle;
-            angle = angle % 180.0;
-            if (angle <= 1.0)
-            {
-                result = 0.0;
-            }
-            else if (Math.Abs(angle - 180.0) <= 1.0)
-            {
-                result = 0.0;
-            }
-            else if (Math.Abs(angle - 90.0) <= 1.0)
-            {
-                result = 90.0;
-            }
-            else if (Math.Abs(angle - 270.0) <= 1.0)
-            {
-                result = 90.0;
-            }
-            return result;
+            var clone = text.Clone() as DBText;
+            var mt = Matrix3d.Rotation(text.Rotation*-1.0, text.Normal, text.AlignmentPoint);
+            clone.TransformBy(mt);
+            var height = clone.GeometricExtents.MaxPoint.Y - clone.GeometricExtents.MinPoint.Y;
+            return height;
         }
+
         //计算无次梁搁置主梁BH
         private Tuple<int, int> CalculateMainBeams(Line SingleBeam, int Switch)
         {

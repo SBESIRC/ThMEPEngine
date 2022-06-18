@@ -4,6 +4,8 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using AcHelper;
+using GeometryExtensions;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -12,30 +14,51 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public Point3d StPt { get; set; }
         private string PumpText { get; set; }
         private string PipeDN { get; set; }
+        private Matrix3d U2WMat { get; set; }
         public WaterPump(Point3d stPt, string text, string DN)
         {
             StPt = stPt;
             PumpText = text;
             PipeDN = DN;
+            U2WMat = Active.Editor.UCS2WCS();
         }
+
         public void Insert(AcadDatabase acadDatabase)
         {
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
+            var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
                     StPt.OffsetXY(-3200, 1200), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
+            var blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
                     StPt.OffsetXY(-2600, 1200), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "止回阀",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "止回阀",
                     StPt.OffsetXY(-2300, 700), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "止回阀",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "止回阀",
                     StPt.OffsetX(-2300), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "安全阀",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "安全阀",
                     StPt.OffsetXY(-1700, 700), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "安全阀",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "安全阀",
                     StPt.OffsetX(-1700), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "闸阀",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "闸阀",
                     StPt.OffsetXY(-1400, 700), new Scale3d(1, 1, 1), 0);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "闸阀",
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "闸阀",
                     StPt.OffsetX(-1400), new Scale3d(1, 1, 1), 0);
+            blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
 
             InsertLine(acadDatabase, StPt.OffsetXY(-3200, 1200), StPt.OffsetX(-3200));
             InsertLine(acadDatabase, StPt.OffsetX(-3200), StPt.OffsetX(-2300));
@@ -65,6 +88,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 LayerId = DbHelper.GetLayerId(layer),
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
+            line.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(line);
         }
 
@@ -81,7 +105,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 WidthFactor = 0.7,
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
-
+            dbText.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(dbText);
         }
     }

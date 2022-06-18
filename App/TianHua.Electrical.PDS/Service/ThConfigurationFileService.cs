@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Data;
 using ThMEPEngineCore.IO.ExcelService;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
@@ -9,15 +9,28 @@ namespace TianHua.Electrical.PDS.Service
 {
     public class ThConfigurationFileService
     {
-        public List<ThPDSBlockInfo> Acquire(string loadConfigUrl)
+        public List<ThPDSBlockInfo> TableInfo;
+        public List<ThPDSFilterBlockInfo> FilterBlockInfo;
+
+        public ThConfigurationFileService()
+        {
+
+        }
+
+        public void Acquire(string loadConfigUrl)
         {
             var excelSrevice = new ReadExcelService();
             var dataSet = excelSrevice.ReadExcelToDataSet(loadConfigUrl, true);
-            var table = dataSet.Tables[ThPDSCommon.BLOCK];
-            return GetBlockTable(table);
+            TableInfo = GetBlockTable(dataSet.Tables[ThPDSCommon.BLOCK]);
+            FilterBlockInfo = GetFilterTable(dataSet.Tables[ThPDSCommon.FILTER]);
         }
 
-        public List<ThPDSBlockInfo> GetBlockTable(System.Data.DataTable table)
+        /// <summary>
+        /// 读取Block sheet
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public List<ThPDSBlockInfo> GetBlockTable(DataTable table)
         {
             var blockInfos = new List<ThPDSBlockInfo>();
             for (int row = 0; row < table.Rows.Count; row++)
@@ -27,7 +40,7 @@ namespace TianHua.Electrical.PDS.Service
                 var column = 0;
                 blockInfo.BlockName = StringFilter(table.Rows[row][column].ToString());
 
-                if(string.IsNullOrEmpty(blockInfo.BlockName))
+                if (string.IsNullOrEmpty(blockInfo.BlockName))
                 {
                     continue;
                 }
@@ -86,7 +99,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     blockInfo.FireLoad = ThPDSFireLoad.FireLoad;
                 }
-                else if(table.Rows[row][column].Equals("False"))
+                else if (table.Rows[row][column].Equals("False"))
                 {
                     blockInfo.FireLoad = ThPDSFireLoad.NonFireLoad;
                 }
@@ -112,6 +125,40 @@ namespace TianHua.Electrical.PDS.Service
             return blockInfos;
         }
 
+        /// <summary>
+        /// 读取Filter sheet
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public List<ThPDSFilterBlockInfo> GetFilterTable(DataTable table)
+        {
+            var blockInfos = new List<ThPDSFilterBlockInfo>();
+            for (int row = 0; row < table.Rows.Count; row++)
+            {
+                var blockInfo = new ThPDSFilterBlockInfo();
+                // Block
+                var column = 0;
+                blockInfo.BlockName = StringFilter(table.Rows[row][column].ToString());
+
+                if (string.IsNullOrEmpty(blockInfo.BlockName))
+                {
+                    continue;
+                }
+
+                // Properties(Include)
+                column++;
+                blockInfo.Properties = StringFilter(table.Rows[row][column].ToString());
+
+                // Filtering method
+                column++;
+                var filteringMethod = (FilteringMethod)Enum.Parse(typeof(FilteringMethod), StringFilter(table.Rows[row][column].ToString()));
+                blockInfo.FilteringMethod = filteringMethod;
+
+                blockInfos.Add(blockInfo);
+            }
+            return blockInfos;
+        }
+
         private string StringFilter(string str)
         {
             return str.Replace(" ", "").Replace("\n", ""); ;
@@ -119,11 +166,11 @@ namespace TianHua.Electrical.PDS.Service
 
         private ThPDSPhase TypeConvert(string value)
         {
-            if(value == "1")
+            if (value == "1")
             {
                 return ThPDSPhase.一相;
             }
-            else if(value == "3")
+            else if (value == "3")
             {
                 return ThPDSPhase.三相;
             }
@@ -135,7 +182,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private LayingSite CableLayingMethodConvert(string str)
         {
-            switch(str)
+            switch (str)
             {
                 case "CE":
                     return LayingSite.CE;

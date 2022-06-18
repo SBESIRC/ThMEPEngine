@@ -510,7 +510,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
-        private bool _ShowLogs = false;//显示日志，默认为false
+        private bool _ShowLogs = true;//显示日志，默认为true
 
         public bool ShowLogs
         {

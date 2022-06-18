@@ -27,12 +27,16 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Diagram\ThPDSMotorInfoService.cs" />
+    <Compile Include="Model\ThPDSFilterBlockInfo.cs" />
     <Compile Include="Project\Module\Configure\DistributionMeteringConfiguration.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\CompensationCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\FeederCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PDSBaseLowVoltageCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PowerReceivingCabinet.cs" />
     <Compile Include="Project\Module\THPDSSubstation.cs" />
+    <Compile Include="Project\PDSProjectManagement.cs" />
+    <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
+    <Compile Include="Service\ThPDSLoadIDMatchService.cs" />
     <Compile Include="Service\ThPDSMotorInfo.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
     <Compile Include="Engine\ThPDSBlcokObbEngine.cs" />

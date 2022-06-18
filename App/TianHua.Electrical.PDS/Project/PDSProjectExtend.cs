@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Project
         /// 创建PDSProjectGraph
         /// </summary>
         /// <param name="Graph"></param>
-        public static ThPDSProjectGraph CreatPDSProjectGraph(this BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
+        public static ThPDSProjectGraph CreatPDSProjectGraph(this ProjectGraph graph)
         {
             var ProjectGraph = new ThPDSProjectGraph(graph);
             //ProjectGraph.CalculateSecondaryCircuit();
@@ -566,13 +566,54 @@ namespace TianHua.Electrical.PDS.Project
                     }
                     else
                     {
-                        if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        //消防
+                        if (edge.Target.Load.FireLoad)
                         {
-                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                            if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                            {
+                                edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                            }
+                            else
+                            {
+                                switch (PDSProject.Instance.projectGlobalConfiguration.FireStartType)
+                                {
+                                    case FireStartType.星三角启动:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                }
+                                
+                            }
                         }
                         else
                         {
-                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                            if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                            {
+                                edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                            }
+                            else
+                            {
+                                switch (PDSProject.Instance.projectGlobalConfiguration.NormalStartType)
+                                {
+                                    case FireStartType.星三角启动:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                }
+
+                            }
                         }
                     }
                 }
@@ -584,13 +625,52 @@ namespace TianHua.Electrical.PDS.Project
                     }
                     else
                     {
-                        if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        //消防
+                        if (edge.Target.Load.FireLoad)
                         {
-                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                            if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                            {
+                                edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                            }
+                            else
+                            {
+                                switch (PDSProject.Instance.projectGlobalConfiguration.FireStartType)
+                                {
+                                    case FireStartType.星三角启动:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                }
+                            }
                         }
                         else
                         {
-                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                            if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                            {
+                                edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                            }
+                            else
+                            {
+                                switch (PDSProject.Instance.projectGlobalConfiguration.NormalStartType)
+                                {
+                                    case FireStartType.星三角启动:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                                            break;
+                                        }
+                                }
+                            }
                         }
                     }
                 }

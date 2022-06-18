@@ -255,25 +255,28 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static void SetPointType(SprayIn sprayIn, List<List<Point3dEx>> rstPaths, List<Point3dEx> extraNodes)
+        public static void SetPointType(SprayIn sprayIn, List<List<Point3dEx>> rstPaths, List<Point3dEx> extraNodes = null)
         {
             foreach (var ptls in rstPaths)
             {
                 for (int i = 0; i < ptls.Count; i++)
                 {
                     var pt = ptls[i];
-                    if(sprayIn.PtDic[pt].Count == 1)
+                    var negihtbors = sprayIn.PtDic[pt];
+                    var neighborCnt = sprayIn.PtDic[pt].Count;
+                    var type = sprayIn.PtTypeDic[pt];
+                    if (neighborCnt == 1)
                     {
                         continue;
                     }
                     bool typeFlag = false;
-                    if (sprayIn.PtDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch 或 AlarmValve
+                    if (neighborCnt == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch 或 AlarmValve
                     {
-                        if(sprayIn.PtTypeDic[pt].Contains("AlarmValve"))
+                        if(type.Contains("AlarmValve"))
                         {
                             continue;
                         }
-                        foreach(var p in sprayIn.PtDic[pt])
+                        foreach(var p in negihtbors)
                         {
                             if(ptls.Contains(p))
                             {
@@ -291,15 +294,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                                 {
                                     continue;
                                 }
-                                if (!sprayIn.PtTypeDic.ContainsKey(p2))
-                                {
-                                    ;
-                                }
-                                    if (sprayIn.PtTypeDic.ContainsKey(p2))
+                                if (sprayIn.PtTypeDic.ContainsKey(p2))
                                 {
                                     if (sprayIn.PtTypeDic[p2].Contains("PressureValve"))
                                     {
                                         sprayIn.PtTypeDic.AddType(pt, "SubLoop");
+                                        typeFlag = true;
+                                        break;
+                                    }
+                                    if (sprayIn.PtTypeDic[p2].Contains("AlarmValve"))
+                                    {
+                                        sprayIn.PtTypeDic.AddType(pt, "BranchLoop");
                                         typeFlag = true;
                                         break;
                                     }
@@ -312,15 +317,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                         {
                             continue;
                         }
-                        foreach (var p in sprayIn.PtDic[pt])
+                        if(extraNodes is not null)
                         {
-                            if (extraNodes.Contains(p))
+                            foreach (var p in sprayIn.PtDic[pt])
                             {
-                                sprayIn.PtTypeDic.AddType(pt, "PangTong");
-                                typeFlag = true;
-                                break;
+                                if (extraNodes.Contains(p))
+                                {
+                                    sprayIn.PtTypeDic.AddType(pt, "PangTong");
+                                    typeFlag = true;
+                                    break;
+                                }
                             }
                         }
+                        
                         if (typeFlag)
                         {
                             continue;
@@ -328,7 +337,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                         sprayIn.PtTypeDic.AddType(pt, "Branch");
                     }
 
-                    if (sprayIn.PtDic[pt].Count == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
+                    if (neighborCnt == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
                     {
                         if (!sprayIn.PtTypeDic.ContainsKey(pt))//没有初始化的必定是 主环点MainLoop
                         {

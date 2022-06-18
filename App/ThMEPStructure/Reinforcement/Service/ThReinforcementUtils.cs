@@ -336,12 +336,17 @@ namespace ThMEPStructure.Reinforcement.Service
         public static List<double> GetDoubles(string content)
         {
             var datas = new List<double>();
-            string pattern = @"\d+([.]\d+)?";
+            string pattern = @"([+-]?((\d*\.\d+)|\d+|(\d+\.\d*)))([eE][+-]?\d+)?";
             foreach (Match item in Regex.Matches(content, pattern))
             {
                 datas.Add(double.Parse(item.Value));
             }
             return datas;
+        }
+        public static bool IsPureNumber(this string content)
+        {
+            var pattern = @"^([+-]?((\d*\.\d+)|\d+|(\d+\.\d*)))([eE][+-]?\d+)?$";
+            return Regex.IsMatch(content, pattern);
         }
         /// <summary>
         /// 判断value1是否大于value2,

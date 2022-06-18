@@ -266,7 +266,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             segLines = CombineEmptyToNoneEmptyArea(segLines, true, HorizontalFirst);
             segLines = CombineEmptyToEmptyArea(segLines, true, HorizontalFirst, out subAreaCnt_new);
             var grouped = segLines.GroupSegLines().OrderBy(g => g.Count).Last();
-            grouped.CleanLineWithOneIntSecPt(InterParameter.TotalArea);
+            grouped = grouped.CleanLineWithOneIntSecPt(InterParameter.TotalArea);
             return grouped;
         }
         public static List<LineSegment> DefineSegLinePriority(this List<LineSegment> segLines)
@@ -438,7 +438,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             foreach (var edge in edges)
             {
                 //edge.ToDbLine().AddToCurrentSpace();
-                var extended = edge.ExtendToBound(subArea.Area, (true, true));
+                var extended = edge.ExtendToBound(subArea.Area, (true, true)).Extend(-0.2);
                 //extended.ToDbLine().AddToCurrentSpace();
                 var IsVerticle = extended.IsVertical();
                 var extendFlags = (3, 2);
@@ -459,58 +459,75 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         Cast<LineString>().Where(l => l.IsVertical() == IsVerticle).Count() == 0;
                     if (NeedExtraSegLine)//需要补线
                     {
-                        var baseLine = new LineSegment(pt, pt.Move(w1, extendFlag));
-                        var rect = baseLine.GetHalfBuffer(h1+1, true).Buffer(-1);
-                        var rectVaild = true;
-                        if (!rect.Within(subArea.Area))
-                        {
-                            rect = baseLine.GetHalfBuffer(h1 + 1, false).Buffer(-1);
-                            rectVaild = rect.Within(subArea.Area);
-                        }
-                        if (rectVaild)
-                        {
-                            if (positiveDir) extended =  extended.Move(0.5 * (1+VMStock.RoadWidth));
-                            else extended = extended.Move(-0.5 * (1 + VMStock.RoadWidth));
-                            var newSegLine = extended.ExtendToBound(subArea.Area, (true, true));
-                            var newSegLines = SegLineStrings.ToLineSegments();
-                            newSegLines.Add(newSegLine);
-                            var IsVaild = SegLineIsVaild(newSegLines,newSegLines.Count-1);
-                            if(IsVaild) return newSegLine.ToLineString();
-                        }
-
-                        baseLine = new LineSegment(pt, pt.Move(w2, extendFlag));
-                        rect = baseLine.GetHalfBuffer(h2 + 1, true).Buffer(-1);
-                        rectVaild = true;
-                        if (!rect.Within(subArea.Area))
-                        {
-                            rect = baseLine.GetHalfBuffer(h2 + 1, false).Buffer(-1);
-                            rectVaild = rect.Within(subArea.Area);
-                        }
-                        if (rectVaild)
-                        {
-                            if (positiveDir) extended = extended.Move(0.5 * (1 + VMStock.RoadWidth));
-                            else extended = extended.Move(-0.5 * (1 + VMStock.RoadWidth));
-                            var newSegLine = extended.ExtendToBound(subArea.Area, (true, true));
-                            var newSegLines = SegLineStrings.ToLineSegments();
-                            newSegLines.Add(newSegLine);
-                            var IsVaild = SegLineIsVaild(newSegLines, newSegLines.Count - 1);
-                            if (IsVaild) return newSegLine.ToLineString();
-                        }
+                        newSeg = GetNewSegAtBestPlace(subArea, SegLineStrings, extended,
+                                    pt, positiveDir, extendFlag, w1, h1, maxLength);
+                        if(newSeg != null) return newSeg;
+                        newSeg = GetNewSegAtBestPlace(subArea, SegLineStrings, extended,
+                                    pt, positiveDir, extendFlag, w2, h2, maxLength);
+                        if (newSeg != null) return newSeg;
                     }
-                    
                 }
             }
             return newSeg;
         }
-
-        public static bool SegLineIsVaild(List<LineSegment> SegLines,int idx)
+        private static LineString GetNewSegAtBestPlace(SubArea subArea, List<LineString> SegLineStrings,LineSegment extended,
+                                    Coordinate pt, bool positiveDir,int extendFlag,double w,double h,double maxLength)//w,h:尝试矩形框的长和宽
         {
-            var validLane = SegLineEx.GetVaildLane(idx, SegLines, InterParameter.TotalArea, InterParameter.BoundaryObjectsSPIDX);
-            double tol = VMStock.RoadWidth - 0.1;// 5500 -0.1
-            if (validLane == null) return true;
-            var rect = validLane.GetRect(tol);
-            var rst = InterParameter.BoundarySpatialIndex.SelectCrossingGeometry(rect);
-            return rst.Count == 0;
+            LineSegment seg =null;
+            var baseLine = new LineSegment(pt, pt.Move(w, extendFlag));
+            var rect = baseLine.GetHalfBuffer(h + 1, true).Buffer(-1);
+            var rectVaild = true;
+            if (!rect.Within(subArea.Area))
+            {
+                rect = baseLine.GetHalfBuffer(h + 1, false).Buffer(-1);
+                rectVaild = rect.Within(subArea.Area);
+            }
+            if (rectVaild)
+            {
+                if (positiveDir) seg = extended.Move(0.5 * (1 + VMStock.RoadWidth));//移动半车道宽
+                else seg = extended.Move(-0.5 * (1 + VMStock.RoadWidth));
+                seg = seg.ExtendToBound(subArea.Area, (true, true));
+                var newSegLines = SegLineStrings.ToLineSegments();
+                newSegLines.Add(seg);
+                var InfluencedIdx = new List<int>();
+                for(int i = 0; i < newSegLines.Count; i++)
+                {
+                    if(newSegLines[i].Intersection(seg) != null) InfluencedIdx.Add(i);
+                }
+                var IsVaild = SegLineIsVaild(newSegLines, InfluencedIdx);
+                if (IsVaild) return seg.ToLineString();
+
+                var extendedBase = new LineSegment(pt, pt.Move(maxLength, extendFlag));//移动到极限距离
+                var maxMoveSize = extendedBase.ToLineString().Intersection(subArea.Area.Shell).Distance(pt.ToPoint());
+                if (positiveDir) seg = extended.Move(maxMoveSize - 0.5 * (2 + VMStock.RoadWidth));
+                else seg = extended.Move(-maxMoveSize + 0.5 * (2 + VMStock.RoadWidth));
+                seg = seg.ExtendToBound(subArea.Area, (true, true));
+                newSegLines = SegLineStrings.ToLineSegments();
+                newSegLines.Add(seg);
+                InfluencedIdx = new List<int>();
+                for (int i = 0; i < newSegLines.Count; i++)
+                {
+                    if (newSegLines[i].Intersection(seg) != null) InfluencedIdx.Add(i);
+                }
+                IsVaild = SegLineIsVaild(newSegLines, InfluencedIdx);
+                if (IsVaild) return seg.ToLineString();
+            }
+            return null;
+        }
+        
+        public static bool SegLineIsVaild(List<LineSegment> SegLines,List<int> idxs)
+        {
+            foreach(var idx in idxs)
+            {
+                var validLane = SegLineEx.GetVaildLane(idx, SegLines, InterParameter.TotalArea, InterParameter.BoundaryObjectsSPIDX);
+                double tol = VMStock.RoadWidth - 0.1;// 5500 -0.1
+                if (validLane == null) return false;
+                var rect = validLane.GetRect(tol);
+                var rst = InterParameter.BoundarySpatialIndex.SelectCrossingGeometry(rect);
+                if (rst.Count > 0) return false;
+                if(!SegLines[idx].ConnectWithAny(SegLines)) return false;
+            }
+            return true;
         }
         #endregion
     }

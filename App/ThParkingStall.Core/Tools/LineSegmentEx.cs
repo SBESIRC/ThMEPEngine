@@ -101,7 +101,7 @@ namespace ThParkingStall.Core.Tools
         {
             foreach (var l2 in otherLines)
             {
-                if (line.Intersection(l2) != null) return true;
+                if (line.IsVertical()!=l2.IsVertical() &&line.Intersection(l2) != null) return true;
             }
             return false;
         }
@@ -234,7 +234,6 @@ namespace ThParkingStall.Core.Tools
                 lines.ForEach(l => { values.Add(l.P0.X); values.Add(l.P1.X); });
                 return new LineSegment( values.Min(), valueMid,  values.Max(),valueMid);
             }
-
         }
         public static (LineSegment, LineSegment) Split(this LineSegment line,Coordinate coordinate)
         {

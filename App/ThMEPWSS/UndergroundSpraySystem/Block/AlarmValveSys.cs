@@ -5,7 +5,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using DotNetARX;
 using System;
+using AcHelper;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using GeometryExtensions;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -14,11 +16,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         private Point3d StPt { get; set; }
         private double PipeLength { get; set; }
         public Point3d EndPt { get; set; }
+        private Matrix3d U2WMat { get; set; }
         public AlarmValveSys(Point3d stPt, int alarmValveIndex, double floorHeight)
         {
             StPt = stPt;
             PipeLength = floorHeight - 2600 - 2550 - 600 * alarmValveIndex;
             EndPt = StPt.OffsetY(1550 + PipeLength);
+            U2WMat = Active.Editor.UCS2WCS();
         }
         public void Insert(AcadDatabase acadDatabase)
         {
@@ -48,13 +52,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             {
                 LayerId = DbHelper.GetLayerId(layer),
                 ColorIndex = (int)ColorIndex.BYLAYER
-        };
+            };
+            line.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(line);
         }
 
         private void InsertBlock(AcadDatabase acadDatabase, string blockName, Point3d pt, string layer = "W-FRPT-SPRL-EQPM", double scaled = 1, double rotation = Math.PI/2)
         {
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, blockName, pt, new Scale3d(scaled, scaled, scaled), rotation);
+            var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, blockName, pt, 
+                new Scale3d(scaled, scaled, scaled), rotation);
+            var blk = acadDatabase.Element<BlockReference>(objID);
+            blk.TransformBy(U2WMat);
         }
 
         private void InsertText(AcadDatabase acadDatabase, Point3d insertPt, string text, double rotation = 0, string layer = "W-FRPT-HYDT-DIMS")
@@ -70,7 +78,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 WidthFactor = 0.7,
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
-
+            dbText.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(dbText);
         }
     }

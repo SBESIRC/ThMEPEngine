@@ -7,7 +7,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
     public class SubLoopDeal
     {
-        public static void Get(ref HashSet<Point3dEx> visited, List<List<Point3dEx>> mainPathList, SprayIn sprayIn,
+        public static bool Get(ref HashSet<Point3dEx> visited, List<List<Point3dEx>> mainPathList, SprayIn sprayIn,
              SpraySystem spraySystem)
         {
             visited.Clear();
@@ -54,6 +54,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 spraySystem.SubLoopBranchPtDic.Add(subLoop.First(), new List<Point3dEx>());
                 spraySystem.SubLoopBranchPtDic.Add(subLoop.Last(), new List<Point3dEx>());
             }
+            return spraySystem.SubLoops.Count() > 0;
         }
 
         public static void SetType(SprayIn sprayIn, SpraySystem spraySystem)

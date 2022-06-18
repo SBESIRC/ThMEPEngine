@@ -68,7 +68,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
         private double CloseTol = 5.0;
-        public bool Init(BlockReference block, Serilog.Core.Logger logger, bool extractSegLine = true)
+        public bool Init(BlockReference block, Serilog.Core.Logger logger, bool extractSegLine = true, bool UpdateRelationship = false)
         {
             Logger = logger;
 
@@ -76,7 +76,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //Show();
             if (extractSegLine)
             {
-                return ProcessSegLines();
+                return ProcessSegLines(null,true,UpdateRelationship);
             }
             return true;
         }
@@ -103,7 +103,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 //基于交点打断
                 segLines_C.ForEach(l => 
                     BreakedSegLines.AddRange(l.Split(CrossPts.Select(c=>c.Coordinate).ToList())));
-                SegLines = BreakedSegLines;
+                SegLines = BreakedSegLines.CleanLineWithOneIntSecPt(WallLine);
                 //获取连接关系
                 SeglineIndexList = SegLines.GetSegLineIntsecList();
                 SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);

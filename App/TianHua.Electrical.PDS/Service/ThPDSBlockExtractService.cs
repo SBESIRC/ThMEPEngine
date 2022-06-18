@@ -18,39 +18,73 @@ namespace TianHua.Electrical.PDS.Service
             MarkBlocks = new Dictionary<Entity, ThPDSBlockReferenceData>();
             LoadBlocks = new Dictionary<Entity, ThPDSBlockReferenceData>();
             DistBoxBlocks = new Dictionary<Entity, ThPDSBlockReferenceData>();
+            Ignore = new List<Polyline>();
+            Attached = new List<Polyline>();
+            Terminal = new List<Polyline>();
         }
 
         /// <summary>
         /// 标注块
         /// </summary>
-        public Dictionary<Entity, ThPDSBlockReferenceData> MarkBlocks { get; set; }
+        public Dictionary<Entity, ThPDSBlockReferenceData> MarkBlocks;
 
         /// <summary>
         /// 负载块
         /// </summary>
-        public Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
+        public Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks;
 
         /// <summary>
         /// 配电箱
         /// </summary>
-        public Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; }
+        public Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks;
+
+        /// <summary>
+        /// 忽略块
+        /// </summary>
+        public List<Polyline> Ignore;
+
+        /// <summary>
+        /// 附着块
+        /// </summary>
+        public List<Polyline> Attached;
+
+        /// <summary>
+        /// 末端块
+        /// </summary>
+        public List<Polyline> Terminal;
 
         public void Extract(Database database, List<ThPDSBlockInfo> tableInfo, List<string> nameFilter,
-            List<string> propertyFilter, List<string> distBoxKey)
+            List<string> propertyFilter, List<string> distBoxKey, List<ThPDSFilterBlockInfo> filterBlockInfo)
         {
             using (var acad = AcadDatabase.Use(database))
             {
+                var newNameFilter = new List<string>();
+                var newPropertyFilter = new List<string>();
+                nameFilter.ForEach(o => newNameFilter.Add(o));
+                propertyFilter.ForEach(o => newPropertyFilter.Add(o));
+                filterBlockInfo.ForEach(o =>
+                {
+                    if (string.IsNullOrEmpty(o.Properties))
+                    {
+                        newNameFilter.Add(o.BlockName);
+                    }
+                    else
+                    {
+                        newPropertyFilter.Add(o.Properties);
+                    }
+                });
+
                 var engine = new ThPDSBlockExtractionEngine
                 {
-                    NameFilter = nameFilter.Distinct().ToList(),
-                    PropertyFilter = propertyFilter.Distinct().ToList(),
+                    NameFilter = newNameFilter.Distinct().ToList(),
+                    PropertyFilter = newPropertyFilter.Distinct().ToList(),
                     DistBoxKey = distBoxKey,
                 };
                 engine.ExtractFromMS(database);
                 engine.Results.Select(o => o.Data as ThPDSBlockReferenceData)
                     .ForEach(blockData =>
                     {
-                        var block = acad.Element<BlockReference>(blockData.ObjId, true);
+                        var block = acad.Element<BlockReference>(blockData.ObjId, true).Clone() as BlockReference;
                         if (blockData.EffectiveName.IndexOf(ThPDSCommon.LOAD_LABELS) == 0
                             || blockData.EffectiveName.Contains(ThPDSCommon.PUMP_LABELS)
                             || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_DETAILS))
@@ -108,19 +142,40 @@ namespace TianHua.Electrical.PDS.Service
                         }
                         else
                         {
-                            foreach (var row in tableInfo)
+                            var attributes = blockData.Attributes.Select(x => x.Value).ToList();
+                            var filterBlock = filterBlockInfo.Where(info => info.BlockName.Equals(blockData.EffectiveName)
+                                || attributes.Contains(info.Properties)).FirstOrDefault();
+                            if (filterBlock != null)
                             {
-                                if (row.BlockName == blockData.EffectiveName)
+                                switch (filterBlock.FilteringMethod)
                                 {
-                                    Assign(blockData, row);
-                                    break;
+                                    case FilteringMethod.Ignore:
+                                        Ignore.Add(ThPDSBufferService.Buffer(block.BlockOBB()));
+                                        break;
+                                    case FilteringMethod.Attached:
+                                        Attached.Add(ThPDSBufferService.Buffer(block.BlockOBB()));
+                                        break;
+                                    case FilteringMethod.Terminal:
+                                        Terminal.Add(ThPDSBufferService.Buffer(block.BlockOBB()));
+                                        break;
                                 }
                             }
-                            if (LoadBlocks.Any(b => b.Value.Position.DistanceTo(blockData.Position) < 1.0))
+                            else
                             {
-                                return;
+                                foreach (var row in tableInfo)
+                                {
+                                    if (row.BlockName == blockData.EffectiveName)
+                                    {
+                                        Assign(blockData, row);
+                                        break;
+                                    }
+                                }
+                                if (LoadBlocks.Any(b => b.Value.Position.DistanceTo(blockData.Position) < 1.0))
+                                {
+                                    return;
+                                }
+                                LoadBlocks.Add(block, blockData);
                             }
-                            LoadBlocks.Add(block, blockData);
                         }
                     });
             }

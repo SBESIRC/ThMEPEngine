@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using System.Linq;
 using ThCADExtension;
@@ -94,33 +95,19 @@ namespace ThCADCore.NTS
             };
         }
 
-        public static List<Region> ToDbRegions(this MultiPolygon mPolygon)
+        public static List<MPolygon> ToMPolygons(this MultiPolygon mPolygon)
         {
-            var regions = new List<Region>();
+            var regions = new List<MPolygon>();
             foreach (Polygon polygon in mPolygon.Geometries)
             {
-                regions.Add(polygon.ToDbRegion());
+                regions.Add(polygon.ToDbMPolygon());
             }
             return regions;
         }
 
-        public static List<Polyline> ToDbPolylines(this MultiPolygon mPolygon)
-        {
-            var plines = new List<Polyline>();
-            foreach (Polygon polygon in mPolygon.Geometries)
-            {
-                plines.Add(polygon.Shell.ToDbPolyline());
-            }
-            return plines;
-        }
-
-        public static List<DBObject> ToDbObjects(this Geometry geometry, bool keepHoles = false)
+        public static List<DBObject> ToDbObjectsEx(this Geometry geometry)
         {
             var objs = new List<DBObject>();
-            if (geometry.IsEmpty)
-            {
-                return objs;
-            }
             if (geometry is LineString lineString)
             {
                 objs.Add(lineString.ToDbPolyline());
@@ -131,36 +118,21 @@ namespace ThCADCore.NTS
             }
             else if (geometry is Polygon polygon)
             {
-                if (keepHoles)
-                {
-                    objs.Add(polygon.ToDbMPolygon());
-                }
-                else
-                {
-                    objs.AddRange(polygon.ToDbPolylines());
-                }
-                //if (keepHoles && polygon.NumInteriorRings > 0)
-                //{
-                //    objs.Add(polygon.ToDbMPolygon());
-                //}
-                //else
-                //{
-                //    objs.AddRange(polygon.ToDbPolylines());
-                //}
+                objs.Add(polygon.ToDbMPolygon());
             }
             else if (geometry is MultiLineString lineStrings)
             {
-                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsEx()));
             }
             else if (geometry is MultiPolygon polygons)
             {
-                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsEx()));
             }
             else if (geometry is GeometryCollection geometries)
             {
-                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsEx()));
             }
-            else if (geometry is Point point) 
+            else if (geometry is Point point)
             {
                 objs.Add(point.ToDbPoint());
             }
@@ -338,5 +310,76 @@ namespace ThCADCore.NTS
         {
             return Orientation.IsCCW(pline.ToNTSLineString().Coordinates);
         }
+
+        #region Obsolete
+        [Obsolete("该方法已被弃用，请使用ToMPolygonsEx代替")]
+        public static List<Polyline> ToDbPolylines(this MultiPolygon mPolygon)
+        {
+            var plines = new List<Polyline>();
+            foreach (Polygon polygon in mPolygon.Geometries)
+            {
+                plines.Add(polygon.Shell.ToDbPolyline());
+            }
+            return plines;
+        }
+
+        [Obsolete("该方法已被弃用，请使用ToDbObjectsEx代替")]
+        public static List<DBObject> ToDbObjects(this Geometry geometry, bool keepHoles = false)
+        {
+            var objs = new List<DBObject>();
+            if (geometry.IsEmpty)
+            {
+                return objs;
+            }
+            if (geometry is LineString lineString)
+            {
+                objs.Add(lineString.ToDbPolyline());
+            }
+            else if (geometry is LinearRing linearRing)
+            {
+                objs.Add(linearRing.ToDbPolyline());
+            }
+            else if (geometry is Polygon polygon)
+            {
+                if (keepHoles)
+                {
+                    objs.Add(polygon.ToDbMPolygon());
+                }
+                else
+                {
+                    objs.AddRange(polygon.ToDbPolylines());
+                }
+                //if (keepHoles && polygon.NumInteriorRings > 0)
+                //{
+                //    objs.Add(polygon.ToDbMPolygon());
+                //}
+                //else
+                //{
+                //    objs.AddRange(polygon.ToDbPolylines());
+                //}
+            }
+            else if (geometry is MultiLineString lineStrings)
+            {
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
+            }
+            else if (geometry is MultiPolygon polygons)
+            {
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
+            }
+            else if (geometry is GeometryCollection geometries)
+            {
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
+            }
+            else if (geometry is Point point)
+            {
+                objs.Add(point.ToDbPoint());
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return objs;
+        }
+        #endregion
     }
 }

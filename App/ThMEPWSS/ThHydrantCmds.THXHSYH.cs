@@ -123,5 +123,19 @@ namespace ThMEPWSS
             }
         }
 
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThLoadBlkTemplate", CommandFlags.Modal)]
+        public void ThLoadBlkTemplate()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                var blkNameList = new List<string> { "室内消火栓平面" };
+                var layerNameList = new List<string> { "" };
+
+                InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameList, layerNameList);
+            }
+        }
     }
 }

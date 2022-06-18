@@ -216,21 +216,6 @@ namespace ThMEPWSS
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThLoadBlkTemplate", CommandFlags.Modal)]
-        public void ThLoadBlkTemplate()
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-
-                var blkNameList = new List<string> { "热水器标注" };
-                var layerNameList = new List<string> { "" };
-
-                ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameList, layerNameList);
-            }
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThDrainageVpipeData", CommandFlags.Modal)]
         public void ThDrainageVpipeData()
         {

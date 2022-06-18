@@ -40,9 +40,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 try
                 {
                     var block = dbObjs[i] as BlockReference;
-
                     var pt = GetCenter(block.GeometricExtents);
-
                     var pline = CreatePolyline(pt, 1000);
                     var res = verticalSpatialIndex.SelectCrossingPolygon(pline).ToArray();
                     if (res.Count() == 0)
@@ -76,23 +74,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             var dbObjs = new DBObjectCollection();
             foreach (var pt in verticals)
             {
-                var pline = CreatePolyline(pt);
+                var pline = CreatePolyline(pt._pt);
                 dbObjs.Add(pline);
             }
             return dbObjs;
-        }
-
-        private static Polyline CreatePolyline(Point3dEx c, int tolerance = 50)
-        {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y - tolerance)); // low left
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y + tolerance)); // high left
-            pts.Add(new Point2d(c._pt.X + tolerance, c._pt.Y + tolerance)); // high right
-            pts.Add(new Point2d(c._pt.X + tolerance, c._pt.Y - tolerance)); // low right
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y - tolerance)); // low left
-            pl.CreatePolyline(pts);
-            return pl;
         }
 
         private static Polyline CreatePolyline(Point3d c, int tolerance = 50)
@@ -145,27 +130,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             hydrantWithReel = _hydrantWithReel;
             return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
-        }
-
-        private void DrawFireHydrant(Database database)
-        {
-            string layerName = "消火栓圆圈图层";
-            try
-            {
-                ThMEPEngineCoreLayerUtils.CreateAILayer(database, layerName, 30);
-            }
-            catch { }
-
-            foreach (var db in DBobjs)
-            {
-                var br = db as BlockReference;
-                using (AcadDatabase currentDb = AcadDatabase.Active())
-                {
-                    var rect = br.GetRect();
-                    rect.LayerId = DbHelper.GetLayerId(layerName);
-                    currentDb.CurrentSpace.Add(rect);
-                }
-            }
         }
     }
 

@@ -197,18 +197,32 @@ namespace ThMEPStructure
         [CommandMethod("TIANHUACAD", "THMUTSC", CommandFlags.Modal)]
         public void THMUTSC()
         {
-            var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
-            pofo.Filter = "Ifc files (*.Ifc)|*.Ifc";
+            var pofo = new PromptOpenFileOptions("\n选择要成图的Ydb文件");
+            pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc";
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
-                var config = new ThStructurePlaneConfig()
+                string ifcFilePath = "";
+                if(System.IO.Path.GetExtension(pfnr.StringResult).ToUpper()==".YDB")
                 {
-                    IfcFilePath = pfnr.StringResult,
-                    SvgSavePath = "",
-                };
-                var generator = new ThStructurePlaneGenerator(config);
-                generator.Generate();
+                    var ydbToIfcService = new ThYdbToIfcConvertService();
+                    ifcFilePath = ydbToIfcService.Convert(pfnr.StringResult);
+                }
+                else
+                {
+                    ifcFilePath = pfnr.StringResult;
+                }
+                
+                if(!string.IsNullOrEmpty(ifcFilePath))
+                {
+                    var config = new ThStructurePlaneConfig()
+                    {
+                        IfcFilePath = ifcFilePath,
+                        SvgSavePath = "",
+                    };
+                    var generator = new ThStructurePlaneGenerator(config);
+                    generator.Generate();
+                }               
             }
         }
     }

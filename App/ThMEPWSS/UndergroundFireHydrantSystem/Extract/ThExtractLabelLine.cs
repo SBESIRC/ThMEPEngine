@@ -25,7 +25,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer))
+                   .Where(o => IsTargetLayer(o.Layer))
                    .Where(o => IsTargetObject(o)).ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
@@ -49,7 +49,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 return LabelLineCollection;
             }
         }
-        private bool IsHYDTPipeLayer(string layer)
+        private bool IsTargetLayer(string layer)
         {
             return layer.ToUpper() == "W-RAIN-DIMS" ||
                    layer.ToUpper() == "W-FRPT-HYDT-DIMS" ||

@@ -4,6 +4,7 @@ using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThCADCore.NTS;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
@@ -53,9 +54,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         q.Enqueue(pt);
                         HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                         visited.Add(pt);
+                        int level = 0;
+                        var ptLevelDic = new Dictionary<Point3dEx, int>();//每个点及其level
                         while (q.Count > 0)
                         {
                             var curPt = q.Dequeue();
+                            if(!ptLevelDic.ContainsKey(curPt))
+                            {
+                                ptLevelDic.Add(curPt, 0);
+                            }
                             if (sprayIn.PtTypeDic.ContainsKey(curPt))
                             {
                                 if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
@@ -73,9 +80,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                             if (adjs.Count == 1)
                             {
                                 termPts.Add(curPt);
+                                
                                 continue;
                             }
-
                             foreach (var adj in adjs)
                             {
                                 if (spraySystem.MainLoops[j].Contains(adj))
@@ -88,6 +95,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                                 visited2.Add(adj);
                                 q.Enqueue(adj);
+                                if(adjs.Count == 3)
+                                {
+                                    ptLevelDic.Add(adj, ptLevelDic[curPt] + 1);
+                                }
+                                else
+                                {
+                                    ptLevelDic.Add(adj, ptLevelDic[curPt]);
+                                }
+                                
                             }
                         }
                         if (termPts.Count != 0)
@@ -106,6 +122,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                             {
                                 continue;
                             }
+                            termPts = termPts.OrderBy(p => ptLevelDic[p]).ToList();
                             spraySystem.BranchDic.Add(pt, termPts);
                         }
                     }

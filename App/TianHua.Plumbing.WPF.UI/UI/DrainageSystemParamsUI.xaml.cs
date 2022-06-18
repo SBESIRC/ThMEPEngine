@@ -36,6 +36,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.DataContext = _vm;
             cbxBasinDn.ItemsSource = cbxFloorDrain.ItemsSource = new string[] { "DN50", "DN75", };
             this.Basin.ItemsSource = new string[] { "双池S弯", "双池P弯" };
+            cbxWellFD.ItemsSource = cbxBalFD.ItemsSource = cbxCndFD.ItemsSource = new string[] { "DN50", "DN75", };
+            cbxLNLG.ItemsSource = cbxYTYS.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
+            cbxLNHG.ItemsSource = new string[] { "DN25", "DN32", "DN50" };
+            cbxSJLG.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
         }
 
 

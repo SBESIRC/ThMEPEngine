@@ -1,23 +1,36 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.Runtime;
-using System.Windows;
-using TianHua.Electrical.PDS.Command;
-using TianHua.Electrical.PDS.Service;
+﻿using Autodesk.AutoCAD.Runtime;
 using TianHua.Electrical.PDS.UI.UI;
+using TianHua.Electrical.PDS.Service;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI
 {
     public class ThElectricalPDSUIApp : IExtensionApplication
     {
+        // 全局界面
+        // https://through-the-interface.typepad.com/through_the_interface/2006/10/perdocument_dat_1.html
+        // https://forums.autodesk.com/t5/net/any-reason-to-make-a-class-defining-commands-as-static/td-p/5449525
+        private static ElecSandboxUI _PDSUI;
+
         public void Initialize()
         {
-
+            //add code to run when the ExtApp initializes. Here are a few examples:
+            //  Checking some host information like build #, a patch or a particular Arx/Dbx/Dll;
+            //  Creating/Opening some files to use in the whole life of the assembly, e.g. logs;
+            //  Adding some ribbon tabs, panels, and/or buttons, when necessary;
+            //  Loading some dependents explicitly which are not taken care of automatically;
+            //  Subscribing to some events which are important for the whole session;
+            //  Etc.
         }
 
         public void Terminate()
         {
-
+            //add code to clean up things when the ExtApp terminates. For example:
+            //  Closing the log files;
+            //  Deleting the custom ribbon tabs/panels/buttons;
+            //  Unloading those dependents;
+            //  Un-subscribing to those events;
+            //  Etc.
         }
 
         /// <summary>
@@ -26,30 +39,31 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THDLXT", CommandFlags.Modal)]
         public static void THDLXT()
         {
-            try
+            if (_PDSUI == null)
             {
-                ElecSandboxUI.InitPDSProjectData();
+                // 初始化全局界面
+                _PDSUI = new ElecSandboxUI();
+                _PDSUI.LoadProject();
             }
-            catch (Exception ex)
+
+            if (_PDSUI != null)
             {
-                MessageBox.Show(ex.Message);
+                // 初始化窗口位置
+                int w = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
+                int h = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+                _PDSUI.Loaded += (s, e) =>
+                {
+                    _PDSUI.Width = w - 200;
+                    _PDSUI.Height = h - 200;
+                    if (_PDSUI.Width > 1300) _PDSUI.Width = 1300;
+                    if (_PDSUI.Height > 850) _PDSUI.Height = 850;
+                    _PDSUI.Left = (w - _PDSUI.Width) / 2;
+                    _PDSUI.Top = (h - _PDSUI.Height) / 2;
+                };
+
+                // 显示窗口
+                AcadApp.ShowModelessWindow(_PDSUI);
             }
-            var win = ElecSandboxUI.TryGetCurrentWindow();
-            if (win is not null) return;
-            win = ElecSandboxUI.TryCreateSingleton();
-            if (win == null) return;
-            int w = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
-            int h = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
-            win.Loaded += (s, e) =>
-            {
-                win.Width = w - 200;
-                win.Height = h - 200;
-                if (win.Width > 1300) win.Width = 1300;
-                if (win.Height > 850) win.Height = 850;
-                win.Left = (w - win.Width) / 2;
-                win.Top = (h - win.Height) / 2;
-            };
-            AcadApp.ShowModelessWindow(win);
         }
 
         /// <summary>

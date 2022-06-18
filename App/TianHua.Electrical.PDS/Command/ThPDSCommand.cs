@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Command
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
-            PDSProject.Instance.PushGraphData(unionGraph);
+            PDSProjectManagement.PushGraphData(unionGraph);
         }
 
         public void Dispose()

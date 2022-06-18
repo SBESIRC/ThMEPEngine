@@ -41,12 +41,12 @@ namespace TianHua.Electrical.PDS.Engine
 
             // 读取配置表信息
             var fileService = new ThConfigurationFileService();
-            var tableInfo = fileService.Acquire(ThCADCommon.PDSComponentsPath());
+            fileService.Acquire(ThCADCommon.PDSComponentsPath());
             var distBoxKey = new List<string>();
             var nameFilter = new List<string>();
             var propertyFilter = new List<string>();
             var tableAnalysis = new ThPDSTableAnalysisService();
-            tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
+            tableAnalysis.Analysis(fileService.TableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
 
             //加载数据
             foreach (Database database in databases)
@@ -112,10 +112,13 @@ namespace TianHua.Electrical.PDS.Engine
 
                         // 根据块名提取负载及标注块
                         var loadExtractService = new ThPDSBlockExtractService();
-                        loadExtractService.Extract(acad.Database, tableInfo, nameFilter, propertyFilter, distBoxKey);
-                        BlockTransform(acad, transformer, loadExtractService.MarkBlocks);
-                        BlockTransform(acad, transformer, loadExtractService.DistBoxBlocks);
-                        BlockTransform(acad, transformer, loadExtractService.LoadBlocks);
+                        loadExtractService.Extract(acad.Database, fileService.TableInfo, nameFilter, propertyFilter, distBoxKey, fileService.FilterBlockInfo);
+                        BlockTransform(transformer, loadExtractService.MarkBlocks);
+                        BlockTransform(transformer, loadExtractService.DistBoxBlocks);
+                        BlockTransform(transformer, loadExtractService.LoadBlocks);
+                        EntitiesTransform(transformer, loadExtractService.Ignore.ToCollection());
+                        EntitiesTransform(transformer, loadExtractService.Attached.ToCollection());
+                        EntitiesTransform(transformer, loadExtractService.Terminal.ToCollection());
 
                         // 提取配电箱框线
                         var allDistBoxFrame = ThPDSDistBoxFrameExtraction.GetDistBoxFrame(acad.Database).ToCollection();
@@ -162,6 +165,7 @@ namespace TianHua.Electrical.PDS.Engine
                             // 负载
                             var loadIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.LoadBlocks.Keys.ToCollection());
                             var loads = loadIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+                            var loadsData = loadExtractService.LoadBlocks.Where(b => loads.Contains(b.Key)).ToList();
 
                             // 配电箱框线
                             var distBoxFrameIndex = new ThCADCoreNTSSpatialIndex(allDistBoxFrame);
@@ -171,8 +175,9 @@ namespace TianHua.Electrical.PDS.Engine
                             var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
 
                             var isStandardStorey = storey.StoreyTypeString.Equals("标准层");
-                            var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
-                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames, isStandardStorey);
+                            var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loadsData, cableTrays, cables, markService,
+                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames, isStandardStorey,
+                                loadExtractService.Ignore, loadExtractService.Attached, loadExtractService.Terminal);
 
                             graphEngine.MultiDistBoxAnalysis(acad.Database);
                             graphEngine.CreatGraph();
@@ -200,9 +205,9 @@ namespace TianHua.Electrical.PDS.Engine
                         EdgeMapList.Add(edgeMap);
 
                         // 移回原位
-                        EntitiesReset(acad, transformer, loadExtractService.MarkBlocks);
-                        EntitiesReset(acad, transformer, loadExtractService.DistBoxBlocks);
-                        EntitiesReset(acad, transformer, loadExtractService.LoadBlocks);
+                        EntitiesReset(transformer, loadExtractService.MarkBlocks);
+                        EntitiesReset(transformer, loadExtractService.DistBoxBlocks);
+                        EntitiesReset(transformer, loadExtractService.LoadBlocks);
                     }
                 }
             }
@@ -234,26 +239,22 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
-        private void BlockTransform(AcadDatabase acad, ThMEPOriginTransformer transformer,
-            Dictionary<Entity, ThPDSBlockReferenceData> blockData)
+        private void BlockTransform(ThMEPOriginTransformer transformer, Dictionary<Entity, ThPDSBlockReferenceData> blockData)
         {
             blockData.ForEach(o =>
             {
-                var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                block.TransformBy(o.Value.OwnerSpace2WCS);
-                transformer.Transform(block);
-                ThMEPEntityExtension.ProjectOntoXYPlane(block);
+                o.Key.TransformBy(o.Value.OwnerSpace2WCS);
+                transformer.Transform(o.Key);
+                ThMEPEntityExtension.ProjectOntoXYPlane(o.Key);
             });
         }
 
-        private void EntitiesReset(AcadDatabase acad, ThMEPOriginTransformer transformer,
-            Dictionary<Entity, ThPDSBlockReferenceData> blockData)
+        private void EntitiesReset(ThMEPOriginTransformer transformer, Dictionary<Entity, ThPDSBlockReferenceData> blockData)
         {
             blockData.ForEach(o =>
             {
-                var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                block.TransformBy(o.Value.OwnerSpace2WCS.Inverse());
-                transformer.Reset(block);
+                o.Key.TransformBy(o.Value.OwnerSpace2WCS.Inverse());
+                transformer.Reset(o.Key);
             });
         }
 

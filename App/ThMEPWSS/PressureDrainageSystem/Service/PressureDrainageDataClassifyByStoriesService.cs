@@ -72,7 +72,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 for (int i = 0; i < floorNumber; i++)
                 {
-                    if (Algorithms.IsPointIn(extendList[i], horLine.GetMidpoint()))
+                    if (Algorithms.IsPointIn(extendList[i], horLine.Line.GetMidpoint()))
                     {
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].HorizontalPipe.Add(horLine);
                         break;
@@ -97,7 +97,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 for (int i = 0; i < floorNumber; i++)
                 {
-                    if (Algorithms.IsPointIn(extendList[i], wrappipe.CenterPoint()))
+                    if (Algorithms.IsPointIn(extendList[i], new Point3d(wrappipe.CenterPoint().X, wrappipe.CenterPoint().Y,0)))
                     {
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].Wrappipes.Add(wrappipe);
                         break;

@@ -273,7 +273,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else if (e is Line line)
                 {
-                    results.Add(line.Buffer(dis, ThBufferEndCapStyle.Square));
+                    results.Add(line.BufferSquare(dis));
                 }
                 else
                 {

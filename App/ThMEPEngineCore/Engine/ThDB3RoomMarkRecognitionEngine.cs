@@ -47,7 +47,8 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcAnnotationElementData> datas, Point3dCollection polygon)
         {
-            var objs = datas.Select(o => o.Geometry).ToCollection();
+            //过滤DBText没有算出OBB的情况，防止丢进去引起NTS报错
+            var objs = datas.Where(o => (o.Geometry as Polyline).NumberOfVertices > 0).Select(o => o.Geometry).ToCollection();
             var filterDatas = new List<ThRawIfcAnnotationElementData>();
             if (polygon.Count > 0)
             {

@@ -111,7 +111,7 @@ namespace ThMEPEngineCore.Engine
                                 {
                                     continue;
                                 }
-                                if (visitor.IsBuildElementBlockReference(blockObj))
+                                if (visitor.IsBuildElementInnerBlockReference(blockObj))
                                 {
                                     if (visitor.CheckLayerValid(blockObj) && visitor.IsDistributionElement(blockObj))
                                     {

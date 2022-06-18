@@ -1537,8 +1537,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     //添加的灯没有指向该节点的
                     continue;
                 var nodeLights = lineLights.Where(c => !c.isHoisting && c.nearNode.nodePoint.DistanceTo(item.graphNode.nodePoint) < 100).ToList();
-                if (null != nodeLights && nodeLights.Count > 0) 
+                if (null != nodeLights && nodeLights.Count > 0)
                     nodeAddLight.AddRange(nodeLights);
+                else
+                    continue;
                 var dir1 = nodeLights.FirstOrDefault().direction;
                 bool isAdd = false;
                 foreach (var tempLight in nodeAddLight) 

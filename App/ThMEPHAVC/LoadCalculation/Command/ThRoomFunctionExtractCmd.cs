@@ -84,23 +84,32 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 InsertBlockService.initialization();
 
                 var Rectangle = dbobjs.GeometricExtents().ToRectangle();
-                var pts = Rectangle.Vertices();
-                var roomEngine = new ThDB3RoomOutlineRecognitionEngine();
-                roomEngine.RecognizeMS(database.Database, dBObject);
-                var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
+                var startPt = Rectangle.StartPoint;
+                var originTransformer = new ThMEPOriginTransformer(startPt);
+                var pts = originTransformer.Transform(Rectangle.Vertices());
+
+                // 获取块里和本地的房间名称
+                var roomMarkExtraction = new ThDB3RoomMarkExtractionEngine();
+                roomMarkExtraction.Extract(database.Database);
+                roomMarkExtraction.Results.ForEach(r=>originTransformer.Transform(r.Geometry));
                 var markEngine = new ThDB3RoomMarkRecognitionEngine();
-                markEngine.Recognize(database.Database, pts);
+                markEngine.Recognize(roomMarkExtraction.Results, pts);
                 var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
+
+                // 获取房间轮廓线
+                var roomOutlineExtraction = new ThDB3RoomOutlineExtractionEngine();
+                roomOutlineExtraction.ExtractFromMS(database.Database, dBObject);
+                roomOutlineExtraction.Results.ForEach(r => originTransformer.Transform(r.Geometry));
+                var roomEngine = new ThDB3RoomOutlineRecognitionEngine();
+                roomEngine.Recognize(roomOutlineExtraction.Results, pts);
+                var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
+
+                // 造房间
                 var roomBuilder = new ThRoomBuilderEngine();
                 roomBuilder.Build(rooms, marks);
-
-                var startPt = Rectangle.StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(startPt);
-
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 var roomFunctionBlocks = getPrimitivesService.GetRoomFunctionBlocks();
 
-                rooms.ForEach(o => originTransformer.Transform(o.Boundary));
                 LogicService logicService = new LogicService();
                 var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.TQHasPrefix, ThLoadCalculationUIService.Instance.Parameter.TQPerfixContent, StartingNo);
                 //移回原点

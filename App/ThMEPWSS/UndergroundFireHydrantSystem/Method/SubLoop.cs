@@ -30,7 +30,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 //次环路深度搜索
-                DepthFirstSearch.dfsSubLoop(nd[0], subTempPath, visited, ref subPathList, nd[1], fireHydrantSysIn, stopwatch);
+                DepthFirstSearch.DfsSubLoop(nd[0], subTempPath, visited, ref subPathList, nd[1], fireHydrantSysIn, stopwatch);
                 stopwatch.Stop();
                 visited.Remove(visited.Last());//删除占用的点，避免干扰其他次环的遍历
             }

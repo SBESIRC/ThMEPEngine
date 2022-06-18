@@ -13,17 +13,18 @@ namespace ThMEPIFC.Ifc2x3
         {
             if (Model != null)
             {
-                ThTGL2IFC2x3Factory.CreateSite(Model, project.Site);
-                var building = ThTGL2IFC2x3Factory.CreateBuilding(Model, project.Site.Building);
+                var site = ThTGL2IFC2x3Factory.CreateSite(Model, project.Site);
+                var building = ThTGL2IFC2x3Factory.CreateBuilding(Model, site, project.Site.Building);
                 foreach (var thtchstorey in project.Site.Building.Storeys)
                 {
                     var walls = new List<IfcWall>();
                     var slabs = new List<IfcSlab>();
                     var doors = new List<IfcDoor>();
                     var windows = new List<IfcWindow>();
-                    var floor_origin = thtchstorey.FloorOrigin;
+                    var railings = new List<IfcRailing>();
+                    var floor_origin = thtchstorey.Origin;
                     var storey = ThTGL2IFC2x3Factory.CreateStorey(Model, building, thtchstorey);
-                    foreach (var thtchwall in thtchstorey.ThTCHWalls)
+                    foreach (var thtchwall in thtchstorey.Walls)
                     {
                         var wall = ThTGL2IFC2x3Factory.CreateWall(Model, thtchwall, floor_origin);
                         walls.Add(wall);
@@ -42,15 +43,21 @@ namespace ThMEPIFC.Ifc2x3
                             var hole = ThTGL2IFC2x3Factory.CreateHole(Model, thtchhole, wall, thtchwall, floor_origin);
                         }
                     }
-                    foreach (var thtchslab in thtchstorey.ThTCHSlabs)
+                    foreach (var thtchslab in thtchstorey.Slabs)
                     {
-                        var slab = ThTGL2IFC2x3Factory.CreateSlab(Model, thtchslab, floor_origin);
+                        var slab = ThTGL2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin);
                         slabs.Add(slab);
                     }
+                    foreach (var thtchrailing in thtchstorey.Railings)
+                    {
+                        var railing = ThTGL2IFC2x3Factory.CreateRailing(Model, thtchrailing, floor_origin);
+                        railings.Add(railing);
+                    }
+                    ThTGL2IFC2x3Factory.relContainSlabs2Storey(Model, slabs, storey);
                     ThTGL2IFC2x3Factory.relContainWalls2Storey(Model, walls, storey);
                     ThTGL2IFC2x3Factory.relContainDoors2Storey(Model, doors, storey);
                     ThTGL2IFC2x3Factory.relContainWindows2Storey(Model, windows, storey);
-                    ThTGL2IFC2x3Factory.relContainSlabs2Storey(Model, slabs, storey);
+                    ThTGL2IFC2x3Factory.relContainsRailings2Storey(Model, railings, storey);
                 }
             }
         }

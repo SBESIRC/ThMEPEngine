@@ -14,7 +14,7 @@ namespace ThParkingStallProgramDisplay
         
         static void Main()
         {
-            string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog_2.txt");
+            string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog_process.txt");
 
             var Logger = new Serilog.LoggerConfiguration().WriteTo.File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5),
             rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
@@ -39,6 +39,7 @@ namespace ThParkingStallProgramDisplay
             Logger?.Information(LogFileName);
             var logs = new List<string>();
             bool process = true;
+            bool hasBug = false;
             while (process)
             {
                 var fs = new FileStream(LogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -56,6 +57,12 @@ namespace ThParkingStallProgramDisplay
                             if (line.Contains("地库程序运行结束"))
                             {
                                 process = false;
+                                break;
+                            }
+                            if(line.Contains("程序出错"))
+                            {
+                                process = false;
+                                hasBug = true;
                                 break;
                             }
                             if (!logs.Contains(line))
@@ -76,7 +83,7 @@ namespace ThParkingStallProgramDisplay
                     fs.Close();
                 }
             }
-            process = true;
+            process = !hasBug;
             while (process)
             {
                 var fs2 = new FileStream(LogFileName2, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

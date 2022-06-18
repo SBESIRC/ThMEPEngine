@@ -18,31 +18,13 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSGeometryClipper.Clip(polyline, curve, inverted);
         }
 
-        public static DBObjectCollection Buffer(this Polyline polyline, double distance)
-        {
-            var buffer = new BufferOp(polyline.ToNTSPolygon(), new BufferParameters()
-            {
-                JoinStyle = NTSJoinStyle.Mitre,
-            });
-            return buffer.GetResultGeometry(distance).ToDbCollection();
-        }
-        public static DBObjectCollection Buffer(this Polyline polyline, double distance,bool keepHole)
+        public static DBObjectCollection Buffer(this Polyline polyline, double distance,bool keepHole = false)
         {
             var buffer = new BufferOp(polyline.ToNTSPolygon(), new BufferParameters()
             {
                 JoinStyle = NTSJoinStyle.Mitre,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection(keepHole);
-        }
-
-        public static Polyline Buffer(this Line line, double distance)
-        {
-            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
-        }
-
-        public static Polyline BufferSquare(this Line line, double distance)
-        {
-            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Square).ToDbObjects()[0] as Polyline;
         }
 
         public static DBObjectCollection BufferPL(this Polyline polyline, double distance)

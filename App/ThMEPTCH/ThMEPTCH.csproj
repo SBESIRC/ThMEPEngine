@@ -73,8 +73,10 @@
     <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
+    <Compile Include="Model\ThTCHSlabDescendingData.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />
     <Compile Include="Model\ThTCHBuildingStorey.cs" />
+    <Compile Include="Model\ThTCHRailing.cs" />
     <Compile Include="Model\ThTCHSlab.cs" />
     <Compile Include="Model\ThTCHOpening.cs" />
     <Compile Include="Model\ThTCHProject.cs" />

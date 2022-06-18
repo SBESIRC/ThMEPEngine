@@ -21,7 +21,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
         {
             var sprinkPts = sprinklerParameter.SprinklerPt;
             var dtOrthogonalSeg = ThSprinklerNetworkService.FindOrthogonalAngleFromDT(sprinkPts, out var dtSeg);
-            if(dtOrthogonalSeg.Count == 0)
+            if (dtOrthogonalSeg.Count == 0)
             {
                 DTTol = 1600.0;
                 return new List<ThSprinklerNetGroup>();
@@ -65,34 +65,35 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             // 往组里添加线
             ThSprinklerNetworkService.AddSingleDTLineToGroup(dtSeg, groupList, DTTol * 1.5);
             ThSprinklerNetworkService.AddSinglePTToGroup(groupList, pts, DTTol * 1.5);
+
             // 删除穿墙的线
             groupList = ThSprinklerNetworkService.DeleteWallLine(groupList, geometry);
 
             ThSprinklerNetworkService.AddShortLineToGroup(groupList, pts, subMainPipe, DTTol * 0.8);
             groupList = ThSprinklerNetworkService.DeleteWallLine(groupList, geometry);
-            var netList = ConvertToNet(groupList);
+            var netList = ThSprinklerNetGraphService.ConvertToNet(groupList);
             ThSprinklerNetworkService.FilterGroupNetByConvexHull(ref netList);
             return netList;
 
             //var sepaGroupList = SeparateNetByDist(netList, DTTol * 1.5);
         }
 
-        /// <summary>
-        /// 组转图
-        /// </summary>
-        /// <param name="groupList"></param>
-        /// <returns></returns>
-        private static List<ThSprinklerNetGroup> ConvertToNet(List<KeyValuePair<double, List<Line>>> groupList)
-        {
-            var netList = new List<ThSprinklerNetGroup>();
-            for (int i = 0; i < groupList.Count; i++)
-            {
-                var net = ThSprinklerNetGraphService.CreateNetwork(groupList[i].Key, groupList[i].Value);
-                netList.Add(net);
-            }
+        ///// <summary>
+        ///// 组转图
+        ///// </summary>
+        ///// <param name="groupList"></param>
+        ///// <returns></returns>
+        //private static List<ThSprinklerNetGroup> ConvertToNet(List<KeyValuePair<double, List<Line>>> groupList)
+        //{
+        //    var netList = new List<ThSprinklerNetGroup>();
+        //    for (int i = 0; i < groupList.Count; i++)
+        //    {
+        //        var net = ThSprinklerNetGraphService.CreateNetwork(groupList[i].Key, groupList[i].Value);
+        //        netList.Add(net);
+        //    }
 
-            return netList;
-        }
+        //    return netList;
+        //}
 
         /// <summary>
         /// 分离一组里面比较远的组

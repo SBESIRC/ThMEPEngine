@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 using TianHua.Electrical.PDS.Model;
 
@@ -11,7 +12,7 @@ namespace TianHua.Electrical.PDS.Service
         /// </summary>
         public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-        public void Analysis(List<ThPDSBlockInfo> tableInfo, ref List<string> nameFilter,ref List<string> propertyFilter,
+        public void Analysis(List<ThPDSBlockInfo> tableInfo, ref List<string> nameFilter, ref List<string> propertyFilter,
             ref List<string> distBoxKey)
         {
             foreach (var o in tableInfo)
@@ -32,6 +33,9 @@ namespace TianHua.Electrical.PDS.Service
                     distBoxKey.Add(propertyFilter[i]);
                 }
             }
+
+            // 调整数组顺序
+            distBoxKey = distBoxKey.OrderByDescending(key => key.Length).ToList();
         }
     }
 }
