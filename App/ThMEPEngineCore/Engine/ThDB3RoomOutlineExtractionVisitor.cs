@@ -72,8 +72,7 @@ namespace ThMEPEngineCore.Engine
             if (entity.Hyperlinks.Count > 0)
             {
                 var thPropertySet = ThPropertySet.CreateWithHyperlink2(entity.Hyperlinks[0].Description);
-                if (thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY) &&
-                    thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_BOUNDARY))
+                if (thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
                 {
                     return true;
                 }
