@@ -28,7 +28,7 @@
     <Compile Include="DB\THMEPDBCoreServices.cs" />
     <Compile Include="IO\ExcelService\ExcelService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DB\SQLite\SQLiteHelper.cs" />
+    <Compile Include="DB\SQLite\ThMEPSQLiteHelper.cs" />
     <Compile Include="DB\SQLite\THMEPSQLiteServices.cs" />
     <Compile Include="ThMEPIOApp.cs" />
   </ItemGroup>
