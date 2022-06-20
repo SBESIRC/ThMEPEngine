@@ -202,7 +202,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public void MultiDistBoxAnalysis(Database database)
+        public void MultiDistBoxAnalysis()
         {
             DistBoxFrames.ForEach(frame =>
             {
@@ -272,7 +272,7 @@ namespace TianHua.Electrical.PDS.Engine
                         }
                         var thisMark = new ThPDSTextInfo();
                         var thisCircuitMark = new ThPDSTextInfo();
-                        var buffer = ThPDSBufferService.Buffer(distBox, database);
+                        var buffer = ThPDSBufferService.Buffer(distBox, Database);
                         var privateMark = MarkService.GetMarks(buffer);
                         privateMark.Texts.ForEach(o =>
                         {

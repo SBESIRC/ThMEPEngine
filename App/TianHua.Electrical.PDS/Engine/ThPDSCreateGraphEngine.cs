@@ -179,7 +179,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames, isStandardStorey,
                                 loadExtractService.Ignore, loadExtractService.Attached, loadExtractService.Terminal);
 
-                            graphEngine.MultiDistBoxAnalysis(acad.Database);
+                            graphEngine.MultiDistBoxAnalysis();
                             graphEngine.CreatGraph();
                             graphEngine.UnionEdge();
                             graphEngine.UnionLightingEdge();

@@ -6,9 +6,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 
+using ThCADExtension;
 using ThMEPEngineCore.Engine;
-using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -59,17 +60,42 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 if (o is Polyline polyline)
                 {
-                    var polyInfo = new ThPDSEntityInfo(o, true);
-                    var lines = new DBObjectCollection();
-                    polyInfo.Entity.Explode(lines);
-                    lines.OfType<Line>().Where(e => e.Length > 1.0)
-                        .ForEach(e => Results.Add(new ThPDSEntityInfo(e, polyInfo)));
+                    AddPolyline(polyline);
+                }
+                else if (o is Arc arc)
+                {
+                    var arcToPline = arc.TessellateArcWithArc(100.0);
+                    AddPolyline(arcToPline);
                 }
                 else
                 {
                     Results.Add(new ThPDSEntityInfo(o, true));
                 }
             });
+        }
+
+        private void AddPolyline(Polyline pline)
+        {
+            var polyInfo = new ThPDSEntityInfo(pline, true);
+            var curves = new DBObjectCollection();
+            polyInfo.Entity.Explode(curves);
+            var lines = new List<Line>();
+            foreach (var curve in curves)
+            {
+                if (curve is Line line)
+                {
+                    lines.Add(line);
+                }
+                else if (curve is Arc arc)
+                {
+                    var arcToPolyline = arc.TessellateArcWithArc(100.0);
+                    var arcCurves = new DBObjectCollection();
+                    arcToPolyline.Explode(arcCurves);
+                    lines.AddRange(arcCurves.OfType<Line>());
+                }
+            }
+            lines.OfType<Line>().Where(e => e.Length > 1.0)
+                .ForEach(e => Results.Add(new ThPDSEntityInfo(e, polyInfo)));
         }
 
         /// <summary>
