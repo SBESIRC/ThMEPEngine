@@ -52,8 +52,7 @@ namespace ThMEPArchitecture.MultiProcess
                     if (acad.Layers.Contains("添加分割线"))
                         newSegs.ForEach(l => l.ToDbLine(2, "添加分割线").AddToCurrentSpace());
                 }
-                newSegs.AddRange(layoutData.SegLines);
-                layoutData.ProcessSegLines(newSegs, false, true);
+                layoutData.ProcessSegLines(layoutData.SegLines.Concat(newSegs).ToList(), false, true);
                 dataWraper.UpdateInterParameter(layoutData);
                 InterParameter.Init(dataWraper);
             }

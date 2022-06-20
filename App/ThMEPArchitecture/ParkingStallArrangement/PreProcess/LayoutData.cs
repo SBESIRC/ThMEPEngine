@@ -36,6 +36,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public  List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
         public List<Circle> CAD_Anchors = new List<Circle>();// 提取到的cad锚点
+        public List<int> FixedSegLineIdx = new List<int> ();//迭代范围为0的分割线的index
         // NTS 数据结构
         public  Polygon WallLine;//初始边界线
         public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分割线
@@ -99,17 +100,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 var CrossPts = SegLines.GetCrossPoints(WallLine);
                 var BreakedSegLines = new List<LineSegment>();
-                var segLines_C = SegLines.Select(l => l.Clone()).ToList();
+                var newFixedSegLines = SegLines.Slice(FixedSegLineIdx);
                 //基于交点打断
-                segLines_C.ForEach(l => 
-                    BreakedSegLines.AddRange(l.Split(CrossPts.Select(c=>c.Coordinate).ToList())));
+                for (int i = 0; i < SegLines.Count; i++)
+                {
+                    var segLine = SegLines[i];
+                    var breakded = segLine.Split(CrossPts.Select(c => c.Coordinate).ToList());
+                    BreakedSegLines.AddRange(breakded);
+                }
                 SegLines = BreakedSegLines.CleanLineWithOneIntSecPt(WallLine);
                 //获取连接关系
                 SeglineIndexList = SegLines.GetSegLineIntsecList();
                 SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
                 //获取交点关系
                 SegLineIntSecNode = SegLines.GetSegLineIntSecNode(CrossPts);
-                GetLowerUpperBound();
+                GetLowerUpperBound(newFixedSegLines);
                 //ShowLowerUpperBound();
             }
             return true;
@@ -212,11 +217,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (layerName.Contains("分割线")&& !layerName.Contains("最终"))
+            if (layerName.Contains("分割线"))
             {
                 if (ent is Line line)
                 {
-                    CAD_SegLines.Add(line);
+                    if(line.Length > 1000)
+                    {
+                        CAD_SegLines.Add(line);
+                        if (layerName.Contains("固定")) FixedSegLineIdx.Add(CAD_SegLines.Count - 1);
+                    }
                 }
             }
             if (layerName.Contains("锚点"))
@@ -242,7 +251,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private void UpdateSegLines()
         {
             SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).Select(l => l.ToNTSLineSegment()).ToList();
-            RemoveSortSegLine();
+            //RemoveSortSegLine();
         }
         private void RemoveSortSegLine()
         {
@@ -253,6 +262,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 if (segLine.Length < 100)
                 {
                     SegLines.RemoveAt(i);
+                    FixedSegLineIdx.Remove(i);
                 }
             }
         }
@@ -262,7 +272,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var UnionedObstacles = new MultiPolygon(CAD_Obstacles.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
             Obstacles = UnionedObstacles.Get<Polygon>(true);
         }
-
         private List<Polygon> UpdateWallLine()//墙线合并
         {
             List<Polygon> RampPolgons = new List<Polygon>();
@@ -583,7 +592,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         #endregion
 
         #region 计算最大最小值
-        public void GetLowerUpperBound()
+        public void GetLowerUpperBound(List<LineSegment> newFixedSegLines)
         {
             LowerUpperBound = new List<(double, double)>();
             double HorzSize = WallLine.Coordinates.Max(c => c.X) - WallLine.Coordinates.Min(c => c.X);
@@ -592,7 +601,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             for (int i = 0; i < SegLines.Count; i++)
             {
                 if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0||
-                    Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius))
+                    Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius) ||
+                    newFixedSegLines.Any(l =>l.PartEqual(SegLines[i])))
                 {
                     if (SegLines[i].IsVertical())
                         LowerUpperBound.Add((SegLines[i].P0.X, SegLines[i].P0.X));
