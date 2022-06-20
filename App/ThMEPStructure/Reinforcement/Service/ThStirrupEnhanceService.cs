@@ -62,14 +62,12 @@ namespace ThMEPStructure.Reinforcement.Service
         public override void Enhance()
         {
             // Step1: 增大拉筋2、3的直径与箍筋1的直径相同（若2、3直径就与1相同，则直接进入迭代2）
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            var pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if(IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step2: 在迭代1的基础上，加大箍筋1的直径一级
@@ -77,7 +75,7 @@ namespace ThMEPStructure.Reinforcement.Service
             if(!string.IsNullOrEmpty(newStirrup1))
             {
                 RectEdgeComponent.Stirrup = newStirrup1;
-                var pvcal = CalculatePvcal();
+                pvcal = CalculatePvcal();
                 if (IsBiggerThanStirrupRatio(pvcal))
                 {
                     IsSuccess = true;
@@ -86,14 +84,12 @@ namespace ThMEPStructure.Reinforcement.Service
             }
 
             // Step3: 在迭代2的基础上，增大拉筋2、3的直径与箍筋1的直径相同
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step4: 在迭代3的基础上，继续加大箍筋1的直径1级
@@ -101,7 +97,7 @@ namespace ThMEPStructure.Reinforcement.Service
             if (!string.IsNullOrEmpty(newStirrup2))
             {
                 RectEdgeComponent.Stirrup = newStirrup2;
-                var pvcal = CalculatePvcal();
+                pvcal = CalculatePvcal();
                 if (IsBiggerThanStirrupRatio(pvcal))
                 {
                     IsSuccess = true;
@@ -110,14 +106,12 @@ namespace ThMEPStructure.Reinforcement.Service
             }
 
             // Step5: 在迭代4的基础上，增大拉筋2、3的直径与箍筋1的直径相同
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step6: 在迭代5的基础上，减小箍筋/拉筋间距，每次减小间距5，直至满足要求；（最小间距>=80）
@@ -281,22 +275,21 @@ namespace ThMEPStructure.Reinforcement.Service
         public override void Enhance()
         {
             // Step1: 增大拉筋2、3、4的直径与箍筋1的直径相同（若2、3、4直径就与1相同，则直接进入迭代2）
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            var pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
+           
 
             // Step2: 在迭代1的基础上，加大箍筋1的直径一级
             var newStirrup1 = EnlargeStirrupDiameter(LTypeEdgeComponent.Stirrup);
             if (!string.IsNullOrEmpty(newStirrup1))
             {
                 LTypeEdgeComponent.Stirrup = newStirrup1;
-                var pvcal = CalculatePvcal();
+                pvcal = CalculatePvcal();
                 if (IsBiggerThanStirrupRatio(pvcal))
                 {
                     IsSuccess = true;
@@ -305,14 +298,12 @@ namespace ThMEPStructure.Reinforcement.Service
             }
 
             // Step3: 在迭代2的基础上，增大拉筋2、3、4的直径与箍筋1的直径相同
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step4: 在迭代3的基础上，继续加大箍筋1的直径1级
@@ -320,7 +311,7 @@ namespace ThMEPStructure.Reinforcement.Service
             if (!string.IsNullOrEmpty(newStirrup2))
             {
                 LTypeEdgeComponent.Stirrup = newStirrup2;
-                var pvcal = CalculatePvcal();
+                pvcal = CalculatePvcal();
                 if (IsBiggerThanStirrupRatio(pvcal))
                 {
                     IsSuccess = true;
@@ -329,14 +320,12 @@ namespace ThMEPStructure.Reinforcement.Service
             }
 
             // Step5: 在迭代4的基础上，增大拉筋2、3、4的直径与箍筋1的直径相同
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step6: 在迭代5的基础上，减小箍筋/拉筋间距，每次减小间距5，直至满足要求；（最小间距>=80）
@@ -542,14 +531,12 @@ namespace ThMEPStructure.Reinforcement.Service
         public override void Enhance()
         {
             // Step1: 增大拉筋2、3、4的直径与箍筋1的直径相同（若2、3、4直径就与1相同，则直接进入迭代2）
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            var pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step2: 在迭代1的基础上，加大箍筋1的直径一级
@@ -557,7 +544,7 @@ namespace ThMEPStructure.Reinforcement.Service
             if (!string.IsNullOrEmpty(newStirrup1))
             {
                 TTypeEdgeComponent.Stirrup = newStirrup1;
-                var pvcal = CalculatePvcal();
+                pvcal = CalculatePvcal();
                 if (IsBiggerThanStirrupRatio(pvcal))
                 {
                     IsSuccess = true;
@@ -566,14 +553,12 @@ namespace ThMEPStructure.Reinforcement.Service
             }
 
             // Step3: 在迭代2的基础上，增大拉筋2、3、4的直径与箍筋1的直径相同
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step4: 在迭代3的基础上，继续加大箍筋1的直径1级
@@ -581,7 +566,7 @@ namespace ThMEPStructure.Reinforcement.Service
             if (!string.IsNullOrEmpty(newStirrup2))
             {
                 TTypeEdgeComponent.Stirrup = newStirrup2;
-                var pvcal = CalculatePvcal();
+                pvcal = CalculatePvcal();
                 if (IsBiggerThanStirrupRatio(pvcal))
                 {
                     IsSuccess = true;
@@ -590,14 +575,12 @@ namespace ThMEPStructure.Reinforcement.Service
             }
 
             // Step5: 在迭代4的基础上，增大拉筋2、3、4的直径与箍筋1的直径相同
-            if (SetDiameterIdentical())
+            SetDiameterIdentical();
+            pvcal = CalculatePvcal();
+            if (IsBiggerThanStirrupRatio(pvcal))
             {
-                var pvcal = CalculatePvcal();
-                if (IsBiggerThanStirrupRatio(pvcal))
-                {
-                    IsSuccess = true;
-                    return;
-                }
+                IsSuccess = true;
+                return;
             }
 
             // Step6: 在迭代5的基础上，减小箍筋/拉筋间距，每次减小间距5，直至满足要求；（最小间距>=80）
