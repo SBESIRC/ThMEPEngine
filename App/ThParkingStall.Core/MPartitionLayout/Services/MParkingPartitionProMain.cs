@@ -2281,6 +2281,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if(IsConnectedToLaneDouble(lane.Line))IniLanes.Add(lane);
                     else
                     {
+                        if (IsConnectedToLane(lane.Line, false))
+                            lane.Line = new LineSegment(lane.Line.P1, lane.Line.P0);
                         //如果只生成一个modulebox，宽度是7850，车位是5300，如果在后续生成车道的过程中有可能碰车位，这时应该缩短车道，作特殊处理
                         var modified_lane = lane.Line;
                         foreach (var box in CarModules)
@@ -2290,7 +2292,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                             var cond_perp = IsPerpLine(box.Line, modified_lane);
                             if (cond_dis && cond_character && cond_perp)
                             {
-                                modified_lane = new LineSegment(lane.Line.P0, lane.Line.P1.Translation(-Vector(lane.Line).Normalize() * (DisVertCarLength - DisVertCarLengthBackBack)));
+                                var end = lane.Line.P1.Translation(-Vector(lane.Line).Normalize() * (DisVertCarLength - DisVertCarLengthBackBack));
+                                modified_lane = new LineSegment(lane.Line.P0, end);
                             }
                         }
                         lane.Line=modified_lane;
