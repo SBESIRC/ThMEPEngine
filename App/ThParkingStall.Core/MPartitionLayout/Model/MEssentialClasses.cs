@@ -51,6 +51,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public Vector2D Vec;
         public bool IsInBackBackModule = false;
         public bool IsInVertUnsureModule = false;
+        public bool IsSingleModule=false;//针对单box7850与车位5300，在生成新车道有可能碰车位做特殊处理时的标记
     }
     public class GenerateLaneParas
     {

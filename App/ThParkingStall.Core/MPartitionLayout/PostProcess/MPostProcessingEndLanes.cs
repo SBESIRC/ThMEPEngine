@@ -327,64 +327,77 @@ namespace ThParkingStall.Core.MPartitionLayout
                 succeedLine = lane;
                 var tlane_depth = lane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));
                 var tlane_rec = PolyFromLines(lane, tlane_depth);
-                cars = cars.Where(e => !tlane_rec.Contains(e.Polyline.Envelope.Centroid)).ToList();
-                pillars = pillars.Where(e => !tlane_rec.Contains(e.Envelope.Centroid)).ToList();
-                var partitionpro = new MParkingPartitionPro();
-                partitionpro.Walls = Walls;
-                partitionpro.Boundary = boundary;
-                partitionpro.ObstaclesSpatialIndex = obspacialindex;
-                partitionpro.Obstacles = obspacialindex.SelectAll().Cast<Polygon>().ToList();
-                partitionpro.IniLanes.Add(new Lane(lane, vecmove.Normalize()));
-                partitionpro.IniLanes.AddRange(lanes.Select(e => new Lane(e, Vector2D.Zero)));
-                partitionpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-                var firstlane = partitionpro.IniLanes[0];
-                partitionpro.IniLanes = new List<Lane>() { firstlane };
-                var vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.RoadWidth / 2 + (VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth),
-               VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength, false, null, true);
-                foreach (var k in vertlanes)
+
+                //0620modified:
+                tlane_rec = tlane_rec.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck);
+                var prepsplit_lanes=lanes.Where(e => e.IntersectPoint(tlane_rec).Count()>0).Where(e => IsPerpLine(e,lane))
+                    .Where(e => e.ToLineString().IntersectPoint(lane.ToLineString()).Count()>0).ToList();
+                var lanes_split=SplitLine(lane, prepsplit_lanes);
+                if (lanes_split.Count() > 0)
                 {
-                    var vl = k.Line;
-                    if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10) lane = new LineSegment(lane.P1, lane.P0);
-                    //if (ClosestPointInVertLines(vl.P0, vl, lanes.ToArray()) < 10)
-                    //{
-                    //    vl.P0 = vl.P0.Translation(Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
-                    //}
-                    //if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10)
-                    //{
-                    //    vl.P1 = vl.P1.Translation(-Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
-                    //}
-                    var line = new LineSegment(vl);
-                    line = line.Translation(k.Vec.Normalize() * VMStock.RoadWidth / 2);
-                    partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength,
-                        VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
-                        , true, false, false, false, true, true, false, false, true, false, false, false, true);
-                }
-                vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth + VMStock.RoadWidth / 2 : VMStock.ParallelSpotLength
-                    + VMStock.RoadWidth / 2,
-                    VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
-                    false);
-                foreach (var k in vertlanes)
-                {
-                    var vl = k.Line;
-                    if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10) lane = new LineSegment(lane.P1, lane.P0);
-                    //if (ClosestPointInVertLines(vl.P0, vl, lanes.ToArray()) < 10)
-                    //{
-                    //    vl.P0 = vl.P0.Translation(Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
-                    //}
-                    //if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10)
-                    //{
-                    //    vl.P1 = vl.P1.Translation(-Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
-                    //}
-                    var line = new LineSegment(vl);
-                    line = line.Translation(k.Vec.Normalize() * 2750);
-                    partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec,
+                    lane=lanes_split[0];
+                    tlane_depth = lane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));
+                    tlane_rec = PolyFromLines(lane, tlane_depth);
+
+                    cars = cars.Where(e => !tlane_rec.Contains(e.Polyline.Envelope.Centroid)).ToList();
+                    pillars = pillars.Where(e => !tlane_rec.Contains(e.Envelope.Centroid)).ToList();
+                    var partitionpro = new MParkingPartitionPro();
+                    partitionpro.Walls = Walls;
+                    partitionpro.Boundary = boundary;
+                    partitionpro.ObstaclesSpatialIndex = obspacialindex;
+                    partitionpro.Obstacles = obspacialindex.SelectAll().Cast<Polygon>().ToList();
+                    partitionpro.IniLanes.Add(new Lane(lane, vecmove.Normalize()));
+                    partitionpro.IniLanes.AddRange(lanes.Select(e => new Lane(e, Vector2D.Zero)));
+                    partitionpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+                    var firstlane = partitionpro.IniLanes[0];
+                    partitionpro.IniLanes = new List<Lane>() { firstlane };
+                    var vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.RoadWidth / 2 + (VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth),
+                   VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength, false, null, true);
+                    foreach (var k in vertlanes)
+                    {
+                        var vl = k.Line;
+                        if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10) lane = new LineSegment(lane.P1, lane.P0);
+                        //if (ClosestPointInVertLines(vl.P0, vl, lanes.ToArray()) < 10)
+                        //{
+                        //    vl.P0 = vl.P0.Translation(Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
+                        //}
+                        //if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10)
+                        //{
+                        //    vl.P1 = vl.P1.Translation(-Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
+                        //}
+                        var line = new LineSegment(vl);
+                        line = line.Translation(k.Vec.Normalize() * VMStock.RoadWidth / 2);
+                        partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength,
+                            VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
+                            , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                    }
+                    vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth + VMStock.RoadWidth / 2 : VMStock.ParallelSpotLength
+                        + VMStock.RoadWidth / 2,
                         VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
-                        VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength
-                        , true, false, false, false, true, true, false);
+                        false);
+                    foreach (var k in vertlanes)
+                    {
+                        var vl = k.Line;
+                        if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10) lane = new LineSegment(lane.P1, lane.P0);
+                        //if (ClosestPointInVertLines(vl.P0, vl, lanes.ToArray()) < 10)
+                        //{
+                        //    vl.P0 = vl.P0.Translation(Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
+                        //}
+                        //if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10)
+                        //{
+                        //    vl.P1 = vl.P1.Translation(-Vector(vl).Normalize() * MParkingPartitionPro.DisLaneWidth / 2);
+                        //}
+                        var line = new LineSegment(vl);
+                        line = line.Translation(k.Vec.Normalize() * 2750);
+                        partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec,
+                            VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
+                            VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength
+                            , true, false, false, false, true, true, false);
+                    }
+                    partitionpro.ReDefinePillarDimensions();
+                    cars.AddRange(partitionpro.Cars);
+                    pillars.AddRange(partitionpro.Pillars);
                 }
-                partitionpro.ReDefinePillarDimensions();
-                cars.AddRange(partitionpro.Cars);
-                pillars.AddRange(partitionpro.Pillars);
             }
             else return;
 

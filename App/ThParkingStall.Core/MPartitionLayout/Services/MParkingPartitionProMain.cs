@@ -247,10 +247,19 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var laneSdl = LineSegmentSDL(endp, Vector(lanes[i].Line).Normalize(), 10000);
                 var laneSdlbuffer = laneSdl.Buffer(DisLaneWidth / 2);
                 var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(laneSdlbuffer).Cast<Polygon>().ToList();
+                var car_crossed= CarSpatialIndex.SelectCrossingGeometry(laneSdlbuffer).Cast<Polygon>().ToList();
                 var next_to_obs = false;
                 foreach (var cross in obscrossed)
                 {
-                    if (cross.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1)
+                    if (cross.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1 || cross.Contains(lanes[i].Line.P1))
+                    {
+                        next_to_obs = true;
+                        break;
+                    }
+                }
+                foreach (var cross in car_crossed)
+                {
+                    if (cross.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1 || cross.Contains(lanes[i].Line.P1))
                     {
                         next_to_obs = true;
                         break;
@@ -263,7 +272,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                     points.AddRange(cross.Coordinates);
                     points.AddRange(cross.IntersectPoint(laneSdlbuffer));
                 }
-                points = points.Where(p => laneSdlbuffer.Contains(p)).ToList();
+                foreach (var cross in CarSpatialIndex.SelectCrossingGeometry(laneSdlbuffer).Cast<Polygon>())
+                {
+                    points.AddRange(cross.Coordinates);
+                    points.AddRange(cross.IntersectPoint(laneSdlbuffer));
+                }
+                points = points.Where(p => laneSdlbuffer.Contains(p) || laneSdlbuffer.ClosestPoint(p).Distance(p)<1).ToList();
                 points.AddRange(Boundary.IntersectPoint(laneSdlbuffer));
                 points = points.Select(p => laneSdl.ClosestPoint(p)).ToList();
                 if (preprocess)
@@ -1024,6 +1038,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 else
                 {
+                    int generate_module_count = paras.CarModulesToAdd.Count;
                     if (splitori.Length > lane.Length)
                     {
                         var lane_ini_pair = lane.Translation(vec * (DisVertCarLengthBackBack + DisLaneWidth / 2));
@@ -1102,6 +1117,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                             Lane ln = new Lane(split, vec);
                             paras.LanesToAdd.Add(ln);
                         }
+                    }
+                    if (paras.CarModulesToAdd.Count - generate_module_count == 1)
+                    {
+                        //如果只生成一个modulebox，宽度是7850，车位是5300，如果在后续生成车道的过程中有可能碰车位，这时应该缩短车道，作特殊处理
+                        paras.CarModulesToAdd[paras.CarModulesToAdd.Count - 1].IsSingleModule = true;
                     }
                 }
             }
@@ -2253,7 +2273,31 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (paras.SetNotBeMoved != -1) IniLanes[paras.SetNotBeMoved].CanBeMoved = false;
             if (paras.SetGStartAdjLane != -1) IniLanes[paras.SetGStartAdjLane].GStartAdjLine = true;
             if (paras.SetGEndAdjLane != -1) IniLanes[paras.SetGEndAdjLane].GEndAdjLine = true;
-            if (paras.LanesToAdd.Count > 0) IniLanes.AddRange(paras.LanesToAdd);
+            if (paras.LanesToAdd.Count > 0)
+            {
+                IniLanes.AddRange(paras.LanesToAdd);
+                foreach (var lane in paras.LanesToAdd)
+                {
+                    if(IsConnectedToLaneDouble(lane.Line))IniLanes.Add(lane);
+                    else
+                    {
+                        //如果只生成一个modulebox，宽度是7850，车位是5300，如果在后续生成车道的过程中有可能碰车位，这时应该缩短车道，作特殊处理
+                        var modified_lane = lane.Line;
+                        foreach (var box in CarModules)
+                        {
+                            var cond_dis = box.Box.Contains(lane.Line.P1) || box.Box.ClosestPoint(lane.Line.P1).Distance(box.Box.ClosestPoint(lane.Line.P1)) < 1;
+                            var cond_character = box.IsSingleModule;
+                            var cond_perp = IsPerpLine(box.Line, modified_lane);
+                            if (cond_dis && cond_character && cond_perp)
+                            {
+                                modified_lane = new LineSegment(lane.Line.P0, lane.Line.P1.Translation(-Vector(lane.Line).Normalize() * (DisVertCarLength - DisVertCarLengthBackBack)));
+                            }
+                        }
+                        lane.Line=modified_lane;
+                        IniLanes.Add(lane);
+                    }
+                }
+            }
             if (paras.CarBoxesToAdd.Count > 0)
             {
                 CarBoxes.AddRange(paras.CarBoxesToAdd);
