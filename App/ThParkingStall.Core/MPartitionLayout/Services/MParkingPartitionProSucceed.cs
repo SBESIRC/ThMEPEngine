@@ -290,7 +290,15 @@ namespace ThParkingStall.Core.MPartitionLayout
                     }
                     obpl = obpl.Scale(1 / (ScareFactorForCollisionCheck - 0.01));
                     obpoints = obpoints.Where(p => obpl.IsPointInFast(p)).Select(p => bdsplittest.ClosestPoint(p)).ToList();
-                    var boxsplits = SplitLine(bdsplittest, obpoints).Where(e => !IsInAnyPolys(e.MidPoint, obcrossed)).Where(e => e.Length >= minlength);
+                    var boxsplits = SplitLine(bdsplittest, obpoints).Where(e =>
+                    {                   
+                        var box= PolyFromLines(e.Scale(ScareFactorForCollisionCheck), e.Scale(ScareFactorForCollisionCheck).Translation(-lane.Vec.Normalize() * mindistance));
+                        foreach (var cross in obcrossed)
+                        {
+                            if (cross.IntersectPoint(box).Count() > 0) return false;
+                        }
+                        return !IsInAnyPolys(e.MidPoint, obcrossed);
+                    }).Where(e => e.Length >= minlength);
                     foreach (var bxsplit in boxsplits)
                     {
                         var boxsplit = bxsplit;

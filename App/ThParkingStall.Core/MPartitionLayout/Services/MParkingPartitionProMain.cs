@@ -1930,7 +1930,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     return generated;
                 }
             }
-            else if (CloseToWall(lane.Line.P1, lane.Line) && !lane.GEndAdjLine)
+            if (CloseToWall(lane.Line.P1, lane.Line) && !lane.GEndAdjLine)
             {
                 var generated = GenerateAdjacentLanesFunc(ref paras, lane, i, false);
                 if (generated != -1)
@@ -2129,6 +2129,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var pcenter_i = BuildingBoxes[i].Centroid.Coordinate;
                     var pcenter_j = BuildingBoxes[j].Centroid.Coordinate;
                     var line_ij = new LineSegment(pcenter_i, pcenter_j);
+                    var degree = Math.Abs(line_ij.Angle) / Math.PI * 180;
+                    degree = Math.Min(degree, Math.Abs(90 - degree));
+                    if (degree > 10) continue;
                     var lines = SplitLine(line_ij, BuildingBoxes).Where(e => !IsInAnyBoxes(e.MidPoint, BuildingBoxes));
                     line_ij = ChangeLineToBeOrthogonal(line_ij);
                     if (line_ij.Length < 1) continue;
@@ -2196,6 +2199,19 @@ namespace ThParkingStall.Core.MPartitionLayout
                         }
                     }
                     if (quit) continue;
+                    var gline_buffer = gline.Buffer(DisLaneWidth / 2);
+                    gline_buffer = gline_buffer.Scale(ScareFactorForCollisionCheck);
+                    var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(gline_buffer).Cast<Polygon>().ToList();
+                    gline_buffer = gline.Buffer(DisLaneWidth / 2);
+                    var points = new List<Coordinate>();
+                    foreach (var cross in obscrossed)
+                    {
+                        points.AddRange(cross.Coordinates);
+                        points.AddRange(cross.IntersectPoint(gline_buffer));
+                    }
+                    points = points.Where(p => gline_buffer.Contains(p)).Select(p => gline.ClosestPoint(p)).Where(p => p.Distance(gline.P0) > 1).ToList();
+                    var gline_splits = SplitLine(gline, points);
+                    if (gline_splits.Count > 0) gline = gline_splits[0];
                     paras.LanesToAdd.Add(new Lane(gline, Vector(line).Normalize()));
                     paras.LanesToAdd.Add(new Lane(gline, -Vector(line).Normalize()));
                     paras.CarBoxesToAdd.Add(PolyFromLine(gline));
