@@ -2109,7 +2109,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     cvs.ContextMenu = new();
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR);
                                     if (m != null)
                                     {
                                         if (conductor != null)
@@ -2127,7 +2127,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor1");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1);
                                     if (m != null)
                                     {
                                         if (conductor1 != null)
@@ -2145,7 +2145,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor2");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2);
                                     if (m != null)
                                     {
                                         if (conductor2 != null)
@@ -3025,7 +3025,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     cvs.ContextMenu = new();
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR);
                                     if (m != null)
                                     {
                                         if (conductor != null)
@@ -3036,10 +3036,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor1");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1);
                                     if (m != null)
                                     {
                                         if (conductor1 != null)
@@ -3050,10 +3054,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor2");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2);
                                     if (m != null)
                                     {
                                         if (conductor2 != null)
@@ -3063,6 +3071,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
+                                        }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
                                         }
                                     }
                                 }
@@ -3454,7 +3466,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             {
                                                 Conductor conductor = sc.Conductor;
-                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR);
                                                 if (m != null)
                                                 {
                                                     if (conductor != null)
@@ -3464,6 +3476,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                         var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                                         reg(r, vm);
+                                                    }
+                                                    else
+                                                    {
+                                                        m.Visibility = Visibility.Collapsed;
                                                     }
                                                 }
                                             }
