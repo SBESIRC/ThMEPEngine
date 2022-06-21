@@ -24,12 +24,13 @@ namespace ThMEPEngineCore.Model.Electrical
     public class ThEStoreys : ThIfcSpatialStructureElement
     {
         public ObjectId ObjectId { get; }
-
         public ThBlockReferenceData Data { get; }
+        public string StoreyTypeString { get; private set; }
         public ThEStoreys(ObjectId id)
         {
-            ObjectId = id;
+            ObjectId= id;
             Data = new ThBlockReferenceData(id);
+            StoreyTypeString = (string)Data.CustomProperties.GetValue(ThPipeCommon.STOREY_DYNAMIC_PROPERTY_TYPE);
         }
         public string StoreyNumber
         {
@@ -68,8 +69,6 @@ namespace ThMEPEngineCore.Model.Electrical
                 }
             }
         }
-        public string StoreyTypeString => (string)Data.CustomProperties.GetValue(ThPipeCommon.STOREY_DYNAMIC_PROPERTY_TYPE);
-
         public EStoreyType StoreyType
         {
             get
