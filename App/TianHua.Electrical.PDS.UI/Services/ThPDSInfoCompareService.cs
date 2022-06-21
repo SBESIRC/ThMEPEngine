@@ -232,7 +232,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
-                    if (tag is null)
+                    if(edge.Source.Type == Model.PDSNodeType.VirtualLoad)
+                    {
+                        continue;
+                    }
+                    else if (tag is null)
                     {
                         items.Add(new()
                         {
@@ -381,7 +385,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
-                    if (tag is null)
+                    if(node.Type == Model.PDSNodeType.VirtualLoad)
+                    {
+                        continue;
+                    }
+                    else if (tag is null)
                     {
                         items.Add(new()
                         {
