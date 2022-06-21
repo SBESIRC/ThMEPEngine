@@ -257,6 +257,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", false);
                     }
                 }
+                if (vm is ThPDSDistributionBoxModel target)
+                {
+                    if (target.IsDualPower)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("Power", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("LowPower", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("HighPower", true);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("Power", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("LowPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("HighPower", false);
+                    }
+                }
                 if (vm is ThPDSCircuitModel circuit)
                 {
                     if (circuit.IsDualPower)

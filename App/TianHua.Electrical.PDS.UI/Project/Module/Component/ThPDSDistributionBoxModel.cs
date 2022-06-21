@@ -17,10 +17,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             _node = graphNode;
         }
-        [Browsable(false)]
-        public double LowPower => _node.Details.LowPower;
-        [Browsable(false)]
-        public double HighPower => _node.Details.HighPower;
 
         [ReadOnly(true)]
         [Category("配电箱参数")]
@@ -30,15 +26,48 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _node.Load.ID.LoadID;
         }
 
+        [Browsable(true)]
         [DisplayName("功率")]
         [Category("配电箱参数")]
+        [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double Power
         {
             get => _node.Details.HighPower;
             set
             {
-                _node.Details.HighPower = value;
+                _node.SetNodeHighPower(value);
                 OnPropertyChanged(nameof(Power));
+                OnPropertyChanged(nameof(CalculateCurrent));
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("平时功率")]
+        [Category("配电箱参数")]
+        [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
+        public double LowPower
+        {
+            get => _node.Details.LowPower;
+            set
+            {
+                _node.SetNodeLowPower(value);
+                OnPropertyChanged(nameof(LowPower));
+                OnPropertyChanged(nameof(CalculateCurrent));
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("消防功率")]
+        [Category("配电箱参数")]
+        [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
+        public double HighPower
+        {
+            get => _node.Details.HighPower;
+            set
+            {
+                _node.SetNodeHighPower(value);
+                OnPropertyChanged(nameof(HighPower));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
@@ -124,5 +153,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertyChanged(nameof(BoxInstallationType));
             }
         }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsDualPower => _node.Details.IsDualPower;
     }
 }
