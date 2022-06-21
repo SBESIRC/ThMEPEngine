@@ -191,7 +191,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THDXXHSXTT", CommandFlags.Modal)]
         public void THDXXHSXTT()
         {
-            var uiDrainage = new uiFireHydrantSystem();
+            var uiDrainage = new UiFireHydrantSystem();
             AcadApp.ShowModelessWindow(uiDrainage);
         }
 
@@ -201,7 +201,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THDXPLXTT", CommandFlags.Modal)]
         public void THDXPLXTT()
         {
-            var uiDrainage = new uiUNDSpraySystem();
+            var uiDrainage = new UiUNDSpraySystem();
             AcadApp.ShowModelessWindow(uiDrainage);
         }
 

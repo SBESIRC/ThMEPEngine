@@ -1,4 +1,4 @@
-﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiFireHydrantSystemSet"
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.UiFireHydrantSystemSet"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

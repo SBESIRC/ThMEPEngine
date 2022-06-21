@@ -1,9 +1,4 @@
-﻿using AcHelper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.ViewModel;
@@ -11,19 +6,19 @@ using TianHua.Plumbing.WPF.UI.UI;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
 {
-    /// <summary>
-    /// uiFireHydrantSystem.xaml 的交互逻辑
-    /// </summary>
-    public partial class uiFireHydrantSystem : ThCustomWindow
+    public partial class UiFireHydrantSystem : ThCustomWindow
     {
         public static FireHydrantSystemViewModel viewModel;
-        public uiFireHydrantSystem()
+        public UiFireHydrantSystem()
         {
             InitializeComponent();
             if (null == viewModel)
+            {
                 viewModel = new FireHydrantSystemViewModel();
-            this.DataContext = viewModel;
+            }
+            DataContext = viewModel;
         }
+
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
             using (var cmd = new ThFireHydrantCmd(viewModel))
@@ -41,15 +36,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
         {
             FireHydrantSystemViewModel.InsertSubLoopMark();
         }
-        private void btnSet_Click(object sender, RoutedEventArgs e)
+
+        private void BtnSet_Click(object sender, RoutedEventArgs e)
         {
             var oldViewModel = viewModel.SetViewModel?.Clone();
-            uiFireHydrantSystemSet systemSet = new uiFireHydrantSystemSet(viewModel.SetViewModel);
+            UiFireHydrantSystemSet systemSet = new UiFireHydrantSystemSet(viewModel.SetViewModel);
             systemSet.Owner = this;
             var ret = systemSet.ShowDialog();
-            if (ret == false)
+            if (ret == false)//用户取消了操作
             {
-                //用户取消了操作
                 viewModel.SetViewModel = oldViewModel;
                 return;
             }

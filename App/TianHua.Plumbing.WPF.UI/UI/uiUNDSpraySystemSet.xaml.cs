@@ -1,33 +1,25 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.UndergroundSpraySystem.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
-    /// <summary>
-    /// uiUNDSpraySystemSet.xaml 的交互逻辑
-    /// </summary>
-    public partial class uiUNDSpraySystemSet : ThCustomWindow
+    public partial class UiUNDSpraySystemSet : ThCustomWindow
     {
         public SprayVMSet setViewModel;
-        public uiUNDSpraySystemSet(SprayVMSet viewModel = null)
+        public UiUNDSpraySystemSet(SprayVMSet viewModel = null)
         {
             InitializeComponent();
-            this.Title = "参数设置";
+            Title = "参数设置";
             setViewModel = viewModel;
-            //orgViewModel = viewModel;
             if (null == viewModel)
+            {
                 setViewModel = new SprayVMSet();
-            this.DataContext = setViewModel;
+            }
+            DataContext = setViewModel;
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)

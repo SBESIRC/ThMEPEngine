@@ -1,36 +1,28 @@
-﻿using Autodesk.AutoCAD.EditorInput;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
-using ThMEPWSS.Command;
 using ThMEPWSS.UndergroundSpraySystem.ViewModel;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using AcHelper;
 using ThMEPWSS.UndergroundSpraySystem.Command;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
-    /// <summary>
-    /// uiUNDSpraySystem.xaml 的交互逻辑
-    /// </summary>
-    public partial class uiUNDSpraySystem : ThCustomWindow
+    public partial class UiUNDSpraySystem : ThCustomWindow
     {
         static SprayVM viewModel;
-        public uiUNDSpraySystem()
+        public UiUNDSpraySystem()
         {
             InitializeComponent();
             if (null == viewModel)
                 viewModel = new SprayVM();
-            this.DataContext = viewModel;
+            DataContext = viewModel;
         }
 
-        private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
+        private void BtnSelectFloor_Click(object sender, RoutedEventArgs e)
         {
             viewModel.CreateFloorFraming();
         }
 
-        private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
+        private void BtnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
             viewModel.InitListDatas();
         }
@@ -53,10 +45,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         }
 
-        private void btnSet_Click(object sender, RoutedEventArgs e)
+        private void BtnSet_Click(object sender, RoutedEventArgs e)
         {
             var oldViewModel = viewModel.SetViewModel?.Clone();
-            var systemSet = new uiUNDSpraySystemSet(viewModel.SetViewModel);
+            var systemSet = new UiUNDSpraySystemSet(viewModel.SetViewModel);
             systemSet.Owner = this;
             var ret = systemSet.ShowDialog();
             if (ret == false)
