@@ -244,7 +244,7 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     }
                 }
-                else if(!string.IsNullOrEmpty(str) && descriptionAssign)
+                else if (!string.IsNullOrEmpty(str) && descriptionAssign)
                 {
                     thPDSLoad.ID.Description = str;
                     descriptionAssign = false;
@@ -510,6 +510,10 @@ namespace TianHua.Electrical.PDS.Service
             List<string> distBoxKey)
         {
             var id = CreateCircuitID(srcPanelID, tarPanelID, infos, distBoxKey);
+            if (string.IsNullOrEmpty(id.SourcePanelID) && !string.IsNullOrEmpty(srcPanelID))
+            {
+                id.SourcePanelIDList.Add(srcPanelID);
+            }
             var circuit = new ThPDSCircuit
             {
                 ID = id,
@@ -623,7 +627,7 @@ namespace TianHua.Electrical.PDS.Service
             out bool frequencyConversion)
         {
             var powers = new List<double>();
-            var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
+            var check = "[0-9]+[.]?[0-9]{0,}[kK]{1}[wW]{1}";
             var r = new Regex(@check);
             needCopy = false;
             frequencyConversion = false;
