@@ -7,29 +7,35 @@
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     Title="压力排水系统图"
                     SizeToContent="WidthAndHeight"
-             mc:Ignorable="d" Height="350" >
+             mc:Ignorable="d" Height="350" 
+                    WindowStartupLocation="CenterOwner">
     <Grid  Margin="5"  x:Name="gridForm">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="46*"/>
+            <ColumnDefinition Width="37*"/>
+            <ColumnDefinition Width="83*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Row="0">
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="3">
             <WrapPanel Orientation="Vertical">
                 <cus:ImageButton Content="楼层框定" Name="PDSSelectFloor" Height="24" Width="80" TabIndex="1" Click="PDSSelectFloor_Click"></cus:ImageButton>
                 <cus:ImageButton x:Name="PDSReadStoreys" Content="读取楼层" Height="24" Width="80" Margin="0,5,0,0"  TabIndex="2" Click="PDSReadStoreys_Click"></cus:ImageButton>
             </WrapPanel>
             <cus:ImageButton Content="参数设置" ImageTextLocation="TextOnly" Name="btnSet" Click="SetParameter_Click"  Margin="5,0,0,0" Width="80"  TabIndex="3"></cus:ImageButton>
         </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Orientation="Vertical" Grid.ColumnSpan="3" Margin="0,0,0,24" Grid.RowSpan="3">
             <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
             <Label Content="楼层表：" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
             <ListBox Height="195" ItemsSource="{Binding UndpdsFloorListDatas}" SelectionChanged="ListBox_SelectionChanged" >
             </ListBox>
         </StackPanel>
-       
-        <StackPanel Grid.Row="3" HorizontalAlignment="Right">
+
+        <StackPanel Grid.Row="3" HorizontalAlignment="Left" Margin="12,0,0,0" Grid.Column="2">
             <cus:ImageButton Content="生成" Width="70" Height="24"  TabIndex="4" Click="GenerateDiagramButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>
