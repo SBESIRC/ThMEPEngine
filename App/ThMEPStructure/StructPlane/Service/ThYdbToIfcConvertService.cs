@@ -28,10 +28,8 @@ namespace ThMEPStructure.StructPlane.Service
                 var ydbPath = Path.GetDirectoryName(ydbFile);
                 var ydbFileName = Path.GetFileNameWithoutExtension(ydbFile);
                 var outputIfcName = ydbFileName + ".ifc";
-                
-                ToIfc(ydbFile, outputIfcName);
-
                 ifcFileName = Path.Combine(ydbPath, outputIfcName);
+                ToIfc(ydbFile, ifcFileName);
                 if (!IsExist(ifcFileName))
                 {
                     ifcFileName = "";
