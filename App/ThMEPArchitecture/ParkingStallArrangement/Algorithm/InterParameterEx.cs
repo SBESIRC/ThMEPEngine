@@ -433,8 +433,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var Center = BoundingBox.Centroid;
             double w1 = VMStock.RoadWidth + VMStock.VerticalSpotLength + VMStock.D2;
             double w2 = VMStock.RoadWidth + 2*( VMStock.VerticalSpotLength + VMStock.D2);
+            double w3 = VMStock.RoadWidth + VMStock.ParallelSpotWidth;
             double h1 = 0.5 * VMStock.RoadWidth + (VMStock.ColumnSizeOfParalleToRoad + 2* VMStock.ColumnAdditionalSize) *2 + VMStock.VerticalSpotWidth * 5 + VMStock.D1;
             double h2 = h1 - VMStock.VerticalSpotWidth;
+            double h3 = 0.5 * VMStock.RoadWidth + (VMStock.ColumnSizeOfParalleToRoad + 2 * VMStock.ColumnAdditionalSize) * 3 + VMStock.ParallelSpotLength * 3;
             foreach (var edge in edges)
             {
                 //edge.ToDbLine().AddToCurrentSpace();
@@ -464,6 +466,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         if(newSeg != null) return newSeg;
                         newSeg = GetNewSegAtBestPlace(subArea, SegLineStrings, extended,
                                     pt, positiveDir, extendFlag, w2, h2, maxLength);
+                        if (newSeg != null) return newSeg;
+                        newSeg = GetNewSegAtBestPlace(subArea, SegLineStrings, extended,
+                                    pt, positiveDir, extendFlag, w3, h3, maxLength);
                         if (newSeg != null) return newSeg;
                     }
                 }
