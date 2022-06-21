@@ -19,12 +19,12 @@ namespace ThMEPIO.DB.SQLite
 
         public DataTable GetTable(string sql)
         {
-            return SQLiteHelper.ExecuteDataTable(_connecttion, sql);
+            return ThMEPSQLiteHelper.ExecuteDataTable(_connecttion, sql);
         }
 
         public int ExecuteNonQuery(string sql)
         {
-            return SQLiteHelper.ExecuteNonQuery(_connecttion, sql);
+            return ThMEPSQLiteHelper.ExecuteNonQuery(_connecttion, sql);
         }
     }
 }
