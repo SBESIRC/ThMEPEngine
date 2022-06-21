@@ -93,12 +93,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
         {
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
+            //bool usePline = ParameterViewModel.UsePolylineAsObstacle;
 
             var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
             var dataWraper = Converter.GetDataWraper(outerBrder, ParameterViewModel);
             if (!getouterBorderFlag) return;
-            var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+            var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false);
             if(!dataPreprocessingFlag)
             {
                 return;

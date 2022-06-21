@@ -37,8 +37,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private BisectionArea BisectAreaTree;//二分树状区域
         private Dictionary<Tuple<int?, int?, int?, int?>, BisectionArea> BisectAreaDic;//记录全部计算过的区域
         private Dictionary<Tuple<int, int, int, bool>,BisectionSegLine> BisectSegLineDic;// 记录全部计算过的segline
-        private HashSet<int> VertSegLineValues = new HashSet<int>();// 所有合理垂直分割线的值
-        private HashSet<int> HorzSegLineValues = new HashSet<int>();// 所有合理水平分割线的值
+        private HashSet<int> VertSegLineValues = new HashSet<int>();// 所有合理垂直分区线的值
+        private HashSet<int> HorzSegLineValues = new HashSet<int>();// 所有合理水平分区线的值
         public HashSet<BisectionPlan> AllSegPlans = new HashSet<BisectionPlan>();
         private bool ShowSegLineOnly = true;
         public AutoSegGenerator(LayoutData layoutData, Serilog.Core.Logger logger,int cutol =1000)
@@ -71,7 +71,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             ShowSegLineOnly = showSegLineOnly;
             LastPlanOnly = lastPlanOnly;
-            Logger?.Information("二分分割线穷举");
+            Logger?.Information("二分分区线穷举");
             var initAreaKey = new Tuple<int?, int?, int?, int?>(null, null, null, null);
             BisectAreaDic.Add(initAreaKey, BisectAreaTree);
             List<BisectionArea> areas = new List<BisectionArea> { BisectAreaTree };
@@ -86,7 +86,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 areas = nextLevelAreas;
             }
-            Logger?.Information(" 二分分割线总数：" + BisectSegLineDic.Count.ToString() +"");
+            Logger?.Information(" 二分分区线总数：" + BisectSegLineDic.Count.ToString() +"");
             //if(ShowSegLineOnly) GetGrid();
             //else
             if (!ShowSegLineOnly)
@@ -157,7 +157,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var Set = new HashSet<BisectionPlan> { initPlan };
             int SegLineCount = 0;
             Logger?.Information("\n #####################################");
-            Logger?.Information("\n 分割线个数：0");
+            Logger?.Information("\n 分区线个数：0");
             Logger?.Information("\n 方案个数（包含重复）：1" );
             Logger?.Information("\n 方案个数（不包含重复）：1");
             if(!LastPlanOnly) AllSegPlans.Add(initPlan);
@@ -171,7 +171,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 if (!LastPlanOnly) AllSegPlans.UnionWith(Set);
                 ReclaimMemory();
                 Logger?.Information("\n #####################################");
-                Logger?.Information("\n 分割线个数："+ SegLineCount.ToString());
+                Logger?.Information("\n 分区线个数："+ SegLineCount.ToString());
                 Logger?.Information("\n 方案个数（包含重复）：" + SubPlanCounts.ToString());
                 Logger?.Information("\n 方案个数（不包含重复）：" + Set.Count.ToString());
             }
@@ -187,7 +187,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     BisectionArea bisecArea = BisectAreaDic[areaKey];
                     SubPlanCounts += bisecArea.SegLines.Count;//记录所有方案数
-                    for (int i = 0; i < bisecArea.SegLines.Count; ++i)//子区域全部的可能分割线
+                    for (int i = 0; i < bisecArea.SegLines.Count; ++i)//子区域全部的可能分区线
                     {
                         var SegLines = bisecArea.SegLines[i];
                         var newPlan = plan.GetSubPlan(SegLines,
@@ -207,24 +207,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var subAreas = new List<BisectionArea>();
             if (bisectArea.AllSearched == true) return subAreas;// 已经探索过则不探索，因为其子区域都已加过探索列表
-            UpdateAllVertSeg(bisectArea);// 更新垂直分割线子区域
-            UpdateAllHorzSeg(bisectArea);// 更新水平分割线子区域
+            UpdateAllVertSeg(bisectArea);// 更新垂直分区线子区域
+            UpdateAllHorzSeg(bisectArea);// 更新水平分区线子区域
             bisectArea.AllSearched = true;
             bisectArea.SubAreaKeys.ForEach(k => subAreas.Add(BisectAreaDic[k]));
-            //bisectArea.ShowSegLines();// 展示分割线
+            //bisectArea.ShowSegLines();// 展示分区线
             return subAreas;
         }
         private void UpdateAllVertSeg(BisectionArea bisectArea)//区域探索完添加标记
         {
-            //假设当前区域外部没有墙线，或者分割线穿插不到外部的墙线
+            //假设当前区域外部没有墙线，或者分区线穿插不到外部的墙线
             var area = bisectArea.Area.Clone() as Polyline;
             var pts = area.GetPoints();
             var left = pts.Min(pt => pt.X);
             var right = pts.Max(pt => pt.X);
             var bottom = (int)pts.Min(pt => pt.Y) - Tol;
             var top = (int)pts.Max(pt => pt.Y) + Tol;
-            // 竖向起始分割线，从left开始，步长;cutdistance
-            bool CrossBuilding = false;// 判断车道buffer是否穿障碍物,上一个buffer包含障碍物才考虑生成新的分割线
+            // 竖向起始分区线，从left开始，步长;cutdistance
+            bool CrossBuilding = false;// 判断车道buffer是否穿障碍物,上一个buffer包含障碍物才考虑生成新的分区线
             var startX = left;//上一个位置
             var endX = left + StepSize;//尝试位置，新位置
             while (endX < right)
@@ -249,17 +249,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 else// 之前区域包含建筑
                 {
-                    var segRectInBuild = BuildingSpatialIndex.SelectFence(segLine);//判断分割线是否穿墙
-                    if (segRectInBuild.Count > 0)// 当前分割线穿墙
+                    var segRectInBuild = BuildingSpatialIndex.SelectFence(segLine);//判断分区线是否穿墙
+                    if (segRectInBuild.Count > 0)// 当前分区线穿墙
                     {
                         endX += StepSize;// 扩大区域
                     }
                     else// 不穿墙，判断是否vaild
                     {
                         var segFlag = IsCorrectSegLines(segLine, area, out double maxVal, out double minVal, out double moveDist);
-                        if (segFlag)// 为合理分割线
+                        if (segFlag)// 为合理分区线
                         {
-                            // 移动分割线到中点
+                            // 移动分区线到中点
                             var foundMid = GetMidVal(endX, minVal, maxVal, true, out int midX);// 获取中点坐标，优先在所有已有的线中找
                             segLine.StartPoint = new Point3d(midX, top, 0);
                             segLine.EndPoint = new Point3d(midX, bottom, 0);
@@ -272,11 +272,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 CrossBuilding = false;
                                 startX = endX;
                                 var vals = GetStartEndValue(area, segLine);
-                                // 将当前分割线转换为BisecSegLine 
+                                // 将当前分区线转换为BisecSegLine 
                                 var BisecSegLine = new BisectionSegLine(segLine, midX, vals.Item1, vals.Item2, maxVal, minVal);
                                 var lineKey = BisecSegLine.Key;
                                 if (BisectSegLineDic.ContainsKey(lineKey)) BisecSegLine = BisectSegLineDic[lineKey];
-                                else//新的分割线
+                                else//新的分区线
                                 {
                                     BisectSegLineDic.Add(lineKey, BisecSegLine);
                                     //if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
@@ -298,7 +298,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 }
                             }
                         }
-                        else//不合理分割线，无操作，扩大范围
+                        else//不合理分区线，无操作，扩大范围
                         {
                             
                         }
@@ -310,15 +310,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         private void UpdateAllHorzSeg(BisectionArea bisectArea)//区域探索完添加标记
         {
-            //假设当前区域外部没有墙线，或者分割线穿插不到外部的墙线
+            //假设当前区域外部没有墙线，或者分区线穿插不到外部的墙线
             var area = bisectArea.Area.Clone() as Polyline;
             var pts = area.GetPoints();
             var left = (int)pts.Min(pt => pt.X) - Tol;
             var right = (int)pts.Max(pt => pt.X) + Tol;
             var buttom = pts.Min(pt => pt.Y);
             var top = pts.Max(pt => pt.Y) ;
-            // 竖向起始分割线，从left开始，步长;cutdistance
-            bool CrossBuilding = false;// 判断车道buffer是否穿障碍物,上一个buffer包含障碍物才考虑生成新的分割线
+            // 竖向起始分区线，从left开始，步长;cutdistance
+            bool CrossBuilding = false;// 判断车道buffer是否穿障碍物,上一个buffer包含障碍物才考虑生成新的分区线
 
             var startY = buttom;//上一个位置
             var endY = startY + StepSize;//尝试位置，新位置
@@ -345,7 +345,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 else// 之前区域包含建筑
                 {
                     var segRectInBuild = BuildingSpatialIndex.SelectFence(segLine);
-                    if (segRectInBuild.Count > 0)// 当前分割线穿墙
+                    if (segRectInBuild.Count > 0)// 当前分区线穿墙
                     {
                         endY += StepSize;// 扩大区域
                     }
@@ -353,9 +353,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     {
                         var segFlag = IsCorrectSegLines(segLine, area, out double maxVal, out double minVal, out double moveDist);
 
-                        if (segFlag)// 为合理分割线
+                        if (segFlag)// 为合理分区线
                         {
-                            // 移动分割线到中点
+                            // 移动分区线到中点
                             var foundMid = GetMidVal(endY, minVal, maxVal, false, out int midY);// 获取中点坐标，优先在所有已有的线中找
                             segLine.StartPoint = new Point3d(left, midY, 0);
                             segLine.EndPoint = new Point3d(right, midY, 0);
@@ -368,11 +368,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 CrossBuilding = false;
                                 startY = endY;
                                 var vals = GetStartEndValue(area, segLine);
-                                // 将当前分割线转换为BisecSegLine 
+                                // 将当前分区线转换为BisecSegLine 
                                 var BisecSegLine = new BisectionSegLine(segLine, midY, vals.Item1, vals.Item2, maxVal, minVal);
                                 var lineKey = BisecSegLine.Key;
                                 if (BisectSegLineDic.ContainsKey(lineKey)) BisecSegLine = BisectSegLineDic[lineKey];
-                                else// 新的分割线
+                                else// 新的分区线
                                 {
                                     BisectSegLineDic.Add(lineKey, BisecSegLine);
                                     //if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
@@ -394,7 +394,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 }
                             }
                         }
-                        else//不合理分割线，无操作，扩大范围
+                        else//不合理分区线，无操作，扩大范围
                         {
                         }
                         endY += moveDist;
@@ -434,7 +434,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return false;//当前无记录
         }
 
-        private (int,int) GetStartEndValue(Polyline area, Line SegLine)//利用分割线有效的部分
+        private (int,int) GetStartEndValue(Polyline area, Line SegLine)//利用分区线有效的部分
         {
             int minVal;
             int maxVal;
@@ -451,7 +451,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             return (minVal, maxVal);
         }
-        private Line GetVaildSegLineAtLine(Polyline area, Line SegLine)// 获取当前有效分割线,切掉超出边界的部分
+        private Line GetVaildSegLineAtLine(Polyline area, Line SegLine)// 获取当前有效分区线,切掉超出边界的部分
         {
             var templ = SegLine.Intersect(area, Intersect.OnBothOperands);
             if (templ.Count != 2)
@@ -497,9 +497,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             return true;
         }
-        private List<Line> GetAllSegLineAtLine(Polyline area,Line SegLine)// 获取一个区域在当前线的位置的全部分割线
+        private List<Line> GetAllSegLineAtLine(Polyline area,Line SegLine)// 获取一个区域在当前线的位置的全部分区线
         {
-            // 假设分割线穿过区域被截断成多根
+            // 假设分区线穿过区域被截断成多根
             var segLineList = new List<Line>();
             var templ = SegLine.Intersect(area, Intersect.OnBothOperands);
             if (templ.Count < 2)
@@ -570,7 +570,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         public void DrawSegLine(int layer = 0)
         {
-            string LayerName = "AI-自动分割线" + layer.ToString();
+            string LayerName = "AI-自动分区线" + layer.ToString();
             var segLine_C = SegLine.Clone() as Line;
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
@@ -584,7 +584,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
     }
     class BisectionArea// 二分区域，树状结构
     {
-        public List<BisectionSegLine> Spliters;// 分割出当前区域的分割线,分别在区域的上下左右
+        public List<BisectionSegLine> Spliters;// 分割出当前区域的分区线,分别在区域的上下左右
         public Polyline Area;
         public List<BisectionSegLine> SegLines;
 
@@ -592,7 +592,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public bool AllSearched;// 是否完成探索
         public BisectionArea(Polyline area,List<BisectionSegLine> spliters)
         {
-            if(spliters.Count != 4) throw new ArgumentException("分割线数量不对");
+            if(spliters.Count != 4) throw new ArgumentException("分区线数量不对");
             Spliters = spliters;// 构造区域的ID的数据结构
             Area = area.Clone() as Polyline;
             SegLines = new List<BisectionSegLine>();
@@ -603,7 +603,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             return Spliters.GetKey();
         }
-        // 添加分支，一根分割线可以确定一个分支
+        // 添加分支，一根分区线可以确定一个分支
         public void AddBranch(BisectionSegLine BisecSegLine,out List<BisectionSegLine> curSpliters1, out List<BisectionSegLine> curSpliters2)
         {
             curSpliters1 = new List<BisectionSegLine>();
@@ -630,7 +630,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public void ShowSegLines()
         {
-            string LayerName = "AI-自动分割线";
+            string LayerName = "AI-自动分区线";
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
                 if (!currentDb.Layers.Contains(LayerName))
@@ -645,7 +645,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
         }
     }
-    class BisectionPlan: IEquatable<BisectionPlan>//分割线组合
+    class BisectionPlan: IEquatable<BisectionPlan>//分区线组合
     {
         public HashSet<Tuple<int, int, int, bool>> PlanKey;// 分割方案的key
         public HashSet<Tuple<int?, int?, int?, int?>> AllAreas;//所有子区域 key的合集
@@ -661,7 +661,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             PlanKey.ForEach(key => hashCodeToReturn ^= key.GetHashCode());
             return hashCodeToReturn;
         }
-        // 获取基于新分割线的子方案。 subAreaKeys 为新分割出的区域的key（两个）
+        // 获取基于新分区线的子方案。 subAreaKeys 为新分割出的区域的key（两个）
         // orgAreaKey 为原始区域
         public BisectionPlan GetSubPlan(BisectionSegLine segLine, (Tuple<int?, int?, int?, int?>, Tuple<int?, int?, int?, int?>)
             subAreaKeys, Tuple<int?, int?, int?, int?> orgAreaKey)
@@ -778,8 +778,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         public static Tuple<int?, int?, int?, int?> GetKey(this List<BisectionSegLine> Spliters)// 获取当前区域的key，区域ID
         {
-            if (Spliters.Count != 4) throw new ArgumentException("分割线数量不对");
-            //4个值分别代表分割当前区域上下左右位置的分割线,每个值都可以为空
+            if (Spliters.Count != 4) throw new ArgumentException("分区线数量不对");
+            //4个值分别代表分割当前区域上下左右位置的分区线,每个值都可以为空
             var result = new List<int?>();
             for (int i = 0; i < Spliters.Count; ++i)
             {
@@ -788,7 +788,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var Vertical = spliter.Vertical;
                     var value = spliter.Value;
-                    if (Vertical != Directions[i]) throw new ArgumentException("当前区域分割线方向错误");
+                    if (Vertical != Directions[i]) throw new ArgumentException("当前区域分区线方向错误");
                     result.Add(value);
                 }
                 else result.Add(null);
@@ -863,7 +863,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return false;
         }
 
-        private static (int, int) GetStartEndValue(this Line SegLine)//利用分割线有效的部分
+        private static (int, int) GetStartEndValue(this Line SegLine)//利用分区线有效的部分
         {
             int minVal;
             int maxVal;

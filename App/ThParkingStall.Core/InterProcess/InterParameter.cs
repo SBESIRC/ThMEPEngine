@@ -13,8 +13,8 @@ namespace ThParkingStall.Core.InterProcess
         private static Polygon _TotalArea;//总区域，边界为外包框
         public static Polygon TotalArea { get { return _TotalArea; }}//总区域，边界为外包框
 
-        private static List<LineSegment> _InitSegLines;//所有初始分割线
-        public static List<LineSegment> InitSegLines { get { return _InitSegLines; } }//所有初始分割线
+        private static List<LineSegment> _InitSegLines;//所有初始分区线
+        public static List<LineSegment> InitSegLines { get { return _InitSegLines; } }//所有初始分区线
 
         private static List<Polygon> _Buildings;// 所有障碍物，包含坡道
         private static List<Polygon> Buildings { get { return _Buildings; } }// 所有障碍物，包含坡道
@@ -24,15 +24,15 @@ namespace ThParkingStall.Core.InterProcess
         private static List<Polygon> _BoundingBoxes;// 所有的建筑物的边框
         private static List<Polygon> BoundingBoxes { get { return _BoundingBoxes; } }// 所有的建筑物的边框
 
-        private static List<List<int>> _SegLineIntsecList;//分割线临近线
-        public static List<List<int>> SeglineIndexList { get { return _SegLineIntsecList; } }//分割线临近线
-        private static List<(bool, bool)> _SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
-        public static List<(bool, bool)> SeglineConnectToBound { get { return _SeglineConnectToBound; } }//分割线（负，正）方向是否与边界连接
+        private static List<List<int>> _SegLineIntsecList;//分区线临近线
+        public static List<List<int>> SeglineIndexList { get { return _SegLineIntsecList; } }//分区线临近线
+        private static List<(bool, bool)> _SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
+        public static List<(bool, bool)> SeglineConnectToBound { get { return _SeglineConnectToBound; } }//分区线（负，正）方向是否与边界连接
 
-        public static List<(int, int, int, int)> _SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
+        public static List<(int, int, int, int)> _SegLineIntSecNode;//四岔节点关系，上下左右的分区线index
 
-        public static List<(int, int, int, int)> SegLineIntSecNode { get { return _SegLineIntSecNode; } }//四岔节点关系，上下左右的分割线index
-        //private static List<HashSet<int>> NewIdxToOrg;//动态更新，合并后分割线对应到原始分割线index
+        public static List<(int, int, int, int)> SegLineIntSecNode { get { return _SegLineIntSecNode; } }//四岔节点关系，上下左右的分区线index
+        //private static List<HashSet<int>> NewIdxToOrg;//动态更新，合并后分区线对应到原始分区线index
         private static List<Ramp> _Ramps;//坡道
         public static List<Ramp> Ramps { get { return _Ramps; } }//坡道
 
@@ -55,7 +55,7 @@ namespace ThParkingStall.Core.InterProcess
         public static void Init(DataWraper dataWraper)
         {
             _TotalArea = dataWraper.TotalArea;//总区域
-            _InitSegLines = dataWraper.SegLines;//初始分割线
+            _InitSegLines = dataWraper.SegLines;//初始分区线
             _Buildings = dataWraper.Buildings;//所有障碍物，包含坡道
 
             _BoundingBoxes = dataWraper.BoundingBoxes;// 所有的建筑物的边框
@@ -108,14 +108,14 @@ namespace ThParkingStall.Core.InterProcess
                 //获取以下元素
                 //Polygon area;//该区域的面域
                 //LineString subBoundary;// 该区域的边界线
-                // subSegLineStrings;//该区域全部分割线(linestring)
-                //List<LineSegment> subSegLines;//该区域全部分割线(linesegment)
+                // subSegLineStrings;//该区域全部分区线(linestring)
+                //List<LineSegment> subSegLines;//该区域全部分区线(linesegment)
                 //List<Polygon> subBuildings; //该区域全部建筑物,
                 //List<Ramp> subRamps;//该区域全部的坡道
                 //List<Polygon> subBoundingBoxes;//该区域所有建筑物的bounding box
                 var area = areas[i];
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
-                var subLaneLineStrings = vaildSegSpatialIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分割线
+                var subLaneLineStrings = vaildSegSpatialIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
                 var subLanes = subLaneLineStrings.GetVaildParts(area);
 
                 var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();

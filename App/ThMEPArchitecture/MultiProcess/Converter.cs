@@ -49,8 +49,8 @@ namespace ThMEPArchitecture.MultiProcess
                 var newSegs = InterParameterEx.AddSegLines();
                 using (AcadDatabase acad = AcadDatabase.Active())
                 {
-                    if (acad.Layers.Contains("添加分割线"))
-                        newSegs.ForEach(l => l.ToDbLine(2, "添加分割线").AddToCurrentSpace());
+                    if (acad.Layers.Contains("添加分区线"))
+                        newSegs.ForEach(l => l.ToDbLine(2, "添加分区线").AddToCurrentSpace());
                 }
                 layoutData.ProcessSegLines(layoutData.SegLines.Concat(newSegs).ToList(), false, true);
                 dataWraper.UpdateInterParameter(layoutData);
@@ -187,7 +187,7 @@ namespace ThMEPArchitecture.MultiProcess
             var Buildings = dataWraper.Buildings;
             var Ramps = dataWraper.Ramps;
             var lowerUpperBound = new List<(double, double)>();
-            var vaildSegs = SegLines.GetVaildSegLines(TotalArea,0);//获取有效分割线,边界上线取最大值
+            var vaildSegs = SegLines.GetVaildSegLines(TotalArea,0);//获取有效分区线,边界上线取最大值
             var ObstacleSpatialIndex = new MNTSSpatialIndex(Buildings);
             var boundLineSpatialIndex = new MNTSSpatialIndex(TotalArea.Shell.ToLineStrings().Cast<Geometry>());
             var RampSpatialIndex = new MNTSSpatialIndex(Ramps.Select(ramp => ramp.Area));

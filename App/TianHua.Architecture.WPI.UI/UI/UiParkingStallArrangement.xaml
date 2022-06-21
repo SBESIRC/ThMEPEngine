@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.3)" SizeToContent="Manual" Height="745"
+              Title="车位自动排布(2.4)" SizeToContent="Manual" Height="730"
               Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -20,13 +20,15 @@
             <StackPanel >
                 <StackPanel Orientation="Horizontal">
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
-                    <CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiProcess}">多核心加速(beta)</CheckBox>
+                    <!--<CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiProcess}">多核心加速(beta)</CheckBox>-->
                 </StackPanel >
                 <StackPanel Orientation="Vertical">
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
                     <StackPanel Orientation="Horizontal">
                         <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=1}" Width="210">
                         <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding AddBoundSegLines}">补充边界分区线</CheckBox>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -142,9 +144,9 @@
                                 <Label>速度：</Label>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">快速(5分钟)</RadioButton>
-                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">一般(30分钟)</RadioButton>
-                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">慢速(60分钟)</RadioButton>
+                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">极速(1分钟)</RadioButton>
+                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">常规(3分钟)</RadioButton>
+                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">慢速(10分钟)</RadioButton>
                             </StackPanel>
                         </StackPanel>
                         <Label></Label>
@@ -166,16 +168,19 @@
                         <TextBox Width="30" Margin="0,5,5,5" Text="{Binding ProcessCount}"/>
                         <Label Content="进程内线程数量："/>
                         <TextBox Width="30" Margin="0,5,5,5" Text="{Binding ThreadCount}"/>
-                    </StackPanel> 
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,10,5,5">
                 <StackPanel Orientation="Horizontal">
                     <Label></Label>
                     <Button Name="btnRun" Width="40" FontSize="16" FontWeight="Bold" Click="btnRun_Click">运行</Button>
-                    <Label></Label>
-                    <CheckBox Margin="5,8,5,5" FontSize="16" IsChecked="{Binding ShowLogs}">显示日志</CheckBox>
-                    <Label></Label>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="20,0,0,5" Content="信息打印:"/>
+                        <CheckBox Margin="0,0,5,5" Height="15"  IsChecked="{Binding ShowTitle}">总指标</CheckBox>
+                        <CheckBox Margin="5,0,5,5" Height="15"  IsChecked="{Binding ShowSubAreaTitle}">分区指标</CheckBox>
+                        <CheckBox Margin="5,0,5,5" Height="15"  IsChecked="{Binding ShowTable}">指标表格</CheckBox>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

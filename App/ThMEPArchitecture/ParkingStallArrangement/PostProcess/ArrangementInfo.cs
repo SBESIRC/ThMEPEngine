@@ -90,7 +90,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             //dbText.AlignmentPoint = position;
             return dbText;
         }
-
+        public static DBText GetText(string strText, double x,double y, double height, string layer,int coloridx = 0)
+        {
+            var pt = new Point3d(x, y,0);
+            var text = GetText(strText, pt, height, layer);
+            text.ColorIndex = coloridx;
+            return text;
+        }
         public static void ShowText(this SubArea subArea, double distance = 3000,string layer = "AI-分区指标")
         {
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -114,14 +120,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             var A = subArea.GetAValue(distance);
             var r = GetRValue(A);
             var r_str = "参考指标： " + string.Format("{0:N1}", r);
-            r_str += "m" + Convert.ToChar(0x00b2) + "/个";
+            r_str += "m" + Convert.ToChar(0x00b2) + "/辆";
             var r_text = GetText(r_str, positions.First(), heights.First(), layer);
             r_text.ColorIndex = 0;
             lisText.Add(r_text);
 
             var R = subArea.Area.Area* mmtoM / subArea.Count;
             var R_str = "车均面积： " + string.Format("{0:N1}", R);
-            R_str += "m" + Convert.ToChar(0x00b2) + "/个";
+            R_str += "m" + Convert.ToChar(0x00b2) + "/辆";
             var R_text = GetText(R_str, positions[1], heights[1], layer);
             if (R < r) R_text.ColorIndex = 3;
             else R_text.ColorIndex = 1;

@@ -216,7 +216,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var sortedSegs = segLinesEx.Select(lex => lex.Segline).ToList();
 
             var sortedSegLines = SeglineTools.SeglinePrecut(sortedSegs, area);
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;           
+            //bool usePline = ParameterViewModel.UsePolylineAsObstacle;           
 
             var autoSpliterLayerName = $"AI-自动分割线{index}";
             if (!acadDatabase.Layers.Contains(autoSpliterLayerName))
@@ -233,7 +233,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             if (ParameterViewModel.JustCreateSplittersChecked) return;
 
             outerBrder.SegLines = sortedSegLines;
-            var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+            var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false);
             if (!dataPreprocessingFlag)
             {
                 return;
@@ -269,7 +269,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             else
             {
                 ParkingPartitionPro.LayoutMode = ParameterStock.RunMode;
-                BreakFlag = ParameterViewModel.OptmizeThenBreakSeg;
+                BreakFlag = false;
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel,null, BreakFlag);
             }
 

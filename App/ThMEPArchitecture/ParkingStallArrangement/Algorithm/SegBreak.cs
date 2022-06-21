@@ -609,8 +609,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var segbkparam = new SegBreak(outerBrder, GaPara, verticaldirection, gopositive);// 打断操作
             outerBrder.SegLines = new List<Line>();
             segbkparam.NewSegLines.ForEach(l => outerBrder.SegLines.Add(l.Clone() as Line));// 复制打断后的分割线
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+            //bool usePline = ParameterViewModel.UsePolylineAsObstacle;
+            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false);
 
             ParkingStallGAGenerator geneAlgorithm;
             if (Orgsolutions != null)
