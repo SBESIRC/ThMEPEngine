@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -72,12 +73,16 @@ namespace ThMEPStructure.Common
         {
             get
             {
-                return 
-                    "--config_path " + AddQuotationMarks(ModifyPath(SvgConfigFilePath)) +
-                    " --input_path " + AddQuotationMarks(ModifyPath(IfcFilePath)) +
-                    " --output_path " + AddQuotationMarks(ModifyPath(SvgSavePath)) +
-                    " --log_path " + AddQuotationMarks(ModifyPath(Path.Combine(LogSavePath + "log.txt")));
+                return BuildArgument(SvgConfigFilePath, IfcFilePath, SvgSavePath, LogSavePath);
             }
+        }
+        public string BuildArgument(string svgConfigFilePath,string ifcFilePath,string svgSavePath,string logSavePath)
+        {
+            return
+                   "--config_path " + AddQuotationMarks(ModifyPath(svgConfigFilePath)) +
+                   " --input_path " + AddQuotationMarks(ModifyPath(ifcFilePath)) +
+                   " --output_path " + AddQuotationMarks(ModifyPath(svgSavePath)) +
+                   " --log_path " + AddQuotationMarks(ModifyPath(Path.Combine(logSavePath + "log.txt")));
         }
         private string AddQuotationMarks(string path)
         {
@@ -123,7 +128,20 @@ namespace ThMEPStructure.Common
         { 
             SetSavePath();
 
-            JsonConfig.SvgConfig.save_path = SvgSavePath;
+            if(DrawingType == DrawingType.Elevation)
+            {
+                // 对于立面图，Svg保存路径要给绝对路径
+                JsonConfig.SvgConfig.save_path = GetSingleFullSvgSavePath(SvgSavePath, 1, "elevation");
+            }
+            else if(DrawingType == DrawingType.Section)
+            {
+                // 对于剖面图，Svg保存路径要给绝对路径
+                JsonConfig.SvgConfig.save_path = GetSingleFullSvgSavePath(SvgSavePath, 1, "section");
+            }
+            else
+            {
+                JsonConfig.SvgConfig.save_path = SvgSavePath;
+            }
             JsonConfig.ObjConfig.path = IfcFilePath;
             JsonConfig.DebugConfig.log_path = LogSavePath;
             JsonConfig.GlobalConfig.image_type = ImageType;
@@ -135,6 +153,21 @@ namespace ThMEPStructure.Common
             }
             SetValues(svgConfig,JsonConfig);
             WriteJson(SvgConfigFilePath, svgConfig);
+        }
+
+        private string GetSingleFullSvgSavePath(string svgSavePath,int floorNo,string type)
+        {
+            if(!string.IsNullOrEmpty(IfcFilePath))
+            { 
+                // 获取Ifc路径
+                var ifcFileName = Path.GetFileNameWithoutExtension(IfcFilePath);
+                var outputSvgName = ifcFileName + "-" + floorNo + "-" + type+".svg";
+                return Path.Combine(svgSavePath, outputSvgName);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         private string GetSvgConfgFilePath()

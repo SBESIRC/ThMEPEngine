@@ -220,8 +220,8 @@ namespace ThMEPStructure
                 } 
             }
         }
-        [CommandMethod("TIANHUACAD", "THMUTSC", CommandFlags.Modal)]
-        public void THMUTSC()
+        [CommandMethod("TIANHUACAD", "THSMUTSC", CommandFlags.Modal)]
+        public void THSMUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ydb文件");
             pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc";
@@ -253,7 +253,7 @@ namespace ThMEPStructure
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THAUTSC", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THAMUTSC", CommandFlags.Modal)]
         public void THAUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
@@ -261,13 +261,59 @@ namespace ThMEPStructure
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
+                var options = new PromptKeywordOptions("\n选择出图方式");
+                options.Keywords.Add("平面图", "P", "平面图(P)");
+                options.Keywords.Add("立面图", "E", "立面图(E)");
+                options.Keywords.Add("剖面图", "S", "剖面图(S)");
+                options.Keywords.Default = "平面图";
+                options.AllowArbitraryInput = true;
+                var result1 = Active.Editor.GetKeywords(options);
+                if (result1.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var drawingType = DrawingType.Unknown;
+                switch(result1.StringResult)
+                {
+                    case "平面图":
+                        drawingType = DrawingType.Plan;
+                        break;
+                    case "立面图":
+                        drawingType = DrawingType.Elevation;
+                        break;
+                    case "剖面图":
+                        drawingType = DrawingType.Section;
+                        break;
+                    default:
+                        break;
+                }
+
                 var config = new ThPlaneConfig()
                 {
                     IfcFilePath = pfnr.StringResult,
                     SvgSavePath = "",
-                    DrawingScale ="1:100",
-                    DrawingType = DrawingType.Plan,
+                    DrawingScale = "1:100",
+                    DrawingType = drawingType,
                 };
+
+                if (drawingType == DrawingType.Section)
+                {
+                    var ppo = new PromptDoubleOptions("\n请输入裁剪位置");
+                    ppo.AllowArbitraryInput = true;
+                    ppo.AllowNegative = true;
+                    ppo.AllowNone = false;
+                    ppo.AllowZero = true;
+                    var pdr = Active.Editor.GetDouble(ppo);
+                    if(pdr.Status == PromptStatus.OK)
+                    {
+                        config.JsonConfig.GlobalConfig.cut_position = pdr.Value;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
                 var generator = new ThArchitectureGenerator(config);
                 generator.Generate();
             }

@@ -70,7 +70,7 @@ namespace ThMEPStructure.Common
     internal class GlobalConfig
     {
         public string image_type { get; set; }
-        public string cut_position { get; set; }
+        public double? cut_position { get; set; }
         public Direction eye_dir { get; set; }
         public Direction up { get; set; }
         public int scale_size { get; set; }

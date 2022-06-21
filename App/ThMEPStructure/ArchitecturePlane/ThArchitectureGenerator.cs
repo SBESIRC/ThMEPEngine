@@ -29,7 +29,20 @@ namespace ThMEPStructure.ArchitecturePlane
             Clear();
 
             // 成图
-            Plot();
+            if(Config.DrawingType == DrawingType.Elevation || Config.DrawingType == DrawingType.Section)
+            {
+                // elevation的SvgSavePath需要FullFilePath
+                var argument = Config.BuildArgument(
+                    Config.SvgConfigFilePath,
+                    Config.IfcFilePath, 
+                    Config.JsonConfig.SvgConfig.save_path,
+                    Config.LogSavePath);
+                Plot(Config.ExeFilePath, argument);
+            }
+            else
+            {
+                Plot(Config.ExeFilePath,Config.Arguments);
+            }
 
             // 获取Svg
             var svgFiles = GetGeneratedSvgFiles();
@@ -41,12 +54,12 @@ namespace ThMEPStructure.ArchitecturePlane
             // 删除
             Erase(svgFiles);
         }
-        private void Plot()
+        private void Plot(string exeFilePath,string arguments)
         {
             using (var proc = new Process())
             {
                 object output = null;                           
-                proc.StartInfo.FileName = Config.ExeFilePath;                
+                proc.StartInfo.FileName = exeFilePath;                
                 // 是否使用操作系统Shell启动
                 proc.StartInfo.UseShellExecute = false;
                 // 不显示程序窗口
@@ -59,13 +72,17 @@ namespace ThMEPStructure.ArchitecturePlane
                 proc.StartInfo.RedirectStandardError = true;
 
                 // elevation-generator.exe--config_path config_path --input_path input_path --output_path output_path --log_path log_path
-                proc.StartInfo.Arguments = Config.Arguments;
+                proc.StartInfo.Arguments = arguments;
                     
                 proc.Start();
                 proc.WaitForExit();
                 if (proc.ExitCode == 0)
                 {
-                    output = proc.StandardOutput.ReadToEnd();
+                    output = proc.StandardOutput.ReadToEnd();                    
+                }
+                else
+                {
+                    output = proc.StandardError.ReadToEnd();
                 }
             }
         }
@@ -108,6 +125,22 @@ namespace ThMEPStructure.ArchitecturePlane
             });
         }
 
+        private List<string> GetElevationSvgFiles()
+        {
+            var results = new List<string>();
+            var ifcFileName = Config.IfcFileName.ToUpper();
+            var di = new DirectoryInfo(Config.SvgSavePath);
+            foreach (var fileInfo in di.GetFiles())
+            {
+                if (fileInfo.Extension.ToUpper() == ".SVG" &&
+                    fileInfo.Name.ToUpper().StartsWith(ifcFileName))
+                {
+                    results.Add(fileInfo.FullName);
+                }
+            }
+            return results;
+        }
+
         private List<string> GetGeneratedSvgFiles()
         {
             var results = new List<string>();
@@ -122,10 +155,32 @@ namespace ThMEPStructure.ArchitecturePlane
                     results.Add(fileInfo.FullName);
                 }
             }
-            return results
-                .Where(o=>IsValidSvgFile(o))
-                .ToList();
+            // 返回以Ifc文件名开始的所有Svg文件
+            return results;
+
+            //if(Config.DrawingType == DrawingType.Elevation)
+            //{
+            //    return results
+            //   .Where(o => IsElevationSvgFile(o))
+            //   .ToList();
+            //}
+            //else
+            //{
+            //    return results
+            //    .Where(o => IsValidSvgFile(o))
+            //    .ToList();
+            //}
         }
+
+        private bool IsElevationSvgFile(string svgFilePath)
+        {
+            //ifcFileName-> 0407-1
+            var ifcFileName = Config.IfcFileName.ToUpper();
+            // 0407-1-elevation-sdfs-sfsd-sfsd-sdfsd.svg
+            var svgFileName = Path.GetFileNameWithoutExtension(svgFilePath);
+            return svgFileName.ToUpper().StartsWith(ifcFileName);
+        }
+
         private bool IsValidSvgFile(string svgFilePath)
         {
             //ifcFileName-> 0407-1
