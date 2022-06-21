@@ -422,6 +422,38 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         {
             return type.IsNotPublic && type.Name.StartsWith("Imp") && type.Namespace == "Autodesk.AutoCAD.DatabaseServices";
         }
+        public static List<Entity> GetAllEntitiesByExplodingTianZhengElementThoroughly(Entity entity)
+        {
+            if (!IsTianZhengElement(entity)) return new List<Entity>() { entity };
+            List<Entity> results = new List<Entity>();
+            List<Entity> containers = new List<Entity>() { entity };
+            while (true)
+            {
+                var elements = new List<Entity>();
+                foreach (var ent in containers)
+                {
+                    if (IsTianZhengElement(ent))
+                    {
+                        try
+                        {
+                            var res = ent.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+                            foreach (var r in res)
+                            {
+                                if (IsTianZhengElement(r)) elements.Add(r);
+                                else results.Add(r);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            //有的天正元素无法炸开？
+                        }
+                    }
+                }
+                containers = elements;
+                if (containers.Count == 0) break;
+            }
+            return results;
+        }
 
         /// <summary>
         /// 实现一个Icomparer接口根据指定轴坐标大小排序点集
