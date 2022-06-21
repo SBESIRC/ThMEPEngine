@@ -2315,6 +2315,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                                         if (r == MessageBoxResult.Cancel) return;
                                         ThPDSProjectGraphService.DeleteCircuit(graph, edge);
+                                        UpdateTreeView();
                                         UpdateCanvas();
                                     });
                                 }
