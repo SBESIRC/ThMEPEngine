@@ -32,6 +32,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             SprayViewModel.InsertNodeMark();
         }
 
+        private void AlarmValveSys_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.IsAlarmValveSys = true;
+            using (var cmd = new ThSpraySystemCmd(viewModel))
+            {
+                cmd.Execute();
+            }
+        }
+
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
             using (var cmd = new ThSpraySystemCmd(viewModel))

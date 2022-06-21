@@ -15,6 +15,7 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
             <WrapPanel Orientation="Vertical">
@@ -33,8 +34,11 @@
         <StackPanel Grid.Row="2" HorizontalAlignment="Center">
             <cus:ImageButton Content="标记喷淋总管" Width="140" Height="24" Margin="0,10,0,10" TabIndex="4" Click="NodeMark_Click"></cus:ImageButton>
         </StackPanel>
+        <StackPanel Grid.Row="3" HorizontalAlignment="Center">
+            <cus:ImageButton Content="报警阀后系统图" Width="140" Height="24" Margin="0,10,0,10" TabIndex="4" Click="AlarmValveSys_Click"></cus:ImageButton>
+        </StackPanel>
         
-        <StackPanel Grid.Row="3" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="4" HorizontalAlignment="Right">
             <cus:ImageButton Content="生成" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>

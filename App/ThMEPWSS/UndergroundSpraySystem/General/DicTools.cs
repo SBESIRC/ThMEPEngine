@@ -126,6 +126,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             var objs = dbPtSpatialIndex.SelectCrossingPolygon(rect);
             return objs.Count > 0;
         }
+
         public static void CreatePtDic(SprayIn sprayIn)
         {
             double maxDist = 1000;
@@ -309,9 +310,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                                         break;
                                     }
                                 }
-                                
                             }
-                            
                         }
                         if(typeFlag)
                         {

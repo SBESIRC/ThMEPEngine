@@ -8,6 +8,10 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Command;
 using ThMEPWSS.UndergroundSpraySystem.Method;
 using ThMEPWSS.UndergroundSpraySystem.General;
+using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using GeometryExtensions;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Command
 {
@@ -31,7 +35,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    CreateSpraySystem(currentDb);
+                    if(_UiConfigs.IsAlarmValveSys)
+                    {
+                        CreateAlarmValveSystem(currentDb);
+                    }
+                    else
+                    {
+                        CreateSpraySystem(currentDb);
+                    }
+                    
                 }
             }
             catch (Exception ex)
@@ -56,6 +68,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
                 var sprayIn = new SprayIn(null);//输入参数
                 pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
             }
+        }
+
+        public void CreateAlarmValveSystem(AcadDatabase curDb)
+        {
+            var startPts = SpraySys.GetStartPts();
+            if (startPts.Count == 0) return;
+            var rstGetInsertPt = SpraySys.GetInsertPoint(out Point3d insertPt);
+            if (!rstGetInsertPt) return;
+            var selectArea = _UiConfigs.SelectedArea;
+            var sprayOut = new SprayOut(insertPt);//输出参数
+            var sprayIn = new SprayIn(_UiConfigs, startPts);//输入参数
+            var spraySystem = new SpraySystem();//系统参数
+            AlarmValveSystem.GetInput(curDb, sprayIn, selectArea);
+            AlarmValveSystem.Processing(curDb, sprayIn, spraySystem, sprayOut);
+            AlarmValveSystem.GetOutput(sprayIn, spraySystem, sprayOut);
+            sprayOut.Draw(curDb);
         }
 
         public void CreateSpraySystem(AcadDatabase curDb)
@@ -124,12 +152,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
         /// <param name="sprayOut"></param>
         public static void CmdWithAcrossLayers(AcadDatabase curDb, SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
         {
-            ;
             var rstMainLoopsInOtherFloor = SpraySysWithAcrossFloor.AcrossFloorTypeCheck(curDb, sprayIn, spraySystem);
 
             if(rstMainLoopsInOtherFloor)//存在跨楼层主环
             {
-                ;
                 //环管跨楼层时，1.dfs起点所在层；2.dfs其它层；3.将其它层的连接到起点所在层
                 SpraySysWithMainLoopAcrossFloor.Processing(curDb, sprayIn, spraySystem);
                 SpraySysWithMainLoopAcrossFloor.GetOutput(sprayIn, spraySystem, sprayOut);
@@ -143,7 +169,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
                     SpraySysWithMainLoopAcrossFloor.GetOutputInOtherFloor(sprayIn, spraySystem, sprayOut, 2);
                 }
             }
-
             else
             {
                 //暂时用楼层数作为判断条件
@@ -157,9 +182,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
                     SpraySysWithAcrossFloor.Processing(curDb, sprayIn, spraySystem);
                     SpraySysWithAcrossFloor.GetOutput(sprayIn, spraySystem, sprayOut);
                 }
-                
             }
-      
         }
     }
 }

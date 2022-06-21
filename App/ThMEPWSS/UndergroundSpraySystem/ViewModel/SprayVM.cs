@@ -25,11 +25,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
         public Point3dCollection SelectedArea;//框定区域
         public Dictionary<string, Polyline> FloorRect;//楼层区域
         public Dictionary<string, Point3d> FloorPt;//楼层标准点
+        public bool IsAlarmValveSys;//生成阀后系统图
+
 
         public SprayVM()
         {
             FloorRect = new Dictionary<string, Polyline>();
             FloorPt = new Dictionary<string, Point3d>();
+            IsAlarmValveSys = false;
         }
         public void CreateFloorFraming()
         {

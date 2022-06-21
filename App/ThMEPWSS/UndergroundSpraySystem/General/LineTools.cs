@@ -38,35 +38,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        private static Point3dEx GetPipePt(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex)
-        {
-            var rect = vpt._pt.GetRect(120);
-            var objs = dbPtSpatialIndex.SelectCrossingPolygon(rect);
-            if (objs.Count == 0)
-            {
-                return new Point3dEx();
-            }
-            else if (objs.Count == 1)
-            {
-                var pt = (objs[0] as DBPoint).Position;
-                return new Point3dEx(pt.X, pt.Y, 0);
-            }
-            else
-            {
-                ;
-                foreach (var obj in objs)
-                {
-                    var pt = (obj as DBPoint).Position;
-                    var dist = pt.DistanceTo(vpt._pt);
-                    if (dist > 1)
-                    {
-                        return new Point3dEx(pt);
-                    }
-                }
-                return new Point3dEx();
-            }
-        }
-
         public static List<Line> ConnectVerticalLine(this List<Line> pipeLines, SprayIn sprayIn)
         {
             //基于竖管连接管线
@@ -258,60 +229,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         }
 
 
-        public static void AddPtDic(SprayIn sprayIn, List<Point3d> pts, Point3d centerPt)
-        {
-            var centPtex = new Point3dEx(centerPt);//报警阀中心点
-            if (sprayIn.PtDic.Keys.Contains(centPtex))//字典包含报警阀中心点
-            {
-                foreach (var pt in pts)
-                {
-                    var ptex = new Point3dEx(pt);
-                    if (centPtex.Equals(ptex))
-                    {
-                        continue;
-                    }
-                    if (!sprayIn.PtDic[centPtex].Contains(ptex))
-                    {
-                        sprayIn.PtDic[centPtex].Add(ptex);
-                    }
-                }
-            }
-            else//字典不包含报警阀中心点
-            {
-                var ptsNew = new List<Point3dEx>();
-                foreach (var pt in pts)
-                {
-                    var ptex = new Point3dEx(pt);
-                    if (centPtex.Equals(ptex))
-                    {
-                        continue;
-                    }
-                    ptsNew.Add(ptex);
-                }
-                sprayIn.PtDic.Add(centPtex, ptsNew);
-            }
-
-            foreach (var pt in pts)
-            {
-                var ptex = new Point3dEx(pt);
-                if (centPtex.Equals(ptex))
-                {
-                    continue;
-                }
-                if (sprayIn.PtDic.Keys.Contains(ptex))
-                {
-                    if (!sprayIn.PtDic[ptex].Contains(centPtex))
-                    {
-                        sprayIn.PtDic[ptex].Add(centPtex);
-                    }
-                }
-                else
-                {
-                    sprayIn.PtDic.Add(ptex, new List<Point3dEx>() { centPtex });
-                }
-            }
-        }
-
         public static List<Line> ConnectBreakLine(this List<Line> lineList, SprayIn sprayIn)
         {
             //连接不是端点的孤立线段
@@ -370,6 +287,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
             return PipeLineList.CleanLaneLines3(lineList);//merge
         }
+
         public static List<Line> PipeLineSplit(this List<Line> pipeLineList, List<Point3dEx> pts, double toleranceForPointIsLineTerm = 1.0, double toleranceForPointOnLine = 1.0)
         {
             foreach (var pt in pts)//管线打断

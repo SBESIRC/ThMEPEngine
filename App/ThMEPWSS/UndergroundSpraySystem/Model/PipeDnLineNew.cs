@@ -150,6 +150,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
             return segLineDic;
         }
-
     }
 }

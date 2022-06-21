@@ -30,10 +30,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var Results = acadDatabase.ModelSpace
-                   .OfType<Entity>()
+                var Results = acadDatabase.ModelSpace.OfType<Entity>()
                    .Where(e => e is DBText || e.IsTCHText())//文字 或 天正文字
-                   .Where(e => IsTargetLayer(e.Layer))
                    .ToCollection();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results);
@@ -54,7 +52,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private void AddObj(Entity entity)
         {
-            
             if (entity is DBText dBText)
             {
 
@@ -74,13 +71,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             return dbTexts;
         }
 
-        private bool IsTargetLayer(string layer)
-        {
-            return true;
-            //var rst1 = layer.Contains("W-FRPT-SPRL-DIMS");
-           // var rst2 = layer.Contains("W-DRAI-DIMS");
-            //return rst1||rst2;
-        }
 
         private void AddTchText(Entity ent)
         {
@@ -111,10 +101,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         private void AddDbText(DBText dBText)
         {
             var st = dBText.TextString;
-            if(st.Contains("接室外"))
-            {
-                ;
-            }
             if (!st.StartsWith("DN"))
             {
                 if (!st.Contains("水泵接合器"))
@@ -125,6 +111,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 DBObjs.Add(dbText);
             }
         }
-
     }
 }
