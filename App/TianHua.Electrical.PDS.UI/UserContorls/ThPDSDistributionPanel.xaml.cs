@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         private void ThPDSDistributionPanel_Loaded(object sender, RoutedEventArgs e)
         {
             var builder = new ThPDSCircuitGraphTreeBuilder();
-            this.tv.DataContext = builder.Build(Graph);
+            this.tv.DataContext = builder.BuildV1_1(Graph);
             if (new Services.ThPDSCircuitGraphComponentGenerator().IN(null) is null)
             {
                 UpdateCanvas();

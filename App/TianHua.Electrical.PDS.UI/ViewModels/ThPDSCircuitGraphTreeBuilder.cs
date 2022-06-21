@@ -160,5 +160,79 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 return node;
             }
         }
+
+        public ThPDSCircuitGraphTreeModel BuildV1_1(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
+        {
+            var lst = new ObservableCollection<ThPDSCircuitGraphTreeModel>();
+            var nodeId = -1;
+            var idDict = new Dictionary<ThPDSProjectGraphNode, int>();
+
+            foreach (var node in graph.Vertices)
+            {
+                if (!idDict.ContainsKey(node))
+                {
+                    idDict[node] = ++nodeId;
+                }
+            }
+
+            var TopNode = new ThPDSCircuitGraphTreeModel()
+            {
+                DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+            };
+
+            var RootNodes = graph.Vertices.Where(x => graph.InDegree(x) == 0 && x.Type == Model.PDSNodeType.DistributionBox);
+            var primaryNodeDic = RootNodes.ToDictionary(key => key, value => new ThPDSCircuitGraphTreeModel { Id = idDict[value], Name = value.LoadIdString(), DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>() });
+            foreach (var rootNode in RootNodes)
+            {
+                ThPDSCircuitGraphTreeModel m = new ThPDSCircuitGraphTreeModel()
+                {
+                    Id=idDict[rootNode],
+                    Name=rootNode.LoadIdString(),
+                    DataList =new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                };
+                TopNode.DataList.Add(m);
+                DFSSearch(m, rootNode);
+            }
+
+            void DFSSearch(ThPDSCircuitGraphTreeModel m,ThPDSProjectGraphNode node)
+            {
+                var edges = graph.OutEdges(node);
+                foreach (var edge in edges)
+                {
+                    var target = edge.Target;
+                    if (target.Type == Model.PDSNodeType.DistributionBox)
+                    {
+                        var targetModel = new ThPDSCircuitGraphTreeModel()
+                        {
+                            Id = idDict[target],
+                            Name = target.LoadIdString(),
+                            DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                        };
+                        m.DataList.Add(targetModel);
+                        DFSSearch(targetModel, target);
+                    }
+                    else if(target.Type == Model.PDSNodeType.VirtualLoad)
+                    {
+                        var VirtualLoadEdges = graph.OutEdges(target);
+                        foreach (var virtualLoadedge in VirtualLoadEdges)
+                        {
+                            var virtualLoadTarget = virtualLoadedge.Target;
+                            if (virtualLoadTarget.Type == Model.PDSNodeType.DistributionBox)
+                            {
+                                var targetModel = new ThPDSCircuitGraphTreeModel()
+                                {
+                                    Id = idDict[virtualLoadTarget],
+                                    Name = virtualLoadTarget.LoadIdString(),
+                                    DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                                };
+                                m.DataList.Add(targetModel);
+                                DFSSearch(targetModel, virtualLoadTarget);
+                            }
+                        }
+                    }
+                }
+            }
+            return TopNode;
+        }
     }
 }

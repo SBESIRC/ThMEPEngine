@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
+using QuikGraph.Algorithms;
 using QuikGraph.Serialization;
 using System.Collections.Generic;
 using ICSharpCode.SharpZipLib.Zip;
@@ -29,9 +30,35 @@ namespace TianHua.Electrical.PDS.Project
             var ProjectGraph = new ProjectGraph();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
             graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
-            graph.Edges.ForEach(o => ProjectGraph.AddEdge(
-                new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
-                ));
+            foreach (var node in graph.TopologicalSort())
+            {
+                var edges = graph.OutEdges(node).ToList();
+                while (edges.Count > 0)
+                {
+                    var edge = edges.First();
+                    var SameGroupEdges = edges.Where(o => o.Circuit.CircuitUID == edge.Circuit.CircuitUID);
+                    if (SameGroupEdges.Count() >= 2)//分支干线
+                    {
+                        var virtualNode = new ThPDSProjectGraphNode();
+                        virtualNode.Type = PDSNodeType.VirtualLoad;
+                        virtualNode.Load = new ThPDSLoad();
+                        virtualNode.Load.SetLocation(edge.Target.Loads[0].Location);
+                        virtualNode.Load.InstalledCapacity = new ThInstalledCapacity();
+                        virtualNode.Details.LowPower = edges.Sum(o => VertexDir[o.Target].Details.LowPower);
+                        virtualNode.Details.HighPower = edges.Sum(o => VertexDir[o.Target].Details.HighPower);
+                        virtualNode.Details.IsDualPower = edges.Any(o => VertexDir[o.Target].Details.IsDualPower);
+                        ProjectGraph.AddVertex(virtualNode);
+                        ProjectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], virtualNode) { Circuit = edge.Circuit });
+                        SameGroupEdges.ForEach(o => ProjectGraph.AddEdge(new ThPDSProjectGraphEdge(virtualNode, VertexDir[o.Target]) { Circuit = o.Circuit }));
+                        edges.RemoveAll(o => SameGroupEdges.Contains(o));
+                    }
+                    else
+                    {
+                        ProjectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], VertexDir[edge.Target]) { Circuit = edge.Circuit });
+                        edges.Remove(edge);
+                    }
+                }
+            }
             _project.graphData = ProjectGraph.CreatPDSProjectGraph();
             PDSProjectExtend.CalculateProjectInfo();
             _project.DataChanged?.Invoke();

@@ -63,7 +63,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var builder = new ThPDSCircuitGraphTreeBuilder();
             void UpdateTreeView()
             {
-                var tree = builder.Build(graph);
+                var tree = builder.BuildV1_1(graph);
                 {
                     void dfs(ThPDSCircuitGraphTreeModel node)
                     {
@@ -78,7 +78,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     panel.tv.DataContext = tree;
                 }
             }
-            var tree = builder.Build(graph);
+            var tree = builder.BuildV1_1(graph);
             static string FixString(string text)
             {
                 if (string.IsNullOrEmpty(text)) return " ";
