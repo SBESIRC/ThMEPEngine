@@ -20,7 +20,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (null == viewmodel)
                 viewmodel = new PressureDrainageSystemDiagramVieModel();          
             this.DataContext = viewmodel;
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
         private void Cancle_Click(object sender, RoutedEventArgs e)
         {
