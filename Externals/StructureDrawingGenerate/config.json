@@ -1,45 +1,71 @@
 {
   "ObjConfig": {
-    "path": "C:/Users/liuguangsheng/Desktop/0407.ifc",
+    "path": "./obj_file/jianzhu-HM.ifc",
     "current_floor": null,
     "high_floor": null
   },
-  "BoxConfig": {
-    "x_min": null,
-    "x_max": null,
-    "y_min": null,
-    "y_max": null,
-    "z_min": null,
-    "z_max": null,
-    "angle": null
-  },
-  "GlConfig": {
-    "gl_size": 16384,
-    "use_cuda": false
-  },
-  "ClipConfig": {},
-  "MergeConfig": {
-    "apporx_merge_mode": false,
-    "merge_mode": null
-  },
-  "SvgConfig": {
-    "image_size": null,
-    "save_path": "C:\\Users\\liuguangsheng\\AppData\\Local\\Temp\\"
-  },
-  "GlobalConfig": {
-    "eye_dir": {
-      "x": 0,
-      "y": 0,
-      "z": -1
+    "BoxConfig": {
+        "x_min": null,
+        "x_max": null,
+        "y_min": null,
+        "y_max": null,
+        "z_min": null,
+        "z_max": null,
+        "angle": null
     },
-    "up": {
-      "x": 0,
-      "y": 1,
-      "z": 0
+    "GlConfig":{
+        "gl_size":16384,
+        "use_cuda":true
     },
-    "scale_size": 34359738368
-  },
-  "DebugConfig": {
-    "print_time": true
-  }
+    "ClipConfig":{
+        
+    },
+    "MergeConfig":{
+        "apporx_merge_mode":false,
+        "merge_mode":null
+    },
+    "SvgConfig":{
+        "image_size":null,
+        "save_path":"./svg/平面.svg"
+    },
+    "GlobalConfig": {
+        "image_type": null,
+        "cut_position": 34400,
+        
+        
+        "eye_dir": {
+          "x": 0,
+          "y": -1,
+          "z": 0
+        },
+        "up": {
+          "x": 0,
+          "y": 0,
+          "z": 1
+        },
+        "eye_dir": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },"up": {
+          "x": 0,
+          "y": 0,
+          "z": 1
+        },
+        "eye_dir": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "scale_size": 34359738368
+    },
+    "DebugConfig":{
+        "print_time": true,
+        "log_path":"log.txt"
+    }
 }

@@ -8,12 +8,18 @@ namespace ThMEPStructure.Model.Printer
     {
         public string LayerName { get; set; }
         public string LineType { get; set; }
+        public int Color { get; set; }
+        public string TextureMaterial { get; set; }
         public LineWeight LineWeight { get; set; }
+        public double? LineTypeScale { get; set; }
         public PrintConfig()
         {
             LayerName = "0";
             LineType = "ByLayer";
+            TextureMaterial = "";
+            LineTypeScale = null;
             LineWeight = LineWeight.ByLayer;
+            Color = (int)ColorIndex.BYLAYER;
         }
     }
     internal class HatchPrintConfig : PrintConfig,ICloneable

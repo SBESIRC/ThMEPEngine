@@ -3,23 +3,21 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using AcHelper;
+using ThMEPStructure.Common;
 
 namespace ThMEPStructure.StructPlane.Service
 {
     internal class ThStructurePlaneGenerator
     {
-        private ThStructurePlaneConfig Config { get; set; }
-        public ThStructurePlaneGenerator(ThStructurePlaneConfig config)
+        private ThPlaneConfig Config { get; set; }
+        public ThStructurePlaneGenerator(ThPlaneConfig config)
         {
             Config = config;
         }
         public void Generate()
         {
             // 先配置
-            if(!Config.Configure())
-            {
-                return;
-            }
+            Config.Configure();
 
             // 清除
             Clear();

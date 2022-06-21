@@ -10,8 +10,12 @@ using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Command;
 using ThMEPStructure.Reinforcement.Command;
+using ThMEPStructure.ArchiecturePlane;
 using ThMEPStructure.StructPlane.Service;
+using ThMEPStructure.ArchiecturePlane.Print;
 using ThMEPStructure.ArchiecturePlane.Service;
+using ThMEPStructure.Common;
+using ThMEPEngineCore.IO.SVG;
 
 namespace ThMEPStructure
 {
@@ -184,14 +188,36 @@ namespace ThMEPStructure
                 var svg = new ThMEPEngineCore.IO.SVG.ThArchitectureSVGReader();
                 svg.ReadFromFile(pfnr.StringResult);
 
-                //// 沿着X轴镜像
-                //var mt = Matrix3d.Rotation(System.Math.PI, Vector3d.XAxis, Point3d.Origin);
-                //geometries.ForEach(o => o.Boundary.TransformBy(mt));
-
-                // Print                    
-                var prinService = new ThArchSvgEntityPrintService(svg.Geos,
-                    svg.FloorInfos, svg.DocProperties);
-                prinService.Print(Active.Database);
+                // Print
+                var svgInput = new ThArchSvgInput()
+                {
+                    Geos = svg.Geos,
+                    FloorInfos = svg.FloorInfos,
+                    DocProperties = svg.DocProperties,
+                    ComponentInfos = svg.ComponentInfos,
+                };
+                var printParameter = new ThPlanePrintParameter()
+                {
+                    DrawingScale = "1:100"
+                };
+                var drawingType =  svg.DocProperties.GetDrawingType();
+                ThArchDrawingPrinter printer = null;
+                switch (drawingType)
+                {
+                    case DrawingType.Plan:
+                        printer= new ThArchPlanDrawingPrinter(svgInput, printParameter);
+                        break;
+                    case DrawingType.Elevation:
+                        printer = new ThArchElevationDrawingPrinter(svgInput, printParameter);
+                        break;
+                    case DrawingType.Section:
+                        printer = new ThArchSectionDrawingPrinter(svgInput, printParameter);    
+                        break;
+                }
+                if(printer!=null)
+                {
+                    printer.Print(Active.Database);
+                } 
             }
         }
         [CommandMethod("TIANHUACAD", "THMUTSC", CommandFlags.Modal)]
@@ -215,14 +241,35 @@ namespace ThMEPStructure
                 
                 if(!string.IsNullOrEmpty(ifcFilePath))
                 {
-                    var config = new ThStructurePlaneConfig()
+                    var config = new ThPlaneConfig()
                     {
                         IfcFilePath = ifcFilePath,
                         SvgSavePath = "",
+                        DrawingType = DrawingType.Structure,
                     };
                     var generator = new ThStructurePlaneGenerator(config);
                     generator.Generate();
                 }               
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THAUTSC", CommandFlags.Modal)]
+        public void THAUTSC()
+        {
+            var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
+            pofo.Filter = "Ifc files (*.ifc)|*.ifc";
+            var pfnr = Active.Editor.GetFileNameForOpen(pofo);
+            if (pfnr.Status == PromptStatus.OK)
+            {
+                var config = new ThPlaneConfig()
+                {
+                    IfcFilePath = pfnr.StringResult,
+                    SvgSavePath = "",
+                    DrawingScale ="1:100",
+                    DrawingType = DrawingType.Plan,
+                };
+                var generator = new ThArchitectureGenerator(config);
+                generator.Generate();
             }
         }
     }

@@ -75,8 +75,8 @@ namespace ThMEPStructure.StructPlane.Service
             var res = PrintGeos(db, newGeos, slabHatchConfigs); //BeamLines,BeamTexts
 
             // 过滤多余文字
-            var beamLines = ToDBObjectCollection(db, res.Item1);
-            var beamTexts = ToDBObjectCollection(db, res.Item2.Keys.ToCollection());
+            var beamLines = res.Item1.ToDBObjectCollection(db);
+            var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
             var removedTexts = FilterBeamMarks(beamLines, beamTexts);
 
             // 将带有标高的文字，换成两行
@@ -132,46 +132,6 @@ namespace ThMEPStructure.StructPlane.Service
             acadApp.Application.SetSystemVariable("MEASUREMENT", Measurement);
         }
 
-        private DBObjectCollection ToDBObjectCollection(Database db,ObjectIdCollection objIds)
-        {
-            using (var acadDb = AcadDatabase.Use(db))
-            {
-                return objIds
-                    .OfType<ObjectId>()
-                    .Where(o=>!o.IsErased)
-                    .Select(o => acadDb.Element<Entity>(o)).ToCollection();
-            }
-        }
-        private Extents2d ToExtents2d(DBObjectCollection objs)
-        {
-            var extents = new Extents2d();
-            double minX = double.MaxValue, minY = double.MaxValue,
-                maxX = double.MinValue, maxY = double.MinValue;
-            objs.OfType<Curve>().ForEach(entity =>
-            {
-                if (!entity.IsErased && entity.GeometricExtents != null)
-                {
-                    if (entity.GeometricExtents.MinPoint.X < minX)
-                    {
-                        minX = entity.GeometricExtents.MinPoint.X;
-                    }
-                    if (entity.GeometricExtents.MinPoint.Y < minY)
-                    {
-                        minY = entity.GeometricExtents.MinPoint.Y;
-                    }
-                    if (entity.GeometricExtents.MaxPoint.X > maxX)
-                    {
-                        maxX = entity.GeometricExtents.MaxPoint.X;
-                    }
-                    if (entity.GeometricExtents.MaxPoint.Y > maxY)
-                    {
-                        maxY = entity.GeometricExtents.MaxPoint.Y;
-                    }
-                }
-            });
-            extents = new Extents2d(minX, minY, maxX, maxY);
-            return extents;
-        }
         private void PrintHeadText(Database database)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
@@ -180,7 +140,7 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return;
             }
-            var extents = ToExtents2d(ToDBObjectCollection(database, ObjIds));
+            var extents = ObjIds.ToDBObjectCollection(database).ToExtents2d();
             var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
                 extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
             var printService = new ThPrintDrawingHeadService()

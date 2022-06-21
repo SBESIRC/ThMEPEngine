@@ -1,0 +1,15 @@
+新增配置文件配置项
+GlobalConfig::image_type：成图类型，生成结构图，值为"structure",平面图为"plane",立面图为"elevation",剖面图"section"
+GlobalConfig::cut_position：若生成剖面图或平面图时，指定剖切面的相应值
+命令行参数新增配置项
+可使用-?指令获取所有说明
+floor_name:：等价ObjConfig::current_floor
+image_type：等价于GlobalConfig::image_type
+eye_dir：指定与坐标轴平行的视线方向
+up_dir：指定与坐标轴平行的上方向
+cut_position：等价于GlobalConfig::cut_position
+新增功能：
+1. 支持生成所有楼层的平面图，与结构类似，需要令current_floor为null或""，cut_position配置为空或INT_MIN，结果的输出路径为文件夹
+2. 支持生成单一楼层的平面图，需指定current_floor，该配置项优先级高于cut_position
+3. 支持指定剖切面的平面图和剖面图，需指定cut_position，cut_position代表垂直于eye_dir的剖切面
+4. 支持生成立面图
