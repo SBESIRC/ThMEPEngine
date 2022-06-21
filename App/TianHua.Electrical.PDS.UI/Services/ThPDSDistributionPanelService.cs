@@ -2273,7 +2273,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             tree.DataList.Clear();
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
-                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
+                                                if (!node.Equals(vertice))
+                                                    tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
