@@ -11,6 +11,7 @@ namespace TianHua.Electrical.PDS.Service
         public const string LOAD_ID = "负载编号";
         public const string DESCRIPTION = "负载用途";
         public const string ELECTRICITY = "电量";
+        public const string LOAD_ELECTRICITY = "负载电量";
         public const string POWER_CATEGORY = "电源类别";
         public const string PROPERTY_VALUE_FIRE_POWER = "消防电源";
         public const string NON_PROPERTY_VALUE_FIRE_POWER = "非消防电源";

@@ -283,8 +283,6 @@ namespace TianHua.Electrical.PDS.Service
                     DefaultDescription = distBoxData.DefaultDescription,
                     // 电动机及负载标注 直接存块Id
                 },
-                InstalledCapacity = AnalysePower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? CleanBlank( distBoxData.Attributes[ThPDSCommon.ELECTRICITY]) : "", }),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 CircuitType = distBoxData.DefaultCircuitType,
@@ -296,6 +294,15 @@ namespace TianHua.Electrical.PDS.Service
                 CableLayingMethod1 = distBoxData.CableLayingMethod1,
                 CableLayingMethod2 = distBoxData.CableLayingMethod2,
             };
+            if (distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY))
+            {
+                thPDSLoad.InstalledCapacity = AnalysePower(new List<string> { CleanBlank(distBoxData.Attributes[ThPDSCommon.ELECTRICITY]) });
+            }
+            else if (distBoxData.Attributes.ContainsKey(ThPDSCommon.LOAD_ELECTRICITY))
+            {
+                thPDSLoad.InstalledCapacity = AnalysePower(new List<string> { CleanBlank(distBoxData.Attributes[ThPDSCommon.LOAD_ELECTRICITY]) });
+            }
+
             thPDSLoad.SetLocation(new ThPDSLocation
             {
                 ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
@@ -673,6 +680,7 @@ namespace TianHua.Electrical.PDS.Service
             var r = new Regex(@check);
             for (var i = 0; i < infos.Count; i++)
             {
+                infos[i] = infos[i].Replace("\\", "/");
                 var m = r.Match(infos[i]);
                 while (m.Success)
                 {
