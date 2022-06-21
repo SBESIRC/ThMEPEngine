@@ -10,10 +10,10 @@ using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Command;
 using ThMEPStructure.Reinforcement.Command;
-using ThMEPStructure.ArchiecturePlane;
+using ThMEPStructure.ArchitecturePlane;
 using ThMEPStructure.StructPlane.Service;
-using ThMEPStructure.ArchiecturePlane.Print;
-using ThMEPStructure.ArchiecturePlane.Service;
+using ThMEPStructure.ArchitecturePlane.Print;
+using ThMEPStructure.ArchitecturePlane.Service;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 
