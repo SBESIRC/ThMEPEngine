@@ -129,7 +129,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 var lane = IniLanes[i].Line;
                 var splits = SplitLine(lane, Walls);
-                if (splits.Count() > 1)
+                if (splits.Count() >= 1)
                 {
                     IniLanes[i].Line = splits.OrderByDescending(e => e.Length).First();
                 }
