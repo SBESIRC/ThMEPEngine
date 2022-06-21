@@ -240,6 +240,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 if (line_align_backback_rest.Length > 0)
                 {
                     lanes.Insert(i + 1, new Lane(line_align_backback_rest, lanes[i].Vec));
+                    var mod = new CarModule(PolyFromLines(line_align_backback_rest, line_align_backback_rest.Translation(lanes[i].Vec.Normalize()* DisVertCarLength)), line_align_backback_rest, lanes[i].Vec.Normalize());
+                    mod.IsInBackBackModule = CarModules[i].IsInBackBackModule;
+                    CarModules.Insert(i + 1, mod);
+                    lengths.Insert(i + 1, line_align_backback_rest.Length);
                     align_backback_for_align_rest = true;
                 }
             }
