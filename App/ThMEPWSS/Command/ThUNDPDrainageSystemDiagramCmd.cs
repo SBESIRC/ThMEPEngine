@@ -1,10 +1,8 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using System;
-using System.Diagnostics;
 using ThMEPEngineCore.Command;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.PressureDrainage.Model;
 using ThMEPWSS.PressureDrainageSystem.Model;
@@ -14,13 +12,13 @@ namespace ThMEPWSS.Command
 {
     public class ThUNDPDrainageSystemDiagramCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly PressureDrainageSystemDiagramVieModel _pressureDrainageViewModel;
+        private readonly PressureDrainageSystemDiagramVieModel _vm;
         public Point3d InsertPt { get; set; }
         public ThUNDPDrainageSystemDiagramCmd(PressureDrainageSystemDiagramVieModel pressureDrainageViewModel = null)
         {
-            _pressureDrainageViewModel = pressureDrainageViewModel;
-            this.CommandName = "THDXPSXTT";
-            this.ActionName = "生成";
+            ActionName = "生成";  
+            CommandName = "THDXPSXTT";
+            _vm = pressureDrainageViewModel;
         }
         public void Dispose()
         {
@@ -33,12 +31,9 @@ namespace ThMEPWSS.Command
                 using (var Doclock = Active.Document.LockDocument())
                 using (var curDb = AcadDatabase.Active())
                 {
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
-
                     //读取模型数据
                     PressureDrainageDataReader ModelReader = new PressureDrainageDataReader();
-                    PressureDrainageModelData modeldata = ModelReader.GetPressureDrainageModelData(_pressureDrainageViewModel);
+                    PressureDrainageModelData modeldata = ModelReader.GetPressureDrainageModelData(_vm);
                     if (modeldata == null)
                     {
                         return;
@@ -52,15 +47,18 @@ namespace ThMEPWSS.Command
                     ThPressureDrainageSystemDiagram diagram = new ThPressureDrainageSystemDiagram(modeldata);
                     diagram.Init();
                     diagram.Draw(this.InsertPt);
-
-                    sw.Stop();
-                    Active.Editor.WriteMessage($"系统图绘制完成，用时{sw.Elapsed.TotalSeconds.ToString("0.00")}秒\n");
                 }
             }
             catch (Exception ex)
-            {           
-                Active.Editor.WriteMessage(ex.Message + "\n");
+            {
+                Active.Editor.WriteLine(ex.Message);
             }
+        }
+
+        public override void AfterExecute()
+        {
+            base.AfterExecute();
+            Active.Editor.WriteLine($"系统图绘制完成，用时{_stopwatch.Elapsed.TotalSeconds.ToString("0.00")}秒");
         }
     }
 }
