@@ -1202,8 +1202,9 @@ namespace ThParkingStall.Core.MPartitionLayout
             return pl;
         }
         public void GenerateCarsAndPillarsForEachLane(LineSegment line, Vector2D vec, double length_divided, double length_offset,
+            ref LineSegment line_align_backback_rest,
   bool add_to_car_spacialindex = true, bool judge_carmodulebox = true, bool adjust_pillar_edge = false, bool judge_modulebox = false,
-  bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false,
+  bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true,bool align_backback_for_align_rest=false, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false,
   bool generate_middle_pillar = false, bool isin_backback = false,bool check_adj_collision=false)
         {
             int inipillar_count = Pillars.Count;
@@ -1251,15 +1252,29 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var crosscars = CarSpatialIndex.SelectCrossingGeometry(tlbf).Cast<Polygon>().OrderBy(t => t.Envelope.Centroid.Coordinate.Distance(pts)).ToList();
                 if (crosscars.Count() > 1)
                 {
-                    for (int i = 1; i < crosscars.Count(); i++)
+                    if (align_backback_for_align_rest)
                     {
-                        if (Math.Abs(crosscars[i].Envelope.Centroid.Coordinate.Distance(crosscars[i - 1].Envelope.Centroid.Coordinate) - DisVertCarWidth - DisPillarLength) < 10)
+                        var crossed_first_car = crosscars.OrderBy(car => car.ClosestPoint(line.P0).Distance(line.P0)).First();
+                        var p = crossed_first_car.Coordinates.OrderBy(t => t.Distance(line.P0)).First();
+                        var ponline_ex = line.ClosestPoint(p, true);
+                        var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
+                        line = new LineSegment(line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)), line.P1);
+                    }
+                    else
+                    {
+                        for (int i = 1; i < crosscars.Count(); i++)
                         {
-                            var p = crosscars[i].Coordinates.OrderBy(t => t.Distance(line.P0)).First();
-                            var ponline_ex = line.ClosestPoint(p, true);
-                            var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
-                            line = new LineSegment(line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)), line.P1);
-                            break;
+                            if (Math.Abs(crosscars[i].Envelope.Centroid.Coordinate.Distance(crosscars[i - 1].Envelope.Centroid.Coordinate) - DisVertCarWidth - DisPillarLength) < 10)
+                            {
+                                var p = crosscars[i].Coordinates.OrderBy(t => t.Distance(line.P0)).First();
+                                var ponline_ex = line.ClosestPoint(p, true);
+                                var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
+                                line_align_backback_rest = new LineSegment(line.P0, line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)));
+                                line_align_backback_rest = line_align_backback_rest.Translation(-vec.Normalize() * DisLaneWidth / 2);
+                                if (line_align_backback_rest.Length < length_divided) line_align_backback_rest = new LineSegment();
+                                line = new LineSegment(line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)), line.P1);
+                                break;
+                            }
                         }
                     }
                 }
@@ -1282,6 +1297,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             Polygon precar = new Polygon(new LinearRing(new Coordinate[0]));
             int segscount = segs.Count();
             int c = 0;
+            if (segscount == 0) line_align_backback_rest = new LineSegment();
             foreach (var seg in segs)
             {
                 c++;

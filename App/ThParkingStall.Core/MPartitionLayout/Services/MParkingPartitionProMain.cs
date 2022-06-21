@@ -204,6 +204,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             List<double>lengths=new List<double>();
             lanes.ForEach(e => lengths.Add(e.Line.Length));
             ProcessLanes(ref lanes);
+            var align_backback_for_align_rest = false;
             for (int i = 0; i < lanes.Count; i++)
             {
                 var vl = lanes[i].Line;
@@ -233,7 +234,14 @@ namespace ThParkingStall.Core.MPartitionLayout
                     line.P1 = line.P1.Translation(-Vector(line).Normalize() * (DisLaneWidth / 2 + DisPillarLength - dis_end));
                 var judge_in_obstacles = false;
                 if (lengths[i] != lanes[i].Line.Length) judge_in_obstacles = true;
-                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, judge_in_obstacles, true, true, generate_middle_pillar, isin_backback, true);
+                var line_align_backback_rest = new LineSegment();
+                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, ref line_align_backback_rest, false, false, false, false, true, false, true,false, judge_in_obstacles, true, true, generate_middle_pillar, isin_backback, true);
+                align_backback_for_align_rest = false;
+                if (line_align_backback_rest.Length > 0)
+                {
+                    lanes.Insert(i + 1, new Lane(line_align_backback_rest, lanes[i].Vec));
+                    align_backback_for_align_rest = true;
+                }
             }
         }
         public void ProcessLanes(ref List<Lane> lanes, bool preprocess = false)
@@ -301,14 +309,23 @@ namespace ThParkingStall.Core.MPartitionLayout
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
             SortLaneByDirection(vertlanes, LayoutMode);
-            foreach (var k in vertlanes)
+            var align_backback_for_align_rest = false;
+            for (int i = 0; i < vertlanes.Count; i++)
             {
+                var k = vertlanes[i];
                 var vl = k.Line;
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = new LineSegment(vl);
                 line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                var line_align_backback_rest = new LineSegment();
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
-                    , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                    , ref line_align_backback_rest, true, false, false, false,true, true, true, align_backback_for_align_rest, false, true, false, false, false, true);
+                align_backback_for_align_rest = false;
+                if (line_align_backback_rest.Length > 0)
+                {
+                    vertlanes.Insert(i + 1, new Lane(line_align_backback_rest, k.Vec));
+                    align_backback_for_align_rest = true;
+                }
             }
 
             //var generated = false;
@@ -343,8 +360,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = new LineSegment(vl);
                 line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                var line_align_backback_rest = new LineSegment();
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
-                    , true, false, false, false, true, true, false);
+                    ,ref line_align_backback_rest, true, false, false, false, true, true, false);
             }
         }
         public void PostProcess()
@@ -777,8 +795,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var vl = k.Line;
                     var line = new LineSegment(vl);
                     line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                    var line_align_backback_rest = new LineSegment();
                     tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), DisVertCarWidth, DisVertCarLength
-                        , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                        , ref line_align_backback_rest, true, false, false, false, true, true, false, false,false, true, false, false, false, true);
                 }
                 tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
                 vertlanes = tmpro.GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
@@ -789,8 +808,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                     UnifyLaneDirection(ref vl, IniLanes);
                     var line = new LineSegment(vl);
                     line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                    var line_align_backback_rest = new LineSegment();
                     tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
-                        , true, false, false, false, true, true, false);
+                        ,ref line_align_backback_rest, true, false, false, false, true, true, false);
                 }
                 var generatecars_count = tmpro.Cars.Count;
                 generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));
@@ -1379,8 +1399,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                             var vl = k.Line;
                             var line = new LineSegment(vl);
                             line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                            var line_align_backback_rest = new LineSegment();
                             tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), DisVertCarWidth, DisVertCarLength
-                                , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                                ,ref line_align_backback_rest, true, false, false, false, true, true, false,false, false, true, false, false, false, true);
                         }
                         tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
                         vertlanes = tmpro.GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
@@ -1391,8 +1412,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                             UnifyLaneDirection(ref vl, IniLanes);
                             var line = new LineSegment(vl);
                             line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                            var line_align_backback_rest = new LineSegment();
                             tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
-                                , true, false, false, false, true, true, false);
+                                ,ref line_align_backback_rest, true, false, false, false, true, true, false);
                         }
                         var generatecars_count = tmpro.Cars.Count;
                         generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));

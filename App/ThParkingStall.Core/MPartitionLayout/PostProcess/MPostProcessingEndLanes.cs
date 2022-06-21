@@ -367,9 +367,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                         //}
                         var line = new LineSegment(vl);
                         line = line.Translation(k.Vec.Normalize() * VMStock.RoadWidth / 2);
+                        var line_align_backback_rest = new LineSegment();
                         partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength,
                             VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
-                            , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                            , ref line_align_backback_rest, true, false, false, false, true, true, false,false, false, true, false, false, false, true);
                     }
                     vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth + VMStock.RoadWidth / 2 : VMStock.ParallelSpotLength
                         + VMStock.RoadWidth / 2,
@@ -389,10 +390,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                         //}
                         var line = new LineSegment(vl);
                         line = line.Translation(k.Vec.Normalize() * 2750);
+                        var line_align_backback_rest = new LineSegment();
                         partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec,
                             VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
                             VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength
-                            , true, false, false, false, true, true, false);
+                            ,ref line_align_backback_rest, true, false, false, false, true, true, false);
                     }
                     partitionpro.ReDefinePillarDimensions();
                     cars.AddRange(partitionpro.Cars);
@@ -794,9 +796,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 //}
                 var line = new LineSegment(vl);
                 line = line.Translation(k.Vec.Normalize() * VMStock.RoadWidth / 2);
+                var line_align_backback_rest = new LineSegment();
                 partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength,
                     VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
-                    , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                    ,ref line_align_backback_rest, true, false, false, false, true, true, false,false, false, true, false, false, false, true);
             }
             vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth + VMStock.RoadWidth / 2 : VMStock.ParallelSpotLength
                 + VMStock.RoadWidth / 2,
@@ -816,10 +819,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                 //}
                 var line = new LineSegment(vl);
                 line = line.Translation(k.Vec.Normalize() * 2750);
+                var line_align_backback_rest = new LineSegment();
                 partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec,
                     VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
                     VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength
-                    , true, false, false, false, true, true, false);
+                    , ref line_align_backback_rest, true, false, false, false, true, true, false);
             }
             partitionpro.ReDefinePillarDimensions();
             cars.AddRange(partitionpro.Cars);
@@ -888,9 +892,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                     tmpro.IniLanes.Add(new Lane(split, Vector(inherit_line).Normalize()));
                     tmpro.Obstacles = new List<Polygon>();
                     tmpro.ObstaclesSpatialIndex = new MNTSSpatialIndex(tmpro.Obstacles);
+                    var line_align_backback_rest = new LineSegment();
                     tmpro.GenerateCarsAndPillarsForEachLane(split, Vector(inherit_line).Normalize(), VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength,
                                    VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
-                                   , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                                   ,ref line_align_backback_rest, true, false, false, false, true, true, false,false, false, true, false, false, false, true);
                     var tmpcars = tmpro.Cars;
                     tmpcars = tmpro.Cars.Where(e => boundary.Contains(e.Polyline.Centroid.Coordinate))
                         .Where(e => laneboxpacialindex.SelectCrossingGeometry(e.Polyline.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck)).Count == 0)
