@@ -56,6 +56,7 @@
     <Compile Include="Service\ThPDSEdgeContainsService.cs" />
     <Compile Include="Service\ThPDSGraphVerifyService.cs" />
     <Compile Include="Service\ThPDSPoint3dService.cs" />
+    <Compile Include="Service\ThPDSPowerTransformerService.cs" />
     <Compile Include="Service\ThPDSPushDataService.cs" />
     <Compile Include="Service\ThPDSReplaceStringService.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />

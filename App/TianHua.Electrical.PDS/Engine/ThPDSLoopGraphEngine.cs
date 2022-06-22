@@ -1672,6 +1672,31 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
+        public void AnalsisPowerTransformer()
+        {
+            var addNodes = new List<ThPDSCircuitGraphNode>();
+            var addEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            PDSGraph.Graph.Vertices.ForEach(vertex =>
+            {
+                if (vertex.NodeType != PDSNodeType.DistributionBox)
+                {
+                    return;
+                }
+                vertex.Loads[0].ID.PowerTransformerCircuitList.ForEach(circuit =>
+                {
+                    if (!ThPDSPowerTransformerService.Contains(addNodes, circuit.Item1))
+                    {
+                        var powerTransformer = ThPDSGraphService.CreatePowerTransformer(circuit.Item1);
+                        addNodes.Add(powerTransformer);
+                        var newEdge = ThPDSGraphService.CreateEdge(powerTransformer, vertex, circuit);
+                        addEdges.Add(newEdge);
+                    }
+                });
+            });
+            PDSGraph.Graph.AddVertexRange(addNodes);
+            PDSGraph.Graph.AddEdgeRange(addEdges);
+        }
+
         private void CreateLightingEdge(List<ThPDSCircuitGraphNode> targets, ThPDSCircuitGraphNode distBox)
         {
             targets.ForEach(load =>

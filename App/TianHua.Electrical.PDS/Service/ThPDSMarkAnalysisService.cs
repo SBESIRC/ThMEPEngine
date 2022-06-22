@@ -40,6 +40,9 @@ namespace TianHua.Electrical.PDS.Service
             });
 
             var descriptionAssign = true;
+            var numRegex = new Regex(@"[0-9]+");
+            var powerTransformerCircuitRegex = new Regex(@"[0-9]?W[0-9]{1}[0-9]{2}-[0-9]{1,2}");
+            var powerTransformerRegex = new Regex(@"[0-9]?W[0-9]{1}[0-9]{2}");
             foreach (var str in marks)
             {
                 if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
@@ -54,7 +57,6 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         if (strClean.Contains("~"))
                         {
-                            var numRegex = new Regex(@"[0-9]+");
                             var match = numRegex.Match(strClean);
                             if (match.Success)
                             {
@@ -72,8 +74,6 @@ namespace TianHua.Electrical.PDS.Service
                         }
                         else
                         {
-
-                            var numRegex = new Regex(@"[0-9]+");
                             var match = numRegex.Match(strClean);
                             while (match.Success)
                             {
@@ -82,10 +82,20 @@ namespace TianHua.Electrical.PDS.Service
                             }
                         }
                     }
-                    else if (!string.IsNullOrEmpty(strClean) && descriptionAssign)
+                    else
                     {
-                        thPDSDistBox.ID.Description = strClean;
-                        descriptionAssign = false;
+                        var match = powerTransformerCircuitRegex.Match(strClean);
+                        if (match.Success)
+                        {
+                            var powerTransformer = powerTransformerRegex.Match(match.Value).Value;
+                            var circuitId = match.Value.Replace(powerTransformer, "").Replace("-", "");
+                            thPDSDistBox.ID.PowerTransformerCircuitList.Add(Tuple.Create(powerTransformer, circuitId));
+                        }
+                        else if (!string.IsNullOrEmpty(strClean) && Regex.IsMatch(strClean, @"[\u4e00-\u9fa5]") && descriptionAssign)
+                        {
+                            thPDSDistBox.ID.Description = strClean;
+                            descriptionAssign = false;
+                        }
                     }
                 }
             }
@@ -518,6 +528,15 @@ namespace TianHua.Electrical.PDS.Service
             {
                 ID = id,
             };
+            return circuit;
+        }
+
+        public ThPDSCircuit CircuitMarkAnalysis(Tuple<string, string> powerTransformerNumber)
+        {
+            var circuit = new ThPDSCircuit();
+            circuit.ID.SourcePanelIDList.Add(powerTransformerNumber.Item1);
+            circuit.ID.CircuitIDList.Add(powerTransformerNumber.Item2);
+
             return circuit;
         }
 
