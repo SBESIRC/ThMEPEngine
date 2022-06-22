@@ -1475,7 +1475,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             edge.ComponentCheckCascade();
             //统计回路级联电流
-            edge.Details.CascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
 
             var node = edge.Source;
             var miniBusbar = node.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge)).Key;
