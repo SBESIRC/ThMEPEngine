@@ -32,17 +32,17 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
-        [DisplayName("回路形式")]
+
+        [DisplayName("消防属性")]
         [Category("配电回路参数")]
-        [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSCircuitType>), typeof(PropertyEditorBase))]
-        public ThPDSCircuitType CircuitType
+        public bool FireLoad
         {
-            get => _edge.Target.Load.CircuitType;
+            get => _edge.Target.Load.FireLoad;
             set
             {
-                _edge.Target.Load.CircuitType = value;
-                OnPropertyChanged(nameof(CircuitType));
+                _edge.Target.SetFireLoad(value);
+                OnPropertyChanged(nameof(FireLoad));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
