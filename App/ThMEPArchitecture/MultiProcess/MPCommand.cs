@@ -359,6 +359,7 @@ namespace ThMEPArchitecture.MultiProcess
                 ParameterStock.RunMode = MultiSolutionList[i];
                 var addBoundSegLines = AddBoundSegLines && i == 0;
                 var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel, addBoundSegLines);
+                MPGAData.dataWraper = dataWraper;
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
                 {
                     using (MemoryMappedViewStream stream = mmf.CreateViewStream())
@@ -374,7 +375,7 @@ namespace ThMEPArchitecture.MultiProcess
                     {
                         var res = GA.Run2(displayInfo);
                         var best = res.First();
-
+                        MPGAData.Set(best);
                         DisplayParkingStall.Clear();
                         if(i!= 0)
                         {
@@ -386,6 +387,7 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     catch (Exception ex)
                     {
+                        MPGAData.Save();
                         DisplayLogger?.Information(ex.Message);
                         DisplayLogger?.Information("程序出错！");
                         Logger?.Information(ex.Message);

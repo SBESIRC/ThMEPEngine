@@ -396,7 +396,7 @@ namespace ThParkingStall.Core.InterProcess
     public static class MPGAData
     {
         public static DataWraper dataWraper;
-        public static int ProcIndex;
+        public static int ProcIndex = -1;
         static object lockObj = new object();
         static bool Saved = false;
         public static void Set(Chromosome chromosome)
@@ -409,7 +409,9 @@ namespace ThParkingStall.Core.InterProcess
             {
                 if (!Saved)
                 {
-                    var path = Path.Combine(System.IO.Path.GetTempPath(), fileName + ProcIndex.ToString() + ".dat");
+                    string path;
+                    if (ProcIndex!= -1) path = Path.Combine(System.IO.Path.GetTempPath(), fileName + ProcIndex.ToString() + ".dat");
+                    else path = Path.Combine(System.IO.Path.GetTempPath(), fileName  + ".dat");
                     // Gain code access to the file that we are going
                     // to write to
                     try
