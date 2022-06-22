@@ -602,7 +602,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0||
                     Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius) ||
-                    newFixedSegLines.Any(l =>l.PartEqual(SegLines[i])))
+                    newFixedSegLines.Any(l =>l.IsSubSetOf(SegLines[i])))
                 {
                     if (SegLines[i].IsVertical())
                         LowerUpperBound.Add((SegLines[i].P0.X, SegLines[i].P0.X));
