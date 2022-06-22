@@ -61,6 +61,12 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         public override void Enhance()
         {
+            // 如果内置表中的配箍率大于提取的配箍率，则不需要放大
+            if(ThReinforcementUtils.IsBiggerThan(EdgeComponent.StirrUpRatio, StirrupRatio, 2))
+            {
+                return;
+            }
+
             // Step1: 增大拉筋2、3的直径与箍筋1的直径相同（若2、3直径就与1相同，则直接进入迭代2）
             SetDiameterIdentical();
             var pvcal = CalculatePvcal();
@@ -274,6 +280,12 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         public override void Enhance()
         {
+            // 如果内置表中的配箍率大于提取的配箍率，则不需要放大
+            if (ThReinforcementUtils.IsBiggerThan(EdgeComponent.StirrUpRatio, StirrupRatio, 2))
+            {
+                return;
+            }
+
             // Step1: 增大拉筋2、3、4的直径与箍筋1的直径相同（若2、3、4直径就与1相同，则直接进入迭代2）
             SetDiameterIdentical();
             var pvcal = CalculatePvcal();
@@ -530,6 +542,12 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         public override void Enhance()
         {
+            // 如果内置表中的配箍率大于提取的配箍率，则不需要放大
+            if (ThReinforcementUtils.IsBiggerThan(EdgeComponent.StirrUpRatio, StirrupRatio, 2))
+            {
+                return;
+            }
+
             // Step1: 增大拉筋2、3、4的直径与箍筋1的直径相同（若2、3、4直径就与1相同，则直接进入迭代2）
             SetDiameterIdentical();
             var pvcal = CalculatePvcal();

@@ -81,14 +81,13 @@ namespace ThMEPStructure.Reinforcement.Service
                                 var firstFilters = reinforceTexts.OfType<DBText>().Where(o=> rangePoly.Contains(o.Position)).ToCollection();
                                 if(firstFilters.Count==1)
                                 {
-                                    reinforceContent = reinforceTexts.OfType<DBText>().First().TextString;
+                                    reinforceContent = firstFilters.OfType<DBText>().First().TextString;
                                     isCal = IsCalculationLayer(GetLayer(reinforceTexts.OfType<DBText>().First()));
                                 }
                                 else if(firstFilters.Count>0)
                                 {
                                     // 有待进一步
-                                    var codeCenter = GetCenter(code);
-                                    firstFilters = firstFilters.OfType<DBText>().OrderBy(o => codeCenter.DistanceTo(GetCenter(o))).ToCollection();
+                                    firstFilters = firstFilters.OfType<DBText>().OrderBy(o => sourcePt.DistanceTo(o.Position)).ToCollection();
                                     reinforceContent = firstFilters.OfType<DBText>().First().TextString;
                                     isCal = IsCalculationLayer(GetLayer(firstFilters.OfType<DBText>().First()));
                                 }
