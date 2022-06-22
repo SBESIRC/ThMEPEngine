@@ -42,13 +42,19 @@ namespace ThMEPEngineCore.ConnectWiring.Data
             var allHoleRooms = roomTableConfig.CalRoomLst(holeRooms);
             //数据处理
             var geos = new List<ThGeometry>();
+            var tempHoles = new Dictionary<Polyline, string>();
+            var tempRooms = new List<Polyline>();
             foreach (var room in Rooms)
             {
                 var roomInfos = GetMPolygonInfo(room.Boundary);
-                holes.AddRange(roomInfos.Value);
+                tempRooms.Add(roomInfos.Key);
+                foreach (var hole in roomInfos.Value)
+                {
+                    tempHoles.Add(hole, room.Name);
+                }
                 if (allHoleRooms.Any(x=> room.Tags.Any(y=> RoomConfigTreeService.CompareRoom(x, y))))
                 {
-                    holes.Add(roomInfos.Key);
+                    tempHoles.Add(roomInfos.Key, room.Name);
                 }
                 else
                 {
@@ -62,7 +68,24 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     }
                 }
             }
-
+            var needRooms = tempHoles.Where(x => tempRooms.Any(y => x.Key.Contains(y))).ToList();
+            //foreach (var room in needRooms)
+            //{
+            //    var geometry = new ThGeometry();
+            //    geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
+            //    geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, room.Value);
+            //    geometry.Boundary = room.Key;
+            //    geos.Add(geometry);
+            //}
+            holes.AddRange(tempHoles.Except(needRooms).Select(x => x.Key).ToList());
+            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    //foreach (var item in s)
+            //    //{
+            //    //    db.ModelSpace.Add(item.Boundary);
+            //    //}
+            //}
+            
             return geos;
         }
 

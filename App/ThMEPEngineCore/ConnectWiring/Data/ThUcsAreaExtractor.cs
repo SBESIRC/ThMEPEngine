@@ -293,7 +293,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     if (frame is Polyline)
                     {
                         var extendCurve = ExtendCurve(frame, 1000) as Polyline;
-                        if (frame.Closed && frame.EndPoint.DistanceTo(frame.StartPoint) < 1)
+                        if (frame.Closed || frame.EndPoint.DistanceTo(frame.StartPoint) < 1)
                         {
                             frameLst.Add(extendCurve);
                         }
