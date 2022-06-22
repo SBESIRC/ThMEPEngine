@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Input;
 using System.Windows.Controls;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
@@ -25,9 +26,71 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             }
             else
             {
+                InitDragDrop();
                 Service.Init(this);
                 PDS.Project.PDSProject.Instance.DataChanged += () => Service.Init(this);
             }
+        }
+
+        protected void InitDragDrop()
+        {
+            this.tv.Drop += Tv_OnDrop;
+            this.tv.DragOver += Tv_OnDragOver;
+            this.tv.DragEnter += Tv_OnDragEnter;
+            this.tv.DragLeave += Tv_OnDragLeave;
+            this.tv.MouseMove += Tv_OnMouseMove;
+            this.tv.GiveFeedback += Tv_OnGiveFeedback;
+        }
+
+        protected void Tv_OnMouseMove(object sender, MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                var data = this.tv.SelectedValue;
+                if (data != null)
+                {
+                    DragDrop.DoDragDrop(this.tv, data, DragDropEffects.Move);
+                }
+            }
+        }
+
+        protected void Tv_OnGiveFeedback(object sender, GiveFeedbackEventArgs e)
+        {
+            base.OnGiveFeedback(e);
+            if (e.Effects.HasFlag(DragDropEffects.Copy))
+            {
+                Mouse.SetCursor(Cursors.Cross);
+            }
+            else if (e.Effects.HasFlag(DragDropEffects.Move))
+            {
+                Mouse.SetCursor(Cursors.Pen);
+            }
+            else
+            {
+                Mouse.SetCursor(Cursors.No);
+            }
+            e.Handled = true;
+        }
+
+        protected void Tv_OnDrop(object sender, DragEventArgs e)
+        {
+            //
+        }
+
+        protected void Tv_OnDragOver(object sender, DragEventArgs e)
+        {
+            //
+        }
+
+        protected void Tv_OnDragEnter(object sender, DragEventArgs e)
+        {
+            //
+        }
+
+        protected void Tv_OnDragLeave(object sender, DragEventArgs e)
+        {
+            //
         }
 
         private void Tv_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

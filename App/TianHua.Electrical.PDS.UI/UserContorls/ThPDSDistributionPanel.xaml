@@ -57,7 +57,7 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Row="0" Grid.Column="0">
                 <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                    <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
+                    <TreeView x:Name="tv" AllowDrop="True" ItemsSource="{Binding DataList}">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
                                 <StackPanel Orientation="Horizontal">
