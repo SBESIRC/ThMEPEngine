@@ -155,6 +155,15 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
         }
 
+        public void SetFireLoad(bool isFireLoad)
+        {
+            if (Load.FireLoad != isFireLoad)
+            {
+                this.Load.SetFireLoad(isFireLoad);
+                this.UpdateWithNode(false);
+            }
+        }
+
         #region
         public event EventHandler TagChanged;
         protected virtual void OnTagChanged(EventArgs args)
