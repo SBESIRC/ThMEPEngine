@@ -93,8 +93,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="edge"></param>
-        public static void DeleteCircuit(ProjectGraph graph,
-            ThPDSProjectGraphEdge edge)
+        public static void DeleteCircuit(ProjectGraph graph,ThPDSProjectGraphEdge edge)
         {
             //删除回路只删除这个连接关系，前后节点都还保留
             //所以删除后，后面的负载会失去原有的回路,需要人再去分配
@@ -112,6 +111,27 @@ namespace TianHua.Electrical.PDS.Project.Module
                     DeleteSmallBusbar(edge.Source, minibar);
                 }
             }
+        }
+
+        /// <summary>
+        /// 删除回路
+        /// </summary>
+        public static void DeleteCircuit(ProjectGraph graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
+        {
+            var edge = graph.Edges.FirstOrDefault(o => o.Source == source && o.Target == target);
+            DeleteCircuit(graph, edge);
+        }
+
+        /// <summary>
+        /// 指定上下级连接关系
+        /// </summary>
+        public static void SpecifyConnectionCircuit(ProjectGraph graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
+        {
+            if (source.IsNull())
+                return;
+            //新建回路
+            var newEdge = AddCircuit(graph, source, CircuitFormOutType.常规, target.Load.Phase);
+            DistributeLoad(graph, newEdge, target);
         }
 
         /// <summary>
