@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         private void ThPDSDistributionPanel_Loaded(object sender, RoutedEventArgs e)
         {
             var builder = new ThPDSCircuitGraphTreeBuilder();
-            this.tv.DataContext = builder.BuildV1_1(Graph);
+            this.tv.DataContext = builder.Build(Graph);
             if (new Services.ThPDSCircuitGraphComponentGenerator().IN(null) is null)
             {
                 UpdateCanvas();
@@ -49,9 +49,9 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         private void UpdateCanvas()
         {
             if (this.tv.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-            var left = ThCADExtension.ThEnumExtension.GetDescription(Graph.Vertices.ToList()[sel.Id].Details.CircuitFormType.CircuitFormType) ?? "1路进线";
-            var v = Graph.Vertices.ToList()[sel.Id];
-            var rights = Graph.Edges.Where(eg => eg.Source == Graph.Vertices.ToList()[sel.Id]).Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm.CircuitFormType) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
+            var left = ThCADExtension.ThEnumExtension.GetDescription(Graph.Vertices.First(o => o.Load.LoadUID.Equals(sel.NodeUID)).Details.CircuitFormType.CircuitFormType) ?? "1路进线";
+            var v = Graph.Vertices.First(o => o.Load.LoadUID.Equals(sel.NodeUID));
+            var rights = Graph.Edges.Where(eg => eg.Source.Load.LoadUID.Equals(sel.NodeUID)).Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm.CircuitFormType) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
             var rd = new ThPDSCircuitGraphHighDpiRenderer() { Left = left, Rights = rights, PDSBlockInfos = Services.ThPDSCircuitGraphComponentGenerator.PDSBlockInfos };
             rd.Render(canvas, Graph);
         }

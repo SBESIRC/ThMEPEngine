@@ -63,7 +63,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var builder = new ThPDSCircuitGraphTreeBuilder();
             void UpdateTreeView()
             {
-                var tree = builder.BuildV1_1(graph);
+                var tree = builder.Build(graph);
                 {
                     void dfs(ThPDSCircuitGraphTreeModel node)
                     {
@@ -78,7 +78,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     panel.tv.DataContext = tree;
                 }
             }
-            var tree = builder.BuildV1_1(graph);
+            var tree = builder.Build(graph);
             static string FixString(string text)
             {
                 if (string.IsNullOrEmpty(text)) return " ";
@@ -125,13 +125,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var batchGenCmd = new RelayCommand(() =>
             {
                 // 获取勾选的节点
-                var vertices = graph.Vertices.ToList();
+                var vertices = graph.Vertices;
                 var nodes = new List<ThPDSProjectGraphNode>();
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.IsChecked == true)
+                    if (node.IsChecked == true && !node.IsRoot)
                     {
-                        nodes.Add(vertices[node.Id]);
+                        nodes.Add(vertices.First(o => o.Load.LoadUID.Equals(node.NodeUID)));
                     }
                     foreach (var n in node.DataList)
                     {
@@ -324,9 +324,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             ThPDSProjectGraphNode GetCurrentVertice()
             {
-                var id = tv.SelectedItem is ThPDSCircuitGraphTreeModel sel1 ? sel1.Id : (tv.SelectedItem is ThPDSGraphTreeModel sel2 ? sel2.Id : -1);
-                if (id < 0) return null;
-                return graph.Vertices.ToList()[id];
+                if (tv.SelectedItem is ThPDSCircuitGraphTreeModel item)
+                {
+                    return graph.Vertices.FirstOrDefault(o => o.Load.LoadUID.Equals(item.NodeUID));
+                }
+                return null;
             }
             balancedPhaseSequence = () =>
             {
@@ -345,13 +347,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             autoNumbering = () =>
             {
                 // 获取勾选的节点
-                var vertices = graph.Vertices.ToList();
+                var vertices = graph.Vertices;
                 var nodes = new List<ThPDSProjectGraphNode>();
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.IsChecked == true)
+                    if (node.IsChecked == true  && !node.IsRoot)
                     {
-                        nodes.Add(vertices[node.Id]);
+                        nodes.Add(vertices.First(o => o.Load.LoadUID.Equals(node.NodeUID)));
                     }
                     foreach (var n in node.DataList)
                     {
@@ -3256,7 +3258,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
-                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID, });
+                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { NodeUID = edge.Circuit.CircuitUID, Name = edge.Circuit.ID.CircuitID, });
                                 }
                                 var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;
@@ -3265,7 +3267,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     foreach (ThPDSCircuitGraphTreeModel m in w.ctl.SelectedItems)
                                     {
-                                        ThPDSProjectGraphService.AssignCircuit2SmallBusbar(vertice, mbb, edges[m.Id]);
+                                        ThPDSProjectGraphService.AssignCircuit2SmallBusbar(vertice, mbb, edges.First(o => o.Circuit.CircuitUID.Equals(m.NodeUID)));
                                     }
                                     UpdateCanvas();
                                 }

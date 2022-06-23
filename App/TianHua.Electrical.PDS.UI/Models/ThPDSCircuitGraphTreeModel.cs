@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using ThControlLibraryWPF.ControlUtils;
 
 namespace TianHua.Electrical.PDS.UI.Models
 {
     public class ThPDSCircuitGraphTreeModel : NotifyPropertyChangedBase
     {
-        public int Id { get; set; }
+        public string NodeUID { get; set; }
         public string Key { get; set; }
         public object Tag { get; set; }
+        public bool IsRoot { get; set; }
         public ThPDSCircuitGraphTreeModel Parent { get; set; }
         public ThPDSCircuitGraphTreeModel Root { get; set; }
         string _Name;

@@ -174,7 +174,6 @@
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
-    <Compile Include="ViewModels\ThPDSGraphTreeModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ElecSandboxUI.xaml">
