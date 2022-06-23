@@ -79,14 +79,14 @@ namespace ThCADExtension
         /// <param name="blockReference"></param>
         /// <returns></returns>
         public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
-        {
-            var visibility = blockReference.CurrentVisibilityStateValue();
-            if (!string.IsNullOrEmpty(visibility))
             {
-                return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
+                var visibility = blockReference.CurrentVisibilityStateValue();
+                if (!string.IsNullOrEmpty(visibility))
+                {
+                    return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
+                }
+                return new ObjectIdCollection();
             }
-            return new ObjectIdCollection();
-        }
 
         /// <summary>
         /// 提取动态块中指定可见性下可见的实体
@@ -112,12 +112,18 @@ namespace ThCADExtension
         /// <returns></returns>
         public static string CurrentVisibilityStateValue(this ThBlockReferenceData blockReference)
         {
-            if (null == blockReference.CustomProperties)
-                return "";
-            var properties = blockReference.CustomProperties
-                .Cast<DynamicBlockReferenceProperty>()
-                .Where(o => o.IsVisibility());
-            return properties.Any() ? properties.First().Value as string : "";
+            var db = blockReference.ObjId.Database;
+            using (var acadDatabase = AcadDatabase.Use(db))
+            {
+                var blkref = acadDatabase.Element<BlockReference>(blockReference.ObjId);
+                var property = blkref.DynamicBlockReferencePropertyCollection
+                    .OfType<DynamicBlockReferenceProperty>()
+                    .Where(o => o.IsVisibility())
+                    .FirstOrDefault();
+                if (property == null) 
+                    return string.Empty;
+                return property.Value.ToString();
+            }
         }
 
         // Reference:
