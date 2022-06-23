@@ -52,6 +52,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
         public void InitListDatas()
         {
             FloorListDatas = new List<string>();
+            FloorRect = new Dictionary<string, Polyline>();
+            FloorPt = new Dictionary<string, Point3d>();
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
@@ -92,9 +94,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                         return;
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    ;
                 }
             }
         }

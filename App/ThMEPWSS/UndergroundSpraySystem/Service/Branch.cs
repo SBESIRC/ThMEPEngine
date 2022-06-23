@@ -173,6 +173,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             bool textRecord = false; //记录是否标记排气阀
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
+                if (pt._pt.DistanceTo(new Point3d(813344514.4, 373000862.5,0)) < 10)
+                    ;
                 double fireNums = 0;
 
                 if (spraySystem.SubLoopFireAreasDic.ContainsKey(pt))
