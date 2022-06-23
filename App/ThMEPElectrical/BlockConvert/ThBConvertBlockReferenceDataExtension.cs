@@ -35,7 +35,7 @@ namespace ThMEPElectrical.BlockConvert
                     var convertRuleList = SourceBConvertRules
                         .Where(rule => (rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name))
                         .ToList();
-                    if(convertRuleList.Count > 1)
+                    if (convertRuleList.Count > 1)
                     {
                         convertRule = convertRuleList.Where(rule => ThStringTools.CompareWithChinesePunctuation(data.CurrentVisibilityStateValue(),
                             rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] as string)).First();
@@ -196,21 +196,28 @@ namespace ThMEPElectrical.BlockConvert
             return new Polyline();
         }
 
-        public static void AdjustLoadLabel(this BlockReference targetBlock)
+        public static void AdjustLoadLabel(this ThBlockReferenceData targetBlockData)
         {
-            var entities = new DBObjectCollection();
-            var targetBlockData = new ThBlockReferenceData(targetBlock.ObjectId);
-            if (targetBlockData.EffectiveName.Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
+            using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                FilterAndBurst(targetBlock, entities);
-            }
-            else
-            {
-                ThBlockReferenceExtensions.Burst(targetBlock, entities);
-            }
+                var targetBlock = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
+                //如果不是动态块，则返回
+                if (targetBlock == null || !targetBlock.IsDynamicBlock)
+                {
+                    return;
+                }
+                var entities = new DBObjectCollection();
+                if (targetBlockData.EffectiveName.Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
+                {
+                    FilterAndBurst(targetBlock, entities);
+                }
+                else
+                {
+                    ThBlockReferenceExtensions.Burst(targetBlock, entities);
+                }
 
-            if (!targetBlockData.CustomProperties.IsNull())
-            {
+                //返回动态块的动态属性
+                var customProperties = targetBlock.DynamicBlockReferencePropertyCollection;
                 entities = entities.OfType<DBText>().ToCollection();
                 var textMaxWidth = entities.GetMaxWidth();
                 if (targetBlockData.EffectiveName.Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
@@ -221,7 +228,7 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     textMaxWidth = textMaxWidth > 1600 ? ((int)textMaxWidth / 100 * 100 + 500) : 2100;
                 }
-                targetBlockData.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_TABLE_WIDTH, textMaxWidth);
+                customProperties.SetValue(ThBConvertCommon.PROPERTY_TABLE_WIDTH, textMaxWidth);
             }
         }
 
