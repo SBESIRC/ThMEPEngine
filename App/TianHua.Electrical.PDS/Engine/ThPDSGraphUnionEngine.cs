@@ -251,9 +251,21 @@ namespace TianHua.Electrical.PDS.Engine
                     foreach (var vertex in graph.Vertices)
                     {
                         // id、楼层、位置判断
-                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && PositionCheck(vertex, node)
-                            && DescriptionCheck(vertex, node) && PowerCheck(vertex, node) && TypeCheck(vertex, node))
+                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && PositionCheck(vertex, node) && TypeCheck(vertex, node))
                         {
+                            if (!PowerCheck(vertex, node))
+                            {
+                                vertex.Loads[0].InstalledCapacity = vertex.Loads[0].InstalledCapacity.HighPower
+                                    > node.Loads[0].InstalledCapacity.HighPower ? vertex.Loads[0].InstalledCapacity : node.Loads[0].InstalledCapacity;
+                            }
+                            if (!DescriptionCheck(vertex, node))
+                            {
+                                if (vertex.Loads[0].ID.Description.Equals(vertex.Loads[0].ID.DefaultDescription))
+                                {
+                                    vertex.Loads[0].ID.Description = node.Loads[0].ID.Description;
+                                }
+                            }
+
                             originalNode = vertex;
                             if (!LocationEquals(node.Loads[0].Location, originalNode.Loads[0].Location))
                             {

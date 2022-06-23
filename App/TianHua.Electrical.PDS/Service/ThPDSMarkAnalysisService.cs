@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Dreambuild.AutoCAD;
+
 using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
@@ -324,14 +326,24 @@ namespace TianHua.Electrical.PDS.Service
             }
             else if (distBoxData.FireLoad == ThPDSFireLoad.Unknown)
             {
-                if (!distBoxData.CustomProperties.IsNull() && distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                using (var acadDatabase = AcadDatabase.Use(distBoxData.Database))
                 {
-                    var fireLoad = distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
-                    thPDSLoad.SetFireLoad(fireLoad);
-                }
-                else
-                {
-                    thPDSLoad.SetFireLoad(ThPDSFireLoad.Unknown);
+                    var br = distBoxData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    //如果不是动态块，则返回
+                    if (br == null || !br.IsDynamicBlock)
+                    {
+                        thPDSLoad.SetFireLoad(ThPDSFireLoad.Unknown);
+                    }
+                    else
+                    {
+                        //获得动态块的动态属性
+                        var customProperties = br.DynamicBlockReferencePropertyCollection;
+                        if (customProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                        {
+                            var fireLoad = customProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
+                            thPDSLoad.SetFireLoad(fireLoad);
+                        }
+                    }
                 }
             }
 

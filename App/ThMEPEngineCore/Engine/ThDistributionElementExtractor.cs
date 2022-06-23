@@ -89,9 +89,13 @@ namespace ThMEPEngineCore.Engine
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (visitor.IsBuildElementBlock(blockTableRecord))
                     {
-                        var data = new ThBlockReferenceData(blockReference.ObjectId);
-                        var objs = data.VisibleEntities();
-                        if (objs.Count == 0)
+                        var objs = new ObjectIdCollection();
+                        if(blockTableRecord.IsDynamicBlock)
+                        {
+                            var data = new ThBlockReferenceData(blockReference.ObjectId);
+                            objs = data.VisibleEntities();
+                        }
+                        else
                         {
                             foreach (var objId in blockTableRecord)
                             {

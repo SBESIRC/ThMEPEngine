@@ -172,7 +172,7 @@ namespace TianHua.Electrical.PDS.Engine
                             var distBoxFrames = distBoxFrameIndex.SelectCrossingPolygon(x).OfType<Polyline>().ToList();
 
                             //做一个标注的Service
-                            var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
+                            var markService = new ThMarkService(acad.Database, marksInfo, markBlockData, tchWireDimsInfo);
 
                             var isStandardStorey = storey.StoreyTypeString.Equals("标准层");
                             var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loadsData, cableTrays, cables, markService,

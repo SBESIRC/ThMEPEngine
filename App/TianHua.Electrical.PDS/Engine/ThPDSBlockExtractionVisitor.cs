@@ -126,6 +126,12 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
+            // 暂时忽略绑定的外参
+            if (blockTableRecord.Name.Contains("__覆盖_") || blockTableRecord.Name.Contains("__附着_"))
+            {
+                return false;
+            }
+            // 忽略外参
             if (blockTableRecord.IsFromExternalReference || blockTableRecord.IsFromOverlayReference)
             {
                 return false;

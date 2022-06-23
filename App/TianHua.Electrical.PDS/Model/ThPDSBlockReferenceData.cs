@@ -19,20 +19,6 @@ namespace TianHua.Electrical.PDS.Model
         public Database Database { get; set; }
         public ObjectId ObjId { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
-        public DynamicBlockReferencePropertyCollection CustomProperties
-        {
-            get
-            {
-                try
-                {
-                    return ObjId.GetDynProperties();
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
 
         /// <summary>
         /// 一级负载类型

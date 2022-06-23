@@ -61,7 +61,7 @@ namespace TianHua.Electrical.PDS.Service
         public const string CONTROL_CIRCUIT_DESCRIPTION = "控制回路";
 
         public const double ALLOWABLE_TOLERANCE = 26.0;  //允许公差
-        public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
+        public const double STOREY_TOLERANCE = 1000.0;  //允许楼层位置偏差
         public const double INNER_TOLERANCE = 57400.0;  //内框高度
 
         public const string MOTOR_AND_LOAD_LABELS = "电动机及负载标注";
