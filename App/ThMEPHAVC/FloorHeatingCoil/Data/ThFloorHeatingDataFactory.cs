@@ -15,6 +15,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model.Hvac;
 
 
@@ -29,7 +30,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public List<ThExtractorBase> Extractors { get; set; }
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<Polyline> SenitaryTerminalOBBTemp { get; set; } = new List<Polyline>();
-        public List<Polyline> RoomSeparateLine { get; set; } = new List<Polyline>();
+        public List<Line> RoomSeparateLine { get; set; } = new List<Line>();
         public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
         public List<BlockReference> WaterSeparator { get; set; } = new List<BlockReference>();
 
@@ -47,8 +48,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
         {
-            var manger = Extract(database); // visitor manager,提取的是原始数据
-            MoveToOrigin(manger, Transformer); // 移动到原点
+            //var manger = Extract(database); // visitor manager,提取的是原始数据
+            //MoveToOrigin(manger, Transformer); // 移动到原点
 
             Extractors = new List<ThExtractorBase>()
             {
@@ -56,7 +57,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 {
                     ElementLayer = "AI-门",
                     Transformer = Transformer,
-                    VisitorManager = manger,
+                    //VisitorManager = manger,
                 },
                 new ThFloorHeatingRoomExtractor ()
                 {
@@ -134,8 +135,22 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 ElementLayer = ThFloorHeatingCommon.Layer_RoomSeparate,
             };
             extractService.Extract(database, framePts);
-            RoomSeparateLine.AddRange(extractService.Polys);
+
+            var extractServiceLine = new ThExtractLineService()
+            {
+                ElementLayer = ThFloorHeatingCommon.Layer_RoomSeparate,
+            };
+            extractServiceLine.Extract(database, framePts);
+
+            var obj = new DBObjectCollection();
+            extractService.Polys.ForEach(x => obj.Add(x));
+            var lines = ThDrawTool.GetLines(obj);
+
+            RoomSeparateLine.AddRange(lines);
+            RoomSeparateLine.AddRange(extractServiceLine.Lines);
         }
+
+
 
         private void ExtractWaterSeparator(Database database, Point3dCollection framePts)
         {

@@ -17,9 +17,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                                                         "浴缸" ,
                                                                         };
 
-        public static string Layer_RoomSeparate = "AI-房间分割线";
-        public static string Layer_Obstacle = "AI-障碍物";
-        public static string Layer_RoomSuggestDist = "AI-间距";
+        public static string Layer_RoomSeparate = "AI-地暖伸缩缝";
+        public static string Layer_Obstacle = "AI-地暖障碍物";
+        public static string Layer_RoomSuggestDist = "AI-地暖推荐间距";
         public static string BlkName_WaterSeparator = "AI-集分水器";
 
     }

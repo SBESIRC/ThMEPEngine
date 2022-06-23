@@ -40,7 +40,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var db3Doors = ExtractDb3Door(database, pts);
+            //var db3Doors = ExtractDb3Door(database, pts);
             var localDoors = ExtractMsDoor(database, pts);
             //对Clean的结果进一步过虑
             for (int i = 0; i < localDoors.Count; i++)
@@ -48,10 +48,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 localDoors[i].Outline = ThCleanEntityService.Buffer(localDoors[i].Outline as Polyline, 25);
             }
 
-            //处理重叠
-            var conflictService = new ThHandleConflictService();
-            Doors = conflictService.Union(db3Doors, localDoors);
-
+            ////处理重叠
+            //var conflictService = new ThHandleConflictService();
+            //Doors = conflictService.Union(db3Doors, localDoors);
+            Doors.AddRange(localDoors);
             var objs = Doors.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
             Doors = Doors.Where(o => objs.Contains(o.Outline)).ToList();
             var bufferService = new ThNTSBufferService();
@@ -60,6 +60,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 Doors[i].Outline = bufferService.Buffer(Doors[i].Outline, 15);
             }
         }
+
         #region ----------提取DB3门-----------
         private DBObjectCollection ExtractDb3Column(Point3dCollection pts)
         {
