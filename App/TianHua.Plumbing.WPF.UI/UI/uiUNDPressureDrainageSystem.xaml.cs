@@ -113,6 +113,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     return;
                 }
                 uiUNDPDrainageSystemInfoCheck infoCheck = new uiUNDPDrainageSystemInfoCheck();
+                infoCheck.Owner = this;
                 var ret = infoCheck.ShowDialog();
                 if (ret == false)
                 {
