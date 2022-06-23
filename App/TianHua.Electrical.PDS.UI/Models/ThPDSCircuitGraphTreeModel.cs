@@ -10,7 +10,6 @@ namespace TianHua.Electrical.PDS.UI.Models
         public object Tag { get; set; }
         public bool IsRoot { get; set; }
         public ThPDSCircuitGraphTreeModel Parent { get; set; }
-        public ThPDSCircuitGraphTreeModel Root { get; set; }
         string _Name;
         public string Name
         {

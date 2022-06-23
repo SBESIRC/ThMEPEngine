@@ -64,37 +64,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             void UpdateTreeView()
             {
                 var tree = builder.Build(graph);
-                {
-                    void dfs(ThPDSCircuitGraphTreeModel node)
-                    {
-                        foreach (var n in node.DataList)
-                        {
-                            n.Parent = node;
-                            n.Root = tree;
-                            dfs(n);
-                        }
-                    }
-                    dfs(tree);
-                    panel.tv.DataContext = tree;
-                }
+                panel.tv.DataContext = tree;
             }
             var tree = builder.Build(graph);
             static string FixString(string text)
             {
                 if (string.IsNullOrEmpty(text)) return " ";
                 return text;
-            }
-            {
-                void dfs(ThPDSCircuitGraphTreeModel node)
-                {
-                    foreach (var n in node.DataList)
-                    {
-                        n.Parent = node;
-                        n.Root = tree;
-                        dfs(n);
-                    }
-                }
-                dfs(tree);
             }
             var selAllCmd = new RelayCommand(() =>
             {

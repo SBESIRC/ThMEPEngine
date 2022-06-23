@@ -18,6 +18,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 Name = "",
                 NodeUID = "",
                 IsRoot = true,
+                Parent = null,
                 DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
             };
 
@@ -30,6 +31,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     IsRoot = false,
                     Name = rootNode.Value,
                     NodeUID = rootNode.Key.Load.LoadUID,
+                    Parent = root,
                     DataList =new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                 };
                 root.DataList.Add(m);
@@ -48,6 +50,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                         {
                             NodeUID = target.Load.LoadUID,
                             Name = nextNode.Value,
+                            Parent = m,
                             DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                         };
                         m.DataList.Add(targetModel);
@@ -65,6 +68,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                                 {
                                     NodeUID = virtualLoadTarget.Load.LoadUID,
                                     Name = virtualLoadNextNode.Value,
+                                    Parent = m,
                                     DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                                 };
                                 m.DataList.Add(targetModel);
