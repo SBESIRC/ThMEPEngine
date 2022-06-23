@@ -8,11 +8,11 @@
              xmlns:local="clr-namespace:TianHua.Mep.UI.UI"
                     Title="提取房间框线"
                     SizeToContent="WidthAndHeight"
-                    Width="220"
-                    Height="365"
+                    Width="250"
+                    Height="400"
                     ResizeMode="NoResize"
-                    MaxHeight="365"
-                    MaxWidth="220"
+                    MaxHeight="400"
+                    MaxWidth="250"
              mc:Ignorable="d" Closed="ThCustomWindow_Closed">
     <Window.Resources>
         <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
@@ -24,127 +24,35 @@
             </Border>
         </ControlTemplate>        
     </Window.Resources>
-    <StackPanel Margin="3,5" Orientation="Vertical">
-        <Line Grid.Row="4" Margin="0,0,0,5" X1="0" Y1="0" X2="220" Y2="0" Stroke="Gray" 
-                      StrokeThickness="1" VerticalAlignment="Center"/>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="提取墙线" Width="60" Name="btnExtractWall" Template="{StaticResource ButtonTemplate}" Click="btnExtractWall_Click"></Button>
-            <Button Content="生成房间框线" Width="90" Name="btnBuildRoomOutline" Margin="10,0,7,0" Template="{StaticResource ButtonTemplate}" Click="btnBuildRoomOutline_Click"></Button>
-        </StackPanel>
-        <Line Grid.Row="4" Margin="0,5,0,5" X1="0" Y1="0" X2="220" Y2="0" Stroke="Gray" 
-                      StrokeThickness="1" VerticalAlignment="Center"/>        
+    <StackPanel Margin="3,5" Orientation="Vertical">             
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <Label Content="墙体图层配置" ></Label>
             <Button Name="btnSelectLayer" Width="60" Margin="0,0" Content="增加图层" Template="{StaticResource ButtonTemplate}" Height="20" Click="btnSelectLayer_Click"></Button>
             <Button Name="btnDeleteLayer" Width="60" Margin="5,0" Content="删除图层" Template="{StaticResource ButtonTemplate}" Height="20" Click="btnDeleteLayer_Click"></Button>
         </StackPanel>
         <StackPanel>
-            <ListBox x:Name="listBox" Height="230"
+            <ListBox x:Name="listBox" Height="260"
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                             SelectionMode="Multiple"
-                                        ItemsSource="{Binding LayerInfos}" Margin="5">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}" >
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                    <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" x:Name="Bd" SnapsToDevicePixels="True">
-                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
-                                            <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </CheckBox>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <MultiTrigger>
-                                            <MultiTrigger.Conditions>
-                                                <Condition Property="IsMouseOver">
-                                                    <Condition.Value>
-                                                        <s:Boolean>True</s:Boolean>
-                                                    </Condition.Value>
-                                                </Condition>
-                                            </MultiTrigger.Conditions>
-                                            <Setter Property="Panel.Background" TargetName="Bd">
-                                                <Setter.Value>
-                                                    <SolidColorBrush>#1F26A0DA</SolidColorBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Setter Property="BorderBrush" TargetName="Bd">
-                                                <Setter.Value>
-                                                    <SolidColorBrush>#A826A0DA</SolidColorBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </MultiTrigger>
-                                        <MultiTrigger>
-                                            <MultiTrigger.Conditions>
-                                                <Condition Property="Selector.IsSelectionActive">
-                                                    <Condition.Value>
-                                                        <s:Boolean>False</s:Boolean>
-                                                    </Condition.Value>
-                                                </Condition>
-                                                <Condition Property="Selector.IsSelected">
-                                                    <Condition.Value>
-                                                        <s:Boolean>True</s:Boolean>
-                                                    </Condition.Value>
-                                                </Condition>
-                                            </MultiTrigger.Conditions>
-                                            <Setter Property="Panel.Background" TargetName="Bd">
-                                                <Setter.Value>
-                                                    <SolidColorBrush>#3DDADADA</SolidColorBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Setter Property="BorderBrush" TargetName="Bd">
-                                                <Setter.Value>
-                                                    <SolidColorBrush>#FFDADADA</SolidColorBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </MultiTrigger>
-                                        <MultiTrigger>
-                                            <MultiTrigger.Conditions>
-                                                <Condition Property="Selector.IsSelectionActive">
-                                                    <Condition.Value>
-                                                        <s:Boolean>True</s:Boolean>
-                                                    </Condition.Value>
-                                                </Condition>
-                                                <Condition Property="Selector.IsSelected">
-                                                    <Condition.Value>
-                                                        <s:Boolean>True</s:Boolean>
-                                                    </Condition.Value>
-                                                </Condition>
-                                            </MultiTrigger.Conditions>
-                                            <Setter Property="Panel.Background" TargetName="Bd">
-                                                <Setter.Value>
-                                                    <SolidColorBrush>#3D26A0DA</SolidColorBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Setter Property="BorderBrush" TargetName="Bd">
-                                                <Setter.Value>
-                                                    <SolidColorBrush>#FF26A0DA</SolidColorBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </MultiTrigger>
-                                        <Trigger Property="IsEnabled">
-                                            <Trigger.Value>
-                                                <s:Boolean>False</s:Boolean>
-                                            </Trigger.Value>
-                                            <Setter Property="TextElement.Foreground" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
+                             SelectionMode="Multiple" ItemsSource="{Binding LayerInfos}" Margin="5">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Layer}"/>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Left" Text="{Binding Layer}"/>
+                        </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
-        <StackPanel Margin="0,5,0,10" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="保 存" Width="50" Name="btnOk" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>
-            <Button Content="取 消" Width="50" Margin="5,0,0,0" Name="btnCancel" Template="{StaticResource ButtonTemplate}" Click="btnCancel_Click"></Button>
+        <StackPanel Margin="0,5,0,10" Orientation="Horizontal" HorizontalAlignment="Left">
+            <CheckBox x:Name="chkYnAddShearWall" IsThreeState="False" Content="是否提取剪力墙"></CheckBox>
+            <Button Content="保 存" Width="50" Name="btnOk" Margin="80,0" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>            
+        </StackPanel>
+        <Line Grid.Row="4" Margin="0,0,0,5" X1="0" Y1="0" X2="250" Y2="0" Stroke="Gray" 
+                      StrokeThickness="1" VerticalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,0">
+            <Button Content="提取墙线" Width="60" Name="btnExtractWall" Template="{StaticResource ButtonTemplate}" Click="btnExtractWall_Click"></Button>
+            <Button Content="生成房间框线" Width="90" Name="btnBuildRoomOutline" Margin="10,0,7,0" Template="{StaticResource ButtonTemplate}" Click="btnBuildRoomOutline_Click"></Button>
         </StackPanel>
     </StackPanel>
 </cus:ThCustomWindow>

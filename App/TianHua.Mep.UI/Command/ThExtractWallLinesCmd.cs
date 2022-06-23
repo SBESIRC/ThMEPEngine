@@ -15,7 +15,7 @@ using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Mep.UI.Command
 {
-    public class ThExtractWallLinesCmd: ThMEPBaseCommand,IDisposable
+    public class ThExtractWallLinesCmd : ThMEPBaseCommand, IDisposable
     {
         /// <summary>
         /// 配置的墙体图层
@@ -26,6 +26,7 @@ namespace TianHua.Mep.UI.Command
         /// </summary>
         public DBObjectCollection Walls { get; private set; }
         public Point3dCollection RangePts { get; private set; }
+        public bool YnExtractShearWall { get; set; }
         public ThExtractWallLinesCmd(List<string> wallLayers)
         {
             ActionName = "提取墙线";
@@ -98,7 +99,11 @@ namespace TianHua.Mep.UI.Command
         }
         private DBObjectCollection GetRoomDatas(Database database,Point3dCollection frame)
         {
-            var data = new ThRoomdata(false);
+            var data = new ThRoomdata(false)
+            { 
+                YnExtractShearWall=this.YnExtractShearWall,
+            };
+
             data.Build(database, frame);
             return data.MergeData();
         }
