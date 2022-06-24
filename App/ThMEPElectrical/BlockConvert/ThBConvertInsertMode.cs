@@ -3,6 +3,11 @@
     public enum ThBConvertInsertMode
     {
         /// <summary>
+        /// 图块基点
+        /// </summary>
+        BasePoint,
+
+        /// <summary>
         /// 几何中心
         /// </summary>
         OBBCenter,
@@ -13,11 +18,6 @@
         BottomCenter,
 
         /// <summary>
-        /// 图块基点
-        /// </summary>
-        BasePoint,
-
-        /// <summary>
         /// 圆心
         /// </summary>
         CircleCenter,
@@ -26,5 +26,15 @@
         /// 文字中心
         /// </summary>
         TextCenter,
+
+        /// <summary>
+        /// 轴流风机
+        /// </summary>
+        AxialFlowFan,
+
+        /// <summary>
+        /// 设备基点
+        /// </summary>
+        EquipmentBase,
     }
 }

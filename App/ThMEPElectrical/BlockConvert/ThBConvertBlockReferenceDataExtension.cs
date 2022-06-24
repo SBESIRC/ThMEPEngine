@@ -12,6 +12,7 @@ using NFox.Cad;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -84,48 +85,6 @@ namespace ThMEPElectrical.BlockConvert
                         return blkref.GeometricExtents.CenterPoint();
                     }
                 }
-                else if (positionMode == ThBConvertInsertMode.TextCenter)
-                {
-                    var entities = new DBObjectCollection();
-                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                    blkref.Explode(entities);
-                    var obbLayer = convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string;
-                    if (string.IsNullOrEmpty(obbLayer))
-                    {
-                        entities = entities.OfType<DBText>().ToCollection();
-                    }
-                    else
-                    {
-                        entities = entities.OfType<DBText>()
-                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
-                            .ToCollection();
-                    }
-                    if (entities.Count > 0)
-                    {
-                        return entities.GeometricExtents().CenterPoint();
-                    }
-                    else
-                    {
-                        return blkref.GeometricExtents.CenterPoint();
-                    }
-                }
-                else if (positionMode == ThBConvertInsertMode.CircleCenter)
-                {
-                    var entities = new DBObjectCollection();
-                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                    blkref.ExplodeWithVisible(entities);
-                    entities = entities.OfType<Circle>()
-                        .Where(e => e.Layer == convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string)
-                        .ToCollection();
-                    if (entities.Count > 0)
-                    {
-                        return entities.GeometricExtents().CenterPoint();
-                    }
-                    else
-                    {
-                        return blkref.GeometricExtents.CenterPoint();
-                    }
-                }
                 else if (positionMode == ThBConvertInsertMode.BottomCenter)
                 {
                     var entities = new DBObjectCollection();
@@ -176,6 +135,82 @@ namespace ThMEPElectrical.BlockConvert
                     {
                         throw new NotImplementedException();
                     }
+                }
+                else if (positionMode == ThBConvertInsertMode.CircleCenter)
+                {
+                    var entities = new DBObjectCollection();
+                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                    blkref.ExplodeWithVisible(entities);
+                    entities = entities.OfType<Circle>()
+                        .Where(e => e.Layer == convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string)
+                        .ToCollection();
+                    if (entities.Count > 0)
+                    {
+                        return entities.GeometricExtents().CenterPoint();
+                    }
+                    else
+                    {
+                        return blkref.GeometricExtents.CenterPoint();
+                    }
+                }
+                else if (positionMode == ThBConvertInsertMode.TextCenter)
+                {
+                    var entities = new DBObjectCollection();
+                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                    blkref.Explode(entities);
+                    var obbLayer = convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string;
+                    if (string.IsNullOrEmpty(obbLayer))
+                    {
+                        entities = entities.OfType<DBText>().ToCollection();
+                    }
+                    else
+                    {
+                        entities = entities.OfType<DBText>()
+                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
+                            .ToCollection();
+                    }
+                    if (entities.Count > 0)
+                    {
+                        return entities.GeometricExtents().CenterPoint();
+                    }
+                    else
+                    {
+                        return blkref.GeometricExtents.CenterPoint();
+                    }
+                }
+                else if (positionMode == ThBConvertInsertMode.AxialFlowFan)
+                {
+                    var br = data.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    //如果不是动态块，则返回
+                    if (br == null || !br.IsDynamicBlock)
+                    {
+                        return data.Position;
+                    }
+                    //返回动态块的动态属性
+                    var customProperties = br.DynamicBlockReferencePropertyCollection;
+
+                    var rotation = Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2));
+                    var length = Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_LENGTH));
+                    var offset = new Point3d(0, -length / 2, 0).TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, Point3d.Origin));
+                    var baseVector = new Point3d(offset.X + Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X)),
+                        offset.Y + Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y)), 0)
+                        .TransformBy(Matrix3d.Rotation(data.Rotation * data.ScaleFactors.X * data.ScaleFactors.Y, Vector3d.ZAxis, Point3d.Origin));
+                    return new Point3d(data.Position.X + baseVector.X * data.ScaleFactors.X, data.Position.Y + baseVector.Y * data.ScaleFactors.Y, 0);
+                }
+                else if (positionMode == ThBConvertInsertMode.EquipmentBase)
+                {
+                    var br = data.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    //如果不是动态块，则返回
+                    if (br == null || !br.IsDynamicBlock)
+                    {
+                        return data.Position;
+                    }
+                    //返回动态块的动态属性
+                    var customProperties = br.DynamicBlockReferencePropertyCollection;
+                    var vector = new Point3d(Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X)),
+                        Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y)), 0)
+                        .TransformBy(Matrix3d.Rotation(data.Rotation * data.ScaleFactors.X * data.ScaleFactors.Y, Vector3d.ZAxis, Point3d.Origin));
+                    return new Point3d(data.Position.X + vector.X * data.ScaleFactors.X, data.Position.Y + vector.Y * data.ScaleFactors.Y, 0);
                 }
                 else
                 {

@@ -215,12 +215,11 @@ namespace ThMEPElectrical.BlockConvert
                         label_y = (double)sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y);
                     }
 
-                    var labelPoint = new Point3d(label_x, label_y, 0);
-                    if (srcPosition.DistanceTo(targetBlockData.Position) > 1000.0)
-                    {
-                        labelPoint = new Point3d(label_x + (srcPosition.X - targetBlockData.Position.X) * sourceBlockData.ScaleFactors.X,
-                            label_y + (srcPosition.Y - targetBlockData.Position.Y) * sourceBlockData.ScaleFactors.Y, 0);
-                    }
+                    var labelPoint = new Point3d((sourceBlockData.Position.X - targetBlockData.Position.X) * sourceBlockData.ScaleFactors.X,
+                        (sourceBlockData.Position.Y - targetBlockData.Position.Y) * sourceBlockData.ScaleFactors.Y, 0)
+                        .TransformBy(Matrix3d.Rotation(-sourceBlockData.Rotation * sourceBlockData.ScaleFactors.X * sourceBlockData.ScaleFactors.Y,
+                        Vector3d.ZAxis, Point3d.Origin));
+                    labelPoint = new Point3d(label_x + labelPoint.X, label_y + labelPoint.Y, 0);
                     if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {
