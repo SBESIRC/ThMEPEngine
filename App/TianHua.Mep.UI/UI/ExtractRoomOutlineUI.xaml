@@ -45,7 +45,7 @@
             </ListBox>
         </StackPanel>
         <StackPanel Margin="0,5,0,10" Orientation="Horizontal" HorizontalAlignment="Left">
-            <CheckBox x:Name="chkYnAddShearWall" IsThreeState="False" Content="是否提取剪力墙"></CheckBox>
+            <CheckBox x:Name="chkYnAddShearWall" IsThreeState="False" Content="自动提取剪力墙"></CheckBox>
             <Button Content="保 存" Width="50" Name="btnOk" Margin="80,0" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>            
         </StackPanel>
         <Line Grid.Row="4" Margin="0,0,0,5" X1="0" Y1="0" X2="250" Y2="0" Stroke="Gray" 
