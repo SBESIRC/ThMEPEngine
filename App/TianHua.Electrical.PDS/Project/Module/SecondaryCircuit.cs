@@ -11,12 +11,10 @@ namespace TianHua.Electrical.PDS.Project.Module
     [Serializable]
     public class SecondaryCircuit
     {
-        public int Index;
-        public SecondaryCircuit(int index, SecondaryCircuitInfo secondaryCircuitInfo)
+        public SecondaryCircuit(SecondaryCircuitInfo secondaryCircuitInfo)
         {
-            Index = index;
             CircuitDescription = secondaryCircuitInfo.Description;
-
+            CircuitID = String.Empty;
             if (SecondaryCircuitConfiguration.FireSecondaryCircuitInfos.Contains(secondaryCircuitInfo))
             {
                 AlternativeSecondaryCircuitInfos = SecondaryCircuitConfiguration.FireSecondaryCircuitInfos;
@@ -30,13 +28,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 回路ID
         /// </summary>
-        public string CircuitID
-        {
-            get
-            {
-                return $"WC{Index.ToString("00")}";
-            }
-        }
+        public string CircuitID { get; set; }
+
+        public int Index => CircuitID.Length > 2 ? int.TryParse(CircuitID.Substring(CircuitID.Length - 2), out int value) ? value : 0 : 0;
 
         /// <summary>
         /// 回路描述
