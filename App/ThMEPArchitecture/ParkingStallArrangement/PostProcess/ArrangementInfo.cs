@@ -51,30 +51,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             return obstacleArea / subArea.Area.Area;
         }
 
-        public static double GetRValue(double a)
-        {
-            var LisA = new List<double> { 0, 1.0/30.0, 1.0/15.0, 1.0/10.0, 1.0/6.0, 1.0/4.0, 1.0/3.0, 1.0/2.0 };
-            var LisR = new List<double> { 25, 27, 28, 29, 31, 33, 36, 42 };
-            double prop;
-            for(int i = 0; i < LisA.Count-1; i++)
-            {
-                if(a >= LisA[i] && a < LisA[i + 1])
-                {
-                    var lb = LisR[i];
-                    var ub = LisR[i + 1];
-                    prop = (a - LisA[i]) / (LisA[i + 1] - LisA[i]);
-                    var r = prop * (ub - lb) + lb;
-                    //Active.Editor.WriteMessage(r.ToString() + " \n");
-                    return r;
-                }
-            }
-            var trans_a_start = Math.Atan(LisR.Last());
-            var trans_a_end = Math.PI/2;
-            prop = (a - LisA.Last()) / (1- LisA.Last());
-            var trans_a = prop*(trans_a_end - trans_a_start) + trans_a_start;
-            return Math.Tan(trans_a);
+        //public static double GetRValue(double a)
+        //{
+        //    var LisA = new List<double> { 0, 1.0/30.0, 1.0/15.0, 1.0/10.0, 1.0/6.0, 1.0/4.0, 1.0/3.0, 1.0/2.0 };
+        //    var LisR = new List<double> { 25, 27, 28, 29, 31, 33, 36, 42 };
+        //    double prop;
+        //    for(int i = 0; i < LisA.Count-1; i++)
+        //    {
+        //        if(a >= LisA[i] && a < LisA[i + 1])
+        //        {
+        //            var lb = LisR[i];
+        //            var ub = LisR[i + 1];
+        //            prop = (a - LisA[i]) / (LisA[i + 1] - LisA[i]);
+        //            var r = prop * (ub - lb) + lb;
+        //            //Active.Editor.WriteMessage(r.ToString() + " \n");
+        //            return r;
+        //        }
+        //    }
+        //    var trans_a_start = Math.Atan(LisR.Last());
+        //    var trans_a_end = Math.PI/2;
+        //    prop = (a - LisA.Last()) / (1- LisA.Last());
+        //    var trans_a = prop*(trans_a_end - trans_a_start) + trans_a_start;
+        //    return Math.Tan(trans_a);
 
-        }
+        //}
         public static DBText GetText( string strText, Point3d position,double height, string layer)
         {
             var dbText = new DBText();
@@ -118,7 +118,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             var lisText = new List<Entity>();
 
             var A = subArea.GetAValue(distance);
-            var r = GetRValue(A);
+            var r = TableTools.GetRValue(A);
             var r_str = "参考指标： " + string.Format("{0:N1}", r);
             r_str += "m" + Convert.ToChar(0x00b2) + "/辆";
             var r_text = GetText(r_str, positions.First(), heights.First(), layer);

@@ -441,6 +441,14 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
 
                 if(ParameterViewModel.ShowTitle) ShowTitle(ParkingStallCount, areaPerStall, stopWatch.Elapsed.TotalSeconds);
+                if (ParameterViewModel.ShowTable)
+                {
+                    var minY = InterParameter.TotalArea.Coordinates.Min(c => c.Y);
+                    var midX = (InterParameter.TotalArea.Coordinates.Max(c => c.X) +
+                        InterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
+                    TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
+
+                }
                 if (displayInfo!=null)
                 {
                     displayInfo.FinalStalls = $"最大车位数: {ParkingStallCount} ";

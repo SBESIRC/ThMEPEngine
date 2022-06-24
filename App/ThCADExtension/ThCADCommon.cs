@@ -274,6 +274,10 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "建筑门窗填充样式文件.dwg");
         }
+        public static string ParkingStallTablePath()
+        {
+            return Path.Combine(SupportPath(), "地库指标表格.dwg");
+        }
 
         // 运行时根目录
         private static string RootPath()
