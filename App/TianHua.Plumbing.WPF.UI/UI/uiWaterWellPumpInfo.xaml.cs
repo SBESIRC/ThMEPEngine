@@ -68,23 +68,25 @@ namespace TianHua.Plumbing.WPF.UI.UI
             identifyInfo.WhiteList = config["集水井"];
             IdentifyInfo = identifyInfo;
 
-            var selectWell = new ThSelectWaterWellCmd(IdentifyInfo);
-            selectWell.Execute();
-            var wellList = selectWell.WaterWellList;
-            foreach (var o in wellList)
+            var selectWellCmd = new ThSelectWaterWellCmd(IdentifyInfo);
+            selectWellCmd.Execute();
+            var wellList = selectWellCmd.WaterWellList;
+            foreach (var selectWell in wellList)
             {
                 bool isHave = false;
-                foreach (var b in WaterWellList)
+                foreach (var listWell in WaterWellList)
                 {
-                    if (o.IsEqual(b))
+                    if (selectWell.IsEqual(listWell))
                     {
                         isHave = true;
+                        listWell.PumpModel = selectWell.PumpModel;
+                        //listWell.IsHavePump = selectWell.IsHavePump;
                         break;
                     }
                 }
                 if (!isHave)
                 {
-                    WaterWellList.Add(o);
+                    WaterWellList.Add(selectWell);
                 }
             }
 

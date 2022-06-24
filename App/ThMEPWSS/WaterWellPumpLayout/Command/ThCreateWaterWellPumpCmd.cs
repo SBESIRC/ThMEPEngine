@@ -41,24 +41,24 @@ namespace ThMEPWSS.Command
             CommandName = "THSJSB";
             ConfigInfo = vm.GetConfigInfo();
         }
-        public List<ThWWaterWell> GetWaterWellEntityList(Point3dCollection input)
-        {
-            List<ThWWaterWell> waterWellList = new List<ThWWaterWell>();
-            using (var database = AcadDatabase.Active())
-            using (var waterwellEngine = new ThWWaterWellRecognitionEngine(ConfigInfo.WaterWellInfo.identifyInfo))
-            {
-                waterwellEngine.Recognize(database.Database, input);
-                waterwellEngine.RecognizeMS(database.Database, input);
-                var objIds = new ObjectIdCollection(); // Print
-                foreach (var element in waterwellEngine.Datas)
-                {
-                    ThWWaterWell waterWell = ThWWaterWell.Create(element);
-                    waterWell.Init();
-                    waterWellList.Add(waterWell);
-                }
-            }
-            return waterWellList;
-        }
+        //public List<ThWWaterWell> GetWaterWellEntityList(Point3dCollection input)
+        //{
+        //    List<ThWWaterWell> waterWellList = new List<ThWWaterWell>();
+        //    using (var database = AcadDatabase.Active())
+        //    using (var waterwellEngine = new ThWWaterWellRecognitionEngine(ConfigInfo.WaterWellInfo.identifyInfo))
+        //    {
+        //        waterwellEngine.Recognize(database.Database, input);
+        //        waterwellEngine.RecognizeMS(database.Database, input);
+        //        var objIds = new ObjectIdCollection(); // Print
+        //        foreach (var element in waterwellEngine.Datas)
+        //        {
+        //            ThWWaterWell waterWell = ThWWaterWell.Create(element);
+        //            waterWell.Init();
+        //            waterWellList.Add(waterWell);
+        //        }
+        //    }
+        //    return waterWellList;
+        //}
 
         public List<Line> GetRoomLine(Point3dCollection range)
         {
@@ -110,49 +110,49 @@ namespace ThMEPWSS.Command
             resLine.AddRange(wallData.GetWallEdges(Active.Database, input));
             return resLine;
         }
-        public List<Point3d> GetParkSpacePointInRange(Point3dCollection input)
-        {
-            using (var database = AcadDatabase.Active())
-            using (var acadDb = AcadDatabase.Use(database.Database))
-            {
-                var partSpace = acadDb.ModelSpace.OfType<BlockReference>().Where(o => o.Layer == "AE-EQPM-CARS").ToList();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
-                var dbObjects = spatialIndex.SelectCrossingPolygon(input);
+        //public List<Point3d> GetParkSpacePointInRange(Point3dCollection input)
+        //{
+        //    using (var database = AcadDatabase.Active())
+        //    using (var acadDb = AcadDatabase.Use(database.Database))
+        //    {
+        //        var partSpace = acadDb.ModelSpace.OfType<BlockReference>().Where(o => o.Layer == "AE-EQPM-CARS").ToList();
+        //        var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
+        //        var dbObjects = spatialIndex.SelectCrossingPolygon(input);
 
-                var rst = new List<Point3d>();
-                foreach (var obj in dbObjects)
-                {
-                    if (obj is BlockReference)
-                    {
-                        var blk = obj as BlockReference;
-                        rst.Add(blk.Position);
-                    }
-                }
-                return rst;
-            }
-        }
-        public List<BlockReference> GetPipeInRange(Point3dCollection input)
-        {
-            using (var database = AcadDatabase.Active())
-            using (var acadDb = AcadDatabase.Use(database.Database))
-            {
-                var partSpace = acadDb.ModelSpace.OfType<BlockReference>()
-                    .Where(o => !o.BlockTableRecord.IsNull && (o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150")).ToList();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
-                var dbObjects = spatialIndex.SelectCrossingPolygon(input);
+        //        var rst = new List<Point3d>();
+        //        foreach (var obj in dbObjects)
+        //        {
+        //            if (obj is BlockReference)
+        //            {
+        //                var blk = obj as BlockReference;
+        //                rst.Add(blk.Position);
+        //            }
+        //        }
+        //        return rst;
+        //    }
+        //}
+        //public List<BlockReference> GetPipeInRange(Point3dCollection input)
+        //{
+        //    using (var database = AcadDatabase.Active())
+        //    using (var acadDb = AcadDatabase.Use(database.Database))
+        //    {
+        //        var partSpace = acadDb.ModelSpace.OfType<BlockReference>()
+        //            .Where(o => !o.BlockTableRecord.IsNull && (o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150")).ToList();
+        //        var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
+        //        var dbObjects = spatialIndex.SelectCrossingPolygon(input);
 
-                var rst = new List<BlockReference>();
-                foreach (var obj in dbObjects)
-                {
-                    if (obj is BlockReference)
-                    {
-                        var blk = obj as BlockReference;
-                        rst.Add(blk);
-                    }
-                }
-                return rst;
-            }
-        }
+        //        var rst = new List<BlockReference>();
+        //        foreach (var obj in dbObjects)
+        //        {
+        //            if (obj is BlockReference)
+        //            {
+        //                var blk = obj as BlockReference;
+        //                rst.Add(blk);
+        //            }
+        //        }
+        //        return rst;
+        //    }
+        //}
         public void Dispose()
         {
             //
@@ -232,18 +232,20 @@ namespace ThMEPWSS.Command
                         {
                             if (ConfigInfo.PumpInfo.isCoveredWaterWell)
                             {
-                                if (well.IsHavePump)
+                                // if (well.IsHavePump)
+                                if (well.PumpModel != null)
                                 {
                                     toDbService.RemovePumpInDb(well.PumpModel);
                                     well.PumpModel = null;
-                                    well.IsHavePump = false;
+                                    //well.IsHavePump = false;
                                     //删除对应的水泵
                                 }
                                 toDbService.InsertPumpToDb(well, int.Parse(info.PumpCount), info.PumpNumber, fontHeight);
                             }
                             else
                             {
-                                if (well.IsHavePump)
+                                //if (well.IsHavePump)
+                                if (well.PumpModel != null)
                                 {
                                     continue;
                                 }

@@ -39,7 +39,11 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                 SetPumpCount(blk, pumpCount);
                 SetPumpSpace(blk, space);
                 SetFontHeight(blk, fontHeight);
-                //var dump = ThWaterPumpModel.Create(blk);
+
+                var dump = ThWaterPumpModel.Create(blk);
+                model.PumpModel = dump;
+               // model.IsHavePump = true;
+
                 //dump.SetPumpCount(pumpCount);
                 //dump.SetPumpSpace(space);
                 //dump.SetFontHeight(fontHeight);
