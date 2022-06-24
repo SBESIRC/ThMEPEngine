@@ -22,11 +22,15 @@
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.Row="1"  Orientation="Horizontal">
-            <DataGrid />
+            <ScrollViewer HorizontalScrollBarVisibility ="Auto">
+                <DataGrid />
+            </ScrollViewer>
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.Row="2"  Orientation="Horizontal">
-            <DataGrid />
+            <ScrollViewer HorizontalScrollBarVisibility ="Auto">
+                <DataGrid />
+            </ScrollViewer>
         </StackPanel>
     </Grid>
 </UserControl>
