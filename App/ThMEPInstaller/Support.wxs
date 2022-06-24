@@ -132,6 +132,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" Guid="{6C454254-2EA7-4EF8-B836-0BEBE5F7ECCA}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" Source="$(var.AutoloaderContentsPath)\Support\建筑门窗填充样式文件.dwg" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" Guid="{0C6C85D4-7FD5-4C0E-9574-99EF27C36B35}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" Source="$(var.AutoloaderContentsPath)\Support\地库指标表格.dwg" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -300,6 +303,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Reinforcement_Template" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_Template_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" />
         </ComponentGroup>
     </Fragment>
 </Wix>
