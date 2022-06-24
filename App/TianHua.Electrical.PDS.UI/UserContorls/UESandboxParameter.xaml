@@ -25,7 +25,7 @@
     <Grid Background="White">
         <DockPanel LastChildFill="True">
             <ScrollViewer>
-                <StackPanel Orientation="Vertical" Height="2000">
+                <StackPanel Orientation="Vertical" Margin="5">
                     <Label Visibility="Visible" Content="供配电系统" FontSize="16" FontWeight="Black"  Padding="0" VerticalContentAlignment="Center"></Label>
                     <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
                     <StackPanel Orientation="Vertical">
@@ -66,15 +66,19 @@
                             <Label Content="默认导体材料"></Label>
                             <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
                         </StackPanel>
-                        <StackPanel Orientation="Vertical">
-                            <RadioButton IsChecked="{Binding MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables}">
-                                <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <RadioButton  Style="{x:Null}" Margin="10,0,0,0" Padding="0" VerticalAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          IsChecked="{Binding MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                     <Label>消防配电干线及分支电缆采用</Label>
                                     <ComboBox ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource,Mode=OneTime}"  SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
                                     <Label>矿物绝缘电缆</Label>
                                 </StackPanel>
                             </RadioButton>
-                            <RadioButton IsChecked="{Binding FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution}">
+                            <RadioButton IsChecked="{Binding FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution}"
+                                Style="{x:Null}" Margin="10,0,0,0" Padding="0" VerticalAlignment="Center"
+                                          VerticalContentAlignment="Center">
                                 <Label>消防配电干线及分支电缆采用阻燃耐火电力电缆【慎用】</Label>
                             </RadioButton>
                         </StackPanel>
