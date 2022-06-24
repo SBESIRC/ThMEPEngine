@@ -23,19 +23,21 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 {
     public class ThFloorHeatingDataFactory
     {
-        //input
+        //----input
         public ThMEPOriginTransformer Transformer { get; set; }
         public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
-        //output
+        //----output
         public List<ThExtractorBase> Extractors { get; set; }
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<Polyline> SenitaryTerminalOBBTemp { get; set; } = new List<Polyline>();
         public List<Line> RoomSeparateLine { get; set; } = new List<Line>();
         public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
         public List<BlockReference> WaterSeparator { get; set; } = new List<BlockReference>();
+        public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
 
         public ThFloorHeatingDataFactory()
-        { }
+        {
+        }
         public void GetElements(Database database, Point3dCollection framePts)
         {
             ExtractBasicArchitechObject(database, framePts);
@@ -44,6 +46,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             ExtractRoomSeparateLine(database, framePts);
             ExtractRoomSuggestDist(database, framePts);
             ExtractWaterSeparator(database, framePts);
+            ExtractRoomSetFrame(database, framePts);
         }
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
@@ -150,11 +153,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             RoomSeparateLine.AddRange(extractServiceLine.Lines);
         }
 
-
-
         private void ExtractWaterSeparator(Database database, Point3dCollection framePts)
         {
-            var extractService = new ThExtractBlockReferenceService()
+            var extractService = new ThWaterSeparatorExtractor()
             {
                 BlockName = ThFloorHeatingCommon.BlkName_WaterSeparator,
             };
@@ -170,6 +171,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             };
             extractService.Extract(database, framePts);
             RoomSuggestDist.AddRange(extractService.Texts.OfType<DBText>());
+        }
+
+        private void ExtractRoomSetFrame(Database database, Point3dCollection framePts)
+        {
+            var extractService = new ThExtractPolylineService()
+            {
+                ElementLayer = ThFloorHeatingCommon.Layer_RoomSetFrame,
+            };
+            extractService.Extract(database, framePts);
+            RoomSetFrame.AddRange(extractService.Polys);
         }
 
 

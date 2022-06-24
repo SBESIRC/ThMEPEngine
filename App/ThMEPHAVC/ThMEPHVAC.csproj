@@ -90,9 +90,11 @@
     <Compile Include="FloorHeatingCoil\Data\ThHandleConflictService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThHVACHandleNonClosedPolylineService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThSanitaryTerminalRecognitionEngine.cs" />
+    <Compile Include="FloorHeatingCoil\Data\ThWaterSeparatorExtractor.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingCoilSetting.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingRoom.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />
+    <Compile Include="FloorHeatingCoil\Model\ThRoomSetModel.cs" />
     <Compile Include="FloorHeatingCoil\Service\LineStringEx.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThGeomUtil.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThMEPHVACCommonUtils.cs" />

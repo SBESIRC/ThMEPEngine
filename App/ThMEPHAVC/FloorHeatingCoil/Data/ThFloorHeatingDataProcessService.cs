@@ -35,13 +35,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public List<Line> RoomSeparateLine { get; set; } = new List<Line>();
         public List<BlockReference> WaterSeparatorData { get; set; } = new List<BlockReference>();
         public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
+        public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
+
+        //----private
+        private List<Polyline> Door { get; set; } = new List<Polyline>();
+        private List<ThFloorHeatingRoom> Room { get; set; } = new List<ThFloorHeatingRoom>();
+        private List<ThFloorHeatingWaterSeparator> WaterSeparator { get; set; } = new List<ThFloorHeatingWaterSeparator>();
+        private List<Polyline> FurnitureObstacle { get; set; } = new List<Polyline>();
 
         //----output
-        public List<Polyline> Door { get; set; } = new List<Polyline>();
-        public List<ThFloorHeatingRoom> Room { get; set; } = new List<ThFloorHeatingRoom>();
-        public ThFloorHeatingWaterSeparator WaterSeparator { get; set; }
-        public List<Polyline> FurnitureObstacle { get; set; } = new List<Polyline>();
-       
+
+        public List<ThRoomSetModel> RoomSet = new List<ThRoomSetModel>();
+
         public ThFloorHeatingDataProcessService()
         {
 
@@ -55,9 +60,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         public void ProcessWaterSeparator()
         {
-            if (WaterSeparatorData.Count > 0)
+            foreach (var waterSeparator in WaterSeparatorData)
             {
-                WaterSeparator = new ThFloorHeatingWaterSeparator(WaterSeparatorData[0]);
+                var w = new ThFloorHeatingWaterSeparator(waterSeparator);
+                WaterSeparator.Add(w);
             }
         }
 
@@ -136,21 +142,50 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
             FurnitureObstacle.AddRange(FurnitureObstacleDataTemp);
         }
+
+        public void CreateRoomSet()
+        {
+            foreach (var frame in RoomSetFrame)
+            {
+                var door = Door.Where(x => frame.Contains(x)).ToList();
+                var room = Room.Where(x => frame.Contains(x.RoomBoundary)).ToList();
+                var waterSeparator = WaterSeparator.Where(x => frame.Contains(x.OBB)).FirstOrDefault();
+                var roomSeparateline = RoomSeparateLine.Where(x => frame.Contains(x)).ToList();
+                var obstacle = FurnitureObstacle.Where(x => frame.Contains(x)).ToList();
+
+                var roomset = new ThRoomSetModel();
+                roomset.Frame = frame;
+                roomset.Door.AddRange(door);
+                roomset.Room.AddRange(room);
+                roomset.WaterSeparator = waterSeparator;
+                roomset.RoomSeparateLine.AddRange(roomSeparateline);
+                roomset.FurnitureObstacle.AddRange(obstacle);
+                RoomSet.Add(roomset);
+            }
+        }
+
+
+
+
         public void ProjectOntoXYPlane()
         {
 
         }
         public void Print()
         {
-            Door.ForEach(x => DrawUtils.ShowGeometry(x, "l0door", 3));
-            Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l0room", 30));
-            Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary.Shell().GetCentroidPoint(), String.Format("{0},{1}", string.Join(";", x.Name.ToArray()), x.SuggestDist), "l0roomName", 30, hight: 150));
-            RoomSeparateLine.ForEach(x => DrawUtils.ShowGeometry(x, "l0roomSeparator", 1));
-            if (WaterSeparator != null)
+            foreach (var roomset in RoomSet)
             {
-                WaterSeparator.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l0waterSeparator", 1, r: 30));
+                roomset.Door.ForEach(x => DrawUtils.ShowGeometry(x, "l0door", 3));
+                roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l0room", 30));
+                roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary.Shell().GetCentroidPoint(), String.Format("{0},{1}", string.Join(";", x.Name.ToArray()), x.SuggestDist), "l0roomName", 30, hight: 150));
+                roomset.RoomSeparateLine.ForEach(x => DrawUtils.ShowGeometry(x, "l0roomSeparator", 1));
+                if (roomset.WaterSeparator != null)
+                {
+                    roomset.WaterSeparator.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l0waterSeparator", 1, r: 30));
+                }
+                roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l0obstacle", 1));
+
             }
-            FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l0obstacle", 1));
         }
         public void Transform(ThMEPOriginTransformer transformer)
         {
