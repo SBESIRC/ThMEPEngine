@@ -6,7 +6,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
     internal class ThArchPrinterManager
     {
         public readonly static string DoorWindowDwgName = "建筑门窗填充样式文件";
-        public readonly static string PlaneTemplateDwgName = "建筑平、立、剖图示意";
+        public readonly static string PlaneTemplateDwgName = "建筑平立剖图示意";
     }
     internal class ThArchPrintLayerManager: ThArchPrinterManager
     {

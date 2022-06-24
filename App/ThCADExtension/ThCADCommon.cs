@@ -268,7 +268,7 @@ namespace ThCADExtension
         // 建筑专业图层
         public static string ArchitectureTemplatePath()
         {
-            return Path.Combine(SupportPath(), "建筑平、立、剖图示意.dwg");
+            return Path.Combine(SupportPath(), "建筑平立剖图示意.dwg");
         }
         public static string ArchitectureDoorWindowTemplatePath()
         {
