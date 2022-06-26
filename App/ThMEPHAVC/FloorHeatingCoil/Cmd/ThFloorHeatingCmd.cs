@@ -79,6 +79,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     RoomSuggestDist = dataFactory.RoomSuggestDist,
                     WaterSeparatorData = dataFactory.WaterSeparator,
                     FurnitureObstacleDataTemp = dataFactory.SenitaryTerminalOBBTemp,
+                    RoomSetFrame = dataFactory.RoomSetFrame,
                 };
 
                 //dataQuery.Transform(transformer);
@@ -86,7 +87,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 dataQuery.CraeteRoomSapceModel();
                 dataQuery.ProcessWaterSeparator();
                 dataQuery.CreateFurnitureObstacle();
-
+                dataQuery.CreateRoomSet();
                 dataQuery.Print();
                 //dataQuery.Reset(transformer);
 

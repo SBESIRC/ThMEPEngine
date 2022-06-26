@@ -35,12 +35,11 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var target = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
                 FillProperties(targetBlockData, source);
                 targetBlockData.ObjId.UpdateAttributesInBlock(new Dictionary<string, string>(targetBlockData.Attributes));
                 if (targetBlockData.EffectiveName.Contains(ThBConvertCommon.BLOCK_LOAD_DIMENSION))
                 {
-                    ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(target);
+                    ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(targetBlockData);
                 }
             }
         }
@@ -59,16 +58,20 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                if (!targetBlockData.CustomProperties.IsNull())
+                var br = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                //如果不是动态块，则返回
+                if (br == null || !br.IsDynamicBlock)
                 {
-                    if (ThBConvertUtils.IsFirePower(srcBlockReference))
-                    {
-                        targetBlockData.ObjId.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
-                    }
-                    else
-                    {
-                        targetBlockData.ObjId.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
-                    }
+                    return;
+                }
+
+                if (ThBConvertUtils.IsFirePower(srcBlockReference))
+                {
+                    targetBlockData.ObjId.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
+                }
+                else
+                {
+                    targetBlockData.ObjId.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
                 }
             }
         }
@@ -82,8 +85,14 @@ namespace ThMEPElectrical.BlockConvert
             {
                 foreach (var block in list)
                 {
+                    var br = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    //如果不是动态块，则返回
+                    if (br == null || !br.IsDynamicBlock)
+                    {
+                        continue;
+                    }
+                    var blockProperties = br.DynamicBlockReferencePropertyCollection;
                     var blockAttributes = (block.Data as ThBlockReferenceData).Attributes;
-                    var blockProperties = (block.Data as ThBlockReferenceData).CustomProperties;
                     if (blockAttributes.ContainsKey("集水井编号") && (string)blockAttributes["集水井编号"] == srcBlockData.Attributes["编号"])
                     {
                         // 插入水泵标注，并获得其id
@@ -111,7 +120,7 @@ namespace ThMEPElectrical.BlockConvert
                         }
 
                         objId.UpdateAttributesInBlock(new Dictionary<string, string>(pumpAttributes));
-                        ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(pumpLabel);
+                        ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(pumpLabelData);
                         if (blockAttributes.ContainsKey("井内水泵台数") && blockProperties.Contains("水泵配置"))
                         {
                             var quantity = blockAttributes["井内水泵台数"];
@@ -160,13 +169,26 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void SpecialTreatment(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData)
+        public override void SpecialTreatment(ThBlockReferenceData targetBlockData, ThBlockReferenceData sourceBlockData)
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var targetProperties = targetBlockData.CustomProperties;
-                var srcProperties = srcBlockData.CustomProperties;
-                if (targetProperties.IsNull() || srcProperties.IsNull())
+                var targetBlock = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                //如果不是动态块，则返回
+                if (targetBlock == null || !targetBlock.IsDynamicBlock)
+                {
+                    return;
+                }
+                var sourceBlock = sourceBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                //如果不是动态块，则返回
+                if (sourceBlock == null || !sourceBlock.IsDynamicBlock)
+                {
+                    return;
+                }
+
+                var targetProperties = targetBlock.DynamicBlockReferencePropertyCollection;
+                var sourceProperties = sourceBlock.DynamicBlockReferencePropertyCollection;
+                if (targetProperties.IsNull() || sourceProperties.IsNull())
                 {
                     return;
                 }
@@ -175,30 +197,29 @@ namespace ThMEPElectrical.BlockConvert
                 if (targetBlockData.EffectiveName.Contains(ThBConvertCommon.BLOCK_LOAD_DIMENSION))
                 {
                     double label_x = 0, label_y = 0;
-                    var srcPosition = srcBlockData.Position.TransformBy(srcBlockData.OwnerSpace2WCS);
-                    if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X))
+                    var srcPosition = sourceBlockData.Position.TransformBy(sourceBlockData.OwnerSpace2WCS);
+                    if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X))
                     {
-                        label_x = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X);
+                        label_x = (double)sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X);
                     }
-                    else if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X))
+                    else if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X))
                     {
-                        label_x = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X);
+                        label_x = (double)sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X);
                     }
-                    if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y))
+                    if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y))
                     {
-                        label_y = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y);
+                        label_y = (double)sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y);
                     }
-                    else if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
+                    else if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {
-                        label_y = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y);
+                        label_y = (double)sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y);
                     }
 
-                    var labelPoint = new Point3d(label_x, label_y, 0);
-                    if (srcPosition.DistanceTo(targetBlockData.Position) > 1000.0)
-                    {
-                        labelPoint = new Point3d(label_x + (srcPosition.X - targetBlockData.Position.X) * srcBlockData.ScaleFactors.X,
-                            label_y + (srcPosition.Y - targetBlockData.Position.Y) * srcBlockData.ScaleFactors.Y, 0);
-                    }
+                    var labelPoint = new Point3d((sourceBlockData.Position.X - targetBlockData.Position.X) * sourceBlockData.ScaleFactors.X,
+                        (sourceBlockData.Position.Y - targetBlockData.Position.Y) * sourceBlockData.ScaleFactors.Y, 0)
+                        .TransformBy(Matrix3d.Rotation(-sourceBlockData.Rotation * sourceBlockData.ScaleFactors.X * sourceBlockData.ScaleFactors.Y,
+                        Vector3d.ZAxis, Point3d.Origin));
+                    labelPoint = new Point3d(label_x + labelPoint.X, label_y + labelPoint.Y, 0);
                     if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {
@@ -211,96 +232,53 @@ namespace ThMEPElectrical.BlockConvert
                     || targetBlockData.EffectiveName.Equals("E-BFAN011")
                     || targetBlockData.EffectiveName.Equals("E-BFAN012"))
                 {
-                    if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE)
+                    if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE))
                     {
                         targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE,
-                            srcProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE));
+                            sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE));
                     }
-                    if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X)
+                    if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X))
                     {
                         targetProperties.SetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X,
-                            srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X));
+                            sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X));
                     }
-                    if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y)
+                    if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y))
                     {
                         targetProperties.SetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y,
-                            srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y));
+                            sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y));
                     }
-                    if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1)
+                    if (sourceProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1))
                     {
                         targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1,
-                            srcProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1));
+                            sourceProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1));
                     }
                 }
-                else if (srcBlockData.EffectiveName.Contains(ThBConvertCommon.BLOCK_SUBMERSIBLE_PUMP))
+                else if (sourceBlockData.EffectiveName.Contains(ThBConvertCommon.BLOCK_SUBMERSIBLE_PUMP))
                 {
-                    if (targetProperties.Contains("距离") && srcProperties.Contains("距离"))
+                    if (targetProperties.Contains("距离") && sourceProperties.Contains("距离"))
                     {
-                        targetProperties.SetValue("距离", srcProperties.GetValue("距离"));
+                        targetProperties.SetValue("距离", sourceProperties.GetValue("距离"));
                     }
-                    if (targetProperties.Contains("距离1") && srcProperties.Contains("距离1"))
+                    if (targetProperties.Contains("距离1") && sourceProperties.Contains("距离1"))
                     {
-                        targetProperties.SetValue("距离1", srcProperties.GetValue("距离1"));
+                        targetProperties.SetValue("距离1", sourceProperties.GetValue("距离1"));
                     }
-                    if (targetProperties.Contains("距离2") && srcProperties.Contains("距离2"))
+                    if (targetProperties.Contains("距离2") && sourceProperties.Contains("距离2"))
                     {
-                        targetProperties.SetValue("距离2", srcProperties.GetValue("距离2"));
+                        targetProperties.SetValue("距离2", sourceProperties.GetValue("距离2"));
                     }
-                    if (targetProperties.Contains("角度") && srcProperties.Contains("角度"))
+                    if (targetProperties.Contains("角度") && sourceProperties.Contains("角度"))
                     {
-                        targetProperties.SetValue("角度", srcProperties.GetValue("角度"));
+                        targetProperties.SetValue("角度", sourceProperties.GetValue("角度"));
                     }
-                    if (targetProperties.Contains("角度1") && srcProperties.Contains("角度1"))
+                    if (targetProperties.Contains("角度1") && sourceProperties.Contains("角度1"))
                     {
-                        targetProperties.SetValue("角度1", srcProperties.GetValue("角度1"));
+                        targetProperties.SetValue("角度1", sourceProperties.GetValue("角度1"));
                     }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 按插入点调整位置
-        /// </summary>
-        /// <param name="blkRef"></param>
-        /// <param name="srcBlockData"></param>
-        private void TransformByBasePoint(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
-                var targetBlockDataPosition = Point3d.Origin.TransformBy(targetMCS2WCS);
-                var srcMCS2WCS = srcBlockData.BlockTransform.PreMultiplyBy(srcBlockData.OwnerSpace2WCS);
-                var srcBlockDataPosition = Point3d.Origin.TransformBy(srcMCS2WCS);
-                var offset = targetBlockDataPosition.GetVectorTo(srcBlockDataPosition);
-                blockReference.TransformBy(Matrix3d.Displacement(offset));
-
-                var targetProperties = targetBlockData.CustomProperties;
-                var srcProperties = srcBlockData.CustomProperties;
-                if (targetProperties.Contains("距离") && srcProperties.Contains("距离"))
-                {
-                    targetProperties.SetValue("距离", srcProperties.GetValue("距离"));
-                }
-                if (targetProperties.Contains("距离1") && srcProperties.Contains("距离1"))
-                {
-                    targetProperties.SetValue("距离1", srcProperties.GetValue("距离1"));
-                }
-                if (targetProperties.Contains("距离2") && srcProperties.Contains("距离2"))
-                {
-                    targetProperties.SetValue("距离2", srcProperties.GetValue("距离2"));
-                }
-                if (targetProperties.Contains("角度") && srcProperties.Contains("角度"))
-                {
-                    targetProperties.SetValue("角度", srcProperties.GetValue("角度"));
-                }
-                if (targetProperties.Contains("角度1") && srcProperties.Contains("角度1"))
-                {
-                    targetProperties.SetValue("角度1", srcProperties.GetValue("角度1"));
                 }
             }
         }
@@ -400,12 +378,12 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        private void FillProperties(ThBlockReferenceData target, ThBlockReferenceData source)
+        private void FillProperties(ThBlockReferenceData targetData, ThBlockReferenceData sourceData)
         {
             // 负载编号：“设备符号"&"-"&"楼层-编号”
-            if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_NUMBER))
+            if (targetData.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_NUMBER))
             {
-                target.Attributes[ThBConvertCommon.PROPERTY_LOAD_NUMBER] = ThBConvertUtils.LoadSN(source);
+                targetData.Attributes[ThBConvertCommon.PROPERTY_LOAD_NUMBER] = ThBConvertUtils.LoadSN(sourceData);
             }
 
             //// 电量：“电量”
@@ -415,24 +393,41 @@ namespace ThMEPElectrical.BlockConvert
             //}
 
             // 负载电量：“负载电量”
-            if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_POWER_QUANTITY))
+            if (targetData.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_POWER_QUANTITY))
             {
-                target.Attributes[ThBConvertCommon.PROPERTY_LOAD_POWER_QUANTITY] = ThBConvertUtils.LoadPowerFromTHModel(source);
+                targetData.Attributes[ThBConvertCommon.PROPERTY_LOAD_POWER_QUANTITY] = ThBConvertUtils.LoadPowerFromTHModel(sourceData);
             }
 
             // 负载用途：“负载用途”
-            if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_USAGE))
+            if (targetData.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_USAGE))
             {
-                target.Attributes[ThBConvertCommon.PROPERTY_LOAD_USAGE] = ThBConvertUtils.LoadUsage(source);
+                targetData.Attributes[ThBConvertCommon.PROPERTY_LOAD_USAGE] = ThBConvertUtils.LoadUsage(sourceData);
             }
 
             // 由于翻转会造成文字居中显示异常，故暂不支持负载标注的翻转
             // 翻转状态
-            if (!target.CustomProperties.IsNull() && target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
-                && !source.CustomProperties.IsNull() && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
+            using (var acadDatabase = AcadDatabase.Use(targetData.Database))
             {
-                target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP,
-                    source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
+                var target = targetData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                //如果不是动态块，则返回
+                if (target == null || !target.IsDynamicBlock)
+                {
+                    return;
+                }
+                var source = sourceData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                //如果不是动态块，则返回
+                if (source == null || !source.IsDynamicBlock)
+                {
+                    return;
+                }
+                var targetCustomProperties = target.DynamicBlockReferencePropertyCollection;
+                var sourceCustomProperties = source.DynamicBlockReferencePropertyCollection;
+
+                if (targetCustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
+                    && sourceCustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
+                {
+                    targetCustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP, sourceCustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
+                }
             }
         }
     }

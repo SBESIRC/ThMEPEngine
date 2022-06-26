@@ -110,7 +110,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
 
         #region 第一代初始化
-        private List<MPGene> ConvertLineToGene()//仅根据分割线生成第一代
+        private List<MPGene> ConvertLineToGene()//仅根据分区线生成第一代
         {
             var genome = new List<MPGene>();
             foreach (var lineSeg in InterParameter.InitSegLines)
@@ -156,7 +156,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<MPChromosome> CreateFirstPopulation()
         {
             List<MPChromosome> solutions = new List<MPChromosome>();
-            // 添加初始画的分割线,该解必须是合理解
+            // 添加初始画的分区线,该解必须是合理解
             var orgSolution = new MPChromosome();
 
             var orgGenome = ConvertLineToGene();//创建初始基因序列

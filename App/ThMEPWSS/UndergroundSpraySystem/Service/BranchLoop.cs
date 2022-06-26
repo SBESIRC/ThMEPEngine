@@ -56,20 +56,20 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                                 var type = sprayIn.PtTypeDic[pt];
                                 var alValveGap = alarmGap;
-                                if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
-                                {
-                                    sprayIn.PtTypeDic[pt] = "Branch";
-                                    type = sprayIn.PtTypeDic[pt];
-                                }
-                                if (type.Equals("Branch"))
-                                {
-                                    if (spraySystem.BranchPtDic.ContainsKey(pt))
-                                    {
-                                        spraySystem.BranchPtDic.Remove(pt);
-                                    }
-                                    sprayOut.PipeLine.Add(new Line(ePt1, ePt1.OffsetY(1200)));
-                                    spraySystem.BranchPtDic.Add(pt, ePt1.OffsetY(1200));
-                                }
+                                //if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
+                                //{
+                                //    sprayIn.PtTypeDic[pt] = "Branch";
+                                //    type = sprayIn.PtTypeDic[pt];
+                                //}
+                                //if (type.Equals("Branch"))
+                                //{
+                                //    if (spraySystem.BranchPtDic.ContainsKey(pt))
+                                //    {
+                                //        spraySystem.BranchPtDic.Remove(pt);
+                                //    }
+                                //    sprayOut.PipeLine.Add(new Line(ePt1, ePt1.OffsetY(1200)));
+                                //    spraySystem.BranchPtDic.Add(pt, ePt1.OffsetY(1200));
+                                //}
                                 if (type.Contains("AlarmValve"))
                                 {
                                     if (firstAlarmValve)

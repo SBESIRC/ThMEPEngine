@@ -21,15 +21,18 @@ namespace TianHua.Mep.UI.ViewModel
     {
         private readonly string AIWallLayer = "AI-墙线";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
+        public bool YnExtractShearWall { get; set; }
         public ThExtractRoomOutlineVM()
-        {
+        {            
             LayerInfos = new ObservableCollection<ThLayerInfo>(LoadLayers());
+            YnExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
         }
         public void ExtractWalls()
         {
             using (var lockDoc = Active.Document.LockDocument())
             using (var cmd = new ThExtractWallLinesCmd(GetLayers()))
             {
+                cmd.YnExtractShearWall = YnExtractShearWall;
                 SetFocusToDwgView();                
                 cmd.Execute();
                 CreateAILayer(AIWallLayer, 7);
@@ -61,7 +64,8 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void Confirm()
         {
-            SaveLayers();            
+            SaveLayers();
+            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = YnExtractShearWall;
         }
         public void SelectLayer()
         {
@@ -188,6 +192,7 @@ namespace TianHua.Mep.UI.ViewModel
                     .ToCollection();
             }
         }
+
         private List<ThLayerInfo> LoadLayers()
         {            
             // 优先获取以A_WALL结尾的梁
@@ -206,16 +211,6 @@ namespace TianHua.Mep.UI.ViewModel
             results.AddRange(storeInfos);
 
             //results = Sort(results);
-            return results;
-        }
-        private List<ThLayerInfo> Sort(List<ThLayerInfo> infos)
-        {
-            // 把选中的放前面，再按名称排名
-            var results = new List<ThLayerInfo>();
-            var selected = infos.Where(o => o.IsSelected).ToList();
-            var unSelected = infos.Where(o => !o.IsSelected).ToList();
-            results.AddRange(selected.OrderBy(o => o.Layer));
-            results.AddRange(unSelected.OrderBy(o => o.Layer));
             return results;
         }
         private void SaveLayers()
@@ -271,5 +266,6 @@ namespace TianHua.Mep.UI.ViewModel
         {
         }
         public List<ThLayerInfo> LayerInfos { get; set; }
+        public bool YnExtractShearWall { get; set; } = true;
     }
 }

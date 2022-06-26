@@ -65,7 +65,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(map[e as Polyline]));
 
                     dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
-
                 }
                 sprayIn.Verticals = GetVerticals();
                 Draw.Verticals(sprayIn.Verticals);

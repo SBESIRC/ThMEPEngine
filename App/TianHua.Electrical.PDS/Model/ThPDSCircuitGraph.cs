@@ -24,6 +24,8 @@ namespace TianHua.Electrical.PDS.Model
         PowerTransformer = 6,
         [Description("馈线母排")]
         FeederBusbar = 7,
+        [Description("虚拟负载")]
+        VirtualLoad = 8,
     }
 
     public class ThPDSCircuitGraphNode : IEquatable<ThPDSCircuitGraphNode>

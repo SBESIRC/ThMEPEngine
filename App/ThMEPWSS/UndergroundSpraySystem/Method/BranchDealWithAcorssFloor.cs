@@ -288,8 +288,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
-
-
         private static void MainLoopBranchBfs(Point3dEx pt, ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var mainLoop = spraySystem.MainLoop;
@@ -379,7 +377,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
             return  null;
         }
-    
-    
     }
 }

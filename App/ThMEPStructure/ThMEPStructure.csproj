@@ -25,11 +25,54 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArchiecturePlane\Print\ThCommonPrinter.cs" />
-    <Compile Include="ArchiecturePlane\Service\ThArchSvgEntityPrintService.cs" />
-    <Compile Include="ArchiecturePlane\Service\ThArchPrintManager.cs" />
-    <Compile Include="ArchiecturePlane\Service\ThArchPlaneUtils.cs" />
-    <Compile Include="Common\Utils.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThAEwallPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchElevationDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchPlanDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchPrintManager.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchSectionDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchSvgInput.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThBeamPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThComponentBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorMarkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThPrintDrawingHeadService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThSectionMaterialMapConfig.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThSlabPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThTCHBlockMapConfig.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThTchDoorBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowOutlinePrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorOutlinePrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorStonePrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThElevationElementPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThHatchPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThImportDatabaseService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThKanXianPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThRailingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThCommonPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowMarkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThAdjustTextBoundaryService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThAdjustWindowBlkYScaleService.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThArchPlaneUtils.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowBlkConfigTable.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorBlkConfigTable.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThComponentOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorNumberCreator.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThPlanMaterialMapConfig.cs" />
+    <Compile Include="Common\PlaneJsonConfig.cs" />
+    <Compile Include="Common\ThPlaneConfig.cs" />
+    <Compile Include="ArchitecturePlane\ThArchitectureGenerator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThWindowOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorStoneCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThGeometryQuerier.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThNumberCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThWallThickReadService.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThWindowNumberCreator.cs" />
+    <Compile Include="ArchitecturePlane\ThArchitecturePlaneCommon.cs" />
+    <Compile Include="Common\ThPlanePrintParameter.cs" />
+    <Compile Include="Common\ThPlaneUtils.cs" />
     <Compile Include="GirderConnect\BuildBeam\BuildBeamLayoutConfig.cs" />
     <Compile Include="GirderConnect\BuildBeam\ThBuildBeam.cs" />
     <Compile Include="GirderConnect\Command\ThDoubleBeamLineCommand.cs" />
@@ -147,7 +190,6 @@
     <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
     <Compile Include="StructPlane\Service\ThStructurePlaneGenerator.cs" />
     <Compile Include="StructPlane\Service\ThSvgEntityPrintService.cs" />
-    <Compile Include="StructPlane\Service\ThStructurePlaneConfig.cs" />
     <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
     <Compile Include="StructPlane\Service\ThYdbToIfcConvertService.cs" />
     <Compile Include="ThMEPStructureApp.cs" />
@@ -174,6 +216,7 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

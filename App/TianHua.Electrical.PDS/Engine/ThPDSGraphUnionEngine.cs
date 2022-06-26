@@ -14,13 +14,15 @@ namespace TianHua.Electrical.PDS.Engine
     {
         private List<ThPDSEdgeMap> EdgeMapList;
 
+        public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> UnionGraph;
+
         public ThPDSGraphUnionEngine(List<ThPDSEdgeMap> edgeMapList)
         {
             EdgeMapList = edgeMapList;
+            UnionGraph = new BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
         }
 
-        public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
-            List<BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
+        public void GraphUnion(List<BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
             ThPDSCircuitGraphNode cableTrayNode)
         {
             var cabletrayEdgeList = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
@@ -96,30 +98,29 @@ namespace TianHua.Electrical.PDS.Engine
                 }
             }
 
-            var unionGraph = new BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
             cabletrayEdgeList.ForEach(edge =>
             {
-                if (!IsContains(unionGraph, edge.Target, out var originalNode))
+                if (!IsContains(UnionGraph, edge.Target, out var originalNode))
                 {
-                    unionGraph.AddVertex(edge.Target);
+                    UnionGraph.AddVertex(edge.Target);
                 }
             });
             addEdgeList.ForEach(edge =>
             {
-                var sourceCheck = IsContains(unionGraph, edge.Source, out var originalSourceNode);
-                var targetCheck = IsContains(unionGraph, edge.Target, out var originalTargetNode);
+                var sourceCheck = IsContains(UnionGraph, edge.Source, out var originalSourceNode);
+                var targetCheck = IsContains(UnionGraph, edge.Target, out var originalTargetNode);
                 if (!sourceCheck)
                 {
-                    unionGraph.AddVertex(edge.Source);
+                    UnionGraph.AddVertex(edge.Source);
                 }
                 if (!targetCheck)
                 {
-                    unionGraph.AddVertex(edge.Target);
+                    UnionGraph.AddVertex(edge.Target);
                 }
 
                 if (!sourceCheck && !targetCheck)
                 {
-                    unionGraph.AddEdge(edge);
+                    UnionGraph.AddEdge(edge);
                 }
                 else
                 {
@@ -127,9 +128,9 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         Circuit = edge.Circuit,
                     };
-                    if (!ThPDSEdgeContainsService.EdgeContainsEx(newEdge, unionGraph))
+                    if (!ThPDSEdgeContainsService.EdgeContainsEx(newEdge, UnionGraph))
                     {
-                        unionGraph.AddEdge(newEdge);
+                        UnionGraph.AddEdge(newEdge);
                     }
                 }
             });
@@ -142,24 +143,95 @@ namespace TianHua.Electrical.PDS.Engine
                     if (vertex.NodeType != PDSNodeType.CableCarrier
                         && graph.OutDegree(vertex) == 0 && graph.InDegree(vertex) == 0)
                     {
-                        if(!IsContains(unionGraph, vertex, out var originalSourceNode))
+                        if (!IsContains(UnionGraph, vertex, out var originalSourceNode))
                         {
-                            unionGraph.AddVertex(vertex);
+                            UnionGraph.AddVertex(vertex);
                         }
                     }
                 });
             });
 
-            unionGraph.Edges.ForEach(edge =>
+            UnionGraph.Edges.ForEach(edge =>
             {
-                if(edge.Target.Loads[0].InstalledCapacity.IsDualPower
+                if (edge.Target.Loads[0].InstalledCapacity.IsDualPower
                 && !edge.Source.Loads[0].InstalledCapacity.IsDualPower)
                 {
                     edge.Source.Loads[0].InstalledCapacity.IsDualPower = true;
                 }
             });
+        }
 
-            return unionGraph;
+        public void SplitSeriesConnection()
+        {
+            var addEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            var removeEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+
+            UnionGraph.Edges.ForEach(edge =>
+            {
+                if (ThPDSTerminalPanelService.IsTwowayTerminalPanel(edge))
+                {
+                    // 上级节点搜索
+                    var sourceEdges = UnionGraph.InEdges(edge.Source).ToList();
+                    if (sourceEdges.Count > 0)
+                    {
+                        while (ThPDSTerminalPanelService.IsTwowayTerminalPanel(sourceEdges[0]))
+                        {
+                            sourceEdges = UnionGraph.InEdges(sourceEdges[0].Source).ToList();
+                            if (sourceEdges.Count == 0)
+                            {
+                                break;
+                            }
+                        }
+                        if (sourceEdges.Count > 0)
+                        {
+                            var newEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(sourceEdges[0].Source, edge.Target);
+                            newEdge.Circuit = sourceEdges[0].Circuit;
+                            removeEdges.Add(edge);
+                            addEdges.Add(newEdge);
+                            UpdateEdgeMap(edge, newEdge);
+                            return;
+                        }
+                    }
+
+                    // 下级节点搜索
+                    var targetEdges = UnionGraph.OutEdges(edge.Target).ToList();
+                    if (targetEdges.Count > 0)
+                    {
+                        while (ThPDSTerminalPanelService.IsTwowayTerminalPanel(targetEdges[0]))
+                        {
+                            targetEdges = UnionGraph.OutEdges(targetEdges[0].Target).ToList();
+                            if (targetEdges.Count == 0)
+                            {
+                                break;
+                            }
+                        }
+                        if (targetEdges.Count > 0)
+                        {
+                            var newEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(targetEdges[0].Target, edge.Source);
+                            newEdge.Circuit = targetEdges[0].Circuit;
+                            removeEdges.Add(edge);
+                            addEdges.Add(newEdge);
+                            UpdateEdgeMap(edge, newEdge);
+                            return;
+                        }
+                    }
+                }
+            });
+
+            removeEdges.ForEach(edge => UnionGraph.RemoveEdge(edge));
+            addEdges.ForEach(edge => UnionGraph.AddEdge(edge));
+        }
+
+        private void UpdateEdgeMap(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> newEdge)
+        {
+            EdgeMapList.ForEach(map =>
+            {
+                if (map.EdgeMap.ContainsKey(edge))
+                {
+                    map.EdgeMap.Add(newEdge, map.EdgeMap[edge]);
+                    map.EdgeMap.Remove(edge);
+                }
+            });
         }
 
         /// <summary>
@@ -179,9 +251,21 @@ namespace TianHua.Electrical.PDS.Engine
                     foreach (var vertex in graph.Vertices)
                     {
                         // id、楼层、位置判断
-                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && PositionCheck(vertex, node)
-                            && DescriptionCheck(vertex, node) && PowerCheck(vertex, node) && TypeCheck(vertex, node))
+                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && PositionCheck(vertex, node) && TypeCheck(vertex, node))
                         {
+                            if (!PowerCheck(vertex, node))
+                            {
+                                vertex.Loads[0].InstalledCapacity = vertex.Loads[0].InstalledCapacity.HighPower
+                                    > node.Loads[0].InstalledCapacity.HighPower ? vertex.Loads[0].InstalledCapacity : node.Loads[0].InstalledCapacity;
+                            }
+                            if (!DescriptionCheck(vertex, node))
+                            {
+                                if (vertex.Loads[0].ID.Description.Equals(vertex.Loads[0].ID.DefaultDescription))
+                                {
+                                    vertex.Loads[0].ID.Description = node.Loads[0].ID.Description;
+                                }
+                            }
+
                             originalNode = vertex;
                             if (!LocationEquals(node.Loads[0].Location, originalNode.Loads[0].Location))
                             {

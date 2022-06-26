@@ -32,18 +32,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
     {
         // CAD 数据结构
         public List<Polyline> CAD_WallLines = new List<Polyline>();// 提取到的cad边界线
-        public  List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分割线
+        public  List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分区线
         public  List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public  List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
         public List<Circle> CAD_Anchors = new List<Circle>();// 提取到的cad锚点
+        public List<int> FixedSegLineIdx = new List<int> ();//迭代范围为0的分区线的index
         // NTS 数据结构
         public  Polygon WallLine;//初始边界线
-        public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分割线
+        public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分区线
         public  List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public  List<Ramp> Ramps = new List<Ramp>();// 坡道
         public List<Anchor> Anchors = new List<Anchor>();
         // NTS 衍生数据
-        public  List<LineSegment> VaildLanes;//分割线等价车道线
+        public  List<LineSegment> VaildLanes;//分区线等价车道线
         public  Polygon SegLineBoundary;//智能边界，外部障碍物为不可穿障碍物
         public  List<Polygon> InnerBuildings; //不可穿障碍物（中间障碍物）,包含坡道
         public  List<int> OuterBuildingIdxs; //可穿建筑物（外围障碍物）的index,包含坡道
@@ -61,9 +62,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  MNTSSpatialIndex BoundaryObjectsSPIDX;//边界打成断线+可忽略障碍物的spatialindex；
         public  MNTSSpatialIndex BoundLineSpatialIndex;//边界的打成碎线的spindex
 
-        public List<List<int>> SeglineIndexList;//分割线连接关系
-        public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
-        public List<(int,int,int,int)> SegLineIntSecNode = new List<(int, int, int, int)>();//四岔节点关系，上下左右的分割线index
+        public List<List<int>> SeglineIndexList;//分区线连接关系
+        public List<(bool, bool)> SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
+        public List<(int,int,int,int)> SegLineIntSecNode = new List<(int, int, int, int)>();//四岔节点关系，上下左右的分区线index
 
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
@@ -88,7 +89,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 if (SegLines.Count == 0)
                 {
-                    Active.Editor.WriteLine("未提取到分割线，请检查图层以及线的类型（直线）");
+                    Active.Editor.WriteLine("未提取到分区线，请检查图层以及线的类型（直线）");
                     return false;
                 }
                 bool Isvaild = SegLineVaild();
@@ -99,17 +100,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 var CrossPts = SegLines.GetCrossPoints(WallLine);
                 var BreakedSegLines = new List<LineSegment>();
-                var segLines_C = SegLines.Select(l => l.Clone()).ToList();
+                var newFixedSegLines = SegLines.Slice(FixedSegLineIdx);
                 //基于交点打断
-                segLines_C.ForEach(l => 
-                    BreakedSegLines.AddRange(l.Split(CrossPts.Select(c=>c.Coordinate).ToList())));
+                for (int i = 0; i < SegLines.Count; i++)
+                {
+                    var segLine = SegLines[i];
+                    var breakded = segLine.Split(CrossPts.Select(c => c.Coordinate).ToList());
+                    BreakedSegLines.AddRange(breakded);
+                }
                 SegLines = BreakedSegLines.CleanLineWithOneIntSecPt(WallLine);
                 //获取连接关系
                 SeglineIndexList = SegLines.GetSegLineIntsecList();
                 SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
                 //获取交点关系
                 SegLineIntSecNode = SegLines.GetSegLineIntSecNode(CrossPts);
-                GetLowerUpperBound();
+                GetLowerUpperBound(newFixedSegLines);
                 //ShowLowerUpperBound();
             }
             return true;
@@ -212,11 +217,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (layerName.Contains("分割线")&& !layerName.Contains("最终"))
+            if (layerName.Contains("分割线")|| layerName.Contains("分区线"))
             {
                 if (ent is Line line)
                 {
-                    CAD_SegLines.Add(line);
+                    if(line.Length > 1000)
+                    {
+                        CAD_SegLines.Add(line);
+                        if (layerName.Contains("固定")) FixedSegLineIdx.Add(CAD_SegLines.Count - 1);
+                    }
                 }
             }
             if (layerName.Contains("锚点"))
@@ -242,7 +251,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private void UpdateSegLines()
         {
             SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).Select(l => l.ToNTSLineSegment()).ToList();
-            RemoveSortSegLine();
+            //RemoveSortSegLine();
         }
         private void RemoveSortSegLine()
         {
@@ -253,6 +262,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 if (segLine.Length < 100)
                 {
                     SegLines.RemoveAt(i);
+                    FixedSegLineIdx.Remove(i);
                 }
             }
         }
@@ -262,7 +272,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var UnionedObstacles = new MultiPolygon(CAD_Obstacles.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
             Obstacles = UnionedObstacles.Get<Polygon>(true);
         }
-
         private List<Polygon> UpdateWallLine()//墙线合并
         {
             List<Polygon> RampPolgons = new List<Polygon>();
@@ -366,26 +375,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2) );
         }
         #endregion
-        #region 分割线检查
+        #region 分区线检查
         public bool SegLineVaild()
         {
             // 标记圆半径5000
             // 判断正交（中点标记）
             if (!IsOrthogonal()) return false;
             //VaildSegLines.ShowInitSegLine();
-            // 判断每根分割线至少有两个交点(端点标记）
+            // 判断每根分区线至少有两个交点(端点标记）
             if (!HaveAtLeastTwoIntsecPoints(true)) return false;
             // 先预切割
             SegLines.SeglinePrecut(WallLine);
             SeglineIndexList = SegLines.GetSegLineIntsecList();
             SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
-            //获取有效分割线
+            //获取有效分区线
             VaildLanes = SegLines.GetVaildLanes(WallLine,BoundaryObjectsSPIDX);
-            // 判断分割线净宽（中点标记）
+            // 判断分区线净宽（中点标记）
             if (!LaneWidthSatisfied()) return false;
             // 后预切割
             SegLines.SeglinePrecut(WallLine);
-            // 判断每根分割线至少有两个交点(端点标记）
+            // 判断每根分区线至少有两个交点(端点标记）
             if (!HaveAtLeastTwoIntsecPoints(false)) return false;
             // 判断车道是否全部相连（两个以上标记剩余中点，以下标记自己）
             if (!Allconnected()) return false;
@@ -409,9 +418,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     if (X_dif / Y_dif > tol)
                     {
-                        Logger?.Information("发现非正交分割线 ！\n");
-                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
-                        Active.Editor.WriteMessage("发现非正交分割线 ！\n");
+                        Logger?.Information("发现非正交分区线 ！\n");
+                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分区线不符合要求\n");
+                        Active.Editor.WriteMessage("发现非正交分区线 ！\n");
                         //Active.Editor.WriteMessage("起始点：" + spt.ToString() + "\n");
                         //Active.Editor.WriteMessage("终点：" + ept.ToString() + "\n");
                         line.MarkLineSeg(true);
@@ -425,9 +434,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     if (Y_dif / X_dif > tol)
                     {
-                        Logger?.Information("发现非正交分割线 ！\n");
-                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
-                        Active.Editor.WriteMessage("发现非正交分割线 ！\n");
+                        Logger?.Information("发现非正交分区线 ！\n");
+                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分区线不符合要求\n");
+                        Active.Editor.WriteMessage("发现非正交分区线 ！\n");
                         //Active.Editor.WriteMessage("起始点：" + spt.ToString() + "\n");
                         //Active.Editor.WriteMessage("终点：" + ept.ToString() + "\n");
                         line.MarkLineSeg(true);
@@ -441,7 +450,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             return true;
         }
-        // 判断每根分割线至少有两个交点
+        // 判断每根分区线至少有两个交点
         private  bool HaveAtLeastTwoIntsecPoints(bool beforeMove)
         {
             for (int i = 0; i < SegLines.Count; i++)
@@ -450,8 +459,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 if (intsecPtCnts < 2)
                 {
                     string message;
-                    if (beforeMove) message = "该分割线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
-                    else message = "移动后，该分割线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
+                    if (beforeMove) message = "该分区线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
+                    else message = "移动后，该分区线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
                     Logger?.Information(message);
                     Active.Editor.WriteMessage(message);
                     SegLines[i].MarkLineSeg(true);
@@ -460,7 +469,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             return true;
         }
-        // 判断分割线净宽,如果不够移动一下在判断是否够
+        // 判断分区线净宽,如果不够移动一下在判断是否够
         private  bool LaneWidthSatisfied()
         {
             
@@ -478,8 +487,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     var initDist = rst.Min(geo => geo.Distance(seglstr));
                     if (!ExistWidthSatisfied(i, initDist))
                     {
-                        Logger?.Information("分割线范围不够车道净宽！\n");
-                        Active.Editor.WriteMessage("分割线范围不够车道净宽！\n");
+                        Logger?.Information("分区线范围不够车道净宽！\n");
+                        Active.Editor.WriteMessage("分区线范围不够车道净宽！\n");
                         SegLines[i].MarkLineSeg(true);
                         return false;
                     }
@@ -505,15 +514,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private  bool SatisfiedAfterMove(int idx, ref List<LineSegment> segLines_C)
         {
             double tol = ParameterStock.RoadWidth - 0.1;// 5500-0.1
-            segLines_C.ExtendAndIntSect(SeglineIndexList);//延长各分割线使之相交
+            segLines_C.ExtendAndIntSect(SeglineIndexList);//延长各分区线使之相交
             segLines_C[idx] = segLines_C[idx].ExtendToBound(WallLine, SeglineConnectToBound[idx]);
-            var vaildSeg = SegLineEx.GetVaildLane(idx, segLines_C, SegLineBoundary,BoundaryObjectsSPIDX);// 获取分割线有效部分
-            if (vaildSeg == null) return false;//有效分割线无效
+            var vaildSeg = SegLineEx.GetVaildLane(idx, segLines_C, SegLineBoundary,BoundaryObjectsSPIDX);// 获取分区线有效部分
+            if (vaildSeg == null) return false;//有效分区线无效
             var rect = vaildSeg.GetRect(tol);
             var rst = BoundarySpatialIndex.SelectCrossingGeometry(rect);
             if (rst.Count > 0) return false;
             SegLines.Clear();
-            SegLines = segLines_C;//分割线满足需求
+            SegLines = segLines_C;//分区线满足需求
             return true;
         }
         private  bool VaildLaneWidthSatisfied()
@@ -528,8 +537,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 var rst = BoundarySpatialIndex.SelectCrossingGeometry(rect);
                 if (rst.Count > 0)
                 {
-                    Logger?.Information("自动调整后分割线净宽仍然不够！\n");
-                    Active.Editor.WriteMessage("自动调整后分割线净宽仍然不够！ \n");
+                    Logger?.Information("自动调整后分区线净宽仍然不够！\n");
+                    Active.Editor.WriteMessage("自动调整后分区线净宽仍然不够！ \n");
                     SegLines[i].MarkLineSeg(true);
                     flag = false;
                 }
@@ -558,8 +567,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                     if (j == curCount - 1)
                     {
-                        Logger?.Information("分割线未互相连接 ！\n");
-                        Active.Editor.WriteMessage("分割线未互相连接！ \n");
+                        Logger?.Information("分区线未互相连接 ！\n");
+                        Active.Editor.WriteMessage("分区线未互相连接！ \n");
                         if (CheckedLines.Count < 3)
                         {
                             foreach (var linetomark in CheckedLines)
@@ -583,7 +592,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         #endregion
 
         #region 计算最大最小值
-        public void GetLowerUpperBound()
+        public void GetLowerUpperBound(List<LineSegment> newFixedSegLines)
         {
             LowerUpperBound = new List<(double, double)>();
             double HorzSize = WallLine.Coordinates.Max(c => c.X) - WallLine.Coordinates.Min(c => c.X);
@@ -592,7 +601,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             for (int i = 0; i < SegLines.Count; i++)
             {
                 if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0||
-                    Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius))
+                    Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius) ||
+                    newFixedSegLines.Any(l =>l.IsSubSetOf(SegLines[i])))
                 {
                     if (SegLines[i].IsVertical())
                         LowerUpperBound.Add((SegLines[i].P0.X, SegLines[i].P0.X));

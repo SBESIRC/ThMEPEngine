@@ -15,6 +15,7 @@ namespace TianHua.Mep.UI.UI
         {
             InitializeComponent();
             this.DataContext = RoomOutlineVM;
+            this.chkYnAddShearWall.IsChecked = RoomOutlineVM.YnExtractShearWall;
             this.Topmost = true;
         }
 
@@ -24,6 +25,7 @@ namespace TianHua.Mep.UI.UI
 
         private void btnExtractWall_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            RoomOutlineVM.YnExtractShearWall = this.chkYnAddShearWall.IsChecked == true;
             RoomOutlineVM.ExtractWalls();
         }
 
@@ -34,6 +36,7 @@ namespace TianHua.Mep.UI.UI
 
         private void btnOk_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            RoomOutlineVM.YnExtractShearWall = this.chkYnAddShearWall.IsChecked==true;
             RoomOutlineVM.Confirm();
         }
 

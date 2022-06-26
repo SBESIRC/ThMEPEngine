@@ -16,19 +16,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
     {
         public Point3d StPt { get; set; }
         public string FloorNum { get; set; }
-        public string Area { get; set; }
-        public Dictionary<int, string> FloorDic { get; set; }
         public TermPoint2 TermPt { get; set; }
         private string PipeDN { get; set; }
-        public bool hasFlow { get; set; }
+        public bool HasFlow { get; set; }
         private Matrix3d U2WMat { get; set; }
+
         public FireDistrictRight(Point3d stPt, TermPoint2 termPoint, string DN, bool hasflow)
         {
             StPt = stPt;
             FloorNum = termPoint.PipeNumber.Replace("接至", "").Split('喷')[0];
             TermPt = termPoint;
             PipeDN = DN;
-            hasFlow = hasflow;
+            HasFlow = hasflow;
             U2WMat = Active.Editor.UCS2WCS();
         }
 
@@ -40,7 +39,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 InsertText(acadDatabase, StPt.OffsetXY(50, 150), PipeDN);
             }
             
-            if (hasFlow)
+            if (HasFlow)
             {
                 var objID2 = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "信号阀＋水流指示器",
                     StPt.OffsetXY(300-57592, 11322), new Scale3d(1, 1, 1), 0);
@@ -147,6 +146,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertSolid(acadDatabase, StPt.OffsetXY(3497, -1546), StPt.OffsetXY(3320, -1646), StPt.OffsetXY(3362, -1698));
             InsertSolid(acadDatabase, StPt.OffsetXY(3615, -1927), StPt.OffsetXY(3523, -2107), StPt.OffsetXY(3469, -2068));
         }
+
         private static void SetDynBlockValue(ObjectId blockId, string propName, object value)
         {
             var props = blockId.GetDynProperties();//获得动态块的所有动态属性
@@ -177,6 +177,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 }
             }
         }
+
         private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer)
         {
             var line = new Line(pt1, pt2)
@@ -187,6 +188,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             line.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(line);
         }
+
         private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer, string linetype)
         {
             var line = new Line(pt1, pt2)
@@ -198,6 +200,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             line.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(line);
         }
+
         private void InsertSolid(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, Point3d pt3, string layer = "W-FRPT-NOTE")
         {
             var solid = new Solid(pt1, pt2, pt3)

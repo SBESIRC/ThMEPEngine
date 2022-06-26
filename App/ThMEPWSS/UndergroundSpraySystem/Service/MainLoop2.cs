@@ -95,8 +95,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     for (int i = 0; i < rstPath.Count; i++)
                     {
                         var pt = rstPath[i];
-                        //var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
-                        //var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                         var type = sprayIn.PtTypeDic[pt];
 
                         if (type.Contains("AlarmValve"))
@@ -143,11 +141,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 }
                             }
                         }
-                        //else if(sprayIn.PtDic[pt].Count == 3)
-                        //{
-                        //    sprayOut.PipeLine.Add(new Line(stPt.OffsetX(15000), stPt.OffsetXY(15000, 1200)));
-                        //    spraySystem.BranchPtDic.Add(pt, stPt.OffsetXY(15000, 1200));
-                        //}
                     }
                     if (stPt.X > spraySystem.MaxOffSetX)
                     {

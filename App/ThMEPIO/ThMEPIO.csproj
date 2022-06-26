@@ -28,32 +28,13 @@
     <Compile Include="DB\THMEPDBCoreServices.cs" />
     <Compile Include="IO\ExcelService\ExcelService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DB\SQLite\SQLiteHelper.cs" />
+    <Compile Include="DB\SQLite\ThMEPSQLiteHelper.cs" />
     <Compile Include="DB\SQLite\THMEPSQLiteServices.cs" />
-    <Compile Include="DB\SQLite\ThSQLiteHelper.cs" />
     <Compile Include="ThMEPIOApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus">
       <Version>5.8.8</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Data.Sqlite.Core">
-      <Version>6.0.5</Version>
-    </PackageReference>
-    <PackageReference Include="sqlite-net-pcl">
-      <Version>1.8.116</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.bundle_green">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.core">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl">
-      <Version>2.0.4</Version>
     </PackageReference>
     <PackageReference Include="System.Data.SQLite">
       <Version>1.0.116</Version>

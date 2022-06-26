@@ -1,9 +1,9 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Common;
 using ThMEPStructure.Model.Printer;
-using ThMEPStructure.ArchiecturePlane.Service;
+using ThMEPStructure.ArchitecturePlane.Service;
 
-namespace ThMEPStructure.ArchiecturePlane.Print
+namespace ThMEPStructure.ArchitecturePlane.Print
 {
     internal class ThCommonPrinter
     {

@@ -39,6160 +39,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
   using System.Diagnostics;
   using Newtonsoft.Json.Linq;
   using StoreyContext = Pipe.Model.StoreyContext;
-  public static class THDrainageService
-  {
-    public static bool DrawWLPipeSystem()
-    {
-      TOILET_WELLS_INTERVAL = null;
-      if (((DrainageSystemDiagram.commandContext.StoreyContext.StoreyInfos?.Count) ?? THESAURUSSTAMPEDE) is THESAURUSSTAMPEDE)
-      {
-        return INTRAVASCULARLY;
-      }
-      TOILET_WELLS_INTERVAL = GeoFac.CreateGeometry(DrainageSystemDiagram.commandContext.StoreyContext.StoreyInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary.ToPolygon())).Envelope.ToGRect().Expand(POLYOXYMETHYLENE).ToPt3dCollection();
-      {
-        var vm = DrainageSystemDiagramViewModel.Singleton;
-        static bool isRainLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSABJURE);
-        static bool isDraiLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSREMNANT);
-        static bool isDrainageLayer(string layer) => isRainLayer(layer) || isDraiLayer(layer);
-        static string GetEffectiveLayer(string TOILET_BUFFER_DISTANCE)
-        {
-          return GetEffectiveName(TOILET_BUFFER_DISTANCE);
-        }
-        static string GetEffectiveName(string WELLS_MAX_AREA)
-        {
-          WELLS_MAX_AREA ??= THESAURUSDEPLORE;
-          var MAX_ANGEL_TOLLERANCE = WELLS_MAX_AREA.LastIndexOf(THESAURUSCONTEND);
-          if (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE && !WELLS_MAX_AREA.EndsWith(MULTIPROCESSING))
-          {
-            WELLS_MAX_AREA = WELLS_MAX_AREA.Substring(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING);
-          }
-          MAX_ANGEL_TOLLERANCE = WELLS_MAX_AREA.LastIndexOf(SUPERREGENERATIVE);
-          if (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE && !WELLS_MAX_AREA.EndsWith(THESAURUSCOURIER))
-          {
-            WELLS_MAX_AREA = WELLS_MAX_AREA.Substring(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING);
-          }
-          return WELLS_MAX_AREA;
-        }
-        static string GetEffectiveBRName(string MIN_WELL_TO_URINAL_DISTANCE)
-        {
-          return GetEffectiveName(MIN_WELL_TO_URINAL_DISTANCE);
-        }
-        static bool IsWantedBlock(BlockTableRecord blockTableRecord)
-        {
-          if (blockTableRecord.IsDynamicBlock)
-          {
-            return INTRAVASCULARLY;
-          }
-          if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
-          {
-            return INTRAVASCULARLY;
-          }
-          if (!blockTableRecord.Explodable)
-          {
-            return INTRAVASCULARLY;
-          }
-          return THESAURUSOBSTINACY;
-        }
-        bool MAX_ROOM_INTERVAL = INTRAVASCULARLY;
-        var KITCHEN_BUFFER_DISTANCE = new List<StoreyInfo>();
-        var MAX_TOILET_TO_KITCHEN_DISTANCE = INTRAVASCULARLY;
-        var MAX_TOILET_TO_KITCHEN_DISTANCE1 = new List<Geometry>();
-        var MAX_KITCHEN_TO_RAINPIPE_DISTANCE = new List<Geometry>();
-        var MAX_BALCONY_TO_RAINPIPE_DISTANCE = new List<Geometry>();
-        var MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = new List<Geometry>();
-        var MAX_TOILET_TO_FLOORDRAIN_DISTANCE = new List<Geometry>();
-        var MAX_TOILET_TO_FLOORDRAIN_DISTANCE2 = new List<Geometry>();
-        var MAX_TOILET_TO_FLOORDRAIN_DISTANCE1 = new List<Geometry>();
-        var MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = new List<Geometry>();
-        var MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE = new List<Geometry>();
-        var MAX_BALCONY_TO_BALCONY_DISTANCE = new List<CText>();
-        var MAX_KITCHEN_TO_BALCONY_DISTANCE = new List<Geometry>();
-        var MIN_DEVICEPLATFORM_AREA = new List<Geometry>();
-        var MAX_DEVICEPLATFORM_AREA = new List<Geometry>();
-        var MAX_BASECIRCLE_AREA = new List<Geometry>();
-        var max_balconywashingfloordrain_to_balconyfloordrain = new List<Geometry>();
-        FocusMainWindow();
-        if (!TrySelectPoint(out Point3d SIDEWATERBUCKET_X_INDENT)) return INTRAVASCULARLY;
-if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
-        using var lck = DocLock;
-        using var adb = AcadDatabase.Active();
-        using var tr = new _DrawingTransaction(adb);
-        static string TryParseWrappingPipeDNText(string repeated_point_distance)
-        {
-          if (repeated_point_distance is null) return null;
-          var TolLightRangeMin = Regex.Replace(repeated_point_distance, THESAURUSRESUSCITATE, THESAURUSDEPLORE, RegexOptions.IgnoreCase);
-          TolLightRangeMin = Regex.Replace(TolLightRangeMin, QUOTATION3BABOVE, THESAURUSDEPLORE);
-          TolLightRangeMin = Regex.Replace(TolLightRangeMin, THESAURUSMISTRUST, THESAURUSSPECIFICATION);
-          TolLightRangeMin = TolLightRangeMin.Replace(INTELLECTUALNESS, THESAURUSDEPLORE);
-          return TolLightRangeMin;
-        }
-        Point3dCollection range = TOILET_WELLS_INTERVAL;
-        {
-          var max_device_to_device = GetStoreyBlockReferences(adb);
-          var max_device_to_balcony = new List<BlockReference>();
-          foreach (var tolReturnValueRangeTo in max_device_to_device)
-          {
-            var TolLightRangeSingleSideMin = GetStoreyInfo(tolReturnValueRangeTo);
-            if (range?.ToGRect().ToPolygon().Contains(TolLightRangeSingleSideMin.Boundary.ToPolygon()) ?? THESAURUSOBSTINACY)
-            {
-              max_device_to_balcony.Add(tolReturnValueRangeTo);
-              KITCHEN_BUFFER_DISTANCE.Add(TolLightRangeSingleSideMin);
-            }
-          }
-          FixStoreys(KITCHEN_BUFFER_DISTANCE);
-        }
-        var max_balconywashingfloordrain_to_rainpipe = CreateEnvelopeTester(KITCHEN_BUFFER_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary).ToList());
-        foreach (var maxToiletToCondensepipeDistance in adb.ModelSpace.OfType<Entity>())
-          {
-            if (maxToiletToCondensepipeDistance is BlockReference tolReturnValueRangeTo)
-            {
-              if (!tolReturnValueRangeTo.BlockTableRecord.IsValid) continue;
-              var minDeviceplatformArea = adb.Blocks.Element(tolReturnValueRangeTo.BlockTableRecord);
-              var _fs = new List<KeyValuePair<Geometry, Action>>();
-              Action maxDeviceplatformArea = null;
-              try
-              {
-                MAX_ROOM_INTERVAL = minDeviceplatformArea.XrefStatus != XrefStatus.NotAnXref;
-                handleBlockReference(tolReturnValueRangeTo, Matrix3d.Identity, _fs);
-              }
-              finally
-              {
-                MAX_ROOM_INTERVAL = INTRAVASCULARLY;
-              }
-              {
-                var TolLightRangeSingleSideMin = tolReturnValueRangeTo.XClipInfo();
-                if (TolLightRangeSingleSideMin.IsValid)
-                {
-                  TolLightRangeSingleSideMin.TransformBy(tolReturnValueRangeTo.BlockTransform);
-                  var default_voltage = TolLightRangeSingleSideMin.PreparedPolygon;
-                  foreach (var max_rainpipe_to_balconyfloordrain in _fs)
-                  {
-                    if (default_voltage.Intersects(max_rainpipe_to_balconyfloordrain.Key))
-                    {
-                      maxDeviceplatformArea += max_rainpipe_to_balconyfloordrain.Value;
-                    }
-                  }
-                }
-                else
-                {
-                  foreach (var max_rainpipe_to_balconyfloordrain in _fs)
-                  {
-                    maxDeviceplatformArea += max_rainpipe_to_balconyfloordrain.Value;
-                  }
-                }
-                maxDeviceplatformArea?.Invoke();
-              }
-            }
-            else
-            {
-              var _fs = new List<KeyValuePair<Geometry, Action>>();
-              handleEntity(maxToiletToCondensepipeDistance, Matrix3d.Identity, _fs);
-              foreach (var max_rainpipe_to_balconyfloordrain in _fs)
-              {
-                max_rainpipe_to_balconyfloordrain.Value();
-              }
-            }
-          }
-        StoreyInfo max_balconywashingmachine_to_balconybasinline(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-        {
-          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE is null) return null;
-          foreach (var TolLightRangeSingleSideMin in KITCHEN_BUFFER_DISTANCE)
-          {
-            if (IsNumStorey(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-            {
-              if (TolLightRangeSingleSideMin.Numbers.Contains(GetStoreyScore(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))) return TolLightRangeSingleSideMin;
-            }
-            else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == THESAURUSARGUMENTATIVE)
-            {
-              if (TolLightRangeSingleSideMin.StoreyType == StoreyType.LargeRoof) return TolLightRangeSingleSideMin;
-            }
-          }
-          var min_downspout_to_balconyfloordrain = KITCHEN_BUFFER_DISTANCE.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.StoreyType == StoreyType.SmallRoof).OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary.CenterY).ToList();
-          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == ANTHROPOMORPHICALLY)
-          {
-            return min_downspout_to_balconyfloordrain.FirstOrDefault();
-          }
-          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == THESAURUSSCUFFLE)
-          {
-            if (min_downspout_to_balconyfloordrain.Count >= THESAURUSPERMUTATION) return min_downspout_to_balconyfloordrain[THESAURUSHOUSING];
-            return null;
-          }
-          return null;
-        }
-        var SIDEWATERBUCKET_Y_INDENT = new List<string>();
-        var max_condensepipe_to_washmachine = KITCHEN_BUFFER_DISTANCE.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers).Max();
-        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < max_condensepipe_to_washmachine; MAX_ANGEL_TOLLERANCE++)
-        {
-          SIDEWATERBUCKET_Y_INDENT.Add((MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING) + THESAURUSASPIRATION);
-        }
-        SIDEWATERBUCKET_Y_INDENT.Add(THESAURUSARGUMENTATIVE);
-        if (max_balconywashingmachine_to_balconybasinline(ANTHROPOMORPHICALLY) is not null)
-        {
-          SIDEWATERBUCKET_Y_INDENT.Add(ANTHROPOMORPHICALLY);
-          if (max_balconywashingmachine_to_balconybasinline(THESAURUSSCUFFLE) is not null)
-          {
-            SIDEWATERBUCKET_Y_INDENT.Add(THESAURUSSCUFFLE);
-          }
-        }
-        IEnumerable<string> max_downspout_to_balconywashingfloordrain(StoreyInfo TolLightRangeSingleSideMin) => SIDEWATERBUCKET_Y_INDENT.Where(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => max_balconywashingmachine_to_balconybasinline(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN) == TolLightRangeSingleSideMin);
-        string max_rainpipe_to_washmachine(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-        {
-          return SIDEWATERBUCKET_Y_INDENT.TryGet(SIDEWATERBUCKET_Y_INDENT.IndexOf(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) + THESAURUSHOUSING);
-        }
-        string commonradius(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-        {
-          return SIDEWATERBUCKET_Y_INDENT.TryGet(SIDEWATERBUCKET_Y_INDENT.IndexOf(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) - THESAURUSHOUSING);
-        }
-        static Func<Envelope, bool> CreateEnvelopeTester(ICollection<GRect> rects)
-        {
-          if (rects.Count == THESAURUSSTAMPEDE) return DEFAULT_FIRE_VALVE_WIDTH => INTRAVASCULARLY;
-          var engine = new NetTopologySuite.Index.Strtree.STRtree<object>(rects.Count > THESAURUSACRIMONIOUS ? rects.Count : THESAURUSACRIMONIOUS);
-          foreach (var DEFAULT_FIRE_VALVE_WIDTH in rects) engine.Insert(DEFAULT_FIRE_VALVE_WIDTH.ToEnvolope(), null);
-          return envo =>
-          {
-            if (envo is null) throw new ArgumentNullException();
-            return engine.Query(envo).Any();
-          };
-        }
-        var max_balconybasin_to_balcony = MAX_TOILET_TO_FLOORDRAIN_DISTANCE.Select(TolLightRangeSingleSideMax => new GCircle(TolLightRangeSingleSideMax.GetCenter(), TolLightRangeSingleSideMax.ToGRect().InnerRadius)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Radius > THESAURUSDRAGOON).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToCirclePolygon(SUPERLATIVENESS)).Where(TolLightRangeSingleSideMax => max_balconywashingfloordrain_to_rainpipe(TolLightRangeSingleSideMax.EnvelopeInternal)).ToList();
-        var balcony_buffer_distance = MAX_TOILET_TO_FLOORDRAIN_DISTANCE.Select(TolLightRangeSingleSideMax => new GCircle(TolLightRangeSingleSideMax.GetCenter(), TolLightRangeSingleSideMax.ToGRect().InnerRadius)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Radius <= THESAURUSDRAGOON).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToCirclePolygon(SUPERLATIVENESS)).Where(TolLightRangeSingleSideMax => max_balconywashingfloordrain_to_rainpipe(TolLightRangeSingleSideMax.EnvelopeInternal)).ToList();
-          {
-            var min_balconybasin_to_balcony = GeoFac.CreateIntersectsSelector(MAX_BALCONY_TO_BALCONY_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
-            foreach (var max_tag_yposition in GeoFac.GroupGeometries(MAX_TOILET_TO_KITCHEN_DISTANCE1.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Square).Tag(TolLightRangeSingleSideMax)).ToList()))
-            {
-              var tolReturnValueRange = max_tag_yposition.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).OfType<Geometry>().ToList();
-              var TolLane = GeoFac.GetManyLines(tolReturnValueRange).ToList();
-              var hsegs = TolLane.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSCOMMUNICATION)).ToList();
-              if (hsegs.Count is THESAURUSPERMUTATION)
-              {
-                var _tol_avg_column_dist = TolLane.YieldPoints().Distinct().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
-                var ptsdf = GeoFac.CreateDisjointSelector(_tol_avg_column_dist);
-                _tol_avg_column_dist = ptsdf(GeoFac.CreateGeometryEx(hsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Flat)).ToList()));
-                var max_kitchen_to_balcony_distance = hsegs.SelectMany(default_fire_valve_length =>
-                {
-                  static bool IsWantedText(string repeated_point_distance)
-                  {
-                    if (repeated_point_distance is null) return INTRAVASCULARLY;
-                    return IsDrainageLabel(repeated_point_distance) || repeated_point_distance.Contains(THESAURUSLECHER);
-                  }
-                  var _raiseDistanceToStartDefault = default_fire_valve_length.Center;
-                  var MAX_DEVICE_TO_BALCONY = THESAURUSARRIVE;
-                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsWantedText(TolLightRangeSingleSideMax.UserData as string)).ToList();
-                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE <= DISPENSABLENESS; MAX_ANGEL_TOLLERANCE++)
-                  {
-                    if (max_tag_xposition.Count > THESAURUSSTAMPEDE) break;
-                    MAX_DEVICE_TO_BALCONY = HYPERDISYLLABLE + MAX_ANGEL_TOLLERANCE * THESAURUSACRIMONIOUS;
-                    max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
-                  }
-                  return max_tag_xposition.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).OfType<string>();
-                }).Distinct().ToList();
-                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint3d()).Distinct(new Point3dComparer(THESAURUSACRIMONIOUS)))
-                {
-                  foreach (var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE in max_kitchen_to_balcony_distance)
-                  {
-                    MAX_DEVICEPLATFORM_AREA.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                  }
-                }
-              }
-            }
-          }
-        {
-          var sidewaterbucket_x_indent = GeoFac.CreateIntersectsSelector(max_balconybasin_to_balcony);
-          foreach (var sidewaterbucket_y_indent in MAX_DEVICEPLATFORM_AREA)
-          {
-            if (sidewaterbucket_y_indent.UserData is not string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) continue;
-            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(INTELLECTUALNESS))
-            {
-              var well_to_wall_offset = MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Split(THESAURUSHABITAT);
-              if (well_to_wall_offset.Length == THESAURUSPERMUTATION)
-              {
-                if (Regex.IsMatch(well_to_wall_offset[THESAURUSHOUSING], UREDINIOMYCETES))
-                {
-                  if (IsDrainageLabel(well_to_wall_offset[THESAURUSSTAMPEDE]))
-                  {
-                    MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = well_to_wall_offset[THESAURUSSTAMPEDE];
-                  }
-                }
-              }
-            }
-            if (IsDrainageLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-            {
-              foreach (var toilet_wells_interval in sidewaterbucket_x_indent(sidewaterbucket_y_indent))
-              {
-                toilet_wells_interval.UserData = MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE;
-              }
-            }
-          }
-          foreach (var sidewaterbucket_y_indent in MAX_DEVICEPLATFORM_AREA)
-          {
-            if (sidewaterbucket_y_indent.UserData is not string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) continue;
-            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSELIGIBLE))
-            {
-              if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSADVENT))
-              {
-                MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE.Add(GeoFac.CreateGeometryEx(GeoFac.GetPoints(sidewaterbucket_y_indent).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
-              }
-              else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONMALTESE))
-              {
-                MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE.Add(GeoFac.CreateGeometryEx(GeoFac.GetPoints(sidewaterbucket_y_indent).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
-              }
-            }
-            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSLECHER))
-            {
-              string toilet_buffer_distance = null, MAX_CONDENSEPIPE_TO_WASHMACHINE = null;
-              if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSPLUMMET) || MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(ALSOHEAVENWARDS))
-              {
-                toilet_buffer_distance = THESAURUSTOPICAL;
-              }
-              else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSPROLONG))
-              {
-                toilet_buffer_distance = THESAURUSBANDAGE;
-              }
-              else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONSPENSERIAN))
-              {
-                toilet_buffer_distance = THESAURUSCONSERVATION;
-              }
-              var tolReturnValueMinRange = Regex.Match(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, UREDINIOMYCETES);
-              if (tolReturnValueMinRange.Success) MAX_CONDENSEPIPE_TO_WASHMACHINE = tolReturnValueMinRange.Groups[THESAURUSSTAMPEDE].Value;
-              if (toilet_buffer_distance is not null)
-              {
-                MAX_CONDENSEPIPE_TO_WASHMACHINE ??= THESAURUSIMPETUOUS;
-                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in GeoFac.GetPoints(sidewaterbucket_y_indent))
-                {
-                  MAX_TOILET_TO_FLOORDRAIN_DISTANCE2.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.Tag(toilet_buffer_distance + INTELLECTUALNESS + MAX_CONDENSEPIPE_TO_WASHMACHINE));
-                }
-              }
-            }
-          }
-          var min_balconybasin_to_balcony = GeoFac.CreateIntersectsSelector(MAX_BALCONY_TO_BALCONY_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
-          foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupGeometries(GeoFac.GetManyLines(MAX_TOILET_TO_KITCHEN_DISTANCE1).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList()).Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax)))
-          {
-            var wells_max_area = GeoFac.GetLines(DEFAULT_FIRE_VALVE_LENGTH).ToList();
-            var min_well_to_urinal_distance = wells_max_area.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSCOMMUNICATION)).ToList();
-            var _tol_avg_column_dist = GeoFac.GetAlivePoints(wells_max_area, THESAURUSCOMMUNICATION).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).Where(TolLightRangeSingleSideMax => !min_well_to_urinal_distance.Any(default_fire_valve_length => default_fire_valve_length.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Square).Intersects(TolLightRangeSingleSideMax))).ToList();
-            if (min_well_to_urinal_distance.Count == THESAURUSHOUSING && _tol_avg_column_dist.Count > THESAURUSSTAMPEDE)
-            {
-              foreach (var default_fire_valve_length in min_well_to_urinal_distance)
-              {
-                var _raiseDistanceToStartDefault = default_fire_valve_length.Center;
-                {
-                  var MAX_DEVICE_TO_BALCONY = THESAURUSARRIVE;
-                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
-                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE <= DISPENSABLENESS; MAX_ANGEL_TOLLERANCE++)
-                  {
-                    if (max_tag_xposition.Count > THESAURUSSTAMPEDE) break;
-                    MAX_DEVICE_TO_BALCONY = HYPERDISYLLABLE + MAX_ANGEL_TOLLERANCE * THESAURUSACRIMONIOUS;
-                    max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
-                  }
-                  if (max_tag_xposition.Count == THESAURUSHOUSING)
-                  {
-                    foreach (var maxToiletToFloordrainDistance1 in max_tag_xposition)
-                    {
-                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-                      {
-                        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = maxToiletToFloordrainDistance1.UserData;
-                        foreach (var pipe in sidewaterbucket_x_indent(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN))
-                        {
-                          if (pipe.UserData is not null)
-                          {
-                            continue;
-                          }
-                          pipe.UserData = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                        }
-                      }
-                    }
-                  }
-                }
-                {
-                  static bool IsWantedLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-                  {
-                    if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE is null) return INTRAVASCULARLY;
-                    return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSELIGIBLE);
-                  }
-                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(THESAURUSSURPRISED)).ToLineString()).Where(TolLightRangeSingleSideMax => IsWantedLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
-                  if (max_tag_xposition.Count == THESAURUSHOUSING)
-                  {
-                    foreach (var maxToiletToFloordrainDistance1 in max_tag_xposition)
-                    {
-                      var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = maxToiletToFloordrainDistance1.UserData as string;
-                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-                      {
-                        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = maxToiletToFloordrainDistance1.UserData;
-                      }
-                      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSADVENT))
-                      {
-                        MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE.Add(GeoFac.CreateGeometryEx(_tol_avg_column_dist.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
-                      }
-                      else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONMALTESE))
-                      {
-                        MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE.Add(GeoFac.CreateGeometryEx(_tol_avg_column_dist.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        var max_room_interval = GeoFac.CreateContainsSelector(max_balconybasin_to_balcony);
-        var kitchen_buffer_distance = new List<HashSet<string>>();
-        var max_toilet_to_kitchen_distance = new List<List<Geometry>>();
-        var max_toilet_to_kitchen_distance1 = new List<List<Geometry>>();
-        var max_kitchen_to_rainpipe_distance = new List<List<Geometry>>();
-        var max_balcony_to_rainpipe_distance = new List<List<HashSet<string>>>();
-        var max_toilet_to_condensepipe_distance = new List<Dictionary<string, string>>();
-        var max_toilet_to_floordrain_distance = new List<Dictionary<string, string>>();
-        var max_toilet_to_floordrain_distance2 = new List<Dictionary<string, string>>();
-        var max_toilet_to_floordrain_distance1 = new List<List<Geometry>>();
-        var max_balcony_to_deviceplatform_distance = new List<HashSet<string>>();
-        var max_balconyrainpipe_to_floordrain_distance = new List<HashSet<string>>();
-        using (var max_balcony_to_balcony_distance = new PriorityQueue(THESAURUSINCOMPLETE))
-        {
-          foreach (var TolLightRangeSingleSideMin in KITCHEN_BUFFER_DISTANCE)
-          {
-            var max_kitchen_to_balcony_distance = new HashSet<string>();
-            kitchen_buffer_distance.Add(max_kitchen_to_balcony_distance);
-            var min_deviceplatform_area = new List<HashSet<string>>();
-            max_balcony_to_rainpipe_distance.Add(min_deviceplatform_area);
-            var max_deviceplatform_area = new List<Geometry>();
-            max_toilet_to_kitchen_distance.Add(max_deviceplatform_area);
-            var max_basecircle_area = new List<Geometry>();
-            max_toilet_to_kitchen_distance1.Add(max_basecircle_area);
-            var MaxBalconywashingfloordrainToBalconyfloordrain = new List<Geometry>();
-            max_kitchen_to_rainpipe_distance.Add(MaxBalconywashingfloordrainToBalconyfloordrain);
-            var MaxBalconywashingfloordrainToRainpipe = new Dictionary<string, string>();
-            max_toilet_to_condensepipe_distance.Add(MaxBalconywashingfloordrainToRainpipe);
-            var MaxDeviceToDevice = new Dictionary<string, string>();
-            max_toilet_to_floordrain_distance.Add(MaxDeviceToDevice);
-            var MaxDeviceToBalcony = new List<Geometry>();
-            max_toilet_to_floordrain_distance1.Add(MaxDeviceToBalcony);
-            var MaxRainpipeToBalconyfloordrain = new Dictionary<string, string>();
-            max_toilet_to_floordrain_distance2.Add(MaxRainpipeToBalconyfloordrain);
-            var MinDownspoutToBalconyfloordrain = new HashSet<string>();
-            max_balcony_to_deviceplatform_distance.Add(MinDownspoutToBalconyfloordrain);
-            var MaxCondensepipeToWashmachine = new HashSet<string>();
-            max_balconyrainpipe_to_floordrain_distance.Add(MaxCondensepipeToWashmachine);
-            var MaxBalconywashingmachineToBalconybasinline = TolLightRangeSingleSideMin.Boundary.ToPolygon();
-            var MaxDownspoutToBalconywashingfloordrain = max_room_interval(MaxBalconywashingmachineToBalconybasinline);
-            var MaxRainpipeToWashmachine = GeoFac.CreateIntersectsSelector(MaxDownspoutToBalconywashingfloordrain);
-            var Commonradius = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_KITCHEN_TO_BALCONY_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
-            var MaxBalconybasinToBalcony = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(balcony_buffer_distance)(MaxBalconywashingmachineToBalconybasinline));
-            var BalconyBufferDistance = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_TOILET_TO_FLOORDRAIN_DISTANCE1)(MaxBalconywashingmachineToBalconybasinline));
-            var MinBalconybasinToBalcony = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BASECIRCLE_AREA)(MaxBalconywashingmachineToBalconybasinline));
-            var MaxTagYposition = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
-            var MaxTagXposition = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
-            var MaxTagLength = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MIN_DEVICEPLATFORM_AREA.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSDERELICTION)).ToList())(MaxBalconywashingmachineToBalconybasinline));
-            var wlineGeos = GeoFac.GroupLinesByConnPoints(GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(GeoFac.GetManyLines(MAX_TOILET_TO_CONDENSEPIPE_DISTANCE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList())(MaxBalconywashingmachineToBalconybasinline))(MaxBalconywashingmachineToBalconybasinline), THESAURUSACRIMONIOUS).ToList();
-            var TextIndent = GeoFac.CreateIntersectsSelector(wlineGeos);
-            var dlineGeos = GeoFac.GroupLinesByConnPoints(GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(GeoFac.GetManyLines(MAX_KITCHEN_TO_RAINPIPE_DISTANCE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList())(MaxBalconywashingmachineToBalconybasinline))(MaxBalconywashingmachineToBalconybasinline), THESAURUSACRIMONIOUS).ToList();
-            var TextHeight = GeoFac.CreateIntersectsSelector(dlineGeos);
-            max_balcony_to_balcony_distance.Enqueue((int)GeoCalState.GroupPipe, () =>
-            {
-              var MaxDownspoutToBalconywashingfloordrain = max_room_interval(TolLightRangeSingleSideMin.Boundary.ToPolygon());
-              var vpsnf = GeoFac.NearestNeighboursGeometryF(MaxDownspoutToBalconywashingfloordrain.OfType<Geometry>().ToList());
-              var okvps = new HashSet<Geometry>();
-              foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
-              {
-                var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
-                if (!IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                {
-                  continue;
-                }
-                {
-                  max_kitchen_to_balcony_distance.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-                  if (IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                  {
-                    var center = toilet_wells_interval.GetCenter();
-                    var _vps = vpsnf(toilet_wells_interval.GetCenter().ToGRect(POLYOXYMETHYLENE).ToPolygon(), MaxDownspoutToBalconywashingfloordrain.Count).Where(TolLightRangeSingleSideMax => !okvps.Contains(TolLightRangeSingleSideMax)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter().GetDistanceTo(center) < POLYOXYMETHYLENE).ToList();
-                                {
-                      var text_indent = new List<Geometry>();
-                      var text_height = new List<Geometry>();
-                      foreach (var ToiletWellsInterval in _vps)
-                      {
-                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
-                        if (text_indent.Count == THESAURUSSTAMPEDE && text_height.Count == THESAURUSSTAMPEDE)
-                        {
-                          if (IsFL(SidewaterbucketYIndent)) text_indent.Add(ToiletWellsInterval);
-                          else if (IsWL(SidewaterbucketYIndent)) text_height.Add(ToiletWellsInterval);
-                        }
-                        else if (text_indent.Count == THESAURUSHOUSING && text_height.Count == THESAURUSSTAMPEDE)
-                        {
-                          if (IsWL(SidewaterbucketYIndent)) text_height.Add(ToiletWellsInterval);
-                        }
-                        if (text_height.Count == THESAURUSHOUSING && text_indent.Count == THESAURUSSTAMPEDE)
-                        {
-                          if (IsFL(SidewaterbucketYIndent)) text_indent.Add(ToiletWellsInterval);
-                        }
-                        if (text_indent.Count == THESAURUSHOUSING && text_height.Count == THESAURUSHOUSING) break;
-                                  }
-                      if (text_indent.Count == THESAURUSHOUSING && text_height.Count == THESAURUSHOUSING)
-                      {
-                        okvps.AddRange(text_height);
-                        okvps.AddRange(text_indent);
-                        okvps.Add(toilet_wells_interval);
-                                    var lbs = new HashSet<string>();
-                        min_deviceplatform_area.Add(lbs);
-                        foreach (var wl in text_height)
-                        {
-                          lbs.Add(wl.UserData as string);
-                        }
-                        foreach (var fl in text_indent)
-                        {
-                          lbs.Add(fl.UserData as string);
-                        }
-                        lbs.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-                                    continue;
-                      }
-                    }
-                    {
-                      var max_tag_xposition = new List<Geometry>();
-                      var text_height = new List<Geometry>();
-                      foreach (var ToiletWellsInterval in _vps)
-                      {
-                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
-                        if (IsWL(SidewaterbucketYIndent))
-                        {
-                          text_height.Add(ToiletWellsInterval);
-                          break;
-                        }
-                        if (IsPL(SidewaterbucketYIndent))
-                        {
-                          max_tag_xposition.Add(ToiletWellsInterval);
-                          break;
-                        }
-                      }
-                      if (max_tag_xposition.Count == THESAURUSHOUSING || text_height.Count == THESAURUSHOUSING)
-                      {
-                        okvps.AddRange(text_height);
-                        okvps.AddRange(max_tag_xposition);
-                        okvps.Add(toilet_wells_interval);
-                                    var lbs = new HashSet<string>();
-                        min_deviceplatform_area.Add(lbs);
-                        foreach (var wl in text_height)
-                        {
-                          lbs.Add(wl.UserData as string);
-                        }
-                        foreach (var fl in max_tag_xposition)
-                        {
-                          lbs.Add(fl.UserData as string);
-                        }
-                        lbs.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-                                    continue;
-                      }
-                    }
-                  }
-                }
-              }
-            });
-            max_balcony_to_balcony_distance.Enqueue((int)GeoCalState.MarkCompsToPipe, () =>
-            {
-                          max_balcony_to_balcony_distance.Enqueue((int)GeoCalState.MarkTranslator, () =>
-                          {
-                              foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
-                  {
-                    var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
-                    if (string.IsNullOrEmpty(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                    {
-                      var SidewaterbucketXIndent = INTRAVASCULARLY;
-                      {
-                        var WellToWallOffset = GeoFac.CreateGeometry(TextIndent(toilet_wells_interval));
-                        foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(WellToWallOffset))
-                        {
-                          var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
-                          if (IsDrainageLabel(SidewaterbucketYIndent))
-                          {
-                            toilet_wells_interval.UserData = SidewaterbucketYIndent;
-                            if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
-                            {
-                              MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
-                            }
-                            else
-                            {
-                              MaxCondensepipeToWashmachine.Add(SidewaterbucketYIndent);
-                            }
-                            SidewaterbucketXIndent = THESAURUSOBSTINACY;
-                            break;
-                          }
-                        }
-                      }
-                      if (!SidewaterbucketXIndent)
-                      {
-                        var ToiletBufferDistance = GeoFac.CreateGeometry(TextHeight(toilet_wells_interval));
-                        foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(ToiletBufferDistance))
-                        {
-                          var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
-                          if (IsDrainageLabel(SidewaterbucketYIndent))
-                          {
-                            toilet_wells_interval.UserData = SidewaterbucketYIndent;
-                            if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
-                            {
-                              MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
-                                          {
-                                var WellsMaxArea = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(max_balconywashingfloordrain_to_balconyfloordrain)(MaxBalconywashingmachineToBalconybasinline));
-                                var shooters = WellsMaxArea(toilet_wells_interval).Concat(WellsMaxArea(ToiletWellsInterval)).Distinct().ToList();
-                                            if (shooters.Count == THESAURUSPERMUTATION)
-                                {
-                                  var TolRegroupMainYRange = Regex.Match(shooters[THESAURUSSTAMPEDE].UserData as string, NEUROTRANSMITTER);
-                                  var TolConnectSecPtRange = Regex.Match(shooters[THESAURUSHOUSING].UserData as string, NEUROTRANSMITTER);
-                                  if (TolRegroupMainYRange.Success && TolConnectSecPtRange.Success)
-                                  {
-                                    var well_to_wall_offset = new double[] { double.Parse(TolRegroupMainYRange.Groups[THESAURUSHOUSING].Value), double.Parse(TolConnectSecPtRange.Groups[THESAURUSHOUSING].Value) };
-                                    var _tolReturnValueMaxDistance = well_to_wall_offset.Min();
-                                    var _tolReturnValueMinRange = well_to_wall_offset.Max();
-                                    if (_tolReturnValueMinRange / _tolReturnValueMaxDistance > THESAURUSPERMUTATION)
-                                    {
-                                                  MinDownspoutToBalconyfloordrain.Remove(SidewaterbucketYIndent);
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                            else
-                            {
-                              MaxCondensepipeToWashmachine.Add(SidewaterbucketYIndent);
-                            }
-                            SidewaterbucketXIndent = THESAURUSOBSTINACY;
-                            break;
-                          }
-                        }
-                      }
-                    }
-                  }
-                              {
-                    var shooters = GeoFac.CreateContainsSelector(MAX_DEVICEPLATFORM_AREA)(MaxBalconywashingmachineToBalconybasinline);
-                    foreach (var default_fire_valve_width in shooters.Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData))
-                    {
-                      var MinWellToUrinalDistance = default_fire_valve_width.ToList();
-                      if (MinWellToUrinalDistance.Count == THESAURUSPERMUTATION)
-                      {
-                        if (MinWellToUrinalDistance[THESAURUSSTAMPEDE].GetCenter().GetDistanceTo(MinWellToUrinalDistance[THESAURUSHOUSING].GetCenter()) > THESAURUSHYPNOTIC)
-                        {
-                          MinDownspoutToBalconyfloordrain.Add(default_fire_valve_width.Key as string);
-                        }
-                      }
-                    }
-                  }
-                              foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
-                  {
-                    var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
-                    if (string.IsNullOrEmpty(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                    {
-                      foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(toilet_wells_interval.ToGRect().Expand(THESAURUSENTREPRENEUR).ToPolygon()))
-                      {
-                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
-                        if (IsDrainageLabel(SidewaterbucketYIndent))
-                        {
-                          toilet_wells_interval.UserData = SidewaterbucketYIndent;
-                          MaxCondensepipeToWashmachine.Add(SidewaterbucketYIndent);
-                          break;
-                        }
-                      }
-                    }
-                  }
-                });
-              max_balcony_to_balcony_distance.Enqueue((int)GeoCalState.MarkCompsToPipe, () =>
-                          {
-                  foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
-                  {
-                    var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
-                    if (IsDrainageLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                    {
-                      max_kitchen_to_balcony_distance.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-                      var WellToWallOffset = GeoFac.CreateGeometry(TextIndent(toilet_wells_interval));
-                      foreach (var wp in BalconyBufferDistance(WellToWallOffset))
-                      {
-                        foreach (var sidewaterbucket_y_indent in MinBalconybasinToBalcony(wp))
-                        {
-                          var repeated_point_distance = TryParseWrappingPipeDNText(sidewaterbucket_y_indent.UserData as string);
-                          if (repeated_point_distance is not null)
-                          {
-                            MaxDeviceToDevice[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = repeated_point_distance;
-                            break;
-                          }
-                        }
-                        MaxDeviceToBalcony.Add(wp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                      }
-                      if (IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                      {
-                        foreach (var fd in Commonradius(WellToWallOffset))
-                        {
-                          max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                        }
-                        foreach (var cp in MaxBalconybasinToBalcony(WellToWallOffset))
-                        {
-                          MaxBalconywashingfloordrainToBalconyfloordrain.Add(cp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                        }
-                        if (MaxTagYposition(WellToWallOffset).Any())
-                        {
-                          MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = THESAURUSADVENT;
-                        }
-                        else if (MaxTagXposition(WellToWallOffset).Any())
-                        {
-                          MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = VICISSITUDINOUS;
-                        }
-                        else if (MaxTagLength(WellToWallOffset).Any())
-                        {
-                          MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = THESAURUSINTENTIONAL;
-                        }
-                      }
-                      else if (IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                      {
-                        if (IsDraiFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                        {
-                          foreach (var fd in Commonradius(GeoFac.CreateGeometry(TextHeight(toilet_wells_interval))))
-                          {
-                            max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                          }
-                        }
-                      }
-                    }
-                  }
-                });
-            });
-            max_balcony_to_balcony_distance.Enqueue((int)GeoCalState.MarkWaterBucketToPipe, () =>
-            {
-              foreach (var MaxRoomInterval in GeoFac.CreateContainsSelector(MAX_TOILET_TO_FLOORDRAIN_DISTANCE2)(MaxBalconywashingmachineToBalconybasinline))
-              {
-                            var KitchenBufferDistance = max_downspout_to_balconywashingfloordrain(TolLightRangeSingleSideMin).ToList();
-                            if (KitchenBufferDistance.Count > THESAURUSSTAMPEDE)
-                {
-                  var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = KitchenBufferDistance[THESAURUSSTAMPEDE];
-                  var MaxToiletToKitchenDistance = commonradius(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN);
-                  if (MaxToiletToKitchenDistance is not null)
-                  {
-                    var MaxToiletToKitchenDistance1 = max_balconywashingmachine_to_balconybasinline(MaxToiletToKitchenDistance);
-                    if (MaxToiletToKitchenDistance1 is not null)
-                    {
-                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = MaxToiletToKitchenDistance1.ContraPoint - TolLightRangeSingleSideMin.ContraPoint;
-                      var MaxKitchenToRainpipeDistance = MaxRoomInterval.UserData as string;
-                      var MaxBalconyToRainpipeDistance = (MaxRoomInterval.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).ToGRect(QUOTATIONWITTIG).ToPolygon();
-                                  if (!string.IsNullOrEmpty(MaxKitchenToRainpipeDistance))
-                      {
-                        var MaxDownspoutToBalconywashingfloordrain = max_room_interval(MaxToiletToKitchenDistance1.Boundary.ToPolygon());
-                        foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
-                        {
-                          var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
-                                      if (IsY1L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                          {
-                            if (MaxBalconyToRainpipeDistance.Intersects(toilet_wells_interval))
-                            {
-                              MaxRainpipeToBalconyfloordrain[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = MaxKitchenToRainpipeDistance;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            });
-          }
-        }
-        var MaxToiletToCondensepipeDistance = kitchen_buffer_distance.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToHashSet();
-        List<PipeLine> pipeLines = new();
-        static bool IsDraiType(PipeType MaxToiletToFloordrainDistance)
-        {
-          var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = MaxToiletToFloordrainDistance.ToString();
-          return MaxToiletToFloordrainDistance != PipeType.FL0 && (MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSBASELESS) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSDECLAIM) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSPOSSESSIVE) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(INCORRESPONDENCE) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSCONFIRM));
-        }
-        static bool IsRainType(PipeType MaxToiletToFloordrainDistance)
-        {
-          return MaxToiletToFloordrainDistance is PipeType.Y1L or PipeType.Y2L or PipeType.YL or PipeType.NL or PipeType.FL0;
-        }
-        static PipeType GetPipeType(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-        {
-          if (IsY1L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.Y1L;
-          if (IsY2L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.Y2L;
-          if (IsNL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.NL;
-          if (IsYL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.YL;
-          if (IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.FL0;
-          if (IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.FL;
-          if (IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.PL;
-          if (IsWL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.WL;
-          if (IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.DL;
-          if (IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.TL;
-          return PipeType.Unknown;
-        }
-        var MaxToiletToFloordrainDistance2 = new HashSet<string>();
-        foreach (var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE in MaxToiletToCondensepipeDistance.Where(TolLightRangeSingleSideMax => !IsTL(TolLightRangeSingleSideMax)))
-        {
-          if (MaxToiletToFloordrainDistance2.Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) continue;
-          var MaxBalconyToBalconyDistance = new PipeLine();
-          var MaxKitchenToBalconyDistance = new HashSet<string>() { MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE };
-          pipeLines.Add(MaxBalconyToBalconyDistance);
-          PipeType MaxBalconyrainpipeToFloordrainDistance = default;
-          string MaxBalconyToDeviceplatformDistance = default;
-          string MaxToiletToFloordrainDistance1 = default;
-          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < SIDEWATERBUCKET_Y_INDENT.Count; MAX_ANGEL_TOLLERANCE++)
-          {
-            var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = SIDEWATERBUCKET_Y_INDENT[MAX_ANGEL_TOLLERANCE];
-            var TolLightRangeSingleSideMin = max_balconywashingmachine_to_balconybasinline(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN);
-            string MinDeviceplatformArea()
-            {
-              if (TolLightRangeSingleSideMin is null) return null;
-              max_toilet_to_floordrain_distance2[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].TryGetValue(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, out var MaxRoomInterval);
-              return MaxRoomInterval;
-            }
-            bool MaxDeviceplatformArea()
-            {
-              if (TolLightRangeSingleSideMin is null) return INTRAVASCULARLY;
-              var tolGroupEmgLightEvac = max_balcony_to_deviceplatform_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-              if (tolGroupEmgLightEvac)
-              {
-                var MinWellToUrinalDistance = max_downspout_to_balconywashingfloordrain(TolLightRangeSingleSideMin).ToList();
-                if (MinWellToUrinalDistance.Count > THESAURUSHOUSING)
-                {
-                  return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN == MinWellToUrinalDistance.OrderBy(GetStoreyScore).Last();
-                }
-              }
-              return tolGroupEmgLightEvac;
-            }
-            bool MaxBasecircleArea()
-            {
-              if (TolLightRangeSingleSideMin is null) return INTRAVASCULARLY;
-              var tolGroupEmgLightEvac = !MaxDeviceplatformArea() && max_balconyrainpipe_to_floordrain_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-              if (tolGroupEmgLightEvac)
-              {
-                var MinWellToUrinalDistance = max_downspout_to_balconywashingfloordrain(TolLightRangeSingleSideMin).ToList();
-                if (MinWellToUrinalDistance.Count > THESAURUSHOUSING)
-                {
-                  return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN == MinWellToUrinalDistance.OrderBy(GetStoreyScore).Last();
-                }
-              }
-              return tolGroupEmgLightEvac;
-            }
-            int maxBalconywashingfloordrainToBalconyfloordrain()
-            {
-              if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
-              var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
-              foreach (var wp in max_toilet_to_floordrain_distance1[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
-              {
-                if (wp.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
-              }
-              return maxBalconyrainpipeToFloordrainDistance;
-            }
-            int maxBalconywashingfloordrainToRainpipe()
-            {
-              if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
-              var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
-              foreach (var fd in max_toilet_to_kitchen_distance1[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
-              {
-                if (fd.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
-              }
-              if (maxBalconyrainpipeToFloordrainDistance > THESAURUSPERMUTATION) maxBalconyrainpipeToFloordrainDistance = THESAURUSPERMUTATION;
-              return maxBalconyrainpipeToFloordrainDistance;
-            }
-            int maxDeviceToDevice()
-            {
-              if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
-              var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
-              foreach (var cp in max_kitchen_to_rainpipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
-              {
-                if (cp.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
-              }
-              if (maxBalconyrainpipeToFloordrainDistance > THESAURUSPERMUTATION) maxBalconyrainpipeToFloordrainDistance = THESAURUSPERMUTATION;
-              return maxBalconyrainpipeToFloordrainDistance;
-            }
-            bool maxDeviceToBalcony()
-            {
-              if (TolLightRangeSingleSideMin is null) return INTRAVASCULARLY;
-              if (kitchen_buffer_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return THESAURUSOBSTINACY;
-              if (max_balcony_to_rainpipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return THESAURUSOBSTINACY;
-              return INTRAVASCULARLY;
-            }
-            string maxRainpipeToBalconyfloordrain()
-            {
-              if (MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE) return null;
-              if (TolLightRangeSingleSideMin is null) return null;
-              max_toilet_to_floordrain_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].TryGetValue(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, out var DEFAULT_FIRE_VALVE_WIDTH);
-              return DEFAULT_FIRE_VALVE_WIDTH;
-            }
-            string minDownspoutToBalconyfloordrain()
-            {
-              if (IsDraiType(maxCondensepipeToWashmachine())) return THESAURUSPAGEANT;
-              if (MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE) return null;
-              if (TolLightRangeSingleSideMin is null) return null;
-              max_toilet_to_condensepipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].TryGetValue(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, out var MaxBalconyToDeviceplatformDistance);
-              return MaxBalconyToDeviceplatformDistance;
-            }
-            PipeType maxCondensepipeToWashmachine()
-            {
-              if (TolLightRangeSingleSideMin is null) return PipeType.Unknown;
-              var max_kitchen_to_balcony_distance = max_balcony_to_rainpipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].FirstOrDefault(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-              if (max_kitchen_to_balcony_distance is null)
-              {
-                MaxToiletToFloordrainDistance2.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-                MaxKitchenToBalconyDistance.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-                return GetPipeType(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-              }
-              MaxToiletToFloordrainDistance2.AddRange(max_kitchen_to_balcony_distance);
-              MaxKitchenToBalconyDistance.AddRange(max_kitchen_to_balcony_distance);
-              if (max_kitchen_to_balcony_distance.Count == INTROPUNITIVENESS)
-              {
-                return PipeType.WLTLFL;
-              }
-              if (max_kitchen_to_balcony_distance.Count == THESAURUSPERMUTATION)
-              {
-                if (max_kitchen_to_balcony_distance.Any(IsTL) && max_kitchen_to_balcony_distance.Any(IsPL)) return PipeType.PLTL;
-                if (max_kitchen_to_balcony_distance.Any(IsTL) && max_kitchen_to_balcony_distance.Any(IsWL)) return PipeType.WLTL;
-              }
-              return PipeType.Unknown;
-            }
-            var MaxToiletToFloordrainDistance = maxCondensepipeToWashmachine();
-            if (MaxBalconyrainpipeToFloordrainDistance == PipeType.Unknown) MaxBalconyrainpipeToFloordrainDistance = MaxToiletToFloordrainDistance;
-            MaxBalconyToBalconyDistance.Runs.Add(new() { Index = MAX_ANGEL_TOLLERANCE, Storey = MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN, HasLong = INTRAVASCULARLY, HasShort = INTRAVASCULARLY, Exists = maxDeviceToBalcony(), });
-            var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs.Last();
-            if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
-            {
-              DEFAULT_FIRE_VALVE_WIDTH.HasLong = MaxDeviceplatformArea();
-              DEFAULT_FIRE_VALVE_WIDTH.HasShort = MaxBasecircleArea();
-              DEFAULT_FIRE_VALVE_WIDTH.FDSCount = maxBalconywashingfloordrainToRainpipe();
-              DEFAULT_FIRE_VALVE_WIDTH.CPSCount = maxDeviceToDevice();
-              DEFAULT_FIRE_VALVE_WIDTH.WPSCount = maxBalconywashingfloordrainToBalconyfloordrain();
-              if (DEFAULT_FIRE_VALVE_WIDTH.WPSCount > DEFAULT_FIRE_VALVE_WIDTH.FDSCount) DEFAULT_FIRE_VALVE_WIDTH.WPSCount = DEFAULT_FIRE_VALVE_WIDTH.FDSCount;
-              MaxBalconyToDeviceplatformDistance ??= minDownspoutToBalconyfloordrain();
-              MaxToiletToFloordrainDistance1 ??= maxRainpipeToBalconyfloordrain();
-              if (MaxBalconyrainpipeToFloordrainDistance.ToString().Contains(THESAURUSDECLAIM))
-              {
-                if (GetStoreyScore(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN) < GetStoreyScore(SIDEWATERBUCKET_Y_INDENT[max_condensepipe_to_washmachine]))
-                {
-                  DEFAULT_FIRE_VALVE_WIDTH.HasCleaningPort = THESAURUSOBSTINACY;
-                }
-              }
-            }
-            DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = MinDeviceplatformArea();
-          }
-          if (MaxBalconyrainpipeToFloordrainDistance == PipeType.Unknown) MaxBalconyrainpipeToFloordrainDistance = PipeType.FL;
-          MaxBalconyToBalconyDistance.PipeType = MaxBalconyrainpipeToFloordrainDistance;
-          MaxBalconyToBalconyDistance.Outlet = MaxBalconyToDeviceplatformDistance;
-          MaxToiletToFloordrainDistance1 ??= THESAURUSRECTIFY;
-          MaxBalconyToBalconyDistance.WPRadius = MaxToiletToFloordrainDistance1;
-          MaxBalconyToBalconyDistance.Labels.AddRange(MaxKitchenToBalconyDistance.Distinct().OrderBy(y => GetPipeType(y)).ThenBy(y => y));
-          {
-            if (MaxBalconyToBalconyDistance.PipeType is PipeType.TL) MaxBalconyToBalconyDistance.PipeType = PipeType.PL;
-            if (string.IsNullOrEmpty(MaxBalconyToBalconyDistance.Outlet))
-            {
-              if (IsDraiType((MaxBalconyToBalconyDistance.PipeType)))
-              {
-                MaxBalconyToBalconyDistance.Outlet = THESAURUSPAGEANT;
-              }
-              else
-              {
-                MaxBalconyToBalconyDistance.Outlet = THESAURUSINTENTIONAL;
-              }
-            }
-            for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE--)
-            {
-              var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-              if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
-              {
-                --MAX_ANGEL_TOLLERANCE;
-                while (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE)
-                {
-                  DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                  --MAX_ANGEL_TOLLERANCE;
-                }
-                break;
-              }
-            }
-            {
-              if (MaxBalconyToBalconyDistance.PipeType is PipeType.Y1L)
-              {
-                var wbk = MaxBalconyToBalconyDistance.Runs.FirstOrDefault(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.WaterBucket is not null);
-                if (wbk is null)
-                {
-                  for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; --MAX_ANGEL_TOLLERANCE)
-                  {
-                    var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-                    DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
-                  }
-                }
-              }
-            }
-            {
-              if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) <= THESAURUSHOUSING)
-              {
-                foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
-                {
-                  if (IsDraiType(MaxBalconyToBalconyDistance.PipeType))
-                  {
-                    if (GetStoreyScore((DEFAULT_FIRE_VALVE_WIDTH.Storey)) <= GetStoreyScore(THESAURUSARGUMENTATIVE))
-                    {
-                      DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    }
-                  }
-                  else
-                  {
-                    DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
-                    {
-                      DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
-                    }
-                  }
-                }
-              }
-              if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) <= THESAURUSHOUSING)
-              {
-                foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
-                {
-                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                  if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
-                  {
-                    DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
-                  }
-                }
-              }
-            }
-          }
-          for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE;)
-          {
-            var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-            if (DEFAULT_FIRE_VALVE_WIDTH.WaterBucket is not null)
-            {
-              --MAX_ANGEL_TOLLERANCE;
-              while (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE)
-              {
-                MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].WaterBucket = null;
-                --MAX_ANGEL_TOLLERANCE;
-              }
-            }
-            else
-            {
-              --MAX_ANGEL_TOLLERANCE;
-            }
-          }
-          if (MaxBalconyrainpipeToFloordrainDistance == PipeType.FL)
-          {
-            if (MaxBalconyToBalconyDistance.Runs.Where(DEFAULT_FIRE_VALVE_WIDTH => DEFAULT_FIRE_VALVE_WIDTH.Exists).All(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.FDSCount == THESAURUSSTAMPEDE))
-            {
-              foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
-              {
-                if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
-                {
-                  if (GetStoreyScore(DEFAULT_FIRE_VALVE_WIDTH.Storey) < GetStoreyScore(SIDEWATERBUCKET_Y_INDENT[max_condensepipe_to_washmachine]))
-                  {
-                    DEFAULT_FIRE_VALVE_WIDTH.HasBasin = THESAURUSOBSTINACY;
-                  }
-                }
-              }
-            }
-          }
-        }
-        if (!vm.Params.YS)
-        {
-          pipeLines = pipeLines.Where(TolLightRangeSingleSideMax => !IsRainType(TolLightRangeSingleSideMax.PipeType)).ToList();
-        }
-        if (!vm.Params.WFS)
-        {
-          pipeLines = pipeLines.Where(TolLightRangeSingleSideMax => !IsDraiType(TolLightRangeSingleSideMax.PipeType)).ToList();
-        }
-        var gpItems = pipeLines.GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.OrderBy(y => GetPipeType(y.Labels.First())).ThenBy(y => y.Labels.First()).ToList()).OrderBy(TolLightRangeSingleSideMax => GetPipeType(TolLightRangeSingleSideMax.First().Labels.First())).ThenBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.First().Labels.First()).ToList();
-        using (var max_balcony_to_balcony_distance = new PriorityQueue(THESAURUSINCOMPLETE))
-        {
-          var MAX_RAINPIPE_TO_WASHMACHINE = new List<DBTextInfo>(THESAURUSREPERCUSSION);
-          var COMMONRADIUS = new List<BlockInfo>(THESAURUSREPERCUSSION);
-          var MAX_BALCONYBASIN_TO_BALCONY = new List<LineInfo>(THESAURUSREPERCUSSION);
-          var BALCONY_BUFFER_DISTANCE = new List<CircleInfo>(THESAURUSREPERCUSSION);
-          var MIN_BALCONYBASIN_TO_BALCONY = new List<DimInfo>(THESAURUSREPERCUSSION);
-          var maxBalconywashingmachineToBalconybasinline = new DrainageLayoutManager(MAX_RAINPIPE_TO_WASHMACHINE, COMMONRADIUS, MAX_BALCONYBASIN_TO_BALCONY, BALCONY_BUFFER_DISTANCE, MIN_BALCONYBASIN_TO_BALCONY);
-          var HEIGHT = THESAURUSINCOMING;
-          var _tolReturnValueDistCheck = new List<int>(SIDEWATERBUCKET_Y_INDENT.Count);
-          {
-            var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = THESAURUSSTAMPEDE;
-            var _vm = FloorHeightsViewModel.Instance;
-            for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < SIDEWATERBUCKET_Y_INDENT.Count; MAX_ANGEL_TOLLERANCE++)
-            {
-              _tolReturnValueDistCheck.Add(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN);
-              var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _vm.GeneralFloor;
-              if (_vm.ExistsSpecialFloor) MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _vm.Items.FirstOrDefault(tolReturnValueMinRange => test(tolReturnValueMinRange.Floor, GetStoreyScore(SIDEWATERBUCKET_Y_INDENT[MAX_ANGEL_TOLLERANCE])))?.Height ?? MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
-              MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN += MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
-              static bool test(string TolLightRangeSingleSideMax, int TolLightRangeMin)
-              {
-                var tolReturnValueMinRange = Regex.Match(TolLightRangeSingleSideMax, QUOTATIONSTYLOGRAPHIC);
-                if (tolReturnValueMinRange.Success)
-                {
-                  if (int.TryParse(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value, out int _tolReturnValue0Approx) && int.TryParse(tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value, out int TolGroupEvcaEmg))
-                  {
-                    var _tolReturnValueMaxDistance = Math.Min(_tolReturnValue0Approx, TolGroupEvcaEmg);
-                    var _tolReturnValueMinRange = Math.Max(_tolReturnValue0Approx, TolGroupEvcaEmg);
-                    for (int MAX_ANGEL_TOLLERANCE = _tolReturnValueMaxDistance; MAX_ANGEL_TOLLERANCE <= _tolReturnValueMinRange; MAX_ANGEL_TOLLERANCE++)
-                    {
-                      if (MAX_ANGEL_TOLLERANCE == TolLightRangeMin) return THESAURUSOBSTINACY;
-                    }
-                  }
-                  else
-                  {
-                    return INTRAVASCULARLY;
-                  }
-                }
-                tolReturnValueMinRange = Regex.Match(TolLightRangeSingleSideMax, TETRAIODOTHYRONINE);
-                if (tolReturnValueMinRange.Success)
-                {
-                  if (int.TryParse(TolLightRangeSingleSideMax, out int MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN))
-                  {
-                    if (MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN == TolLightRangeMin) return THESAURUSOBSTINACY;
-                  }
-                }
-                return INTRAVASCULARLY;
-              }
-            }
-          }
-          const double maxDownspoutToBalconywashingfloordrain = ThWSDStorey.RF_OFFSET_Y;
-          var maxRainpipeToWashmachine = gpItems.Count;
-          var maxBalconybasinToBalcony = BALANOPHORACEAE;
-          var balconyBufferDistance = maxBalconybasinToBalcony * maxRainpipeToWashmachine * QUOTATIONEDIBLE;
-          var minBalconybasinToBalcony = THESAURUSLEGISLATION;
-          var maxTagYposition = LAUTENKLAVIZIMBEL;
-          var WELL_TO_WALL_OFFSET = minBalconybasinToBalcony + maxRainpipeToWashmachine * maxBalconybasinToBalcony + maxTagYposition;
-          Point3d maxTagXposition(int MAX_ANGEL_TOLLERANCE, int MAX_ANGLE_TOLLERANCE)
-          {
-            return maxTagLength(MAX_ANGEL_TOLLERANCE).OffsetX(minBalconybasinToBalcony + MAX_ANGLE_TOLLERANCE * maxBalconybasinToBalcony);
-          }
-          Point3d maxTagLength(int MAX_ANGEL_TOLLERANCE)
-          {
-            return SIDEWATERBUCKET_X_INDENT.OffsetY(HEIGHT * MAX_ANGEL_TOLLERANCE);
-          }
-          foreach (var MAX_ANGEL_TOLLERANCE in Enumerable.Range(THESAURUSSTAMPEDE, SIDEWATERBUCKET_Y_INDENT.Count).OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
-          {
-            var tolGroupBlkLane = SIDEWATERBUCKET_Y_INDENT[MAX_ANGEL_TOLLERANCE];
-            string textIndent()
-            {
-              if (tolGroupBlkLane is THESAURUSREGION) return MULTINATIONALLY;
-              var tolGroupEmgLightEvac = (_tolReturnValueDistCheck[MAX_ANGEL_TOLLERANCE] / LAUTENKLAVIZIMBEL).ToString(THESAURUSINFINITY); ;
-              if (tolGroupEmgLightEvac == THESAURUSINFINITY) return MULTINATIONALLY;
-              return tolGroupEmgLightEvac;
-            }
-            var _tolReturnValueMax = maxTagLength(MAX_ANGEL_TOLLERANCE);
-            textHeight(tolGroupBlkLane, _tolReturnValueMax, WELL_TO_WALL_OFFSET, textIndent());
-            void textHeight(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, Point3d basePt, double WELL_TO_WALL_OFFSET, string repeated_point_distance)
-            {
-              {
-                var TolUniformSideLenth = DrawLineLazy(basePt.X, basePt.Y, basePt.X + WELL_TO_WALL_OFFSET, basePt.Y);
-                var maxBalconyToDeviceplatformDistance = DrawTextLazy(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, THESAURUSSTAMPEDE));
-                Dr.SetLabelStylesForWNote(TolUniformSideLenth, maxBalconyToDeviceplatformDistance);
-                DrawBlockReference(blkName: THESAURUSSUPERFICIAL, basePt: basePt.OffsetX(QUOTATIONPITUITARY), layer: COSTERMONGERING, props: new Dictionary<string, string>() { { THESAURUSSUPERFICIAL, repeated_point_distance } });
-              }
-              if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == THESAURUSARGUMENTATIVE)
-              {
-                var TolUniformSideLenth = DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + maxDownspoutToBalconywashingfloordrain, THESAURUSSTAMPEDE), new Point3d(basePt.X + WELL_TO_WALL_OFFSET, basePt.Y + maxDownspoutToBalconywashingfloordrain, THESAURUSSTAMPEDE));
-                var maxBalconyToDeviceplatformDistance = DrawTextLazy(THESAURUSSHADOWY, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + maxDownspoutToBalconywashingfloordrain + ThWSDStorey.INDEX_TEXT_OFFSET_Y, THESAURUSSTAMPEDE));
-                Dr.SetLabelStylesForWNote(TolUniformSideLenth, maxBalconyToDeviceplatformDistance);
-              }
-            }
-          }
-          var sidewaterbucketXIndent = SIDEWATERBUCKET_Y_INDENT.IndexOf(THESAURUSARGUMENTATIVE);
-          var sidewaterbucketYIndent = SIDEWATERBUCKET_Y_INDENT.Count - THESAURUSHOUSING;
-          static string GetPipeLayer(PipeType MaxBalconyrainpipeToFloordrainDistance)
-          {
-            if (MaxBalconyrainpipeToFloordrainDistance is PipeType.TL) return THUNDERSTRICKEN;
-            if (MaxBalconyrainpipeToFloordrainDistance is PipeType.FL) return THESAURUSADVERSITY;
-            return IsDraiType(MaxBalconyrainpipeToFloordrainDistance) ? THESAURUSCONTROVERSY : INSTRUMENTALITY;
-          }
-          static string GetNoteLayer(PipeType MaxBalconyrainpipeToFloordrainDistance)
-          {
-            return IsDraiType(MaxBalconyrainpipeToFloordrainDistance) ? THESAURUSSTRIPED : CIRCUMCONVOLUTION;
-          }
-          static string GetEQPMLayer(PipeType MaxBalconyrainpipeToFloordrainDistance)
-          {
-            return IsDraiType(MaxBalconyrainpipeToFloordrainDistance) ? THESAURUSJUBILEE : DENDROCHRONOLOGIST;
-          }
-          foreach (var MAX_ANGLE_TOLLERANCE in Enumerable.Range(THESAURUSSTAMPEDE, maxRainpipeToWashmachine))
-          {
-            var _tolReturnValueRange = gpItems[MAX_ANGLE_TOLLERANCE].First();
-            var max_kitchen_to_balcony_distance = gpItems[MAX_ANGLE_TOLLERANCE].SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Labels).ToHashSet();
-            var eMax = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
-            var pipeLineInfos = new List<LineInfo>(THESAURUSREPERCUSSION);
-            var MAX_DEVICE_TO_DEVICE = QUOTATIONTRANSFERABLE;
-            var wellToWallOffset = new List<Point3d>();
-            var toiletWellsInterval = new List<Point3d>();
-            var toiletBufferDistance = new List<GRect>();
-            foreach (var MAX_ANGEL_TOLLERANCE in Enumerable.Range(THESAURUSSTAMPEDE, SIDEWATERBUCKET_Y_INDENT.Count).OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
-            {
-              var MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE).OffsetX(MAX_DEVICE_TO_DEVICE);
-              if (_tolReturnValueRange.Outlet is null)
-              {
-                max_balcony_to_balcony_distance.Enqueue((int)LayoutState.SanPaiMark, () =>
-                {
-                                  var eMin = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
-                  if (eMin is THESAURUSSTAMPEDE) return;
-                  if (MAX_ANGEL_TOLLERANCE == eMin)
-                  {
-                                    if (_tolReturnValueRange.Runs.TryGet(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING)?.WaterBucket is not null)
-                    {
-                                      wellToWallOffset.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED));
-                      toiletWellsInterval.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED - ASSOCIATIONISTS));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONPITUITARY)), CIRCUMCONVOLUTION));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -QUOTATIONPITUITARY)), CIRCUMCONVOLUTION));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFRISKY, -QUOTATIONWITTIG), THESAURUSEXECUTIVE + _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].Storey, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                    }
-                  }
-                });
-              }
-              if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WaterBucket is not null)
-              {
-                var MaxRoomInterval = _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WaterBucket;
-                var toilet_buffer_distance = MaxRoomInterval.Split(THESAURUSHABITAT)[THESAURUSSTAMPEDE];
-                var MAX_CONDENSEPIPE_TO_WASHMACHINE = MaxRoomInterval.Split(THESAURUSHABITAT)[THESAURUSHOUSING];
-                if (toilet_buffer_distance.Contains(THESAURUSPROLONG) || toilet_buffer_distance.Contains(QUOTATIONSPENSERIAN))
-                {
-                  var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
-                  MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(THESAURUSUNDERSTANDING);
-                  if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent) MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(maxDownspoutToBalconywashingfloordrain);
-                  COMMONRADIUS.Add(new BlockInfo(THESAURUSCURDLE, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSBEHOVE)));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-CONSUMMATIVENESS, UNACCEPTABLENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDEPUTIZE, THESAURUSHEARTLESS)), CIRCUMCONVOLUTION));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDEPUTIZE, THESAURUSHEARTLESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONWORSTED, THESAURUSHEARTLESS)), CIRCUMCONVOLUTION));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONWORSTED, THESAURUSHEARTLESS), toilet_buffer_distance, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSVISIBLE, QUOTATIONETHIOPS), MAX_CONDENSEPIPE_TO_WASHMACHINE, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                  wellToWallOffset.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(-THESAURUSBEHOVE));
-                  toiletWellsInterval.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(-THESAURUSBEHOVE + ASSOCIATIONISTS));
-                  MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
-                }
-                else
-                {
-                  var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
-                  if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent) MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(maxDownspoutToBalconywashingfloordrain);
-                  COMMONRADIUS.Add(new BlockInfo(THESAURUSPRECOCIOUS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, PHOSPHORYLATION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMISUNDERSTANDING, THESAURUSINSTITUTE)), CIRCUMCONVOLUTION));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMISUNDERSTANDING, THESAURUSINSTITUTE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINCONCLUSIVE, THESAURUSINSTITUTE)), CIRCUMCONVOLUTION));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINCONCLUSIVE, THESAURUSINSTITUTE), toilet_buffer_distance, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOBIPINNATISECT, CATECHOLAMINERGIC), MAX_CONDENSEPIPE_TO_WASHMACHINE, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                  MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
-                }
-                if (eMax + THESAURUSHOUSING == MAX_ANGEL_TOLLERANCE)
-                {
-                  maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                  if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent)
-                  {
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, maxDownspoutToBalconywashingfloordrain)), INSTRUMENTALITY));
-                  }
-                  if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE - THESAURUSHOUSING].HasLong || _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE - THESAURUSHOUSING].HasShort)
-                  {
-                    var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
-                    MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(-HEIGHT);
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE)), INSTRUMENTALITY));
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE)), INSTRUMENTALITY));
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS)), INSTRUMENTALITY));
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC)), INSTRUMENTALITY));
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), INSTRUMENTALITY));
-                    MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
-                  }
-                  else
-                  {
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -HEIGHT)), INSTRUMENTALITY));
-                  }
-                  maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                  pipeLineInfos.AddRange(maxBalconywashingmachineToBalconybasinline.GetLineInfos());
-                  var _tol_avg_column_dist = maxBalconywashingmachineToBalconybasinline.GetLineVertices().OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).ToList();
-                  if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE) MAX_DEVICE_TO_DEVICE += _tol_avg_column_dist.Last().X - _tol_avg_column_dist.First().X;
-                }
-              }
-              if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].Exists)
-              {
-                {
-                  if (_tolReturnValueRange.PipeType is PipeType.PLTL or PipeType.WLTL)
-                  {
-                    maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                    void maxDeviceplatformArea()
-                    {
-                      COMMONRADIUS.Add(new BlockInfo(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSMOULDER, THESAURUSBEAUTIFY)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION, });
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSEFFULGENT)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSEFFULGENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSINDISPENSABLE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSREPRESSIVE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSREPRESSIVE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSMADNESS)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSMADNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSMADNESS)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSMADNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, CONTRADISTINGUISHED)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, CONTRADISTINGUISHED), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSINDISPENSABLE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSWINDING, THESAURUSBEAUTIFY)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSWINDING, THESAURUSBEAUTIFY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSMOULDER, THESAURUSBEAUTIFY)), THESAURUSCONTROVERSY));
-                      COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                      MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, INTERNATIONALLY), new(POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), THESAURUSDUBIETY, QUOTATIONBENJAMIN));
-                      MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSDOMESTIC), new(-POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), CONSECUTIVENESS, QUOTATIONBENJAMIN));
-                      var LineCoincideTolerance = new List<Vector2d> { new Vector2d(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS), new Vector2d(THESAURUSSTAMPEDE, THESAURUSDISCERNIBLE), new Vector2d(-THESAURUSDOMESTIC, THESAURUSSTAMPEDE) };
-                      var _tol_avg_column_dist = LineCoincideTolerance.ToPoint2ds(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.ToPoint2d());
-                      MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(_tol_avg_column_dist[THESAURUSHOUSING], _tol_avg_column_dist[THESAURUSPERMUTATION], _tol_avg_column_dist[INTROPUNITIVENESS] - _tol_avg_column_dist[THESAURUSPERMUTATION], INTERNALIZATION, QUOTATIONBENJAMIN));
-                    }
-                    if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-                    {
-                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
-                      {
-                        maxDeviceplatformArea();
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSHALLOW, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSHALLOW, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, IMMEASURABLENESS)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, IMMEASURABLENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, ALSOWATERLANDIAN)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, ALSOWATERLANDIAN), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, INTERNATIONALLY)), THUNDERSTRICKEN));
-                      }
-                      else
-                      {
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION });
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSDISCERNIBLE)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSDISCERNIBLE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INTERNATIONALLY)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
-                        MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INTERNATIONALLY), new(POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), THESAURUSDUBIETY, QUOTATIONBENJAMIN));
-                        MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC), new(-POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), CONSECUTIVENESS, QUOTATIONBENJAMIN));
-                      }
-                    }
-                    else if (MAX_ANGEL_TOLLERANCE == eMax)
-                    {
-                      if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent)
-                      {
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, maxDownspoutToBalconywashingfloordrain), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      }
-                    }
-                    else if (MAX_ANGEL_TOLLERANCE == eMax - THESAURUSHOUSING)
-                    {
-                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
-                      {
-                        if (MAX_TOILET_TO_KITCHEN_DISTANCE)
-                        {
-                          COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSOUTLANDISH)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSCOMPLAINT, THESAURUSCONVOY)), THUNDERSTRICKEN));
-                        }
-                        else
-                        {
-                          maxDeviceplatformArea();
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOPALIMBACCHIC, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOPALIMBACCHIC, THESAURUSPREFER)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOPALIMBACCHIC, THESAURUSPREFER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSEQUATION)), THUNDERSTRICKEN));
-                        }
-                      }
-                      else
-                      {
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION });
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, INTROJECTIONISM), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSEUPHORIA), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, INTROJECTIONISM)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
-                      }
-                    }
-                    else
-                    {
-                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
-                      {
-                        if (MAX_TOILET_TO_KITCHEN_DISTANCE)
-                        {
-                          COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSOUTLANDISH)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSCONVOY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, THESAURUSREPARATION)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, THESAURUSREPARATION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSBLESSING, THESAURUSREPARATION)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSBLESSING, THESAURUSREPARATION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSCONVOY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSGETAWAY)), THUNDERSTRICKEN));
-                        }
-                        else
-                        {
-                          maxDeviceplatformArea();
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, ANTHROPOPHAGINIAN), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSCOMPLAINT, QUOTATIONNAMAQUA)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLEGALIZE, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLEGALIZE, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, IMMEASURABLENESS)), THUNDERSTRICKEN));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, IMMEASURABLENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
-                        }
-                      }
-                      else
-                      {
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION });
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSGETAWAY)), THUNDERSTRICKEN));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
-                      }
-                    }
-                    maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                    pipeLineInfos.AddRange(maxBalconywashingmachineToBalconybasinline.GetLineInfos().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.LayerName.Contains(THESAURUSPENNILESS)));
-                    {
-                      var _tol_avg_column_dist = maxBalconywashingmachineToBalconybasinline.GetLineInfos().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.LayerName.Contains(THESAURUSPENNILESS)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line).YieldPoints().OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).ToList();
-                      if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE) MAX_DEVICE_TO_DEVICE += _tol_avg_column_dist.Last().X - _tol_avg_column_dist.First().X;
-                    }
-                  }
-                  else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
-                  {
-                    maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                    if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-                    {
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)), THUNDERSTRICKEN));
-                    }
-                    else if (MAX_ANGEL_TOLLERANCE == eMax)
-                    {
-                      if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent)
-                      {
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, maxDownspoutToBalconywashingfloordrain), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
-                      }
-                    }
-                    else if (MAX_ANGEL_TOLLERANCE == eMax - THESAURUSHOUSING)
-                    {
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)), THUNDERSTRICKEN));
-                    }
-                    else
-                    {
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)), THUNDERSTRICKEN));
-                    }
-                    maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                    pipeLineInfos.AddRange(maxBalconywashingmachineToBalconybasinline.GetLineInfos().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.LayerName.Contains(THESAURUSDEVIANT)));
-                  }
-                  else
-                  {
-                    var h = HEIGHT;
-                    if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent && MAX_ANGEL_TOLLERANCE == eMax) h = maxDownspoutToBalconywashingfloordrain;
-                    if (MAX_ANGEL_TOLLERANCE != eMax || (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent && MAX_ANGEL_TOLLERANCE == eMax))
-                    {
-                      maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
-                      {
-                        if (MAX_ANGEL_TOLLERANCE != sidewaterbucketXIndent)
-                        {
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                        }
-                      }
-                      else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasShort)
-                      {
-                        if (MAX_ANGEL_TOLLERANCE != sidewaterbucketXIndent)
-                        {
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, COOPERATIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, COOPERATIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSSTAMPEDE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, ALSOMULTIFLORAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSACQUIESCENT, ALSOMULTIFLORAL)), GetNoteLayer(_tolReturnValueRange.PipeType)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, ALSOMULTIFLORAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHESITANCY, THESAURUSUNOCCUPIED)), GetNoteLayer(_tolReturnValueRange.PipeType)));
-                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSCELESTIAL), THESAURUSTENACIOUS, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
-                        }
-                      }
-                      else
-                      {
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, h), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                      }
-                      maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                      pipeLineInfos.AddRange(maxBalconywashingmachineToBalconybasinline.GetLineInfos());
-                      var _tol_avg_column_dist = maxBalconywashingmachineToBalconybasinline.GetLineVertices().OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).ToList();
-                      if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE) MAX_DEVICE_TO_DEVICE += _tol_avg_column_dist.Last().X - _tol_avg_column_dist.First().X;
-                    }
-                  }
-                }
-                if (_tolReturnValueRange.PipeType is PipeType.FL && _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin && MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE && MAX_ANGEL_TOLLERANCE != eMax)
-                {
-                  maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                  COMMONRADIUS.Add(new BlockInfo(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
-                  COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY)), THESAURUSADVERSITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, PROMORPHOLOGIST), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY)), THESAURUSADVERSITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY)), THESAURUSADVERSITY));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, THESAURUSEFFICACY), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                  maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                  var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                  max_balcony_to_balcony_distance.Enqueue((int)LayoutState.Basin, () =>
-                  {
-                    var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
-                    var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-maxBalconybasinToBalcony), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(maxBalconybasinToBalcony)).ToLineString());
-                    if (target is Point _raiseDistanceToStartDefault)
-                    {
-                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                      tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                    }
-                  });
-                }
-                if (MAX_ANGEL_TOLLERANCE == eMax)
-                {
-                  if (_tolReturnValueRange.PipeType == PipeType.Y1L)
-                  {
-                  }
-                  else
-                  {
-                    maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                    var layer = GetPipeLayer(_tolReturnValueRange.PipeType);
-                    if (_tolReturnValueRange.PipeType is PipeType.WLTLFL) layer = THUNDERSTRICKEN;
-                    var canPeopleBeOnRoof = RainSystemDiagramViewModel.Singleton.Params.CouldHavePeopleOnRoof;
-                    COMMONRADIUS.Add(new BlockInfo(THESAURUSNARCOTIC, layer, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent ? maxDownspoutToBalconywashingfloordrain : THESAURUSSTAMPEDE)) { DynaDict = new() { { QUINQUAGENARIAN, MAX_ANGEL_TOLLERANCE >= sidewaterbucketXIndent ? (canPeopleBeOnRoof ? THESAURUSPARTNER : THESAURUSINEFFECTUAL) : HYPERVENTILATION } } });
-                    maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                    var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                    max_balcony_to_balcony_distance.Enqueue((int)LayoutState.FixAirBlock, () =>
-                    {
-                      var vlineInfos = pipeLineInfos.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.IsVertical(THESAURUSHOUSING)).ToList();
-                      if (vlineInfos.Count > THESAURUSSTAMPEDE)
-                      {
-                        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = vlineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line).YieldPoints().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).Last();
-                        var _raiseDistanceToStartDefault = tolReturnValueMinRange.GetBrBasePoints().First();
-                        if (_raiseDistanceToStartDefault.Y < MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.Y)
-                        {
-                          tolReturnValueMinRange.MoveElements(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN - _raiseDistanceToStartDefault.ToPoint2d());
-                        }
-                      }
-                    });
-                  }
-                }
-                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].CPSCount == THESAURUSPERMUTATION)
-                {
-                  maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                  BALCONY_BUFFER_DISTANCE.Add(new CircleInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, QUOTATIONPITUITARY), VÖLKERWANDERUNG, DENDROCHRONOLOGIST));
-                  BALCONY_BUFFER_DISTANCE.Add(new CircleInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, QUOTATIONPITUITARY), VÖLKERWANDERUNG, DENDROCHRONOLOGIST));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSMAGNETIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER)), INSTRUMENTALITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, THESAURUSENDANGER)), INSTRUMENTALITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER)), INSTRUMENTALITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, QUOTATIONWITTIG)), INSTRUMENTALITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, QUOTATIONWITTIG)), INSTRUMENTALITY));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, THESAURUSDERELICTION), THESAURUSDISREPUTABLE, THESAURUSINVOICE, CONTROVERSIALLY));
-                  maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                  var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                  max_balcony_to_balcony_distance.Enqueue((int)LayoutState.CondensePipe, () =>
-                  {
-                    var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
-                    var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                    if (target is Point _raiseDistanceToStartDefault)
-                    {
-                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                      tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                    }
-                  });
-                }
-                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].CPSCount == THESAURUSHOUSING)
-                {
-                  maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                  BALCONY_BUFFER_DISTANCE.Add(new CircleInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, QUOTATIONPITUITARY), VÖLKERWANDERUNG, DENDROCHRONOLOGIST));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSMAGNETIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER)), INSTRUMENTALITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER)), INSTRUMENTALITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, QUOTATIONWITTIG)), INSTRUMENTALITY));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, THESAURUSGETAWAY), THESAURUSDISREPUTABLE, THESAURUSINVOICE, CONTROVERSIALLY));
-                  maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                  var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                  max_balcony_to_balcony_distance.Enqueue((int)LayoutState.CondensePipe, () =>
-                  {
-                    var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
-                    var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                    if (target is Point _raiseDistanceToStartDefault)
-                    {
-                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                      tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                    }
-                  });
-                }
-                if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-                {
-                  max_balcony_to_balcony_distance.Enqueue((int)LayoutState.Outlet, () =>
-                  {
-                    MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE).OffsetX(MAX_DEVICE_TO_DEVICE);
-                                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WPSCount == THESAURUSHOUSING)
-                    {
-                      COMMONRADIUS.Add(new BlockInfo(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, -THESAURUSBELLOW)));
-                    }
-                    if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSHOUSING)
-                    {
-                      if (IsRainType(_tolReturnValueRange.PipeType))
-                      {
-                        MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, -THESAURUSCOMPOUND), QUOTATIONBREWSTER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSBELLOW)), INSTRUMENTALITY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS)), INSTRUMENTALITY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS)), INSTRUMENTALITY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -REACTIONARINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS)), INSTRUMENTALITY));
-                        COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEXCHANGE, -PORTMANTOLOGISM)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
-                        var LineCoincideTolerance = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSBELLOW), new Vector2d(THESAURUSSTAMPEDE, -THESAURUSINHERIT), new Vector2d(-THESAURUSSCINTILLATE, THESAURUSINHERIT) };
-                        var _tol_avg_column_dist = LineCoincideTolerance.ToPoint2ds(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.ToPoint2d());
-                        MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(_tol_avg_column_dist[THESAURUSHOUSING], _tol_avg_column_dist[INTROPUNITIVENESS], _tol_avg_column_dist[THESAURUSPERMUTATION] - _tol_avg_column_dist[THESAURUSHOUSING], METACOMMUNICATION, THESAURUSINVOICE));
-                      }
-                    }
-                                      {
-                      if (IsDraiType(_tolReturnValueRange.PipeType))
-                      {
-                        if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
-                        {
-                          COMMONRADIUS.Add(new BlockInfo(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSHALLUCINATE)));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, -THROMBOEMBOLISM)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, -THROMBOEMBOLISM), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, -THESAURUSSATIATE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, -THESAURUSSATIATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSSATIATE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, -QUOTATIONQUICHE)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, -QUOTATIONQUICHE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSTRAUMATIC, -STENTOROPHŌNIKOS)), THESAURUSCONTROVERSY));
-                          MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSTRAUMATIC, -STENTOROPHŌNIKOS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -STENTOROPHŌNIKOS)), THESAURUSCONTROVERSY));
-                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSASTUTE, -THESAURUSASSIMILATE), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-SPECTROFLUORIMETER, -THESAURUSRUINOUS), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                        }
-                        else if (_tolReturnValueRange.PipeType is PipeType.TL)
-                        {
-                        }
-                        else
-                        {
-                          var layer = GetPipeLayer(_tolReturnValueRange.PipeType);
-                          if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin)
-                          {
-                            COMMONRADIUS.Add(new BlockInfo(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
-                            COMMONRADIUS.Add(new BlockInfo(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DIFFERENTIATEDNESS, -THESAURUSIMPRACTICABLE)));
-                                              MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSRECONCILE, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSRECONCILE, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHOMICIDAL, -POLYOXYMETHYLENE)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHOMICIDAL, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -METROPOLITANATE)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -METROPOLITANATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -THESAURUSHYPNOTIC)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -THESAURUSHYPNOTIC)), layer));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-IMAGINATIVENESS, -THESAURUSLOITER), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-IMAGINATIVENESS, -THESAURUSLAWYER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                          }
-                          else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSPERMUTATION)
-                          {
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(OTHERWORLDLINESS, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(SCIENTIFICALNESS, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSISOLATION)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSFAINTLY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONBUBONIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(SCIENTIFICALNESS, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONBUBONIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONBUBONIC, -THESAURUSISOLATION)), layer));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHEADSTRONG, -THESAURUSCONTEMPT), QUOTATIONDOPPLER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTROMOTIVE, -THESAURUSHOMICIDAL), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSNECESSITOUS, -THESAURUSMATTER), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                            COMMONRADIUS.Add(new BlockInfo(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSIMPRACTICABLE)));
-                            COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSINTRENCH)) { ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, QUOTATIONBARBADOS } }, });
-                            COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(REPRESENTATIONAL, -THESAURUSINTRENCH)) { ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, QUOTATIONBARBADOS } }, });
-                          }
-                          else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSHOUSING)
-                          {
-                            COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSINTRENCH)) { ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, QUOTATIONBARBADOS } }, });
-                            COMMONRADIUS.Add(new BlockInfo(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSIMPRACTICABLE)));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(OTHERWORLDLINESS, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(OTHERWORLDLINESS, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPRETTY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSISOLATION)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSFAINTLY)), layer));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSABSORBENT, -OLIGOSACCHARIDES), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTROMOTIVE, -THESAURUSHOMICIDAL), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                          }
-                          else if (_tolReturnValueRange.PipeType is PipeType.PLTL or PipeType.WLTL)
-                          {
-                            COMMONRADIUS.Add(new BlockInfo(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSRECONCILE, -THESAURUSIMPRACTICABLE)));
-                            COMMONRADIUS.Add(new BlockInfo(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -THESAURUSHYPNOTIC)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION, });
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE)), THESAURUSCONTROVERSY));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY)), THESAURUSCONTROVERSY));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINTEGRITY, -THESAURUSPRETTY)), THESAURUSCONTROVERSY));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINTEGRITY, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISTASTEFUL, -POLYOXYMETHYLENE)), THESAURUSCONTROVERSY));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISTASTEFUL, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -METROPOLITANATE)), THESAURUSCONTROVERSY));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -METROPOLITANATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -THESAURUSHYPNOTIC)), THESAURUSCONTROVERSY));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPROGRESSIVE, -THESAURUSLOITER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPROGRESSIVE, -THESAURUSLAWYER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                          }
-                          else
-                          {
-                            COMMONRADIUS.Add(new BlockInfo(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSHALLUCINATE)));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY)), layer));
-                            MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSFAINTLY)), layer));
-                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTROMOTIVE, -THESAURUSHOMICIDAL), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
-                          }
-                        }
-                      }
-                      else
-                      {
-                        COMMONRADIUS.Add(new BlockInfo(THESAURUSSUPERFICIAL, CIRCUMCONVOLUTION, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY)) { PropDict = new() { { THESAURUSSUPERFICIAL, _tolReturnValueRange.WPRadius } } });
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW)), INSTRUMENTALITY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)), INSTRUMENTALITY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG)), INSTRUMENTALITY));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
-                        MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
-                        MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -INCOMPREHENSIBILIS), IRRESPONSIBLENESS, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                        switch (_tolReturnValueRange.Outlet)
-                        {
-                          case THESAURUSINTENTIONAL:
-                            {
-                              COMMONRADIUS.Add(new BlockInfo(THESAURUSGAUCHE, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSINSINCERE)) { PropDict = new() { { THESAURUSSPECIFICATION, THESAURUSSPECIFICATION } } });
-                            }
-                            break;
-                          case THESAURUSADVENT:
-                            {
-                              COMMONRADIUS.Add(new BlockInfo(THESAURUSEMPHASIS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)));
-                              MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
-                              MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
-                              MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSUPPOSITION, -QUOTATION1ASHANKS), CHRISTADELPHIAN, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                            }
-                            break;
-                          case VICISSITUDINOUS:
-                            {
-                              MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
-                              MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
-                              MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSUPPOSITION, -QUOTATION1ASHANKS), QUOTATIONSECOND, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                            }
-                            break;
-                          default:
-                            break;
-                        }
-                      }
-                    }
-                  });
-                }
-                if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-                {
-                  if (_tolReturnValueRange.PipeType is not (PipeType.WLTLFL or PipeType.WLTL or PipeType.PLTL))
-                  {
-                    maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                    COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                    MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC), new(POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), THESAURUSDUBIETY, THESAURUSINVOICE));
-                    maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                    var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                    max_balcony_to_balcony_distance.Enqueue((int)LayoutState.CheckPoint, () =>
-                    {
-                      var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetBrBasePoints().First();
-                      var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                      if (target is Point _raiseDistanceToStartDefault)
-                      {
-                        var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint3d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                        tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                      }
-                    });
-                  }
-                }
-                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSPERMUTATION)
-                {
-                  if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-                  {
-                  }
-                  else
-                  {
-                    if (IsRainType(_tolReturnValueRange.PipeType))
-                    {
-                      maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                      COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
-                      COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), });
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSGETAWAY), QUOTATIONBREWSTER, THESAURUSINVOICE, CONTROVERSIALLY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(PSEUDEPIGRAPHOS, -THESAURUSMANIFESTATION), QUOTATIONBREWSTER, THESAURUSINVOICE, CONTROVERSIALLY));
-                      maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                      var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                      max_balcony_to_balcony_distance.Enqueue((int)LayoutState.FloorDrain, () =>
-                      {
-                        var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
-                        var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                        if (target is Point _raiseDistanceToStartDefault)
-                        {
-                          var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                          tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                        }
-                      });
-                    }
-                    else
-                    {
-                      maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                      COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MAXILLOPALATINE, -THESAURUSINTRENCH)) { ScaleEx = new(THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, ACCOMMODATINGLY } }, });
-                      COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, -THESAURUSINTRENCH)) { ScaleEx = new(THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, ACCOMMODATINGLY } }, });
-                      COMMONRADIUS.Add(new BlockInfo(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MAXILLOPALATINE, -THESAURUSINTRENCH), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINDECOROUS, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINDECOROUS, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMISAPPREHEND, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-SYNAESTHETICALLY, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFLUTTER, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFLUTTER, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, -THESAURUSINTRENCH)), THESAURUSADVERSITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFLUTTER, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSALLEGIANCE, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSALLEGIANCE, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSINTRENCH)), THESAURUSADVERSITY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSDESTRUCTION), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-OLIGOMENORRHOEA, -THESAURUSDESTRUCTION), QUOTATIONDOPPLER, THESAURUSSTRIPED, CONTROVERSIALLY));
-                      maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                      var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                      max_balcony_to_balcony_distance.Enqueue((int)LayoutState.FloorDrain, () =>
-                      {
-                        var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
-                        var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                        if (target is Point _raiseDistanceToStartDefault)
-                        {
-                          var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                          tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                        }
-                      });
-                    }
-                  }
-                }
-                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSHOUSING)
-                {
-                  if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-                  {
-                    if (INTRAVASCULARLY)
-                    {
-                      {
-                        var seg1 = new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSOBSERVANCE));
-                        var seg2 = new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSOBSERVANCE));
-                        var pt1 = seg1.StartPoint.ToPoint3d();
-                        var _tol_lane = pt1.OffsetX(seg2.X1 - seg1.X1);
-                        MIN_BALCONYBASIN_TO_BALCONY.Add(new DimInfo(pt1, _tol_lane, new(THESAURUSSTAMPEDE, -seg2.Length, THESAURUSSTAMPEDE), METACOMMUNICATION, THESAURUSINVOICE));
-                      }
-                      COMMONRADIUS.Add(new BlockInfo(THESAURUSSUPERFICIAL, CIRCUMCONVOLUTION, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY)));
-                      COMMONRADIUS.Add(new BlockInfo(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, -THESAURUSBELLOW)));
-                      COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEXCHANGE, -PORTMANTOLOGISM)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAYHEM, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAYHEM, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAYHEM, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTRICIAN, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSBELLOW)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -REACTIONARINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS)), INSTRUMENTALITY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -QUOTATION1ASHANKS), QUOTATIONSECOND, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -INCOMPREHENSIBILIS), QUOTATIONDOPPLER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSCOMPOUND), QUOTATIONBREWSTER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
-                    }
-                  }
-                  else
-                  {
-                    maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                    COMMONRADIUS.Add(new BlockInfo(PERSUADABLENESS, GetEQPMLayer(_tolReturnValueRange.PipeType), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                    MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), GetPipeLayer(_tolReturnValueRange.PipeType)));
-                    MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSGETAWAY), QUOTATIONBREWSTER, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
-                    maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                    var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                    max_balcony_to_balcony_distance.Enqueue((int)LayoutState.FloorDrain, () =>
-                    {
-                      var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
-                      var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                      if (target is Point _raiseDistanceToStartDefault)
-                      {
-                        var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                        tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                      }
-                    });
-                  }
-                }
-              }
-            }
-            string wellsMaxArea = null, minWellToUrinalDistance = null, maxRoomInterval = null, kitchenBufferDistance = null, maxToiletToKitchenDistance = null, maxToiletToKitchenDistance1 = null;
-            if (_tolReturnValueRange.PipeType is PipeType.PLTL)
-            {
-              var pllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsPL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              var tllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsTL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              if (pllabels.Count == THESAURUSPERMUTATION)
-              {
-                wellsMaxArea = pllabels[THESAURUSSTAMPEDE];
-                minWellToUrinalDistance = pllabels[THESAURUSHOUSING];
-              }
-              else if (pllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = pllabels.Count / THESAURUSPERMUTATION + pllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = pllabels.Count - tol_blk_max_connect;
-                wellsMaxArea = pllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = pllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                wellsMaxArea = pllabels.JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = null;
-              }
-              if (tllabels.Count == THESAURUSPERMUTATION)
-              {
-                maxRoomInterval = tllabels[THESAURUSSTAMPEDE];
-                kitchenBufferDistance = tllabels[THESAURUSHOUSING];
-              }
-              else if (tllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = tllabels.Count / THESAURUSPERMUTATION + tllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = tllabels.Count - tol_blk_max_connect;
-                maxRoomInterval = tllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                kitchenBufferDistance = tllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                maxRoomInterval = tllabels.JoinWith(THESAURUSCAVALIER);
-                kitchenBufferDistance = null;
-              }
-            }
-            else if (_tolReturnValueRange.PipeType is PipeType.WLTL)
-            {
-              var wllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsWL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              var tllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsTL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              if (wllabels.Count == THESAURUSPERMUTATION)
-              {
-                wellsMaxArea = wllabels[THESAURUSSTAMPEDE];
-                minWellToUrinalDistance = wllabels[THESAURUSHOUSING];
-              }
-              else if (wllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = wllabels.Count / THESAURUSPERMUTATION + wllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = wllabels.Count - tol_blk_max_connect;
-                wellsMaxArea = wllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = wllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                wellsMaxArea = wllabels.JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = null;
-              }
-              if (tllabels.Count == THESAURUSPERMUTATION)
-              {
-                maxRoomInterval = tllabels[THESAURUSSTAMPEDE];
-                kitchenBufferDistance = tllabels[THESAURUSHOUSING];
-              }
-              else if (tllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = tllabels.Count / THESAURUSPERMUTATION + tllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = tllabels.Count - tol_blk_max_connect;
-                maxRoomInterval = tllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                kitchenBufferDistance = tllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                maxRoomInterval = tllabels.JoinWith(THESAURUSCAVALIER);
-                kitchenBufferDistance = null;
-              }
-            }
-            else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
-            {
-              var wllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsWL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              var tllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsTL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              var fllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsDraiFL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              if (wllabels.Count == THESAURUSPERMUTATION)
-              {
-                wellsMaxArea = wllabels[THESAURUSSTAMPEDE];
-                minWellToUrinalDistance = wllabels[THESAURUSHOUSING];
-              }
-              else if (wllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = wllabels.Count / THESAURUSPERMUTATION + wllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = wllabels.Count - tol_blk_max_connect;
-                wellsMaxArea = wllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = wllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                wellsMaxArea = wllabels.JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = null;
-              }
-              if (tllabels.Count == THESAURUSPERMUTATION)
-              {
-                maxRoomInterval = tllabels[THESAURUSSTAMPEDE];
-                kitchenBufferDistance = tllabels[THESAURUSHOUSING];
-              }
-              else if (tllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = tllabels.Count / THESAURUSPERMUTATION + tllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = tllabels.Count - tol_blk_max_connect;
-                maxRoomInterval = tllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                kitchenBufferDistance = tllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                maxRoomInterval = tllabels.JoinWith(THESAURUSCAVALIER);
-                kitchenBufferDistance = null;
-              }
-              if (fllabels.Count == THESAURUSPERMUTATION)
-              {
-                maxToiletToKitchenDistance = fllabels[THESAURUSSTAMPEDE];
-                maxToiletToKitchenDistance1 = fllabels[THESAURUSHOUSING];
-              }
-              else if (fllabels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = fllabels.Count / THESAURUSPERMUTATION + fllabels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = fllabels.Count - tol_blk_max_connect;
-                maxToiletToKitchenDistance = fllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                maxToiletToKitchenDistance1 = fllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                maxToiletToKitchenDistance = fllabels.JoinWith(THESAURUSCAVALIER);
-                maxToiletToKitchenDistance1 = null;
-              }
-            }
-            else
-            {
-              var _labels = ConvertLabelStrings(max_kitchen_to_balcony_distance).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-              if (_labels.Count == THESAURUSPERMUTATION)
-              {
-                wellsMaxArea = _labels[THESAURUSSTAMPEDE];
-                minWellToUrinalDistance = _labels[THESAURUSHOUSING];
-              }
-              else if (_labels.Count > THESAURUSPERMUTATION)
-              {
-                var tol_blk_max_connect = _labels.Count / THESAURUSPERMUTATION + _labels.Count % THESAURUSPERMUTATION;
-                var _tol_order_side_lane_pt_on_frame = _labels.Count - tol_blk_max_connect;
-                wellsMaxArea = _labels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = _labels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
-              }
-              else
-              {
-                wellsMaxArea = _labels.JoinWith(THESAURUSCAVALIER);
-                minWellToUrinalDistance = null;
-              }
-            }
-            var maxKitchenToRainpipeDistance = new HashSet<int>();
-            var maxBalconyToRainpipeDistance = new HashSet<int>();
-            {
-              void maxDeviceplatformArea()
-              {
-                {
-                  var maxBalconyrainpipeToFloordrainDistance = _tolReturnValueRange.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists && !TolLightRangeSingleSideMax.HasLong);
-                  if (maxBalconyrainpipeToFloordrainDistance > SUPERLATIVENESS)
-                  {
-                    var _tolReturnValueMaxDistance = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists && !TolLightRangeSingleSideMax.HasLong).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
-                    var _tolReturnValueMinRange = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists && !TolLightRangeSingleSideMax.HasLong).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
-                    maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSPERMUTATION);
-                    maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSPERMUTATION);
-                    maxBalconyToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSHOUSING);
-                    maxBalconyToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSHOUSING);
-                    return;
-                  }
-                }
-                {
-                  var maxBalconyrainpipeToFloordrainDistance = _tolReturnValueRange.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists);
-                  if (maxBalconyrainpipeToFloordrainDistance > THESAURUSSTAMPEDE)
-                  {
-                    if (maxBalconyrainpipeToFloordrainDistance == THESAURUSHOUSING)
-                    {
-                      maxKitchenToRainpipeDistance.Add(_tolReturnValueRange.Runs.First(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Index);
-                    }
-                    else
-                    {
-                      var _tolReturnValueMaxDistance = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
-                      var _tolReturnValueMinRange = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
-                      if (maxBalconyrainpipeToFloordrainDistance <= INTROPUNITIVENESS)
-                      {
-                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance);
-                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange);
-                      }
-                      else if (maxBalconyrainpipeToFloordrainDistance <= SUPERLATIVENESS)
-                      {
-                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSHOUSING);
-                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSHOUSING);
-                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMaxDistance);
-                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMinRange);
-                      }
-                      else
-                      {
-                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSPERMUTATION);
-                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSPERMUTATION);
-                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSHOUSING);
-                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSHOUSING);
-                      }
-                    }
-                  }
-                }
-              }
-              maxDeviceplatformArea();
-            }
-            var (_tol_group_evca_emg, _) = GetDBTextSize(wellsMaxArea, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-            var (_tol_light_range_single_side_min, _) = GetDBTextSize(minWellToUrinalDistance, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-            var (w3, _) = GetDBTextSize(maxRoomInterval, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-            var (w4, _) = GetDBTextSize(kitchenBufferDistance, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-            var (w5, _) = GetDBTextSize(maxToiletToKitchenDistance, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-            var (w6, _) = GetDBTextSize(maxToiletToKitchenDistance1, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-            var wa = Math.Max(_tol_group_evca_emg, _tol_light_range_single_side_min);
-            var wb = Math.Max(w3, w4);
-            var wc = Math.Max(w5, w6);
-            foreach (var MAX_ANGEL_TOLLERANCE in maxBalconyToRainpipeDistance.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
-            {
-              var MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
-            }
-            if (maxKitchenToRainpipeDistance.Count >= THESAURUSPERMUTATION)
-            {
-              if (maxKitchenToRainpipeDistance.Max() == eMax)
-              {
-                maxKitchenToRainpipeDistance.Remove(maxKitchenToRainpipeDistance.Max());
-              }
-            }
-            foreach (var MAX_ANGEL_TOLLERANCE in maxKitchenToRainpipeDistance.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
-            {
-              var MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
-              var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
-              if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
-              {
-                MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(THESAURUSDOMESTIC);
-              }
-              if (_tolReturnValueRange.PipeType is PipeType.PLTL or PipeType.WLTL)
-              {
-                maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC, THESAURUSFORMULATE)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC - wa, THESAURUSFORMULATE)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSFORMULATE)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE + wb, THESAURUSFORMULATE)), THESAURUSSTRIPED));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC - wa, THESAURUSATTACHMENT), wellsMaxArea, THESAURUSSTRIPED, CONTROVERSIALLY));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSATTACHMENT), maxRoomInterval, THESAURUSSTRIPED, CONTROVERSIALLY));
-                if (minWellToUrinalDistance != null)
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC - wa, THESAURUSHYPNOTIC), minWellToUrinalDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
-                if (kitchenBufferDistance != null)
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSHYPNOTIC), kitchenBufferDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
-                maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                max_balcony_to_balcony_distance.Enqueue((int)LayoutState.PipeLabel, () =>
-                {
-                  var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                  var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
-                  var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                  if (target is Point _raiseDistanceToStartDefault)
-                  {
-                    var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                    tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                  }
-                });
-              }
-              else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
-              {
-                maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, MISAPPREHENSIVE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSDERELICTION)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSDERELICTION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE + wc, THESAURUSDERELICTION)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE, THESAURUSFORMULATE)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE - wa, THESAURUSFORMULATE)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, REPRESENTATIONAL)), THESAURUSSTRIPED));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC + wb, REPRESENTATIONAL)), THESAURUSSTRIPED));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE - wa, THESAURUSATTACHMENT), wellsMaxArea, THESAURUSSTRIPED, CONTROVERSIALLY));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE - wa, THESAURUSENDANGER), minWellToUrinalDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSCAPITALISM), maxRoomInterval, THESAURUSSTRIPED, CONTROVERSIALLY));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, QUOTATIONCOLERIDGE), kitchenBufferDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, CONSCRIPTIONIST), maxToiletToKitchenDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, PHYSIOLOGICALLY), maxToiletToKitchenDistance1, THESAURUSSTRIPED, CONTROVERSIALLY));
-                maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                max_balcony_to_balcony_distance.Enqueue((int)LayoutState.PipeLabel, () =>
-                {
-                  var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                  var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
-                  var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                  if (target is Point _raiseDistanceToStartDefault)
-                  {
-                    var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                    tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                  }
-                });
-              }
-              else
-              {
-                maxBalconywashingmachineToBalconybasinline.TakeStartSnap();
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSFORMULATE)), GetNoteLayer(_tolReturnValueRange.PipeType)));
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC + wa, THESAURUSFORMULATE)), GetNoteLayer(_tolReturnValueRange.PipeType)));
-                MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSATTACHMENT), wellsMaxArea, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
-                if (minWellToUrinalDistance != null)
-                {
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new DBTextInfo(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSENDANGER), minWellToUrinalDistance, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
-                }
-                maxBalconywashingmachineToBalconybasinline.TakeStopSnap();
-                var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline.GetSnapshot();
-                max_balcony_to_balcony_distance.Enqueue((int)LayoutState.PipeLabel, () =>
-                {
-                  var TolUniformSideLenth = GeoFac.CreateGeometry(pipeLineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
-                  var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.GetLineVertices().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
-                  var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
-                  if (target is Point _raiseDistanceToStartDefault)
-                  {
-                    var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-                    tolReturnValueMinRange.MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-                  }
-                });
-              }
-              MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
-            }
-            max_balcony_to_balcony_distance.Enqueue((int)LayoutState.FixPipeVLines, () =>
-            {
-              if (wellToWallOffset.Count + toiletWellsInterval.Count + toiletBufferDistance.Count == THESAURUSSTAMPEDE) return;
-              if (pipeLineInfos.Count == THESAURUSSTAMPEDE) return;
-              var layer = pipeLineInfos.First().LayerName;
-              var vlineInfos = pipeLineInfos.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.IsVertical(THESAURUSHOUSING)).ToList();
-              if (vlineInfos.Count == THESAURUSSTAMPEDE) return;
-              foreach (var TolLightRangeSingleSideMin in vlineInfos)
-              {
-                MAX_BALCONYBASIN_TO_BALCONY.Remove(TolLightRangeSingleSideMin);
-              }
-              var vlines = vlineInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToList();
-              if (wellToWallOffset.Count > THESAURUSSTAMPEDE && toiletWellsInterval.Count > THESAURUSSTAMPEDE)
-              {
-                            var kill = GeoFac.CreateGeometryEx(toiletWellsInterval.Distinct().Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax.ToPoint2D(), UNCONSEQUENTIAL, UNCONSEQUENTIAL).ToPolygon()).ToList());
-                var tolReturnValueRange = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(wellToWallOffset.Distinct().Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax.ToPoint2D(), UNCONSEQUENTIAL, UNCONSEQUENTIAL).ToPolygon()).ToList()));
-                vlines = vlines.Except(tolReturnValueRange).ToList();
-                tolReturnValueRange.AddRange(wellToWallOffset.Distinct().Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax.ToPoint2D(), UNCONSEQUENTIAL, UNCONSEQUENTIAL)).Select(DEFAULT_FIRE_VALVE_WIDTH => new GLineSegment(DEFAULT_FIRE_VALVE_WIDTH.LeftTop, DEFAULT_FIRE_VALVE_WIDTH.RightButtom).ToLineString()));
-                var MinWellToUrinalDistance = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(tolReturnValueRange.ToArray())).ToList()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSHOUSING).ToList();
-                vlines.AddRange(MinWellToUrinalDistance.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).Where(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Intersects(kill)));
-              }
-              if (toiletBufferDistance.Count > THESAURUSSTAMPEDE)
-              {
-                vlines = GeoFac.GetLines(new MultiLineString(vlines.ToArray()).Difference(GeoFac.CreateGeometryEx(toiletBufferDistance.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList()))).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
-              }
-              foreach (var TolUniformSideLenth in GeoFac.GetManyLines(vlines))
-              {
-                MAX_BALCONYBASIN_TO_BALCONY.Add(new LineInfo(TolUniformSideLenth, layer));
-              }
-            });
-          }
-          max_balcony_to_balcony_distance.Enqueue((int)LayoutState.Finished, () =>
-          {
-            foreach (var TolLightRangeSingleSideMin in MAX_BALCONYBASIN_TO_BALCONY)
-            {
-              var TolUniformSideLenth = DrawLineSegmentLazy(TolLightRangeSingleSideMin.Line);
-              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.LayerName))
-              {
-                TolUniformSideLenth.Layer = TolLightRangeSingleSideMin.LayerName;
-              }
-              ByLayer(TolUniformSideLenth);
-            }
-            foreach (var TolLightRangeSingleSideMin in BALCONY_BUFFER_DISTANCE)
-            {
-              var maxBalconyrainpipeToFloordrainDistance = DrawCircleLazy(TolLightRangeSingleSideMin.Circle.Center, TolLightRangeSingleSideMin.Circle.Radius);
-              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.LayerName)) maxBalconyrainpipeToFloordrainDistance.Layer = TolLightRangeSingleSideMin.LayerName;
-              ByLayer(maxBalconyrainpipeToFloordrainDistance);
-            }
-            foreach (var TolLightRangeSingleSideMin in MAX_RAINPIPE_TO_WASHMACHINE)
-            {
-              var maxBalconyToDeviceplatformDistance = DrawTextLazy(TolLightRangeSingleSideMin.Text, TolLightRangeSingleSideMin.BasePoint.ToPoint2d());
-              maxBalconyToDeviceplatformDistance.Rotation = TolLightRangeSingleSideMin.Rotation;
-              maxBalconyToDeviceplatformDistance.WidthFactor = THESAURUSDISPASSIONATE;
-              maxBalconyToDeviceplatformDistance.Height = THESAURUSENDANGER;
-              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.LayerName)) maxBalconyToDeviceplatformDistance.Layer = TolLightRangeSingleSideMin.LayerName;
-              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.TextStyle)) DrawingQueue.Enqueue(adb => { SetTextStyle(maxBalconyToDeviceplatformDistance, TolLightRangeSingleSideMin.TextStyle); });
-              ByLayer(maxBalconyToDeviceplatformDistance);
-            }
-            foreach (var TolLightRangeSingleSideMin in COMMONRADIUS)
-            {
-              DrawBlockReference(TolLightRangeSingleSideMin.BlockName, TolLightRangeSingleSideMin.BasePoint, layer: TolLightRangeSingleSideMin.LayerName, cb: tolReturnValueRangeTo =>
-                        {
-                    ByLayer(tolReturnValueRangeTo);
-                    if (TolLightRangeSingleSideMin.ScaleEx.HasValue) tolReturnValueRangeTo.ScaleFactors = TolLightRangeSingleSideMin.ScaleEx.Value;
-                              {
-                      if (TolLightRangeSingleSideMin.DynaDict != null && tolReturnValueRangeTo.IsDynamicBlock) tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection.Cast<DynamicBlockReferenceProperty>().Where(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.ReadOnly).Join(TolLightRangeSingleSideMin.DynaDict, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.PropertyName, y => y.Key, (TolLightRangeSingleSideMax, y) => TolLightRangeSingleSideMax.Value = y.Value).Count();
-                    }
-                  }, props: TolLightRangeSingleSideMin.PropDict, scale: TolLightRangeSingleSideMin.Scale, rotateDegree: TolLightRangeSingleSideMin.Rotate.AngleToDegree());
-            }
-            foreach (var TolLightRangeSingleSideMin in MIN_BALCONYBASIN_TO_BALCONY)
-            {
-              var dim = new AlignedDimension
-              {
-                XLine1Point = TolLightRangeSingleSideMin.Point1,
-                XLine2Point = TolLightRangeSingleSideMin.Point2,
-                DimLinePoint = GeoAlgorithm.MidPoint(TolLightRangeSingleSideMin.Point1, TolLightRangeSingleSideMin.Point2) + TolLightRangeSingleSideMin.Vector,
-                DimensionText = TolLightRangeSingleSideMin.Text,
-                Layer = TolLightRangeSingleSideMin.Layer
-              };
-              ByLayer(dim);
-              DrawEntityLazy(dim);
-            }
-          });
-        }
-        FlushDQ(adb);
-        void handleEntity(Entity maxToiletToCondensepipeDistance, Matrix3d MAX_RAINPIPE_TO_BALCONYFLOORDRAIN, List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance)
-        {
-          if (!IsLayerVisible(maxToiletToCondensepipeDistance)) return;
-          var maxToiletToFloordrainDistance2 = maxToiletToCondensepipeDistance.GetRXClass().DxfName.ToUpper();
-          var TOILET_BUFFER_DISTANCE = maxToiletToCondensepipeDistance.Layer;
-          TOILET_BUFFER_DISTANCE = GetEffectiveLayer(TOILET_BUFFER_DISTANCE);
-          static bool isDLineLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && !layer.Contains(THESAURUSDEVIANT);
-          static bool isVentLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && layer.Contains(THESAURUSDEVIANT);
-          if (!maxToiletToFloordrainDistance2.StartsWith(QUOTATIONCHROMIC))
-          {
-            var bdx = maxToiletToCondensepipeDistance.Bounds;
-            if (bdx.HasValue)
-            {
-              var maxKitchenToBalconyDistance = bdx.Value;
-              maxKitchenToBalconyDistance.TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              if (!max_balconywashingfloordrain_to_rainpipe(maxKitchenToBalconyDistance.ToEnvelope())) return;
-            }
-          }
-          {
-            if (TOILET_BUFFER_DISTANCE is QUOTATIONSTANLEY or THESAURUSDEFAULTER)
-            {
-              if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth)
-              {
-                if (TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-                {
-                  var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                }
-                return;
-              }
-              else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
-              {
-                foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
-                {
-                  if (maxBalconyToBalconyDistance.Length > THESAURUSSTAMPEDE)
-                  {
-                    var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  }
-                }
-                return;
-              }
-              else if (maxToiletToCondensepipeDistance is DBText maxBalconyToDeviceplatformDistance)
-              {
-                var repeated_point_distance = maxBalconyToDeviceplatformDistance.TextString;
-                if (!string.IsNullOrWhiteSpace(repeated_point_distance))
-                {
-                  var maxKitchenToBalconyDistance = maxBalconyToDeviceplatformDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  var ct = new CText() { Text = repeated_point_distance, Boundary = maxKitchenToBalconyDistance };
-                }
-                return;
-              }
-            }
-          }
-          {
-            if (TOILET_BUFFER_DISTANCE is THESAURUSINVOICE)
-            {
-              if (maxToiletToCondensepipeDistance is Spline)
-              {
-                var maxKitchenToBalconyDistance = maxToiletToCondensepipeDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE);
-                return;
-              }
-            }
-          }
-          {
-            if (maxToiletToFloordrainDistance2 == QUOTATIONSWALLOW && TOILET_BUFFER_DISTANCE is THESAURUSINVOICE)
-            {
-              var DEFAULT_FIRE_VALVE_WIDTH = maxToiletToCondensepipeDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, DEFAULT_FIRE_VALVE_WIDTH, MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE);
-            }
-          }
-          {
-            if (maxToiletToCondensepipeDistance is Circle maxBalconyrainpipeToFloordrainDistance && isDrainageLayer(TOILET_BUFFER_DISTANCE))
-            {
-              if (THESAURUSSTAMPEDE < maxBalconyrainpipeToFloordrainDistance.Radius && maxBalconyrainpipeToFloordrainDistance.Radius <= HYPERDISYLLABLE)
-              {
-                var maxKitchenToBalconyDistance = maxBalconyrainpipeToFloordrainDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
-                return;
-              }
-            }
-          }
-          {
-            if (maxToiletToCondensepipeDistance is Circle maxBalconyrainpipeToFloordrainDistance)
-            {
-              if (THESAURUSSTAMPEDE < maxBalconyrainpipeToFloordrainDistance.Radius && maxBalconyrainpipeToFloordrainDistance.Radius <= HYPERDISYLLABLE)
-              {
-                if (isDrainageLayer(maxBalconyrainpipeToFloordrainDistance.Layer))
-                {
-                  var DEFAULT_FIRE_VALVE_WIDTH = maxBalconyrainpipeToFloordrainDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  _tol_lane_protect(maxToiletToFloordrainDistance, DEFAULT_FIRE_VALVE_WIDTH, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
-                  return;
-                }
-              }
-            }
-          }
-          if (TOILET_BUFFER_DISTANCE is INSTRUMENTALITY)
-          {
-            if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-            {
-              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_CONDENSEPIPE_DISTANCE);
-              return;
-            }
-            else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
-            {
-              foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
-              {
-                var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_CONDENSEPIPE_DISTANCE);
-              }
-              return;
-            }
-            if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
-            {
-              dynamic o = maxToiletToCondensepipeDistance;
-              var default_fire_valve_length = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_CONDENSEPIPE_DISTANCE);
-              return;
-            }
-          }
-          if (isDLineLayer(TOILET_BUFFER_DISTANCE))
-          {
-            if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-            {
-              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_KITCHEN_TO_RAINPIPE_DISTANCE);
-              return;
-            }
-            else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
-            {
-              foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
-              {
-                var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_KITCHEN_TO_RAINPIPE_DISTANCE);
-              }
-              return;
-            }
-            if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
-            {
-              dynamic o = maxToiletToCondensepipeDistance;
-              var default_fire_valve_length = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_KITCHEN_TO_RAINPIPE_DISTANCE);
-              return;
-            }
-          }
-          if (isVentLayer(TOILET_BUFFER_DISTANCE))
-          {
-            if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-            {
-              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_BALCONY_TO_RAINPIPE_DISTANCE);
-              return;
-            }
-            else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
-            {
-              foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
-              {
-                var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_BALCONY_TO_RAINPIPE_DISTANCE);
-              }
-              return;
-            }
-            if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
-            {
-              dynamic o = maxToiletToCondensepipeDistance;
-              var default_fire_valve_length = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_BALCONY_TO_RAINPIPE_DISTANCE);
-              return;
-            }
-          }
-          if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
-          {
-            if (TOILET_BUFFER_DISTANCE is THESAURUSSINCERE || TOILET_BUFFER_DISTANCE.Contains(SEROEPIDEMIOLOGY))
-            {
-              foreach (var maxBalconyrainpipeToFloordrainDistance in maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection().OfType<Circle>().Where(IsLayerVisible))
-              {
-                if (maxBalconyrainpipeToFloordrainDistance.Radius > THESAURUSSTAMPEDE && isDrainageLayer(maxBalconyrainpipeToFloordrainDistance.Layer))
-                {
-                  var maxKitchenToBalconyDistance = maxBalconyrainpipeToFloordrainDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
-                }
-              }
-            }
-          }
-          {
-            if (isDrainageLayer(TOILET_BUFFER_DISTANCE) && maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-            {
-              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
-              return;
-            }
-          }
-          if (maxToiletToFloordrainDistance2 == THESAURUSWINDFALL)
-          {
-            dynamic o = maxToiletToCondensepipeDistance.AcadObject;
-            var repeated_point_distance = (string)o.DimStyleText + THESAURUSSPECIFICATION + (string)o.VPipeNum;
-            var colle = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
-            var ts = new List<DBText>();
-            foreach (var tolReturnValue0Approx in colle.OfType<Entity>().Where(IsLayerVisible))
-            {
-              if (tolReturnValue0Approx is Line TolUniformSideLenth && isDrainageLayer(TolUniformSideLenth.Layer))
-              {
-                if (TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-                {
-                  var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
-                  continue;
-                }
-              }
-              else if (tolReturnValue0Approx.GetRXClass().DxfName.ToUpper() == THESAURUSDURESS)
-              {
-                ts.AddRange(tolReturnValue0Approx.ExplodeToDBObjectCollection().OfType<DBText>().Where(IsLayerVisible));
-                continue;
-              }
-            }
-            if (ts.Count > THESAURUSSTAMPEDE)
-            {
-              GRect maxKitchenToBalconyDistance;
-              if (ts.Count == THESAURUSHOUSING) maxKitchenToBalconyDistance = ts[THESAURUSSTAMPEDE].Bounds.ToGRect();
-              else
-              {
-                maxKitchenToBalconyDistance = GeoFac.CreateGeometry(ts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Bounds.ToGRect()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsValid).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon())).EnvelopeInternal.ToGRect();
-              }
-              maxKitchenToBalconyDistance = maxKitchenToBalconyDistance.TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              var ct = new CText() { Text = repeated_point_distance, Boundary = maxKitchenToBalconyDistance };
-              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
-            }
-            return;
-          }
-          {
-            static bool default_fire_valve_width(string TolLightRangeMin) => !TolLightRangeMin.StartsWith(THESAURUSNOTATION) && !TolLightRangeMin.ToLower().Contains(PERPENDICULARITY) && !TolLightRangeMin.ToUpper().Contains(THESAURUSIMPOSTER);
-            if (maxToiletToCondensepipeDistance is DBText maxBalconyToDeviceplatformDistance && isDrainageLayer(TOILET_BUFFER_DISTANCE) && default_fire_valve_width(maxBalconyToDeviceplatformDistance.TextString))
-            {
-              var maxKitchenToBalconyDistance = maxBalconyToDeviceplatformDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              var ct = new CText() { Text = maxBalconyToDeviceplatformDistance.TextString, Boundary = maxKitchenToBalconyDistance };
-              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
-              return;
-            }
-          }
-          if (maxToiletToFloordrainDistance2 == THESAURUSDURESS)
-          {
-            dynamic o = maxToiletToCondensepipeDistance.AcadObject;
-            string repeated_point_distance = o.Text;
-            if (!string.IsNullOrWhiteSpace(repeated_point_distance))
-            {
-              var ct = new CText() { Text = repeated_point_distance, Boundary = maxToiletToCondensepipeDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN) };
-              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
-            }
-            return;
-          }
-          if (maxToiletToFloordrainDistance2 == THESAURUSINHARMONIOUS)
-          {
-            {
-              dynamic o = maxToiletToCondensepipeDistance.AcadObject;
-              string UpText = o.UpText;
-              string DownText = o.DownText;
-              var MAX_TAG_YPOSITION = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
-              var TolLane = MAX_TAG_YPOSITION.OfType<Line>().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGLineSegment()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsValid).Distinct().ToList();
-              var points = GeoFac.GetAlivePoints(TolLane, THESAURUSHOUSING);
-              var _tol_avg_column_dist = points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
-              points = points.Except(GeoFac.CreateIntersectsSelector(_tol_avg_column_dist)(GeoFac.CreateGeometryEx(TolLane.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSHOUSING)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSPERMUTATION).Buffer(THESAURUSHOUSING)).ToList())).Select(_tol_avg_column_dist).ToList(points)).ToList();
-              if (TOILET_BUFFER_DISTANCE is QUOTATIONSTANLEY or THESAURUSDEFAULTER)
-              {
-                if (points.Count == THESAURUSSTAMPEDE) return;
-                string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = null;
-                if (!string.IsNullOrWhiteSpace(UpText) && !string.IsNullOrWhiteSpace(DownText))
-                {
-                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + INTELLECTUALNESS + DownText;
-                }
-                else
-                {
-                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + DownText;
-                }
-                if (string.IsNullOrWhiteSpace(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return;
-                MAX_BASECIRCLE_AREA.Add(GeoFac.CreateGeometry(points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint())).Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                return;
-              }
-              else if (isDrainageLayer(TOILET_BUFFER_DISTANCE))
-              {
-                if (points.Count == THESAURUSSTAMPEDE) return;
-                string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = null;
-                if (!string.IsNullOrWhiteSpace(UpText) && !string.IsNullOrWhiteSpace(DownText))
-                {
-                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + INTELLECTUALNESS + DownText;
-                }
-                else
-                {
-                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + DownText;
-                }
-                if (string.IsNullOrWhiteSpace(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return;
-                MAX_DEVICEPLATFORM_AREA.Add(GeoFac.CreateGeometry(points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint())).Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                return;
-              }
-              if (MAX_TOILET_TO_KITCHEN_DISTANCE)
-              {
-                var colle = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
-                {
-                  foreach (var tolReturnValue0Approx in colle.OfType<Entity>().Where(tolReturnValue0Approx => tolReturnValue0Approx.GetRXClass().DxfName.ToUpper() is THESAURUSDURESS or THESAURUSFACILITATE).Where(TolLightRangeSingleSideMax => isDrainageLayer(TolLightRangeSingleSideMax.Layer)).Where(IsLayerVisible))
-                  {
-                    foreach (var maxBalconyToDeviceplatformDistance in tolReturnValue0Approx.ExplodeToDBObjectCollection().OfType<DBText>().Where(TolLightRangeSingleSideMax => !string.IsNullOrWhiteSpace(TolLightRangeSingleSideMax.TextString)).Where(IsLayerVisible))
-                    {
-                      var maxKitchenToBalconyDistance = maxBalconyToDeviceplatformDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                      var ct = new CText() { Text = maxBalconyToDeviceplatformDistance.TextString, Boundary = maxKitchenToBalconyDistance };
-                      if (IsDrainageLabel(ct.Text)) _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
-                    }
-                  }
-                  foreach (var default_fire_valve_length in colle.OfType<Line>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSSTAMPEDE).Where(TolLightRangeSingleSideMax => isDrainageLayer(TolLightRangeSingleSideMax.Layer)).Where(IsLayerVisible).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN)))
-                  {
-                    _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
-                  }
-                }
-              }
-              return;
-            }
-            return;
-          }
-          if (isDrainageLayer(TOILET_BUFFER_DISTANCE))
-          {
-            {
-              if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth)
-              {
-                var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
-                return;
-              }
-            }
-            {
-              if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
-                {
-                  foreach (var TolUniformSideLenth in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSSTAMPEDE))
-                  {
-                    var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                    _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
-                  }
-                  return;
-                }
-            }
-          }
-        }
-        void handleBlockReference(BlockReference tolReturnValueRangeTo, Matrix3d MAX_RAINPIPE_TO_BALCONYFLOORDRAIN, List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance)
-        {
-          if (!tolReturnValueRangeTo.ObjectId.IsValid || !tolReturnValueRangeTo.BlockTableRecord.IsValid) return;
-          if (!tolReturnValueRangeTo.Visible) return;
-          if (IsLayerVisible(tolReturnValueRangeTo))
-          {
-            var _name = tolReturnValueRangeTo.GetEffectiveName() ?? THESAURUSDEPLORE;
-            var toilet_buffer_distance = GetEffectiveBRName(_name);
-            {
-              if (isDrainageLayer(tolReturnValueRangeTo.Layer))
-                if (toilet_buffer_distance.Contains(INTELLECTUALISTS))
-                {
-                  var center = tolReturnValueRangeTo.Bounds.ToGRect().Center.ToPoint3d().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  if (toilet_buffer_distance is SUPERINDUCEMENT && tolReturnValueRangeTo.IsDynamicBlock)
-                  {
-                    var props = tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection;
-                    foreach (DynamicBlockReferenceProperty prop in props)
-                    {
-                      if (prop.PropertyName == QUINQUAGENARIAN)
-                      {
-                        var propValue = prop.Value.ToString();
-                        if (!string.IsNullOrEmpty(propValue))
-                        {
-                          max_balconywashingfloordrain_to_balconyfloordrain.Add(center.ToNTSPoint().Tag(propValue));
-                        }
-                        break;
-                      }
-                    }
-                  }
-                  var maxKitchenToBalconyDistance = center.ToGRect(THESAURUSENTREPRENEUR);
-                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
-                  return;
-                }
-            }
-            if (toilet_buffer_distance.Contains(THESAURUSTHOROUGHBRED))
-            {
-              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              if (maxKitchenToBalconyDistance.IsValid)
-              {
-                if (maxKitchenToBalconyDistance.Width < POLYOXYMETHYLENE && maxKitchenToBalconyDistance.Height < POLYOXYMETHYLENE)
-                {
-                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE1);
-                }
-              }
-              return;
-            }
-            if (toilet_buffer_distance.Contains(THESAURUSINDULGENT))
-            {
-              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              if (maxKitchenToBalconyDistance.IsValid)
-              {
-                if (maxKitchenToBalconyDistance.Width < POLYOXYMETHYLENE && maxKitchenToBalconyDistance.Height < POLYOXYMETHYLENE)
-                {
-                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_KITCHEN_TO_BALCONY_DISTANCE);
-                }
-              }
-              return;
-            }
-            if (toilet_buffer_distance.Contains(QUOTATIONBITTER))
-            {
-              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              if (maxKitchenToBalconyDistance.IsValid)
-              {
-                if (maxKitchenToBalconyDistance.Width < POLYOXYMETHYLENE && maxKitchenToBalconyDistance.Height < POLYOXYMETHYLENE)
-                {
-                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MIN_DEVICEPLATFORM_AREA);
-                }
-              }
-              return;
-            }
-          }
-          var minDeviceplatformArea = adb.Element<BlockTableRecord>(tolReturnValueRangeTo.BlockTableRecord);
-          if (!IsWantedBlock(minDeviceplatformArea)) return;
-          var _fs = new List<KeyValuePair<Geometry, Action>>();
-          foreach (var objId in minDeviceplatformArea)
-          {
-            var dbObj = adb.Element<Entity>(objId);
-            if (dbObj is BlockReference b)
-            {
-              handleBlockReference(b, tolReturnValueRangeTo.BlockTransform.PreMultiplyBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN), _fs);
-            }
-            else
-            {
-              handleEntity(dbObj, tolReturnValueRangeTo.BlockTransform.PreMultiplyBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN), _fs);
-            }
-          }
-          {
-            var MinWellToUrinalDistance = new List<KeyValuePair<Geometry, Action>>();
-            var TolLightRangeSingleSideMin = tolReturnValueRangeTo.XClipInfo();
-            if (TolLightRangeSingleSideMin.IsValid)
-            {
-              TolLightRangeSingleSideMin.TransformBy(tolReturnValueRangeTo.BlockTransform.PreMultiplyBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN));
-              var default_voltage = TolLightRangeSingleSideMin.PreparedPolygon;
-              foreach (var max_rainpipe_to_balconyfloordrain in _fs)
-              {
-                if (default_voltage.Intersects(max_rainpipe_to_balconyfloordrain.Key))
-                {
-                  MinWellToUrinalDistance.Add(max_rainpipe_to_balconyfloordrain);
-                }
-              }
-            }
-            else
-            {
-              foreach (var max_rainpipe_to_balconyfloordrain in _fs)
-              {
-                MinWellToUrinalDistance.Add(max_rainpipe_to_balconyfloordrain);
-              }
-            }
-            maxToiletToFloordrainDistance.AddRange(MinWellToUrinalDistance);
-          }
-        }
-      }
-      return THESAURUSOBSTINACY;
-    }
-    public static Point3dCollection TOILET_WELLS_INTERVAL;
-    public static Polygon ConvertToPolygon(Polyline maxToiletToFloordrainDistance1)
-    {
-      if (maxToiletToFloordrainDistance1.NumberOfVertices <= THESAURUSPERMUTATION)
-        return null;
-      var list = new List<Point2d>();
-      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < maxToiletToFloordrainDistance1.NumberOfVertices; MAX_ANGEL_TOLLERANCE++)
-      {
-        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxToiletToFloordrainDistance1.GetPoint2dAt(MAX_ANGEL_TOLLERANCE);
-        if (list.Count == THESAURUSSTAMPEDE || !Equals(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, list.Last()))
-        {
-          list.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
-        }
-      }
-      if (list.Count <= THESAURUSPERMUTATION) return null;
-      try
-      {
-        var tmp = list.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSCoordinate()).ToList(list.Count + THESAURUSHOUSING);
-        if (!tmp[THESAURUSSTAMPEDE].Equals(tmp[tmp.Count - THESAURUSHOUSING]))
-        {
-          tmp.Add(tmp[THESAURUSSTAMPEDE]);
-        }
-        var ring = new LinearRing(tmp.ToArray());
-        return new Polygon(ring);
-      }
-      catch (System.Exception ex)
-      {
-        return null;
-      }
-    }
-    public static string TryParseWrappingPipeRadiusText(string repeated_point_distance)
-    {
-      if (repeated_point_distance == null) return null;
-      var TolLightRangeMin = Regex.Replace(repeated_point_distance, UREDINIOMYCETES, THESAURUSDEPLORE, RegexOptions.IgnoreCase);
-      TolLightRangeMin = Regex.Replace(TolLightRangeMin, QUOTATION3BABOVE, THESAURUSDEPLORE);
-      TolLightRangeMin = Regex.Replace(TolLightRangeMin, THESAURUSMISTRUST, THESAURUSSPECIFICATION);
-      return TolLightRangeMin;
-    }
-    public static StoreyType GetStoreyType(string MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN)
-    {
-      return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN switch
-      {
-        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR => StoreyType.SmallRoof,
-        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR => StoreyType.LargeRoof,
-        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR => StoreyType.StandardStorey,
-        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR => StoreyType.NonStandardStorey,
-        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR => StoreyType.NonStandardStorey,
-        _ => StoreyType.Unknown,
-      };
-    }
-    public static List<int> ParseFloorNums(string floorStr)
-    {
-      if (string.IsNullOrWhiteSpace(floorStr)) return new List<int>();
-      floorStr = floorStr.Replace(THESAURUSMETROPOLIS, THESAURUSPROMINENT).Replace(CHROMATOGRAPHER, NATIONALDEMOKRATISCHE).Replace(THESAURUSASPIRATION, THESAURUSDEPLORE).Replace(STEREOPHOTOGRAMMETRY, THESAURUSDEPLORE).Replace(THESAURUSPOLISH, THESAURUSDEPLORE);
-      var defaultFireValveLength = new HashSet<int>();
-      foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in floorStr.Split(THESAURUSPROMINENT))
-      {
-        if (string.IsNullOrEmpty(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN)) continue;
-        var tolReturnValueMinRange = Regex.Match(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN, THESAURUSAGITATION);
-        if (tolReturnValueMinRange.Success)
-        {
-          var _tolReturnValue0Approx = int.Parse(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value);
-          var TolGroupEvcaEmg = int.Parse(tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value);
-          var _tolReturnValueMaxDistance = Math.Min(_tolReturnValue0Approx, TolGroupEvcaEmg);
-          var _tolReturnValueMinRange = Math.Max(_tolReturnValue0Approx, TolGroupEvcaEmg);
-          for (int MAX_ANGEL_TOLLERANCE = _tolReturnValueMaxDistance; MAX_ANGEL_TOLLERANCE <= _tolReturnValueMinRange; MAX_ANGEL_TOLLERANCE++)
-          {
-            defaultFireValveLength.Add(MAX_ANGEL_TOLLERANCE);
-          }
-          continue;
-        }
-        tolReturnValueMinRange = Regex.Match(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN, THESAURUSSANITY);
-        if (tolReturnValueMinRange.Success)
-        {
-          defaultFireValveLength.Add(int.Parse(tolReturnValueMinRange.Value));
-        }
-      }
-      defaultFireValveLength.Remove(THESAURUSSTAMPEDE);
-      return defaultFireValveLength.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
-    }
-    public static bool IsNumStorey(string tolGroupBlkLane)
-    {
-      return GetStoreyScore(tolGroupBlkLane) < ushort.MaxValue;
-    }
-    public static int GetStoreyScore(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return THESAURUSSTAMPEDE;
-      switch (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-      {
-        case THESAURUSARGUMENTATIVE: return ushort.MaxValue;
-        case ANTHROPOMORPHICALLY: return ushort.MaxValue + THESAURUSHOUSING;
-        case THESAURUSSCUFFLE: return ushort.MaxValue + THESAURUSPERMUTATION;
-        default:
-          {
-            int.TryParse(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Replace(THESAURUSASPIRATION, THESAURUSDEPLORE), out int tolGroupEmgLightEvac);
-            return tolGroupEmgLightEvac;
-          }
-      }
-    }
-    public static IEnumerable<string> ConvertLabelStrings(IEnumerable<string> pipeIds)
-    {
-      pipeIds = pipeIds.Distinct().ToList();
-      {
-        var max_kitchen_to_balcony_distance = pipeIds.Where(TolLightRangeSingleSideMax => Regex.IsMatch(TolLightRangeSingleSideMax, THESAURUSJAILER)).ToList();
-        pipeIds = pipeIds.Except(max_kitchen_to_balcony_distance).ToList();
-        foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in ConvertLabelString(max_kitchen_to_balcony_distance))
-        {
-          yield return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN;
-        }
-        static IEnumerable<string> ConvertLabelString(IEnumerable<string> strs)
-        {
-          var kvs = new List<KeyValuePair<string, string>>();
-          foreach (var WELLS_MAX_AREA in strs)
-          {
-            var tolReturnValueMinRange = Regex.Match(WELLS_MAX_AREA, THESAURUSJAILER);
-            if (tolReturnValueMinRange.Success)
-            {
-              kvs.Add(new KeyValuePair<string, string>(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value, tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value));
-            }
-            else
-            {
-              throw new System.Exception();
-            }
-          }
-          return kvs.GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key + THESAURUSSPECIFICATION + string.Join(DEMATERIALISING, GetLabelString(TolLightRangeSingleSideMax.Select(y => y.Value[THESAURUSSTAMPEDE]))));
-        }
-        static IEnumerable<string> GetLabelString(IEnumerable<char> chars)
-        {
-          foreach (var max_rainpipe_to_balconyfloordrain in GetPairs(chars.Select(TolLightRangeSingleSideMax => (int)TolLightRangeSingleSideMax).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax)))
-          {
-            if (max_rainpipe_to_balconyfloordrain.Key == max_rainpipe_to_balconyfloordrain.Value)
-            {
-              yield return Convert.ToChar(max_rainpipe_to_balconyfloordrain.Key).ToString();
-            }
-            else
-            {
-              yield return Convert.ToChar(max_rainpipe_to_balconyfloordrain.Key) + THESAURUSEXCREMENT + Convert.ToChar(max_rainpipe_to_balconyfloordrain.Value);
-            }
-          }
-        }
-      }
-      {
-        var max_kitchen_to_balcony_distance = pipeIds.Where(TolLightRangeSingleSideMax => Regex.IsMatch(TolLightRangeSingleSideMax, THESAURUSCAPRICIOUS)).ToList();
-        pipeIds = pipeIds.Except(max_kitchen_to_balcony_distance).ToList();
-        foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in ConvertLabelString(max_kitchen_to_balcony_distance))
-        {
-          yield return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN;
-        }
-        static IEnumerable<string> ConvertLabelString(IEnumerable<string> strs)
-        {
-          var kvs = new List<ValueTuple<string, string, int>>();
-          foreach (var WELLS_MAX_AREA in strs)
-          {
-            var tolReturnValueMinRange = Regex.Match(WELLS_MAX_AREA, UNIMPRESSIONABLE);
-            if (tolReturnValueMinRange.Success)
-            {
-              kvs.Add(new ValueTuple<string, string, int>(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value, tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value, int.Parse(tolReturnValueMinRange.Groups[INTROPUNITIVENESS].Value)));
-            }
-            else
-            {
-              throw new System.Exception();
-            }
-          }
-          return kvs.GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key + string.Join(DEMATERIALISING, GetLabelString(TolLightRangeSingleSideMax.First().Item2, TolLightRangeSingleSideMax.Select(y => y.Item3))));
-        }
-        static IEnumerable<string> GetLabelString(string prefix, IEnumerable<int> nums)
-        {
-          foreach (var max_rainpipe_to_balconyfloordrain in GetPairs(nums.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax)))
-          {
-            if (max_rainpipe_to_balconyfloordrain.Key == max_rainpipe_to_balconyfloordrain.Value)
-            {
-              yield return prefix + max_rainpipe_to_balconyfloordrain.Key;
-            }
-            else
-            {
-              yield return prefix + max_rainpipe_to_balconyfloordrain.Key + THESAURUSEXCREMENT + prefix + max_rainpipe_to_balconyfloordrain.Value;
-            }
-          }
-        }
-      }
-      var REGION_BORDER_BUFFE_RDISTANCE = pipeIds.Select(id => DrainageLabelItem.Parse(id)).Where(tolReturnValueMinRange => tolReturnValueMinRange != null).ToList();
-      var rest = pipeIds.Except(REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Label)).ToList();
-      var TolLaneProtect = REGION_BORDER_BUFFE_RDISTANCE.GroupBy(tolReturnValueMinRange => VTFac.Create(tolReturnValueMinRange.Prefix, tolReturnValueMinRange.D1S, tolReturnValueMinRange.Suffix)).Select(l => l.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.D2).ToList());
-      foreach (var default_fire_valve_width in TolLaneProtect)
-      {
-        if (default_fire_valve_width.Count == THESAURUSHOUSING)
-        {
-          yield return default_fire_valve_width.First().Label;
-        }
-        else if (default_fire_valve_width.Count > THESAURUSPERMUTATION && default_fire_valve_width.Count == default_fire_valve_width.Last().D2 - default_fire_valve_width.First().D2 + THESAURUSHOUSING)
-        {
-          var tolReturnValueMinRange = default_fire_valve_width.First();
-          yield return $"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-{default_fire_valve_width.First().D2S}{tolReturnValueMinRange.Suffix}~{default_fire_valve_width.Last().D2S}{tolReturnValueMinRange.Suffix}";
-        }
-        else
-        {
-          var sb = new StringBuilder();
-          {
-            var tolReturnValueMinRange = default_fire_valve_width.First();
-            sb.Append($"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-");
-          }
-          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < default_fire_valve_width.Count; MAX_ANGEL_TOLLERANCE++)
-          {
-            var tolReturnValueMinRange = default_fire_valve_width[MAX_ANGEL_TOLLERANCE];
-            sb.Append($"{tolReturnValueMinRange.D2S}{tolReturnValueMinRange.Suffix}");
-            if (MAX_ANGEL_TOLLERANCE != default_fire_valve_width.Count - THESAURUSHOUSING)
-            {
-              sb.Append(DEMATERIALISING);
-            }
-          }
-          yield return sb.ToString();
-        }
-      }
-      foreach (var DEFAULT_FIRE_VALVE_WIDTH in rest)
-      {
-        yield return DEFAULT_FIRE_VALVE_WIDTH;
-      }
-    }
-    public static IEnumerable<KeyValuePair<int, int>> GetPairs(IEnumerable<int> ints)
-    {
-      int sidewaterbucket_y_indent = int.MinValue;
-      int ed = int.MinValue;
-      foreach (var MAX_ANGEL_TOLLERANCE in ints)
-      {
-        if (sidewaterbucket_y_indent == int.MinValue)
-        {
-          sidewaterbucket_y_indent = MAX_ANGEL_TOLLERANCE;
-          ed = MAX_ANGEL_TOLLERANCE;
-        }
-        else if (ed + THESAURUSHOUSING == MAX_ANGEL_TOLLERANCE)
-        {
-          ed = MAX_ANGEL_TOLLERANCE;
-        }
-        else
-        {
-          yield return new KeyValuePair<int, int>(sidewaterbucket_y_indent, ed);
-          sidewaterbucket_y_indent = MAX_ANGEL_TOLLERANCE;
-          ed = MAX_ANGEL_TOLLERANCE;
-        }
-      }
-      if (sidewaterbucket_y_indent != int.MinValue)
-      {
-        yield return new KeyValuePair<int, int>(sidewaterbucket_y_indent, ed);
-      }
-    }
-    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GLineSegment default_fire_valve_length, Action maxDeviceplatformArea)
-    {
-      if (default_fire_valve_length.IsValid) maxToiletToFloordrainDistance.Add(new KeyValuePair<Geometry, Action>(default_fire_valve_length.ToLineString(), maxDeviceplatformArea));
-    }
-    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GLineSegment default_fire_valve_length, List<Geometry> MinWellToUrinalDistance)
-    {
-      if (default_fire_valve_length.IsValid) _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, () => { MinWellToUrinalDistance.Add(default_fire_valve_length.ToLineString()); });
-    }
-    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GRect DEFAULT_FIRE_VALVE_WIDTH, Action maxDeviceplatformArea)
-    {
-      if (DEFAULT_FIRE_VALVE_WIDTH.IsValid) maxToiletToFloordrainDistance.Add(new KeyValuePair<Geometry, Action>(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon(), maxDeviceplatformArea));
-    }
-    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GRect DEFAULT_FIRE_VALVE_WIDTH, List<Geometry> MinWellToUrinalDistance)
-    {
-      if (DEFAULT_FIRE_VALVE_WIDTH.IsValid) _tol_lane_protect(maxToiletToFloordrainDistance, DEFAULT_FIRE_VALVE_WIDTH, () => { MinWellToUrinalDistance.Add(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()); });
-    }
-    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, CText ct, Action maxDeviceplatformArea)
-    {
-      _tol_lane_protect(maxToiletToFloordrainDistance, ct.Boundary, maxDeviceplatformArea);
-    }
-    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, CText ct, List<CText> MinWellToUrinalDistance)
-    {
-      _tol_lane_protect(maxToiletToFloordrainDistance, ct, () => { MinWellToUrinalDistance.Add(ct); });
-    }
-    public static void DrawRainFlatDiagram(RainSystemDiagramViewModel vm)
-    {
-      var range = CadCache.TryGetRange();
-      if (range == null)
-      {
-        Active.Editor.WriteMessage(THESAURUSPOWERLESS);
-        return;
-      }
-      FocusMainWindow();
-      using (DocLock)
-      using (var adb = AcadDatabase.Active())
-      using (var tr = new _DrawingTransaction(adb, THESAURUSOBSTINACY))
-      {
-        if (adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer).Any())
-        {
-          var DEFAULT_FIRE_VALVE_WIDTH = MessageBox.Show(QUOTATIONISOPHANE, THESAURUSMISADVENTURE, MessageBoxButtons.YesNo);
-          if (DEFAULT_FIRE_VALVE_WIDTH == DialogResult.No) return;
-        }
-        if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-        var mlPts = new List<Point>(THESAURUSREPERCUSSION);
-        foreach (var tolReturnValue0Approx in adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer))
-        {
-          var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValue0Approx.GetFirstVertex(THESAURUSSTAMPEDE).ToNTSPoint();
-          MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = tolReturnValue0Approx;
-          mlPts.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
-        }
-        ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CollectRainGeoData(range, adb, out List<StoreyInfo> storeysItems, out ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData);
-        var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CreateRainDrawingData(adb, geoData, INTRAVASCULARLY);
-        exInfo.drDatas = drDatas;
-        exInfo.geoData = geoData;
-        exInfo.storeysItems = storeysItems;
-        exInfo.vm = vm;
-        Dispose();
-        var maxDeviceplatformArea = GeoFac.CreateIntersectsSelector(geoData.WLines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION)).ToList());
-        var _tol_avg_column_dist = mlPts.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => maxDeviceplatformArea(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN).Any()).ToList();
-        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-        {
-          adb.Element<Entity>(((Entity)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ObjectId, THESAURUSOBSTINACY).Erase();
-        }
-        DrawFlatDiagram(exInfo);
-        FlushDQ();
-      }
-    }
-    public static void DrawDrainageFlatDiagram(DrainageSystemDiagramViewModel vm)
-    {
-      var range = CadCache.TryGetRange();
-      if (range == null)
-      {
-        Active.Editor.WriteMessage(THESAURUSPOWERLESS);
-        return;
-      }
-      FocusMainWindow();
-      using (DocLock)
-      using (var adb = AcadDatabase.Active())
-      using (var tr = new _DrawingTransaction(adb, THESAURUSOBSTINACY))
-      {
-        if (adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer).Any())
-        {
-          var DEFAULT_FIRE_VALVE_WIDTH = MessageBox.Show(QUOTATIONISOPHANE, THESAURUSMISADVENTURE, MessageBoxButtons.YesNo);
-          if (DEFAULT_FIRE_VALVE_WIDTH == DialogResult.No) return;
-        }
-        if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-        var mlPts = new List<Point>(THESAURUSREPERCUSSION);
-        foreach (var tolReturnValue0Approx in adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer))
-        {
-          var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValue0Approx.GetFirstVertex(THESAURUSSTAMPEDE).ToNTSPoint();
-          MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = tolReturnValue0Approx;
-          mlPts.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
-        }
-        ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CollectDrainageGeoData(range, adb, out List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> storeysItems, out ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData);
-        var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CreateDrainageDrawingData(geoData, INTRAVASCULARLY);
-        exInfo.drDatas = drDatas;
-        exInfo.geoData = geoData;
-        exInfo.storeysItems = storeysItems;
-        exInfo.vm = vm;
-        Dispose();
-        var maxDeviceplatformArea = GeoFac.CreateIntersectsSelector(geoData.DLines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION)).ToList());
-        var _tol_avg_column_dist = mlPts.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => maxDeviceplatformArea(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN).Any()).ToList();
-        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-        {
-          adb.Element<Entity>(((Entity)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ObjectId, THESAURUSOBSTINACY).Erase();
-        }
-        DrawFlatDiagram(exInfo);
-        FlushDQ();
-      }
-    }
-    public static void DrawFlatDiagram(ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo)
-    {
-      if (exInfo is null) return;
-      DrawBackToFlatDiagram(exInfo);
-    }
-    public static void DrawFlatDiagram(ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo)
-    {
-      if (exInfo is null) return;
-      DrawBackToFlatDiagram(exInfo);
-    }
-    public static void DrawBackToFlatDiagram(ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo)
-    {
-      if (exInfo is null) return;
-      DrawBackToFlatDiagram(exInfo.storeysItems, exInfo.geoData, exInfo.drDatas, exInfo, exInfo.vm);
-    }
-    static List<GLineSegment> Substract(List<GLineSegment> TolLane, IEnumerable<Geometry> DEFAULT_VOLTAGE)
-    {
-      static Func<Geometry, List<T>> CreateIntersectsSelector<T>(ICollection<T> DEFAULT_VOLTAGE) where T : Geometry
-      {
-        if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return DEFAULT_FIRE_VALVE_WIDTH => new List<T>();
-        var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
-        foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
-        return DEFAULT_FIRE_VALVE_LENGTH =>
-        {
-          if (DEFAULT_FIRE_VALVE_LENGTH == null) throw new ArgumentNullException();
-          var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
-          return engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Where(default_fire_valve_width => default_voltage.Intersects(default_fire_valve_width)).ToList();
-        };
-      }
-      var tolReturnValueRange = new HashSet<LineString>(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()));
-      foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE)
-      {
-        var maxDeviceplatformArea = CreateIntersectsSelector(tolReturnValueRange);
-        var _lines = maxDeviceplatformArea(DEFAULT_FIRE_VALVE_LENGTH);
-        if (_lines.Count > THESAURUSSTAMPEDE)
-        {
-          foreach (var TolUniformSideLenth in _lines)
-          {
-            tolReturnValueRange.Remove(TolUniformSideLenth);
-          }
-          tolReturnValueRange.AddRange(_lines.SelectMany(TolUniformSideLenth => GeoFac.GetLines(TolUniformSideLenth.Difference(DEFAULT_FIRE_VALVE_LENGTH)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString())));
-        }
-      }
-      return tolReturnValueRange.SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList();
-    }
-    static GLineSegment GetCenterLine(List<GLineSegment> TolLane)
-    {
-      if (TolLane.Count == THESAURUSSTAMPEDE) throw new ArgumentException();
-      if (TolLane.Count == THESAURUSHOUSING) return TolLane[THESAURUSSTAMPEDE];
-      var angles = TolLane.Select(default_fire_valve_length => default_fire_valve_length.SingleAngle).ToList();
-      if (angles.Max() - angles.Min() >= Math.PI / THESAURUSPERMUTATION)
-      {
-        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < angles.Count; MAX_ANGEL_TOLLERANCE++)
-        {
-          if (angles[MAX_ANGEL_TOLLERANCE] > Math.PI / THESAURUSPERMUTATION)
-          {
-            angles[MAX_ANGEL_TOLLERANCE] -= Math.PI;
-          }
-        }
-      }
-      var angle = angles.Average();
-      var DEFAULT_FIRE_VALVE_WIDTH = Extents2dCalculator.Calc(TolLane.YieldPoints()).ToGRect();
-      var tolReturnValueMinRange = Matrix2d.Displacement(-DEFAULT_FIRE_VALVE_WIDTH.Center.ToVector2d()).PreMultiplyBy(Matrix2d.Rotation(-angle, default));
-      DEFAULT_FIRE_VALVE_WIDTH = Extents2dCalculator.Calc(TolLane.Select(default_fire_valve_length => default_fire_valve_length.TransformBy(tolReturnValueMinRange))).ToGRect();
-      return new GLineSegment(GetMidPoint(DEFAULT_FIRE_VALVE_WIDTH.LeftButtom, DEFAULT_FIRE_VALVE_WIDTH.LeftTop), GetMidPoint(DEFAULT_FIRE_VALVE_WIDTH.RightButtom, DEFAULT_FIRE_VALVE_WIDTH.RightTop)).TransformBy(tolReturnValueMinRange.Inverse());
-    }
-    static double FixValue(double MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)
-    {
-      return Math.Floor(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN + THESAURUSCONFECTIONERY);
-    }
-    public static void DrawBackToFlatDiagram(List<StoreyInfo> storeysItems, ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData, List<ThMEPWSS.ReleaseNs.RainSystemNs.RainDrawingData> drDatas, ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo, RainSystemDiagramViewModel vm)
-    {
-      static string getDn(int MAX_CONDENSEPIPE_TO_WASHMACHINE)
-      {
-        return DnToString(MAX_CONDENSEPIPE_TO_WASHMACHINE);
-      }
-      static string DnToString(int MAX_CONDENSEPIPE_TO_WASHMACHINE)
-      {
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSREVERSE) return PHOTOFLUOROGRAM;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSSYMMETRICAL) return THESAURUSDISREPUTABLE;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSDRAGOON) return ALLITERATIVENESS;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSMORTALITY) return QUOTATIONBREWSTER;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSNEGATE) return QUOTATIONDOPPLER;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSINNOCUOUS) return QUOTATIONDOPPLER;
-        return IRRESPONSIBLENESS;
-      }
-      int parseDn(string MAX_CONDENSEPIPE_TO_WASHMACHINE)
-      {
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE.StartsWith(THESAURUSVICTORIOUS)) return THESAURUSENTREPRENEUR;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSJOURNAL) return THESAURUSEVERLASTING;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is CHRISTIANIZATION or UNPREMEDITATEDNESS) return HYPERDISYLLABLE;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSFINICKY) return parseDn(vm.Params.CondensePipeVerticalDN);
-        var tolReturnValueMinRange = Regex.Match(MAX_CONDENSEPIPE_TO_WASHMACHINE, SUPERNATURALIZE);
-        if (tolReturnValueMinRange.Success) return int.Parse(tolReturnValueMinRange.Value);
-        return THESAURUSSTAMPEDE;
-      }
-      var vp2fdpts = new HashSet<Point2d>();
-      var y1lpts = new HashSet<Point2d>();
-      var y2lpts = new HashSet<Point2d>();
-      var nlpts = new HashSet<Point2d>();
-      var fl0pts = new HashSet<Point2d>();
-      {
-        var toCmp = new HashSet<KeyValuePair<int, int>>();
-        {
-          var REGION_BORDER_BUFFE_RDISTANCE = storeysItems.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Any()).ToList();
-          var minlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Min()).ToList();
-          var maxlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Max()).ToList();
-          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < maxlst.Count; MAX_ANGEL_TOLLERANCE++)
-          {
-            var _tolReturnValueMinRange = maxlst[MAX_ANGEL_TOLLERANCE];
-            for (int MAX_ANGLE_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGLE_TOLLERANCE < maxlst.Count; MAX_ANGLE_TOLLERANCE++)
-            {
-              if (MAX_ANGLE_TOLLERANCE == MAX_ANGEL_TOLLERANCE) continue;
-              var _tolReturnValueMaxDistance = minlst[MAX_ANGLE_TOLLERANCE];
-              if (_tolReturnValueMaxDistance + THESAURUSHOUSING == _tolReturnValueMinRange)
-              {
-                toCmp.Add(new KeyValuePair<int, int>(storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGLE_TOLLERANCE]), storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGEL_TOLLERANCE])));
-              }
-            }
-          }
-        }
-        foreach (var max_rainpipe_to_balconyfloordrain in toCmp)
-        {
-          var low = storeysItems[max_rainpipe_to_balconyfloordrain.Key];
-          var high = storeysItems[max_rainpipe_to_balconyfloordrain.Value];
-          var max_basecircle_area = geoData.FloorDrains.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(INTRAVASCULARLY).ToCirclePolygon(SUPERLATIVENESS, THESAURUSOBSTINACY)).ToList();
-          var Commonradius = GeoFac.CreateEnvelopeSelector(max_basecircle_area);
-          max_basecircle_area = Commonradius(high.Boundary.ToPolygon());
-          var pps = geoData.VerticalPipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList();
-          var ppsf = GeoFac.CreateEnvelopeSelector(pps);
-          pps = ppsf(low.Boundary.ToPolygon());
-          var vhigh = -high.ContraPoint.ToVector2d();
-          var vlow = -low.ContraPoint.ToVector2d();
-          {
-            var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = low.ContraPoint - high.ContraPoint;
-            var si = max_rainpipe_to_balconyfloordrain.Value;
-            var lbdict = exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
-            var y1ls = lbdict.Where(TolLightRangeSingleSideMax => IsY1L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            var y2ls = lbdict.Where(TolLightRangeSingleSideMax => IsY2L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            var nls = lbdict.Where(TolLightRangeSingleSideMax => IsNL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            var fl0s = lbdict.Where(TolLightRangeSingleSideMax => IsFL0(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            y1lpts.AddRange(y1ls.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
-            y2lpts.AddRange(y2ls.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
-            nlpts.AddRange(nls.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
-            fl0pts.AddRange(fl0s.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
-          }
-          var _fds = max_basecircle_area.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vhigh)).ToList();
-          var _pps = pps.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vlow)).ToList();
-          var _ppsf = GeoFac.CreateIntersectsSelector(_pps);
-          foreach (var fd in _fds)
-          {
-            var ToiletWellsInterval = _ppsf(fd.GetCenter().ToNTSPoint()).FirstOrDefault();
-            if (ToiletWellsInterval != null)
-            {
-              vp2fdpts.Add(pps[_pps.IndexOf(ToiletWellsInterval)].GetCenter());
-            }
-          }
-        }
-      }
-      var vp2fdptst = GeoFac.CreateIntersectsTester(vp2fdpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList());
-      var vp2fdptrgs = vp2fdpts.Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax, THESAURUSHESITANCY).ToPolygon()).ToList();
-      var vp2fdptrgst = GeoFac.CreateIntersectsTester(vp2fdptrgs);
-      var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
-      var cadDatas = exInfo.CadDatas;
-      Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
-      Func<List<Geometry>, Func<Geometry, bool>> T = GeoFac.CreateIntersectsTester;
-      Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
-      Func<List<Geometry>, List<List<Geometry>>> GG = GeoFac.GroupGeometries;
-      static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(MinWellToUrinalDistance => GeoFac.CreateGeometry(MinWellToUrinalDistance)).ToList();
-      {
-        var after = new List<ValueTuple<string, Geometry>>();
-        var (sankakuptsf, addsankaku) = GeoFac.CreateIntersectsSelectorEngine(mlInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.BasePoint.ToNTSPoint(TolLightRangeSingleSideMax)));
-        void modify(Geometry range, Action<MLeaderInfo> cb)
-        {
-          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(range))
-          {
-            cb((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData);
-          }
-        }
-        void draw(string repeated_point_distance, Geometry DEFAULT_FIRE_VALVE_LENGTH, bool autoCreate = THESAURUSOBSTINACY, bool overWrite = THESAURUSOBSTINACY, string note = null)
-        {
-          Point2d center;
-          if (DEFAULT_FIRE_VALVE_LENGTH is Point point)
-          {
-            center = point.ToPoint2d();
-            DEFAULT_FIRE_VALVE_LENGTH = GRect.Create(center, UNCONSEQUENTIAL).ToPolygon();
-          }
-          else
-          {
-            center = DEFAULT_FIRE_VALVE_LENGTH.GetCenter();
-          }
-          {
-            var SidewaterbucketXIndent = INTRAVASCULARLY;
-            foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(DEFAULT_FIRE_VALVE_LENGTH))
-            {
-              var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-              if (string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text) || overWrite)
-              {
-                TolLightRangeSingleSideMin.Text = repeated_point_distance;
-              }
-              if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
-              SidewaterbucketXIndent = THESAURUSOBSTINACY;
-            }
-            if (!SidewaterbucketXIndent && autoCreate)
-            {
-              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = center;
-              var TolLightRangeSingleSideMin = MLeaderInfo.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, repeated_point_distance);
-              mlInfos.Add(TolLightRangeSingleSideMin);
-              var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
-              _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
-              if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
-              addsankaku(_raiseDistanceToStartDefault);
-            }
-          }
-        }
-        {
-          using var max_balcony_to_balcony_distance = new PriorityQueue(THESAURUSINCOMPLETE);
-          var precisePts = new HashSet<Point2d>();
-          {
-            foreach (var si in Enumerable.Range(THESAURUSSTAMPEDE, cadDatas.Count))
-            {
-              var djPts = new HashSet<Point>();
-              var _linesGroup = new HashSet<HashSet<GLineSegment>>();
-              var tolGroupBlkLane = geoData.Storeys[si].ToPolygon();
-              var gpGeos = GeoFac.CreateEnvelopeSelector(geoData.Groups.Select(GeoFac.CreateGeometry).ToList())(tolGroupBlkLane);
-              var wlsegs = geoData.OWLines.ToList();
-              var vertices = GeoFac.CreateEnvelopeSelector(wlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.StartPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax)).Concat(wlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.EndPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax))).ToList())(tolGroupBlkLane);
-              var verticesf = GeoFac.CreateIntersectsSelector(vertices);
-              wlsegs = vertices.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).Cast<GLineSegment>().Distinct().ToList();
-              max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
-              {
-                var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
-                var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
-                foreach (var tolReturnValueRange in _linesGroup)
-                {
-                  var kvs = new List<KeyValuePair<GLineSegment, MLeaderInfo>>();
-                  foreach (var TolUniformSideLenth in tolReturnValueRange.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > QUOTATIONLUCANIAN))
-                  {
-                    var _tol_avg_column_dist = sankakuptsf(TolUniformSideLenth.Buffer(THESAURUSPERMUTATION));
-                    if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
-                    {
-                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist[THESAURUSSTAMPEDE];
-                      var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                      kvs.Add(new KeyValuePair<GLineSegment, MLeaderInfo>(TolUniformSideLenth, TolLightRangeSingleSideMin));
-                    }
-                  }
-                  {
-                    var TolLane = kvs.Select(max_rainpipe_to_balconyfloordrain => max_rainpipe_to_balconyfloordrain.Key).Distinct().ToList();
-                    var lns = TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
-                    var vertexs = TolLane.YieldPoints().Distinct().ToList();
-                    var lnsf = GeoFac.CreateIntersectsSelector(lns);
-                    var lnscf = GeoFac.CreateContainsSelector(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(-THESAURUSPERMUTATION).ToLineString()).ToList());
-                    var opts = new List<Ref<RegexOptions>>();
-                    foreach (var vertex in vertexs)
-                    {
-                      var MinWellToUrinalDistance = lnsf(GeoFac.CreateCirclePolygon(vertex, THESAURUSCOMMUNICATION, SUPERLATIVENESS));
-                      RegexOptions opt;
-                      if (MinWellToUrinalDistance.Count == THESAURUSHOUSING)
-                      {
-                        opt = RegexOptions.IgnoreCase;
-                      }
-                      else if (MinWellToUrinalDistance.Count == THESAURUSPERMUTATION)
-                      {
-                        opt = RegexOptions.Multiline;
-                      }
-                      else if (MinWellToUrinalDistance.Count > THESAURUSPERMUTATION)
-                      {
-                        opt = RegexOptions.ExplicitCapture;
-                      }
-                      else
-                      {
-                        opt = RegexOptions.None;
-                      }
-                      opts.Add(new Ref<RegexOptions>(opt));
-                    }
-                    foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(GeoFac.GetLines(GeoFac.CreateGeometry(lns).Difference(GeoFac.CreateGeometryEx(opts.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value == RegexOptions.ExplicitCapture).Select(opts).ToList(vertexs).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(THESAURUSPERMUTATION).ToCirclePolygon(SUPERLATIVENESS)).ToList()))).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList(), UNCONSEQUENTIAL))
-                    {
-                      var bf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
-                      var _tol_avg_column_dist = sankakuptsf(bf);
-                      var _tol_light_range_single_side_max = _tol_avg_column_dist.Select(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ToList();
-                      if (_tol_light_range_single_side_max.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Text).Distinct().Count() == THESAURUSHOUSING)
-                      {
-                        var repeated_point_distance = _tol_light_range_single_side_max[THESAURUSSTAMPEDE];
-                        var _segs = lnscf(bf).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList();
-                        if (_segs.Count > THESAURUSHOUSING)
-                        {
-                          const double LEN = PHOTOCONDUCTION;
-                          if (_segs.Any(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= LEN))
-                          {
-                            foreach (var default_fire_valve_length in _segs)
-                            {
-                              if (default_fire_valve_length.Length < LEN)
-                              {
-                                draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
-                              }
-                            }
-                          }
-                          else
-                          {
-                            var _tolReturnValueMinRange = _segs.Max(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length);
-                            foreach (var default_fire_valve_length in _segs)
-                            {
-                              if (default_fire_valve_length.Length != _tolReturnValueMinRange)
-                              {
-                                draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
-                              }
-                            }
-                          }
-                        }
-                        else
-                        {
-                        }
-                      }
-                    }
-                  }
-                }
-              });
-              var REPEATED_POINT_DISTANCE = cadDatas[si];
-              var wlinesGeos = GeoFac.GroupLinesByConnPoints(REPEATED_POINT_DISTANCE.WLines, DINOFLAGELLATES).ToList();
-              var wlinesGeosf = F(wlinesGeos);
-              var portst = T(REPEATED_POINT_DISTANCE.RainPortSymbols.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSENTREPRENEUR)).ToList());
-              var portsf = F(REPEATED_POINT_DISTANCE.RainPortSymbols);
-              var wellst = T(REPEATED_POINT_DISTANCE.WaterWells.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
-              var MaxTagLength = F(REPEATED_POINT_DISTANCE.WaterWells);
-              var swellst = T(REPEATED_POINT_DISTANCE.WaterSealingWells.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
-              var swellsf = F(REPEATED_POINT_DISTANCE.WaterSealingWells);
-              var ditchest = T(REPEATED_POINT_DISTANCE.Ditches.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSENTREPRENEUR)).ToList());
-              var MaxTagXposition = F(REPEATED_POINT_DISTANCE.Ditches);
-              var fldrs = REPEATED_POINT_DISTANCE.FloorDrains;
-              var MaxDownspoutToBalconywashingfloordrain = REPEATED_POINT_DISTANCE.VerticalPipes;
-              var _vps = MaxDownspoutToBalconywashingfloordrain.ToList();
-              {
-                var max_basecircle_area = MaxDownspoutToBalconywashingfloordrain.Where(vp2fdptst).ToList();
-                fldrs = fldrs.Concat(max_basecircle_area).Distinct().ToList();
-                MaxDownspoutToBalconywashingfloordrain = MaxDownspoutToBalconywashingfloordrain.Except(max_basecircle_area).ToList();
-              }
-              var Commonradius = F(fldrs);
-              var fdst = T(fldrs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)).ToList());
-              var fdrings = geoData.FloorDrainRings.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToCirclePolygon(THESAURUSDISINGENUOUS).Shell.Buffer(THESAURUSACRIMONIOUS)).ToList();
-              var fdringsf = F(fdrings);
-              var fdringst = T(fdrings);
-              var ppsf = F(MaxDownspoutToBalconywashingfloordrain);
-              var ppst = T(MaxDownspoutToBalconywashingfloordrain);
-              var cpst = T(REPEATED_POINT_DISTANCE.CondensePipes);
-              var MaxBalconybasinToBalcony = F(REPEATED_POINT_DISTANCE.CondensePipes);
-              var lbdict = exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
-              var y1ls = lbdict.Where(TolLightRangeSingleSideMax => IsY1L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-              var y2ls = lbdict.Where(TolLightRangeSingleSideMax => IsY2L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-              var nls = lbdict.Where(TolLightRangeSingleSideMax => IsNL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-              var fl0s = lbdict.Where(TolLightRangeSingleSideMax => IsFL0(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-              {
-                var MaxRainpipeToWashmachine = F(MaxDownspoutToBalconywashingfloordrain);
-                var _y1ls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((y1lpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
-                var _y2ls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((y2lpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
-                var _nls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((nlpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
-                var _fl0s = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((fl0pts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
-                {
-                  var default_voltage = G(REPEATED_POINT_DISTANCE.LabelLines).ToIPreparedGeometry();
-                  y1ls = y1ls.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
-                  y2ls = y2ls.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
-                  nls = nls.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
-                  fl0s = fl0s.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
-                }
-                {
-                  y1ls = y1ls.Concat(_y1ls).Distinct().ToList();
-                  y2ls = y2ls.Concat(_y2ls).Distinct().ToList();
-                  nls = nls.Concat(_nls).Distinct().ToList();
-                  fl0s = fl0s.Concat(_fl0s).Distinct().ToList();
-                }
-              }
-              var fldrst = T(fldrs);
-              var nlst = T(nls);
-              var y1lst = T(y1ls);
-              var y2lst = T(y2ls);
-              var fl0st = T(fl0s);
-              var fl0sf = F(fl0s);
-              PipeType maxCondensepipeToWashmachine(Point2d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)
-              {
-                var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
-                if (nlst(_raiseDistanceToStartDefault)) return PipeType.NL;
-                if (y1lst(_raiseDistanceToStartDefault)) return PipeType.Y1L;
-                if (y2lst(_raiseDistanceToStartDefault)) return PipeType.Y2L;
-                if (fl0st(_raiseDistanceToStartDefault)) return PipeType.FL0;
-                return PipeType.Unknown;
-              }
-              string getPipeDn(PipeType MaxToiletToFloordrainDistance)
-              {
-                return MaxToiletToFloordrainDistance switch
-                {
-                  PipeType.FL0 => vm.Params.WaterWellPipeVerticalDN,
-                  PipeType.Y2L => vm.Params.BalconyRainPipeDN,
-                  PipeType.NL => vm.Params.CondensePipeVerticalDN,
-                  PipeType.Unknown => null,
-                  _ => IRRESPONSIBLENESS,
-                };
-              }
-              string getDN(Geometry MaxBalconyToRainpipeDistance)
-              {
-                if (nlst(MaxBalconyToRainpipeDistance)) return vm.Params.CondensePipeVerticalDN;
-                if (y2lst(MaxBalconyToRainpipeDistance)) return vm.Params.BalconyRainPipeDN;
-                if (fl0st(MaxBalconyToRainpipeDistance)) return vm.Params.WaterWellFloorDrainDN;
-                if (y1lst(MaxBalconyToRainpipeDistance)) return IRRESPONSIBLENESS;
-                if (fldrst(MaxBalconyToRainpipeDistance)) return vm.Params.BalconyFloorDrainDN;
-                return null;
-              }
-              var nlfdpts = nls.SelectMany(nl => wlinesGeosf(nl)).Distinct().SelectMany(TolLightRangeSingleSideMax => Commonradius(TolLightRangeSingleSideMax))
-                      .Concat(nls.SelectMany(TolLightRangeSingleSideMax => Commonradius(TolLightRangeSingleSideMax.Buffer(THESAURUSHYPNOTIC))))
-                      .Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter()).Distinct().ToList();
-              foreach (var wlinesGeo in wlinesGeos)
-              {
-                var wlinesGeoBuf = wlinesGeo.Buffer(THESAURUSACRIMONIOUS);
-                var wlbufgf = wlinesGeoBuf.ToIPreparedGeometry();
-                max_balcony_to_balcony_distance.Enqueue(THESAURUSCENSURE, () =>
-                {
-                  foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(wlinesGeo.Buffer(THESAURUSHOUSING)))
-                  {
-                    var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                    if (TolLightRangeSingleSideMin.Text is THESAURUSDEPLORE)
-                    {
-                      if (nlst(wlinesGeo))
-                      {
-                        TolLightRangeSingleSideMin.Text = vm.Params.CondensePipeVerticalDN;
-                      }
-                      else if (y1lst(wlinesGeo) || y2lst(wlinesGeo) || fl0st(wlinesGeo))
-                      {
-                        TolLightRangeSingleSideMin.Text = IRRESPONSIBLENESS;
-                      }
-                    }
-                  }
-                });
-                max_balcony_to_balcony_distance.Enqueue(THESAURUSSTAMPEDE, () =>
-                {
-                  var tolReturnValueRange = Substract(GeoFac.GetLines(wlinesGeo).ToList(), MaxDownspoutToBalconywashingfloordrain.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-SUPERLATIVENESS)).Concat(REPEATED_POINT_DISTANCE.CondensePipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-SUPERLATIVENESS))));
-                  tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= DISPROPORTIONAL).ToList();
-                  tolReturnValueRange = GeoFac.GroupParallelLines(tolReturnValueRange, THESAURUSAPPARATUS, THESAURUSHOUSING).Select(default_fire_valve_width => GetCenterLine(default_fire_valve_width)).ToList();
-                  precisePts.AddRange(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Center));
-                  tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSHOUSING)).ToList()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSMORTUARY).Select(TolLightRangeSingleSideMax => new GLineSegment(new Point2d(FixValue(TolLightRangeSingleSideMax.StartPoint.X), FixValue(TolLightRangeSingleSideMax.StartPoint.Y)), new Point2d(FixValue(TolLightRangeSingleSideMax.EndPoint.X), FixValue(TolLightRangeSingleSideMax.EndPoint.Y)))).Distinct().ToList();
-                  var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList());
-                  {
-                    var _pts = tolReturnValueRange.SelectMany(default_fire_valve_length => new Point2d[] { default_fire_valve_length.StartPoint, default_fire_valve_length.EndPoint }).GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Distinct().Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => wlbufgf.Intersects(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint())).ToList();
-                    var _tol_avg_column_dist = _pts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
-                    djPts.AddRange(_tol_avg_column_dist);
-                    _linesGroup.Add(tolReturnValueRange.ToHashSet());
-                  }
-                  foreach (var default_fire_valve_length in tolReturnValueRange)
-                  {
-                    if (default_fire_valve_length.Length < DINOFLAGELLATES) continue;
-                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = default_fire_valve_length.Center;
-                    var TolLightRangeSingleSideMin = MLeaderInfo.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, THESAURUSDEPLORE);
-                    mlInfos.Add(TolLightRangeSingleSideMin);
-                    var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
-                    _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
-                    addsankaku(_raiseDistanceToStartDefault);
-                  }
-                  max_balcony_to_balcony_distance.Enqueue(THESAURUSHOUSING, () =>
-                                  {
-                                    max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
-                                                      {
-                                                        foreach (var cp in REPEATED_POINT_DISTANCE.CondensePipes)
-                                                        {
-                                                          foreach (var TolUniformSideLenth in linesf(cp))
-                                                          {
-                                                            var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeHorizontalDN;
-                                                            draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.GetCenter().Expand(THESAURUSHOUSING).ToGRect().ToPolygon());
-                                                          }
-                                                        }
-                                                      }
-);
-                                    max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
-                                                    {
-                                                      if (cpst(wlinesGeo))
-                                                      {
-                                                        var DEFAULT_FIRE_VALVE_WIDTH = GeoFac.CreateGeometry(ppsf(wlinesGeo).Concat(MaxBalconybasinToBalcony(wlinesGeo))).ToGRect();
-                                                        var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeHorizontalDN;
-                                                        after.Add(new(MAX_CONDENSEPIPE_TO_WASHMACHINE, DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()));
-                                                      }
-                                                      if (fdst(wlinesGeo))
-                                                      {
-                                                        var DEFAULT_FIRE_VALVE_WIDTH = GeoFac.CreateGeometry(ppsf(wlinesGeo).Concat(Commonradius(wlinesGeo))).ToGRect().Expand(-DISPENSABLENESS);
-                                                        if (!vp2fdptst(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()))
-                                                        {
-                                                          string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                                          {
-                                                            if (fl0st(wlinesGeo))
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
-                                                            }
-                                                            else if (nlst(wlinesGeo))
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
-                                                            }
-                                                            else
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
-                                                            }
-                                                          }
-                                                          after.Add(new(MAX_CONDENSEPIPE_TO_WASHMACHINE, DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()));
-                                                        }
-                                                      }
-                                                    });
-                                    max_balcony_to_balcony_distance.Enqueue(INTROPUNITIVENESS, () =>
-                                                    {
-                                                      foreach (var wlinesGeo in GeoFac.GroupGeometries(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSHOUSING)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList()).Select(GeoFac.CreateGeometry))
-                                                      {
-                                                        if (fldrst(wlinesGeo))
-                                                        {
-                                                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
-                                                          {
-                                                            string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                                            {
-                                                              if (fl0st(wlinesGeo))
-                                                              {
-                                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
-                                                              }
-                                                              else if (nlst(wlinesGeo))
-                                                              {
-                                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
-                                                              }
-                                                              else
-                                                              {
-                                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
-                                                              }
-                                                            }
-                                                            draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
-                                                          }
-                                                        }
-                                                        else if (nlst(wlinesGeo))
-                                                        {
-                                                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
-                                                          {
-                                                            {
-                                                              draw(vm.Params.CondensePipeVerticalDN, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
-                                                            }
-                                                          }
-                                                        }
-                                                        else if (y1lst(wlinesGeo))
-                                                        {
-                                                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
-                                                          {
-                                                            {
-                                                              draw(IRRESPONSIBLENESS, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
-                                                            }
-                                                          }
-                                                        }
-                                                        else if (y2lst(wlinesGeo))
-                                                        {
-                                                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
-                                                          {
-                                                            {
-                                                              draw(vm.Params.BalconyRainPipeDN, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                    });
-                                  });
-                });
-              }
-              max_balcony_to_balcony_distance.Enqueue(ECCLESIASTICISM, () =>
-              {
-                foreach (var gpGeo in gpGeos)
-                {
-                  var pps = ppsf(gpGeo);
-                  foreach (var ToiletWellsInterval in pps)
-                  {
-                    var MAX_CONDENSEPIPE_TO_WASHMACHINE = getPipeDn(maxCondensepipeToWashmachine(ToiletWellsInterval.GetCenter()));
-                    if (MAX_CONDENSEPIPE_TO_WASHMACHINE is not null)
-                    {
-                      modify(GeoFac.GetLines(gpGeo, skipPolygon: THESAURUSOBSTINACY).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSHOUSING)).ToGeometry(), TolLightRangeSingleSideMin => TolLightRangeSingleSideMin.Text = MAX_CONDENSEPIPE_TO_WASHMACHINE);
-                    }
-                  }
-                  if (pps.Count == THESAURUSHOUSING)
-                  {
-                    var ToiletWellsInterval = pps[THESAURUSSTAMPEDE];
-                    if (y1ls.Contains(ToiletWellsInterval) || y2ls.Contains(ToiletWellsInterval))
-                    {
-                      var buf = gpGeo.Buffer(THESAURUSPERMUTATION);
-                      var oksegs = new HashSet<GLineSegment>();
-                      foreach (var default_fire_valve_length in wlsegs)
-                      {
-                        if (buf.Contains(default_fire_valve_length.Center.ToNTSPoint()))
-                        {
-                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(default_fire_valve_length.Buffer(THESAURUSHOUSING)))
-                          {
-                            ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = IRRESPONSIBLENESS;
-                          }
-                          oksegs.Add(default_fire_valve_length);
-                        }
-                      }
-                      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < THESAURUSCOMMUNICATION; MAX_ANGEL_TOLLERANCE++)
-                      {
-                        var TolLane = verticesf(oksegs.YieldPoints().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGRect(THESAURUSPERMUTATION).ToPolygon()).ToGeometry()).Select(TolLightRangeSingleSideMax => (GLineSegment)TolLightRangeSingleSideMax.UserData).Except(oksegs).ToList();
-                        foreach (var default_fire_valve_length in TolLane)
-                        {
-                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(default_fire_valve_length.Buffer(THESAURUSHOUSING)))
-                          {
-                            ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = IRRESPONSIBLENESS;
-                          }
-                          oksegs.Add(default_fire_valve_length);
-                        }
-                        if (TolLane.Count == THESAURUSSTAMPEDE) break;
-                      }
-                    }
-                  }
-                }
-                {
-                  var text_height = GeoFac.CreateEnvelopeSelector(wlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList())(tolGroupBlkLane);
-                  foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(text_height, THESAURUSPERMUTATION))
-                  {
-                    var buf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSHOUSING);
-                    if (cpst(buf) && nlst(buf))
-                    {
-                      var _tol_avg_column_dist = sankakuptsf(buf);
-                      if (_tol_avg_column_dist.All(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE or THESAURUSDISREPUTABLE or QUOTATIONBREWSTER or QUOTATIONDOPPLER))
-                      {
-                        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-                        {
-                          ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = THESAURUSDISREPUTABLE;
-                        }
-                      }
-                    }
-                  }
-                  foreach (var wl in text_height)
-                  {
-                    if (y1lst(wl))
-                    {
-                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(wl.Buffer(THESAURUSPERMUTATION)))
-                      {
-                        ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = IRRESPONSIBLENESS;
-                      }
-                    }
-                  }
-                }
-                foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(REPEATED_POINT_DISTANCE.WLines, THESAURUSCOMMUNICATION))
-                {
-                  var TolLane = GeoFac.GetLines(DEFAULT_FIRE_VALVE_LENGTH).ToList();
-                  if (TolLane.Count == THESAURUSSTAMPEDE) continue;
-                  if (TolLane.Count == THESAURUSHOUSING)
-                  {
-                    var default_fire_valve_length = TolLane[THESAURUSSTAMPEDE];
-                    var buf = default_fire_valve_length.Buffer(THESAURUSPERMUTATION);
-                    var _tol_avg_column_dist = sankakuptsf(buf);
-                    if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
-                    {
-                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist[THESAURUSSTAMPEDE];
-                      if (ppst(default_fire_valve_length.StartPoint.ToNTSPoint()) || ppst(default_fire_valve_length.EndPoint.ToNTSPoint()))
-                      {
-                        if (fdringst(default_fire_valve_length.StartPoint.ToNTSPoint()) || fdringst(default_fire_valve_length.EndPoint.ToNTSPoint()))
-                        {
-                          modify(default_fire_valve_length.Buffer(THESAURUSHOUSING), TolLightRangeSingleSideMin =>
-                                        {
-                                          if (TolLightRangeSingleSideMin.Text is THESAURUSDISREPUTABLE)
-                                          {
-                                            TolLightRangeSingleSideMin.Text = QUOTATIONBREWSTER;
-                                          }
-                                        });
-                        }
-                      }
-                    }
-                  }
-                }
-                {
-                  var lnsGeos = _linesGroup.Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= THESAURUSINCOMPLETE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()))).ToList();
-                  var lnsGeosf = GeoFac.CreateIntersectsSelector(lnsGeos);
-                  foreach (var _segs in _linesGroup)
-                  {
-                    var TolLane = _segs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= THESAURUSINCOMPLETE).ToList();
-                    var DEFAULT_FIRE_VALVE_LENGTH = GeoFac.CreateGeometry(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()));
-                    var buf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
-                    if (TolLane.Count > THESAURUSSTAMPEDE)
-                    {
-                      var _tol_avg_column_dist = sankakuptsf(buf);
-                      if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE)
-                      {
-                        if (_tol_avg_column_dist.Any(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE) && _tol_avg_column_dist.Any(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDISREPUTABLE) && _tol_avg_column_dist.All(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE or THESAURUSDISREPUTABLE))
-                        {
-                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-                          {
-                            ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = THESAURUSDEPLORE;
-                          }
-                        }
-                        if (_tol_avg_column_dist.All(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
-                        {
-                          void patch()
-                          {
-                            foreach (var gpgeo in gpGeos)
-                            {
-                              foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
-                              {
-                                if (toilet_wells_interval.Intersects(gpgeo))
-                                {
-                                  {
-                                    var MAX_CONDENSEPIPE_TO_WASHMACHINE = getDN(toilet_wells_interval.GetCenter().ToNTSPoint());
-                                    if (MAX_CONDENSEPIPE_TO_WASHMACHINE is null) continue;
-                                    foreach (var DEFAULT_FIRE_VALVE_LENGTH in lnsGeosf(new MultiLineString(GeoFac.GetLines(gpgeo, skipPolygon: THESAURUSOBSTINACY).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray()).Buffer(THESAURUSPERMUTATION)))
-                                    {
-                                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION), overWrite: INTRAVASCULARLY);
-                                    }
-                                  }
-                                  break;
-                                }
-                              }
-                            }
-                          }
-                          patch();
-                        }
-                      }
-                    }
-                  }
-                }
-              });
-              max_balcony_to_balcony_distance.Enqueue(THESAURUSCOMMUNICATION, () =>
-              {
-                var points = djPts.ToList();
-                var pointsf = GeoFac.CreateIntersectsSelector(points);
-                var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
-                var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
-                foreach (var bufGeo in GroupGeometries(_linesGroup.Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()))).ToList(), MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).ToList()).Select(GeoFac.CreateGeometry).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)))
-                {
-                  if (portst(bufGeo) || ditchest(bufGeo) || wellst(bufGeo) || swellst(bufGeo))
-                  {
-                    max_balcony_to_balcony_distance.Enqueue(SUPERLATIVENESS, () =>
-                                  {
-                                    var target = portsf(bufGeo).FirstOrDefault() ?? MaxTagXposition(bufGeo).FirstOrDefault() ?? MaxTagLength(bufGeo).FirstOrDefault() ?? swellsf(bufGeo).FirstOrDefault();
-                                    if (target is null) return;
-                                    var edPts = GeoFac.CreateIntersectsSelector(pointsf(target))(bufGeo);
-                                    foreach (var edPt in edPts)
-                                    {
-                                      var max_basecircle_area = Commonradius(bufGeo);
-                                      if (max_basecircle_area.Count == THESAURUSSTAMPEDE) return;
-                                      var pps = ppsf(bufGeo);
-                                      if (pps.Count == THESAURUSSTAMPEDE) return;
-                                      var tolReturnValueRange = linesGeosk(bufGeo);
-                                      if (pps.All(ToiletWellsInterval => !ToiletWellsInterval.Intersects(GeoFac.CreateGeometry(tolReturnValueRange)))) return;
-                                      draw(THESAURUSDEPLORE, bufGeo, overWrite: THESAURUSOBSTINACY);
-                                      {
-                                        var lnsf = GeoFac.CreateIntersectsSelector(GeoFac.GetManyLineStrings(tolReturnValueRange).ToList());
-                                        if (pps.Any(ToiletWellsInterval => fl0s.Contains(ToiletWellsInterval)))
-                                        {
-                                          foreach (var fd in max_basecircle_area)
-                                          {
-                                            foreach (var maxBalconyToBalconyDistance in lnsf(fd))
-                                            {
-                                              var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
-                                              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxBalconyToBalconyDistance.GetCenter();
-                                              draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToGRect(INTROPUNITIVENESS).ToPolygon());
-                                            }
-                                          }
-                                        }
-                                        else
-                                        {
-                                          foreach (var fd in max_basecircle_area)
-                                          {
-                                            var lns = lnsf(fd);
-                                            if (lns.Count == THESAURUSHOUSING)
-                                            {
-                                              var maxBalconyToBalconyDistance = lns[THESAURUSSTAMPEDE];
-                                              string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                              if (fl0st(maxBalconyToBalconyDistance))
-                                              {
-                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
-                                              }
-                                              else if (nlst(maxBalconyToBalconyDistance))
-                                              {
-                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
-                                              }
-                                              else
-                                              {
-                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
-                                              }
-                                              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxBalconyToBalconyDistance.GetCenter();
-                                              draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToGRect(INTROPUNITIVENESS).ToPolygon());
-                                            }
-                                          }
-                                        }
-                                        foreach (var ToiletWellsInterval in pps)
-                                        {
-                                          if (nls.Contains(ToiletWellsInterval) || y1ls.Contains(ToiletWellsInterval) || y2ls.Contains(ToiletWellsInterval) || fl0s.Contains(ToiletWellsInterval))
-                                          {
-                                            var lns = lnsf(ToiletWellsInterval);
-                                            if (lns.Count == THESAURUSHOUSING)
-                                            {
-                                              var maxBalconyToBalconyDistance = lns[THESAURUSSTAMPEDE];
-                                              string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                              if (nls.Contains(ToiletWellsInterval))
-                                              {
-                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeVerticalDN;
-                                              }
-                                              else
-                                              {
-                                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyRainPipeDN;
-                                              }
-                                              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxBalconyToBalconyDistance.GetCenter();
-                                              draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToGRect(INTROPUNITIVENESS).ToPolygon());
-                                            }
-                                          }
-                                        }
-                                      }
-                                      static Func<Geometry, bool> CreateContainsTester<T>(List<T> DEFAULT_VOLTAGE) where T : Geometry
-                                      {
-                                        if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return DEFAULT_FIRE_VALVE_WIDTH => INTRAVASCULARLY;
-                                        var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
-                                        foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
-                                        return DEFAULT_FIRE_VALVE_LENGTH =>
-                                                      {
-                                                        if (DEFAULT_FIRE_VALVE_LENGTH == null) throw new ArgumentNullException();
-                                                        var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
-                                                        return engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Any(default_fire_valve_width => default_voltage.Contains(default_fire_valve_width));
-                                                      };
-                                      }
-                                      max_balcony_to_balcony_distance.Enqueue(THESAURUSSCARCE, () =>
-                                                    {
-                                                      var TolLightRangeMin = CreateContainsTester(after.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2).ToList());
-                                                      var _lines = linesGeosk(bufGeo).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct().ToList();
-                                                      var _tol_avg_column_dist = pointsf(bufGeo);
-                                                      var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
-                                                      var stPts = new HashSet<Point>();
-                                                      var addPts = new HashSet<Point>();
-                                                      {
-                                                        foreach (var maxBalconyrainpipeToFloordrainDistance in MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).Distinct())
-                                                        {
-                                                          var _pts = ptsf(maxBalconyrainpipeToFloordrainDistance.Buffer(THESAURUSPERMUTATION));
-                                                          if (_pts.Count == THESAURUSSTAMPEDE) continue;
-                                                          if (_pts.Count == THESAURUSHOUSING)
-                                                          {
-                                                            stPts.Add(_pts[THESAURUSSTAMPEDE]);
-                                                          }
-                                                          else
-                                                          {
-                                                            var maxKitchenToBalconyDistance = GetBounds(_pts.ToArray());
-                                                            var center = maxKitchenToBalconyDistance.Center.ToNTSPoint();
-                                                            addPts.Add(center);
-                                                            foreach (var default_fire_valve_length in _pts.Select(TolLightRangeSingleSideMax => new GLineSegment(TolLightRangeSingleSideMax.ToPoint2d(), center.ToPoint2d())))
-                                                            {
-                                                              _lines.Add(default_fire_valve_length);
-                                                            }
-                                                          }
-                                                        }
-                                                        stPts.Remove(edPt);
-                                                      }
-                                                      if (stPts.Count == THESAURUSSTAMPEDE)
-                                                      {
-                                                        _lines = _lines.Except(GeoFac.CreateIntersectsSelector(_lines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList())(GeoFac.CreateGeometry(addPts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(UNCONSEQUENTIAL).ToPolygon()))).SelectMany(DEFAULT_FIRE_VALVE_LENGTH => GeoFac.GetLines(DEFAULT_FIRE_VALVE_LENGTH))).ToList();
-                                                        addPts.Clear();
-                                                        var tolReturnValueRange = _lines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
-                                                        var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange);
-                                                        foreach (var ToiletWellsInterval in y1ls.Concat(y2ls).Concat(nls).Concat(fl0s))
-                                                        {
-                                                          stPts.AddRange(ptsf(ToiletWellsInterval));
-                                                          var lns = linesf(ToiletWellsInterval).Where(maxBalconyToBalconyDistance => after.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2).All(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Contains(maxBalconyToBalconyDistance))).ToList();
-                                                          foreach (var maxBalconyToBalconyDistance in lns)
-                                                          {
-                                                            string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                                            if (nls.Contains(ToiletWellsInterval))
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeVerticalDN;
-                                                            }
-                                                            else
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
-                                                            }
-                                                            draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, maxBalconyToBalconyDistance.GetCenter().ToNTSPoint(), overWrite: INTRAVASCULARLY);
-                                                          }
-                                                        }
-                                                        foreach (var fd in fldrs)
-                                                        {
-                                                          stPts.AddRange(ptsf(fd));
-                                                          var lns = linesf(fd).Where(maxBalconyToBalconyDistance => after.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2).All(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Contains(maxBalconyToBalconyDistance))).ToList();
-                                                          foreach (var maxBalconyToBalconyDistance in lns)
-                                                          {
-                                                            string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                                            var buf = fd.Buffer(MISAPPREHENSIVE);
-                                                            if (fl0st(buf))
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
-                                                            }
-                                                            else if (nlst(buf))
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
-                                                            }
-                                                            else
-                                                            {
-                                                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
-                                                            }
-                                                            draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, maxBalconyToBalconyDistance.GetCenter().ToNTSPoint(), overWrite: INTRAVASCULARLY);
-                                                          }
-                                                        }
-                                                      }
-                                                      _tol_avg_column_dist = _tol_avg_column_dist.Concat(addPts).Distinct().ToList();
-                                                      var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToHashSet();
-                                                      var nodes = _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => new GraphNode<Point>(TolLightRangeSingleSideMax)).ToList();
-                                                      {
-                                                        var kvs = new HashSet<KeyValuePair<int, int>>();
-                                                        foreach (var default_fire_valve_length in _lines)
-                                                        {
-                                                          var MAX_ANGEL_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.StartPoint.ToNTSPoint());
-                                                          if (MAX_ANGEL_TOLLERANCE < THESAURUSSTAMPEDE) continue;
-                                                          var MAX_ANGLE_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.EndPoint.ToNTSPoint());
-                                                          if (MAX_ANGLE_TOLLERANCE < THESAURUSSTAMPEDE) continue;
-                                                          if (MAX_ANGEL_TOLLERANCE != MAX_ANGLE_TOLLERANCE)
-                                                          {
-                                                            if (MAX_ANGEL_TOLLERANCE > MAX_ANGLE_TOLLERANCE)
-                                                            {
-                                                              ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.Swap(ref MAX_ANGEL_TOLLERANCE, ref MAX_ANGLE_TOLLERANCE);
-                                                            }
-                                                            kvs.Add(new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE));
-                                                          }
-                                                        }
-                                                        foreach (var max_rainpipe_to_balconyfloordrain in kvs)
-                                                        {
-                                                          nodes[max_rainpipe_to_balconyfloordrain.Key].AddNeighbour(nodes[max_rainpipe_to_balconyfloordrain.Value], THESAURUSHOUSING);
-                                                        }
-                                                      }
-                                                      var dijkstra = new Dijkstra<Point>(nodes);
-                                                      {
-                                                        var paths = new List<IList<GraphNode<Point>>>(stPts.Count);
-                                                        var dnDict = new Dictionary<GLineSegment, int>();
-                                                        foreach (var stPt in stPts)
-                                                        {
-                                                          var path = dijkstra.FindShortestPathBetween(nodes[_tol_avg_column_dist.IndexOf(stPt)], nodes[_tol_avg_column_dist.IndexOf(edPt)]);
-                                                          paths.Add(path);
-                                                        }
-                                                        foreach (var path in paths)
-                                                        {
-                                                          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                                          {
-                                                            dnDict[new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d())] = THESAURUSSTAMPEDE;
-                                                          }
-                                                        }
-                                                        foreach (var path in paths)
-                                                        {
-                                                          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                                          {
-                                                            var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                                            var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
-                                                            foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                                            {
-                                                              var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                                              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
-                                                              {
-                                                                var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
-                                                                dnDict[default_fire_valve_length] = Math.Max(DEFAULT_FIRE_VALVE_WIDTH, dnDict[default_fire_valve_length]);
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                        foreach (var path in paths)
-                                                        {
-                                                          int MAX_CONDENSEPIPE_TO_WASHMACHINE = THESAURUSSTAMPEDE;
-                                                          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                                          {
-                                                            var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                                            var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
-                                                            foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                                            {
-                                                              var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                                              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
-                                                              {
-                                                                var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
-                                                                if (MAX_CONDENSEPIPE_TO_WASHMACHINE < DEFAULT_FIRE_VALVE_WIDTH) MAX_CONDENSEPIPE_TO_WASHMACHINE = DEFAULT_FIRE_VALVE_WIDTH;
-                                                              }
-                                                            }
-                                                            if (dnDict[default_fire_valve_length] < MAX_CONDENSEPIPE_TO_WASHMACHINE) dnDict[default_fire_valve_length] = MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                                          }
-                                                        }
-                                                        foreach (var max_rainpipe_to_balconyfloordrain in dnDict)
-                                                        {
-                                                          var sel = max_rainpipe_to_balconyfloordrain.Key.Buffer(THESAURUSHOUSING);
-                                                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                                          {
-                                                            var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                                            TolLightRangeSingleSideMin.Text = getDn(max_rainpipe_to_balconyfloordrain.Value);
-                                                          }
-                                                        }
-                                                      }
-                                                    });
-                                    }
-                                  });
-                  }
-                }
-              });
-            }
-          }
-          max_balcony_to_balcony_distance.Enqueue(THESAURUSDESTITUTE, () =>
-          {
-            foreach (var tp in after.OrderByDescending(tp => tp.Item2.Area))
-            {
-              draw(tp.Item1, tp.Item2, INTRAVASCULARLY);
-            }
-          });
-          static List<List<Geometry>> GroupGeometries(List<Geometry> tolReturnValueRange, List<Geometry> polys)
-          {
-            var geosGroup = new List<List<Geometry>>();
-            GroupGeometries();
-            return geosGroup;
-            void GroupGeometries()
-            {
-              var DEFAULT_VOLTAGE = tolReturnValueRange.Concat(polys).Distinct().ToList();
-              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return;
-              tolReturnValueRange = tolReturnValueRange.Distinct().ToList();
-              polys = polys.Distinct().ToList();
-              if (tolReturnValueRange.Count + polys.Count != DEFAULT_VOLTAGE.Count) throw new ArgumentException();
-              var lineshs = tolReturnValueRange.ToHashSet();
-              var polyhs = polys.ToHashSet();
-              var pairs = _GroupGeometriesToKVIndex(DEFAULT_VOLTAGE).Where(max_rainpipe_to_balconyfloordrain =>
-              {
-                if (lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
-                if (polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
-                return THESAURUSOBSTINACY;
-              }).ToArray();
-              var dict = new ListDict<int>();
-              var h = new BFSHelper()
-              {
-                Pairs = pairs,
-                TotalCount = DEFAULT_VOLTAGE.Count,
-                Callback = (default_fire_valve_width, MAX_ANGEL_TOLLERANCE) => dict.Add(default_fire_valve_width.root, MAX_ANGEL_TOLLERANCE),
-              };
-              h.BFS();
-              dict.ForEach((_i, l) =>
-              {
-                geosGroup.Add(l.Select(MAX_ANGEL_TOLLERANCE => DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE]).ToList());
-              });
-            }
-            static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> DEFAULT_VOLTAGE) where T : Geometry
-            {
-              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) yield break;
-              var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
-              foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
-              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < DEFAULT_VOLTAGE.Count; MAX_ANGEL_TOLLERANCE++)
-              {
-                var DEFAULT_FIRE_VALVE_LENGTH = DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE];
-                var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
-                foreach (var MAX_ANGLE_TOLLERANCE in engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Where(default_fire_valve_width => default_voltage.Intersects(default_fire_valve_width)).Select(default_fire_valve_width => DEFAULT_VOLTAGE.IndexOf(default_fire_valve_width)).Where(MAX_ANGLE_TOLLERANCE => MAX_ANGEL_TOLLERANCE < MAX_ANGLE_TOLLERANCE))
-                {
-                  yield return new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
-                }
-              }
-            }
-          }
-          max_balcony_to_balcony_distance.Enqueue(THESAURUSACRIMONIOUS, () =>
-          {
-            foreach (var TolLightRangeSingleSideMin in mlInfos)
-            {
-              if (TolLightRangeSingleSideMin.Text == PHOTOFLUOROGRAM) TolLightRangeSingleSideMin.Text = THESAURUSDEPLORE;
-            }
-          });
-          max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
-          {
-            var points = precisePts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
-            var pointsf = GeoFac.CreateIntersectsSelector(points);
-            foreach (var TolLightRangeSingleSideMin in mlInfos)
-            {
-              if (TolLightRangeSingleSideMin.Text is not null)
-              {
-                var _tol_avg_column_dist = pointsf(TolLightRangeSingleSideMin.BasePoint.ToGRect(THESAURUSHOUSING).ToPolygon());
-                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist.FirstOrDefault();
-                if (_tol_avg_column_dist.Count > THESAURUSHOUSING)
-                {
-                  MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = GeoFac.NearestNeighbourGeometryF(_tol_avg_column_dist)(TolLightRangeSingleSideMin.BasePoint.ToNTSPoint());
-                }
-                if (MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN is not null)
-                {
-                  TolLightRangeSingleSideMin.BasePoint = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToPoint3d();
-                }
-              }
-            }
-          });
-        }
-      }
-      foreach (var TolLightRangeSingleSideMin in mlInfos)
-      {
-        if (TolLightRangeSingleSideMin.Text == THESAURUSDEPLORE) TolLightRangeSingleSideMin.Text = THESAURUSIMPETUOUS;
-      }
-      foreach (var TolLightRangeSingleSideMin in mlInfos)
-      {
-        if (!string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text)) DrawMLeader(TolLightRangeSingleSideMin.Text, TolLightRangeSingleSideMin.BasePoint, TolLightRangeSingleSideMin.BasePoint.OffsetXY(HYPERDISYLLABLE, HYPERDISYLLABLE));
-      }
-    }
-    const string MLeaderLayer = ARGENTIMACULATUS;
-    public static MLeader DrawMLeader(string content, Point2d _tolRegroupMainYRange, Point2d _tolConnectSecPtRange)
-    {
-      var tolReturnValue0Approx = new MLeader();
-      tolReturnValue0Approx.MText = new MText() { Contents = content, TextHeight = HYPERDISYLLABLE, ColorIndex = DISPENSABLENESS, };
-      tolReturnValue0Approx.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
-      tolReturnValue0Approx.ArrowSize = THESAURUSENTREPRENEUR;
-      tolReturnValue0Approx.DoglegLength = THESAURUSSTAMPEDE;
-      tolReturnValue0Approx.LandingGap = THESAURUSSTAMPEDE;
-      tolReturnValue0Approx.ExtendLeaderToText = INTRAVASCULARLY;
-      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.LeftLeader);
-      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.RightLeader);
-      tolReturnValue0Approx.AddLeaderLine(_tolRegroupMainYRange.ToPoint3d());
-      var maxKitchenToBalconyDistance = tolReturnValue0Approx.MText.Bounds.ToGRect();
-      var _tolConnectSecPrimAddValue = _tolConnectSecPtRange.OffsetY(maxKitchenToBalconyDistance.Height + HYPERDISYLLABLE).ToPoint3d();
-      if (_tolConnectSecPtRange.X < _tolRegroupMainYRange.X)
-      {
-        _tolConnectSecPrimAddValue = _tolConnectSecPrimAddValue.OffsetX(-maxKitchenToBalconyDistance.Width);
-      }
-      tolReturnValue0Approx.TextLocation = _tolConnectSecPrimAddValue;
-      tolReturnValue0Approx.Layer = MLeaderLayer;
-      DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(tolReturnValue0Approx); });
-      return tolReturnValue0Approx;
-    }
-    public static MLeader DrawMLeader(string content, Point3d _tolRegroupMainYRange, Point3d _tolConnectSecPtRange)
-    {
-      var tolReturnValue0Approx = new MLeader();
-      tolReturnValue0Approx.MText = new MText() { Contents = content, TextHeight = HYPERDISYLLABLE, ColorIndex = DISPENSABLENESS, };
-      tolReturnValue0Approx.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
-      tolReturnValue0Approx.ArrowSize = THESAURUSENTREPRENEUR;
-      tolReturnValue0Approx.DoglegLength = THESAURUSSTAMPEDE;
-      tolReturnValue0Approx.LandingGap = THESAURUSSTAMPEDE;
-      tolReturnValue0Approx.ExtendLeaderToText = INTRAVASCULARLY;
-      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.LeftLeader);
-      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.RightLeader);
-      tolReturnValue0Approx.AddLeaderLine(_tolRegroupMainYRange);
-      var maxKitchenToBalconyDistance = tolReturnValue0Approx.MText.Bounds.ToGRect();
-      var _tolConnectSecPrimAddValue = _tolConnectSecPtRange.OffsetY(maxKitchenToBalconyDistance.Height + HYPERDISYLLABLE);
-      if (_tolConnectSecPtRange.X < _tolRegroupMainYRange.X)
-      {
-        _tolConnectSecPrimAddValue = _tolConnectSecPrimAddValue.OffsetX(-maxKitchenToBalconyDistance.Width);
-      }
-      tolReturnValue0Approx.TextLocation = _tolConnectSecPrimAddValue;
-      tolReturnValue0Approx.Layer = MLeaderLayer;
-      DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(tolReturnValue0Approx); });
-      return tolReturnValue0Approx;
-    }
-    private static void ClearMLeader()
-    {
-      var adb = _DrawingTransaction.Current.adb;
-      LayerTools.AddLayer(adb.Database, MLeaderLayer);
-      foreach (var tolReturnValue0Approx in adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer))
-      {
-        adb.Element<Entity>(tolReturnValue0Approx.ObjectId, THESAURUSOBSTINACY).Erase();
-      }
-    }
-    public static Geometry CreateXGeoRect(GRect DEFAULT_FIRE_VALVE_WIDTH)
-    {
-      return new MultiLineString(new LineString[] {
-                DEFAULT_FIRE_VALVE_WIDTH.ToLinearRing(),
-                new LineString(new Coordinate[] { DEFAULT_FIRE_VALVE_WIDTH.LeftTop.ToNTSCoordinate(), DEFAULT_FIRE_VALVE_WIDTH.RightButtom.ToNTSCoordinate() }),
-                new LineString(new Coordinate[] { DEFAULT_FIRE_VALVE_WIDTH.LeftButtom.ToNTSCoordinate(), DEFAULT_FIRE_VALVE_WIDTH.RightTop.ToNTSCoordinate() })
-            });
-    }
-    public static GRect GetBounds(params Geometry[] DEFAULT_VOLTAGE) => new GeometryCollection(DEFAULT_VOLTAGE).ToGRect();
-    public static void DrawBackToFlatDiagram(List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> _storeysItems, ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData, List<ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageDrawingData> drDatas, ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo, DrainageSystemDiagramViewModel vm)
-    {
-      static string getDn(double area)
-      {
-        return DnToString(Math.Sqrt(area));
-      }
-      static string DnToString(double MAX_CONDENSEPIPE_TO_WASHMACHINE)
-      {
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSSYMMETRICAL) return PHOTOFLUOROGRAM;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSDRAGOON) return PHOTOFLUOROGRAM;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < PERICARDIOCENTESIS) return PHOTOFLUOROGRAM;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSMORTALITY) return QUOTATIONBREWSTER;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSNEGATE) return QUOTATIONDOPPLER;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSINNOCUOUS) return QUOTATIONDOPPLER;
-        return IRRESPONSIBLENESS;
-      }
-      static double parseDn(string MAX_CONDENSEPIPE_TO_WASHMACHINE)
-      {
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE.StartsWith(THESAURUSVICTORIOUS)) return THESAURUSENTREPRENEUR;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSJOURNAL) return THESAURUSEVERLASTING;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is CHRISTIANIZATION or UNPREMEDITATEDNESS) return HYPERDISYLLABLE;
-        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSFINICKY) return THESAURUSENTREPRENEUR;
-        var tolReturnValueMinRange = Regex.Match(MAX_CONDENSEPIPE_TO_WASHMACHINE, SUPERNATURALIZE);
-        if (tolReturnValueMinRange.Success) return double.Parse(tolReturnValueMinRange.Value);
-        return THESAURUSSTAMPEDE;
-      }
-      var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
-      var tk = DateTime.Now.Ticks % THESAURUSFINALITY;
-      var cadDatas = exInfo.CadDatas;
-      Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
-      Func<List<Geometry>, Func<Geometry, bool>> T = GeoFac.CreateIntersectsTester;
-      Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
-      Func<List<Geometry>, List<List<Geometry>>> GG = GeoFac.GroupGeometries;
-      static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(MinWellToUrinalDistance => GeoFac.CreateGeometry(MinWellToUrinalDistance)).ToList();
-      var (sankakuptsf, addsankaku) = GeoFac.CreateIntersectsSelectorEngine(mlInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.BasePoint.ToNTSPoint(TolLightRangeSingleSideMax)));
-      var roomData = geoData.RoomData;
-      var _kitchens = roomData.Where(TolLightRangeSingleSideMax => IsKitchen(TolLightRangeSingleSideMax.Key)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
-      var _toilets = roomData.Where(TolLightRangeSingleSideMax => IsToilet(TolLightRangeSingleSideMax.Key)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
-      var _nonames = roomData.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key is THESAURUSDEPLORE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
-      var _balconies = roomData.Where(TolLightRangeSingleSideMax => IsBalcony(TolLightRangeSingleSideMax.Key)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
-      var kitchenst = T(_kitchens);
-      void draw(string repeated_point_distance, Geometry DEFAULT_FIRE_VALVE_LENGTH, bool autoCreate = THESAURUSOBSTINACY, bool overWrite = THESAURUSOBSTINACY, string note = null)
-      {
-        Point2d center;
-        if (DEFAULT_FIRE_VALVE_LENGTH is Point point)
-        {
-          center = point.ToPoint2d();
-          DEFAULT_FIRE_VALVE_LENGTH = GRect.Create(center, UNCONSEQUENTIAL).ToPolygon();
-        }
-        else
-        {
-          center = DEFAULT_FIRE_VALVE_LENGTH.GetCenter();
-        }
-        {
-          var SidewaterbucketXIndent = INTRAVASCULARLY;
-          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(DEFAULT_FIRE_VALVE_LENGTH))
-          {
-            var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-            if (string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text) || overWrite)
-            {
-              TolLightRangeSingleSideMin.Text = repeated_point_distance;
-            }
-            if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
-            SidewaterbucketXIndent = THESAURUSOBSTINACY;
-          }
-          if (!SidewaterbucketXIndent && autoCreate)
-          {
-            var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = center;
-            var TolLightRangeSingleSideMin = MLeaderInfo.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, repeated_point_distance);
-            mlInfos.Add(TolLightRangeSingleSideMin);
-            var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
-            _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
-            if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
-            addsankaku(_raiseDistanceToStartDefault);
-          }
-        }
-      }
-      var zbqst = GeoFac.CreateIntersectsTester(geoData.zbqs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
-      var xstst = GeoFac.CreateIntersectsTester(geoData.xsts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
-      var dnInfectors = new List<KeyValuePair<Point2d, string>>();
-      var vpInfectors = new HashSet<Point2d>();
-      var flpts = new HashSet<Point2d>();
-      var plpts = new HashSet<Point2d>();
-      var vp2fdpts = new HashSet<Point2d>();
-      var shooters = new HashSet<Point>();
-      {
-        var circleshooters = new HashSet<KeyValuePair<Point2d, Point2d>>();
-        var storeysItems = ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext.StoreyContext.StoreyInfos;
-        var toCmp = new HashSet<KeyValuePair<int, int>>();
-        {
-          var REGION_BORDER_BUFFE_RDISTANCE = storeysItems.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Any()).ToList();
-          var minlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Min()).ToList();
-          var maxlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Max()).ToList();
-          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < maxlst.Count; MAX_ANGEL_TOLLERANCE++)
-          {
-            var _tolReturnValueMinRange = maxlst[MAX_ANGEL_TOLLERANCE];
-            for (int MAX_ANGLE_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGLE_TOLLERANCE < maxlst.Count; MAX_ANGLE_TOLLERANCE++)
-            {
-              if (MAX_ANGLE_TOLLERANCE == MAX_ANGEL_TOLLERANCE) continue;
-              var _tolReturnValueMaxDistance = minlst[MAX_ANGLE_TOLLERANCE];
-              if (_tolReturnValueMaxDistance + THESAURUSHOUSING == _tolReturnValueMinRange)
-              {
-                toCmp.Add(new KeyValuePair<int, int>(storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGLE_TOLLERANCE]), storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGEL_TOLLERANCE])));
-              }
-            }
-          }
-        }
-        var _shooters = geoData.FloorDrainTypeShooter.SelectNotNull(max_rainpipe_to_balconyfloordrain =>
-        {
-          var toilet_buffer_distance = max_rainpipe_to_balconyfloordrain.Value;
-          if (!string.IsNullOrWhiteSpace(toilet_buffer_distance))
-          {
-            if (toilet_buffer_distance.Contains(THESAURUSRESIGNED) || toilet_buffer_distance.Contains(PHOTOAUTOTROPHIC))
-            {
-              return max_rainpipe_to_balconyfloordrain.Key.ToNTSPoint();
-            }
-          }
-          return null;
-        }).ToList();
-        shooters.AddRange(_shooters);
-        var _shootersf = GeoFac.CreateIntersectsSelector(_shooters);
-        foreach (var _kv in toCmp)
-        {
-          var lbdict = exInfo.Items[_kv.Value].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
-          var low = storeysItems[_kv.Key];
-          var high = storeysItems[_kv.Value];
-          var highBound = high.Boundary.ToPolygon();
-          var max_basecircle_area = geoData.FloorDrains.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(INTRAVASCULARLY).ToCirclePolygon(SUPERLATIVENESS, THESAURUSOBSTINACY)).ToList();
-          var Commonradius = GeoFac.CreateEnvelopeSelector(max_basecircle_area);
-          max_basecircle_area = Commonradius(high.Boundary.ToPolygon());
-          var pps = geoData.VerticalPipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList();
-          var ppsf = GeoFac.CreateEnvelopeSelector(pps);
-          pps = ppsf(low.Boundary.ToPolygon());
-          var dps = geoData.DownWaterPorts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Center.ToGRect(HYPERDISYLLABLE).ToPolygon()).ToList();
-          var dpsf = GeoFac.CreateEnvelopeSelector(dps);
-          dps = dpsf(high.Boundary.ToPolygon());
-          var circles = geoData.VerticalPipes.Concat(geoData.DownWaterPorts).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList();
-          var circlesf = GeoFac.CreateEnvelopeSelector(circles);
-          circles = circlesf(low.Boundary.ToPolygon());
-          var vhigh = -high.ContraPoint.ToVector2d();
-          var vlow = -low.ContraPoint.ToVector2d();
-          var _dps = dps.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vhigh)).ToList();
-          var _circles = circles.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vlow)).ToList();
-          var _circlesf = GeoFac.CreateIntersectsSelector(_circles);
-          var _fds = max_basecircle_area.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vhigh)).ToList();
-          var _pps = pps.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vlow)).ToList();
-          var _ppsf = GeoFac.CreateIntersectsSelector(_pps);
-          var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = low.ContraPoint - high.ContraPoint;
-          {
-            shooters.AddRange(_shootersf(highBound).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)));
-          }
-          {
-            var text_indent = lbdict.Where(TolLightRangeSingleSideMax => IsDraiFL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            var max_tag_xposition = lbdict.Where(TolLightRangeSingleSideMax => IsPL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            var max_tag_length = lbdict.Where(TolLightRangeSingleSideMax => IsTL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-            foreach (var ToiletWellsInterval in text_indent.Concat(max_tag_xposition).Concat(max_tag_length))
-            {
-              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = ToiletWellsInterval.GetCenter().Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-              dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, IRRESPONSIBLENESS));
-              vpInfectors.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
-              if (text_indent.Contains(ToiletWellsInterval)) flpts.Add(ToiletWellsInterval.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-              else if (max_tag_xposition.Contains(ToiletWellsInterval)) plpts.Add(ToiletWellsInterval.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-            }
-          }
-          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in dps.Where(dp => kitchenst(dp)).Select(dp => dp.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).GetCenter()))
-          {
-            dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, vm.Params.BasinDN));
-          }
-          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in dps.Where(dp => zbqst(dp)).Select(dp => dp.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).GetCenter()))
-          {
-            dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, IRRESPONSIBLENESS));
-          }
-          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in dps.Where(dp => xstst(dp)).Select(dp => dp.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).GetCenter()))
-          {
-            dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, QUOTATIONBREWSTER));
-          }
-          foreach (var fd in _fds)
-          {
-            var ToiletWellsInterval = _ppsf(fd.GetCenter().ToNTSPoint()).FirstOrDefault();
-            if (ToiletWellsInterval != null)
-            {
-              vp2fdpts.Add(pps[_pps.IndexOf(ToiletWellsInterval)].GetCenter());
-            }
-          }
-          foreach (var dp in _dps)
-          {
-            var circle = _circlesf(dp).FirstOrDefault();
-            if (circle != null)
-            {
-              circleshooters.Add(new KeyValuePair<Point2d, Point2d>(dps[_dps.IndexOf(dp)].GetCenter(), circles[_circles.IndexOf(circle)].GetCenter()));
-            }
-          }
-        }
-      }
-      var shooterst = GeoFac.CreateIntersectsTester(shooters.ToList());
-      var vp2fdptst = GeoFac.CreateIntersectsTester(vp2fdpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList());
-      var vp2fdptrgs = vp2fdpts.Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax, THESAURUSHESITANCY).ToPolygon()).ToList();
-      var vp2fdptrgst = GeoFac.CreateIntersectsTester(vp2fdptrgs);
-      {
-        using var max_balcony_to_balcony_distance = new PriorityQueue(THESAURUSINCOMPLETE);
-        var cleaningPortPtRgs = geoData.CleaningPortBasePoints.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGRect(THESAURUSINCOMPLETE).ToPolygon()).ToList();
-        var cleaningPortPtsRgst = GeoFac.CreateIntersectsTester(cleaningPortPtRgs);
-        foreach (var si in Enumerable.Range(THESAURUSSTAMPEDE, cadDatas.Count))
-        {
-          var REPEATED_POINT_DISTANCE = cadDatas[si];
-          var lbdict = exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
-          var labelLinesGroup = GG(REPEATED_POINT_DISTANCE.LabelLines);
-          var labelLinesGeos = GeosGroupToGeos(labelLinesGroup);
-          var labellinesGeosf = F(labelLinesGeos);
-          var tolGroupBlkLane = geoData.Storeys[si].ToPolygon();
-          var gpGeos = GeoFac.CreateEnvelopeSelector(geoData.Groups.Select(GeoFac.CreateGeometry).ToList())(tolGroupBlkLane);
-          var dlsegs = geoData.DLines;
-          var vertices = GeoFac.CreateEnvelopeSelector(dlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.StartPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax)).Concat(dlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.EndPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax))).ToList())(tolGroupBlkLane);
-          var verticesf = GeoFac.CreateIntersectsSelector(vertices);
-          dlsegs = vertices.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).Cast<GLineSegment>().Distinct().ToList();
-          var killer = REPEATED_POINT_DISTANCE.VerticalPipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-UNCONSEQUENTIAL)).Concat(REPEATED_POINT_DISTANCE.DownWaterPorts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-UNCONSEQUENTIAL))).Concat(REPEATED_POINT_DISTANCE.FloorDrains.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-UNCONSEQUENTIAL)));
-          var dlinesGeos = GeoFac.GroupLinesByConnPoints(Substract(REPEATED_POINT_DISTANCE.DLines.SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList(), killer).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList(), DINOFLAGELLATES).ToList();
-          var precisePts = new HashSet<Point2d>();
-          dlinesGeos = dlinesGeos.SelectMany(dlinesGeo =>
-          {
-            var tolReturnValueRange = Substract(GeoFac.GetLines(dlinesGeo).ToList(), killer);
-            tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= DISPROPORTIONAL).ToList();
-            tolReturnValueRange = GeoFac.GroupParallelLines(tolReturnValueRange, THESAURUSAPPARATUS, THESAURUSHOUSING).Select(default_fire_valve_width => GetCenterLine(default_fire_valve_width)).ToList();
-            tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(DISPROPORTIONAL)).ToList()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSCOMMUNICATION).ToList();
-            precisePts.AddRange(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Center));
-            return GeoFac.GroupGeometries(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSPLAYGROUND).ToLineString()).ToList()).Select(TolLightRangeSingleSideMax =>
-                      {
-                        var lsArr = TolLightRangeSingleSideMax.Cast<LineString>().SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct(new GLineSegment.EqualityComparer(ULTRASONOGRAPHY)).Select(TolLightRangeSingleSideMax => new GLineSegment(new Point2d(FixValue(TolLightRangeSingleSideMax.StartPoint.X), FixValue(TolLightRangeSingleSideMax.StartPoint.Y)), new Point2d(FixValue(TolLightRangeSingleSideMax.EndPoint.X), FixValue(TolLightRangeSingleSideMax.EndPoint.Y))).ToLineString()).ToArray();
-                        return new MultiLineString(lsArr);
-                      });
-          }).Cast<Geometry>().ToList();
-          var dlinesGeosf = F(dlinesGeos);
-          var wrappingPipesf = F(REPEATED_POINT_DISTANCE.WrappingPipes);
-          var dps = REPEATED_POINT_DISTANCE.DownWaterPorts;
-          var ports = REPEATED_POINT_DISTANCE.WaterPorts;
-          var portst = T(ports.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
-          var portsf = F(ports.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
-          var fldrs = REPEATED_POINT_DISTANCE.FloorDrains;
-          var MaxDownspoutToBalconywashingfloordrain = REPEATED_POINT_DISTANCE.VerticalPipes;
-          {
-            var _vps = MaxDownspoutToBalconywashingfloordrain.ToHashSet();
-            foreach (var toilet_wells_interval in _vps.ToList())
-            {
-              lbdict.TryGetValue(toilet_wells_interval, out string SidewaterbucketYIndent);
-              if (!IsDraiLabel(SidewaterbucketYIndent))
-              {
-                if (kitchenst(toilet_wells_interval))
-                {
-                  dps.Add(toilet_wells_interval);
-                  _vps.Remove(toilet_wells_interval);
-                }
-              }
-            }
-            dps = dps.Distinct().ToList();
-            MaxDownspoutToBalconywashingfloordrain = _vps.ToList();
-          }
-          {
-            var max_basecircle_area = MaxDownspoutToBalconywashingfloordrain.Where(vp2fdptst).ToList();
-            fldrs = fldrs.Concat(max_basecircle_area).Distinct().ToList();
-            MaxDownspoutToBalconywashingfloordrain = MaxDownspoutToBalconywashingfloordrain.Except(max_basecircle_area).ToList();
-          }
-          var Commonradius = F(fldrs);
-          var fdst = T(fldrs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)).ToList());
-          var ppsf = F(MaxDownspoutToBalconywashingfloordrain);
-          var ppst = T(MaxDownspoutToBalconywashingfloordrain);
-          var dpsf = F(dps);
-          var dpst = T(dps);
-          var text_indent = lbdict.Where(TolLightRangeSingleSideMax => IsDraiFL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-          var max_tag_xposition = lbdict.Where(TolLightRangeSingleSideMax => IsPL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-          var max_tag_length = lbdict.Where(TolLightRangeSingleSideMax => IsTL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
-          {
-            var MaxRainpipeToWashmachine = F(MaxDownspoutToBalconywashingfloordrain);
-            var _fls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((flpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
-            var _pls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((plpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
-            {
-              var default_voltage = G(REPEATED_POINT_DISTANCE.LabelLines).ToIPreparedGeometry();
-              text_indent = text_indent.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
-              max_tag_xposition = max_tag_xposition.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
-            }
-            {
-              text_indent = text_indent.Concat(_fls).Distinct().ToList();
-              max_tag_xposition = max_tag_xposition.Concat(_pls).Distinct().ToList();
-            }
-          }
-          if (cleaningPortPtRgs.Count > THESAURUSSTAMPEDE)
-          {
-            foreach (var ToiletWellsInterval in MaxDownspoutToBalconywashingfloordrain)
-            {
-              if (cleaningPortPtsRgst(ToiletWellsInterval))
-              {
-                max_tag_xposition.Add(ToiletWellsInterval);
-                if (!lbdict.ContainsKey(ToiletWellsInterval))
-                {
-                  lbdict[ToiletWellsInterval] = THESAURUSBOTTOM + ++tk;
-                }
-              }
-            }
-            max_tag_xposition = max_tag_xposition.Distinct().ToList();
-          }
-          foreach (var default_fire_valve_length in REPEATED_POINT_DISTANCE.VLines.SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSCOMMUNICATION))
-          {
-            draw(IRRESPONSIBLENESS, default_fire_valve_length.ToLineString());
-          }
-          var djPts = new HashSet<Point>();
-          var _linesGroup = new HashSet<HashSet<GLineSegment>>();
-          max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
-          {
-            var dlscf = GeoFac.CreateContainsSelector(dlinesGeos);
-            foreach (var sel in GeoFac.GroupGeometries(fldrs.Select(TolLightRangeSingleSideMax => CreateXGeoRect(TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION).ToGRect())).Concat(dlinesGeos).ToList()).Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax)))
-            {
-              var max_basecircle_area = Commonradius(sel);
-              if (max_basecircle_area.Count == THESAURUSPERMUTATION)
-              {
-                var DEFAULT_FIRE_VALVE_WIDTH = GetBounds(max_basecircle_area.ToArray());
-                var dls = dlscf(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon());
-                if (dls.Count == THESAURUSHOUSING)
-                {
-                  max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
-                            {
-                              string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                              if (shooterst(GeoFac.CreateGeometryEx(max_basecircle_area)))
-                              {
-                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WashingMachineFloorDrainDN;
-                              }
-                              else
-                              {
-                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.OtherFloorDrainDN;
-                              }
-                              foreach (var dl in dlscf(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()))
-                              {
-                                draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, dl.Buffer(THESAURUSPERMUTATION));
-                              }
-                              var fdst = T(max_basecircle_area);
-                              foreach (var dl in dlinesGeosf(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()).Except(dls).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).Where(TolLightRangeSingleSideMax => fdst(TolLightRangeSingleSideMax)))
-                              {
-                                var _dn = MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                if (_dn == QUOTATIONBREWSTER) _dn = QUOTATIONDOPPLER;
-                                draw(_dn, dl.Buffer(THESAURUSPERMUTATION));
-                              }
-                              {
-                              }
-                            });
-                }
-              }
-            }
-          });
-          foreach (var dlinesGeo in dlinesGeos)
-          {
-            var tolReturnValueRange = GeoFac.GetLines(dlinesGeo);
-            _linesGroup.Add(tolReturnValueRange.ToHashSet());
-            max_balcony_to_balcony_distance.Enqueue(THESAURUSCENSURE, () =>
-            {
-              var flst = T(text_indent);
-              var plst = T(max_tag_xposition);
-              foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(dlinesGeo.Buffer(THESAURUSHOUSING)))
-              {
-                var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                if (TolLightRangeSingleSideMin.Text is THESAURUSDEPLORE)
-                {
-                  if (flst(dlinesGeo) || plst(dlinesGeo))
-                  {
-                    TolLightRangeSingleSideMin.Text = IRRESPONSIBLENESS;
-                  }
-                }
-              }
-            });
-            var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList());
-            foreach (var default_fire_valve_length in tolReturnValueRange)
-            {
-              if (default_fire_valve_length.Length < DINOFLAGELLATES) continue;
-              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = default_fire_valve_length.Center;
-              var TolLightRangeSingleSideMin = MLeaderInfo.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, THESAURUSDEPLORE);
-              mlInfos.Add(TolLightRangeSingleSideMin);
-              var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
-              _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
-              addsankaku(_raiseDistanceToStartDefault);
-            }
-            max_balcony_to_balcony_distance.Enqueue(INTROPUNITIVENESS, () =>
-            {
-              var dlinesGeoBuf = dlinesGeo.Buffer(THESAURUSACRIMONIOUS);
-              var dlbufgf = dlinesGeoBuf.ToIPreparedGeometry();
-              if (fdst(dlinesGeo) || ppst(dlinesGeo) || dpst(dlinesGeo))
-              {
-                foreach (var TolUniformSideLenth in tolReturnValueRange)
-                {
-                  foreach (var dp in dpsf(TolUniformSideLenth.ToLineString()))
-                  {
-                    {
-                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = dnInfectors.FirstOrDefault(max_rainpipe_to_balconyfloordrain => dp.Intersects(max_rainpipe_to_balconyfloordrain.Key.ToGRect(HYPERDISYLLABLE).ToPolygon())).Value;
-                      if (!string.IsNullOrEmpty(MAX_CONDENSEPIPE_TO_WASHMACHINE))
-                      {
-                        draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
-                        continue;
-                      }
-                    }
-                    if (zbqst(dp))
-                    {
-                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
-                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
-                    }
-                    else if (xstst(dp))
-                    {
-                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = QUOTATIONBREWSTER;
-                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
-                    }
-                    else
-                    {
-                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = TolUniformSideLenth.Center;
-                      if (kitchenst(dp))
-                      {
-                        var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BasinDN;
-                        draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
-                      }
-                      else
-                      {
-                        var MAX_CONDENSEPIPE_TO_WASHMACHINE = QUOTATIONBREWSTER;
-                        draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
-                      }
-                    }
-                  }
-                  foreach (var fd in Commonradius(TolUniformSideLenth.ToLineString()))
-                  {
-                    string MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                    if (shooterst(fd))
-                    {
-                      MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WashingMachineFloorDrainDN;
-                    }
-                    else
-                    {
-                      MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.OtherFloorDrainDN;
-                    }
-                    draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
-                  }
-                }
-              }
-              max_balcony_to_balcony_distance.Enqueue(QUOTATIONEDIBLE, () =>
-                          {
-                            var _pts = tolReturnValueRange.SelectMany(default_fire_valve_length => new Point2d[] { default_fire_valve_length.StartPoint, default_fire_valve_length.EndPoint }).GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Distinct().Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => dlbufgf.Intersects(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint())).ToList();
-                            var _tol_avg_column_dist = _pts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
-                            djPts.AddRange(_tol_avg_column_dist);
-                            _linesGroup.Add(tolReturnValueRange.ToHashSet());
-                            return;
-                            var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
-                            var stPts = _tol_avg_column_dist.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => fdst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN) || dpst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)).ToList();
-                            var edPts = _tol_avg_column_dist.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => portst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)).ToList();
-                            if (edPts.Count == THESAURUSSTAMPEDE)
-                            {
-                              var pps = ppsf(dlinesGeo);
-                              if (pps.Count == THESAURUSHOUSING)
-                              {
-                                edPts = _tol_avg_column_dist.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => ppst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)).ToList();
-                              }
-                              else if (pps.Count > THESAURUSHOUSING)
-                              {
-                                if (!portst(dlinesGeo))
-                                {
-                                  foreach (var TolUniformSideLenth in tolReturnValueRange)
-                                  {
-                                    if (TolUniformSideLenth.Length >= THESAURUSINHERIT && TolUniformSideLenth.IsHorizontalOrVertical(THESAURUSCOMMUNICATION))
-                                    {
-                                      var defaultFireValveWidth = TolUniformSideLenth.ToLineString();
-                                      foreach (var ToiletWellsInterval in pps)
-                                      {
-                                        if (defaultFireValveWidth.Intersects(ToiletWellsInterval))
-                                        {
-                                          edPts.AddRange(ptsf(ToiletWellsInterval));
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                            max_balcony_to_balcony_distance.Enqueue(THESAURUSCOMMUNICATION, () =>
-                                        {
-                                          return;
-                                        });
-                            max_balcony_to_balcony_distance.Enqueue(SUPERLATIVENESS, () =>
-                                        {
-                                          return;
-                                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
-                                          {
-                                          }
-                                        });
-                            max_balcony_to_balcony_distance.Enqueue(THESAURUSDESTITUTE, () =>
-                                        {
-                                          return;
-                                          if (edPts.Count == THESAURUSHOUSING)
-                                          {
-                                            var edPt = edPts[THESAURUSSTAMPEDE];
-                                            var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToList();
-                                          }
-                                          else
-                                          {
-                                          }
-                                        });
-                          });
-            });
-          }
-          static List<List<Geometry>> GroupGeometries(List<Geometry> tolReturnValueRange, List<Geometry> polys)
-          {
-            var geosGroup = new List<List<Geometry>>();
-            GroupGeometries();
-            return geosGroup;
-            void GroupGeometries()
-            {
-              var DEFAULT_VOLTAGE = tolReturnValueRange.Concat(polys).Distinct().ToList();
-              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return;
-              tolReturnValueRange = tolReturnValueRange.Distinct().ToList();
-              polys = polys.Distinct().ToList();
-              if (tolReturnValueRange.Count + polys.Count != DEFAULT_VOLTAGE.Count) throw new ArgumentException();
-              var lineshs = tolReturnValueRange.ToHashSet();
-              var polyhs = polys.ToHashSet();
-              var pairs = _GroupGeometriesToKVIndex(DEFAULT_VOLTAGE).Where(max_rainpipe_to_balconyfloordrain =>
-              {
-                if (lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
-                if (polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
-                return THESAURUSOBSTINACY;
-              }).ToArray();
-              var dict = new ListDict<int>();
-              var h = new BFSHelper()
-              {
-                Pairs = pairs,
-                TotalCount = DEFAULT_VOLTAGE.Count,
-                Callback = (default_fire_valve_width, MAX_ANGEL_TOLLERANCE) => dict.Add(default_fire_valve_width.root, MAX_ANGEL_TOLLERANCE),
-              };
-              h.BFS();
-              dict.ForEach((_i, l) =>
-              {
-                geosGroup.Add(l.Select(MAX_ANGEL_TOLLERANCE => DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE]).ToList());
-              });
-            }
-            static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> DEFAULT_VOLTAGE) where T : Geometry
-            {
-              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) yield break;
-              var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
-              foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
-              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < DEFAULT_VOLTAGE.Count; MAX_ANGEL_TOLLERANCE++)
-              {
-                var DEFAULT_FIRE_VALVE_LENGTH = DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE];
-                var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
-                foreach (var MAX_ANGLE_TOLLERANCE in engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Where(default_fire_valve_width => default_voltage.Intersects(default_fire_valve_width)).Select(default_fire_valve_width => DEFAULT_VOLTAGE.IndexOf(default_fire_valve_width)).Where(MAX_ANGLE_TOLLERANCE => MAX_ANGEL_TOLLERANCE < MAX_ANGLE_TOLLERANCE))
-                {
-                  yield return new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
-                }
-              }
-            }
-          }
-          max_balcony_to_balcony_distance.Enqueue(THESAURUSCOMMUNICATION, () =>
-          {
-            var TolLightRangeMin = GeoFac.CreateIntersectsTester(vpInfectors.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList());
-            var tolReturnValueRange = _linesGroup.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
-            var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange);
-            {
-              foreach (var ToiletWellsInterval in Enumerable.Range(THESAURUSSTAMPEDE, cadDatas.Count).Select(si => exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2)).SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax)
-                        .Where(TolLightRangeSingleSideMax => IsDraiFL(TolLightRangeSingleSideMax.Value) || IsPL(TolLightRangeSingleSideMax.Value) || IsTL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Concat(MaxDownspoutToBalconywashingfloordrain.Where(TolLightRangeMin)).Distinct())
-              {
-                var TolLane = linesf(ToiletWellsInterval.Buffer(THESAURUSHOUSING)).SelectMany(defaultFireValveWidth => GeoFac.GetLines(defaultFireValveWidth)).Distinct().ToList();
-                if (TolLane.Count == THESAURUSHOUSING)
-                {
-                  var MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
-                  draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolLane[THESAURUSSTAMPEDE].Center.ToGRect(INTROPUNITIVENESS).ToPolygon(), INTRAVASCULARLY, INTRAVASCULARLY, QUOTATIONPELVIC);
-                }
-              }
-            }
-          });
-          max_balcony_to_balcony_distance.Enqueue(SUPERLATIVENESS, () =>
-          {
-            var points = djPts.ToList();
-            var pointsf = GeoFac.CreateIntersectsSelector(points);
-            var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
-            var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
-            foreach (var bufGeo in GroupGeometries(_linesGroup.Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()))).ToList(), MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).Concat(dps).ToList()).Select(GeoFac.CreateGeometry).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)))
-            {
-              if (portst(bufGeo))
-              {
-                max_balcony_to_balcony_distance.Enqueue(THESAURUSDESTITUTE, () =>
-                          {
-                            var target = portsf(bufGeo).FirstOrDefault();
-                            if (target is null) return;
-                            var edPts = GeoFac.CreateIntersectsSelector(pointsf(target))(bufGeo);
-                            var edPt = edPts.FirstOrDefault();
-                            if (edPt is null) return;
-                            var _lines = linesGeosk(bufGeo).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct().ToList();
-                            var _tol_avg_column_dist = pointsf(bufGeo);
-                            var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
-                            var stPts = new HashSet<Point>();
-                            var addPts = new HashSet<Point>();
-                            {
-                              foreach (var maxBalconyrainpipeToFloordrainDistance in MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).Concat(dps).Distinct())
-                              {
-                                var _pts = ptsf(maxBalconyrainpipeToFloordrainDistance.Buffer(THESAURUSPERMUTATION));
-                                if (_pts.Count == THESAURUSSTAMPEDE) continue;
-                                if (_pts.Count == THESAURUSHOUSING)
-                                {
-                                  stPts.Add(_pts[THESAURUSSTAMPEDE]);
-                                }
-                                else
-                                {
-                                  var maxKitchenToBalconyDistance = GetBounds(_pts.ToArray());
-                                  var center = maxKitchenToBalconyDistance.Center.ToNTSPoint();
-                                  addPts.Add(center);
-                                  foreach (var default_fire_valve_length in _pts.Select(TolLightRangeSingleSideMax => new GLineSegment(TolLightRangeSingleSideMax.ToPoint2d(), center.ToPoint2d())))
-                                  {
-                                    _lines.Add(default_fire_valve_length);
-                                    if (text_indent.Contains(maxBalconyrainpipeToFloordrainDistance) || max_tag_xposition.Contains(maxBalconyrainpipeToFloordrainDistance))
-                                    {
-                                      draw(IRRESPONSIBLENESS, default_fire_valve_length.Center.ToNTSPoint());
-                                      max_balcony_to_balcony_distance.Enqueue(THESAURUSBEATIFIC, () =>
-                                                {
-                                                  draw(null, default_fire_valve_length.Center.ToNTSPoint());
-                                                });
-                                    }
-                                  }
-                                }
-                              }
-                              stPts.Remove(edPt);
-                            }
-                            _tol_avg_column_dist = _tol_avg_column_dist.Concat(addPts).Distinct().ToList();
-                            var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToHashSet();
-                            foreach (var dp in dpsf(bufGeo).Where(kitchenst))
-                            {
-                            }
-                            var nodes = _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => new GraphNode<Point>(TolLightRangeSingleSideMax)).ToList();
-                            {
-                              var kvs = new HashSet<KeyValuePair<int, int>>();
-                              foreach (var default_fire_valve_length in _lines)
-                              {
-                                var MAX_ANGEL_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.StartPoint.ToNTSPoint());
-                                var MAX_ANGLE_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.EndPoint.ToNTSPoint());
-                                if (MAX_ANGEL_TOLLERANCE != MAX_ANGLE_TOLLERANCE)
-                                {
-                                  if (MAX_ANGEL_TOLLERANCE > MAX_ANGLE_TOLLERANCE)
-                                  {
-                                    ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.Swap(ref MAX_ANGEL_TOLLERANCE, ref MAX_ANGLE_TOLLERANCE);
-                                  }
-                                  kvs.Add(new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE));
-                                }
-                              }
-                              foreach (var max_rainpipe_to_balconyfloordrain in kvs)
-                              {
-                                nodes[max_rainpipe_to_balconyfloordrain.Key].AddNeighbour(nodes[max_rainpipe_to_balconyfloordrain.Value], THESAURUSHOUSING);
-                              }
-                            }
-                            var dijkstra = new Dijkstra<Point>(nodes);
-                            {
-                              var paths = new List<IList<GraphNode<Point>>>(stPts.Count);
-                              var areaDict = new Dictionary<GLineSegment, double>();
-                              foreach (var stPt in stPts)
-                              {
-                                var path = dijkstra.FindShortestPathBetween(nodes[_tol_avg_column_dist.IndexOf(stPt)], nodes[_tol_avg_column_dist.IndexOf(edPt)]);
-                                if (path.Count == THESAURUSSTAMPEDE) continue;
-                                paths.Add(path);
-                              }
-                              foreach (var path in paths)
-                              {
-                                for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                {
-                                  areaDict[new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d())] = THESAURUSSTAMPEDE;
-                                }
-                              }
-                              foreach (var path in paths)
-                              {
-                                for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                {
-                                  var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                  var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
-                                  foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                  {
-                                    var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                    if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
-                                    {
-                                      var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
-                                      areaDict[default_fire_valve_length] += DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
-                                    }
-                                  }
-                                }
-                              }
-                              foreach (var path in paths)
-                              {
-                                double area = THESAURUSSTAMPEDE;
-                                for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                {
-                                  var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                  var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
-                                  foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                  {
-                                    var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                    if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
-                                    {
-                                      var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
-                                      if (area < DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH) area = DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
-                                    }
-                                  }
-                                  if (areaDict[default_fire_valve_length] < area) areaDict[default_fire_valve_length] = area;
-                                }
-                              }
-                              {
-                                var dict = areaDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key, TolLightRangeSingleSideMax => QUOTATIONTRANSFERABLE);
-                                foreach (var path in paths)
-                                {
-                                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                  {
-                                    var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                    dict[default_fire_valve_length] += areaDict[default_fire_valve_length];
-                                  }
-                                }
-                                areaDict = dict;
-                              }
-                              foreach (var max_rainpipe_to_balconyfloordrain in areaDict)
-                              {
-                                var sel = max_rainpipe_to_balconyfloordrain.Key.Buffer(THESAURUSHOUSING);
-                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                {
-                                  var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                  TolLightRangeSingleSideMin.Text = getDn(max_rainpipe_to_balconyfloordrain.Value);
-                                }
-                              }
-                            }
-                          });
-              }
-              else
-              {
-                max_balcony_to_balcony_distance.Enqueue(THESAURUSSCARCE, () =>
-                          {
-                            var max_basecircle_area = Commonradius(bufGeo);
-                            var pps = ppsf(bufGeo);
-                            if (pps.Count == THESAURUSHOUSING && max_basecircle_area.Count == THESAURUSPERMUTATION)
-                            {
-                              var target = pps[THESAURUSSTAMPEDE];
-                              var edPts = GeoFac.CreateIntersectsSelector(pointsf(target))(bufGeo);
-                              var edPt = edPts.FirstOrDefault();
-                              if (edPt is null) return;
-                              var _lines = linesGeosk(bufGeo).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct().ToList();
-                              foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(bufGeo))
-                              {
-                                var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                if (TolLightRangeSingleSideMin.Note is QUOTATIONPELVIC)
-                                {
-                                  TolLightRangeSingleSideMin.Text = THESAURUSDEPLORE;
-                                  TolLightRangeSingleSideMin.Note = null;
-                                }
-                              }
-                              max_balcony_to_balcony_distance.Enqueue(THESAURUSACRIMONIOUS, () =>
-                                        {
-                                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(bufGeo))
-                                          {
-                                            var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                            if (TolLightRangeSingleSideMin.Text == IRRESPONSIBLENESS)
-                                            {
-                                              TolLightRangeSingleSideMin.Text = QUOTATIONDOPPLER;
-                                            }
-                                          }
-                                        });
-                              var _tol_avg_column_dist = pointsf(bufGeo);
-                              var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
-                              var stPts = new HashSet<Point>();
-                              foreach (var maxBalconyrainpipeToFloordrainDistance in fldrs)
-                              {
-                                var _pts = ptsf(maxBalconyrainpipeToFloordrainDistance.Buffer(THESAURUSPERMUTATION));
-                                if (_pts.Count == THESAURUSSTAMPEDE) continue;
-                                if (_pts.Count == THESAURUSHOUSING)
-                                {
-                                  stPts.Add(_pts[THESAURUSSTAMPEDE]);
-                                }
-                              }
-                              var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToHashSet();
-                              var nodes = _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => new GraphNode<Point>(TolLightRangeSingleSideMax)).ToList();
-                              {
-                                var kvs = new HashSet<KeyValuePair<int, int>>();
-                                foreach (var default_fire_valve_length in _lines)
-                                {
-                                  var MAX_ANGEL_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.StartPoint.ToNTSPoint());
-                                  var MAX_ANGLE_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.EndPoint.ToNTSPoint());
-                                  if (MAX_ANGEL_TOLLERANCE != MAX_ANGLE_TOLLERANCE)
-                                  {
-                                    if (MAX_ANGEL_TOLLERANCE > MAX_ANGLE_TOLLERANCE)
-                                    {
-                                      ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.Swap(ref MAX_ANGEL_TOLLERANCE, ref MAX_ANGLE_TOLLERANCE);
-                                    }
-                                    kvs.Add(new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE));
-                                  }
-                                }
-                                foreach (var max_rainpipe_to_balconyfloordrain in kvs)
-                                {
-                                  nodes[max_rainpipe_to_balconyfloordrain.Key].AddNeighbour(nodes[max_rainpipe_to_balconyfloordrain.Value], THESAURUSHOUSING);
-                                }
-                              }
-                              var dijkstra = new Dijkstra<Point>(nodes);
-                              {
-                                var paths = new List<IList<GraphNode<Point>>>(stPts.Count);
-                                var areaDict = new Dictionary<GLineSegment, double>();
-                                foreach (var stPt in stPts)
-                                {
-                                  var path = dijkstra.FindShortestPathBetween(nodes[_tol_avg_column_dist.IndexOf(stPt)], nodes[_tol_avg_column_dist.IndexOf(edPt)]);
-                                  paths.Add(path);
-                                }
-                                foreach (var path in paths)
-                                {
-                                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                  {
-                                    areaDict[new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d())] = THESAURUSSTAMPEDE;
-                                  }
-                                }
-                                foreach (var path in paths)
-                                {
-                                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                  {
-                                    var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                    var sel = default_fire_valve_length.Buffer(VÖLKERWANDERUNG);
-                                    foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                    {
-                                      var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                      if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
-                                      {
-                                        var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
-                                        areaDict[default_fire_valve_length] += DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
-                                      }
-                                    }
-                                  }
-                                }
-                                foreach (var path in paths)
-                                {
-                                  double area = THESAURUSSTAMPEDE;
-                                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                  {
-                                    var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                    var sel = default_fire_valve_length.Buffer(VÖLKERWANDERUNG);
-                                    foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                    {
-                                      var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                      if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
-                                      {
-                                        var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
-                                        if (area < DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH) area = DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
-                                      }
-                                    }
-                                    if (areaDict[default_fire_valve_length] < area) areaDict[default_fire_valve_length] = area;
-                                  }
-                                }
-                                {
-                                  var dict = areaDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key, TolLightRangeSingleSideMax => QUOTATIONTRANSFERABLE);
-                                  foreach (var path in paths)
-                                  {
-                                    for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
-                                    {
-                                      var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
-                                      dict[default_fire_valve_length] += areaDict[default_fire_valve_length];
-                                    }
-                                  }
-                                  areaDict = dict;
-                                }
-                                foreach (var max_rainpipe_to_balconyfloordrain in areaDict)
-                                {
-                                  var sel = max_rainpipe_to_balconyfloordrain.Key.Buffer(THESAURUSHOUSING);
-                                  foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
-                                  {
-                                    var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                                    TolLightRangeSingleSideMin.Text = getDn(max_rainpipe_to_balconyfloordrain.Value);
-                                  }
-                                }
-                              }
-                            }
-                          });
-              }
-            }
-            max_balcony_to_balcony_distance.Enqueue(ECCLESIASTICISM, () =>
-                      {
-                        foreach (var _segs in _linesGroup)
-                        {
-                          var TolLane = _segs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= THESAURUSINCOMPLETE).ToList();
-                          if (TolLane.Count == THESAURUSSTAMPEDE) continue;
-                          var DEFAULT_FIRE_VALVE_LENGTH = GeoFac.CreateGeometry(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()));
-                          var buf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
-                          void changeDn()
-                          {
-                            foreach (var cleaningPort in geoData.CleaningPorts)
-                            {
-                              if (buf.Intersects(cleaningPort))
-                              {
-                                var MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
-                                if (kitchenst(buf)) MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BasinDN;
-                                var _tol_avg_column_dist = sankakuptsf(buf);
-                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
-                                {
-                                  ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = MAX_CONDENSEPIPE_TO_WASHMACHINE;
-                                }
-                              }
-                            }
-                            if (TolLane.Count == THESAURUSPERMUTATION)
-                            {
-                              var _tol_avg_column_dist = sankakuptsf(buf);
-                              if (_tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is IRRESPONSIBLENESS) == THESAURUSHOUSING && _tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER) == THESAURUSHOUSING)
-                              {
-                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is IRRESPONSIBLENESS))
-                                {
-                                  ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = (_tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER).First().UserData as MLeaderInfo).Text;
-                                }
-                              }
-                              else if (_tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONBREWSTER) == THESAURUSHOUSING && _tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE) == THESAURUSHOUSING)
-                              {
-                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
-                                {
-                                  ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = QUOTATIONBREWSTER;
-                                }
-                              }
-                              else if (_tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONDOPPLER) == THESAURUSHOUSING && _tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE) == THESAURUSHOUSING)
-                              {
-                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((MLeaderInfo)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
-                                {
-                                  ((MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = QUOTATIONDOPPLER;
-                                }
-                              }
-                              return;
-                            }
-                          }
-                          changeDn();
-                        }
-                      });
-            max_balcony_to_balcony_distance.Enqueue(ACANTHOCEPHALANS, () =>
-                      {
-                        foreach (var TolUniformSideLenth in _linesGroup.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length < THESAURUSINCOMPLETE))
-                        {
-                          var _tol_avg_column_dist = sankakuptsf(TolUniformSideLenth.Buffer(ASSOCIATIONISTS));
-                          if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
-                          {
-                            var TolLightRangeSingleSideMin = (MLeaderInfo)_tol_avg_column_dist[THESAURUSSTAMPEDE].UserData;
-                            if (TolLightRangeSingleSideMin.Text == THESAURUSDEPLORE)
-                            {
-                              TolLightRangeSingleSideMin.Text = null;
-                            }
-                          }
-                        }
-                      });
-            max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
-                      {
-                        var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
-                        var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
-                        foreach (var tolReturnValueRange in _linesGroup)
-                        {
-                          var kvs = new List<KeyValuePair<GLineSegment, MLeaderInfo>>();
-                          foreach (var TolUniformSideLenth in tolReturnValueRange.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > QUOTATIONLUCANIAN))
-                          {
-                            var _tol_avg_column_dist = sankakuptsf(TolUniformSideLenth.Buffer(THESAURUSPERMUTATION));
-                            if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
-                            {
-                              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist[THESAURUSSTAMPEDE];
-                              var TolLightRangeSingleSideMin = (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
-                              kvs.Add(new KeyValuePair<GLineSegment, MLeaderInfo>(TolUniformSideLenth, TolLightRangeSingleSideMin));
-                            }
-                          }
-                          {
-                            var TolLane = kvs.Select(max_rainpipe_to_balconyfloordrain => max_rainpipe_to_balconyfloordrain.Key).Distinct().ToList();
-                            var lns = TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
-                            var vertexs = TolLane.YieldPoints().Distinct().ToList();
-                            var lnsf = GeoFac.CreateIntersectsSelector(lns);
-                            var lnscf = GeoFac.CreateContainsSelector(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(-THESAURUSPERMUTATION).ToLineString()).ToList());
-                            var opts = new List<Ref<RegexOptions>>();
-                            foreach (var vertex in vertexs)
-                            {
-                              var MinWellToUrinalDistance = lnsf(GeoFac.CreateCirclePolygon(vertex, THESAURUSCOMMUNICATION, SUPERLATIVENESS));
-                              RegexOptions opt;
-                              if (MinWellToUrinalDistance.Count == THESAURUSHOUSING)
-                              {
-                                opt = RegexOptions.IgnoreCase;
-                              }
-                              else if (MinWellToUrinalDistance.Count == THESAURUSPERMUTATION)
-                              {
-                                opt = RegexOptions.Multiline;
-                              }
-                              else if (MinWellToUrinalDistance.Count > THESAURUSPERMUTATION)
-                              {
-                                opt = RegexOptions.ExplicitCapture;
-                              }
-                              else
-                              {
-                                opt = RegexOptions.None;
-                              }
-                              opts.Add(new Ref<RegexOptions>(opt));
-                            }
-                            foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(GeoFac.GetLines(GeoFac.CreateGeometry(lns).Difference(GeoFac.CreateGeometryEx(opts.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value == RegexOptions.ExplicitCapture).Select(opts).ToList(vertexs).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(THESAURUSPERMUTATION).ToCirclePolygon(SUPERLATIVENESS)).ToList()))).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList(), UNCONSEQUENTIAL))
-                            {
-                              var bf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
-                              var _tol_avg_column_dist = sankakuptsf(bf);
-                              var _tol_light_range_single_side_max = _tol_avg_column_dist.Select(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => (MLeaderInfo)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ToList();
-                              if (_tol_light_range_single_side_max.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Text).Distinct().Count() == THESAURUSHOUSING)
-                              {
-                                var repeated_point_distance = _tol_light_range_single_side_max[THESAURUSSTAMPEDE];
-                                var _segs = lnscf(bf).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList();
-                                if (_segs.Count > THESAURUSHOUSING)
-                                {
-                                  const double LEN = PHOTOCONDUCTION;
-                                  if (_segs.Any(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= LEN))
-                                  {
-                                    foreach (var default_fire_valve_length in _segs)
-                                    {
-                                      if (default_fire_valve_length.Length < LEN)
-                                      {
-                                        draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
-                                      }
-                                    }
-                                  }
-                                  else
-                                  {
-                                    var _tolReturnValueMinRange = _segs.Max(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length);
-                                    foreach (var default_fire_valve_length in _segs)
-                                    {
-                                      if (default_fire_valve_length.Length != _tolReturnValueMinRange)
-                                      {
-                                        draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
-                                      }
-                                    }
-                                  }
-                                }
-                                else
-                                {
-                                }
-                              }
-                            }
-                          }
-                        }
-                      });
-          });
-          max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
-          {
-            var points = precisePts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
-            var pointsf = GeoFac.CreateIntersectsSelector(points);
-            foreach (var TolLightRangeSingleSideMin in mlInfos)
-            {
-              if (TolLightRangeSingleSideMin.Text is not null)
-              {
-                var _tol_avg_column_dist = pointsf(TolLightRangeSingleSideMin.BasePoint.ToGRect(THESAURUSHOUSING).ToPolygon());
-                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist.FirstOrDefault();
-                if (_tol_avg_column_dist.Count > THESAURUSHOUSING)
-                {
-                  MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = GeoFac.NearestNeighbourGeometryF(_tol_avg_column_dist)(TolLightRangeSingleSideMin.BasePoint.ToNTSPoint());
-                }
-                if (MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN is not null)
-                {
-                  TolLightRangeSingleSideMin.BasePoint = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToPoint3d();
-                }
-              }
-            }
-          });
-        }
-        max_balcony_to_balcony_distance.Enqueue(THESAURUSACRIMONIOUS, () =>
-        {
-          foreach (var TolLightRangeSingleSideMin in mlInfos)
-          {
-            if (TolLightRangeSingleSideMin.Text == PHOTOFLUOROGRAM) TolLightRangeSingleSideMin.Text = THESAURUSDEPLORE;
-          }
-        });
-      }
-      foreach (var TolLightRangeSingleSideMin in mlInfos)
-      {
-        if (TolLightRangeSingleSideMin.Text == THESAURUSDEPLORE) TolLightRangeSingleSideMin.Text = THESAURUSIMPETUOUS;
-      }
-      foreach (var TolLightRangeSingleSideMin in mlInfos)
-      {
-        if (!string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text)) DrawMLeader(TolLightRangeSingleSideMin.Text, TolLightRangeSingleSideMin.BasePoint, TolLightRangeSingleSideMin.BasePoint.OffsetXY(HYPERDISYLLABLE, HYPERDISYLLABLE));
-      }
-    }
-    public static void DrawBackToFlatDiagram(ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo)
-    {
-      if (exInfo is null) return;
-      DrawBackToFlatDiagram(exInfo.storeysItems, exInfo.geoData, exInfo.drDatas, exInfo, exInfo.vm);
-    }
-    public static void FixStoreys(List<StoreyInfo> KitchenBufferDistance)
-    {
-      var lst1 = KitchenBufferDistance.Where(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.Count == THESAURUSHOUSING).Select(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers[THESAURUSSTAMPEDE]).ToList();
-      foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in KitchenBufferDistance.Where(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.Count > THESAURUSHOUSING).ToList())
-      {
-        var defaultFireValveLength = new HashSet<int>(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers);
-        foreach (var _s in lst1) defaultFireValveLength.Remove(_s);
-        MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.Clear();
-        MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.AddRange(defaultFireValveLength.OrderBy(MAX_ANGEL_TOLLERANCE => MAX_ANGEL_TOLLERANCE));
-      }
-    }
-    public static StoreyInfo GetStoreyInfo(BlockReference tolReturnValueRangeTo)
-    {
-      var props = tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection;
-      return new StoreyInfo()
-      {
-        StoreyType = GetStoreyType((string)props.GetValue(ADSIGNIFICATION)),
-        Numbers = ParseFloorNums(GetStoreyNumberString(tolReturnValueRangeTo)),
-        ContraPoint = GetContraPoint(tolReturnValueRangeTo),
-        Boundary = tolReturnValueRangeTo.Bounds.ToGRect(),
-      };
-    }
-    public static string GetStoreyNumberString(BlockReference tolReturnValueRangeTo)
-    {
-      var d = tolReturnValueRangeTo.ObjectId.GetAttributesInBlockReference(THESAURUSOBSTINACY);
-      d.TryGetValue(THESAURUSFLAGRANT, out string tolGroupEmgLightEvac);
-      return tolGroupEmgLightEvac;
-    }
-    public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.BlockTableRecord.IsValid && TolLightRangeSingleSideMax.GetEffectiveName() is THESAURUSSTICKY).ToList();
-    public static Point2d GetContraPoint(BlockReference tolReturnValueRangeTo)
-    {
-      double MAX_DEVICE_TO_DEVICE = double.NaN;
-      double MAX_DEVICE_TO_BALCONY = double.NaN;
-      Point2d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-      foreach (DynamicBlockReferenceProperty _raiseDistanceToStartDefault in tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection)
-      {
-        if (_raiseDistanceToStartDefault.PropertyName == QUOTATIONJUMPING)
-        {
-          MAX_DEVICE_TO_DEVICE = Convert.ToDouble(_raiseDistanceToStartDefault.Value);
-        }
-        else if (_raiseDistanceToStartDefault.PropertyName == THESAURUSEXPOSTULATE)
-        {
-          MAX_DEVICE_TO_BALCONY = Convert.ToDouble(_raiseDistanceToStartDefault.Value);
-        }
-      }
-      if (!double.IsNaN(MAX_DEVICE_TO_DEVICE) && !double.IsNaN(MAX_DEVICE_TO_BALCONY))
-      {
-        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueRangeTo.Position.ToPoint2d() + new Vector2d(MAX_DEVICE_TO_DEVICE, MAX_DEVICE_TO_BALCONY);
-      }
-      else
-      {
-        throw new System.Exception(QUOTATIONAMNESTY);
-      }
-      return MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
-    }
-    public static string FixVerticalPipeLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return null;
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSSTUTTER))
-      {
-        return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Substring(INTROPUNITIVENESS);
-      }
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(JUNGERMANNIALES))
-      {
-        return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Substring(THESAURUSPERMUTATION);
-      }
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE;
-    }
-    public static bool IsNotedLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSACQUISITIVE) || MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONCHILLI);
-    }
-    public static bool IsWantedLabelText(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-    }
-    public static bool IsY1L(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(CHRISTIANIZATION);
-    }
-    public static bool IsY2L(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(UNPREMEDITATEDNESS);
-    }
-    public static bool IsNL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSFINICKY);
-    }
-    public static bool IsYL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      for (int MAX_ANGEL_TOLLERANCE = INTROPUNITIVENESS; MAX_ANGEL_TOLLERANCE < THESAURUSACRIMONIOUS; MAX_ANGEL_TOLLERANCE++)
-      {
-        if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSREGENERATE + MAX_ANGEL_TOLLERANCE + THESAURUSREALLY))
-        {
-          return THESAURUSOBSTINACY;
-        }
-      }
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSUNBEATABLE);
-    }
-    public static bool IsRainLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return IsY1L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsY2L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsNL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsYL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-    }
-    public static bool IsDrainageLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      return IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-    }
-    public static bool IsMaybeLabelText(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      if (IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return INTRAVASCULARLY;
-      static bool maxDeviceplatformArea(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-      {
-        return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsWL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-      }
-      return maxDeviceplatformArea(FixVerticalPipeLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-    }
-    public const int THESAURUSHOUSING = 1;
-        public const int THESAURUSCOMMUNICATION = 5;
-        public const int THESAURUSPERMUTATION = 2;
-        public const int THESAURUSSTAMPEDE = 0;
-        public const double ELECTROLUMINESCENT = 10e5;
-        public const int THESAURUSACRIMONIOUS = 10;
-        public const double ASSOCIATIONISTS = .1;
-        public const bool INTRAVASCULARLY = false;
-        public const int THESAURUSDISINGENUOUS = 36;
-        public const bool THESAURUSOBSTINACY = true;
-        public const int DISPENSABLENESS = 40;
-        public const int THESAURUSDICTATORIAL = 1500;
-        public const int SUPERLATIVENESS = 6;
-        public const int THESAURUSREPERCUSSION = 4096;
-        public const string THESAURUSMARSHY = "空调内机--柜机";
-        public const string THESAURUSPROFANITY = "空调内机--挂机";
-        public const string DISORGANIZATION = "TCH_PIPE";
-        public const string INSTRUMENTALITY = "W-RAIN-PIPE";
-        public const string THESAURUSABJURE = "-RAIN-";
-        public const string QUOTATIONSTANLEY = "W-BUSH-NOTE";
-        public const string THESAURUSDEFAULTER = "W-BUSH";
-        public const string THESAURUSINVOICE = "W-RAIN-DIMS";
-        public const int HYPERDISYLLABLE = 100;
-        public const string DENDROCHRONOLOGIST = "W-RAIN-EQPM";
-        public const int THESAURUSINCOMPLETE = 20;
-        public const string THESAURUSWINDFALL = "TCH_VPIPEDIM";
-        public const string THESAURUSSPECIFICATION = "-";
-        public const string THESAURUSDURESS = "TCH_TEXT";
-        public const string QUOTATIONSWALLOW = "TCH_EQUIPMENT";
-        public const string THESAURUSFACILITATE = "TCH_MTEXT";
-        public const string THESAURUSINHARMONIOUS = "TCH_MULTILEADER";
-        public const string THESAURUSDEPLORE = "";
-        public const string THESAURUSELIGIBLE = "接";
-        public const string VICISSITUDINOUS = "排水沟";
-        public const string THESAURUSADVENT = "雨水口";
-        public const int THESAURUSENTREPRENEUR = 50;
-        public const char THESAURUSCONTEND = '|';
-        public const string MULTIPROCESSING = "|";
-        public const char SUPERREGENERATIVE = '$';
-        public const string THESAURUSCOURIER = "$";
-        public const string THESAURUSINDULGENT = "地漏";
-        public const string INCORRESPONDENCE = "DL";
-        public const string THESAURUSENTERPRISE = "可见性";
-        public const string THESAURUSTHOROUGHBRED = "套管";
-        public const int POLYOXYMETHYLENE = 1000;
-        public const string SUPERINDUCEMENT = "带定位立管";
-        public const string THESAURUSURBANITY = "立管编号";
-        public const string THESAURUSSPECIMEN = "$LIGUAN";
-        public const string THESAURUSMANIKIN = "A$C6BDE4816";
-        public const string THESAURUSLANDMARK = "污废合流井编号";
-        public const string THESAURUSCONTROVERSY = "W-DRAI-DOME-PIPE";
-        public const string CIRCUMCONVOLUTION = "W-RAIN-NOTE";
-        public const char CHROMATOGRAPHER = 'B';
-        public const string THESAURUSARGUMENTATIVE = "RF";
-        public const string ANTHROPOMORPHICALLY = "RF+1";
-        public const string THESAURUSSCUFFLE = "RF+2";
-        public const string THESAURUSASPIRATION = "F";
-        public const int THESAURUSDOMESTIC = 400;
-        public const string THESAURUSREGION = "1F";
-        public const string THESAURUSTABLEAU = "-1F";
-        public const string THESAURUSLEGACY = "-0.XX";
-        public const string COSTERMONGERING = "W-NOTE";
-        public const string THESAURUSJUBILEE = "W-DRAI-EQPM";
-        public const string THESAURUSSTRIPED = "W-DRAI-NOTE";
-        public const double QUOTATIONLETTERS = 2500.0;
-        public const double BALANOPHORACEAE = 5500.0;
-        public const double THESAURUSINCOMING = 1800.0;
-        public const string THESAURUSPARTNER = "伸顶通气2000";
-        public const string THESAURUSINEFFECTUAL = "伸顶通气500";
-        public const string HYPERVENTILATION = "本层通气";
-        public const string THESAURUSNARCOTIC = "通气帽系统-AI2";
-        public const string QUINQUAGENARIAN = "可见性1";
-        public const string THESAURUSDUBIETY = "1000";
-        public const int THESAURUSNECESSITOUS = 580;
-        public const string THESAURUSSUPERFICIAL = "标高";
-        public const int QUOTATIONPITUITARY = 550;
-        public const string THESAURUSSHADOWY = "建筑完成面";
-        public const int QUOTATIONBASTARD = 1800;
-        public const int THESAURUSPERVADE = 121;
-        public const int THESAURUSUNEVEN = 1258;
-        public const int THESAURUSUNCOMMITTED = 120;
-        public const int CONTRADISTINGUISHED = 779;
-        public const int COOPERATIVENESS = 1679;
-        public const int THESAURUSERRAND = 658;
-        public const int THESAURUSQUAGMIRE = 90;
-        public const string QUOTATIONSTYLOGRAPHIC = @"^(\-?\d+)\-(\-?\d+)$";
-        public const string TETRAIODOTHYRONINE = @"^\-?\d+$";
-        public const string MULTINATIONALLY = "±0.00";
-        public const double LAUTENKLAVIZIMBEL = 1000.0;
-        public const string THESAURUSINFINITY = "0.00";
-        public const int THESAURUSDISAGREEABLE = 800;
-        public const int QUOTATIONWITTIG = 500;
-        public const int THESAURUSMAIDENLY = 1879;
-        public const int THESAURUSCAVERN = 180;
-        public const int THESAURUSINTRACTABLE = 160;
-        public const string ADENOHYPOPHYSIS = "普通地漏无存水弯";
-        public const string THESAURUSDISREPUTABLE = "DN25";
-        public const int THESAURUSATTACHMENT = 750;
-        public const string IRRESPONSIBLENESS = "DN100";
-        public const double UNDENOMINATIONAL = 0.0;
-        public const int SUBCATEGORIZING = 780;
-        public const int THESAURUSFORMULATE = 700;
-        public const double QUOTATIONTRANSFERABLE = .0;
-        public const int THESAURUSHYPNOTIC = 300;
-        public const int THESAURUSREVERSE = 24;
-        public const int THESAURUSACTUAL = 9;
-        public const int QUOTATIONEDIBLE = 4;
-        public const int INTROPUNITIVENESS = 3;
-        public const int THESAURUSEXECRABLE = 3600;
-        public const int THESAURUSENDANGER = 350;
-        public const int THESAURUSSURPRISED = 150;
-        public const string THESAURUSEXECUTIVE = "散排至";
-        public const int PHOSPHORYLATION = 125;
-        public const int THESAURUSMISUNDERSTANDING = 357;
-        public const int THESAURUSBEHOVE = 83;
-        public const int THESAURUSMAGNETIC = 220;
-        public const int REPRESENTATIONAL = 1400;
-        public const int THESAURUSBELLOW = 621;
-        public const int DOCTRINARIANISM = 1200;
-        public const int THESAURUSINHERIT = 2000;
-        public const int THESAURUSDERELICTION = 600;
-        public const int ACANTHORHYNCHUS = 479;
-        public const int THESAURUSLOITER = 950;
-        public const int PORTMANTOLOGISM = 387;
-        public const int QUOTATIONCOLERIDGE = 1050;
-        public const int THESAURUSEXPERIMENT = 269;
-        public const int MISAPPREHENSIVE = 200;
-        public const string QUOTATIONSECOND = "接至排水沟";
-        public const int QUOTATIONETHIOPS = 187;
-        public const int OTHERWORLDLINESS = 499;
-        public const int THESAURUSPRETTY = 1600;
-        public const int THESAURUSDIFFICULTY = 360;
-        public const int THESAURUSDETERMINED = 130;
-        public const int CONSCRIPTIONIST = 650;
-        public const int VÖLKERWANDERUNG = 30;
-        public const string INTERNALIZATION = "≥600";
-        public const int THESAURUSGETAWAY = 450;
-        public const int ACANTHOCEPHALANS = 18;
-        public const int PHYSIOLOGICALLY = 250;
-        public const double THESAURUSDISPASSIONATE = .7;
-        public const string CONTROVERSIALLY = "TH-STYLE3";
-        public const string THESAURUSCAVALIER = ";";
-        public const double UNCONSEQUENTIAL = .01;
-        public const string PERSUADABLENESS = "地漏系统";
-        public const int PROKELEUSMATIKOS = 745;
-        public const string THESAURUSTENACIOUS = "乙字弯";
-        public const string THESAURUSAGILITY = "立管检查口";
-        public const string THESAURUSSTRINGENT = "套管系统";
-        public const string THESAURUSGAUCHE = "重力流雨水井编号";
-        public const string HELIOCENTRICISM = "666";
-        public const string THESAURUSJAILER = @"^([^\-]*)\-([A-Za-z])$";
-        public const string DEMATERIALISING = ",";
-        public const string THESAURUSEXCREMENT = "~";
-        public const string THESAURUSCAPRICIOUS = @"^([^\-]*\-[A-Za-z])(\d+)$";
-        public const string UNIMPRESSIONABLE = @"^([^\-]*\-)([A-Za-z])(\d+)$";
-        public const int THESAURUSDESTITUTE = 7;
-        public const int SYNTHLIBORAMPHUS = 229;
-        public const int THESAURUSPRIVATE = 230;
-        public const int THESAURUSEXCEPTION = 8192;
-        public const int THESAURUSEPICUREAN = 8000;
-        public const int DINOFLAGELLATES = 15;
-        public const int THESAURUSHESITANCY = 60;
-        public const string THESAURUSJOBBER = "FromImagination";
-        public const int THESAURUSLUMBERING = 55;
-        public const string THESAURUSCROUCH = "X.XX";
-        public const int THESAURUSITEMIZE = 666;
-        public const string THESAURUSPRECOCIOUS = "屋面雨水斗";
-        public const int THESAURUSEXCESS = 255;
-        public const int THESAURUSDELIGHT = 0x91;
-        public const int THESAURUSCRADLE = 0xc7;
-        public const int HYPOSTASIZATION = 0xae;
-        public const int THESAURUSDISCOLOUR = 211;
-        public const string QUOTATIONDOPPLER = "DN75";
-        public const string THESAURUSTOPICAL = "重力雨水斗";
-        public const string THESAURUSBANDAGE = "侧入式雨水斗";
-        public const string THESAURUSCONSERVATION = "87雨水斗";
-        public const string THESAURUSSTUTTER = "73-";
-        public const string JUNGERMANNIALES = "1-";
-        public const string PERSPICACIOUSNESS = "SelectedRange";
-        public const string UREDINIOMYCETES = @"DN\d+";
-        public const string QUOTATION3BABOVE = @"[^\d\.\-]";
-        public const string THESAURUSMISTRUST = @"\d+\-";
-        public const string ADSIGNIFICATION = "楼层类型";
-        public const char THESAURUSMETROPOLIS = '，';
-        public const char THESAURUSPROMINENT = ',';
-        public const char NATIONALDEMOKRATISCHE = '-';
-        public const string STEREOPHOTOGRAMMETRY = "M";
-        public const string THESAURUSPOLISH = " ";
-        public const string THESAURUSAGITATION = @"(\-?\d+)-(\-?\d+)";
-        public const string THESAURUSSANITY = @"\-?\d+";
-        public const string THESAURUSFLAGRANT = "楼层编号";
-        public const string THESAURUSSTICKY = "楼层框定";
-        public const string QUOTATIONJUMPING = "基点 X";
-        public const string THESAURUSEXPOSTULATE = "基点 Y";
-        public const string QUOTATIONAMNESTY = "error occured while getting baseX and baseY";
-        public const string THESAURUSLECHER = "雨水斗";
-        public const string THESAURUSPLUMMET = "重力";
-        public const string QUOTATIONSPENSERIAN = "87";
-        public const string CIRCUMSTANTIARE = "卫生间";
-        public const string THESAURUSCIPHER = "主卫";
-        public const string PREMILLENNIALIST = "公卫";
-        public const string THESAURUSINDIGENT = "次卫";
-        public const string THESAURUSFRAMEWORK = "客卫";
-        public const string THESAURUSHUMILIATION = "洗手间";
-        public const string THESAURUSSTERLING = "卫";
-        public const string THESAURUSSCREEN = @"^[卫]\d$";
-        public const string THESAURUSPEDESTRIAN = "厨房";
-        public const string THESAURUSRECLUSE = "西厨";
-        public const string THESAURUSINCONTROVERTIBLE = "厨";
-        public const string NATIONALIZATION = "阳台";
-        public const string THESAURUSSPECIES = "连廊";
-        public const string CHRISTIANIZATION = "Y1L";
-        public const string UNPREMEDITATEDNESS = "Y2L";
-        public const string THESAURUSFINICKY = "NL";
-        public const string THESAURUSUNBEATABLE = "YL";
-        public const string THESAURUSANTIDOTE = @"^W\d?L";
-        public const string THESAURUSDISSOLVE = @"^F\d?L";
-        public const string AUTOLITHOGRAPHIC = "-0";
-        public const string THESAURUSABUNDANT = @"^P\d?L";
-        public const string THESAURUSOPTIONAL = @"^T\d?L";
-        public const string DIASTEREOISOMER = @"^D\d?L";
-        public const double HYDROELECTRICITY = 383875.8169;
-        public const double THESAURUSMARRIAGE = 250561.9571;
-        public const string SUCCESSLESSNESS = "P型存水弯";
-        public const string THESAURUSLINING = "板上P弯";
-        public const int THESAURUSNAUGHT = 3500;
-        public const int THESAURUSCOMATOSE = 1479;
-        public const int THESAURUSFORESTALL = 2379;
-        public const int THESAURUSLEARNER = 1779;
-        public const int INVULNERABLENESS = 579;
-        public const int THESAURUSOFFEND = 279;
-        public const string PERIODONTOCLASIA = "双池S弯";
-        public const string THUNDERSTRICKEN = "W-DRAI-VENT-PIPE";
-        public const string QUOTATIONBREWSTER = "DN50";
-        public const string THESAURUSADVERSITY = "W-DRAI-WAST-PIPE";
-        public const int THESAURUSFLUTTER = 789;
-        public const int THROMBOEMBOLISM = 1270;
-        public const int THESAURUSJACKPOT = 1090;
-        public const string THESAURUSDISCIPLINARIAN = "双池P弯";
-        public const int THESAURUSPRIMARY = 171;
-        public const int CONSPICUOUSNESS = 329;
-        public const int QUOTATIONDENNIS = 5479;
-        public const int THESAURUSBLESSING = 1079;
-        public const int THESAURUSCLIMATE = 5600;
-        public const int THESAURUSCOLOSSAL = 6079;
-        public const int THESAURUSSCARCE = 8;
-        public const int QUOTATIONAFGHAN = 1379;
-        public const int INDIGESTIBLENESS = 569;
-        public const int THESAURUSNECESSITY = 406;
-        public const int QUOTATIONDEFLUVIUM = 404;
-        public const int HYDROCOTYLACEAE = 3150;
-        public const int THESAURUSMORTUARY = 12;
-        public const int THESAURUSEUPHORIA = 1300;
-        public const double THESAURUSRIBALD = .4;
-        public const string THESAURUSMOLEST = "接阳台洗手盆排水";
-        public const string THESAURUSSCOUNDREL = "DN50，余同";
-        public const int THIGMOTACTICALLY = 1190;
-        public const string QUOTATIONHUMPBACK = "接卫生间排水管";
-        public const string DISCOMMODIOUSNESS = "DN100，余同";
-        public const int THESAURUSOUTLANDISH = 490;
-        public const int RETROGRESSIVELY = 170;
-        public const int PROCRASTINATORY = 2830;
-        public const int INCONSIDERABILIS = 900;
-        public const int THESAURUSSHROUD = 330;
-        public const int THESAURUSSOMETIMES = 895;
-        public const int ELECTROMYOGRAPH = 285;
-        public const int THESAURUSINTRENCH = 390;
-        public const string ACCOMMODATINGLY = "普通地漏P弯";
-        public const int THESAURUSSECLUSION = 1330;
-        public const int PHOTOSYNTHETICALLY = 270;
-        public const string THESAURUSPUGNACIOUS = "接厨房洗涤盆排水";
-        public const int UNAPPREHENSIBLE = 156;
-        public const int THESAURUSNOTABLE = 510;
-        public const int THESAURUSMISSIONARY = 389;
-        public const int ANTICONVULSANTS = 45;
-        public const int THESAURUSPHANTOM = 669;
-        public const int THESAURUSCONSIGNMENT = 590;
-        public const int ACETYLSALICYLIC = 1700;
-        public const int PREREGISTRATION = 520;
-        public const int THESAURUSJOURNALIST = 919;
-        public const int CONSTITUTIVENESS = 990;
-        public const int THESAURUSALLEGIANCE = 129;
-        public const int ALSOSESQUIALTERAL = 693;
-        public const int THESAURUSCUSTOMARY = 1591;
-        public const int APOLLINARIANISM = 511;
-        public const int TRICHINELLIASIS = 289;
-        public const string QUOTATIONBENJAMIN = "W-DRAI-DIMS";
-        public const int THESAURUSSATIATE = 1391;
-        public const int THESAURUSINFLEXIBLE = 667;
-        public const int THESAURUSCAPITALISM = 1450;
-        public const int QUINQUARTICULAR = 251;
-        public const int THESAURUSINVADE = 660;
-        public const int THESAURUSBISEXUAL = 110;
-        public const int THESAURUSSPIRIT = 91;
-        public const int THESAURUSCANDIDATE = 320;
-        public const int ALUMINOSILICATES = 427;
-        public const int THESAURUSEXHILARATION = 183;
-        public const int POLIOENCEPHALITIS = 283;
-        public const double THESAURUSADJUST = 250.0;
-        public const int THESAURUSHALTER = 225;
-        public const int THESAURUSMERITORIOUS = 1125;
-        public const int THESAURUSRATION = 280;
-        public const int THESAURUSNEGATE = 76;
-        public const int QUOTATIONRHEUMATOID = 424;
-        public const int THESAURUSSENSITIVE = 1900;
-        public const string THESAURUSECHELON = "DN100乙字弯";
-        public const string CONSECUTIVENESS = "1350";
-        public const int THESAURUSBOMBARD = 275;
-        public const int INTERNATIONALLY = 210;
-        public const int THESAURUSEVIDENT = 151;
-        public const int THESAURUSINDOMITABLE = 1109;
-        public const int THESAURUSDISCERNIBLE = 420;
-        public const int PRESBYTERIANIZE = 318;
-        public const int THESAURUSDEGREE = 447;
-        public const int THESAURUSSENTIMENTALITY = 43;
-        public const int ULTRASONICATION = 237;
-        public const string THESAURUSSYNTHETIC = "洗衣机地漏P弯";
-        public const int THESAURUSMOTIONLESS = 1380;
-        public const double THESAURUSFEELER = 200.0;
-        public const double THESAURUSATTENDANCE = 780.0;
-        public const double THESAURUSINACCURACY = 130.0;
-        public const int THESAURUSEXCHANGE = 980;
-        public const int UNPERISHABLENESS = 1358;
-        public const int THESAURUSDENTIST = 172;
-        public const int NOVAEHOLLANDIAE = 155;
-        public const int THESAURUSMEDIATION = 1650;
-        public const int THESAURUSFICTION = 71;
-        public const int THESAURUSNEGLIGENCE = 221;
-        public const int THESAURUSCREDITABLE = 29;
-        public const int THESAURUSJINGLE = 1158;
-        public const int ALSOMEGACEPHALOUS = 179;
-        public const int THESAURUSINCARCERATE = 880;
-        public const string METACOMMUNICATION = ">1500";
-        public const int DEMONSTRATIONIST = 921;
-        public const int THESAURUSMIRTHFUL = 2320;
-        public const string QUOTATIONBARBADOS = "普通地漏S弯";
-        public const int THESAURUSLINGER = 3090;
-        public const int METALINGUISTICS = 371;
-        public const int ORTHOPAEDICALLY = 2730;
-        public const int THESAURUSREPRODUCTION = 888;
-        public const int THESAURUSEQUATION = 629;
-        public const int THESAURUSECLECTIC = 460;
-        public const int THESAURUSINGLORIOUS = 2499;
-        public const int QUOTATIONMASTOID = 1210;
-        public const int THESAURUSISOLATION = 850;
-        public const double THESAURUSFLIRTATIOUS = 270.0;
-        public const int THESAURUSCHORUS = 2279;
-        public const int THESAURUSCELESTIAL = 1239;
-        public const int THESAURUSPRIVILEGE = 675;
-        public const string MÖNCHENGLADBACH = "通气帽系统-AI";
-        public const string THESAURUSDECLAIM = "PL";
-        public const string THESAURUSCONFIRM = "TL";
-        public const string QUOTATIONSTRETTO = "管底h+X.XX";
-        public const string UNACCEPTABILITY = "双格洗涤盆排水-AI";
-        public const string CARCINOGENICITY = "S型存水弯";
-        public const string FISSIPAROUSNESS = "板上S弯";
-        public const string THESAURUSCASCADE = "翻转状态";
-        public const string THESAURUSDENOUNCE = "清扫口系统";
-        public const int THESAURUSCOORDINATE = 21;
-        public const string THESAURUSREMNANT = "-DRAI-";
-        public const string THESAURUSINCENSE = "-PIPE";
-        public const string THESAURUSDEVIANT = "VENT";
-        public const string EXTRAORDINARINESS = "AI-空间框线";
-        public const string THESAURUSUNSPEAKABLE = "AI-房间框线";
-        public const string THESAURUSEMBOLDEN = "AI-空间名称";
-        public const string QUOTATIONGOLDEN = "AI-房间名称";
-        public const string THESAURUSSINCERE = "WP_KTN_LG";
-        public const string THESAURUSNOTATION = "De";
-        public const string PERPENDICULARITY = "wb";
-        public const string THESAURUSIMPOSTER = "kd";
-        public const string THESAURUSPREFERENCE = "C-XREF-EXT";
-        public const string THESAURUSINTENTIONAL = "雨水井";
-        public const string THESAURUSCONFRONTATION = "地漏平面";
-        public const string REPRESENTATIVES = "A$C58B12E6E";
-        public const string THESAURUSCORRELATION = "W-DRAI-PIEP-RISR";
-        public const string THESAURUSUNINTERESTED = "A$C5E4A3C21";
-        public const string QUOTATIONCORNISH = "PIPE-喷淋";
-        public const string CONSUBSTANTIATUS = "A-Kitchen-3";
-        public const string THESAURUSCHIVALROUS = "A-Kitchen-4";
-        public const string THESAURUSGRUESOME = "A-Toilet-1";
-        public const string THESAURUSDAPPER = "A-Toilet-2";
-        public const string QUOTATIONPYRIFORM = "A-Toilet-3";
-        public const string THESAURUSEXTORTIONATE = "A-Toilet-4";
-        public const string THESAURUSDRASTIC = "-XiDiPen-";
-        public const string THESAURUSHUMOUR = "A-Kitchen-9";
-        public const string HYPERSENSITIZED = "0$座厕";
-        public const string THESAURUSHOODLUM = "0$asdfghjgjhkl";
-        public const string PHYTOGEOGRAPHER = "A-Toilet-";
-        public const string THESAURUSABOUND = "A-Kitchen-";
-        public const string THESAURUSALLURE = "|lp";
-        public const string THESAURUSMACHINERY = "|lp1";
-        public const string THESAURUSESCALATE = "|lp2";
-        public const string THESAURUSCLINICAL = "A-Toilet-9";
-        public const string THESAURUSBALEFUL = "$xiyiji";
-        public const string THESAURUSARCHER = "feng_dbg_test_washing_machine";
-        public const string THESAURUSRESIGNED = "多通道";
-        public const string PHOTOAUTOTROPHIC = "洗衣机";
-        public const string THESAURUSACQUISITIVE = "单排";
-        public const string QUOTATIONCHILLI = "设置乙字弯";
-        public const string THESAURUSPOWERLESS = "\n处理中断。未找到有效楼层。";
-        public const string QUOTATIONISOPHANE = "已有的管径标注将被覆盖，是否继续？";
-        public const string THESAURUSMISADVENTURE = "Quetion";
-        public const double DISPROPORTIONAL = 5.01;
-        public const double THESAURUSAPPARATUS = 10.01;
-        public const string ARGENTIMACULATUS = "W-辅助-管径";
-        public const int THESAURUSSYMMETRICAL = 26;
-        public const int THESAURUSDRAGOON = 33;
-        public const string ALLITERATIVENESS = "DN32";
-        public const int THESAURUSMORTALITY = 51;
-        public const string SUPERNATURALIZE = @"\d+";
-        public const string QUOTATIONROBERT = "单盆洗手台";
-        public const string THESAURUSDELIVER = "双盆洗手台";
-        public const string CYLINDRICALNESS = "坐便器";
-        public const int THESAURUSINNOCUOUS = 99;
-        public const double THESAURUSPLAYGROUND = .00001;
-        public const double ULTRASONOGRAPHY = .0001;
-        public const string THESAURUSEMPHASIS = "$TwtSys$00000132";
-        public const string THESAURUSVICTORIOUS = "FLDR";
-        public const string THESAURUSJOURNAL = "CP";
-        public const int THESAURUSEVERLASTING = 25;
-        public const string QUOTATIONPELVIC = "PipeDN100";
-        public const int THESAURUSFINALITY = 10000;
-        public const string THESAURUSBOTTOM = "PL-";
-        public const int THESAURUSCENSURE = 11;
-        public const int THESAURUSBEATIFIC = 13;
-        public const string PHOTOFLUOROGRAM = "DN0";
-        public const int PERICARDIOCENTESIS = 49;
-        public const double QUOTATIONLUCANIAN = 5.1;
-        public const double PHOTOCONDUCTION = 400.0;
-        public const string THESAURUSIMPETUOUS = "DNXXX";
-        public const string INTELLECTUALNESS = "\n";
-        public const string QUOTATIONCHROMIC = "TCH";
-        public const string QUOTATIONMALTESE = "沟";
-        public const string THESAURUSPROLONG = "侧";
-        public const int THESAURUSASSURANCE = 505;
-        public const int DETERMINATENESS = 239;
-        public const string THESAURUSREALLY = "L";
-        public const double ALSOMONOSIPHONIC = 3e4;
-        public const int THESAURUSOCCASIONALLY = 19;
-        public const int ECCLESIASTICISM = 17;
-        public const string THESAURUSSTRAIGHTFORWARD = "废水立管";
-        public const string THESAURUSEMPTINESS = "污水立管";
-        public const string THESAURUSHYPOCRISY = "污废合流立管";
-        public const string THESAURUSRECIPE = "沉箱立管";
-        public const string THESAURUSRAFFLE = "通气立管";
-        public const string HYDROCHLOROFLUOROCARBON = "2F";
-        public const double THESAURUSCONFECTIONERY = .5;
-        public const string PARATHYROIDECTOMY = "地漏-AI";
-        public const string PARALINGUISTICALLY = "暂不支持污废分流，仅生成废水系统图";
-        public const int THESAURUSSCINTILLATE = 1231;
-        public const string THESAURUSBASELESS = "FL";
-        public const string THESAURUSPOSSESSIVE = "WL";
-        public const double THESAURUSLEGISLATION = 8000.0;
-        public const int INTROJECTIONISM = 1075;
-        public const int THESAURUSSEDATE = 1100;
-        public const int PROGNOSTICATORY = 2400;
-        public const int THESAURUSHALLUCINATE = 1571;
-        public const int THESAURUSFAINTLY = 1171;
-        public const int QUOTATIONELECTROMOTIVE = 1250;
-        public const int THESAURUSHOMICIDAL = 1121;
-        public const int THESAURUSDESULTORY = 1821;
-        public const int THESAURUSPROSPEROUS = 1321;
-        public const int THESAURUSUNGRATEFUL = 3400;
-        public const int INCOMPREHENSIBILIS = 571;
-        public const int THESAURUSSUPPOSITION = 3350;
-        public const int QUOTATION1ASHANKS = 1271;
-        public const string CHRISTADELPHIAN = "接至雨水口";
-        public const int NEUROPSYCHIATRIST = 1120;
-        public const int SEMICONSCIOUSNESS = 680;
-        public const int PSEUDEPIGRAPHOS = 276;
-        public const int THESAURUSMANIFESTATION = 468;
-        public const int MAXILLOPALATINE = 2180;
-        public const int THESAURUSATTENDANT = 910;
-        public const int THESAURUSLAWYER = 1550;
-        public const int THESAURUSINDECOROUS = 2059;
-        public const int THESAURUSMISAPPREHEND = 1140;
-        public const int SYNAESTHETICALLY = 1040;
-        public const int THESAURUSDESTRUCTION = 790;
-        public const int OLIGOMENORRHOEA = 840;
-        public const int THESAURUSOBSERVANCE = 3042;
-        public const int THESAURUSMAYHEM = 2050;
-        public const int QUOTATIONELECTRICIAN = 3450;
-        public const int THESAURUSVIGOROUS = 853;
-        public const int QUOTATIONFOREGONE = 531;
-        public const int RETROSPECTIVENESS = 1122;
-        public const int REACTIONARINESS = 547;
-        public const int THESAURUSCOMPOUND = 1073;
-        public const string SEROEPIDEMIOLOGY = "EQPM";
-        public const string INTELLECTUALISTS = "立管";
-        public const string QUOTATIONBITTER = "井";
-        public const string THESAURUSENCOMPASS = @"^(F\d?L|T\d?L|P\d?L|D\d?L|W\d?L|Y\d?L|N\d?L)(\w*)\-(\w*)([a-zA-Z]*)$";
-        public const string THESAURUSRESUSCITATE = @"\-?DN\d+";
-        public const char THESAURUSHABITAT = '\n';
-        public const string ALSOHEAVENWARDS = "屋面";
-        public const string NEUROTRANSMITTER = @"DN(\d{1,5})";
-        public const string THESAURUSPAGEANT = "污废合流井";
-        public const string THESAURUSRECTIFY = "0.XX";
-        public const int THESAURUSFRISKY = 1350;
-        public const double THESAURUSUNDERSTANDING = .2446;
-        public const string THESAURUSCURDLE = "侧排雨水斗系统";
-        public const int CONSUMMATIVENESS = 215;
-        public const int UNACCEPTABLENESS = 235;
-        public const int THESAURUSDEPUTIZE = 567;
-        public const int THESAURUSHEARTLESS = 587;
-        public const int QUOTATIONWORSTED = 2052;
-        public const int THESAURUSVISIBLE = 2002;
-        public const int THESAURUSINSTITUTE = 482;
-        public const int THESAURUSINCONCLUSIVE = 1597;
-        public const int ALSOBIPINNATISECT = 1547;
-        public const int CATECHOLAMINERGIC = 82;
-        public const int CORYNOCARPACEAE = 1579;
-        public const int PROBLEMATICALNESS = 1459;
-        public const int THESAURUSSMOULDER = 2444;
-        public const int THESAURUSBEAUTIFY = 1398;
-        public const int THESAURUSEFFULGENT = 679;
-        public const int THESAURUSINDISPENSABLE = 1292;
-        public const int THESAURUSREPRESSIVE = 1020;
-        public const int THESAURUSMADNESS = 899;
-        public const int THESAURUSEFFICACY = 820;
-        public const int PALAEOICHTHYOLOGY = 699;
-        public const int THESAURUSSHALLOW = 1179;
-        public const int IMMEASURABLENESS = 578;
-        public const int ALSOWATERLANDIAN = 365;
-        public const int THESAURUSWINDING = 1844;
-        public const string THESAURUSPENNILESS = "DOME";
-        public const int THESAURUSREFRACTORY = 1275;
-        public const int ALSOMULTIFLORAL = 1178;
-        public const int THESAURUSACQUIESCENT = 1155;
-        public const int THESAURUSUNOCCUPIED = 1740;
-        public const int PROMORPHOLOGIST = 149;
-        public const int QUOTATIONQUICHE = 870;
-        public const int THESAURUSTRAUMATIC = 421;
-        public const int STENTOROPHŌNIKOS = 991;
-        public const int THESAURUSASTUTE = 1348;
-        public const int THESAURUSASSIMILATE = 914;
-        public const int SPECTROFLUORIMETER = 1355;
-        public const int THESAURUSRUINOUS = 1356;
-        public const int DIFFERENTIATEDNESS = 3300;
-        public const int THESAURUSIMPRACTICABLE = 1721;
-        public const int THESAURUSRECONCILE = 2900;
-        public const int METROPOLITANATE = 879;
-        public const int IMAGINATIVENESS = 2150;
-        public const int TRIGONOCEPHALIC = 620;
-        public const int SCIENTIFICALNESS = 1099;
-        public const int QUOTATIONBUBONIC = 1220;
-        public const int THESAURUSHEADSTRONG = 291;
-        public const int THESAURUSCONTEMPT = 1939;
-        public const int THESAURUSMATTER = 1933;
-        public const int THESAURUSABSORBENT = 1268;
-        public const int OLIGOSACCHARIDES = 1950;
-        public const int THESAURUSINTEGRITY = 2500;
-        public const int THESAURUSDISTASTEFUL = 721;
-        public const int THESAURUSPROGRESSIVE = 1750;
-        public const int THESAURUSINSINCERE = 1021;
-        public const double THESAURUSARRIVE = 100.0;
-        public const string THESAURUSREGENERATE = "Y";
-        public const string THESAURUSIMPOUND = "侧入式雨水斗\nDN100";
-        public const int THESAURUSCIRCULAR = 1670;
-        public const int THESAURUSBUSINESS = 1549;
-        public const int THESAURUSSPRINGY = 1429;
-        public const int QUOTATIONSHELLEY = 1170;
-        public const int THESAURUSCOMPLAINT = 1487;
-        public const int THESAURUSCONVOY = 1411;
-        public const int ALSOPALIMBACCHIC = 1213;
-        public const int THESAURUSPREFER = 388;
-        public const int THESAURUSREPARATION = 1290;
-        public const int THESAURUSINFAMOUS = 1187;
-        public const int ANTHROPOPHAGINIAN = 399;
-        public const int QUOTATIONNAMAQUA = 174;
-        public const int THESAURUSLEGALIZE = 1066;
-    public static bool IsToilet(string roomName)
-    {
-      var roomNameContains = new List<string>
-            {
-                CIRCUMSTANTIARE,THESAURUSCIPHER,PREMILLENNIALIST,
-                THESAURUSINDIGENT,THESAURUSFRAMEWORK,THESAURUSHUMILIATION,
-            };
-      if (string.IsNullOrEmpty(roomName))
-        return INTRAVASCULARLY;
-      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
-        return THESAURUSOBSTINACY;
-      if (roomName.Equals(THESAURUSSTERLING))
-        return THESAURUSOBSTINACY;
-      return Regex.IsMatch(roomName, THESAURUSSCREEN);
-    }
-    public static bool IsKitchen(string roomName)
-    {
-      var roomNameContains = new List<string> { THESAURUSPEDESTRIAN, THESAURUSRECLUSE };
-      if (string.IsNullOrEmpty(roomName))
-        return INTRAVASCULARLY;
-      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
-        return THESAURUSOBSTINACY;
-      if (roomName.Equals(THESAURUSINCONTROVERTIBLE))
-        return THESAURUSOBSTINACY;
-      return INTRAVASCULARLY;
-    }
-    public static bool IsBalcony(string roomName)
-    {
-      if (roomName == null) return INTRAVASCULARLY;
-      var roomNameContains = new List<string> { NATIONALIZATION };
-      if (string.IsNullOrEmpty(roomName))
-        return INTRAVASCULARLY;
-      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
-        return THESAURUSOBSTINACY;
-      return INTRAVASCULARLY;
-    }
-    public static bool IsCorridor(string roomName)
-    {
-      if (roomName == null) return INTRAVASCULARLY;
-      var roomNameContains = new List<string> { THESAURUSSPECIES };
-      if (string.IsNullOrEmpty(roomName))
-        return INTRAVASCULARLY;
-      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
-        return THESAURUSOBSTINACY;
-      return INTRAVASCULARLY;
-    }
-    public static bool IsWL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSANTIDOTE);
-    }
-    public static bool IsDraiFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && !IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-    }
-    public static bool IsFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSDISSOLVE);
-    }
-    public static bool IsFL0(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(AUTOLITHOGRAPHIC);
-    }
-    public static bool IsPL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSABUNDANT);
-    }
-    public static bool IsTL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSOPTIONAL);
-    }
-    public static bool IsDL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, DIASTEREOISOMER);
-    }
-    public static bool IsDraiLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-    {
-      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return (IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && !IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) || IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsWL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
-    }
-  }
-  public class DrainageLayoutManager
-  {
-    List<DBTextInfo> MAX_RAINPIPE_TO_WASHMACHINE;
-    int EnlargeTolerance;
-    int MinimumAreaTolerance;
-    List<BlockInfo> COMMONRADIUS;
-    int _fireHydrantOutRaisePipe;
-    int TolLightRangeMax;
-    List<LineInfo> MAX_BALCONYBASIN_TO_BALCONY;
-    int _ringPipeSpace;
-    int _raisePipeDistanceStartPoint;
-    List<CircleInfo> BALCONY_BUFFER_DISTANCE;
-    int _raisePipeSpace;
-    int _ringPipeMaxSpace;
-    List<DimInfo> MIN_BALCONYBASIN_TO_BALCONY;
-    int _scaleRefugeFireH;
-    int _scaleTopFloorTopLine;
-    public DrainageLayoutManager(List<DBTextInfo> MAX_RAINPIPE_TO_WASHMACHINE, List<BlockInfo> COMMONRADIUS, List<LineInfo> MAX_BALCONYBASIN_TO_BALCONY, List<CircleInfo> BALCONY_BUFFER_DISTANCE, List<DimInfo> MIN_BALCONYBASIN_TO_BALCONY)
-    {
-      this.MAX_RAINPIPE_TO_WASHMACHINE = MAX_RAINPIPE_TO_WASHMACHINE;
-      this.COMMONRADIUS = COMMONRADIUS;
-      this.MAX_BALCONYBASIN_TO_BALCONY = MAX_BALCONYBASIN_TO_BALCONY;
-      this.BALCONY_BUFFER_DISTANCE = BALCONY_BUFFER_DISTANCE;
-      this.MIN_BALCONYBASIN_TO_BALCONY = MIN_BALCONYBASIN_TO_BALCONY;
-      TakeStopSnap();
-    }
-    public void TakeStartSnap()
-    {
-      EnlargeTolerance = MAX_RAINPIPE_TO_WASHMACHINE.Count;
-      _fireHydrantOutRaisePipe = COMMONRADIUS.Count;
-      _ringPipeSpace = MAX_BALCONYBASIN_TO_BALCONY.Count;
-      _raisePipeSpace = BALCONY_BUFFER_DISTANCE.Count;
-      _scaleRefugeFireH = MIN_BALCONYBASIN_TO_BALCONY.Count;
-    }
-    public void TakeStopSnap()
-    {
-      MinimumAreaTolerance = MAX_RAINPIPE_TO_WASHMACHINE.Count;
-      TolLightRangeMax = COMMONRADIUS.Count;
-      _raisePipeDistanceStartPoint = MAX_BALCONYBASIN_TO_BALCONY.Count;
-      _ringPipeMaxSpace = BALCONY_BUFFER_DISTANCE.Count;
-      _scaleTopFloorTopLine = MIN_BALCONYBASIN_TO_BALCONY.Count;
-    }
-    public void MoveElements(Vector2d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN) => MoveElements(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN.ToVector3d());
-    public void MoveElements(Vector3d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)
-    {
-      var TolGroupEvcaEmg = MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN.ToVector2d();
-      foreach (var TolLightRangeSingleSideMin in MAX_RAINPIPE_TO_WASHMACHINE)
-      {
-        TolLightRangeSingleSideMin.BasePoint += MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
-      }
-      foreach (var TolLightRangeSingleSideMin in COMMONRADIUS)
-      {
-        TolLightRangeSingleSideMin.BasePoint += MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
-      }
-      foreach (var TolLightRangeSingleSideMin in MAX_BALCONYBASIN_TO_BALCONY)
-      {
-        TolLightRangeSingleSideMin.Line = TolLightRangeSingleSideMin.Line.Offset(TolGroupEvcaEmg);
-      }
-      foreach (var TolLightRangeSingleSideMin in BALCONY_BUFFER_DISTANCE)
-      {
-        TolLightRangeSingleSideMin.Circle = TolLightRangeSingleSideMin.Circle.OffsetXY(TolGroupEvcaEmg.X, TolGroupEvcaEmg.Y);
-      }
-      foreach (var TolLightRangeSingleSideMin in MIN_BALCONYBASIN_TO_BALCONY)
-      {
-        TolLightRangeSingleSideMin.Point1 = TolLightRangeSingleSideMin.Point1.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-        TolLightRangeSingleSideMin.Point2 = TolLightRangeSingleSideMin.Point2.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
-      }
-    }
-    public DrainageLayoutManager GetSnapshot()
-    {
-      return new(MAX_RAINPIPE_TO_WASHMACHINE.GetRange(EnlargeTolerance, MinimumAreaTolerance - EnlargeTolerance), COMMONRADIUS.GetRange(_fireHydrantOutRaisePipe, TolLightRangeMax - _fireHydrantOutRaisePipe), MAX_BALCONYBASIN_TO_BALCONY.GetRange(_ringPipeSpace, _raisePipeDistanceStartPoint - _ringPipeSpace), BALCONY_BUFFER_DISTANCE.GetRange(_raisePipeSpace, _ringPipeMaxSpace - _raisePipeSpace), MIN_BALCONYBASIN_TO_BALCONY.GetRange(_scaleRefugeFireH, _scaleTopFloorTopLine - _scaleRefugeFireH));
-    }
-    public IEnumerable<LineInfo> GetLineInfos()
-    {
-      for (int MAX_ANGEL_TOLLERANCE = _ringPipeSpace; MAX_ANGEL_TOLLERANCE < _raisePipeDistanceStartPoint; MAX_ANGEL_TOLLERANCE++)
-      {
-        yield return MAX_BALCONYBASIN_TO_BALCONY[MAX_ANGEL_TOLLERANCE];
-      }
-    }
-    public IEnumerable<Point3d> GetBrBasePoints()
-    {
-      for (int MAX_ANGEL_TOLLERANCE = _fireHydrantOutRaisePipe; MAX_ANGEL_TOLLERANCE < TolLightRangeMax; MAX_ANGEL_TOLLERANCE++)
-      {
-        yield return COMMONRADIUS[MAX_ANGEL_TOLLERANCE].BasePoint;
-      }
-    }
-    public IEnumerable<Point2d> GetLineVertices()
-    {
-      for (int MAX_ANGEL_TOLLERANCE = _ringPipeSpace; MAX_ANGEL_TOLLERANCE < _raisePipeDistanceStartPoint; MAX_ANGEL_TOLLERANCE++)
-      {
-        yield return MAX_BALCONYBASIN_TO_BALCONY[MAX_ANGEL_TOLLERANCE].Line.StartPoint;
-        yield return MAX_BALCONYBASIN_TO_BALCONY[MAX_ANGEL_TOLLERANCE].Line.EndPoint;
-      }
-    }
-  }
   public class TempGeoFac
   {
     public static IEnumerable<GLineSegment> GetMinConnSegs(List<GLineSegment> TolLane)
@@ -6630,6 +476,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
     public int CPSCount;
     public int WPSCount;
     public string WaterBucket;
+    public bool FDShare;
     public static bool operator ==(PipeRun me, PipeRun tolReturnValueMaxDistance)
     {
       return me.Equals(tolReturnValueMaxDistance);
@@ -6649,6 +496,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
       if (this.CPSCount != tolReturnValueMaxDistance.CPSCount) return INTRAVASCULARLY;
       if (this.WPSCount != tolReturnValueMaxDistance.WPSCount) return INTRAVASCULARLY;
       if (this.WaterBucket != tolReturnValueMaxDistance.WaterBucket) return INTRAVASCULARLY;
+      if (this.FDShare != tolReturnValueMaxDistance.FDShare) return INTRAVASCULARLY;
       return THESAURUSOBSTINACY;
     }
     public override int GetHashCode()
@@ -13306,117 +7154,6 @@ cb: tolReturnValueRangeTo =>
       return (DrainageCadData)MemberwiseClone();
     }
   }
-  public class BlockInfo
-  {
-    public string LayerName;
-    public string BlockName;
-    public Point3d BasePoint;
-    public double Rotate;
-    public double Scale;
-    public Scale3d? ScaleEx;
-    public Dictionary<string, string> PropDict;
-    public Dictionary<string, object> DynaDict;
-    public BlockInfo(string blockName, string layerName, Point3d SIDEWATERBUCKET_X_INDENT)
-    {
-      this.LayerName = layerName;
-      this.BlockName = blockName;
-      this.BasePoint = SIDEWATERBUCKET_X_INDENT;
-      this.PropDict = new Dictionary<string, string>();
-      this.DynaDict = new Dictionary<string, object>();
-      this.Rotate = THESAURUSSTAMPEDE;
-      this.Scale = THESAURUSHOUSING;
-    }
-  }
-  public class LineInfo
-  {
-    public GLineSegment Line;
-    public string LayerName;
-    public LineInfo(GLineSegment TolUniformSideLenth, string layerName)
-    {
-      this.Line = TolUniformSideLenth;
-      this.LayerName = layerName;
-    }
-  }
-  public class DBTextInfo
-  {
-    public string LayerName;
-    public string TextStyle;
-    public Point3d BasePoint;
-    public string Text;
-    public double Rotation;
-    public DBTextInfo(Point3d point, string repeated_point_distance, string layerName, string textStyle)
-    {
-      repeated_point_distance ??= THESAURUSDEPLORE;
-      this.LayerName = layerName;
-      this.TextStyle = textStyle;
-      this.BasePoint = point;
-      this.Text = repeated_point_distance;
-    }
-  }
-  public class DimInfo
-  {
-    public string Layer;
-    public string Text;
-    public Point3d Point1;
-    public Point3d Point2;
-    public Vector3d Vector;
-    public DimInfo(Point2d pt1, Point2d _tol_lane, Vector2d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, string repeated_point_distance, string layer) : this(pt1.ToPoint3d(), _tol_lane.ToPoint3d(), MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN.ToVector3d(), repeated_point_distance, layer) { }
-    public DimInfo(Point3d pt1, Point3d _tol_lane, Vector3d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, string repeated_point_distance, string layer)
-    {
-      this.Layer = layer;
-      this.Point1 = pt1;
-      this.Point2 = _tol_lane;
-      this.Text = repeated_point_distance ?? THESAURUSDEPLORE;
-      this.Vector = MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
-    }
-  }
-  public class CircleInfo
-  {
-    public GCircle Circle;
-    public string LayerName;
-    public CircleInfo(Point3d center, double radius, string layerName) : this(new GCircle(center.X, center.Y, radius), layerName)
-    {
-    }
-    public CircleInfo(GCircle circle, string layerName)
-    {
-      this.Circle = circle;
-      this.LayerName = layerName;
-    }
-  }
-  public class PriorityQueue : IDisposable
-  {
-    Queue<Action>[] queues;
-    public PriorityQueue(int queuesCount)
-    {
-      queues = new Queue<Action>[queuesCount];
-      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < queuesCount; MAX_ANGEL_TOLLERANCE++)
-      {
-        queues[MAX_ANGEL_TOLLERANCE] = new Queue<Action>();
-      }
-    }
-    public void Dispose()
-    {
-      Execute();
-    }
-    public void Enqueue(int priority, Action maxDeviceplatformArea)
-    {
-      queues[priority].Enqueue(maxDeviceplatformArea);
-    }
-    public void Execute()
-    {
-      while (queues.Any(queue => queue.Count > THESAURUSSTAMPEDE))
-      {
-        foreach (var queue in queues)
-        {
-          if (queue.Count > THESAURUSSTAMPEDE)
-          {
-            queue.Dequeue()();
-            break;
-          }
-        }
-      }
-    }
-  }
   public class Point3dComparer : IEqualityComparer<Point3d>
   {
     Tolerance tol;
@@ -13448,188 +7185,6547 @@ cb: tolReturnValueRangeTo =>
     public ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData;
     public DrainageSystemDiagramViewModel vm;
   }
-  public enum LayoutState
+  public static partial class THDrainageService
   {
-    CheckPoint, Basin, FloorDrain, CondensePipe, SanPaiMark, Outlet, PipeLabel, FixPipeVLines, FixAirBlock, Finished,
-  }
-  public enum GeoCalState
-  {
-    MarkTranslator, GroupPipe, MarkCompsToPipe, MarkWaterBucketToPipe, Finished,
-  }
-  public class Ref<T>
-  {
-    public T Value;
-    public Ref() { }
-    public Ref(T MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN) { Value = MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN; }
-  }
-  public class MLeaderInfo
-  {
-    public Point3d BasePoint;
-    public string Text;
-    public string Note;
-    public static MLeaderInfo Create(Point2d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, string repeated_point_distance) => Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToPoint3d(), repeated_point_distance);
-    public static MLeaderInfo Create(Point3d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, string repeated_point_distance)
+    public static Polygon ConvertToPolygon(Polyline maxToiletToFloordrainDistance1)
     {
-      return new MLeaderInfo() { BasePoint = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, Text = repeated_point_distance };
-    }
-  }
-  public class Dijkstra<T>
-  {
-    private readonly List<GraphNode<T>> _graph;
-    private IPriorityQueue<GraphNode<T>> _unvistedNodes;
-    public Dijkstra(IEnumerable<GraphNode<T>> graph)
-    {
-      _graph = graph.ToList();
-    }
-    public IList<GraphNode<T>> FindShortestPathBetween(GraphNode<T> MAX_TAG_LENGTH, GraphNode<T> finish)
-    {
-      PrepareGraphForDijkstra();
-      MAX_TAG_LENGTH.TentativeDistance = THESAURUSSTAMPEDE;
-      var current = MAX_TAG_LENGTH;
-      while (THESAURUSOBSTINACY)
+      if (maxToiletToFloordrainDistance1.NumberOfVertices <= THESAURUSPERMUTATION)
+        return null;
+      var list = new List<Point2d>();
+      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < maxToiletToFloordrainDistance1.NumberOfVertices; MAX_ANGEL_TOLLERANCE++)
       {
-        foreach (var neighbour in current.Neighbours.Where(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.GraphNode.Visited))
+        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxToiletToFloordrainDistance1.GetPoint2dAt(MAX_ANGEL_TOLLERANCE);
+        if (list.Count == THESAURUSSTAMPEDE || !Equals(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, list.Last()))
         {
-          var newTentativeDistance = current.TentativeDistance + neighbour.Distance;
-          if (newTentativeDistance < neighbour.GraphNode.TentativeDistance)
-          {
-            neighbour.GraphNode.TentativeDistance = newTentativeDistance;
-          }
+          list.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
         }
-        current.Visited = THESAURUSOBSTINACY;
-        var next = _unvistedNodes.Pop();
-        if (next == null || next.TentativeDistance == int.MaxValue)
-        {
-          if (finish.TentativeDistance == int.MaxValue)
-          {
-            return new List<GraphNode<T>>();
-          }
-          finish.Visited = THESAURUSOBSTINACY;
-          break;
-        }
-        var smallest = next;
-        current = smallest;
       }
-      return DeterminePathFromWeightedGraph(MAX_TAG_LENGTH, finish);
-    }
-    private static List<GraphNode<T>> DeterminePathFromWeightedGraph(GraphNode<T> MAX_TAG_LENGTH, GraphNode<T> finish)
-    {
-      var current = finish;
-      var path = new List<GraphNode<T>> { current };
-      var currentTentativeDistance = finish.TentativeDistance;
-      while (THESAURUSOBSTINACY)
+      if (list.Count <= THESAURUSPERMUTATION) return null;
+      try
       {
-        if (current == MAX_TAG_LENGTH)
+        var tmp = list.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSCoordinate()).ToList(list.Count + THESAURUSHOUSING);
+        if (!tmp[THESAURUSSTAMPEDE].Equals(tmp[tmp.Count - THESAURUSHOUSING]))
         {
-          break;
+          tmp.Add(tmp[THESAURUSSTAMPEDE]);
         }
-        foreach (var neighbour in current.Neighbours.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GraphNode.Visited))
+        var ring = new LinearRing(tmp.ToArray());
+        return new Polygon(ring);
+      }
+      catch (System.Exception ex)
+      {
+        return null;
+      }
+    }
+    public static string TryParseWrappingPipeRadiusText(string repeated_point_distance)
+    {
+      if (repeated_point_distance == null) return null;
+      var TolLightRangeMin = Regex.Replace(repeated_point_distance, UREDINIOMYCETES, THESAURUSDEPLORE, RegexOptions.IgnoreCase);
+      TolLightRangeMin = Regex.Replace(TolLightRangeMin, QUOTATION3BABOVE, THESAURUSDEPLORE);
+      TolLightRangeMin = Regex.Replace(TolLightRangeMin, THESAURUSMISTRUST, THESAURUSSPECIFICATION);
+      return TolLightRangeMin;
+    }
+    public enum ParkingStallGroupLengthRestrict
+    {
+      CheckPoint, Basin, FloorDrain, CondensePipe, SanPaiMark, Outlet, PipeLabel, FixPipeVLines, FixAirBlock, Finished,
+    }
+    public enum lane_offset
+    {
+      MarkTranslator, GroupPipe, MarkCompsToPipe, MarkWaterBucketToPipe, Finished,
+    }
+    public class _tol_to_close_pt
+    {
+      List<parking_stall_group_length_restrict> MAX_RAINPIPE_TO_WASHMACHINE;
+      int EnlargeTolerance;
+      int MinimumAreaTolerance;
+      List<lane_line_extend_length> COMMONRADIUS;
+      int _fireHydrantOutRaisePipe;
+      int TolLightRangeMax;
+      List<parking_stall_group_width_restrict> MAX_BALCONYBASIN_TO_BALCONY;
+      int _ringPipeSpace;
+      int _raisePipeDistanceStartPoint;
+      List<LANE_LINE_EXTEND_LENGTH> BALCONY_BUFFER_DISTANCE;
+      int _raisePipeSpace;
+      int _ringPipeMaxSpace;
+      List<LANE_OFFSET> MIN_BALCONYBASIN_TO_BALCONY;
+      int _scaleRefugeFireH;
+      int _scaleTopFloorTopLine;
+      public _tol_to_close_pt(List<parking_stall_group_length_restrict> MAX_RAINPIPE_TO_WASHMACHINE, List<lane_line_extend_length> COMMONRADIUS, List<parking_stall_group_width_restrict> MAX_BALCONYBASIN_TO_BALCONY, List<LANE_LINE_EXTEND_LENGTH> BALCONY_BUFFER_DISTANCE, List<LANE_OFFSET> MIN_BALCONYBASIN_TO_BALCONY)
+      {
+        this.MAX_RAINPIPE_TO_WASHMACHINE = MAX_RAINPIPE_TO_WASHMACHINE;
+        this.COMMONRADIUS = COMMONRADIUS;
+        this.MAX_BALCONYBASIN_TO_BALCONY = MAX_BALCONYBASIN_TO_BALCONY;
+        this.BALCONY_BUFFER_DISTANCE = BALCONY_BUFFER_DISTANCE;
+        this.MIN_BALCONYBASIN_TO_BALCONY = MIN_BALCONYBASIN_TO_BALCONY;
+        _LaneOffset();
+      }
+      public void _tol_blk_max_connect()
+      {
+        EnlargeTolerance = MAX_RAINPIPE_TO_WASHMACHINE.Count;
+        _fireHydrantOutRaisePipe = COMMONRADIUS.Count;
+        _ringPipeSpace = MAX_BALCONYBASIN_TO_BALCONY.Count;
+        _raisePipeSpace = BALCONY_BUFFER_DISTANCE.Count;
+        _scaleRefugeFireH = MIN_BALCONYBASIN_TO_BALCONY.Count;
+      }
+      public void _LaneOffset()
+      {
+        MinimumAreaTolerance = MAX_RAINPIPE_TO_WASHMACHINE.Count;
+        TolLightRangeMax = COMMONRADIUS.Count;
+        _raisePipeDistanceStartPoint = MAX_BALCONYBASIN_TO_BALCONY.Count;
+        _ringPipeMaxSpace = BALCONY_BUFFER_DISTANCE.Count;
+        _scaleTopFloorTopLine = MIN_BALCONYBASIN_TO_BALCONY.Count;
+      }
+      public void _LaneLineExtendLength(Vector2d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN) => _LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN.ToVector3d());
+      public void _LaneLineExtendLength(Vector3d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)
+      {
+        var TolGroupEvcaEmg = MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN.ToVector2d();
+        foreach (var TolLightRangeSingleSideMin in MAX_RAINPIPE_TO_WASHMACHINE)
         {
-          if (currentTentativeDistance - neighbour.Distance == neighbour.GraphNode.TentativeDistance)
+          TolLightRangeSingleSideMin.BasePoint += MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
+        }
+        foreach (var TolLightRangeSingleSideMin in COMMONRADIUS)
+        {
+          TolLightRangeSingleSideMin.BasePoint += MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
+        }
+        foreach (var TolLightRangeSingleSideMin in MAX_BALCONYBASIN_TO_BALCONY)
+        {
+          TolLightRangeSingleSideMin.Line = TolLightRangeSingleSideMin.Line.Offset(TolGroupEvcaEmg);
+        }
+        foreach (var TolLightRangeSingleSideMin in BALCONY_BUFFER_DISTANCE)
+        {
+          TolLightRangeSingleSideMin.Circle = TolLightRangeSingleSideMin.Circle.OffsetXY(TolGroupEvcaEmg.X, TolGroupEvcaEmg.Y);
+        }
+        foreach (var TolLightRangeSingleSideMin in MIN_BALCONYBASIN_TO_BALCONY)
+        {
+          TolLightRangeSingleSideMin.Point1 = TolLightRangeSingleSideMin.Point1.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+          TolLightRangeSingleSideMin.Point2 = TolLightRangeSingleSideMin.Point2.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+        }
+      }
+      public _tol_to_close_pt _ParkingStallGroupWidthRestrict()
+      {
+        return new(MAX_RAINPIPE_TO_WASHMACHINE.GetRange(EnlargeTolerance, MinimumAreaTolerance - EnlargeTolerance), COMMONRADIUS.GetRange(_fireHydrantOutRaisePipe, TolLightRangeMax - _fireHydrantOutRaisePipe), MAX_BALCONYBASIN_TO_BALCONY.GetRange(_ringPipeSpace, _raisePipeDistanceStartPoint - _ringPipeSpace), BALCONY_BUFFER_DISTANCE.GetRange(_raisePipeSpace, _ringPipeMaxSpace - _raisePipeSpace), MIN_BALCONYBASIN_TO_BALCONY.GetRange(_scaleRefugeFireH, _scaleTopFloorTopLine - _scaleRefugeFireH));
+      }
+      public IEnumerable<parking_stall_group_width_restrict> _ParkingStallGroupLengthRestrict()
+      {
+        for (int MAX_ANGEL_TOLLERANCE = _ringPipeSpace; MAX_ANGEL_TOLLERANCE < _raisePipeDistanceStartPoint; MAX_ANGEL_TOLLERANCE++)
+        {
+          yield return MAX_BALCONYBASIN_TO_BALCONY[MAX_ANGEL_TOLLERANCE];
+        }
+      }
+      public IEnumerable<Point3d> LaneOffset()
+      {
+        for (int MAX_ANGEL_TOLLERANCE = _fireHydrantOutRaisePipe; MAX_ANGEL_TOLLERANCE < TolLightRangeMax; MAX_ANGEL_TOLLERANCE++)
+        {
+          yield return COMMONRADIUS[MAX_ANGEL_TOLLERANCE].BasePoint;
+        }
+      }
+      public IEnumerable<Point2d> LaneLineExtendLength()
+      {
+        for (int MAX_ANGEL_TOLLERANCE = _ringPipeSpace; MAX_ANGEL_TOLLERANCE < _raisePipeDistanceStartPoint; MAX_ANGEL_TOLLERANCE++)
+        {
+          yield return MAX_BALCONYBASIN_TO_BALCONY[MAX_ANGEL_TOLLERANCE].Line.StartPoint;
+          yield return MAX_BALCONYBASIN_TO_BALCONY[MAX_ANGEL_TOLLERANCE].Line.EndPoint;
+        }
+      }
+    }
+    public class lane_line_extend_length
+    {
+      public string LayerName;
+      public string BlockName;
+      public Point3d BasePoint;
+      public double Rotate;
+      public double Scale;
+      public Scale3d? ScaleEx;
+      public Dictionary<string, string> PropDict;
+      public Dictionary<string, object> DynaDict;
+      public lane_line_extend_length(string blockName, string layerName, Point3d SIDEWATERBUCKET_X_INDENT)
+      {
+        this.LayerName = layerName;
+        this.BlockName = blockName;
+        this.BasePoint = SIDEWATERBUCKET_X_INDENT;
+        this.PropDict = new Dictionary<string, string>();
+        this.DynaDict = new Dictionary<string, object>();
+        this.Rotate = THESAURUSSTAMPEDE;
+        this.Scale = THESAURUSHOUSING;
+      }
+    }
+    public class parking_stall_group_width_restrict
+    {
+      public GLineSegment Line;
+      public string LayerName;
+      public parking_stall_group_width_restrict(GLineSegment TolUniformSideLenth, string layerName)
+      {
+        this.Line = TolUniformSideLenth;
+        this.LayerName = layerName;
+      }
+    }
+    public class parking_stall_group_length_restrict
+    {
+      public string LayerName;
+      public string TextStyle;
+      public Point3d BasePoint;
+      public string Text;
+      public double Rotation;
+      public parking_stall_group_length_restrict(Point3d point, string repeated_point_distance, string layerName, string textStyle)
+      {
+        repeated_point_distance ??= THESAURUSDEPLORE;
+        this.LayerName = layerName;
+        this.TextStyle = textStyle;
+        this.BasePoint = point;
+        this.Text = repeated_point_distance;
+      }
+    }
+    public class LANE_OFFSET
+    {
+      public string Layer;
+      public string Text;
+      public Point3d Point1;
+      public Point3d Point2;
+      public Vector3d Vector;
+      public LANE_OFFSET(Point2d pt1, Point2d _tol_lane, Vector2d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, string repeated_point_distance, string layer) : this(pt1.ToPoint3d(), _tol_lane.ToPoint3d(), MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN.ToVector3d(), repeated_point_distance, layer) { }
+      public LANE_OFFSET(Point3d pt1, Point3d _tol_lane, Vector3d MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, string repeated_point_distance, string layer)
+      {
+        this.Layer = layer;
+        this.Point1 = pt1;
+        this.Point2 = _tol_lane;
+        this.Text = repeated_point_distance ?? THESAURUSDEPLORE;
+        this.Vector = MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
+      }
+    }
+    public class LANE_LINE_EXTEND_LENGTH
+    {
+      public GCircle Circle;
+      public string LayerName;
+      public LANE_LINE_EXTEND_LENGTH(Point3d center, double radius, string layerName) : this(new GCircle(center.X, center.Y, radius), layerName)
+      {
+      }
+      public LANE_LINE_EXTEND_LENGTH(GCircle circle, string layerName)
+      {
+        this.Circle = circle;
+        this.LayerName = layerName;
+      }
+    }
+    public class ParkingStallGroupWidthRestrict : IDisposable
+    {
+      Queue<Action>[] _PolyClosedDistance;
+      public ParkingStallGroupWidthRestrict(int _ParkingPolyEnlargeLength)
+      {
+        _PolyClosedDistance = new Queue<Action>[_ParkingPolyEnlargeLength];
+        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < _ParkingPolyEnlargeLength; MAX_ANGEL_TOLLERANCE++)
+        {
+          _PolyClosedDistance[MAX_ANGEL_TOLLERANCE] = new Queue<Action>();
+        }
+      }
+      public void Dispose()
+      {
+        Execute();
+      }
+      public void Enqueue(int _MaxEdgeLength, Action maxDeviceplatformArea)
+      {
+        _PolyClosedDistance[_MaxEdgeLength].Enqueue(maxDeviceplatformArea);
+      }
+      public void Execute()
+      {
+        while (_PolyClosedDistance.Any(MaxEdgeLength => MaxEdgeLength.Count > THESAURUSSTAMPEDE))
+        {
+          foreach (var MaxEdgeLength in _PolyClosedDistance)
           {
-            current = neighbour.GraphNode;
-            path.Add(current);
-            currentTentativeDistance -= neighbour.Distance;
+            if (MaxEdgeLength.Count > THESAURUSSTAMPEDE)
+            {
+              MaxEdgeLength.Dequeue()();
+              break;
+            }
+          }
+        }
+      }
+    }
+    public static StoreyType GetStoreyType(string MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN)
+    {
+      return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN switch
+      {
+        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR => StoreyType.SmallRoof,
+        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR => StoreyType.LargeRoof,
+        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR => StoreyType.StandardStorey,
+        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR => StoreyType.NonStandardStorey,
+        ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR => StoreyType.NonStandardStorey,
+        _ => StoreyType.Unknown,
+      };
+    }
+    public static List<int> ParseFloorNums(string floorStr)
+    {
+      if (string.IsNullOrWhiteSpace(floorStr)) return new List<int>();
+      floorStr = floorStr.Replace(THESAURUSMETROPOLIS, THESAURUSPROMINENT).Replace(CHROMATOGRAPHER, NATIONALDEMOKRATISCHE).Replace(THESAURUSASPIRATION, THESAURUSDEPLORE).Replace(STEREOPHOTOGRAMMETRY, THESAURUSDEPLORE).Replace(THESAURUSPOLISH, THESAURUSDEPLORE);
+      var defaultFireValveLength = new HashSet<int>();
+      foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in floorStr.Split(THESAURUSPROMINENT))
+      {
+        if (string.IsNullOrEmpty(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN)) continue;
+        var tolReturnValueMinRange = Regex.Match(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN, THESAURUSAGITATION);
+        if (tolReturnValueMinRange.Success)
+        {
+          var _tolReturnValue0Approx = int.Parse(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value);
+          var TolGroupEvcaEmg = int.Parse(tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value);
+          var _tolReturnValueMaxDistance = Math.Min(_tolReturnValue0Approx, TolGroupEvcaEmg);
+          var _tolReturnValueMinRange = Math.Max(_tolReturnValue0Approx, TolGroupEvcaEmg);
+          for (int MAX_ANGEL_TOLLERANCE = _tolReturnValueMaxDistance; MAX_ANGEL_TOLLERANCE <= _tolReturnValueMinRange; MAX_ANGEL_TOLLERANCE++)
+          {
+            defaultFireValveLength.Add(MAX_ANGEL_TOLLERANCE);
+          }
+          continue;
+        }
+        tolReturnValueMinRange = Regex.Match(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN, THESAURUSSANITY);
+        if (tolReturnValueMinRange.Success)
+        {
+          defaultFireValveLength.Add(int.Parse(tolReturnValueMinRange.Value));
+        }
+      }
+      defaultFireValveLength.Remove(THESAURUSSTAMPEDE);
+      return defaultFireValveLength.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+    }
+    public static bool IsNumStorey(string tolGroupBlkLane)
+    {
+      return GetStoreyScore(tolGroupBlkLane) < ushort.MaxValue;
+    }
+    public static int GetStoreyScore(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return THESAURUSSTAMPEDE;
+      switch (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+      {
+        case THESAURUSARGUMENTATIVE: return ushort.MaxValue;
+        case ANTHROPOMORPHICALLY: return ushort.MaxValue + THESAURUSHOUSING;
+        case THESAURUSSCUFFLE: return ushort.MaxValue + THESAURUSPERMUTATION;
+        default:
+          {
+            int.TryParse(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Replace(THESAURUSASPIRATION, THESAURUSDEPLORE), out int tolGroupEmgLightEvac);
+            return tolGroupEmgLightEvac;
+          }
+      }
+    }
+    public static IEnumerable<string> ConvertLabelStrings(IEnumerable<string> pipeIds)
+    {
+      pipeIds = pipeIds.Distinct().ToList();
+      {
+        var max_kitchen_to_balcony_distance = pipeIds.Where(TolLightRangeSingleSideMax => Regex.IsMatch(TolLightRangeSingleSideMax, THESAURUSJAILER)).ToList();
+        pipeIds = pipeIds.Except(max_kitchen_to_balcony_distance).ToList();
+        foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in ConvertLabelString(max_kitchen_to_balcony_distance))
+        {
+          yield return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN;
+        }
+        static IEnumerable<string> ConvertLabelString(IEnumerable<string> strs)
+        {
+          var kvs = new List<KeyValuePair<string, string>>();
+          foreach (var WELLS_MAX_AREA in strs)
+          {
+            var tolReturnValueMinRange = Regex.Match(WELLS_MAX_AREA, THESAURUSJAILER);
+            if (tolReturnValueMinRange.Success)
+            {
+              kvs.Add(new KeyValuePair<string, string>(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value, tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value));
+            }
+            else
+            {
+              throw new System.Exception();
+            }
+          }
+          return kvs.GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key + THESAURUSSPECIFICATION + string.Join(DEMATERIALISING, GetLabelString(TolLightRangeSingleSideMax.Select(y => y.Value[THESAURUSSTAMPEDE]))));
+        }
+        static IEnumerable<string> GetLabelString(IEnumerable<char> chars)
+        {
+          foreach (var max_rainpipe_to_balconyfloordrain in GetPairs(chars.Select(TolLightRangeSingleSideMax => (int)TolLightRangeSingleSideMax).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax)))
+          {
+            if (max_rainpipe_to_balconyfloordrain.Key == max_rainpipe_to_balconyfloordrain.Value)
+            {
+              yield return Convert.ToChar(max_rainpipe_to_balconyfloordrain.Key).ToString();
+            }
+            else
+            {
+              yield return Convert.ToChar(max_rainpipe_to_balconyfloordrain.Key) + THESAURUSEXCREMENT + Convert.ToChar(max_rainpipe_to_balconyfloordrain.Value);
+            }
+          }
+        }
+      }
+      {
+        var max_kitchen_to_balcony_distance = pipeIds.Where(TolLightRangeSingleSideMax => Regex.IsMatch(TolLightRangeSingleSideMax, THESAURUSCAPRICIOUS)).ToList();
+        pipeIds = pipeIds.Except(max_kitchen_to_balcony_distance).ToList();
+        foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in ConvertLabelString(max_kitchen_to_balcony_distance))
+        {
+          yield return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN;
+        }
+        static IEnumerable<string> ConvertLabelString(IEnumerable<string> strs)
+        {
+          var kvs = new List<ValueTuple<string, string, int>>();
+          foreach (var WELLS_MAX_AREA in strs)
+          {
+            var tolReturnValueMinRange = Regex.Match(WELLS_MAX_AREA, UNIMPRESSIONABLE);
+            if (tolReturnValueMinRange.Success)
+            {
+              kvs.Add(new ValueTuple<string, string, int>(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value, tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value, int.Parse(tolReturnValueMinRange.Groups[INTROPUNITIVENESS].Value)));
+            }
+            else
+            {
+              throw new System.Exception();
+            }
+          }
+          return kvs.GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key + string.Join(DEMATERIALISING, GetLabelString(TolLightRangeSingleSideMax.First().Item2, TolLightRangeSingleSideMax.Select(y => y.Item3))));
+        }
+        static IEnumerable<string> GetLabelString(string prefix, IEnumerable<int> nums)
+        {
+          foreach (var max_rainpipe_to_balconyfloordrain in GetPairs(nums.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax)))
+          {
+            if (max_rainpipe_to_balconyfloordrain.Key == max_rainpipe_to_balconyfloordrain.Value)
+            {
+              yield return prefix + max_rainpipe_to_balconyfloordrain.Key;
+            }
+            else
+            {
+              yield return prefix + max_rainpipe_to_balconyfloordrain.Key + THESAURUSEXCREMENT + prefix + max_rainpipe_to_balconyfloordrain.Value;
+            }
+          }
+        }
+      }
+      var REGION_BORDER_BUFFE_RDISTANCE = pipeIds.Select(id => DrainageLabelItem.Parse(id)).Where(tolReturnValueMinRange => tolReturnValueMinRange != null).ToList();
+      var rest = pipeIds.Except(REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Label)).ToList();
+      var TolLaneProtect = REGION_BORDER_BUFFE_RDISTANCE.GroupBy(tolReturnValueMinRange => VTFac.Create(tolReturnValueMinRange.Prefix, tolReturnValueMinRange.D1S, tolReturnValueMinRange.Suffix)).Select(l => l.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.D2).ToList());
+      foreach (var default_fire_valve_width in TolLaneProtect)
+      {
+        if (default_fire_valve_width.Count == THESAURUSHOUSING)
+        {
+          yield return default_fire_valve_width.First().Label;
+        }
+        else if (default_fire_valve_width.Count > THESAURUSPERMUTATION && default_fire_valve_width.Count == default_fire_valve_width.Last().D2 - default_fire_valve_width.First().D2 + THESAURUSHOUSING)
+        {
+          var tolReturnValueMinRange = default_fire_valve_width.First();
+          yield return $"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-{default_fire_valve_width.First().D2S}{tolReturnValueMinRange.Suffix}~{default_fire_valve_width.Last().D2S}{tolReturnValueMinRange.Suffix}";
+        }
+        else
+        {
+          var sb = new StringBuilder();
+          {
+            var tolReturnValueMinRange = default_fire_valve_width.First();
+            sb.Append($"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-");
+          }
+          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < default_fire_valve_width.Count; MAX_ANGEL_TOLLERANCE++)
+          {
+            var tolReturnValueMinRange = default_fire_valve_width[MAX_ANGEL_TOLLERANCE];
+            sb.Append($"{tolReturnValueMinRange.D2S}{tolReturnValueMinRange.Suffix}");
+            if (MAX_ANGEL_TOLLERANCE != default_fire_valve_width.Count - THESAURUSHOUSING)
+            {
+              sb.Append(DEMATERIALISING);
+            }
+          }
+          yield return sb.ToString();
+        }
+      }
+      foreach (var DEFAULT_FIRE_VALVE_WIDTH in rest)
+      {
+        yield return DEFAULT_FIRE_VALVE_WIDTH;
+      }
+    }
+    public static IEnumerable<KeyValuePair<int, int>> GetPairs(IEnumerable<int> ints)
+    {
+      int sidewaterbucket_y_indent = int.MinValue;
+      int ed = int.MinValue;
+      foreach (var MAX_ANGEL_TOLLERANCE in ints)
+      {
+        if (sidewaterbucket_y_indent == int.MinValue)
+        {
+          sidewaterbucket_y_indent = MAX_ANGEL_TOLLERANCE;
+          ed = MAX_ANGEL_TOLLERANCE;
+        }
+        else if (ed + THESAURUSHOUSING == MAX_ANGEL_TOLLERANCE)
+        {
+          ed = MAX_ANGEL_TOLLERANCE;
+        }
+        else
+        {
+          yield return new KeyValuePair<int, int>(sidewaterbucket_y_indent, ed);
+          sidewaterbucket_y_indent = MAX_ANGEL_TOLLERANCE;
+          ed = MAX_ANGEL_TOLLERANCE;
+        }
+      }
+      if (sidewaterbucket_y_indent != int.MinValue)
+      {
+        yield return new KeyValuePair<int, int>(sidewaterbucket_y_indent, ed);
+      }
+    }
+    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GLineSegment default_fire_valve_length, Action maxDeviceplatformArea)
+    {
+      if (default_fire_valve_length.IsValid) maxToiletToFloordrainDistance.Add(new KeyValuePair<Geometry, Action>(default_fire_valve_length.ToLineString(), maxDeviceplatformArea));
+    }
+    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GLineSegment default_fire_valve_length, List<Geometry> MinWellToUrinalDistance)
+    {
+      if (default_fire_valve_length.IsValid) _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, () => { MinWellToUrinalDistance.Add(default_fire_valve_length.ToLineString()); });
+    }
+    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GRect DEFAULT_FIRE_VALVE_WIDTH, Action maxDeviceplatformArea)
+    {
+      if (DEFAULT_FIRE_VALVE_WIDTH.IsValid) maxToiletToFloordrainDistance.Add(new KeyValuePair<Geometry, Action>(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon(), maxDeviceplatformArea));
+    }
+    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, GRect DEFAULT_FIRE_VALVE_WIDTH, List<Geometry> MinWellToUrinalDistance)
+    {
+      if (DEFAULT_FIRE_VALVE_WIDTH.IsValid) _tol_lane_protect(maxToiletToFloordrainDistance, DEFAULT_FIRE_VALVE_WIDTH, () => { MinWellToUrinalDistance.Add(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()); });
+    }
+    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, CText ct, Action maxDeviceplatformArea)
+    {
+      _tol_lane_protect(maxToiletToFloordrainDistance, ct.Boundary, maxDeviceplatformArea);
+    }
+    public static void _tol_lane_protect(List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance, CText ct, List<CText> MinWellToUrinalDistance)
+    {
+      _tol_lane_protect(maxToiletToFloordrainDistance, ct, () => { MinWellToUrinalDistance.Add(ct); });
+    }
+    public static void DrawRainFlatDiagram(RainSystemDiagramViewModel vm)
+    {
+      var range = CadCache.TryGetRange();
+      if (range == null)
+      {
+        Active.Editor.WriteMessage(THESAURUSPOWERLESS);
+        return;
+      }
+      FocusMainWindow();
+      using (DocLock)
+      using (var adb = AcadDatabase.Active())
+      using (var tr = new _DrawingTransaction(adb, THESAURUSOBSTINACY))
+      {
+        if (adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer).Any())
+        {
+          var DEFAULT_FIRE_VALVE_WIDTH = MessageBox.Show(QUOTATIONISOPHANE, THESAURUSMISADVENTURE, MessageBoxButtons.YesNo);
+          if (DEFAULT_FIRE_VALVE_WIDTH == DialogResult.No) return;
+        }
+        if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
+        var mlPts = new List<Point>(THESAURUSREPERCUSSION);
+        foreach (var tolReturnValue0Approx in adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer))
+        {
+          var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValue0Approx.GetFirstVertex(THESAURUSSTAMPEDE).ToNTSPoint();
+          MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = tolReturnValue0Approx;
+          mlPts.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
+        }
+        ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CollectRainGeoData(range, adb, out List<StoreyInfo> storeysItems, out ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData);
+        var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CreateRainDrawingData(adb, geoData, INTRAVASCULARLY);
+        exInfo.drDatas = drDatas;
+        exInfo.geoData = geoData;
+        exInfo.storeysItems = storeysItems;
+        exInfo.vm = vm;
+        Dispose();
+        var maxDeviceplatformArea = GeoFac.CreateIntersectsSelector(geoData.WLines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION)).ToList());
+        var _tol_avg_column_dist = mlPts.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => maxDeviceplatformArea(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN).Any()).ToList();
+        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+        {
+          adb.Element<Entity>(((Entity)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ObjectId, THESAURUSOBSTINACY).Erase();
+        }
+        DrawFlatDiagram(exInfo);
+        FlushDQ();
+      }
+    }
+    public static void DrawDrainageFlatDiagram(DrainageSystemDiagramViewModel vm)
+    {
+      var range = CadCache.TryGetRange();
+      if (range == null)
+      {
+        Active.Editor.WriteMessage(THESAURUSPOWERLESS);
+        return;
+      }
+      FocusMainWindow();
+      using (DocLock)
+      using (var adb = AcadDatabase.Active())
+      using (var tr = new _DrawingTransaction(adb, THESAURUSOBSTINACY))
+      {
+        if (adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer).Any())
+        {
+          var DEFAULT_FIRE_VALVE_WIDTH = MessageBox.Show(QUOTATIONISOPHANE, THESAURUSMISADVENTURE, MessageBoxButtons.YesNo);
+          if (DEFAULT_FIRE_VALVE_WIDTH == DialogResult.No) return;
+        }
+        if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
+        var mlPts = new List<Point>(THESAURUSREPERCUSSION);
+        foreach (var tolReturnValue0Approx in adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer))
+        {
+          var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValue0Approx.GetFirstVertex(THESAURUSSTAMPEDE).ToNTSPoint();
+          MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = tolReturnValue0Approx;
+          mlPts.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
+        }
+        ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CollectDrainageGeoData(range, adb, out List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> storeysItems, out ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData);
+        var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CreateDrainageDrawingData(geoData, INTRAVASCULARLY);
+        exInfo.drDatas = drDatas;
+        exInfo.geoData = geoData;
+        exInfo.storeysItems = storeysItems;
+        exInfo.vm = vm;
+        Dispose();
+        var maxDeviceplatformArea = GeoFac.CreateIntersectsSelector(geoData.DLines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION)).ToList());
+        var _tol_avg_column_dist = mlPts.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => maxDeviceplatformArea(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN).Any()).ToList();
+        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+        {
+          adb.Element<Entity>(((Entity)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ObjectId, THESAURUSOBSTINACY).Erase();
+        }
+        DrawFlatDiagram(exInfo);
+        FlushDQ();
+      }
+    }
+    public static void DrawFlatDiagram(ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo)
+    {
+      if (exInfo is null) return;
+      DrawBackToFlatDiagram(exInfo);
+    }
+    public static void DrawFlatDiagram(ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo)
+    {
+      if (exInfo is null) return;
+      DrawBackToFlatDiagram(exInfo);
+    }
+    public static void DrawBackToFlatDiagram(ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo)
+    {
+      if (exInfo is null) return;
+      DrawBackToFlatDiagram(exInfo.storeysItems, exInfo.geoData, exInfo.drDatas, exInfo, exInfo.vm);
+    }
+    static List<GLineSegment> Substract(List<GLineSegment> TolLane, IEnumerable<Geometry> DEFAULT_VOLTAGE)
+    {
+      static Func<Geometry, List<T>> CreateIntersectsSelector<T>(ICollection<T> DEFAULT_VOLTAGE) where T : Geometry
+      {
+        if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return DEFAULT_FIRE_VALVE_WIDTH => new List<T>();
+        var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
+        foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
+        return DEFAULT_FIRE_VALVE_LENGTH =>
+        {
+          if (DEFAULT_FIRE_VALVE_LENGTH == null) throw new ArgumentNullException();
+          var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
+          return engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Where(default_fire_valve_width => default_voltage.Intersects(default_fire_valve_width)).ToList();
+        };
+      }
+      var tolReturnValueRange = new HashSet<LineString>(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()));
+      foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE)
+      {
+        var maxDeviceplatformArea = CreateIntersectsSelector(tolReturnValueRange);
+        var _lines = maxDeviceplatformArea(DEFAULT_FIRE_VALVE_LENGTH);
+        if (_lines.Count > THESAURUSSTAMPEDE)
+        {
+          foreach (var TolUniformSideLenth in _lines)
+          {
+            tolReturnValueRange.Remove(TolUniformSideLenth);
+          }
+          tolReturnValueRange.AddRange(_lines.SelectMany(TolUniformSideLenth => GeoFac.GetLines(TolUniformSideLenth.Difference(DEFAULT_FIRE_VALVE_LENGTH)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString())));
+        }
+      }
+      return tolReturnValueRange.SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList();
+    }
+    public class _lane_offset<T>
+    {
+      public T Value;
+      public _lane_offset() { }
+      public _lane_offset(T MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN) { Value = MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN; }
+    }
+    public class PARKING_STALL_GROUP_WIDTH_RESTRICT
+    {
+      public Point3d BasePoint;
+      public string Text;
+      public string Note;
+      public static PARKING_STALL_GROUP_WIDTH_RESTRICT Create(Point2d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, string repeated_point_distance) => Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToPoint3d(), repeated_point_distance);
+      public static PARKING_STALL_GROUP_WIDTH_RESTRICT Create(Point3d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, string repeated_point_distance)
+      {
+        return new PARKING_STALL_GROUP_WIDTH_RESTRICT() { BasePoint = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, Text = repeated_point_distance };
+      }
+    }
+    public class PARKING_STALL_GROUP_LENGTH_RESTRICT<T>
+    {
+      private readonly List<GraphNode<T>> _graph;
+      private _lane_line_extend_length<GraphNode<T>> _unvistedNodes;
+      public PARKING_STALL_GROUP_LENGTH_RESTRICT(IEnumerable<GraphNode<T>> graph)
+      {
+        _graph = graph.ToList();
+      }
+      public IList<GraphNode<T>> FindShortestPathBetween(GraphNode<T> MAX_TAG_LENGTH, GraphNode<T> finish)
+      {
+        PrepareGraphForDijkstra();
+        MAX_TAG_LENGTH.TentativeDistance = THESAURUSSTAMPEDE;
+        var current = MAX_TAG_LENGTH;
+        while (THESAURUSOBSTINACY)
+        {
+          foreach (var neighbour in current.Neighbours.Where(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.GraphNode.Visited))
+          {
+            var newTentativeDistance = current.TentativeDistance + neighbour.Distance;
+            if (newTentativeDistance < neighbour.GraphNode.TentativeDistance)
+            {
+              neighbour.GraphNode.TentativeDistance = newTentativeDistance;
+            }
+          }
+          current.Visited = THESAURUSOBSTINACY;
+          var next = _unvistedNodes.Pop();
+          if (next == null || next.TentativeDistance == int.MaxValue)
+          {
+            if (finish.TentativeDistance == int.MaxValue)
+            {
+              return new List<GraphNode<T>>();
+            }
+            finish.Visited = THESAURUSOBSTINACY;
             break;
           }
+          var smallest = next;
+          current = smallest;
+        }
+        return DeterminePathFromWeightedGraph(MAX_TAG_LENGTH, finish);
+      }
+      private static List<GraphNode<T>> DeterminePathFromWeightedGraph(GraphNode<T> MAX_TAG_LENGTH, GraphNode<T> finish)
+      {
+        var current = finish;
+        var path = new List<GraphNode<T>> { current };
+        var currentTentativeDistance = finish.TentativeDistance;
+        while (THESAURUSOBSTINACY)
+        {
+          if (current == MAX_TAG_LENGTH)
+          {
+            break;
+          }
+          foreach (var neighbour in current.Neighbours.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GraphNode.Visited))
+          {
+            if (currentTentativeDistance - neighbour.Distance == neighbour.GraphNode.TentativeDistance)
+            {
+              current = neighbour.GraphNode;
+              path.Add(current);
+              currentTentativeDistance -= neighbour.Distance;
+              break;
+            }
+          }
+        }
+        path.Reverse();
+        return path;
+      }
+      public interface _lane_line_extend_length<T>
+      {
+        void Push(T REPEATED_POINT_DISTANCE);
+        T Pop();
+        bool Contains(T REPEATED_POINT_DISTANCE);
+      }
+      public class ParkingStallGroupWidthRestrict<T> : _lane_line_extend_length<T>
+      {
+        private readonly List<T> _innerList = new List<T>();
+        private readonly IComparer<T> _comparer;
+        public int Count
+        {
+          get { return _innerList.Count; }
+        }
+        public ParkingStallGroupWidthRestrict(IComparer<T> comparer = null)
+        {
+          _comparer = comparer ?? Comparer<T>.Default;
+        }
+        public void Push(T REPEATED_POINT_DISTANCE)
+        {
+          _innerList.Add(REPEATED_POINT_DISTANCE);
+        }
+        public T Pop()
+        {
+          if (_innerList.Count <= THESAURUSSTAMPEDE)
+          {
+            return default(T);
+          }
+          Sort();
+          var REPEATED_POINT_DISTANCE = _innerList[THESAURUSSTAMPEDE];
+          _innerList.RemoveAt(THESAURUSSTAMPEDE);
+          return REPEATED_POINT_DISTANCE;
+        }
+        public bool Contains(T REPEATED_POINT_DISTANCE)
+        {
+          return _innerList.Contains(REPEATED_POINT_DISTANCE);
+        }
+        private void Sort()
+        {
+          _innerList.Sort(_comparer);
         }
       }
-      path.Reverse();
-      return path;
-    }
-    private void PrepareGraphForDijkstra()
-    {
-      _unvistedNodes = new PriorityQueue<GraphNode<T>>(new CompareNeighbour<T>());
-      _graph.ForEach(TolLightRangeSingleSideMax =>
+      private void PrepareGraphForDijkstra()
       {
-        TolLightRangeSingleSideMax.Visited = INTRAVASCULARLY;
-        TolLightRangeSingleSideMax.TentativeDistance = int.MaxValue;
-        _unvistedNodes.Push(TolLightRangeSingleSideMax);
-      });
-    }
-  }
-  internal class CompareNeighbour<T> : IComparer<GraphNode<T>>
-  {
-    public int Compare(GraphNode<T> TolLightRangeSingleSideMax, GraphNode<T> y)
-    {
-      if (TolLightRangeSingleSideMax.TentativeDistance > y.TentativeDistance)
-      {
-        return THESAURUSHOUSING;
-      }
-      if (TolLightRangeSingleSideMax.TentativeDistance < y.TentativeDistance)
-      {
-        return -THESAURUSHOUSING;
-      }
-      return THESAURUSSTAMPEDE;
-    }
-  }
-  public class GraphNode<T>
-  {
-    public readonly List<Neighbour> Neighbours;
-    public bool Visited = INTRAVASCULARLY;
-    public T Value;
-    public int TentativeDistance;
-    public GraphNode(T value)
-    {
-      Value = value;
-      Neighbours = new List<Neighbour>();
-    }
-    public void AddNeighbour(GraphNode<T> graphNode, int distance)
-    {
-      Neighbours.Add(new Neighbour(graphNode, distance));
-      graphNode.Neighbours.Add(new Neighbour(this, distance));
-    }
-    public struct Neighbour
-    {
-      public int Distance;
-      public GraphNode<T> GraphNode;
-      public Neighbour(GraphNode<T> graphNode, int distance)
-      {
-        GraphNode = graphNode;
-        Distance = distance;
+        _unvistedNodes = new ParkingStallGroupWidthRestrict<GraphNode<T>>(new CompareNeighbour<T>());
+        _graph.ForEach(TolLightRangeSingleSideMax =>
+        {
+          TolLightRangeSingleSideMax.Visited = INTRAVASCULARLY;
+          TolLightRangeSingleSideMax.TentativeDistance = int.MaxValue;
+          _unvistedNodes.Push(TolLightRangeSingleSideMax);
+        });
       }
     }
-  }
-  public interface IPriorityQueue<T>
-  {
-    void Push(T REPEATED_POINT_DISTANCE);
-    T Pop();
-    bool Contains(T REPEATED_POINT_DISTANCE);
-  }
-  public class PriorityQueue<T> : IPriorityQueue<T>
-  {
-    private readonly List<T> _innerList = new List<T>();
-    private readonly IComparer<T> _comparer;
-    public int Count
+    internal class CompareNeighbour<T> : IComparer<GraphNode<T>>
     {
-      get { return _innerList.Count; }
-    }
-    public PriorityQueue(IComparer<T> comparer = null)
-    {
-      _comparer = comparer ?? Comparer<T>.Default;
-    }
-    public void Push(T REPEATED_POINT_DISTANCE)
-    {
-      _innerList.Add(REPEATED_POINT_DISTANCE);
-    }
-    public T Pop()
-    {
-      if (_innerList.Count <= THESAURUSSTAMPEDE)
+      public int Compare(GraphNode<T> TolLightRangeSingleSideMax, GraphNode<T> y)
       {
-        return default(T);
+        if (TolLightRangeSingleSideMax.TentativeDistance > y.TentativeDistance)
+        {
+          return THESAURUSHOUSING;
+        }
+        if (TolLightRangeSingleSideMax.TentativeDistance < y.TentativeDistance)
+        {
+          return -THESAURUSHOUSING;
+        }
+        return THESAURUSSTAMPEDE;
       }
-      Sort();
-      var REPEATED_POINT_DISTANCE = _innerList[THESAURUSSTAMPEDE];
-      _innerList.RemoveAt(THESAURUSSTAMPEDE);
-      return REPEATED_POINT_DISTANCE;
     }
-    public bool Contains(T REPEATED_POINT_DISTANCE)
+    public class GraphNode<T>
     {
-      return _innerList.Contains(REPEATED_POINT_DISTANCE);
+      public readonly List<Neighbour> Neighbours;
+      public bool Visited = INTRAVASCULARLY;
+      public T Value;
+      public int TentativeDistance;
+      public GraphNode(T value)
+      {
+        Value = value;
+        Neighbours = new List<Neighbour>();
+      }
+      public void AddNeighbour(GraphNode<T> graphNode, int distance)
+      {
+        Neighbours.Add(new Neighbour(graphNode, distance));
+        graphNode.Neighbours.Add(new Neighbour(this, distance));
+      }
+      public struct Neighbour
+      {
+        public int Distance;
+        public GraphNode<T> GraphNode;
+        public Neighbour(GraphNode<T> graphNode, int distance)
+        {
+          GraphNode = graphNode;
+          Distance = distance;
+        }
+      }
     }
-    private void Sort()
+    static GLineSegment GetCenterLine(List<GLineSegment> TolLane)
     {
-      _innerList.Sort(_comparer);
+      if (TolLane.Count == THESAURUSSTAMPEDE) throw new ArgumentException();
+      if (TolLane.Count == THESAURUSHOUSING) return TolLane[THESAURUSSTAMPEDE];
+      var angles = TolLane.Select(default_fire_valve_length => default_fire_valve_length.SingleAngle).ToList();
+      if (angles.Max() - angles.Min() >= Math.PI / THESAURUSPERMUTATION)
+      {
+        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < angles.Count; MAX_ANGEL_TOLLERANCE++)
+        {
+          if (angles[MAX_ANGEL_TOLLERANCE] > Math.PI / THESAURUSPERMUTATION)
+          {
+            angles[MAX_ANGEL_TOLLERANCE] -= Math.PI;
+          }
+        }
+      }
+      var angle = angles.Average();
+      var DEFAULT_FIRE_VALVE_WIDTH = Extents2dCalculator.Calc(TolLane.YieldPoints()).ToGRect();
+      var tolReturnValueMinRange = Matrix2d.Displacement(-DEFAULT_FIRE_VALVE_WIDTH.Center.ToVector2d()).PreMultiplyBy(Matrix2d.Rotation(-angle, default));
+      DEFAULT_FIRE_VALVE_WIDTH = Extents2dCalculator.Calc(TolLane.Select(default_fire_valve_length => default_fire_valve_length.TransformBy(tolReturnValueMinRange))).ToGRect();
+      return new GLineSegment(GetMidPoint(DEFAULT_FIRE_VALVE_WIDTH.LeftButtom, DEFAULT_FIRE_VALVE_WIDTH.LeftTop), GetMidPoint(DEFAULT_FIRE_VALVE_WIDTH.RightButtom, DEFAULT_FIRE_VALVE_WIDTH.RightTop)).TransformBy(tolReturnValueMinRange.Inverse());
+    }
+    static double FixValue(double MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)
+    {
+      return Math.Floor(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN + THESAURUSCONFECTIONERY);
+    }
+    public static void DrawBackToFlatDiagram(List<StoreyInfo> storeysItems, ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData, List<ThMEPWSS.ReleaseNs.RainSystemNs.RainDrawingData> drDatas, ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo, RainSystemDiagramViewModel vm)
+    {
+      static string getDn(int MAX_CONDENSEPIPE_TO_WASHMACHINE)
+      {
+        return DnToString(MAX_CONDENSEPIPE_TO_WASHMACHINE);
+      }
+      static string DnToString(int MAX_CONDENSEPIPE_TO_WASHMACHINE)
+      {
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSREVERSE) return PHOTOFLUOROGRAM;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSSYMMETRICAL) return THESAURUSDISREPUTABLE;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSDRAGOON) return ALLITERATIVENESS;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSMORTALITY) return QUOTATIONBREWSTER;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSNEGATE) return QUOTATIONDOPPLER;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSINNOCUOUS) return QUOTATIONDOPPLER;
+        return IRRESPONSIBLENESS;
+      }
+      int parseDn(string MAX_CONDENSEPIPE_TO_WASHMACHINE)
+      {
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE.StartsWith(THESAURUSVICTORIOUS)) return THESAURUSENTREPRENEUR;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSJOURNAL) return THESAURUSEVERLASTING;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is CHRISTIANIZATION or UNPREMEDITATEDNESS) return HYPERDISYLLABLE;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSFINICKY) return parseDn(vm.Params.CondensePipeVerticalDN);
+        var tolReturnValueMinRange = Regex.Match(MAX_CONDENSEPIPE_TO_WASHMACHINE, SUPERNATURALIZE);
+        if (tolReturnValueMinRange.Success) return int.Parse(tolReturnValueMinRange.Value);
+        return THESAURUSSTAMPEDE;
+      }
+      var vp2fdpts = new HashSet<Point2d>();
+      var y1lpts = new HashSet<Point2d>();
+      var y2lpts = new HashSet<Point2d>();
+      var nlpts = new HashSet<Point2d>();
+      var fl0pts = new HashSet<Point2d>();
+      {
+        var toCmp = new HashSet<KeyValuePair<int, int>>();
+        {
+          var REGION_BORDER_BUFFE_RDISTANCE = storeysItems.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Any()).ToList();
+          var minlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Min()).ToList();
+          var maxlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Max()).ToList();
+          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < maxlst.Count; MAX_ANGEL_TOLLERANCE++)
+          {
+            var _tolReturnValueMinRange = maxlst[MAX_ANGEL_TOLLERANCE];
+            for (int MAX_ANGLE_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGLE_TOLLERANCE < maxlst.Count; MAX_ANGLE_TOLLERANCE++)
+            {
+              if (MAX_ANGLE_TOLLERANCE == MAX_ANGEL_TOLLERANCE) continue;
+              var _tolReturnValueMaxDistance = minlst[MAX_ANGLE_TOLLERANCE];
+              if (_tolReturnValueMaxDistance + THESAURUSHOUSING == _tolReturnValueMinRange)
+              {
+                toCmp.Add(new KeyValuePair<int, int>(storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGLE_TOLLERANCE]), storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGEL_TOLLERANCE])));
+              }
+            }
+          }
+        }
+        foreach (var max_rainpipe_to_balconyfloordrain in toCmp)
+        {
+          var low = storeysItems[max_rainpipe_to_balconyfloordrain.Key];
+          var high = storeysItems[max_rainpipe_to_balconyfloordrain.Value];
+          var max_basecircle_area = geoData.FloorDrains.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(INTRAVASCULARLY).ToCirclePolygon(SUPERLATIVENESS, THESAURUSOBSTINACY)).ToList();
+          var Commonradius = GeoFac.CreateEnvelopeSelector(max_basecircle_area);
+          max_basecircle_area = Commonradius(high.Boundary.ToPolygon());
+          var pps = geoData.VerticalPipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList();
+          var ppsf = GeoFac.CreateEnvelopeSelector(pps);
+          pps = ppsf(low.Boundary.ToPolygon());
+          var vhigh = -high.ContraPoint.ToVector2d();
+          var vlow = -low.ContraPoint.ToVector2d();
+          {
+            var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = low.ContraPoint - high.ContraPoint;
+            var si = max_rainpipe_to_balconyfloordrain.Value;
+            var lbdict = exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
+            var y1ls = lbdict.Where(TolLightRangeSingleSideMax => IsY1L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            var y2ls = lbdict.Where(TolLightRangeSingleSideMax => IsY2L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            var nls = lbdict.Where(TolLightRangeSingleSideMax => IsNL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            var fl0s = lbdict.Where(TolLightRangeSingleSideMax => IsFL0(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            y1lpts.AddRange(y1ls.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
+            y2lpts.AddRange(y2ls.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
+            nlpts.AddRange(nls.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
+            fl0pts.AddRange(fl0s.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN));
+          }
+          var _fds = max_basecircle_area.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vhigh)).ToList();
+          var _pps = pps.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vlow)).ToList();
+          var _ppsf = GeoFac.CreateIntersectsSelector(_pps);
+          foreach (var fd in _fds)
+          {
+            var ToiletWellsInterval = _ppsf(fd.GetCenter().ToNTSPoint()).FirstOrDefault();
+            if (ToiletWellsInterval != null)
+            {
+              vp2fdpts.Add(pps[_pps.IndexOf(ToiletWellsInterval)].GetCenter());
+            }
+          }
+        }
+      }
+      var vp2fdptst = GeoFac.CreateIntersectsTester(vp2fdpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList());
+      var vp2fdptrgs = vp2fdpts.Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax, THESAURUSHESITANCY).ToPolygon()).ToList();
+      var vp2fdptrgst = GeoFac.CreateIntersectsTester(vp2fdptrgs);
+      var mlInfos = new List<PARKING_STALL_GROUP_WIDTH_RESTRICT>(THESAURUSREPERCUSSION);
+      var cadDatas = exInfo.CadDatas;
+      Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
+      Func<List<Geometry>, Func<Geometry, bool>> T = GeoFac.CreateIntersectsTester;
+      Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
+      Func<List<Geometry>, List<List<Geometry>>> GG = GeoFac.GroupGeometries;
+      static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(MinWellToUrinalDistance => GeoFac.CreateGeometry(MinWellToUrinalDistance)).ToList();
+      {
+        var after = new List<ValueTuple<string, Geometry>>();
+        var (sankakuptsf, addsankaku) = GeoFac.CreateIntersectsSelectorEngine(mlInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.BasePoint.ToNTSPoint(TolLightRangeSingleSideMax)));
+        void modify(Geometry range, Action<PARKING_STALL_GROUP_WIDTH_RESTRICT> cb)
+        {
+          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(range))
+          {
+            cb((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData);
+          }
+        }
+        void draw(string repeated_point_distance, Geometry DEFAULT_FIRE_VALVE_LENGTH, bool autoCreate = THESAURUSOBSTINACY, bool overWrite = THESAURUSOBSTINACY, string note = null)
+        {
+          Point2d center;
+          if (DEFAULT_FIRE_VALVE_LENGTH is Point point)
+          {
+            center = point.ToPoint2d();
+            DEFAULT_FIRE_VALVE_LENGTH = GRect.Create(center, UNCONSEQUENTIAL).ToPolygon();
+          }
+          else
+          {
+            center = DEFAULT_FIRE_VALVE_LENGTH.GetCenter();
+          }
+          {
+            var SidewaterbucketXIndent = INTRAVASCULARLY;
+            foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(DEFAULT_FIRE_VALVE_LENGTH))
+            {
+              var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+              if (string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text) || overWrite)
+              {
+                TolLightRangeSingleSideMin.Text = repeated_point_distance;
+              }
+              if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
+              SidewaterbucketXIndent = THESAURUSOBSTINACY;
+            }
+            if (!SidewaterbucketXIndent && autoCreate)
+            {
+              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = center;
+              var TolLightRangeSingleSideMin = PARKING_STALL_GROUP_WIDTH_RESTRICT.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, repeated_point_distance);
+              mlInfos.Add(TolLightRangeSingleSideMin);
+              var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
+              _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
+              if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
+              addsankaku(_raiseDistanceToStartDefault);
+            }
+          }
+        }
+        {
+          using var max_balcony_to_balcony_distance = new ParkingStallGroupWidthRestrict(THESAURUSINCOMPLETE);
+          var precisePts = new HashSet<Point2d>();
+          {
+            foreach (var si in Enumerable.Range(THESAURUSSTAMPEDE, cadDatas.Count))
+            {
+              var djPts = new HashSet<Point>();
+              var _linesGroup = new HashSet<HashSet<GLineSegment>>();
+              var tolGroupBlkLane = geoData.Storeys[si].ToPolygon();
+              var gpGeos = GeoFac.CreateEnvelopeSelector(geoData.Groups.Select(GeoFac.CreateGeometry).ToList())(tolGroupBlkLane);
+              var wlsegs = geoData.OWLines.ToList();
+              var vertices = GeoFac.CreateEnvelopeSelector(wlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.StartPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax)).Concat(wlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.EndPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax))).ToList())(tolGroupBlkLane);
+              var verticesf = GeoFac.CreateIntersectsSelector(vertices);
+              wlsegs = vertices.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).Cast<GLineSegment>().Distinct().ToList();
+              max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
+              {
+                var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
+                var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
+                foreach (var tolReturnValueRange in _linesGroup)
+                {
+                  var kvs = new List<KeyValuePair<GLineSegment, PARKING_STALL_GROUP_WIDTH_RESTRICT>>();
+                  foreach (var TolUniformSideLenth in tolReturnValueRange.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > QUOTATIONLUCANIAN))
+                  {
+                    var _tol_avg_column_dist = sankakuptsf(TolUniformSideLenth.Buffer(THESAURUSPERMUTATION));
+                    if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
+                    {
+                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist[THESAURUSSTAMPEDE];
+                      var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                      kvs.Add(new KeyValuePair<GLineSegment, PARKING_STALL_GROUP_WIDTH_RESTRICT>(TolUniformSideLenth, TolLightRangeSingleSideMin));
+                    }
+                  }
+                  {
+                    var TolLane = kvs.Select(max_rainpipe_to_balconyfloordrain => max_rainpipe_to_balconyfloordrain.Key).Distinct().ToList();
+                    var lns = TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
+                    var vertexs = TolLane.YieldPoints().Distinct().ToList();
+                    var lnsf = GeoFac.CreateIntersectsSelector(lns);
+                    var lnscf = GeoFac.CreateContainsSelector(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(-THESAURUSPERMUTATION).ToLineString()).ToList());
+                    var opts = new List<_lane_offset<RegexOptions>>();
+                    foreach (var vertex in vertexs)
+                    {
+                      var MinWellToUrinalDistance = lnsf(GeoFac.CreateCirclePolygon(vertex, THESAURUSCOMMUNICATION, SUPERLATIVENESS));
+                      RegexOptions opt;
+                      if (MinWellToUrinalDistance.Count == THESAURUSHOUSING)
+                      {
+                        opt = RegexOptions.IgnoreCase;
+                      }
+                      else if (MinWellToUrinalDistance.Count == THESAURUSPERMUTATION)
+                      {
+                        opt = RegexOptions.Multiline;
+                      }
+                      else if (MinWellToUrinalDistance.Count > THESAURUSPERMUTATION)
+                      {
+                        opt = RegexOptions.ExplicitCapture;
+                      }
+                      else
+                      {
+                        opt = RegexOptions.None;
+                      }
+                      opts.Add(new _lane_offset<RegexOptions>(opt));
+                    }
+                    foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(GeoFac.GetLines(GeoFac.CreateGeometry(lns).Difference(GeoFac.CreateGeometryEx(opts.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value == RegexOptions.ExplicitCapture).Select(opts).ToList(vertexs).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(THESAURUSPERMUTATION).ToCirclePolygon(SUPERLATIVENESS)).ToList()))).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList(), UNCONSEQUENTIAL))
+                    {
+                      var bf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
+                      var _tol_avg_column_dist = sankakuptsf(bf);
+                      var _tol_light_range_single_side_max = _tol_avg_column_dist.Select(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ToList();
+                      if (_tol_light_range_single_side_max.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Text).Distinct().Count() == THESAURUSHOUSING)
+                      {
+                        var repeated_point_distance = _tol_light_range_single_side_max[THESAURUSSTAMPEDE];
+                        var _segs = lnscf(bf).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList();
+                        if (_segs.Count > THESAURUSHOUSING)
+                        {
+                          const double LEN = PHOTOCONDUCTION;
+                          if (_segs.Any(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= LEN))
+                          {
+                            foreach (var default_fire_valve_length in _segs)
+                            {
+                              if (default_fire_valve_length.Length < LEN)
+                              {
+                                draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
+                              }
+                            }
+                          }
+                          else
+                          {
+                            var _tolReturnValueMinRange = _segs.Max(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length);
+                            foreach (var default_fire_valve_length in _segs)
+                            {
+                              if (default_fire_valve_length.Length != _tolReturnValueMinRange)
+                              {
+                                draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
+                              }
+                            }
+                          }
+                        }
+                        else
+                        {
+                        }
+                      }
+                    }
+                  }
+                }
+              });
+              var REPEATED_POINT_DISTANCE = cadDatas[si];
+              var wlinesGeos = GeoFac.GroupLinesByConnPoints(REPEATED_POINT_DISTANCE.WLines, DINOFLAGELLATES).ToList();
+              var wlinesGeosf = F(wlinesGeos);
+              var portst = T(REPEATED_POINT_DISTANCE.RainPortSymbols.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSENTREPRENEUR)).ToList());
+              var portsf = F(REPEATED_POINT_DISTANCE.RainPortSymbols);
+              var wellst = T(REPEATED_POINT_DISTANCE.WaterWells.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
+              var MaxTagLength = F(REPEATED_POINT_DISTANCE.WaterWells);
+              var swellst = T(REPEATED_POINT_DISTANCE.WaterSealingWells.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
+              var swellsf = F(REPEATED_POINT_DISTANCE.WaterSealingWells);
+              var ditchest = T(REPEATED_POINT_DISTANCE.Ditches.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSENTREPRENEUR)).ToList());
+              var MaxTagXposition = F(REPEATED_POINT_DISTANCE.Ditches);
+              var fldrs = REPEATED_POINT_DISTANCE.FloorDrains;
+              var MaxDownspoutToBalconywashingfloordrain = REPEATED_POINT_DISTANCE.VerticalPipes;
+              var _vps = MaxDownspoutToBalconywashingfloordrain.ToList();
+              {
+                var max_basecircle_area = MaxDownspoutToBalconywashingfloordrain.Where(vp2fdptst).ToList();
+                fldrs = fldrs.Concat(max_basecircle_area).Distinct().ToList();
+                MaxDownspoutToBalconywashingfloordrain = MaxDownspoutToBalconywashingfloordrain.Except(max_basecircle_area).ToList();
+              }
+              var Commonradius = F(fldrs);
+              var fdst = T(fldrs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)).ToList());
+              var fdrings = geoData.FloorDrainRings.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToCirclePolygon(THESAURUSDISINGENUOUS).Shell.Buffer(THESAURUSACRIMONIOUS)).ToList();
+              var fdringsf = F(fdrings);
+              var fdringst = T(fdrings);
+              var ppsf = F(MaxDownspoutToBalconywashingfloordrain);
+              var ppst = T(MaxDownspoutToBalconywashingfloordrain);
+              var cpst = T(REPEATED_POINT_DISTANCE.CondensePipes);
+              var MaxBalconybasinToBalcony = F(REPEATED_POINT_DISTANCE.CondensePipes);
+              var lbdict = exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
+              var y1ls = lbdict.Where(TolLightRangeSingleSideMax => IsY1L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+              var y2ls = lbdict.Where(TolLightRangeSingleSideMax => IsY2L(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+              var nls = lbdict.Where(TolLightRangeSingleSideMax => IsNL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+              var fl0s = lbdict.Where(TolLightRangeSingleSideMax => IsFL0(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+              {
+                var MaxRainpipeToWashmachine = F(MaxDownspoutToBalconywashingfloordrain);
+                var _y1ls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((y1lpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
+                var _y2ls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((y2lpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
+                var _nls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((nlpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
+                var _fl0s = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((fl0pts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
+                {
+                  var default_voltage = G(REPEATED_POINT_DISTANCE.LabelLines).ToIPreparedGeometry();
+                  y1ls = y1ls.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
+                  y2ls = y2ls.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
+                  nls = nls.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
+                  fl0s = fl0s.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
+                }
+                {
+                  y1ls = y1ls.Concat(_y1ls).Distinct().ToList();
+                  y2ls = y2ls.Concat(_y2ls).Distinct().ToList();
+                  nls = nls.Concat(_nls).Distinct().ToList();
+                  fl0s = fl0s.Concat(_fl0s).Distinct().ToList();
+                }
+              }
+              var fldrst = T(fldrs);
+              var nlst = T(nls);
+              var y1lst = T(y1ls);
+              var y2lst = T(y2ls);
+              var fl0st = T(fl0s);
+              var fl0sf = F(fl0s);
+              PipeType maxCondensepipeToWashmachine(Point2d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)
+              {
+                var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
+                if (nlst(_raiseDistanceToStartDefault)) return PipeType.NL;
+                if (y1lst(_raiseDistanceToStartDefault)) return PipeType.Y1L;
+                if (y2lst(_raiseDistanceToStartDefault)) return PipeType.Y2L;
+                if (fl0st(_raiseDistanceToStartDefault)) return PipeType.FL0;
+                return PipeType.Unknown;
+              }
+              string getPipeDn(PipeType MaxToiletToFloordrainDistance)
+              {
+                return MaxToiletToFloordrainDistance switch
+                {
+                  PipeType.FL0 => vm.Params.WaterWellPipeVerticalDN,
+                  PipeType.Y2L => vm.Params.BalconyRainPipeDN,
+                  PipeType.NL => vm.Params.CondensePipeVerticalDN,
+                  PipeType.Unknown => null,
+                  _ => IRRESPONSIBLENESS,
+                };
+              }
+              string getDN(Geometry MaxBalconyToRainpipeDistance)
+              {
+                if (nlst(MaxBalconyToRainpipeDistance)) return vm.Params.CondensePipeVerticalDN;
+                if (y2lst(MaxBalconyToRainpipeDistance)) return vm.Params.BalconyRainPipeDN;
+                if (fl0st(MaxBalconyToRainpipeDistance)) return vm.Params.WaterWellFloorDrainDN;
+                if (y1lst(MaxBalconyToRainpipeDistance)) return IRRESPONSIBLENESS;
+                if (fldrst(MaxBalconyToRainpipeDistance)) return vm.Params.BalconyFloorDrainDN;
+                return null;
+              }
+              var nlfdpts = nls.SelectMany(nl => wlinesGeosf(nl)).Distinct().SelectMany(TolLightRangeSingleSideMax => Commonradius(TolLightRangeSingleSideMax))
+                      .Concat(nls.SelectMany(TolLightRangeSingleSideMax => Commonradius(TolLightRangeSingleSideMax.Buffer(THESAURUSHYPNOTIC))))
+                      .Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter()).Distinct().ToList();
+              foreach (var wlinesGeo in wlinesGeos)
+              {
+                var wlinesGeoBuf = wlinesGeo.Buffer(THESAURUSACRIMONIOUS);
+                var wlbufgf = wlinesGeoBuf.ToIPreparedGeometry();
+                max_balcony_to_balcony_distance.Enqueue(THESAURUSCENSURE, () =>
+                {
+                  foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(wlinesGeo.Buffer(THESAURUSHOUSING)))
+                  {
+                    var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                    if (TolLightRangeSingleSideMin.Text is THESAURUSDEPLORE)
+                    {
+                      if (nlst(wlinesGeo))
+                      {
+                        TolLightRangeSingleSideMin.Text = vm.Params.CondensePipeVerticalDN;
+                      }
+                      else if (y1lst(wlinesGeo) || y2lst(wlinesGeo) || fl0st(wlinesGeo))
+                      {
+                        TolLightRangeSingleSideMin.Text = IRRESPONSIBLENESS;
+                      }
+                    }
+                  }
+                });
+                max_balcony_to_balcony_distance.Enqueue(THESAURUSSTAMPEDE, () =>
+                {
+                  var tolReturnValueRange = Substract(GeoFac.GetLines(wlinesGeo).ToList(), MaxDownspoutToBalconywashingfloordrain.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-SUPERLATIVENESS)).Concat(REPEATED_POINT_DISTANCE.CondensePipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-SUPERLATIVENESS))));
+                  tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= DISPROPORTIONAL).ToList();
+                  tolReturnValueRange = GeoFac.GroupParallelLines(tolReturnValueRange, THESAURUSAPPARATUS, THESAURUSHOUSING).Select(default_fire_valve_width => GetCenterLine(default_fire_valve_width)).ToList();
+                  precisePts.AddRange(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Center));
+                  tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSHOUSING)).ToList()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSMORTUARY).Select(TolLightRangeSingleSideMax => new GLineSegment(new Point2d(FixValue(TolLightRangeSingleSideMax.StartPoint.X), FixValue(TolLightRangeSingleSideMax.StartPoint.Y)), new Point2d(FixValue(TolLightRangeSingleSideMax.EndPoint.X), FixValue(TolLightRangeSingleSideMax.EndPoint.Y)))).Distinct().ToList();
+                  var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList());
+                  {
+                    var _pts = tolReturnValueRange.SelectMany(default_fire_valve_length => new Point2d[] { default_fire_valve_length.StartPoint, default_fire_valve_length.EndPoint }).GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Distinct().Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => wlbufgf.Intersects(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint())).ToList();
+                    var _tol_avg_column_dist = _pts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+                    djPts.AddRange(_tol_avg_column_dist);
+                    _linesGroup.Add(tolReturnValueRange.ToHashSet());
+                  }
+                  foreach (var default_fire_valve_length in tolReturnValueRange)
+                  {
+                    if (default_fire_valve_length.Length < DINOFLAGELLATES) continue;
+                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = default_fire_valve_length.Center;
+                    var TolLightRangeSingleSideMin = PARKING_STALL_GROUP_WIDTH_RESTRICT.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, THESAURUSDEPLORE);
+                    mlInfos.Add(TolLightRangeSingleSideMin);
+                    var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
+                    _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
+                    addsankaku(_raiseDistanceToStartDefault);
+                  }
+                  max_balcony_to_balcony_distance.Enqueue(THESAURUSHOUSING, () =>
+                  {
+                    max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
+                      {
+                        foreach (var cp in REPEATED_POINT_DISTANCE.CondensePipes)
+                        {
+                          foreach (var TolUniformSideLenth in linesf(cp))
+                          {
+                            var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeHorizontalDN;
+                            draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.GetCenter().Expand(THESAURUSHOUSING).ToGRect().ToPolygon());
+                          }
+                        }
+                      }
+);
+                    max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
+                    {
+                      if (cpst(wlinesGeo))
+                      {
+                        var DEFAULT_FIRE_VALVE_WIDTH = GeoFac.CreateGeometry(ppsf(wlinesGeo).Concat(MaxBalconybasinToBalcony(wlinesGeo))).ToGRect();
+                        var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeHorizontalDN;
+                        after.Add(new(MAX_CONDENSEPIPE_TO_WASHMACHINE, DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()));
+                      }
+                      if (fdst(wlinesGeo))
+                      {
+                        var DEFAULT_FIRE_VALVE_WIDTH = GeoFac.CreateGeometry(ppsf(wlinesGeo).Concat(Commonradius(wlinesGeo))).ToGRect().Expand(-DISPENSABLENESS);
+                        if (!vp2fdptst(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()))
+                        {
+                          string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                          {
+                            if (fl0st(wlinesGeo))
+                            {
+                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
+                            }
+                            else if (nlst(wlinesGeo))
+                            {
+                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
+                            }
+                            else
+                            {
+                              MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
+                            }
+                          }
+                          after.Add(new(MAX_CONDENSEPIPE_TO_WASHMACHINE, DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()));
+                        }
+                      }
+                    });
+                    max_balcony_to_balcony_distance.Enqueue(INTROPUNITIVENESS, () =>
+                    {
+                      foreach (var wlinesGeo in GeoFac.GroupGeometries(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSHOUSING)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList()).Select(GeoFac.CreateGeometry))
+                      {
+                        if (fldrst(wlinesGeo))
+                        {
+                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
+                          {
+                            string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                            {
+                              if (fl0st(wlinesGeo))
+                              {
+                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
+                              }
+                              else if (nlst(wlinesGeo))
+                              {
+                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
+                              }
+                              else
+                              {
+                                MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
+                              }
+                            }
+                            draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
+                          }
+                        }
+                        else if (nlst(wlinesGeo))
+                        {
+                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
+                          {
+                            {
+                              draw(vm.Params.CondensePipeVerticalDN, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
+                            }
+                          }
+                        }
+                        else if (y1lst(wlinesGeo))
+                        {
+                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
+                          {
+                            {
+                              draw(IRRESPONSIBLENESS, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
+                            }
+                          }
+                        }
+                        else if (y2lst(wlinesGeo))
+                        {
+                          foreach (var default_fire_valve_length in GeoFac.GetLines(wlinesGeo))
+                          {
+                            {
+                              draw(vm.Params.BalconyRainPipeDN, default_fire_valve_length.Center.Expand(THESAURUSCOMMUNICATION).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
+                            }
+                          }
+                        }
+                      }
+                    });
+                  });
+                });
+              }
+              max_balcony_to_balcony_distance.Enqueue(ECCLESIASTICISM, () =>
+              {
+                foreach (var gpGeo in gpGeos)
+                {
+                  var pps = ppsf(gpGeo);
+                  foreach (var ToiletWellsInterval in pps)
+                  {
+                    var MAX_CONDENSEPIPE_TO_WASHMACHINE = getPipeDn(maxCondensepipeToWashmachine(ToiletWellsInterval.GetCenter()));
+                    if (MAX_CONDENSEPIPE_TO_WASHMACHINE is not null)
+                    {
+                      modify(GeoFac.GetLines(gpGeo, skipPolygon: THESAURUSOBSTINACY).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSHOUSING)).ToGeometry(), TolLightRangeSingleSideMin => TolLightRangeSingleSideMin.Text = MAX_CONDENSEPIPE_TO_WASHMACHINE);
+                    }
+                  }
+                  if (pps.Count == THESAURUSHOUSING)
+                  {
+                    var ToiletWellsInterval = pps[THESAURUSSTAMPEDE];
+                    if (y1ls.Contains(ToiletWellsInterval) || y2ls.Contains(ToiletWellsInterval))
+                    {
+                      var buf = gpGeo.Buffer(THESAURUSPERMUTATION);
+                      var oksegs = new HashSet<GLineSegment>();
+                      foreach (var default_fire_valve_length in wlsegs)
+                      {
+                        if (buf.Contains(default_fire_valve_length.Center.ToNTSPoint()))
+                        {
+                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(default_fire_valve_length.Buffer(THESAURUSHOUSING)))
+                          {
+                            ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = IRRESPONSIBLENESS;
+                          }
+                          oksegs.Add(default_fire_valve_length);
+                        }
+                      }
+                      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < THESAURUSCOMMUNICATION; MAX_ANGEL_TOLLERANCE++)
+                      {
+                        var TolLane = verticesf(oksegs.YieldPoints().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGRect(THESAURUSPERMUTATION).ToPolygon()).ToGeometry()).Select(TolLightRangeSingleSideMax => (GLineSegment)TolLightRangeSingleSideMax.UserData).Except(oksegs).ToList();
+                        foreach (var default_fire_valve_length in TolLane)
+                        {
+                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(default_fire_valve_length.Buffer(THESAURUSHOUSING)))
+                          {
+                            ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = IRRESPONSIBLENESS;
+                          }
+                          oksegs.Add(default_fire_valve_length);
+                        }
+                        if (TolLane.Count == THESAURUSSTAMPEDE) break;
+                      }
+                    }
+                  }
+                }
+                {
+                  var text_height = GeoFac.CreateEnvelopeSelector(wlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList())(tolGroupBlkLane);
+                  foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(text_height, THESAURUSPERMUTATION))
+                  {
+                    var buf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSHOUSING);
+                    if (cpst(buf) && nlst(buf))
+                    {
+                      var _tol_avg_column_dist = sankakuptsf(buf);
+                      if (_tol_avg_column_dist.All(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE or THESAURUSDISREPUTABLE or QUOTATIONBREWSTER or QUOTATIONDOPPLER))
+                      {
+                        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+                        {
+                          ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = THESAURUSDISREPUTABLE;
+                        }
+                      }
+                    }
+                  }
+                  foreach (var wl in text_height)
+                  {
+                    if (y1lst(wl))
+                    {
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(wl.Buffer(THESAURUSPERMUTATION)))
+                      {
+                        ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = IRRESPONSIBLENESS;
+                      }
+                    }
+                  }
+                }
+                foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(REPEATED_POINT_DISTANCE.WLines, THESAURUSCOMMUNICATION))
+                {
+                  var TolLane = GeoFac.GetLines(DEFAULT_FIRE_VALVE_LENGTH).ToList();
+                  if (TolLane.Count == THESAURUSSTAMPEDE) continue;
+                  if (TolLane.Count == THESAURUSHOUSING)
+                  {
+                    var default_fire_valve_length = TolLane[THESAURUSSTAMPEDE];
+                    var buf = default_fire_valve_length.Buffer(THESAURUSPERMUTATION);
+                    var _tol_avg_column_dist = sankakuptsf(buf);
+                    if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
+                    {
+                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist[THESAURUSSTAMPEDE];
+                      if (ppst(default_fire_valve_length.StartPoint.ToNTSPoint()) || ppst(default_fire_valve_length.EndPoint.ToNTSPoint()))
+                      {
+                        if (fdringst(default_fire_valve_length.StartPoint.ToNTSPoint()) || fdringst(default_fire_valve_length.EndPoint.ToNTSPoint()))
+                        {
+                          modify(default_fire_valve_length.Buffer(THESAURUSHOUSING), TolLightRangeSingleSideMin =>
+                          {
+                            if (TolLightRangeSingleSideMin.Text is THESAURUSDISREPUTABLE)
+                            {
+                              TolLightRangeSingleSideMin.Text = QUOTATIONBREWSTER;
+                            }
+                          });
+                        }
+                      }
+                    }
+                  }
+                }
+                {
+                  var lnsGeos = _linesGroup.Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= THESAURUSINCOMPLETE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()))).ToList();
+                  var lnsGeosf = GeoFac.CreateIntersectsSelector(lnsGeos);
+                  foreach (var _segs in _linesGroup)
+                  {
+                    var TolLane = _segs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= THESAURUSINCOMPLETE).ToList();
+                    var DEFAULT_FIRE_VALVE_LENGTH = GeoFac.CreateGeometry(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()));
+                    var buf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
+                    if (TolLane.Count > THESAURUSSTAMPEDE)
+                    {
+                      var _tol_avg_column_dist = sankakuptsf(buf);
+                      if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE)
+                      {
+                        if (_tol_avg_column_dist.Any(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE) && _tol_avg_column_dist.Any(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDISREPUTABLE) && _tol_avg_column_dist.All(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE or THESAURUSDISREPUTABLE))
+                        {
+                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+                          {
+                            ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = THESAURUSDEPLORE;
+                          }
+                        }
+                        if (_tol_avg_column_dist.All(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
+                        {
+                          void patch()
+                          {
+                            foreach (var gpgeo in gpGeos)
+                            {
+                              foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
+                              {
+                                if (toilet_wells_interval.Intersects(gpgeo))
+                                {
+                                  {
+                                    var MAX_CONDENSEPIPE_TO_WASHMACHINE = getDN(toilet_wells_interval.GetCenter().ToNTSPoint());
+                                    if (MAX_CONDENSEPIPE_TO_WASHMACHINE is null) continue;
+                                    foreach (var DEFAULT_FIRE_VALVE_LENGTH in lnsGeosf(new MultiLineString(GeoFac.GetLines(gpgeo, skipPolygon: THESAURUSOBSTINACY).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray()).Buffer(THESAURUSPERMUTATION)))
+                                    {
+                                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION), overWrite: INTRAVASCULARLY);
+                                    }
+                                  }
+                                  break;
+                                }
+                              }
+                            }
+                          }
+                          patch();
+                        }
+                      }
+                    }
+                  }
+                }
+              });
+              max_balcony_to_balcony_distance.Enqueue(THESAURUSCOMMUNICATION, () =>
+              {
+                var points = djPts.ToList();
+                var pointsf = GeoFac.CreateIntersectsSelector(points);
+                var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
+                var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
+                foreach (var bufGeo in GroupGeometries(_linesGroup.Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()))).ToList(), MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).ToList()).Select(GeoFac.CreateGeometry).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)))
+                {
+                  if (portst(bufGeo) || ditchest(bufGeo) || wellst(bufGeo) || swellst(bufGeo))
+                  {
+                    max_balcony_to_balcony_distance.Enqueue(SUPERLATIVENESS, () =>
+                    {
+                      var target = portsf(bufGeo).FirstOrDefault() ?? MaxTagXposition(bufGeo).FirstOrDefault() ?? MaxTagLength(bufGeo).FirstOrDefault() ?? swellsf(bufGeo).FirstOrDefault();
+                      if (target is null) return;
+                      var edPts = GeoFac.CreateIntersectsSelector(pointsf(target))(bufGeo);
+                      foreach (var edPt in edPts)
+                      {
+                        var max_basecircle_area = Commonradius(bufGeo);
+                        if (max_basecircle_area.Count == THESAURUSSTAMPEDE) return;
+                        var pps = ppsf(bufGeo);
+                        if (pps.Count == THESAURUSSTAMPEDE) return;
+                        var tolReturnValueRange = linesGeosk(bufGeo);
+                        if (pps.All(ToiletWellsInterval => !ToiletWellsInterval.Intersects(GeoFac.CreateGeometry(tolReturnValueRange)))) return;
+                        draw(THESAURUSDEPLORE, bufGeo, overWrite: THESAURUSOBSTINACY);
+                        {
+                          var lnsf = GeoFac.CreateIntersectsSelector(GeoFac.GetManyLineStrings(tolReturnValueRange).ToList());
+                          if (pps.Any(ToiletWellsInterval => fl0s.Contains(ToiletWellsInterval)))
+                          {
+                            foreach (var fd in max_basecircle_area)
+                            {
+                              foreach (var maxBalconyToBalconyDistance in lnsf(fd))
+                              {
+                                var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
+                                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxBalconyToBalconyDistance.GetCenter();
+                                draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToGRect(INTROPUNITIVENESS).ToPolygon());
+                              }
+                            }
+                          }
+                          else
+                          {
+                            foreach (var fd in max_basecircle_area)
+                            {
+                              var lns = lnsf(fd);
+                              if (lns.Count == THESAURUSHOUSING)
+                              {
+                                var maxBalconyToBalconyDistance = lns[THESAURUSSTAMPEDE];
+                                string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                                if (fl0st(maxBalconyToBalconyDistance))
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
+                                }
+                                else if (nlst(maxBalconyToBalconyDistance))
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
+                                }
+                                else
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
+                                }
+                                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxBalconyToBalconyDistance.GetCenter();
+                                draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToGRect(INTROPUNITIVENESS).ToPolygon());
+                              }
+                            }
+                          }
+                          foreach (var ToiletWellsInterval in pps)
+                          {
+                            if (nls.Contains(ToiletWellsInterval) || y1ls.Contains(ToiletWellsInterval) || y2ls.Contains(ToiletWellsInterval) || fl0s.Contains(ToiletWellsInterval))
+                            {
+                              var lns = lnsf(ToiletWellsInterval);
+                              if (lns.Count == THESAURUSHOUSING)
+                              {
+                                var maxBalconyToBalconyDistance = lns[THESAURUSSTAMPEDE];
+                                string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                                if (nls.Contains(ToiletWellsInterval))
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeVerticalDN;
+                                }
+                                else
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyRainPipeDN;
+                                }
+                                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = maxBalconyToBalconyDistance.GetCenter();
+                                draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToGRect(INTROPUNITIVENESS).ToPolygon());
+                              }
+                            }
+                          }
+                        }
+                        static Func<Geometry, bool> CreateContainsTester<T>(List<T> DEFAULT_VOLTAGE) where T : Geometry
+                        {
+                          if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return DEFAULT_FIRE_VALVE_WIDTH => INTRAVASCULARLY;
+                          var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
+                          foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
+                          return DEFAULT_FIRE_VALVE_LENGTH =>
+                          {
+                            if (DEFAULT_FIRE_VALVE_LENGTH == null) throw new ArgumentNullException();
+                            var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
+                            return engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Any(default_fire_valve_width => default_voltage.Contains(default_fire_valve_width));
+                          };
+                        }
+                        max_balcony_to_balcony_distance.Enqueue(THESAURUSSCARCE, () =>
+                        {
+                          var TolLightRangeMin = CreateContainsTester(after.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2).ToList());
+                          var _lines = linesGeosk(bufGeo).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct().ToList();
+                          var _tol_avg_column_dist = pointsf(bufGeo);
+                          var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
+                          var stPts = new HashSet<Point>();
+                          var addPts = new HashSet<Point>();
+                          {
+                            foreach (var maxBalconyrainpipeToFloordrainDistance in MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).Distinct())
+                            {
+                              var _pts = ptsf(maxBalconyrainpipeToFloordrainDistance.Buffer(THESAURUSPERMUTATION));
+                              if (_pts.Count == THESAURUSSTAMPEDE) continue;
+                              if (_pts.Count == THESAURUSHOUSING)
+                              {
+                                stPts.Add(_pts[THESAURUSSTAMPEDE]);
+                              }
+                              else
+                              {
+                                var maxKitchenToBalconyDistance = GetBounds(_pts.ToArray());
+                                var center = maxKitchenToBalconyDistance.Center.ToNTSPoint();
+                                addPts.Add(center);
+                                foreach (var default_fire_valve_length in _pts.Select(TolLightRangeSingleSideMax => new GLineSegment(TolLightRangeSingleSideMax.ToPoint2d(), center.ToPoint2d())))
+                                {
+                                  _lines.Add(default_fire_valve_length);
+                                }
+                              }
+                            }
+                            stPts.Remove(edPt);
+                          }
+                          if (stPts.Count == THESAURUSSTAMPEDE)
+                          {
+                            _lines = _lines.Except(GeoFac.CreateIntersectsSelector(_lines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList())(GeoFac.CreateGeometry(addPts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(UNCONSEQUENTIAL).ToPolygon()))).SelectMany(DEFAULT_FIRE_VALVE_LENGTH => GeoFac.GetLines(DEFAULT_FIRE_VALVE_LENGTH))).ToList();
+                            addPts.Clear();
+                            var tolReturnValueRange = _lines.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
+                            var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange);
+                            foreach (var ToiletWellsInterval in y1ls.Concat(y2ls).Concat(nls).Concat(fl0s))
+                            {
+                              stPts.AddRange(ptsf(ToiletWellsInterval));
+                              var lns = linesf(ToiletWellsInterval).Where(maxBalconyToBalconyDistance => after.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2).All(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Contains(maxBalconyToBalconyDistance))).ToList();
+                              foreach (var maxBalconyToBalconyDistance in lns)
+                              {
+                                string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                                if (nls.Contains(ToiletWellsInterval))
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondensePipeVerticalDN;
+                                }
+                                else
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
+                                }
+                                draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, maxBalconyToBalconyDistance.GetCenter().ToNTSPoint(), overWrite: INTRAVASCULARLY);
+                              }
+                            }
+                            foreach (var fd in fldrs)
+                            {
+                              stPts.AddRange(ptsf(fd));
+                              var lns = linesf(fd).Where(maxBalconyToBalconyDistance => after.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2).All(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Contains(maxBalconyToBalconyDistance))).ToList();
+                              foreach (var maxBalconyToBalconyDistance in lns)
+                              {
+                                string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                                var buf = fd.Buffer(MISAPPREHENSIVE);
+                                if (fl0st(buf))
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WaterWellFloorDrainDN;
+                                }
+                                else if (nlst(buf))
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.CondenseFloorDrainDN;
+                                }
+                                else
+                                {
+                                  MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BalconyFloorDrainDN;
+                                }
+                                draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, maxBalconyToBalconyDistance.GetCenter().ToNTSPoint(), overWrite: INTRAVASCULARLY);
+                              }
+                            }
+                          }
+                          _tol_avg_column_dist = _tol_avg_column_dist.Concat(addPts).Distinct().ToList();
+                          var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToHashSet();
+                          var nodes = _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => new GraphNode<Point>(TolLightRangeSingleSideMax)).ToList();
+                          {
+                            var kvs = new HashSet<KeyValuePair<int, int>>();
+                            foreach (var default_fire_valve_length in _lines)
+                            {
+                              var MAX_ANGEL_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.StartPoint.ToNTSPoint());
+                              if (MAX_ANGEL_TOLLERANCE < THESAURUSSTAMPEDE) continue;
+                              var MAX_ANGLE_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.EndPoint.ToNTSPoint());
+                              if (MAX_ANGLE_TOLLERANCE < THESAURUSSTAMPEDE) continue;
+                              if (MAX_ANGEL_TOLLERANCE != MAX_ANGLE_TOLLERANCE)
+                              {
+                                if (MAX_ANGEL_TOLLERANCE > MAX_ANGLE_TOLLERANCE)
+                                {
+                                  ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.Swap(ref MAX_ANGEL_TOLLERANCE, ref MAX_ANGLE_TOLLERANCE);
+                                }
+                                kvs.Add(new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE));
+                              }
+                            }
+                            foreach (var max_rainpipe_to_balconyfloordrain in kvs)
+                            {
+                              nodes[max_rainpipe_to_balconyfloordrain.Key].AddNeighbour(nodes[max_rainpipe_to_balconyfloordrain.Value], THESAURUSHOUSING);
+                            }
+                          }
+                          var PolyClosedDistance = new PARKING_STALL_GROUP_LENGTH_RESTRICT<Point>(nodes);
+                          {
+                            var paths = new List<IList<GraphNode<Point>>>(stPts.Count);
+                            var dnDict = new Dictionary<GLineSegment, int>();
+                            foreach (var stPt in stPts)
+                            {
+                              var path = PolyClosedDistance.FindShortestPathBetween(nodes[_tol_avg_column_dist.IndexOf(stPt)], nodes[_tol_avg_column_dist.IndexOf(edPt)]);
+                              paths.Add(path);
+                            }
+                            foreach (var path in paths)
+                            {
+                              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                              {
+                                dnDict[new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d())] = THESAURUSSTAMPEDE;
+                              }
+                            }
+                            foreach (var path in paths)
+                            {
+                              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                              {
+                                var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                                var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
+                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                                {
+                                  var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                                  if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
+                                  {
+                                    var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
+                                    dnDict[default_fire_valve_length] = Math.Max(DEFAULT_FIRE_VALVE_WIDTH, dnDict[default_fire_valve_length]);
+                                  }
+                                }
+                              }
+                            }
+                            foreach (var path in paths)
+                            {
+                              int MAX_CONDENSEPIPE_TO_WASHMACHINE = THESAURUSSTAMPEDE;
+                              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                              {
+                                var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                                var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
+                                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                                {
+                                  var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                                  if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
+                                  {
+                                    var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
+                                    if (MAX_CONDENSEPIPE_TO_WASHMACHINE < DEFAULT_FIRE_VALVE_WIDTH) MAX_CONDENSEPIPE_TO_WASHMACHINE = DEFAULT_FIRE_VALVE_WIDTH;
+                                  }
+                                }
+                                if (dnDict[default_fire_valve_length] < MAX_CONDENSEPIPE_TO_WASHMACHINE) dnDict[default_fire_valve_length] = MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                              }
+                            }
+                            foreach (var max_rainpipe_to_balconyfloordrain in dnDict)
+                            {
+                              var sel = max_rainpipe_to_balconyfloordrain.Key.Buffer(THESAURUSHOUSING);
+                              foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                              {
+                                var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                                TolLightRangeSingleSideMin.Text = getDn(max_rainpipe_to_balconyfloordrain.Value);
+                              }
+                            }
+                          }
+                        });
+                      }
+                    });
+                  }
+                }
+              });
+            }
+          }
+          max_balcony_to_balcony_distance.Enqueue(THESAURUSDESTITUTE, () =>
+          {
+            foreach (var tp in after.OrderByDescending(tp => tp.Item2.Area))
+            {
+              draw(tp.Item1, tp.Item2, INTRAVASCULARLY);
+            }
+          });
+          static List<List<Geometry>> GroupGeometries(List<Geometry> tolReturnValueRange, List<Geometry> polys)
+          {
+            var geosGroup = new List<List<Geometry>>();
+            GroupGeometries();
+            return geosGroup;
+            void GroupGeometries()
+            {
+              var DEFAULT_VOLTAGE = tolReturnValueRange.Concat(polys).Distinct().ToList();
+              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return;
+              tolReturnValueRange = tolReturnValueRange.Distinct().ToList();
+              polys = polys.Distinct().ToList();
+              if (tolReturnValueRange.Count + polys.Count != DEFAULT_VOLTAGE.Count) throw new ArgumentException();
+              var lineshs = tolReturnValueRange.ToHashSet();
+              var polyhs = polys.ToHashSet();
+              var pairs = _GroupGeometriesToKVIndex(DEFAULT_VOLTAGE).Where(max_rainpipe_to_balconyfloordrain =>
+              {
+                if (lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
+                if (polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
+                return THESAURUSOBSTINACY;
+              }).ToArray();
+              var dict = new ListDict<int>();
+              var h = new BFSHelper()
+              {
+                Pairs = pairs,
+                TotalCount = DEFAULT_VOLTAGE.Count,
+                Callback = (default_fire_valve_width, MAX_ANGEL_TOLLERANCE) => dict.Add(default_fire_valve_width.root, MAX_ANGEL_TOLLERANCE),
+              };
+              h.BFS();
+              dict.ForEach((_i, l) =>
+              {
+                geosGroup.Add(l.Select(MAX_ANGEL_TOLLERANCE => DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE]).ToList());
+              });
+            }
+            static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> DEFAULT_VOLTAGE) where T : Geometry
+            {
+              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) yield break;
+              var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
+              foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
+              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < DEFAULT_VOLTAGE.Count; MAX_ANGEL_TOLLERANCE++)
+              {
+                var DEFAULT_FIRE_VALVE_LENGTH = DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE];
+                var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
+                foreach (var MAX_ANGLE_TOLLERANCE in engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Where(default_fire_valve_width => default_voltage.Intersects(default_fire_valve_width)).Select(default_fire_valve_width => DEFAULT_VOLTAGE.IndexOf(default_fire_valve_width)).Where(MAX_ANGLE_TOLLERANCE => MAX_ANGEL_TOLLERANCE < MAX_ANGLE_TOLLERANCE))
+                {
+                  yield return new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
+                }
+              }
+            }
+          }
+          max_balcony_to_balcony_distance.Enqueue(THESAURUSACRIMONIOUS, () =>
+          {
+            foreach (var TolLightRangeSingleSideMin in mlInfos)
+            {
+              if (TolLightRangeSingleSideMin.Text == PHOTOFLUOROGRAM) TolLightRangeSingleSideMin.Text = THESAURUSDEPLORE;
+            }
+          });
+          max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
+          {
+            var points = precisePts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+            var pointsf = GeoFac.CreateIntersectsSelector(points);
+            foreach (var TolLightRangeSingleSideMin in mlInfos)
+            {
+              if (TolLightRangeSingleSideMin.Text is not null)
+              {
+                var _tol_avg_column_dist = pointsf(TolLightRangeSingleSideMin.BasePoint.ToGRect(THESAURUSHOUSING).ToPolygon());
+                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist.FirstOrDefault();
+                if (_tol_avg_column_dist.Count > THESAURUSHOUSING)
+                {
+                  MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = GeoFac.NearestNeighbourGeometryF(_tol_avg_column_dist)(TolLightRangeSingleSideMin.BasePoint.ToNTSPoint());
+                }
+                if (MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN is not null)
+                {
+                  TolLightRangeSingleSideMin.BasePoint = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToPoint3d();
+                }
+              }
+            }
+          });
+        }
+      }
+      foreach (var TolLightRangeSingleSideMin in mlInfos)
+      {
+        if (TolLightRangeSingleSideMin.Text == THESAURUSDEPLORE) TolLightRangeSingleSideMin.Text = THESAURUSIMPETUOUS;
+      }
+      foreach (var TolLightRangeSingleSideMin in mlInfos)
+      {
+        if (!string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text)) DrawMLeader(TolLightRangeSingleSideMin.Text, TolLightRangeSingleSideMin.BasePoint, TolLightRangeSingleSideMin.BasePoint.OffsetXY(HYPERDISYLLABLE, HYPERDISYLLABLE));
+      }
+    }
+    const string MLeaderLayer = ARGENTIMACULATUS;
+    public static MLeader DrawMLeader(string content, Point2d _tolRegroupMainYRange, Point2d _tolConnectSecPtRange)
+    {
+      var tolReturnValue0Approx = new MLeader();
+      tolReturnValue0Approx.MText = new MText() { Contents = content, TextHeight = HYPERDISYLLABLE, ColorIndex = DISPENSABLENESS, };
+      tolReturnValue0Approx.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
+      tolReturnValue0Approx.ArrowSize = THESAURUSENTREPRENEUR;
+      tolReturnValue0Approx.DoglegLength = THESAURUSSTAMPEDE;
+      tolReturnValue0Approx.LandingGap = THESAURUSSTAMPEDE;
+      tolReturnValue0Approx.ExtendLeaderToText = INTRAVASCULARLY;
+      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.LeftLeader);
+      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.RightLeader);
+      tolReturnValue0Approx.AddLeaderLine(_tolRegroupMainYRange.ToPoint3d());
+      var maxKitchenToBalconyDistance = tolReturnValue0Approx.MText.Bounds.ToGRect();
+      var _tolConnectSecPrimAddValue = _tolConnectSecPtRange.OffsetY(maxKitchenToBalconyDistance.Height + HYPERDISYLLABLE).ToPoint3d();
+      if (_tolConnectSecPtRange.X < _tolRegroupMainYRange.X)
+      {
+        _tolConnectSecPrimAddValue = _tolConnectSecPrimAddValue.OffsetX(-maxKitchenToBalconyDistance.Width);
+      }
+      tolReturnValue0Approx.TextLocation = _tolConnectSecPrimAddValue;
+      tolReturnValue0Approx.Layer = MLeaderLayer;
+      DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(tolReturnValue0Approx); });
+      return tolReturnValue0Approx;
+    }
+    public static MLeader DrawMLeader(string content, Point3d _tolRegroupMainYRange, Point3d _tolConnectSecPtRange)
+    {
+      var tolReturnValue0Approx = new MLeader();
+      tolReturnValue0Approx.MText = new MText() { Contents = content, TextHeight = HYPERDISYLLABLE, ColorIndex = DISPENSABLENESS, };
+      tolReturnValue0Approx.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
+      tolReturnValue0Approx.ArrowSize = THESAURUSENTREPRENEUR;
+      tolReturnValue0Approx.DoglegLength = THESAURUSSTAMPEDE;
+      tolReturnValue0Approx.LandingGap = THESAURUSSTAMPEDE;
+      tolReturnValue0Approx.ExtendLeaderToText = INTRAVASCULARLY;
+      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.LeftLeader);
+      tolReturnValue0Approx.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.RightLeader);
+      tolReturnValue0Approx.AddLeaderLine(_tolRegroupMainYRange);
+      var maxKitchenToBalconyDistance = tolReturnValue0Approx.MText.Bounds.ToGRect();
+      var _tolConnectSecPrimAddValue = _tolConnectSecPtRange.OffsetY(maxKitchenToBalconyDistance.Height + HYPERDISYLLABLE);
+      if (_tolConnectSecPtRange.X < _tolRegroupMainYRange.X)
+      {
+        _tolConnectSecPrimAddValue = _tolConnectSecPrimAddValue.OffsetX(-maxKitchenToBalconyDistance.Width);
+      }
+      tolReturnValue0Approx.TextLocation = _tolConnectSecPrimAddValue;
+      tolReturnValue0Approx.Layer = MLeaderLayer;
+      DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(tolReturnValue0Approx); });
+      return tolReturnValue0Approx;
+    }
+    private static void ClearMLeader()
+    {
+      var adb = _DrawingTransaction.Current.adb;
+      LayerTools.AddLayer(adb.Database, MLeaderLayer);
+      foreach (var tolReturnValue0Approx in adb.ModelSpace.OfType<MLeader>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Layer == MLeaderLayer))
+      {
+        adb.Element<Entity>(tolReturnValue0Approx.ObjectId, THESAURUSOBSTINACY).Erase();
+      }
+    }
+    public static Geometry CreateXGeoRect(GRect DEFAULT_FIRE_VALVE_WIDTH)
+    {
+      return new MultiLineString(new LineString[] {
+                DEFAULT_FIRE_VALVE_WIDTH.ToLinearRing(),
+                new LineString(new Coordinate[] { DEFAULT_FIRE_VALVE_WIDTH.LeftTop.ToNTSCoordinate(), DEFAULT_FIRE_VALVE_WIDTH.RightButtom.ToNTSCoordinate() }),
+                new LineString(new Coordinate[] { DEFAULT_FIRE_VALVE_WIDTH.LeftButtom.ToNTSCoordinate(), DEFAULT_FIRE_VALVE_WIDTH.RightTop.ToNTSCoordinate() })
+            });
+    }
+    public static GRect GetBounds(params Geometry[] DEFAULT_VOLTAGE) => new GeometryCollection(DEFAULT_VOLTAGE).ToGRect();
+    public static void DrawBackToFlatDiagram(List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> _storeysItems, ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData, List<ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageDrawingData> drDatas, ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo, DrainageSystemDiagramViewModel vm)
+    {
+      static string getDn(double area)
+      {
+        return DnToString(Math.Sqrt(area));
+      }
+      static string DnToString(double MAX_CONDENSEPIPE_TO_WASHMACHINE)
+      {
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSSYMMETRICAL) return PHOTOFLUOROGRAM;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSDRAGOON) return PHOTOFLUOROGRAM;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < PERICARDIOCENTESIS) return PHOTOFLUOROGRAM;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSMORTALITY) return QUOTATIONBREWSTER;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSNEGATE) return QUOTATIONDOPPLER;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE < THESAURUSINNOCUOUS) return QUOTATIONDOPPLER;
+        return IRRESPONSIBLENESS;
+      }
+      static double parseDn(string MAX_CONDENSEPIPE_TO_WASHMACHINE)
+      {
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE.StartsWith(THESAURUSVICTORIOUS)) return THESAURUSENTREPRENEUR;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSJOURNAL) return THESAURUSEVERLASTING;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is CHRISTIANIZATION or UNPREMEDITATEDNESS) return HYPERDISYLLABLE;
+        if (MAX_CONDENSEPIPE_TO_WASHMACHINE is THESAURUSFINICKY) return THESAURUSENTREPRENEUR;
+        var tolReturnValueMinRange = Regex.Match(MAX_CONDENSEPIPE_TO_WASHMACHINE, SUPERNATURALIZE);
+        if (tolReturnValueMinRange.Success) return double.Parse(tolReturnValueMinRange.Value);
+        return THESAURUSSTAMPEDE;
+      }
+      var mlInfos = new List<PARKING_STALL_GROUP_WIDTH_RESTRICT>(THESAURUSREPERCUSSION);
+      var tk = DateTime.Now.Ticks % THESAURUSFINALITY;
+      var cadDatas = exInfo.CadDatas;
+      Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
+      Func<List<Geometry>, Func<Geometry, bool>> T = GeoFac.CreateIntersectsTester;
+      Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
+      Func<List<Geometry>, List<List<Geometry>>> GG = GeoFac.GroupGeometries;
+      static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(MinWellToUrinalDistance => GeoFac.CreateGeometry(MinWellToUrinalDistance)).ToList();
+      var (sankakuptsf, addsankaku) = GeoFac.CreateIntersectsSelectorEngine(mlInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.BasePoint.ToNTSPoint(TolLightRangeSingleSideMax)));
+      var roomData = geoData.RoomData;
+      var _kitchens = roomData.Where(TolLightRangeSingleSideMax => IsKitchen(TolLightRangeSingleSideMax.Key)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
+      var _toilets = roomData.Where(TolLightRangeSingleSideMax => IsToilet(TolLightRangeSingleSideMax.Key)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
+      var _nonames = roomData.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key is THESAURUSDEPLORE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
+      var _balconies = roomData.Where(TolLightRangeSingleSideMax => IsBalcony(TolLightRangeSingleSideMax.Key)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value).ToList();
+      var kitchenst = T(_kitchens);
+      void draw(string repeated_point_distance, Geometry DEFAULT_FIRE_VALVE_LENGTH, bool autoCreate = THESAURUSOBSTINACY, bool overWrite = THESAURUSOBSTINACY, string note = null)
+      {
+        Point2d center;
+        if (DEFAULT_FIRE_VALVE_LENGTH is Point point)
+        {
+          center = point.ToPoint2d();
+          DEFAULT_FIRE_VALVE_LENGTH = GRect.Create(center, UNCONSEQUENTIAL).ToPolygon();
+        }
+        else
+        {
+          center = DEFAULT_FIRE_VALVE_LENGTH.GetCenter();
+        }
+        {
+          var SidewaterbucketXIndent = INTRAVASCULARLY;
+          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(DEFAULT_FIRE_VALVE_LENGTH))
+          {
+            var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+            if (string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text) || overWrite)
+            {
+              TolLightRangeSingleSideMin.Text = repeated_point_distance;
+            }
+            if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
+            SidewaterbucketXIndent = THESAURUSOBSTINACY;
+          }
+          if (!SidewaterbucketXIndent && autoCreate)
+          {
+            var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = center;
+            var TolLightRangeSingleSideMin = PARKING_STALL_GROUP_WIDTH_RESTRICT.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, repeated_point_distance);
+            mlInfos.Add(TolLightRangeSingleSideMin);
+            var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
+            _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
+            if (!string.IsNullOrWhiteSpace(note)) TolLightRangeSingleSideMin.Note = note;
+            addsankaku(_raiseDistanceToStartDefault);
+          }
+        }
+      }
+      var zbqst = GeoFac.CreateIntersectsTester(geoData.zbqs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
+      var xstst = GeoFac.CreateIntersectsTester(geoData.xsts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
+      var dnInfectors = new List<KeyValuePair<Point2d, string>>();
+      var vpInfectors = new HashSet<Point2d>();
+      var flpts = new HashSet<Point2d>();
+      var plpts = new HashSet<Point2d>();
+      var vp2fdpts = new HashSet<Point2d>();
+      var shooters = new HashSet<Point>();
+      {
+        var circleshooters = new HashSet<KeyValuePair<Point2d, Point2d>>();
+        var storeysItems = ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext.StoreyContext.StoreyInfos;
+        var toCmp = new HashSet<KeyValuePair<int, int>>();
+        {
+          var REGION_BORDER_BUFFE_RDISTANCE = storeysItems.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Any()).ToList();
+          var minlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Min()).ToList();
+          var maxlst = REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers.Max()).ToList();
+          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < maxlst.Count; MAX_ANGEL_TOLLERANCE++)
+          {
+            var _tolReturnValueMinRange = maxlst[MAX_ANGEL_TOLLERANCE];
+            for (int MAX_ANGLE_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGLE_TOLLERANCE < maxlst.Count; MAX_ANGLE_TOLLERANCE++)
+            {
+              if (MAX_ANGLE_TOLLERANCE == MAX_ANGEL_TOLLERANCE) continue;
+              var _tolReturnValueMaxDistance = minlst[MAX_ANGLE_TOLLERANCE];
+              if (_tolReturnValueMaxDistance + THESAURUSHOUSING == _tolReturnValueMinRange)
+              {
+                toCmp.Add(new KeyValuePair<int, int>(storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGLE_TOLLERANCE]), storeysItems.IndexOf(REGION_BORDER_BUFFE_RDISTANCE[MAX_ANGEL_TOLLERANCE])));
+              }
+            }
+          }
+        }
+        var _shooters = geoData.FloorDrainTypeShooter.SelectNotNull(max_rainpipe_to_balconyfloordrain =>
+        {
+          var toilet_buffer_distance = max_rainpipe_to_balconyfloordrain.Value;
+          if (!string.IsNullOrWhiteSpace(toilet_buffer_distance))
+          {
+            if (toilet_buffer_distance.Contains(THESAURUSRESIGNED) || toilet_buffer_distance.Contains(PHOTOAUTOTROPHIC))
+            {
+              return max_rainpipe_to_balconyfloordrain.Key.ToNTSPoint();
+            }
+          }
+          return null;
+        }).ToList();
+        shooters.AddRange(_shooters);
+        var _shootersf = GeoFac.CreateIntersectsSelector(_shooters);
+        foreach (var _kv in toCmp)
+        {
+          var lbdict = exInfo.Items[_kv.Value].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
+          var low = storeysItems[_kv.Key];
+          var high = storeysItems[_kv.Value];
+          var highBound = high.Boundary.ToPolygon();
+          var max_basecircle_area = geoData.FloorDrains.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(INTRAVASCULARLY).ToCirclePolygon(SUPERLATIVENESS, THESAURUSOBSTINACY)).ToList();
+          var Commonradius = GeoFac.CreateEnvelopeSelector(max_basecircle_area);
+          max_basecircle_area = Commonradius(high.Boundary.ToPolygon());
+          var pps = geoData.VerticalPipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList();
+          var ppsf = GeoFac.CreateEnvelopeSelector(pps);
+          pps = ppsf(low.Boundary.ToPolygon());
+          var dps = geoData.DownWaterPorts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Center.ToGRect(HYPERDISYLLABLE).ToPolygon()).ToList();
+          var dpsf = GeoFac.CreateEnvelopeSelector(dps);
+          dps = dpsf(high.Boundary.ToPolygon());
+          var circles = geoData.VerticalPipes.Concat(geoData.DownWaterPorts).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList();
+          var circlesf = GeoFac.CreateEnvelopeSelector(circles);
+          circles = circlesf(low.Boundary.ToPolygon());
+          var vhigh = -high.ContraPoint.ToVector2d();
+          var vlow = -low.ContraPoint.ToVector2d();
+          var _dps = dps.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vhigh)).ToList();
+          var _circles = circles.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vlow)).ToList();
+          var _circlesf = GeoFac.CreateIntersectsSelector(_circles);
+          var _fds = max_basecircle_area.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vhigh)).ToList();
+          var _pps = pps.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(vlow)).ToList();
+          var _ppsf = GeoFac.CreateIntersectsSelector(_pps);
+          var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = low.ContraPoint - high.ContraPoint;
+          {
+            shooters.AddRange(_shootersf(highBound).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)));
+          }
+          {
+            var text_indent = lbdict.Where(TolLightRangeSingleSideMax => IsDraiFL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            var max_tag_xposition = lbdict.Where(TolLightRangeSingleSideMax => IsPL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            var max_tag_length = lbdict.Where(TolLightRangeSingleSideMax => IsTL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+            foreach (var ToiletWellsInterval in text_indent.Concat(max_tag_xposition).Concat(max_tag_length))
+            {
+              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = ToiletWellsInterval.GetCenter().Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+              dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, IRRESPONSIBLENESS));
+              vpInfectors.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN);
+              if (text_indent.Contains(ToiletWellsInterval)) flpts.Add(ToiletWellsInterval.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+              else if (max_tag_xposition.Contains(ToiletWellsInterval)) plpts.Add(ToiletWellsInterval.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+            }
+          }
+          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in dps.Where(dp => kitchenst(dp)).Select(dp => dp.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).GetCenter()))
+          {
+            dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, vm.Params.BasinDN));
+          }
+          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in dps.Where(dp => zbqst(dp)).Select(dp => dp.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).GetCenter()))
+          {
+            dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, IRRESPONSIBLENESS));
+          }
+          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in dps.Where(dp => xstst(dp)).Select(dp => dp.Offset(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).GetCenter()))
+          {
+            dnInfectors.Add(new KeyValuePair<Point2d, string>(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, QUOTATIONBREWSTER));
+          }
+          foreach (var fd in _fds)
+          {
+            var ToiletWellsInterval = _ppsf(fd.GetCenter().ToNTSPoint()).FirstOrDefault();
+            if (ToiletWellsInterval != null)
+            {
+              vp2fdpts.Add(pps[_pps.IndexOf(ToiletWellsInterval)].GetCenter());
+            }
+          }
+          foreach (var dp in _dps)
+          {
+            var circle = _circlesf(dp).FirstOrDefault();
+            if (circle != null)
+            {
+              circleshooters.Add(new KeyValuePair<Point2d, Point2d>(dps[_dps.IndexOf(dp)].GetCenter(), circles[_circles.IndexOf(circle)].GetCenter()));
+            }
+          }
+        }
+      }
+      var shooterst = GeoFac.CreateIntersectsTester(shooters.ToList());
+      var vp2fdptst = GeoFac.CreateIntersectsTester(vp2fdpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList());
+      var vp2fdptrgs = vp2fdpts.Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax, THESAURUSHESITANCY).ToPolygon()).ToList();
+      var vp2fdptrgst = GeoFac.CreateIntersectsTester(vp2fdptrgs);
+      {
+        using var max_balcony_to_balcony_distance = new ParkingStallGroupWidthRestrict(THESAURUSINCOMPLETE);
+        var cleaningPortPtRgs = geoData.CleaningPortBasePoints.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGRect(THESAURUSINCOMPLETE).ToPolygon()).ToList();
+        var cleaningPortPtsRgst = GeoFac.CreateIntersectsTester(cleaningPortPtRgs);
+        foreach (var si in Enumerable.Range(THESAURUSSTAMPEDE, cadDatas.Count))
+        {
+          var REPEATED_POINT_DISTANCE = cadDatas[si];
+          var lbdict = exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2);
+          var labelLinesGroup = GG(REPEATED_POINT_DISTANCE.LabelLines);
+          var labelLinesGeos = GeosGroupToGeos(labelLinesGroup);
+          var labellinesGeosf = F(labelLinesGeos);
+          var tolGroupBlkLane = geoData.Storeys[si].ToPolygon();
+          var gpGeos = GeoFac.CreateEnvelopeSelector(geoData.Groups.Select(GeoFac.CreateGeometry).ToList())(tolGroupBlkLane);
+          var dlsegs = geoData.DLines;
+          var vertices = GeoFac.CreateEnvelopeSelector(dlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.StartPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax)).Concat(dlsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.EndPoint.ToNTSPoint().Tag(TolLightRangeSingleSideMax))).ToList())(tolGroupBlkLane);
+          var verticesf = GeoFac.CreateIntersectsSelector(vertices);
+          dlsegs = vertices.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).Cast<GLineSegment>().Distinct().ToList();
+          var killer = REPEATED_POINT_DISTANCE.VerticalPipes.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-UNCONSEQUENTIAL)).Concat(REPEATED_POINT_DISTANCE.DownWaterPorts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-UNCONSEQUENTIAL))).Concat(REPEATED_POINT_DISTANCE.FloorDrains.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(-UNCONSEQUENTIAL)));
+          var dlinesGeos = GeoFac.GroupLinesByConnPoints(Substract(REPEATED_POINT_DISTANCE.DLines.SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList(), killer).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList(), DINOFLAGELLATES).ToList();
+          var precisePts = new HashSet<Point2d>();
+          dlinesGeos = dlinesGeos.SelectMany(dlinesGeo =>
+          {
+            var tolReturnValueRange = Substract(GeoFac.GetLines(dlinesGeo).ToList(), killer);
+            tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= DISPROPORTIONAL).ToList();
+            tolReturnValueRange = GeoFac.GroupParallelLines(tolReturnValueRange, THESAURUSAPPARATUS, THESAURUSHOUSING).Select(default_fire_valve_width => GetCenterLine(default_fire_valve_width)).ToList();
+            tolReturnValueRange = GeoFac.ToNodedLineSegments(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(DISPROPORTIONAL)).ToList()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSCOMMUNICATION).ToList();
+            precisePts.AddRange(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Center));
+            return GeoFac.GroupGeometries(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSPLAYGROUND).ToLineString()).ToList()).Select(TolLightRangeSingleSideMax =>
+            {
+              var lsArr = TolLightRangeSingleSideMax.Cast<LineString>().SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct(new GLineSegment.EqualityComparer(ULTRASONOGRAPHY)).Select(TolLightRangeSingleSideMax => new GLineSegment(new Point2d(FixValue(TolLightRangeSingleSideMax.StartPoint.X), FixValue(TolLightRangeSingleSideMax.StartPoint.Y)), new Point2d(FixValue(TolLightRangeSingleSideMax.EndPoint.X), FixValue(TolLightRangeSingleSideMax.EndPoint.Y))).ToLineString()).ToArray();
+              return new MultiLineString(lsArr);
+            });
+          }).Cast<Geometry>().ToList();
+          var dlinesGeosf = F(dlinesGeos);
+          var wrappingPipesf = F(REPEATED_POINT_DISTANCE.WrappingPipes);
+          var dps = REPEATED_POINT_DISTANCE.DownWaterPorts;
+          var ports = REPEATED_POINT_DISTANCE.WaterPorts;
+          var portst = T(ports.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
+          var portsf = F(ports.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(MISAPPREHENSIVE)).ToList());
+          var fldrs = REPEATED_POINT_DISTANCE.FloorDrains;
+          var MaxDownspoutToBalconywashingfloordrain = REPEATED_POINT_DISTANCE.VerticalPipes;
+          {
+            var _vps = MaxDownspoutToBalconywashingfloordrain.ToHashSet();
+            foreach (var toilet_wells_interval in _vps.ToList())
+            {
+              lbdict.TryGetValue(toilet_wells_interval, out string SidewaterbucketYIndent);
+              if (!IsDraiLabel(SidewaterbucketYIndent))
+              {
+                if (kitchenst(toilet_wells_interval))
+                {
+                  dps.Add(toilet_wells_interval);
+                  _vps.Remove(toilet_wells_interval);
+                }
+              }
+            }
+            dps = dps.Distinct().ToList();
+            MaxDownspoutToBalconywashingfloordrain = _vps.ToList();
+          }
+          {
+            var max_basecircle_area = MaxDownspoutToBalconywashingfloordrain.Where(vp2fdptst).ToList();
+            fldrs = fldrs.Concat(max_basecircle_area).Distinct().ToList();
+            MaxDownspoutToBalconywashingfloordrain = MaxDownspoutToBalconywashingfloordrain.Except(max_basecircle_area).ToList();
+          }
+          var Commonradius = F(fldrs);
+          var fdst = T(fldrs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)).ToList());
+          var ppsf = F(MaxDownspoutToBalconywashingfloordrain);
+          var ppst = T(MaxDownspoutToBalconywashingfloordrain);
+          var dpsf = F(dps);
+          var dpst = T(dps);
+          var text_indent = lbdict.Where(TolLightRangeSingleSideMax => IsDraiFL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+          var max_tag_xposition = lbdict.Where(TolLightRangeSingleSideMax => IsPL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+          var max_tag_length = lbdict.Where(TolLightRangeSingleSideMax => IsTL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).ToList();
+          {
+            var MaxRainpipeToWashmachine = F(MaxDownspoutToBalconywashingfloordrain);
+            var _fls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((flpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
+            var _pls = MaxRainpipeToWashmachine(GeoFac.CreateGeometry((plpts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()))));
+            {
+              var default_voltage = G(REPEATED_POINT_DISTANCE.LabelLines).ToIPreparedGeometry();
+              text_indent = text_indent.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
+              max_tag_xposition = max_tag_xposition.Where(TolLightRangeSingleSideMax => default_voltage.Intersects(TolLightRangeSingleSideMax)).ToList();
+            }
+            {
+              text_indent = text_indent.Concat(_fls).Distinct().ToList();
+              max_tag_xposition = max_tag_xposition.Concat(_pls).Distinct().ToList();
+            }
+          }
+          if (cleaningPortPtRgs.Count > THESAURUSSTAMPEDE)
+          {
+            foreach (var ToiletWellsInterval in MaxDownspoutToBalconywashingfloordrain)
+            {
+              if (cleaningPortPtsRgst(ToiletWellsInterval))
+              {
+                max_tag_xposition.Add(ToiletWellsInterval);
+                if (!lbdict.ContainsKey(ToiletWellsInterval))
+                {
+                  lbdict[ToiletWellsInterval] = THESAURUSBOTTOM + ++tk;
+                }
+              }
+            }
+            max_tag_xposition = max_tag_xposition.Distinct().ToList();
+          }
+          foreach (var default_fire_valve_length in REPEATED_POINT_DISTANCE.VLines.SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSCOMMUNICATION))
+          {
+            draw(IRRESPONSIBLENESS, default_fire_valve_length.ToLineString());
+          }
+          var djPts = new HashSet<Point>();
+          var _linesGroup = new HashSet<HashSet<GLineSegment>>();
+          max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
+          {
+            var dlscf = GeoFac.CreateContainsSelector(dlinesGeos);
+            foreach (var sel in GeoFac.GroupGeometries(fldrs.Select(TolLightRangeSingleSideMax => CreateXGeoRect(TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION).ToGRect())).Concat(dlinesGeos).ToList()).Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax)))
+            {
+              var max_basecircle_area = Commonradius(sel);
+              if (max_basecircle_area.Count == THESAURUSPERMUTATION)
+              {
+                var DEFAULT_FIRE_VALVE_WIDTH = GetBounds(max_basecircle_area.ToArray());
+                var dls = dlscf(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon());
+                if (dls.Count == THESAURUSHOUSING)
+                {
+                  max_balcony_to_balcony_distance.Enqueue(THESAURUSPERMUTATION, () =>
+                  {
+                    string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                    if (shooterst(GeoFac.CreateGeometryEx(max_basecircle_area)))
+                    {
+                      MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WashingMachineFloorDrainDN;
+                    }
+                    else
+                    {
+                      MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.OtherFloorDrainDN;
+                    }
+                    foreach (var dl in dlscf(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()))
+                    {
+                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, dl.Buffer(THESAURUSPERMUTATION));
+                    }
+                    var fdst = T(max_basecircle_area);
+                    foreach (var dl in dlinesGeosf(DEFAULT_FIRE_VALVE_WIDTH.ToPolygon()).Except(dls).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).Where(TolLightRangeSingleSideMax => fdst(TolLightRangeSingleSideMax)))
+                    {
+                      var _dn = MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                      if (_dn == QUOTATIONBREWSTER) _dn = QUOTATIONDOPPLER;
+                      draw(_dn, dl.Buffer(THESAURUSPERMUTATION));
+                    }
+                    {
+                    }
+                  });
+                }
+              }
+            }
+          });
+          foreach (var dlinesGeo in dlinesGeos)
+          {
+            var tolReturnValueRange = GeoFac.GetLines(dlinesGeo);
+            _linesGroup.Add(tolReturnValueRange.ToHashSet());
+            max_balcony_to_balcony_distance.Enqueue(THESAURUSCENSURE, () =>
+            {
+              var flst = T(text_indent);
+              var plst = T(max_tag_xposition);
+              foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(dlinesGeo.Buffer(THESAURUSHOUSING)))
+              {
+                var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                if (TolLightRangeSingleSideMin.Text is THESAURUSDEPLORE)
+                {
+                  if (flst(dlinesGeo) || plst(dlinesGeo))
+                  {
+                    TolLightRangeSingleSideMin.Text = IRRESPONSIBLENESS;
+                  }
+                }
+              }
+            });
+            var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList());
+            foreach (var default_fire_valve_length in tolReturnValueRange)
+            {
+              if (default_fire_valve_length.Length < DINOFLAGELLATES) continue;
+              var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = default_fire_valve_length.Center;
+              var TolLightRangeSingleSideMin = PARKING_STALL_GROUP_WIDTH_RESTRICT.Create(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN, THESAURUSDEPLORE);
+              mlInfos.Add(TolLightRangeSingleSideMin);
+              var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint();
+              _raiseDistanceToStartDefault.UserData = TolLightRangeSingleSideMin;
+              addsankaku(_raiseDistanceToStartDefault);
+            }
+            max_balcony_to_balcony_distance.Enqueue(INTROPUNITIVENESS, () =>
+            {
+              var dlinesGeoBuf = dlinesGeo.Buffer(THESAURUSACRIMONIOUS);
+              var dlbufgf = dlinesGeoBuf.ToIPreparedGeometry();
+              if (fdst(dlinesGeo) || ppst(dlinesGeo) || dpst(dlinesGeo))
+              {
+                foreach (var TolUniformSideLenth in tolReturnValueRange)
+                {
+                  foreach (var dp in dpsf(TolUniformSideLenth.ToLineString()))
+                  {
+                    {
+                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = dnInfectors.FirstOrDefault(max_rainpipe_to_balconyfloordrain => dp.Intersects(max_rainpipe_to_balconyfloordrain.Key.ToGRect(HYPERDISYLLABLE).ToPolygon())).Value;
+                      if (!string.IsNullOrEmpty(MAX_CONDENSEPIPE_TO_WASHMACHINE))
+                      {
+                        draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
+                        continue;
+                      }
+                    }
+                    if (zbqst(dp))
+                    {
+                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
+                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
+                    }
+                    else if (xstst(dp))
+                    {
+                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = QUOTATIONBREWSTER;
+                      draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
+                    }
+                    else
+                    {
+                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = TolUniformSideLenth.Center;
+                      if (kitchenst(dp))
+                      {
+                        var MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BasinDN;
+                        draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
+                      }
+                      else
+                      {
+                        var MAX_CONDENSEPIPE_TO_WASHMACHINE = QUOTATIONBREWSTER;
+                        draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon());
+                      }
+                    }
+                  }
+                  foreach (var fd in Commonradius(TolUniformSideLenth.ToLineString()))
+                  {
+                    string MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                    if (shooterst(fd))
+                    {
+                      MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.WashingMachineFloorDrainDN;
+                    }
+                    else
+                    {
+                      MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.OtherFloorDrainDN;
+                    }
+                    draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolUniformSideLenth.Center.Expand(THESAURUSACRIMONIOUS).ToGRect().ToPolygon(), overWrite: INTRAVASCULARLY);
+                  }
+                }
+              }
+              max_balcony_to_balcony_distance.Enqueue(QUOTATIONEDIBLE, () =>
+              {
+                var _pts = tolReturnValueRange.SelectMany(default_fire_valve_length => new Point2d[] { default_fire_valve_length.StartPoint, default_fire_valve_length.EndPoint }).GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Distinct().Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => dlbufgf.Intersects(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint())).ToList();
+                var _tol_avg_column_dist = _pts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+                djPts.AddRange(_tol_avg_column_dist);
+                _linesGroup.Add(tolReturnValueRange.ToHashSet());
+                return;
+                var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
+                var stPts = _tol_avg_column_dist.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => fdst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN) || dpst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)).ToList();
+                var edPts = _tol_avg_column_dist.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => portst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)).ToList();
+                if (edPts.Count == THESAURUSSTAMPEDE)
+                {
+                  var pps = ppsf(dlinesGeo);
+                  if (pps.Count == THESAURUSHOUSING)
+                  {
+                    edPts = _tol_avg_column_dist.Where(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => ppst(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)).ToList();
+                  }
+                  else if (pps.Count > THESAURUSHOUSING)
+                  {
+                    if (!portst(dlinesGeo))
+                    {
+                      foreach (var TolUniformSideLenth in tolReturnValueRange)
+                      {
+                        if (TolUniformSideLenth.Length >= THESAURUSINHERIT && TolUniformSideLenth.IsHorizontalOrVertical(THESAURUSCOMMUNICATION))
+                        {
+                          var defaultFireValveWidth = TolUniformSideLenth.ToLineString();
+                          foreach (var ToiletWellsInterval in pps)
+                          {
+                            if (defaultFireValveWidth.Intersects(ToiletWellsInterval))
+                            {
+                              edPts.AddRange(ptsf(ToiletWellsInterval));
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                max_balcony_to_balcony_distance.Enqueue(THESAURUSCOMMUNICATION, () =>
+                {
+                  return;
+                });
+                max_balcony_to_balcony_distance.Enqueue(SUPERLATIVENESS, () =>
+                {
+                  return;
+                  foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+                  {
+                  }
+                });
+                max_balcony_to_balcony_distance.Enqueue(THESAURUSDESTITUTE, () =>
+                {
+                  return;
+                  if (edPts.Count == THESAURUSHOUSING)
+                  {
+                    var edPt = edPts[THESAURUSSTAMPEDE];
+                    var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToList();
+                  }
+                  else
+                  {
+                  }
+                });
+              });
+            });
+          }
+          static List<List<Geometry>> GroupGeometries(List<Geometry> tolReturnValueRange, List<Geometry> polys)
+          {
+            var geosGroup = new List<List<Geometry>>();
+            GroupGeometries();
+            return geosGroup;
+            void GroupGeometries()
+            {
+              var DEFAULT_VOLTAGE = tolReturnValueRange.Concat(polys).Distinct().ToList();
+              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) return;
+              tolReturnValueRange = tolReturnValueRange.Distinct().ToList();
+              polys = polys.Distinct().ToList();
+              if (tolReturnValueRange.Count + polys.Count != DEFAULT_VOLTAGE.Count) throw new ArgumentException();
+              var lineshs = tolReturnValueRange.ToHashSet();
+              var polyhs = polys.ToHashSet();
+              var pairs = _GroupGeometriesToKVIndex(DEFAULT_VOLTAGE).Where(max_rainpipe_to_balconyfloordrain =>
+              {
+                if (lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && lineshs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
+                if (polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Key]) && polyhs.Contains(DEFAULT_VOLTAGE[max_rainpipe_to_balconyfloordrain.Value])) return INTRAVASCULARLY;
+                return THESAURUSOBSTINACY;
+              }).ToArray();
+              var dict = new ListDict<int>();
+              var h = new BFSHelper()
+              {
+                Pairs = pairs,
+                TotalCount = DEFAULT_VOLTAGE.Count,
+                Callback = (default_fire_valve_width, MAX_ANGEL_TOLLERANCE) => dict.Add(default_fire_valve_width.root, MAX_ANGEL_TOLLERANCE),
+              };
+              h.BFS();
+              dict.ForEach((_i, l) =>
+              {
+                geosGroup.Add(l.Select(MAX_ANGEL_TOLLERANCE => DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE]).ToList());
+              });
+            }
+            static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> DEFAULT_VOLTAGE) where T : Geometry
+            {
+              if (DEFAULT_VOLTAGE.Count == THESAURUSSTAMPEDE) yield break;
+              var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(DEFAULT_VOLTAGE.Count > THESAURUSACRIMONIOUS ? DEFAULT_VOLTAGE.Count : THESAURUSACRIMONIOUS);
+              foreach (var DEFAULT_FIRE_VALVE_LENGTH in DEFAULT_VOLTAGE) engine.Insert(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal, DEFAULT_FIRE_VALVE_LENGTH);
+              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < DEFAULT_VOLTAGE.Count; MAX_ANGEL_TOLLERANCE++)
+              {
+                var DEFAULT_FIRE_VALVE_LENGTH = DEFAULT_VOLTAGE[MAX_ANGEL_TOLLERANCE];
+                var default_voltage = GeoFac.PreparedGeometryFactory.Create(DEFAULT_FIRE_VALVE_LENGTH);
+                foreach (var MAX_ANGLE_TOLLERANCE in engine.Query(DEFAULT_FIRE_VALVE_LENGTH.EnvelopeInternal).Where(default_fire_valve_width => default_voltage.Intersects(default_fire_valve_width)).Select(default_fire_valve_width => DEFAULT_VOLTAGE.IndexOf(default_fire_valve_width)).Where(MAX_ANGLE_TOLLERANCE => MAX_ANGEL_TOLLERANCE < MAX_ANGLE_TOLLERANCE))
+                {
+                  yield return new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
+                }
+              }
+            }
+          }
+          max_balcony_to_balcony_distance.Enqueue(THESAURUSCOMMUNICATION, () =>
+          {
+            var TolLightRangeMin = GeoFac.CreateIntersectsTester(vpInfectors.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList());
+            var tolReturnValueRange = _linesGroup.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
+            var linesf = GeoFac.CreateIntersectsSelector(tolReturnValueRange);
+            {
+              foreach (var ToiletWellsInterval in Enumerable.Range(THESAURUSSTAMPEDE, cadDatas.Count).Select(si => exInfo.Items[si].LabelDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item1, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Item2)).SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax)
+                        .Where(TolLightRangeSingleSideMax => IsDraiFL(TolLightRangeSingleSideMax.Value) || IsPL(TolLightRangeSingleSideMax.Value) || IsTL(TolLightRangeSingleSideMax.Value)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key).Concat(MaxDownspoutToBalconywashingfloordrain.Where(TolLightRangeMin)).Distinct())
+              {
+                var TolLane = linesf(ToiletWellsInterval.Buffer(THESAURUSHOUSING)).SelectMany(defaultFireValveWidth => GeoFac.GetLines(defaultFireValveWidth)).Distinct().ToList();
+                if (TolLane.Count == THESAURUSHOUSING)
+                {
+                  var MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
+                  draw(MAX_CONDENSEPIPE_TO_WASHMACHINE, TolLane[THESAURUSSTAMPEDE].Center.ToGRect(INTROPUNITIVENESS).ToPolygon(), INTRAVASCULARLY, INTRAVASCULARLY, QUOTATIONPELVIC);
+                }
+              }
+            }
+          });
+          max_balcony_to_balcony_distance.Enqueue(SUPERLATIVENESS, () =>
+          {
+            var points = djPts.ToList();
+            var pointsf = GeoFac.CreateIntersectsSelector(points);
+            var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
+            var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
+            foreach (var bufGeo in GroupGeometries(_linesGroup.Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()))).ToList(), MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).Concat(dps).ToList()).Select(GeoFac.CreateGeometry).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSPERMUTATION)))
+            {
+              if (portst(bufGeo))
+              {
+                max_balcony_to_balcony_distance.Enqueue(THESAURUSDESTITUTE, () =>
+                {
+                  var target = portsf(bufGeo).FirstOrDefault();
+                  if (target is null) return;
+                  var edPts = GeoFac.CreateIntersectsSelector(pointsf(target))(bufGeo);
+                  var edPt = edPts.FirstOrDefault();
+                  if (edPt is null) return;
+                  var _lines = linesGeosk(bufGeo).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct().ToList();
+                  var _tol_avg_column_dist = pointsf(bufGeo);
+                  var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
+                  var stPts = new HashSet<Point>();
+                  var addPts = new HashSet<Point>();
+                  {
+                    foreach (var maxBalconyrainpipeToFloordrainDistance in MaxDownspoutToBalconywashingfloordrain.Concat(fldrs).Concat(dps).Distinct())
+                    {
+                      var _pts = ptsf(maxBalconyrainpipeToFloordrainDistance.Buffer(THESAURUSPERMUTATION));
+                      if (_pts.Count == THESAURUSSTAMPEDE) continue;
+                      if (_pts.Count == THESAURUSHOUSING)
+                      {
+                        stPts.Add(_pts[THESAURUSSTAMPEDE]);
+                      }
+                      else
+                      {
+                        var maxKitchenToBalconyDistance = GetBounds(_pts.ToArray());
+                        var center = maxKitchenToBalconyDistance.Center.ToNTSPoint();
+                        addPts.Add(center);
+                        foreach (var default_fire_valve_length in _pts.Select(TolLightRangeSingleSideMax => new GLineSegment(TolLightRangeSingleSideMax.ToPoint2d(), center.ToPoint2d())))
+                        {
+                          _lines.Add(default_fire_valve_length);
+                          if (text_indent.Contains(maxBalconyrainpipeToFloordrainDistance) || max_tag_xposition.Contains(maxBalconyrainpipeToFloordrainDistance))
+                          {
+                            draw(IRRESPONSIBLENESS, default_fire_valve_length.Center.ToNTSPoint());
+                            max_balcony_to_balcony_distance.Enqueue(THESAURUSBEATIFIC, () =>
+                            {
+                              draw(null, default_fire_valve_length.Center.ToNTSPoint());
+                            });
+                          }
+                        }
+                      }
+                    }
+                    stPts.Remove(edPt);
+                  }
+                  _tol_avg_column_dist = _tol_avg_column_dist.Concat(addPts).Distinct().ToList();
+                  var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToHashSet();
+                  foreach (var dp in dpsf(bufGeo).Where(kitchenst))
+                  {
+                  }
+                  var nodes = _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => new GraphNode<Point>(TolLightRangeSingleSideMax)).ToList();
+                  {
+                    var kvs = new HashSet<KeyValuePair<int, int>>();
+                    foreach (var default_fire_valve_length in _lines)
+                    {
+                      var MAX_ANGEL_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.StartPoint.ToNTSPoint());
+                      var MAX_ANGLE_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.EndPoint.ToNTSPoint());
+                      if (MAX_ANGEL_TOLLERANCE != MAX_ANGLE_TOLLERANCE)
+                      {
+                        if (MAX_ANGEL_TOLLERANCE > MAX_ANGLE_TOLLERANCE)
+                        {
+                          ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.Swap(ref MAX_ANGEL_TOLLERANCE, ref MAX_ANGLE_TOLLERANCE);
+                        }
+                        kvs.Add(new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE));
+                      }
+                    }
+                    foreach (var max_rainpipe_to_balconyfloordrain in kvs)
+                    {
+                      nodes[max_rainpipe_to_balconyfloordrain.Key].AddNeighbour(nodes[max_rainpipe_to_balconyfloordrain.Value], THESAURUSHOUSING);
+                    }
+                  }
+                  var PolyClosedDistance = new PARKING_STALL_GROUP_LENGTH_RESTRICT<Point>(nodes);
+                  {
+                    var paths = new List<IList<GraphNode<Point>>>(stPts.Count);
+                    var areaDict = new Dictionary<GLineSegment, double>();
+                    foreach (var stPt in stPts)
+                    {
+                      var path = PolyClosedDistance.FindShortestPathBetween(nodes[_tol_avg_column_dist.IndexOf(stPt)], nodes[_tol_avg_column_dist.IndexOf(edPt)]);
+                      if (path.Count == THESAURUSSTAMPEDE) continue;
+                      paths.Add(path);
+                    }
+                    foreach (var path in paths)
+                    {
+                      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                      {
+                        areaDict[new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d())] = THESAURUSSTAMPEDE;
+                      }
+                    }
+                    foreach (var path in paths)
+                    {
+                      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                      {
+                        var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                        var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
+                        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                        {
+                          var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                          if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
+                          {
+                            var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
+                            areaDict[default_fire_valve_length] += DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
+                          }
+                        }
+                      }
+                    }
+                    foreach (var path in paths)
+                    {
+                      double area = THESAURUSSTAMPEDE;
+                      for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                      {
+                        var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                        var sel = default_fire_valve_length.Buffer(THESAURUSHOUSING);
+                        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                        {
+                          var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                          if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
+                          {
+                            var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
+                            if (area < DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH) area = DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
+                          }
+                        }
+                        if (areaDict[default_fire_valve_length] < area) areaDict[default_fire_valve_length] = area;
+                      }
+                    }
+                    {
+                      var dict = areaDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key, TolLightRangeSingleSideMax => QUOTATIONTRANSFERABLE);
+                      foreach (var path in paths)
+                      {
+                        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                        {
+                          var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                          dict[default_fire_valve_length] += areaDict[default_fire_valve_length];
+                        }
+                      }
+                      areaDict = dict;
+                    }
+                    foreach (var max_rainpipe_to_balconyfloordrain in areaDict)
+                    {
+                      var sel = max_rainpipe_to_balconyfloordrain.Key.Buffer(THESAURUSHOUSING);
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                      {
+                        var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                        TolLightRangeSingleSideMin.Text = getDn(max_rainpipe_to_balconyfloordrain.Value);
+                      }
+                    }
+                  }
+                });
+              }
+              else
+              {
+                max_balcony_to_balcony_distance.Enqueue(THESAURUSSCARCE, () =>
+                {
+                  var max_basecircle_area = Commonradius(bufGeo);
+                  var pps = ppsf(bufGeo);
+                  if (pps.Count == THESAURUSHOUSING && max_basecircle_area.Count == THESAURUSPERMUTATION)
+                  {
+                    var target = pps[THESAURUSSTAMPEDE];
+                    var edPts = GeoFac.CreateIntersectsSelector(pointsf(target))(bufGeo);
+                    var edPt = edPts.FirstOrDefault();
+                    if (edPt is null) return;
+                    var _lines = linesGeosk(bufGeo).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).Distinct().ToList();
+                    foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(bufGeo))
+                    {
+                      var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                      if (TolLightRangeSingleSideMin.Note is QUOTATIONPELVIC)
+                      {
+                        TolLightRangeSingleSideMin.Text = THESAURUSDEPLORE;
+                        TolLightRangeSingleSideMin.Note = null;
+                      }
+                    }
+                    max_balcony_to_balcony_distance.Enqueue(THESAURUSACRIMONIOUS, () =>
+                    {
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(bufGeo))
+                      {
+                        var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                        if (TolLightRangeSingleSideMin.Text == IRRESPONSIBLENESS)
+                        {
+                          TolLightRangeSingleSideMin.Text = QUOTATIONDOPPLER;
+                        }
+                      }
+                    });
+                    var _tol_avg_column_dist = pointsf(bufGeo);
+                    var ptsf = GeoFac.CreateIntersectsSelector(_tol_avg_column_dist);
+                    var stPts = new HashSet<Point>();
+                    foreach (var maxBalconyrainpipeToFloordrainDistance in fldrs)
+                    {
+                      var _pts = ptsf(maxBalconyrainpipeToFloordrainDistance.Buffer(THESAURUSPERMUTATION));
+                      if (_pts.Count == THESAURUSSTAMPEDE) continue;
+                      if (_pts.Count == THESAURUSHOUSING)
+                      {
+                        stPts.Add(_pts[THESAURUSSTAMPEDE]);
+                      }
+                    }
+                    var mdPts = _tol_avg_column_dist.Except(stPts).Except(edPts).ToHashSet();
+                    var nodes = _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => new GraphNode<Point>(TolLightRangeSingleSideMax)).ToList();
+                    {
+                      var kvs = new HashSet<KeyValuePair<int, int>>();
+                      foreach (var default_fire_valve_length in _lines)
+                      {
+                        var MAX_ANGEL_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.StartPoint.ToNTSPoint());
+                        var MAX_ANGLE_TOLLERANCE = _tol_avg_column_dist.IndexOf(default_fire_valve_length.EndPoint.ToNTSPoint());
+                        if (MAX_ANGEL_TOLLERANCE != MAX_ANGLE_TOLLERANCE)
+                        {
+                          if (MAX_ANGEL_TOLLERANCE > MAX_ANGLE_TOLLERANCE)
+                          {
+                            ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.Swap(ref MAX_ANGEL_TOLLERANCE, ref MAX_ANGLE_TOLLERANCE);
+                          }
+                          kvs.Add(new KeyValuePair<int, int>(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE));
+                        }
+                      }
+                      foreach (var max_rainpipe_to_balconyfloordrain in kvs)
+                      {
+                        nodes[max_rainpipe_to_balconyfloordrain.Key].AddNeighbour(nodes[max_rainpipe_to_balconyfloordrain.Value], THESAURUSHOUSING);
+                      }
+                    }
+                    var PolyClosedDistance = new PARKING_STALL_GROUP_LENGTH_RESTRICT<Point>(nodes);
+                    {
+                      var paths = new List<IList<GraphNode<Point>>>(stPts.Count);
+                      var areaDict = new Dictionary<GLineSegment, double>();
+                      foreach (var stPt in stPts)
+                      {
+                        var path = PolyClosedDistance.FindShortestPathBetween(nodes[_tol_avg_column_dist.IndexOf(stPt)], nodes[_tol_avg_column_dist.IndexOf(edPt)]);
+                        paths.Add(path);
+                      }
+                      foreach (var path in paths)
+                      {
+                        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                        {
+                          areaDict[new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d())] = THESAURUSSTAMPEDE;
+                        }
+                      }
+                      foreach (var path in paths)
+                      {
+                        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                        {
+                          var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                          var sel = default_fire_valve_length.Buffer(VÖLKERWANDERUNG);
+                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                          {
+                            var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                            if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
+                            {
+                              var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
+                              areaDict[default_fire_valve_length] += DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
+                            }
+                          }
+                        }
+                      }
+                      foreach (var path in paths)
+                      {
+                        double area = THESAURUSSTAMPEDE;
+                        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                        {
+                          var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                          var sel = default_fire_valve_length.Buffer(VÖLKERWANDERUNG);
+                          foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                          {
+                            var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                            if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.Text))
+                            {
+                              var DEFAULT_FIRE_VALVE_WIDTH = parseDn(TolLightRangeSingleSideMin.Text);
+                              if (area < DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH) area = DEFAULT_FIRE_VALVE_WIDTH * DEFAULT_FIRE_VALVE_WIDTH;
+                            }
+                          }
+                          if (areaDict[default_fire_valve_length] < area) areaDict[default_fire_valve_length] = area;
+                        }
+                      }
+                      {
+                        var dict = areaDict.ToDictionary(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Key, TolLightRangeSingleSideMax => QUOTATIONTRANSFERABLE);
+                        foreach (var path in paths)
+                        {
+                          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < path.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE++)
+                          {
+                            var default_fire_valve_length = new GLineSegment(path[MAX_ANGEL_TOLLERANCE].Value.ToPoint2d(), path[MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING].Value.ToPoint2d());
+                            dict[default_fire_valve_length] += areaDict[default_fire_valve_length];
+                          }
+                        }
+                        areaDict = dict;
+                      }
+                      foreach (var max_rainpipe_to_balconyfloordrain in areaDict)
+                      {
+                        var sel = max_rainpipe_to_balconyfloordrain.Key.Buffer(THESAURUSHOUSING);
+                        foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in sankakuptsf(sel))
+                        {
+                          var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                          TolLightRangeSingleSideMin.Text = getDn(max_rainpipe_to_balconyfloordrain.Value);
+                        }
+                      }
+                    }
+                  }
+                });
+              }
+            }
+            max_balcony_to_balcony_distance.Enqueue(ECCLESIASTICISM, () =>
+            {
+              foreach (var _segs in _linesGroup)
+              {
+                var TolLane = _segs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= THESAURUSINCOMPLETE).ToList();
+                if (TolLane.Count == THESAURUSSTAMPEDE) continue;
+                var DEFAULT_FIRE_VALVE_LENGTH = GeoFac.CreateGeometry(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()));
+                var buf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
+                void changeDn()
+                {
+                  foreach (var cleaningPort in geoData.CleaningPorts)
+                  {
+                    if (buf.Intersects(cleaningPort))
+                    {
+                      var MAX_CONDENSEPIPE_TO_WASHMACHINE = IRRESPONSIBLENESS;
+                      if (kitchenst(buf)) MAX_CONDENSEPIPE_TO_WASHMACHINE = vm.Params.BasinDN;
+                      var _tol_avg_column_dist = sankakuptsf(buf);
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
+                      {
+                        ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = MAX_CONDENSEPIPE_TO_WASHMACHINE;
+                      }
+                    }
+                  }
+                  if (TolLane.Count == THESAURUSPERMUTATION)
+                  {
+                    var _tol_avg_column_dist = sankakuptsf(buf);
+                    if (_tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is IRRESPONSIBLENESS) == THESAURUSHOUSING && _tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER) == THESAURUSHOUSING)
+                    {
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is IRRESPONSIBLENESS))
+                      {
+                        ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = (_tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONBREWSTER or QUOTATIONDOPPLER).First().UserData as PARKING_STALL_GROUP_WIDTH_RESTRICT).Text;
+                      }
+                    }
+                    else if (_tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONBREWSTER) == THESAURUSHOUSING && _tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE) == THESAURUSHOUSING)
+                    {
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
+                      {
+                        ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = QUOTATIONBREWSTER;
+                      }
+                    }
+                    else if (_tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is QUOTATIONDOPPLER) == THESAURUSHOUSING && _tol_avg_column_dist.Count(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE) == THESAURUSHOUSING)
+                    {
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Where(TolLightRangeSingleSideMax => ((PARKING_STALL_GROUP_WIDTH_RESTRICT)TolLightRangeSingleSideMax.UserData).Text is THESAURUSDEPLORE))
+                      {
+                        ((PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).Text = QUOTATIONDOPPLER;
+                      }
+                    }
+                    return;
+                  }
+                }
+                changeDn();
+              }
+            });
+            max_balcony_to_balcony_distance.Enqueue(ACANTHOCEPHALANS, () =>
+            {
+              foreach (var TolUniformSideLenth in _linesGroup.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length < THESAURUSINCOMPLETE))
+              {
+                var _tol_avg_column_dist = sankakuptsf(TolUniformSideLenth.Buffer(ASSOCIATIONISTS));
+                if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
+                {
+                  var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)_tol_avg_column_dist[THESAURUSSTAMPEDE].UserData;
+                  if (TolLightRangeSingleSideMin.Text == THESAURUSDEPLORE)
+                  {
+                    TolLightRangeSingleSideMin.Text = null;
+                  }
+                }
+              }
+            });
+            max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
+            {
+              var linesGeos = _linesGroup.Select(tolReturnValueRange => new MultiLineString(tolReturnValueRange.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToArray())).ToList();
+              var linesGeosk = GeoFac.CreateContainsSelector(linesGeos);
+              foreach (var tolReturnValueRange in _linesGroup)
+              {
+                var kvs = new List<KeyValuePair<GLineSegment, PARKING_STALL_GROUP_WIDTH_RESTRICT>>();
+                foreach (var TolUniformSideLenth in tolReturnValueRange.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > QUOTATIONLUCANIAN))
+                {
+                  var _tol_avg_column_dist = sankakuptsf(TolUniformSideLenth.Buffer(THESAURUSPERMUTATION));
+                  if (_tol_avg_column_dist.Count == THESAURUSHOUSING)
+                  {
+                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist[THESAURUSSTAMPEDE];
+                    var TolLightRangeSingleSideMin = (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                    kvs.Add(new KeyValuePair<GLineSegment, PARKING_STALL_GROUP_WIDTH_RESTRICT>(TolUniformSideLenth, TolLightRangeSingleSideMin));
+                  }
+                }
+                {
+                  var TolLane = kvs.Select(max_rainpipe_to_balconyfloordrain => max_rainpipe_to_balconyfloordrain.Key).Distinct().ToList();
+                  var lns = TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
+                  var vertexs = TolLane.YieldPoints().Distinct().ToList();
+                  var lnsf = GeoFac.CreateIntersectsSelector(lns);
+                  var lnscf = GeoFac.CreateContainsSelector(TolLane.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(-THESAURUSPERMUTATION).ToLineString()).ToList());
+                  var opts = new List<_lane_offset<RegexOptions>>();
+                  foreach (var vertex in vertexs)
+                  {
+                    var MinWellToUrinalDistance = lnsf(GeoFac.CreateCirclePolygon(vertex, THESAURUSCOMMUNICATION, SUPERLATIVENESS));
+                    RegexOptions opt;
+                    if (MinWellToUrinalDistance.Count == THESAURUSHOUSING)
+                    {
+                      opt = RegexOptions.IgnoreCase;
+                    }
+                    else if (MinWellToUrinalDistance.Count == THESAURUSPERMUTATION)
+                    {
+                      opt = RegexOptions.Multiline;
+                    }
+                    else if (MinWellToUrinalDistance.Count > THESAURUSPERMUTATION)
+                    {
+                      opt = RegexOptions.ExplicitCapture;
+                    }
+                    else
+                    {
+                      opt = RegexOptions.None;
+                    }
+                    opts.Add(new _lane_offset<RegexOptions>(opt));
+                  }
+                  foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupLinesByConnPoints(GeoFac.GetLines(GeoFac.CreateGeometry(lns).Difference(GeoFac.CreateGeometryEx(opts.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Value == RegexOptions.ExplicitCapture).Select(opts).ToList(vertexs).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGCircle(THESAURUSPERMUTATION).ToCirclePolygon(SUPERLATIVENESS)).ToList()))).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList(), UNCONSEQUENTIAL))
+                  {
+                    var bf = DEFAULT_FIRE_VALVE_LENGTH.Buffer(THESAURUSPERMUTATION);
+                    var _tol_avg_column_dist = sankakuptsf(bf);
+                    var _tol_light_range_single_side_max = _tol_avg_column_dist.Select(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN => (PARKING_STALL_GROUP_WIDTH_RESTRICT)MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData).ToList();
+                    if (_tol_light_range_single_side_max.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Text).Distinct().Count() == THESAURUSHOUSING)
+                    {
+                      var repeated_point_distance = _tol_light_range_single_side_max[THESAURUSSTAMPEDE];
+                      var _segs = lnscf(bf).SelectMany(TolLightRangeSingleSideMax => GeoFac.GetLines(TolLightRangeSingleSideMax)).ToList();
+                      if (_segs.Count > THESAURUSHOUSING)
+                      {
+                        const double LEN = PHOTOCONDUCTION;
+                        if (_segs.Any(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length >= LEN))
+                        {
+                          foreach (var default_fire_valve_length in _segs)
+                          {
+                            if (default_fire_valve_length.Length < LEN)
+                            {
+                              draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
+                            }
+                          }
+                        }
+                        else
+                        {
+                          var _tolReturnValueMinRange = _segs.Max(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length);
+                          foreach (var default_fire_valve_length in _segs)
+                          {
+                            if (default_fire_valve_length.Length != _tolReturnValueMinRange)
+                            {
+                              draw(null, default_fire_valve_length.Center.ToNTSPoint(), overWrite: THESAURUSOBSTINACY);
+                            }
+                          }
+                        }
+                      }
+                      else
+                      {
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          });
+          max_balcony_to_balcony_distance.Enqueue(THESAURUSOCCASIONALLY, () =>
+          {
+            var points = precisePts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+            var pointsf = GeoFac.CreateIntersectsSelector(points);
+            foreach (var TolLightRangeSingleSideMin in mlInfos)
+            {
+              if (TolLightRangeSingleSideMin.Text is not null)
+              {
+                var _tol_avg_column_dist = pointsf(TolLightRangeSingleSideMin.BasePoint.ToGRect(THESAURUSHOUSING).ToPolygon());
+                var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _tol_avg_column_dist.FirstOrDefault();
+                if (_tol_avg_column_dist.Count > THESAURUSHOUSING)
+                {
+                  MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = GeoFac.NearestNeighbourGeometryF(_tol_avg_column_dist)(TolLightRangeSingleSideMin.BasePoint.ToNTSPoint());
+                }
+                if (MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN is not null)
+                {
+                  TolLightRangeSingleSideMin.BasePoint = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToPoint3d();
+                }
+              }
+            }
+          });
+        }
+        max_balcony_to_balcony_distance.Enqueue(THESAURUSACRIMONIOUS, () =>
+        {
+          foreach (var TolLightRangeSingleSideMin in mlInfos)
+          {
+            if (TolLightRangeSingleSideMin.Text == PHOTOFLUOROGRAM) TolLightRangeSingleSideMin.Text = THESAURUSDEPLORE;
+          }
+        });
+      }
+      foreach (var TolLightRangeSingleSideMin in mlInfos)
+      {
+        if (TolLightRangeSingleSideMin.Text == THESAURUSDEPLORE) TolLightRangeSingleSideMin.Text = THESAURUSIMPETUOUS;
+      }
+      foreach (var TolLightRangeSingleSideMin in mlInfos)
+      {
+        if (!string.IsNullOrWhiteSpace(TolLightRangeSingleSideMin.Text)) DrawMLeader(TolLightRangeSingleSideMin.Text, TolLightRangeSingleSideMin.BasePoint, TolLightRangeSingleSideMin.BasePoint.OffsetXY(HYPERDISYLLABLE, HYPERDISYLLABLE));
+      }
+    }
+    public static void DrawBackToFlatDiagram(ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo)
+    {
+      if (exInfo is null) return;
+      DrawBackToFlatDiagram(exInfo.storeysItems, exInfo.geoData, exInfo.drDatas, exInfo, exInfo.vm);
+    }
+    public static void FixStoreys(List<StoreyInfo> KitchenBufferDistance)
+    {
+      var lst1 = KitchenBufferDistance.Where(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.Count == THESAURUSHOUSING).Select(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers[THESAURUSSTAMPEDE]).ToList();
+      foreach (var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN in KitchenBufferDistance.Where(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.Count > THESAURUSHOUSING).ToList())
+      {
+        var defaultFireValveLength = new HashSet<int>(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers);
+        foreach (var _s in lst1) defaultFireValveLength.Remove(_s);
+        MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.Clear();
+        MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Numbers.AddRange(defaultFireValveLength.OrderBy(MAX_ANGEL_TOLLERANCE => MAX_ANGEL_TOLLERANCE));
+      }
+    }
+    public static StoreyInfo GetStoreyInfo(BlockReference tolReturnValueRangeTo)
+    {
+      var props = tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection;
+      return new StoreyInfo()
+      {
+        StoreyType = GetStoreyType((string)props.GetValue(ADSIGNIFICATION)),
+        Numbers = ParseFloorNums(GetStoreyNumberString(tolReturnValueRangeTo)),
+        ContraPoint = GetContraPoint(tolReturnValueRangeTo),
+        Boundary = tolReturnValueRangeTo.Bounds.ToGRect(),
+      };
+    }
+    public static string GetStoreyNumberString(BlockReference tolReturnValueRangeTo)
+    {
+      var d = tolReturnValueRangeTo.ObjectId.GetAttributesInBlockReference(THESAURUSOBSTINACY);
+      d.TryGetValue(THESAURUSFLAGRANT, out string tolGroupEmgLightEvac);
+      return tolGroupEmgLightEvac;
+    }
+    public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.BlockTableRecord.IsValid && TolLightRangeSingleSideMax.GetEffectiveName() is THESAURUSSTICKY).ToList();
+    public static Point2d GetContraPoint(BlockReference tolReturnValueRangeTo)
+    {
+      double MAX_DEVICE_TO_DEVICE = double.NaN;
+      double MAX_DEVICE_TO_BALCONY = double.NaN;
+      Point2d MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+      foreach (DynamicBlockReferenceProperty _raiseDistanceToStartDefault in tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection)
+      {
+        if (_raiseDistanceToStartDefault.PropertyName == QUOTATIONJUMPING)
+        {
+          MAX_DEVICE_TO_DEVICE = Convert.ToDouble(_raiseDistanceToStartDefault.Value);
+        }
+        else if (_raiseDistanceToStartDefault.PropertyName == THESAURUSEXPOSTULATE)
+        {
+          MAX_DEVICE_TO_BALCONY = Convert.ToDouble(_raiseDistanceToStartDefault.Value);
+        }
+      }
+      if (!double.IsNaN(MAX_DEVICE_TO_DEVICE) && !double.IsNaN(MAX_DEVICE_TO_BALCONY))
+      {
+        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueRangeTo.Position.ToPoint2d() + new Vector2d(MAX_DEVICE_TO_DEVICE, MAX_DEVICE_TO_BALCONY);
+      }
+      else
+      {
+        throw new System.Exception(QUOTATIONAMNESTY);
+      }
+      return MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+    }
+    public static string FixVerticalPipeLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return null;
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSSTUTTER))
+      {
+        return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Substring(INTROPUNITIVENESS);
+      }
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(JUNGERMANNIALES))
+      {
+        return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Substring(THESAURUSPERMUTATION);
+      }
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE;
+    }
+    public static bool IsNotedLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSACQUISITIVE) || MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONCHILLI);
+    }
+    public static bool IsWantedLabelText(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+    }
+    public static bool IsY1L(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(CHRISTIANIZATION);
+    }
+    public static bool IsY2L(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(UNPREMEDITATEDNESS);
+    }
+    public static bool IsNL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSFINICKY);
+    }
+    public static bool IsYL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      for (int MAX_ANGEL_TOLLERANCE = INTROPUNITIVENESS; MAX_ANGEL_TOLLERANCE < THESAURUSACRIMONIOUS; MAX_ANGEL_TOLLERANCE++)
+      {
+        if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSREGENERATE + MAX_ANGEL_TOLLERANCE + THESAURUSREALLY))
+        {
+          return THESAURUSOBSTINACY;
+        }
+      }
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSUNBEATABLE);
+    }
+    public static bool IsRainLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return IsY1L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsY2L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsNL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsYL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+    }
+    public static bool IsDrainageLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      return IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+    }
+    public static bool IsMaybeLabelText(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      if (IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return INTRAVASCULARLY;
+      static bool maxDeviceplatformArea(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+      {
+        return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsWL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+      }
+      return maxDeviceplatformArea(FixVerticalPipeLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+    }
+    public const int THESAURUSHOUSING = 1;
+        public const int THESAURUSCOMMUNICATION = 5;
+        public const int THESAURUSPERMUTATION = 2;
+        public const int THESAURUSSTAMPEDE = 0;
+        public const double ELECTROLUMINESCENT = 10e5;
+        public const int THESAURUSACRIMONIOUS = 10;
+        public const double ASSOCIATIONISTS = .1;
+        public const bool INTRAVASCULARLY = false;
+        public const int THESAURUSDISINGENUOUS = 36;
+        public const bool THESAURUSOBSTINACY = true;
+        public const int DISPENSABLENESS = 40;
+        public const int THESAURUSDICTATORIAL = 1500;
+        public const int SUPERLATIVENESS = 6;
+        public const int THESAURUSREPERCUSSION = 4096;
+        public const string THESAURUSMARSHY = "空调内机--柜机";
+        public const string THESAURUSPROFANITY = "空调内机--挂机";
+        public const string DISORGANIZATION = "TCH_PIPE";
+        public const string INSTRUMENTALITY = "W-RAIN-PIPE";
+        public const string THESAURUSABJURE = "-RAIN-";
+        public const string QUOTATIONSTANLEY = "W-BUSH-NOTE";
+        public const string THESAURUSDEFAULTER = "W-BUSH";
+        public const string THESAURUSINVOICE = "W-RAIN-DIMS";
+        public const int HYPERDISYLLABLE = 100;
+        public const string DENDROCHRONOLOGIST = "W-RAIN-EQPM";
+        public const int THESAURUSINCOMPLETE = 20;
+        public const string THESAURUSWINDFALL = "TCH_VPIPEDIM";
+        public const string THESAURUSSPECIFICATION = "-";
+        public const string THESAURUSDURESS = "TCH_TEXT";
+        public const string QUOTATIONSWALLOW = "TCH_EQUIPMENT";
+        public const string THESAURUSFACILITATE = "TCH_MTEXT";
+        public const string THESAURUSINHARMONIOUS = "TCH_MULTILEADER";
+        public const string THESAURUSDEPLORE = "";
+        public const string THESAURUSELIGIBLE = "接";
+        public const string VICISSITUDINOUS = "排水沟";
+        public const string THESAURUSADVENT = "雨水口";
+        public const int THESAURUSENTREPRENEUR = 50;
+        public const char THESAURUSCONTEND = '|';
+        public const string MULTIPROCESSING = "|";
+        public const char SUPERREGENERATIVE = '$';
+        public const string THESAURUSCOURIER = "$";
+        public const string THESAURUSINDULGENT = "地漏";
+        public const string INCORRESPONDENCE = "DL";
+        public const string THESAURUSENTERPRISE = "可见性";
+        public const string THESAURUSTHOROUGHBRED = "套管";
+        public const int POLYOXYMETHYLENE = 1000;
+        public const string SUPERINDUCEMENT = "带定位立管";
+        public const string THESAURUSURBANITY = "立管编号";
+        public const string THESAURUSSPECIMEN = "$LIGUAN";
+        public const string THESAURUSMANIKIN = "A$C6BDE4816";
+        public const string THESAURUSLANDMARK = "污废合流井编号";
+        public const string THESAURUSCONTROVERSY = "W-DRAI-DOME-PIPE";
+        public const string CIRCUMCONVOLUTION = "W-RAIN-NOTE";
+        public const char CHROMATOGRAPHER = 'B';
+        public const string THESAURUSARGUMENTATIVE = "RF";
+        public const string ANTHROPOMORPHICALLY = "RF+1";
+        public const string THESAURUSSCUFFLE = "RF+2";
+        public const string THESAURUSASPIRATION = "F";
+        public const int THESAURUSDOMESTIC = 400;
+        public const string THESAURUSREGION = "1F";
+        public const string THESAURUSTABLEAU = "-1F";
+        public const string THESAURUSLEGACY = "-0.XX";
+        public const string COSTERMONGERING = "W-NOTE";
+        public const string THESAURUSJUBILEE = "W-DRAI-EQPM";
+        public const string THESAURUSSTRIPED = "W-DRAI-NOTE";
+        public const double QUOTATIONLETTERS = 2500.0;
+        public const double BALANOPHORACEAE = 5500.0;
+        public const double THESAURUSINCOMING = 1800.0;
+        public const string THESAURUSPARTNER = "伸顶通气2000";
+        public const string THESAURUSINEFFECTUAL = "伸顶通气500";
+        public const string HYPERVENTILATION = "本层通气";
+        public const string THESAURUSNARCOTIC = "通气帽系统-AI2";
+        public const string QUINQUAGENARIAN = "可见性1";
+        public const string THESAURUSDUBIETY = "1000";
+        public const int THESAURUSNECESSITOUS = 580;
+        public const string THESAURUSSUPERFICIAL = "标高";
+        public const int QUOTATIONPITUITARY = 550;
+        public const string THESAURUSSHADOWY = "建筑完成面";
+        public const int QUOTATIONBASTARD = 1800;
+        public const int THESAURUSPERVADE = 121;
+        public const int THESAURUSUNEVEN = 1258;
+        public const int THESAURUSUNCOMMITTED = 120;
+        public const int CONTRADISTINGUISHED = 779;
+        public const int COOPERATIVENESS = 1679;
+        public const int THESAURUSERRAND = 658;
+        public const int THESAURUSQUAGMIRE = 90;
+        public const string QUOTATIONSTYLOGRAPHIC = @"^(\-?\d+)\-(\-?\d+)$";
+        public const string TETRAIODOTHYRONINE = @"^\-?\d+$";
+        public const string MULTINATIONALLY = "±0.00";
+        public const double LAUTENKLAVIZIMBEL = 1000.0;
+        public const string THESAURUSINFINITY = "0.00";
+        public const int THESAURUSDISAGREEABLE = 800;
+        public const int QUOTATIONWITTIG = 500;
+        public const int THESAURUSMAIDENLY = 1879;
+        public const int THESAURUSCAVERN = 180;
+        public const int THESAURUSINTRACTABLE = 160;
+        public const string ADENOHYPOPHYSIS = "普通地漏无存水弯";
+        public const string THESAURUSDISREPUTABLE = "DN25";
+        public const int THESAURUSATTACHMENT = 750;
+        public const string IRRESPONSIBLENESS = "DN100";
+        public const double UNDENOMINATIONAL = 0.0;
+        public const int SUBCATEGORIZING = 780;
+        public const int THESAURUSFORMULATE = 700;
+        public const double QUOTATIONTRANSFERABLE = .0;
+        public const int THESAURUSHYPNOTIC = 300;
+        public const int THESAURUSREVERSE = 24;
+        public const int THESAURUSACTUAL = 9;
+        public const int QUOTATIONEDIBLE = 4;
+        public const int INTROPUNITIVENESS = 3;
+        public const int THESAURUSEXECRABLE = 3600;
+        public const int THESAURUSENDANGER = 350;
+        public const int THESAURUSSURPRISED = 150;
+        public const string THESAURUSEXECUTIVE = "散排至";
+        public const int PHOSPHORYLATION = 125;
+        public const int THESAURUSMISUNDERSTANDING = 357;
+        public const int THESAURUSBEHOVE = 83;
+        public const int THESAURUSMAGNETIC = 220;
+        public const int REPRESENTATIONAL = 1400;
+        public const int THESAURUSBELLOW = 621;
+        public const int DOCTRINARIANISM = 1200;
+        public const int THESAURUSINHERIT = 2000;
+        public const int THESAURUSDERELICTION = 600;
+        public const int ACANTHORHYNCHUS = 479;
+        public const int THESAURUSLOITER = 950;
+        public const int PORTMANTOLOGISM = 387;
+        public const int QUOTATIONCOLERIDGE = 1050;
+        public const int THESAURUSEXPERIMENT = 269;
+        public const int MISAPPREHENSIVE = 200;
+        public const string QUOTATIONSECOND = "接至排水沟";
+        public const int QUOTATIONETHIOPS = 187;
+        public const int OTHERWORLDLINESS = 499;
+        public const int THESAURUSPRETTY = 1600;
+        public const int THESAURUSDIFFICULTY = 360;
+        public const int THESAURUSDETERMINED = 130;
+        public const int CONSCRIPTIONIST = 650;
+        public const int VÖLKERWANDERUNG = 30;
+        public const string INTERNALIZATION = "≥600";
+        public const int THESAURUSGETAWAY = 450;
+        public const int ACANTHOCEPHALANS = 18;
+        public const int PHYSIOLOGICALLY = 250;
+        public const double THESAURUSDISPASSIONATE = .7;
+        public const string CONTROVERSIALLY = "TH-STYLE3";
+        public const int THESAURUSLITANY = 2200;
+        public const string THESAURUSCAVALIER = ";";
+        public const double UNCONSEQUENTIAL = .01;
+        public const string PERSUADABLENESS = "地漏系统";
+        public const int PROKELEUSMATIKOS = 745;
+        public const string THESAURUSTENACIOUS = "乙字弯";
+        public const string THESAURUSAGILITY = "立管检查口";
+        public const string THESAURUSSTRINGENT = "套管系统";
+        public const string THESAURUSGAUCHE = "重力流雨水井编号";
+        public const string HELIOCENTRICISM = "666";
+        public const string THESAURUSJAILER = @"^([^\-]*)\-([A-Za-z])$";
+        public const string DEMATERIALISING = ",";
+        public const string THESAURUSEXCREMENT = "~";
+        public const string THESAURUSCAPRICIOUS = @"^([^\-]*\-[A-Za-z])(\d+)$";
+        public const string UNIMPRESSIONABLE = @"^([^\-]*\-)([A-Za-z])(\d+)$";
+        public const int THESAURUSDESTITUTE = 7;
+        public const int SYNTHLIBORAMPHUS = 229;
+        public const int THESAURUSPRIVATE = 230;
+        public const int THESAURUSEXCEPTION = 8192;
+        public const int THESAURUSEPICUREAN = 8000;
+        public const int DINOFLAGELLATES = 15;
+        public const int THESAURUSHESITANCY = 60;
+        public const string THESAURUSJOBBER = "FromImagination";
+        public const int THESAURUSLUMBERING = 55;
+        public const string THESAURUSCROUCH = "X.XX";
+        public const int THESAURUSITEMIZE = 666;
+        public const string THESAURUSPRECOCIOUS = "屋面雨水斗";
+        public const int THESAURUSEXCESS = 255;
+        public const int THESAURUSDELIGHT = 0x91;
+        public const int THESAURUSCRADLE = 0xc7;
+        public const int HYPOSTASIZATION = 0xae;
+        public const int THESAURUSDISCOLOUR = 211;
+        public const string QUOTATIONDOPPLER = "DN75";
+        public const string THESAURUSTOPICAL = "重力雨水斗";
+        public const string THESAURUSBANDAGE = "侧入式雨水斗";
+        public const string THESAURUSCONSERVATION = "87雨水斗";
+        public const string THESAURUSSTUTTER = "73-";
+        public const string JUNGERMANNIALES = "1-";
+        public const string PERSPICACIOUSNESS = "SelectedRange";
+        public const string UREDINIOMYCETES = @"DN\d+";
+        public const string QUOTATION3BABOVE = @"[^\d\.\-]";
+        public const string THESAURUSMISTRUST = @"\d+\-";
+        public const string ADSIGNIFICATION = "楼层类型";
+        public const char THESAURUSMETROPOLIS = '，';
+        public const char THESAURUSPROMINENT = ',';
+        public const char NATIONALDEMOKRATISCHE = '-';
+        public const string STEREOPHOTOGRAMMETRY = "M";
+        public const string THESAURUSPOLISH = " ";
+        public const string THESAURUSAGITATION = @"(\-?\d+)-(\-?\d+)";
+        public const string THESAURUSSANITY = @"\-?\d+";
+        public const string THESAURUSFLAGRANT = "楼层编号";
+        public const string THESAURUSSTICKY = "楼层框定";
+        public const string QUOTATIONJUMPING = "基点 X";
+        public const string THESAURUSEXPOSTULATE = "基点 Y";
+        public const string QUOTATIONAMNESTY = "error occured while getting baseX and baseY";
+        public const string THESAURUSLECHER = "雨水斗";
+        public const string THESAURUSPLUMMET = "重力";
+        public const string QUOTATIONSPENSERIAN = "87";
+        public const string CIRCUMSTANTIARE = "卫生间";
+        public const string THESAURUSCIPHER = "主卫";
+        public const string PREMILLENNIALIST = "公卫";
+        public const string THESAURUSINDIGENT = "次卫";
+        public const string THESAURUSFRAMEWORK = "客卫";
+        public const string THESAURUSHUMILIATION = "洗手间";
+        public const string THESAURUSSTERLING = "卫";
+        public const string THESAURUSSCREEN = @"^[卫]\d$";
+        public const string THESAURUSPEDESTRIAN = "厨房";
+        public const string THESAURUSRECLUSE = "西厨";
+        public const string THESAURUSINCONTROVERTIBLE = "厨";
+        public const string NATIONALIZATION = "阳台";
+        public const string THESAURUSSPECIES = "连廊";
+        public const string CHRISTIANIZATION = "Y1L";
+        public const string UNPREMEDITATEDNESS = "Y2L";
+        public const string THESAURUSFINICKY = "NL";
+        public const string THESAURUSUNBEATABLE = "YL";
+        public const string THESAURUSANTIDOTE = @"^W\d?L";
+        public const string THESAURUSDISSOLVE = @"^F\d?L";
+        public const string AUTOLITHOGRAPHIC = "-0";
+        public const string THESAURUSABUNDANT = @"^P\d?L";
+        public const string THESAURUSOPTIONAL = @"^T\d?L";
+        public const string DIASTEREOISOMER = @"^D\d?L";
+        public const double HYDROELECTRICITY = 383875.8169;
+        public const double THESAURUSMARRIAGE = 250561.9571;
+        public const string SUCCESSLESSNESS = "P型存水弯";
+        public const string THESAURUSLINING = "板上P弯";
+        public const int THESAURUSNAUGHT = 3500;
+        public const int THESAURUSCOMATOSE = 1479;
+        public const int THESAURUSFORESTALL = 2379;
+        public const int THESAURUSLEARNER = 1779;
+        public const int INVULNERABLENESS = 579;
+        public const int THESAURUSOFFEND = 279;
+        public const string PERIODONTOCLASIA = "双池S弯";
+        public const string THUNDERSTRICKEN = "W-DRAI-VENT-PIPE";
+        public const string QUOTATIONBREWSTER = "DN50";
+        public const string THESAURUSADVERSITY = "W-DRAI-WAST-PIPE";
+        public const int THESAURUSFLUTTER = 789;
+        public const int THROMBOEMBOLISM = 1270;
+        public const int THESAURUSJACKPOT = 1090;
+        public const string THESAURUSDISCIPLINARIAN = "双池P弯";
+        public const int THESAURUSPRIMARY = 171;
+        public const int CONSPICUOUSNESS = 329;
+        public const int QUOTATIONDENNIS = 5479;
+        public const int THESAURUSBLESSING = 1079;
+        public const int THESAURUSCLIMATE = 5600;
+        public const int THESAURUSCOLOSSAL = 6079;
+        public const int THESAURUSSCARCE = 8;
+        public const int QUOTATIONAFGHAN = 1379;
+        public const int INDIGESTIBLENESS = 569;
+        public const int THESAURUSNECESSITY = 406;
+        public const int QUOTATIONDEFLUVIUM = 404;
+        public const int HYDROCOTYLACEAE = 3150;
+        public const int THESAURUSMORTUARY = 12;
+        public const int THESAURUSEUPHORIA = 1300;
+        public const double THESAURUSRIBALD = .4;
+        public const string THESAURUSMOLEST = "接阳台洗手盆排水";
+        public const string THESAURUSSCOUNDREL = "DN50，余同";
+        public const int THIGMOTACTICALLY = 1190;
+        public const string QUOTATIONHUMPBACK = "接卫生间排水管";
+        public const string DISCOMMODIOUSNESS = "DN100，余同";
+        public const int THESAURUSOUTLANDISH = 490;
+        public const int RETROGRESSIVELY = 170;
+        public const int PROCRASTINATORY = 2830;
+        public const int INCONSIDERABILIS = 900;
+        public const int THESAURUSSHROUD = 330;
+        public const int THESAURUSSOMETIMES = 895;
+        public const int ELECTROMYOGRAPH = 285;
+        public const int THESAURUSINTRENCH = 390;
+        public const string ACCOMMODATINGLY = "普通地漏P弯";
+        public const int THESAURUSSECLUSION = 1330;
+        public const int PHOTOSYNTHETICALLY = 270;
+        public const string THESAURUSPUGNACIOUS = "接厨房洗涤盆排水";
+        public const int UNAPPREHENSIBLE = 156;
+        public const int THESAURUSNOTABLE = 510;
+        public const int THESAURUSMISSIONARY = 389;
+        public const int ANTICONVULSANTS = 45;
+        public const int THESAURUSPHANTOM = 669;
+        public const int THESAURUSCONSIGNMENT = 590;
+        public const int ACETYLSALICYLIC = 1700;
+        public const int PREREGISTRATION = 520;
+        public const int THESAURUSJOURNALIST = 919;
+        public const int CONSTITUTIVENESS = 990;
+        public const int THESAURUSALLEGIANCE = 129;
+        public const int ALSOSESQUIALTERAL = 693;
+        public const int THESAURUSCUSTOMARY = 1591;
+        public const int APOLLINARIANISM = 511;
+        public const int TRICHINELLIASIS = 289;
+        public const string QUOTATIONBENJAMIN = "W-DRAI-DIMS";
+        public const int THESAURUSSATIATE = 1391;
+        public const int THESAURUSINFLEXIBLE = 667;
+        public const int THESAURUSCAPITALISM = 1450;
+        public const int QUINQUARTICULAR = 251;
+        public const int THESAURUSINVADE = 660;
+        public const int THESAURUSBISEXUAL = 110;
+        public const int THESAURUSSPIRIT = 91;
+        public const int THESAURUSCANDIDATE = 320;
+        public const int ALUMINOSILICATES = 427;
+        public const int THESAURUSEXHILARATION = 183;
+        public const int POLIOENCEPHALITIS = 283;
+        public const double THESAURUSADJUST = 250.0;
+        public const int THESAURUSHALTER = 225;
+        public const int THESAURUSMERITORIOUS = 1125;
+        public const int THESAURUSRATION = 280;
+        public const int THESAURUSNEGATE = 76;
+        public const int QUOTATIONRHEUMATOID = 424;
+        public const int THESAURUSSENSITIVE = 1900;
+        public const string THESAURUSECHELON = "DN100乙字弯";
+        public const string CONSECUTIVENESS = "1350";
+        public const int THESAURUSBOMBARD = 275;
+        public const int INTERNATIONALLY = 210;
+        public const int THESAURUSEVIDENT = 151;
+        public const int THESAURUSINDOMITABLE = 1109;
+        public const int THESAURUSDISCERNIBLE = 420;
+        public const int PRESBYTERIANIZE = 318;
+        public const int THESAURUSDEGREE = 447;
+        public const int THESAURUSSENTIMENTALITY = 43;
+        public const int ULTRASONICATION = 237;
+        public const string THESAURUSSYNTHETIC = "洗衣机地漏P弯";
+        public const int THESAURUSMOTIONLESS = 1380;
+        public const double THESAURUSFEELER = 200.0;
+        public const double THESAURUSATTENDANCE = 780.0;
+        public const double THESAURUSINACCURACY = 130.0;
+        public const int THESAURUSEXCHANGE = 980;
+        public const int UNPERISHABLENESS = 1358;
+        public const int THESAURUSDENTIST = 172;
+        public const int NOVAEHOLLANDIAE = 155;
+        public const int THESAURUSMEDIATION = 1650;
+        public const int THESAURUSFICTION = 71;
+        public const int THESAURUSNEGLIGENCE = 221;
+        public const int THESAURUSCREDITABLE = 29;
+        public const int THESAURUSJINGLE = 1158;
+        public const int ALSOMEGACEPHALOUS = 179;
+        public const int THESAURUSINCARCERATE = 880;
+        public const string METACOMMUNICATION = ">1500";
+        public const int DEMONSTRATIONIST = 921;
+        public const int THESAURUSMIRTHFUL = 2320;
+        public const string QUOTATIONBARBADOS = "普通地漏S弯";
+        public const int THESAURUSLINGER = 3090;
+        public const int METALINGUISTICS = 371;
+        public const int ORTHOPAEDICALLY = 2730;
+        public const int THESAURUSREPRODUCTION = 888;
+        public const int THESAURUSEQUATION = 629;
+        public const int THESAURUSECLECTIC = 460;
+        public const int THESAURUSINGLORIOUS = 2499;
+        public const int QUOTATIONMASTOID = 1210;
+        public const int THESAURUSISOLATION = 850;
+        public const double THESAURUSFLIRTATIOUS = 270.0;
+        public const int THESAURUSCHORUS = 2279;
+        public const int THESAURUSCELESTIAL = 1239;
+        public const int THESAURUSPRIVILEGE = 675;
+        public const string MÖNCHENGLADBACH = "通气帽系统-AI";
+        public const string THESAURUSDECLAIM = "PL";
+        public const string THESAURUSCONFIRM = "TL";
+        public const string QUOTATIONSTRETTO = "管底h+X.XX";
+        public const string UNACCEPTABILITY = "双格洗涤盆排水-AI";
+        public const string CARCINOGENICITY = "S型存水弯";
+        public const string FISSIPAROUSNESS = "板上S弯";
+        public const string THESAURUSCASCADE = "翻转状态";
+        public const string THESAURUSDENOUNCE = "清扫口系统";
+        public const int THESAURUSCOORDINATE = 21;
+        public const string THESAURUSREMNANT = "-DRAI-";
+        public const string THESAURUSINCENSE = "-PIPE";
+        public const string THESAURUSDEVIANT = "VENT";
+        public const string EXTRAORDINARINESS = "AI-空间框线";
+        public const string THESAURUSUNSPEAKABLE = "AI-房间框线";
+        public const string THESAURUSEMBOLDEN = "AI-空间名称";
+        public const string QUOTATIONGOLDEN = "AI-房间名称";
+        public const string THESAURUSSINCERE = "WP_KTN_LG";
+        public const string THESAURUSNOTATION = "De";
+        public const string PERPENDICULARITY = "wb";
+        public const string THESAURUSIMPOSTER = "kd";
+        public const string THESAURUSPREFERENCE = "C-XREF-EXT";
+        public const string THESAURUSINTENTIONAL = "雨水井";
+        public const string THESAURUSCONFRONTATION = "地漏平面";
+        public const string REPRESENTATIVES = "A$C58B12E6E";
+        public const string THESAURUSCORRELATION = "W-DRAI-PIEP-RISR";
+        public const string THESAURUSUNINTERESTED = "A$C5E4A3C21";
+        public const string QUOTATIONCORNISH = "PIPE-喷淋";
+        public const string CONSUBSTANTIATUS = "A-Kitchen-3";
+        public const string THESAURUSCHIVALROUS = "A-Kitchen-4";
+        public const string THESAURUSGRUESOME = "A-Toilet-1";
+        public const string THESAURUSDAPPER = "A-Toilet-2";
+        public const string QUOTATIONPYRIFORM = "A-Toilet-3";
+        public const string THESAURUSEXTORTIONATE = "A-Toilet-4";
+        public const string THESAURUSDRASTIC = "-XiDiPen-";
+        public const string THESAURUSHUMOUR = "A-Kitchen-9";
+        public const string HYPERSENSITIZED = "0$座厕";
+        public const string THESAURUSHOODLUM = "0$asdfghjgjhkl";
+        public const string PHYTOGEOGRAPHER = "A-Toilet-";
+        public const string THESAURUSABOUND = "A-Kitchen-";
+        public const string THESAURUSALLURE = "|lp";
+        public const string THESAURUSMACHINERY = "|lp1";
+        public const string THESAURUSESCALATE = "|lp2";
+        public const string THESAURUSCLINICAL = "A-Toilet-9";
+        public const string THESAURUSBALEFUL = "$xiyiji";
+        public const string THESAURUSARCHER = "feng_dbg_test_washing_machine";
+        public const string THESAURUSRESIGNED = "多通道";
+        public const string PHOTOAUTOTROPHIC = "洗衣机";
+        public const string THESAURUSACQUISITIVE = "单排";
+        public const string QUOTATIONCHILLI = "设置乙字弯";
+        public const string THESAURUSPOWERLESS = "\n处理中断。未找到有效楼层。";
+        public const string QUOTATIONISOPHANE = "已有的管径标注将被覆盖，是否继续？";
+        public const string THESAURUSMISADVENTURE = "Quetion";
+        public const double DISPROPORTIONAL = 5.01;
+        public const double THESAURUSAPPARATUS = 10.01;
+        public const string ARGENTIMACULATUS = "W-辅助-管径";
+        public const int THESAURUSSYMMETRICAL = 26;
+        public const int THESAURUSDRAGOON = 33;
+        public const string ALLITERATIVENESS = "DN32";
+        public const int THESAURUSMORTALITY = 51;
+        public const string SUPERNATURALIZE = @"\d+";
+        public const string QUOTATIONROBERT = "单盆洗手台";
+        public const string THESAURUSDELIVER = "双盆洗手台";
+        public const string CYLINDRICALNESS = "坐便器";
+        public const int THESAURUSINNOCUOUS = 99;
+        public const double THESAURUSPLAYGROUND = .00001;
+        public const double ULTRASONOGRAPHY = .0001;
+        public const string THESAURUSEMPHASIS = "$TwtSys$00000132";
+        public const string THESAURUSVICTORIOUS = "FLDR";
+        public const string THESAURUSJOURNAL = "CP";
+        public const int THESAURUSEVERLASTING = 25;
+        public const string QUOTATIONPELVIC = "PipeDN100";
+        public const int THESAURUSFINALITY = 10000;
+        public const string THESAURUSBOTTOM = "PL-";
+        public const int THESAURUSCENSURE = 11;
+        public const int THESAURUSBEATIFIC = 13;
+        public const string PHOTOFLUOROGRAM = "DN0";
+        public const int PERICARDIOCENTESIS = 49;
+        public const double QUOTATIONLUCANIAN = 5.1;
+        public const double THESAURUSDISTRIBUTION = 300.0;
+        public const double PHOTOCONDUCTION = 400.0;
+        public const string THESAURUSIMPETUOUS = "DNXXX";
+        public const string INTELLECTUALNESS = "\n";
+        public const string QUOTATIONCHROMIC = "TCH";
+        public const string QUOTATIONMALTESE = "沟";
+        public const string THESAURUSPROLONG = "侧";
+        public const int THESAURUSASSURANCE = 505;
+        public const int DETERMINATENESS = 239;
+        public const string THESAURUSREALLY = "L";
+        public const double ALSOMONOSIPHONIC = 3e4;
+        public const int THESAURUSOCCASIONALLY = 19;
+        public const int ECCLESIASTICISM = 17;
+        public const string THESAURUSSTRAIGHTFORWARD = "废水立管";
+        public const string THESAURUSEMPTINESS = "污水立管";
+        public const string THESAURUSHYPOCRISY = "污废合流立管";
+        public const string THESAURUSRECIPE = "沉箱立管";
+        public const string THESAURUSRAFFLE = "通气立管";
+        public const string HYDROCHLOROFLUOROCARBON = "2F";
+        public const double THESAURUSCONFECTIONERY = .5;
+        public const string PARATHYROIDECTOMY = "地漏-AI";
+        public const string PARALINGUISTICALLY = "暂不支持污废分流，仅生成废水系统图";
+        public const int THESAURUSSCINTILLATE = 1231;
+        public const string THESAURUSBASELESS = "FL";
+        public const string THESAURUSPOSSESSIVE = "WL";
+        public const double THESAURUSLEGISLATION = 8000.0;
+        public const int INTROJECTIONISM = 1075;
+        public const int THESAURUSSEDATE = 1100;
+        public const int PROGNOSTICATORY = 2400;
+        public const int THESAURUSHALLUCINATE = 1571;
+        public const int THESAURUSFAINTLY = 1171;
+        public const int QUOTATIONELECTROMOTIVE = 1250;
+        public const int THESAURUSHOMICIDAL = 1121;
+        public const int THESAURUSDESULTORY = 1821;
+        public const int THESAURUSPROSPEROUS = 1321;
+        public const int THESAURUSUNGRATEFUL = 3400;
+        public const int INCOMPREHENSIBILIS = 571;
+        public const int THESAURUSSUPPOSITION = 3350;
+        public const int QUOTATION1ASHANKS = 1271;
+        public const string CHRISTADELPHIAN = "接至雨水口";
+        public const int NEUROPSYCHIATRIST = 1120;
+        public const int SEMICONSCIOUSNESS = 680;
+        public const int PSEUDEPIGRAPHOS = 276;
+        public const int THESAURUSMANIFESTATION = 468;
+        public const int MAXILLOPALATINE = 2180;
+        public const int THESAURUSATTENDANT = 910;
+        public const int THESAURUSLAWYER = 1550;
+        public const int THESAURUSINDECOROUS = 2059;
+        public const int THESAURUSMISAPPREHEND = 1140;
+        public const int SYNAESTHETICALLY = 1040;
+        public const int THESAURUSDESTRUCTION = 790;
+        public const int OLIGOMENORRHOEA = 840;
+        public const int THESAURUSOBSERVANCE = 3042;
+        public const int THESAURUSMAYHEM = 2050;
+        public const int QUOTATIONELECTRICIAN = 3450;
+        public const int THESAURUSVIGOROUS = 853;
+        public const int QUOTATIONFOREGONE = 531;
+        public const int RETROSPECTIVENESS = 1122;
+        public const int REACTIONARINESS = 547;
+        public const int THESAURUSCOMPOUND = 1073;
+        public const string SEROEPIDEMIOLOGY = "EQPM";
+        public const string INTELLECTUALISTS = "立管";
+        public const string QUOTATIONBITTER = "井";
+        public const string THESAURUSENCOMPASS = @"^(F\d?L|T\d?L|P\d?L|D\d?L|W\d?L|Y\d?L|N\d?L)(\w*)\-(\w*)([a-zA-Z]*)$";
+        public const string THESAURUSRESUSCITATE = @"\-?DN\d+";
+        public const char THESAURUSHABITAT = '\n';
+        public const string ALSOHEAVENWARDS = "屋面";
+        public const string NEUROTRANSMITTER = @"DN(\d{1,5})";
+        public const string THESAURUSPAGEANT = "污废合流井";
+        public const string THESAURUSRECTIFY = "0.XX";
+        public const int THESAURUSFRISKY = 1350;
+        public const double THESAURUSUNDERSTANDING = .2446;
+        public const string THESAURUSCURDLE = "侧排雨水斗系统";
+        public const int CONSUMMATIVENESS = 215;
+        public const int UNACCEPTABLENESS = 235;
+        public const int THESAURUSDEPUTIZE = 567;
+        public const int THESAURUSHEARTLESS = 587;
+        public const int QUOTATIONWORSTED = 2052;
+        public const int THESAURUSVISIBLE = 2002;
+        public const int THESAURUSINSTITUTE = 482;
+        public const int THESAURUSINCONCLUSIVE = 1597;
+        public const int ALSOBIPINNATISECT = 1547;
+        public const int CATECHOLAMINERGIC = 82;
+        public const int CORYNOCARPACEAE = 1579;
+        public const int PROBLEMATICALNESS = 1459;
+        public const int THESAURUSSMOULDER = 2444;
+        public const int THESAURUSBEAUTIFY = 1398;
+        public const int THESAURUSEFFULGENT = 679;
+        public const int THESAURUSINDISPENSABLE = 1292;
+        public const int THESAURUSREPRESSIVE = 1020;
+        public const int THESAURUSMADNESS = 899;
+        public const int THESAURUSEFFICACY = 820;
+        public const int PALAEOICHTHYOLOGY = 699;
+        public const int THESAURUSSHALLOW = 1179;
+        public const int IMMEASURABLENESS = 578;
+        public const int ALSOWATERLANDIAN = 365;
+        public const int THESAURUSWINDING = 1844;
+        public const string THESAURUSPENNILESS = "DOME";
+        public const int THESAURUSREFRACTORY = 1275;
+        public const int ALSOMULTIFLORAL = 1178;
+        public const int THESAURUSACQUIESCENT = 1155;
+        public const int THESAURUSUNOCCUPIED = 1740;
+        public const int PROMORPHOLOGIST = 149;
+        public const int THESAURUSTRAUMATIC = 421;
+        public const int DIFFERENTIATEDNESS = 3300;
+        public const int THESAURUSIMPRACTICABLE = 1721;
+        public const int THESAURUSRECONCILE = 2900;
+        public const int METROPOLITANATE = 879;
+        public const int IMAGINATIVENESS = 2150;
+        public const int TRIGONOCEPHALIC = 620;
+        public const int SCIENTIFICALNESS = 1099;
+        public const int QUOTATIONBUBONIC = 1220;
+        public const int THESAURUSHEADSTRONG = 291;
+        public const int THESAURUSCONTEMPT = 1939;
+        public const int THESAURUSMATTER = 1933;
+        public const int THESAURUSABSORBENT = 1268;
+        public const int OLIGOSACCHARIDES = 1950;
+        public const int THESAURUSINTEGRITY = 2500;
+        public const int THESAURUSDISTASTEFUL = 721;
+        public const int THESAURUSPROGRESSIVE = 1750;
+        public const int THESAURUSINSINCERE = 1021;
+        public const double THESAURUSARRIVE = 100.0;
+        public const string THESAURUSREGENERATE = "Y";
+        public const string THESAURUSIMPOUND = "侧入式雨水斗\nDN100";
+        public const int THESAURUSCIRCULAR = 1670;
+        public const int THESAURUSBUSINESS = 1549;
+        public const int THESAURUSSPRINGY = 1429;
+        public const int QUOTATIONSHELLEY = 1170;
+        public const int THESAURUSCOMPLAINT = 1487;
+        public const int THESAURUSCONVOY = 1411;
+        public const int ALSOPALIMBACCHIC = 1213;
+        public const int THESAURUSPREFER = 388;
+        public const int THESAURUSREPARATION = 1290;
+        public const int THESAURUSINFAMOUS = 1187;
+        public const int ANTHROPOPHAGINIAN = 399;
+        public const int QUOTATIONNAMAQUA = 174;
+        public const int THESAURUSLEGALIZE = 1066;
+        public const int THESAURUSHEADWAY = 1172;
+        public const int THESAURUSERUDITION = 2371;
+        public const int THESAURUSCADENCE = 1001;
+        public const int CONDESCENDINGLY = 1601;
+        public const int AUTHORITATIVELY = 2100;
+        public const int THESAURUSNEEDLE = 2451;
+        public const int THESAURUSMARINE = 2600;
+        public const int MERCURIFICATION = 951;
+        public const string THESAURUSCATEGORICAL = "排";
+    public static bool IsToilet(string roomName)
+    {
+      var roomNameContains = new List<string>
+            {
+                CIRCUMSTANTIARE,THESAURUSCIPHER,PREMILLENNIALIST,
+                THESAURUSINDIGENT,THESAURUSFRAMEWORK,THESAURUSHUMILIATION,
+            };
+      if (string.IsNullOrEmpty(roomName))
+        return INTRAVASCULARLY;
+      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
+        return THESAURUSOBSTINACY;
+      if (roomName.Equals(THESAURUSSTERLING))
+        return THESAURUSOBSTINACY;
+      return Regex.IsMatch(roomName, THESAURUSSCREEN);
+    }
+    public static bool IsKitchen(string roomName)
+    {
+      var roomNameContains = new List<string> { THESAURUSPEDESTRIAN, THESAURUSRECLUSE };
+      if (string.IsNullOrEmpty(roomName))
+        return INTRAVASCULARLY;
+      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
+        return THESAURUSOBSTINACY;
+      if (roomName.Equals(THESAURUSINCONTROVERTIBLE))
+        return THESAURUSOBSTINACY;
+      return INTRAVASCULARLY;
+    }
+    public static bool IsBalcony(string roomName)
+    {
+      if (roomName == null) return INTRAVASCULARLY;
+      var roomNameContains = new List<string> { NATIONALIZATION };
+      if (string.IsNullOrEmpty(roomName))
+        return INTRAVASCULARLY;
+      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
+        return THESAURUSOBSTINACY;
+      return INTRAVASCULARLY;
+    }
+    public static bool IsCorridor(string roomName)
+    {
+      if (roomName == null) return INTRAVASCULARLY;
+      var roomNameContains = new List<string> { THESAURUSSPECIES };
+      if (string.IsNullOrEmpty(roomName))
+        return INTRAVASCULARLY;
+      if (roomNameContains.Any(maxBalconyrainpipeToFloordrainDistance => roomName.Contains(maxBalconyrainpipeToFloordrainDistance)))
+        return THESAURUSOBSTINACY;
+      return INTRAVASCULARLY;
+    }
+    public static bool IsWL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSANTIDOTE);
+    }
+    public static bool IsDraiFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && !IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+    }
+    public static bool IsFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSDISSOLVE);
+    }
+    public static bool IsFL0(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(AUTOLITHOGRAPHIC);
+    }
+    public static bool IsPL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSABUNDANT);
+    }
+    public static bool IsTL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSOPTIONAL);
+    }
+    public static bool IsDL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, DIASTEREOISOMER);
+    }
+    public static bool IsDraiLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+    {
+      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      return (IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && !IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) || IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsWL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+    }
+    public static Point3dCollection TOILET_WELLS_INTERVAL;
+    public static bool DrawWLPipeSystem()
+    {
+      TOILET_WELLS_INTERVAL = null;
+      if (((DrainageSystemDiagram.commandContext.StoreyContext.StoreyInfos?.Count) ?? THESAURUSSTAMPEDE) is THESAURUSSTAMPEDE)
+      {
+        return INTRAVASCULARLY;
+      }
+      TOILET_WELLS_INTERVAL = GeoFac.CreateGeometry(DrainageSystemDiagram.commandContext.StoreyContext.StoreyInfos.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary.ToPolygon())).Envelope.ToGRect().Expand(POLYOXYMETHYLENE).ToPt3dCollection();
+      {
+        var vm = DrainageSystemDiagramViewModel.Singleton;
+        static bool isRainLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSABJURE);
+        static bool isDraiLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSREMNANT);
+        static bool isDrainageLayer(string layer) => isRainLayer(layer) || isDraiLayer(layer);
+        static string GetEffectiveLayer(string TOILET_BUFFER_DISTANCE)
+        {
+          return GetEffectiveName(TOILET_BUFFER_DISTANCE);
+        }
+        static string GetEffectiveName(string WELLS_MAX_AREA)
+        {
+          WELLS_MAX_AREA ??= THESAURUSDEPLORE;
+          var MAX_ANGEL_TOLLERANCE = WELLS_MAX_AREA.LastIndexOf(THESAURUSCONTEND);
+          if (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE && !WELLS_MAX_AREA.EndsWith(MULTIPROCESSING))
+          {
+            WELLS_MAX_AREA = WELLS_MAX_AREA.Substring(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING);
+          }
+          MAX_ANGEL_TOLLERANCE = WELLS_MAX_AREA.LastIndexOf(SUPERREGENERATIVE);
+          if (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE && !WELLS_MAX_AREA.EndsWith(THESAURUSCOURIER))
+          {
+            WELLS_MAX_AREA = WELLS_MAX_AREA.Substring(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING);
+          }
+          return WELLS_MAX_AREA;
+        }
+        static string GetEffectiveBRName(string MIN_WELL_TO_URINAL_DISTANCE)
+        {
+          return GetEffectiveName(MIN_WELL_TO_URINAL_DISTANCE);
+        }
+        static bool IsWantedBlock(BlockTableRecord blockTableRecord)
+        {
+          if (blockTableRecord.IsDynamicBlock)
+          {
+            return INTRAVASCULARLY;
+          }
+          if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+          {
+            return INTRAVASCULARLY;
+          }
+          if (!blockTableRecord.Explodable)
+          {
+            return INTRAVASCULARLY;
+          }
+          return THESAURUSOBSTINACY;
+        }
+        bool MAX_ROOM_INTERVAL = INTRAVASCULARLY;
+        var KITCHEN_BUFFER_DISTANCE = new List<StoreyInfo>();
+        var MAX_TOILET_TO_KITCHEN_DISTANCE = INTRAVASCULARLY;
+        var MAX_TOILET_TO_KITCHEN_DISTANCE1 = new List<Geometry>();
+        var MAX_KITCHEN_TO_RAINPIPE_DISTANCE = new List<Geometry>();
+        var MAX_BALCONY_TO_RAINPIPE_DISTANCE = new List<Geometry>();
+        var MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = new List<Geometry>();
+        var MAX_TOILET_TO_FLOORDRAIN_DISTANCE = new List<Geometry>();
+        var MAX_TOILET_TO_FLOORDRAIN_DISTANCE2 = new List<Geometry>();
+        var MAX_TOILET_TO_FLOORDRAIN_DISTANCE1 = new List<Geometry>();
+        var MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = new List<Geometry>();
+        var MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE = new List<Geometry>();
+        var MAX_BALCONY_TO_BALCONY_DISTANCE = new List<CText>();
+        var MAX_KITCHEN_TO_BALCONY_DISTANCE = new List<Geometry>();
+        var MIN_DEVICEPLATFORM_AREA = new List<Geometry>();
+        var MAX_DEVICEPLATFORM_AREA = new List<Geometry>();
+        var MAX_BASECIRCLE_AREA = new List<Geometry>();
+        var max_balconywashingfloordrain_to_balconyfloordrain = new List<Geometry>();
+        FocusMainWindow();
+        if (!TrySelectPoint(out Point3d SIDEWATERBUCKET_X_INDENT)) return INTRAVASCULARLY;
+if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
+        using var lck = DocLock;
+        using var adb = AcadDatabase.Active();
+        using var tr = new _DrawingTransaction(adb);
+        static string TryParseWrappingPipeDNText(string repeated_point_distance)
+        {
+          if (repeated_point_distance is null) return null;
+          var TolLightRangeMin = Regex.Replace(repeated_point_distance, THESAURUSRESUSCITATE, THESAURUSDEPLORE, RegexOptions.IgnoreCase);
+          TolLightRangeMin = Regex.Replace(TolLightRangeMin, QUOTATION3BABOVE, THESAURUSDEPLORE);
+          TolLightRangeMin = Regex.Replace(TolLightRangeMin, THESAURUSMISTRUST, THESAURUSSPECIFICATION);
+          TolLightRangeMin = TolLightRangeMin.Replace(INTELLECTUALNESS, THESAURUSDEPLORE);
+          return TolLightRangeMin;
+        }
+        Point3dCollection range = TOILET_WELLS_INTERVAL;
+        {
+          var max_device_to_device = GetStoreyBlockReferences(adb);
+          var max_device_to_balcony = new List<BlockReference>();
+          foreach (var tolReturnValueRangeTo in max_device_to_device)
+          {
+            var TolLightRangeSingleSideMin = GetStoreyInfo(tolReturnValueRangeTo);
+            if (range?.ToGRect().ToPolygon().Contains(TolLightRangeSingleSideMin.Boundary.ToPolygon()) ?? THESAURUSOBSTINACY)
+            {
+              max_device_to_balcony.Add(tolReturnValueRangeTo);
+              KITCHEN_BUFFER_DISTANCE.Add(TolLightRangeSingleSideMin);
+            }
+          }
+          FixStoreys(KITCHEN_BUFFER_DISTANCE);
+        }
+        var max_balconywashingfloordrain_to_rainpipe = CreateEnvelopeTester(KITCHEN_BUFFER_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary).ToList());
+        foreach (var maxToiletToCondensepipeDistance in adb.ModelSpace.OfType<Entity>())
+          {
+            if (maxToiletToCondensepipeDistance is BlockReference tolReturnValueRangeTo)
+            {
+              if (!tolReturnValueRangeTo.BlockTableRecord.IsValid) continue;
+              var minDeviceplatformArea = adb.Blocks.Element(tolReturnValueRangeTo.BlockTableRecord);
+              var _fs = new List<KeyValuePair<Geometry, Action>>();
+              Action maxDeviceplatformArea = null;
+              try
+              {
+                MAX_ROOM_INTERVAL = minDeviceplatformArea.XrefStatus != XrefStatus.NotAnXref;
+                handleBlockReference(tolReturnValueRangeTo, Matrix3d.Identity, _fs);
+              }
+              finally
+              {
+                MAX_ROOM_INTERVAL = INTRAVASCULARLY;
+              }
+              {
+                var TolLightRangeSingleSideMin = tolReturnValueRangeTo.XClipInfo();
+                if (TolLightRangeSingleSideMin.IsValid)
+                {
+                  TolLightRangeSingleSideMin.TransformBy(tolReturnValueRangeTo.BlockTransform);
+                  var default_voltage = TolLightRangeSingleSideMin.PreparedPolygon;
+                  foreach (var max_rainpipe_to_balconyfloordrain in _fs)
+                  {
+                    if (default_voltage.Intersects(max_rainpipe_to_balconyfloordrain.Key))
+                    {
+                      maxDeviceplatformArea += max_rainpipe_to_balconyfloordrain.Value;
+                    }
+                  }
+                }
+                else
+                {
+                  foreach (var max_rainpipe_to_balconyfloordrain in _fs)
+                  {
+                    maxDeviceplatformArea += max_rainpipe_to_balconyfloordrain.Value;
+                  }
+                }
+                maxDeviceplatformArea?.Invoke();
+              }
+            }
+            else
+            {
+              var _fs = new List<KeyValuePair<Geometry, Action>>();
+              handleEntity(maxToiletToCondensepipeDistance, Matrix3d.Identity, _fs);
+              foreach (var max_rainpipe_to_balconyfloordrain in _fs)
+              {
+                max_rainpipe_to_balconyfloordrain.Value();
+              }
+            }
+          }
+        StoreyInfo max_balconywashingmachine_to_balconybasinline(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+        {
+          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE is null) return null;
+          foreach (var TolLightRangeSingleSideMin in KITCHEN_BUFFER_DISTANCE)
+          {
+            if (IsNumStorey(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+            {
+              if (TolLightRangeSingleSideMin.Numbers.Contains(GetStoreyScore(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))) return TolLightRangeSingleSideMin;
+            }
+            else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == THESAURUSARGUMENTATIVE)
+            {
+              if (TolLightRangeSingleSideMin.StoreyType == StoreyType.LargeRoof) return TolLightRangeSingleSideMin;
+            }
+          }
+          var min_downspout_to_balconyfloordrain = KITCHEN_BUFFER_DISTANCE.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.StoreyType == StoreyType.SmallRoof).OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary.CenterY).ToList();
+          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == ANTHROPOMORPHICALLY)
+          {
+            return min_downspout_to_balconyfloordrain.FirstOrDefault();
+          }
+          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == THESAURUSSCUFFLE)
+          {
+            if (min_downspout_to_balconyfloordrain.Count >= THESAURUSPERMUTATION) return min_downspout_to_balconyfloordrain[THESAURUSHOUSING];
+            return null;
+          }
+          return null;
+        }
+        var SIDEWATERBUCKET_Y_INDENT = new List<string>();
+        var max_condensepipe_to_washmachine = KITCHEN_BUFFER_DISTANCE.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers).Max();
+        for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < max_condensepipe_to_washmachine; MAX_ANGEL_TOLLERANCE++)
+        {
+          SIDEWATERBUCKET_Y_INDENT.Add((MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING) + THESAURUSASPIRATION);
+        }
+        SIDEWATERBUCKET_Y_INDENT.Add(THESAURUSARGUMENTATIVE);
+        if (max_balconywashingmachine_to_balconybasinline(ANTHROPOMORPHICALLY) is not null)
+        {
+          SIDEWATERBUCKET_Y_INDENT.Add(ANTHROPOMORPHICALLY);
+          if (max_balconywashingmachine_to_balconybasinline(THESAURUSSCUFFLE) is not null)
+          {
+            SIDEWATERBUCKET_Y_INDENT.Add(THESAURUSSCUFFLE);
+          }
+        }
+        IEnumerable<string> max_downspout_to_balconywashingfloordrain(StoreyInfo TolLightRangeSingleSideMin) => SIDEWATERBUCKET_Y_INDENT.Where(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN => max_balconywashingmachine_to_balconybasinline(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN) == TolLightRangeSingleSideMin);
+        string max_rainpipe_to_washmachine(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+        {
+          return SIDEWATERBUCKET_Y_INDENT.TryGet(SIDEWATERBUCKET_Y_INDENT.IndexOf(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) + THESAURUSHOUSING);
+        }
+        string commonradius(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+        {
+          return SIDEWATERBUCKET_Y_INDENT.TryGet(SIDEWATERBUCKET_Y_INDENT.IndexOf(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) - THESAURUSHOUSING);
+        }
+        static Func<Envelope, bool> CreateEnvelopeTester(ICollection<GRect> rects)
+        {
+          if (rects.Count == THESAURUSSTAMPEDE) return DEFAULT_FIRE_VALVE_WIDTH => INTRAVASCULARLY;
+          var engine = new NetTopologySuite.Index.Strtree.STRtree<object>(rects.Count > THESAURUSACRIMONIOUS ? rects.Count : THESAURUSACRIMONIOUS);
+          foreach (var DEFAULT_FIRE_VALVE_WIDTH in rects) engine.Insert(DEFAULT_FIRE_VALVE_WIDTH.ToEnvolope(), null);
+          return envo =>
+          {
+            if (envo is null) throw new ArgumentNullException();
+            return engine.Query(envo).Any();
+          };
+        }
+        var max_balconybasin_to_balcony = MAX_TOILET_TO_FLOORDRAIN_DISTANCE.Select(TolLightRangeSingleSideMax => new GCircle(TolLightRangeSingleSideMax.GetCenter(), TolLightRangeSingleSideMax.ToGRect().InnerRadius)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Radius > THESAURUSDRAGOON).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToCirclePolygon(SUPERLATIVENESS)).Where(TolLightRangeSingleSideMax => max_balconywashingfloordrain_to_rainpipe(TolLightRangeSingleSideMax.EnvelopeInternal)).ToList();
+        var balcony_buffer_distance = MAX_TOILET_TO_FLOORDRAIN_DISTANCE.Select(TolLightRangeSingleSideMax => new GCircle(TolLightRangeSingleSideMax.GetCenter(), TolLightRangeSingleSideMax.ToGRect().InnerRadius)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Radius <= THESAURUSDRAGOON).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToCirclePolygon(SUPERLATIVENESS)).Where(TolLightRangeSingleSideMax => max_balconywashingfloordrain_to_rainpipe(TolLightRangeSingleSideMax.EnvelopeInternal)).ToList();
+          {
+            var min_balconybasin_to_balcony = GeoFac.CreateIntersectsSelector(MAX_BALCONY_TO_BALCONY_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
+            foreach (var max_tag_yposition in GeoFac.GroupGeometries(MAX_TOILET_TO_KITCHEN_DISTANCE1.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Square).Tag(TolLightRangeSingleSideMax)).ToList()))
+            {
+              var tolReturnValueRange = max_tag_yposition.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).OfType<Geometry>().ToList();
+              var TolLane = GeoFac.GetManyLines(tolReturnValueRange).ToList();
+              var hsegs = TolLane.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSCOMMUNICATION)).ToList();
+              if (hsegs.Count is THESAURUSPERMUTATION)
+              {
+                var _tol_avg_column_dist = TolLane.YieldPoints().Distinct().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+                var ptsdf = GeoFac.CreateDisjointSelector(_tol_avg_column_dist);
+                _tol_avg_column_dist = ptsdf(GeoFac.CreateGeometryEx(hsegs.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Flat)).ToList()));
+                var max_kitchen_to_balcony_distance = hsegs.SelectMany(default_fire_valve_length =>
+                {
+                  static bool IsWantedText(string repeated_point_distance)
+                  {
+                    if (repeated_point_distance is null) return INTRAVASCULARLY;
+                    return IsDrainageLabel(repeated_point_distance) || repeated_point_distance.Contains(THESAURUSLECHER);
+                  }
+                  var _raiseDistanceToStartDefault = default_fire_valve_length.Center;
+                  var MAX_DEVICE_TO_BALCONY = THESAURUSARRIVE;
+                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsWantedText(TolLightRangeSingleSideMax.UserData as string)).ToList();
+                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE <= DISPENSABLENESS; MAX_ANGEL_TOLLERANCE++)
+                  {
+                    if (max_tag_xposition.Count > THESAURUSSTAMPEDE) break;
+                    MAX_DEVICE_TO_BALCONY = HYPERDISYLLABLE + MAX_ANGEL_TOLLERANCE * THESAURUSACRIMONIOUS;
+                    max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
+                  }
+                  return max_tag_xposition.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData).OfType<string>();
+                }).Distinct().ToList();
+                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint3d()).Distinct(new Point3dComparer(THESAURUSACRIMONIOUS)))
+                {
+                  foreach (var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE in max_kitchen_to_balcony_distance)
+                  {
+                    MAX_DEVICEPLATFORM_AREA.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                  }
+                }
+              }
+            }
+          }
+        {
+          var sidewaterbucket_x_indent = GeoFac.CreateIntersectsSelector(max_balconybasin_to_balcony);
+          foreach (var sidewaterbucket_y_indent in MAX_DEVICEPLATFORM_AREA)
+          {
+            if (sidewaterbucket_y_indent.UserData is not string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) continue;
+            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(INTELLECTUALNESS))
+            {
+              var well_to_wall_offset = MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Split(THESAURUSHABITAT);
+              if (well_to_wall_offset.Length == THESAURUSPERMUTATION)
+              {
+                if (Regex.IsMatch(well_to_wall_offset[THESAURUSHOUSING], UREDINIOMYCETES) || well_to_wall_offset[THESAURUSHOUSING].Contains(THESAURUSCATEGORICAL))
+                {
+                  if (IsDrainageLabel(well_to_wall_offset[THESAURUSSTAMPEDE]))
+                  {
+                    MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = well_to_wall_offset[THESAURUSSTAMPEDE];
+                  }
+                }
+              }
+            }
+            if (IsDrainageLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+            {
+              foreach (var toilet_wells_interval in sidewaterbucket_x_indent(sidewaterbucket_y_indent))
+              {
+                toilet_wells_interval.UserData = MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE;
+              }
+            }
+          }
+          foreach (var sidewaterbucket_y_indent in MAX_DEVICEPLATFORM_AREA)
+          {
+            if (sidewaterbucket_y_indent.UserData is not string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) continue;
+            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSELIGIBLE))
+            {
+              if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSADVENT))
+              {
+                MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE.Add(GeoFac.CreateGeometryEx(GeoFac.GetPoints(sidewaterbucket_y_indent).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
+              }
+              else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONMALTESE))
+              {
+                MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE.Add(GeoFac.CreateGeometryEx(GeoFac.GetPoints(sidewaterbucket_y_indent).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
+              }
+            }
+            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSLECHER))
+            {
+              string toilet_buffer_distance = null, MAX_CONDENSEPIPE_TO_WASHMACHINE = null;
+              if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSPLUMMET) || MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(ALSOHEAVENWARDS))
+              {
+                toilet_buffer_distance = THESAURUSTOPICAL;
+              }
+              else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSPROLONG))
+              {
+                toilet_buffer_distance = THESAURUSBANDAGE;
+              }
+              else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONSPENSERIAN))
+              {
+                toilet_buffer_distance = THESAURUSCONSERVATION;
+              }
+              var tolReturnValueMinRange = Regex.Match(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, UREDINIOMYCETES);
+              if (tolReturnValueMinRange.Success) MAX_CONDENSEPIPE_TO_WASHMACHINE = tolReturnValueMinRange.Groups[THESAURUSSTAMPEDE].Value;
+              if (toilet_buffer_distance is not null)
+              {
+                MAX_CONDENSEPIPE_TO_WASHMACHINE ??= THESAURUSIMPETUOUS;
+                foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in GeoFac.GetPoints(sidewaterbucket_y_indent))
+                {
+                  MAX_TOILET_TO_FLOORDRAIN_DISTANCE2.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.Tag(toilet_buffer_distance + INTELLECTUALNESS + MAX_CONDENSEPIPE_TO_WASHMACHINE));
+                }
+              }
+            }
+          }
+          var min_balconybasin_to_balcony = GeoFac.CreateIntersectsSelector(MAX_BALCONY_TO_BALCONY_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList());
+          foreach (var DEFAULT_FIRE_VALVE_LENGTH in GeoFac.GroupGeometries(GeoFac.GetManyLines(MAX_TOILET_TO_KITCHEN_DISTANCE1).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList()).Select(TolLightRangeSingleSideMax => GeoFac.CreateGeometry(TolLightRangeSingleSideMax)))
+          {
+            var wells_max_area = GeoFac.GetLines(DEFAULT_FIRE_VALVE_LENGTH).ToList();
+            var min_well_to_urinal_distance = wells_max_area.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSCOMMUNICATION)).ToList();
+            var _tol_avg_column_dist = GeoFac.GetAlivePoints(wells_max_area, THESAURUSCOMMUNICATION).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).Where(TolLightRangeSingleSideMax => !min_well_to_urinal_distance.Any(default_fire_valve_length => default_fire_valve_length.Buffer(THESAURUSCOMMUNICATION, EndCapStyle.Square).Intersects(TolLightRangeSingleSideMax))).ToList();
+            if (min_well_to_urinal_distance.Count == THESAURUSHOUSING && _tol_avg_column_dist.Count > THESAURUSSTAMPEDE)
+            {
+              foreach (var default_fire_valve_length in min_well_to_urinal_distance)
+              {
+                var _raiseDistanceToStartDefault = default_fire_valve_length.Center;
+                {
+                  var MAX_DEVICE_TO_BALCONY = THESAURUSARRIVE;
+                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
+                  for (int MAX_ANGEL_TOLLERANCE = THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE <= DISPENSABLENESS; MAX_ANGEL_TOLLERANCE++)
+                  {
+                    if (max_tag_xposition.Count > THESAURUSSTAMPEDE) break;
+                    MAX_DEVICE_TO_BALCONY = HYPERDISYLLABLE + MAX_ANGEL_TOLLERANCE * THESAURUSACRIMONIOUS;
+                    max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(MAX_DEVICE_TO_BALCONY)).ToLineString()).Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
+                  }
+                  if (max_tag_xposition.Count == THESAURUSHOUSING)
+                  {
+                    foreach (var maxToiletToFloordrainDistance1 in max_tag_xposition)
+                    {
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+                      {
+                        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = maxToiletToFloordrainDistance1.UserData;
+                        foreach (var pipe in sidewaterbucket_x_indent(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN))
+                        {
+                          if (pipe.UserData is not null)
+                          {
+                            continue;
+                          }
+                          pipe.UserData = MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData;
+                        }
+                      }
+                    }
+                  }
+                }
+                {
+                  static bool IsWantedLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+                  {
+                    if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE is null) return INTRAVASCULARLY;
+                    return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSELIGIBLE);
+                  }
+                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(THESAURUSSURPRISED)).ToLineString()).Where(TolLightRangeSingleSideMax => IsWantedLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
+                  if (max_tag_xposition.Count == THESAURUSHOUSING)
+                  {
+                    foreach (var maxToiletToFloordrainDistance1 in max_tag_xposition)
+                    {
+                      var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = maxToiletToFloordrainDistance1.UserData as string;
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+                      {
+                        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = maxToiletToFloordrainDistance1.UserData;
+                      }
+                      if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSADVENT))
+                      {
+                        MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE.Add(GeoFac.CreateGeometryEx(_tol_avg_column_dist.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
+                      }
+                      else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONMALTESE))
+                      {
+                        MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE.Add(GeoFac.CreateGeometryEx(_tol_avg_column_dist.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        var max_room_interval = GeoFac.CreateContainsSelector(max_balconybasin_to_balcony);
+        var kitchen_buffer_distance = new List<HashSet<string>>();
+        var max_toilet_to_kitchen_distance = new List<List<Geometry>>();
+        var max_toilet_to_kitchen_distance1 = new List<List<Geometry>>();
+        var max_kitchen_to_rainpipe_distance = new List<List<Geometry>>();
+        var max_balcony_to_rainpipe_distance = new List<List<HashSet<string>>>();
+        var max_toilet_to_condensepipe_distance = new List<Dictionary<string, string>>();
+        var max_toilet_to_floordrain_distance = new List<Dictionary<string, string>>();
+        var max_toilet_to_floordrain_distance2 = new List<Dictionary<string, string>>();
+        var max_toilet_to_floordrain_distance1 = new List<List<Geometry>>();
+        var max_balcony_to_deviceplatform_distance = new List<HashSet<string>>();
+        var max_balconyrainpipe_to_floordrain_distance = new List<HashSet<string>>();
+        using (var max_balcony_to_balcony_distance = new ParkingStallGroupWidthRestrict(THESAURUSINCOMPLETE))
+        {
+          foreach (var TolLightRangeSingleSideMin in KITCHEN_BUFFER_DISTANCE)
+          {
+            var max_kitchen_to_balcony_distance = new HashSet<string>();
+            kitchen_buffer_distance.Add(max_kitchen_to_balcony_distance);
+            var min_deviceplatform_area = new List<HashSet<string>>();
+            max_balcony_to_rainpipe_distance.Add(min_deviceplatform_area);
+            var max_deviceplatform_area = new List<Geometry>();
+            max_toilet_to_kitchen_distance.Add(max_deviceplatform_area);
+            var max_basecircle_area = new List<Geometry>();
+            max_toilet_to_kitchen_distance1.Add(max_basecircle_area);
+            var MaxBalconywashingfloordrainToBalconyfloordrain = new List<Geometry>();
+            max_kitchen_to_rainpipe_distance.Add(MaxBalconywashingfloordrainToBalconyfloordrain);
+            var MaxBalconywashingfloordrainToRainpipe = new Dictionary<string, string>();
+            max_toilet_to_condensepipe_distance.Add(MaxBalconywashingfloordrainToRainpipe);
+            var MaxDeviceToDevice = new Dictionary<string, string>();
+            max_toilet_to_floordrain_distance.Add(MaxDeviceToDevice);
+            var MaxDeviceToBalcony = new List<Geometry>();
+            max_toilet_to_floordrain_distance1.Add(MaxDeviceToBalcony);
+            var MaxRainpipeToBalconyfloordrain = new Dictionary<string, string>();
+            max_toilet_to_floordrain_distance2.Add(MaxRainpipeToBalconyfloordrain);
+            var MinDownspoutToBalconyfloordrain = new HashSet<string>();
+            max_balcony_to_deviceplatform_distance.Add(MinDownspoutToBalconyfloordrain);
+            var MaxCondensepipeToWashmachine = new HashSet<string>();
+            max_balconyrainpipe_to_floordrain_distance.Add(MaxCondensepipeToWashmachine);
+            var MaxBalconywashingmachineToBalconybasinline = TolLightRangeSingleSideMin.Boundary.ToPolygon();
+            var MaxDownspoutToBalconywashingfloordrain = max_room_interval(MaxBalconywashingmachineToBalconybasinline);
+            var MaxRainpipeToWashmachine = GeoFac.CreateIntersectsSelector(MaxDownspoutToBalconywashingfloordrain);
+            var Commonradius = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_KITCHEN_TO_BALCONY_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
+            var MaxBalconybasinToBalcony = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(balcony_buffer_distance)(MaxBalconywashingmachineToBalconybasinline));
+            var BalconyBufferDistance = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_TOILET_TO_FLOORDRAIN_DISTANCE1)(MaxBalconywashingmachineToBalconybasinline));
+            var MinBalconybasinToBalcony = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BASECIRCLE_AREA)(MaxBalconywashingmachineToBalconybasinline));
+            var MaxTagYposition = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
+            var MaxTagXposition = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
+            var MaxTagLength = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MIN_DEVICEPLATFORM_AREA.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSDERELICTION)).ToList())(MaxBalconywashingmachineToBalconybasinline));
+            var wlineGeos = GeoFac.GroupLinesByConnPoints(GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(GeoFac.GetManyLines(MAX_TOILET_TO_CONDENSEPIPE_DISTANCE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList())(MaxBalconywashingmachineToBalconybasinline))(MaxBalconywashingmachineToBalconybasinline), THESAURUSACRIMONIOUS).ToList();
+            var TextIndent = GeoFac.CreateIntersectsSelector(wlineGeos);
+            var dlineGeos = GeoFac.GroupLinesByConnPoints(GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(GeoFac.GetManyLines(MAX_KITCHEN_TO_RAINPIPE_DISTANCE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList())(MaxBalconywashingmachineToBalconybasinline))(MaxBalconywashingmachineToBalconybasinline), THESAURUSACRIMONIOUS).ToList();
+            var TextHeight = GeoFac.CreateIntersectsSelector(dlineGeos);
+            max_balcony_to_balcony_distance.Enqueue((int)lane_offset.GroupPipe, () =>
+            {
+              var MaxDownspoutToBalconywashingfloordrain = max_room_interval(TolLightRangeSingleSideMin.Boundary.ToPolygon());
+              var vpsnf = GeoFac.NearestNeighboursGeometryF(MaxDownspoutToBalconywashingfloordrain.OfType<Geometry>().ToList());
+              var okvps = new HashSet<Geometry>();
+              foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
+              {
+                var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
+                if (!IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                {
+                  continue;
+                }
+                {
+                  max_kitchen_to_balcony_distance.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+                  if (IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                  {
+                    var center = toilet_wells_interval.GetCenter();
+                    var _vps = vpsnf(toilet_wells_interval.GetCenter().ToGRect(POLYOXYMETHYLENE).ToPolygon(), MaxDownspoutToBalconywashingfloordrain.Count).Where(TolLightRangeSingleSideMax => !okvps.Contains(TolLightRangeSingleSideMax)).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.GetCenter().GetDistanceTo(center) < POLYOXYMETHYLENE).ToList();
+                    {
+                      var text_indent = new List<Geometry>();
+                      var text_height = new List<Geometry>();
+                      foreach (var ToiletWellsInterval in _vps)
+                      {
+                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
+                        if (text_indent.Count == THESAURUSSTAMPEDE && text_height.Count == THESAURUSSTAMPEDE)
+                        {
+                          if (IsFL(SidewaterbucketYIndent)) text_indent.Add(ToiletWellsInterval);
+                          else if (IsWL(SidewaterbucketYIndent)) text_height.Add(ToiletWellsInterval);
+                        }
+                        else if (text_indent.Count == THESAURUSHOUSING && text_height.Count == THESAURUSSTAMPEDE)
+                        {
+                          if (IsWL(SidewaterbucketYIndent)) text_height.Add(ToiletWellsInterval);
+                        }
+                        if (text_height.Count == THESAURUSHOUSING && text_indent.Count == THESAURUSSTAMPEDE)
+                        {
+                          if (IsFL(SidewaterbucketYIndent)) text_indent.Add(ToiletWellsInterval);
+                        }
+                        if (text_indent.Count == THESAURUSHOUSING && text_height.Count == THESAURUSHOUSING) break;
+                      }
+                      if (text_indent.Count == THESAURUSHOUSING && text_height.Count == THESAURUSHOUSING)
+                      {
+                        okvps.AddRange(text_height);
+                        okvps.AddRange(text_indent);
+                        okvps.Add(toilet_wells_interval);
+                        var lbs = new HashSet<string>();
+                        min_deviceplatform_area.Add(lbs);
+                        foreach (var wl in text_height)
+                        {
+                          lbs.Add(wl.UserData as string);
+                        }
+                        foreach (var fl in text_indent)
+                        {
+                          lbs.Add(fl.UserData as string);
+                        }
+                        lbs.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+                        continue;
+                      }
+                    }
+                    {
+                      var max_tag_xposition = new List<Geometry>();
+                      var text_height = new List<Geometry>();
+                      foreach (var ToiletWellsInterval in _vps)
+                      {
+                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
+                        if (IsWL(SidewaterbucketYIndent))
+                        {
+                          text_height.Add(ToiletWellsInterval);
+                          break;
+                        }
+                        if (IsPL(SidewaterbucketYIndent))
+                        {
+                          max_tag_xposition.Add(ToiletWellsInterval);
+                          break;
+                        }
+                      }
+                      if (max_tag_xposition.Count == THESAURUSHOUSING || text_height.Count == THESAURUSHOUSING)
+                      {
+                        okvps.AddRange(text_height);
+                        okvps.AddRange(max_tag_xposition);
+                        okvps.Add(toilet_wells_interval);
+                        var lbs = new HashSet<string>();
+                        min_deviceplatform_area.Add(lbs);
+                        foreach (var wl in text_height)
+                        {
+                          lbs.Add(wl.UserData as string);
+                        }
+                        foreach (var fl in max_tag_xposition)
+                        {
+                          lbs.Add(fl.UserData as string);
+                        }
+                        lbs.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+                        continue;
+                      }
+                    }
+                  }
+                }
+              }
+            });
+            max_balcony_to_balcony_distance.Enqueue((int)lane_offset.MarkCompsToPipe, () =>
+            {
+              max_balcony_to_balcony_distance.Enqueue((int)lane_offset.MarkTranslator, () =>
+              {
+                foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
+                {
+                  var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
+                  if (string.IsNullOrEmpty(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                  {
+                    var SidewaterbucketXIndent = INTRAVASCULARLY;
+                    {
+                      var WellToWallOffset = GeoFac.CreateGeometry(TextIndent(toilet_wells_interval));
+                      foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(WellToWallOffset))
+                      {
+                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
+                        if (IsDrainageLabel(SidewaterbucketYIndent))
+                        {
+                          toilet_wells_interval.UserData = SidewaterbucketYIndent;
+                          if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
+                          {
+                            MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
+                          }
+                          else
+                          {
+                            MaxCondensepipeToWashmachine.Add(SidewaterbucketYIndent);
+                          }
+                          SidewaterbucketXIndent = THESAURUSOBSTINACY;
+                          break;
+                        }
+                      }
+                    }
+                    if (!SidewaterbucketXIndent)
+                    {
+                      var ToiletBufferDistance = GeoFac.CreateGeometry(TextHeight(toilet_wells_interval));
+                      foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(ToiletBufferDistance))
+                      {
+                        var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
+                        if (IsDrainageLabel(SidewaterbucketYIndent))
+                        {
+                          toilet_wells_interval.UserData = SidewaterbucketYIndent;
+                          if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
+                          {
+                            MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
+                            {
+                              var WellsMaxArea = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(max_balconywashingfloordrain_to_balconyfloordrain)(MaxBalconywashingmachineToBalconybasinline));
+                              var shooters = WellsMaxArea(toilet_wells_interval).Concat(WellsMaxArea(ToiletWellsInterval)).Distinct().ToList();
+                              if (shooters.Count == THESAURUSPERMUTATION)
+                              {
+                                var TolRegroupMainYRange = Regex.Match(shooters[THESAURUSSTAMPEDE].UserData as string, NEUROTRANSMITTER);
+                                var TolConnectSecPtRange = Regex.Match(shooters[THESAURUSHOUSING].UserData as string, NEUROTRANSMITTER);
+                                if (TolRegroupMainYRange.Success && TolConnectSecPtRange.Success)
+                                {
+                                  var well_to_wall_offset = new double[] { double.Parse(TolRegroupMainYRange.Groups[THESAURUSHOUSING].Value), double.Parse(TolConnectSecPtRange.Groups[THESAURUSHOUSING].Value) };
+                                  var _tolReturnValueMaxDistance = well_to_wall_offset.Min();
+                                  var _tolReturnValueMinRange = well_to_wall_offset.Max();
+                                  if (_tolReturnValueMinRange / _tolReturnValueMaxDistance > THESAURUSPERMUTATION)
+                                  {
+                                    MinDownspoutToBalconyfloordrain.Remove(SidewaterbucketYIndent);
+                                  }
+                                }
+                              }
+                            }
+                          }
+                          else
+                          {
+                            MaxCondensepipeToWashmachine.Add(SidewaterbucketYIndent);
+                          }
+                          SidewaterbucketXIndent = THESAURUSOBSTINACY;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
+                {
+                  var shooters = GeoFac.CreateContainsSelector(MAX_DEVICEPLATFORM_AREA)(MaxBalconywashingmachineToBalconybasinline);
+                  foreach (var default_fire_valve_width in shooters.Where(TolLightRangeSingleSideMax => IsDrainageLabel(TolLightRangeSingleSideMax.UserData as string)).GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.UserData))
+                  {
+                    var MinWellToUrinalDistance = default_fire_valve_width.ToList();
+                    if (MinWellToUrinalDistance.Count == THESAURUSPERMUTATION)
+                    {
+                      if (MinWellToUrinalDistance[THESAURUSSTAMPEDE].GetCenter().GetDistanceTo(MinWellToUrinalDistance[THESAURUSHOUSING].GetCenter()) > THESAURUSHYPNOTIC)
+                      {
+                        MinDownspoutToBalconyfloordrain.Add(default_fire_valve_width.Key as string);
+                      }
+                    }
+                  }
+                }
+                foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
+                {
+                  var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
+                  if (string.IsNullOrEmpty(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                  {
+                    foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(toilet_wells_interval.ToGRect().Expand(THESAURUSENTREPRENEUR).ToPolygon()))
+                    {
+                      var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
+                      if (IsDrainageLabel(SidewaterbucketYIndent))
+                      {
+                        toilet_wells_interval.UserData = SidewaterbucketYIndent;
+                        MaxCondensepipeToWashmachine.Add(SidewaterbucketYIndent);
+                        break;
+                      }
+                    }
+                  }
+                }
+              });
+              max_balcony_to_balcony_distance.Enqueue((int)lane_offset.MarkCompsToPipe, () =>
+              {
+                foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
+                {
+                  var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
+                  if (IsDrainageLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                  {
+                    max_kitchen_to_balcony_distance.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+                    var WellToWallOffset = GeoFac.CreateGeometry(TextIndent(toilet_wells_interval));
+                    foreach (var wp in BalconyBufferDistance(WellToWallOffset))
+                    {
+                      foreach (var sidewaterbucket_y_indent in MinBalconybasinToBalcony(wp))
+                      {
+                        var repeated_point_distance = TryParseWrappingPipeDNText(sidewaterbucket_y_indent.UserData as string);
+                        if (repeated_point_distance is not null)
+                        {
+                          MaxDeviceToDevice[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = repeated_point_distance;
+                          break;
+                        }
+                      }
+                      MaxDeviceToBalcony.Add(wp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                    }
+                    if (IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                    {
+                      foreach (var fd in Commonradius(WellToWallOffset))
+                      {
+                        max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                      }
+                      foreach (var cp in MaxBalconybasinToBalcony(WellToWallOffset))
+                      {
+                        MaxBalconywashingfloordrainToBalconyfloordrain.Add(cp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                      }
+                      if (MaxTagYposition(WellToWallOffset).Any())
+                      {
+                        MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = THESAURUSADVENT;
+                      }
+                      else if (MaxTagXposition(WellToWallOffset).Any())
+                      {
+                        MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = VICISSITUDINOUS;
+                      }
+                      else if (MaxTagLength(WellToWallOffset).Any())
+                      {
+                        MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = THESAURUSINTENTIONAL;
+                      }
+                    }
+                    else if (IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                    {
+                      if (IsDraiFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                      {
+                        foreach (var fd in Commonradius(GeoFac.CreateGeometry(TextHeight(toilet_wells_interval))))
+                        {
+                          max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                        }
+                      }
+                    }
+                  }
+                }
+              });
+            });
+            max_balcony_to_balcony_distance.Enqueue((int)lane_offset.MarkWaterBucketToPipe, () =>
+            {
+              foreach (var MaxRoomInterval in GeoFac.CreateContainsSelector(MAX_TOILET_TO_FLOORDRAIN_DISTANCE2)(MaxBalconywashingmachineToBalconybasinline))
+              {
+                var KitchenBufferDistance = max_downspout_to_balconywashingfloordrain(TolLightRangeSingleSideMin).ToList();
+                if (KitchenBufferDistance.Count > THESAURUSSTAMPEDE)
+                {
+                  var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = KitchenBufferDistance[THESAURUSSTAMPEDE];
+                  var MaxToiletToKitchenDistance = commonradius(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN);
+                  if (MaxToiletToKitchenDistance is not null)
+                  {
+                    var MaxToiletToKitchenDistance1 = max_balconywashingmachine_to_balconybasinline(MaxToiletToKitchenDistance);
+                    if (MaxToiletToKitchenDistance1 is not null)
+                    {
+                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = MaxToiletToKitchenDistance1.ContraPoint - TolLightRangeSingleSideMin.ContraPoint;
+                      var MaxKitchenToRainpipeDistance = MaxRoomInterval.UserData as string;
+                      var MaxBalconyToRainpipeDistance = (MaxRoomInterval.GetCenter() + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN).ToGRect(QUOTATIONWITTIG).ToPolygon();
+                      if (!string.IsNullOrEmpty(MaxKitchenToRainpipeDistance))
+                      {
+                        var MaxDownspoutToBalconywashingfloordrain = max_room_interval(MaxToiletToKitchenDistance1.Boundary.ToPolygon());
+                        foreach (var toilet_wells_interval in MaxDownspoutToBalconywashingfloordrain)
+                        {
+                          var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = toilet_wells_interval.UserData as string;
+                          if (IsY1L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                          {
+                            if (MaxBalconyToRainpipeDistance.Intersects(toilet_wells_interval))
+                            {
+                              MaxRainpipeToBalconyfloordrain[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = MaxKitchenToRainpipeDistance;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+        var MaxToiletToCondensepipeDistance = kitchen_buffer_distance.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToHashSet();
+        List<PipeLine> pipeLines = new();
+        static bool IsDraiType(PipeType MaxToiletToFloordrainDistance)
+        {
+          var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = MaxToiletToFloordrainDistance.ToString();
+          return MaxToiletToFloordrainDistance != PipeType.FL0 && (MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSBASELESS) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSDECLAIM) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSPOSSESSIVE) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(INCORRESPONDENCE) || MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN.Contains(THESAURUSCONFIRM));
+        }
+        static bool IsRainType(PipeType MaxToiletToFloordrainDistance)
+        {
+          return MaxToiletToFloordrainDistance is PipeType.Y1L or PipeType.Y2L or PipeType.YL or PipeType.NL or PipeType.FL0;
+        }
+        static PipeType GetPipeType(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+        {
+          if (IsY1L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.Y1L;
+          if (IsY2L(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.Y2L;
+          if (IsNL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.NL;
+          if (IsYL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.YL;
+          if (IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.FL0;
+          if (IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.FL;
+          if (IsPL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.PL;
+          if (IsWL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.WL;
+          if (IsDL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.DL;
+          if (IsTL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return PipeType.TL;
+          return PipeType.Unknown;
+        }
+        var MaxToiletToFloordrainDistance2 = new HashSet<string>();
+        foreach (var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE in MaxToiletToCondensepipeDistance.Where(TolLightRangeSingleSideMax => !IsTL(TolLightRangeSingleSideMax)))
+        {
+          if (MaxToiletToFloordrainDistance2.Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) continue;
+          var MaxBalconyToBalconyDistance = new PipeLine();
+          var MaxKitchenToBalconyDistance = new HashSet<string>() { MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE };
+          pipeLines.Add(MaxBalconyToBalconyDistance);
+          PipeType MaxBalconyrainpipeToFloordrainDistance = default;
+          string MaxBalconyToDeviceplatformDistance = default;
+          string MaxToiletToFloordrainDistance1 = default;
+          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < SIDEWATERBUCKET_Y_INDENT.Count; MAX_ANGEL_TOLLERANCE++)
+          {
+            var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = SIDEWATERBUCKET_Y_INDENT[MAX_ANGEL_TOLLERANCE];
+            var TolLightRangeSingleSideMin = max_balconywashingmachine_to_balconybasinline(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN);
+            string MinDeviceplatformArea()
+            {
+              if (TolLightRangeSingleSideMin is null) return null;
+              max_toilet_to_floordrain_distance2[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].TryGetValue(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, out var MaxRoomInterval);
+              return MaxRoomInterval;
+            }
+            bool MaxDeviceplatformArea()
+            {
+              if (TolLightRangeSingleSideMin is null) return INTRAVASCULARLY;
+              var tolGroupEmgLightEvac = max_balcony_to_deviceplatform_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+              if (tolGroupEmgLightEvac)
+              {
+                var MinWellToUrinalDistance = max_downspout_to_balconywashingfloordrain(TolLightRangeSingleSideMin).ToList();
+                if (MinWellToUrinalDistance.Count > THESAURUSHOUSING)
+                {
+                  return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN == MinWellToUrinalDistance.OrderBy(GetStoreyScore).Last();
+                }
+              }
+              return tolGroupEmgLightEvac;
+            }
+            bool MaxBasecircleArea()
+            {
+              if (TolLightRangeSingleSideMin is null) return INTRAVASCULARLY;
+              var tolGroupEmgLightEvac = !MaxDeviceplatformArea() && max_balconyrainpipe_to_floordrain_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+              if (tolGroupEmgLightEvac)
+              {
+                var MinWellToUrinalDistance = max_downspout_to_balconywashingfloordrain(TolLightRangeSingleSideMin).ToList();
+                if (MinWellToUrinalDistance.Count > THESAURUSHOUSING)
+                {
+                  return MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN == MinWellToUrinalDistance.OrderBy(GetStoreyScore).Last();
+                }
+              }
+              return tolGroupEmgLightEvac;
+            }
+            int maxBalconywashingfloordrainToBalconyfloordrain()
+            {
+              if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
+              var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
+              foreach (var wp in max_toilet_to_floordrain_distance1[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
+              {
+                if (wp.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
+              }
+              if (maxBalconyrainpipeToFloordrainDistance > THESAURUSSTAMPEDE) maxBalconyrainpipeToFloordrainDistance = THESAURUSHOUSING;
+              return maxBalconyrainpipeToFloordrainDistance;
+            }
+            int maxBalconywashingfloordrainToRainpipe()
+            {
+              if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
+              var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
+              foreach (var fd in max_toilet_to_kitchen_distance1[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
+              {
+                if (fd.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
+              }
+              if (maxBalconyrainpipeToFloordrainDistance > THESAURUSPERMUTATION) maxBalconyrainpipeToFloordrainDistance = THESAURUSPERMUTATION;
+              return maxBalconyrainpipeToFloordrainDistance;
+            }
+            int maxDeviceToDevice()
+            {
+              if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
+              var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
+              foreach (var cp in max_kitchen_to_rainpipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
+              {
+                if (cp.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
+              }
+              if (maxBalconyrainpipeToFloordrainDistance > THESAURUSPERMUTATION) maxBalconyrainpipeToFloordrainDistance = THESAURUSPERMUTATION;
+              return maxBalconyrainpipeToFloordrainDistance;
+            }
+            bool maxDeviceToBalcony()
+            {
+              if (TolLightRangeSingleSideMin is null) return INTRAVASCULARLY;
+              if (kitchen_buffer_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return THESAURUSOBSTINACY;
+              if (max_balcony_to_rainpipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return THESAURUSOBSTINACY;
+              return INTRAVASCULARLY;
+            }
+            string maxRainpipeToBalconyfloordrain()
+            {
+              if (MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE) return null;
+              if (TolLightRangeSingleSideMin is null) return null;
+              max_toilet_to_floordrain_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].TryGetValue(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, out var DEFAULT_FIRE_VALVE_WIDTH);
+              return DEFAULT_FIRE_VALVE_WIDTH;
+            }
+            string minDownspoutToBalconyfloordrain()
+            {
+              if (IsDraiType(maxCondensepipeToWashmachine())) return THESAURUSPAGEANT;
+              if (MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE) return null;
+              if (TolLightRangeSingleSideMin is null) return null;
+              max_toilet_to_condensepipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].TryGetValue(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, out var MaxBalconyToDeviceplatformDistance);
+              return MaxBalconyToDeviceplatformDistance;
+            }
+            PipeType maxCondensepipeToWashmachine()
+            {
+              if (TolLightRangeSingleSideMin is null) return PipeType.Unknown;
+              var max_kitchen_to_balcony_distance = max_balcony_to_rainpipe_distance[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)].FirstOrDefault(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Contains(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+              if (max_kitchen_to_balcony_distance is null)
+              {
+                MaxToiletToFloordrainDistance2.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+                MaxKitchenToBalconyDistance.Add(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+                return GetPipeType(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+              }
+              MaxToiletToFloordrainDistance2.AddRange(max_kitchen_to_balcony_distance);
+              MaxKitchenToBalconyDistance.AddRange(max_kitchen_to_balcony_distance);
+              if (max_kitchen_to_balcony_distance.Count == INTROPUNITIVENESS)
+              {
+                return PipeType.WLTLFL;
+              }
+              if (max_kitchen_to_balcony_distance.Count == THESAURUSPERMUTATION)
+              {
+                if (max_kitchen_to_balcony_distance.Any(IsTL) && max_kitchen_to_balcony_distance.Any(IsPL)) return PipeType.PLTL;
+                if (max_kitchen_to_balcony_distance.Any(IsTL) && max_kitchen_to_balcony_distance.Any(IsWL)) return PipeType.WLTL;
+              }
+              return PipeType.Unknown;
+            }
+            var MaxToiletToFloordrainDistance = maxCondensepipeToWashmachine();
+            if (MaxBalconyrainpipeToFloordrainDistance == PipeType.Unknown) MaxBalconyrainpipeToFloordrainDistance = MaxToiletToFloordrainDistance;
+            MaxBalconyToBalconyDistance.Runs.Add(new() { Index = MAX_ANGEL_TOLLERANCE, Storey = MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN, HasLong = INTRAVASCULARLY, HasShort = INTRAVASCULARLY, Exists = maxDeviceToBalcony(), });
+            var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs.Last();
+            if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
+            {
+              DEFAULT_FIRE_VALVE_WIDTH.HasLong = MaxDeviceplatformArea();
+              DEFAULT_FIRE_VALVE_WIDTH.HasShort = MaxBasecircleArea();
+              DEFAULT_FIRE_VALVE_WIDTH.FDSCount = maxBalconywashingfloordrainToRainpipe();
+              DEFAULT_FIRE_VALVE_WIDTH.CPSCount = maxDeviceToDevice();
+              DEFAULT_FIRE_VALVE_WIDTH.WPSCount = maxBalconywashingfloordrainToBalconyfloordrain();
+              if (DEFAULT_FIRE_VALVE_WIDTH.WPSCount > DEFAULT_FIRE_VALVE_WIDTH.FDSCount)
+              {
+                if (MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE)
+                {
+                  DEFAULT_FIRE_VALVE_WIDTH.WPSCount = DEFAULT_FIRE_VALVE_WIDTH.FDSCount;
+                }
+              }
+              MaxBalconyToDeviceplatformDistance ??= minDownspoutToBalconyfloordrain();
+              MaxToiletToFloordrainDistance1 ??= maxRainpipeToBalconyfloordrain();
+              if (MaxBalconyrainpipeToFloordrainDistance.ToString().Contains(THESAURUSDECLAIM))
+              {
+                if (GetStoreyScore(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN) < GetStoreyScore(SIDEWATERBUCKET_Y_INDENT[max_condensepipe_to_washmachine]))
+                {
+                  DEFAULT_FIRE_VALVE_WIDTH.HasCleaningPort = THESAURUSOBSTINACY;
+                }
+              }
+            }
+            DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = MinDeviceplatformArea();
+          }
+          if (MaxBalconyrainpipeToFloordrainDistance == PipeType.Unknown) MaxBalconyrainpipeToFloordrainDistance = PipeType.FL;
+          MaxBalconyToBalconyDistance.PipeType = MaxBalconyrainpipeToFloordrainDistance;
+          MaxBalconyToBalconyDistance.Outlet = MaxBalconyToDeviceplatformDistance;
+          MaxToiletToFloordrainDistance1 ??= THESAURUSRECTIFY;
+          MaxBalconyToBalconyDistance.WPRadius = MaxToiletToFloordrainDistance1;
+          MaxBalconyToBalconyDistance.Labels.AddRange(MaxKitchenToBalconyDistance.Distinct().OrderBy(y => GetPipeType(y)).ThenBy(y => y));
+          {
+            if (MaxBalconyToBalconyDistance.PipeType is PipeType.TL) MaxBalconyToBalconyDistance.PipeType = PipeType.PL;
+            if (string.IsNullOrEmpty(MaxBalconyToBalconyDistance.Outlet))
+            {
+              if (IsDraiType((MaxBalconyToBalconyDistance.PipeType)))
+              {
+                MaxBalconyToBalconyDistance.Outlet = THESAURUSPAGEANT;
+              }
+              else
+              {
+                MaxBalconyToBalconyDistance.Outlet = THESAURUSINTENTIONAL;
+              }
+            }
+            for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE--)
+            {
+              var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+              if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
+              {
+                --MAX_ANGEL_TOLLERANCE;
+                while (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE)
+                {
+                  DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                  --MAX_ANGEL_TOLLERANCE;
+                }
+                break;
+              }
+            }
+            {
+              if (MaxBalconyToBalconyDistance.PipeType is PipeType.Y1L)
+              {
+                var wbk = MaxBalconyToBalconyDistance.Runs.FirstOrDefault(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.WaterBucket is not null);
+                if (wbk is null)
+                {
+                  for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; --MAX_ANGEL_TOLLERANCE)
+                  {
+                    var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+                    DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                    DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
+                  }
+                }
+              }
+            }
+            {
+              if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) <= THESAURUSHOUSING)
+              {
+                foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
+                {
+                  if (IsDraiType(MaxBalconyToBalconyDistance.PipeType))
+                  {
+                    if (GetStoreyScore((DEFAULT_FIRE_VALVE_WIDTH.Storey)) <= GetStoreyScore(THESAURUSARGUMENTATIVE))
+                    {
+                      DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                    }
+                  }
+                  else
+                  {
+                    DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                    if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
+                    {
+                      DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
+                    }
+                  }
+                }
+              }
+              if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) <= THESAURUSHOUSING)
+              {
+                foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
+                {
+                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                  if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
+                  {
+                    DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
+                  }
+                }
+              }
+            }
+            for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < MaxBalconyToBalconyDistance.Runs.Count; MAX_ANGEL_TOLLERANCE++)
+            {
+              if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+              {
+                MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].WPSCount = THESAURUSHOUSING;
+              }
+            }
+          }
+          for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE;)
+          {
+            var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+            if (DEFAULT_FIRE_VALVE_WIDTH.WaterBucket is not null)
+            {
+              --MAX_ANGEL_TOLLERANCE;
+              while (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE)
+              {
+                MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].WaterBucket = null;
+                --MAX_ANGEL_TOLLERANCE;
+              }
+            }
+            else
+            {
+              --MAX_ANGEL_TOLLERANCE;
+            }
+          }
+          if (MaxBalconyrainpipeToFloordrainDistance == PipeType.FL)
+          {
+            if (MaxBalconyToBalconyDistance.Runs.Where(DEFAULT_FIRE_VALVE_WIDTH => DEFAULT_FIRE_VALVE_WIDTH.Exists).All(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.FDSCount == THESAURUSSTAMPEDE))
+            {
+              foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
+              {
+                if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
+                {
+                  if (GetStoreyScore(DEFAULT_FIRE_VALVE_WIDTH.Storey) < GetStoreyScore(SIDEWATERBUCKET_Y_INDENT[max_condensepipe_to_washmachine]))
+                  {
+                    DEFAULT_FIRE_VALVE_WIDTH.HasBasin = THESAURUSOBSTINACY;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (!vm.Params.YS)
+        {
+          pipeLines = pipeLines.Where(TolLightRangeSingleSideMax => !IsRainType(TolLightRangeSingleSideMax.PipeType)).ToList();
+        }
+        if (!vm.Params.WFS)
+        {
+          pipeLines = pipeLines.Where(TolLightRangeSingleSideMax => !IsDraiType(TolLightRangeSingleSideMax.PipeType)).ToList();
+        }
+        var gpItems = pipeLines.GroupBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.OrderBy(y => GetPipeType(y.Labels.First())).ThenBy(y => y.Labels.First()).ToList()).OrderBy(TolLightRangeSingleSideMax => GetPipeType(TolLightRangeSingleSideMax.First().Labels.First())).ThenBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.First().Labels.First()).ToList();
+        using (var max_balcony_to_balcony_distance = new ParkingStallGroupWidthRestrict(THESAURUSINCOMPLETE))
+        {
+          var MAX_RAINPIPE_TO_WASHMACHINE = new List<parking_stall_group_length_restrict>(THESAURUSREPERCUSSION);
+          var COMMONRADIUS = new List<lane_line_extend_length>(THESAURUSREPERCUSSION);
+          var MAX_BALCONYBASIN_TO_BALCONY = new List<parking_stall_group_width_restrict>(THESAURUSREPERCUSSION);
+          var BALCONY_BUFFER_DISTANCE = new List<LANE_LINE_EXTEND_LENGTH>(THESAURUSREPERCUSSION);
+          var MIN_BALCONYBASIN_TO_BALCONY = new List<LANE_OFFSET>(THESAURUSREPERCUSSION);
+          var maxBalconywashingmachineToBalconybasinline = new _tol_to_close_pt(MAX_RAINPIPE_TO_WASHMACHINE, COMMONRADIUS, MAX_BALCONYBASIN_TO_BALCONY, BALCONY_BUFFER_DISTANCE, MIN_BALCONYBASIN_TO_BALCONY);
+          var HEIGHT = THESAURUSINCOMING;
+          var _tolReturnValueDistCheck = new List<int>(SIDEWATERBUCKET_Y_INDENT.Count);
+          {
+            var MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = THESAURUSSTAMPEDE;
+            var _vm = FloorHeightsViewModel.Instance;
+            for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < SIDEWATERBUCKET_Y_INDENT.Count; MAX_ANGEL_TOLLERANCE++)
+            {
+              _tolReturnValueDistCheck.Add(MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN);
+              var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _vm.GeneralFloor;
+              if (_vm.ExistsSpecialFloor) MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _vm.Items.FirstOrDefault(tolReturnValueMinRange => test(tolReturnValueMinRange.Floor, GetStoreyScore(SIDEWATERBUCKET_Y_INDENT[MAX_ANGEL_TOLLERANCE])))?.Height ?? MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
+              MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN += MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN;
+              static bool test(string TolLightRangeSingleSideMax, int TolLightRangeMin)
+              {
+                var tolReturnValueMinRange = Regex.Match(TolLightRangeSingleSideMax, QUOTATIONSTYLOGRAPHIC);
+                if (tolReturnValueMinRange.Success)
+                {
+                  if (int.TryParse(tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value, out int _tolReturnValue0Approx) && int.TryParse(tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value, out int TolGroupEvcaEmg))
+                  {
+                    var _tolReturnValueMaxDistance = Math.Min(_tolReturnValue0Approx, TolGroupEvcaEmg);
+                    var _tolReturnValueMinRange = Math.Max(_tolReturnValue0Approx, TolGroupEvcaEmg);
+                    for (int MAX_ANGEL_TOLLERANCE = _tolReturnValueMaxDistance; MAX_ANGEL_TOLLERANCE <= _tolReturnValueMinRange; MAX_ANGEL_TOLLERANCE++)
+                    {
+                      if (MAX_ANGEL_TOLLERANCE == TolLightRangeMin) return THESAURUSOBSTINACY;
+                    }
+                  }
+                  else
+                  {
+                    return INTRAVASCULARLY;
+                  }
+                }
+                tolReturnValueMinRange = Regex.Match(TolLightRangeSingleSideMax, TETRAIODOTHYRONINE);
+                if (tolReturnValueMinRange.Success)
+                {
+                  if (int.TryParse(TolLightRangeSingleSideMax, out int MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN))
+                  {
+                    if (MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN == TolLightRangeMin) return THESAURUSOBSTINACY;
+                  }
+                }
+                return INTRAVASCULARLY;
+              }
+            }
+          }
+          const double maxDownspoutToBalconywashingfloordrain = ThWSDStorey.RF_OFFSET_Y;
+          var maxRainpipeToWashmachine = gpItems.Count;
+          var maxBalconybasinToBalcony = BALANOPHORACEAE;
+          var balconyBufferDistance = maxBalconybasinToBalcony * maxRainpipeToWashmachine * QUOTATIONEDIBLE;
+          var minBalconybasinToBalcony = THESAURUSLEGISLATION;
+          var maxTagYposition = LAUTENKLAVIZIMBEL;
+          var WELL_TO_WALL_OFFSET = minBalconybasinToBalcony + maxRainpipeToWashmachine * maxBalconybasinToBalcony + maxTagYposition;
+          Point3d maxTagXposition(int MAX_ANGEL_TOLLERANCE, int MAX_ANGLE_TOLLERANCE)
+          {
+            return maxTagLength(MAX_ANGEL_TOLLERANCE).OffsetX(minBalconybasinToBalcony + MAX_ANGLE_TOLLERANCE * maxBalconybasinToBalcony);
+          }
+          Point3d maxTagLength(int MAX_ANGEL_TOLLERANCE)
+          {
+            return SIDEWATERBUCKET_X_INDENT.OffsetY(HEIGHT * MAX_ANGEL_TOLLERANCE);
+          }
+          foreach (var MAX_ANGEL_TOLLERANCE in Enumerable.Range(THESAURUSSTAMPEDE, SIDEWATERBUCKET_Y_INDENT.Count).OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
+          {
+            var tolGroupBlkLane = SIDEWATERBUCKET_Y_INDENT[MAX_ANGEL_TOLLERANCE];
+            string textIndent()
+            {
+              if (tolGroupBlkLane is THESAURUSREGION) return MULTINATIONALLY;
+              var tolGroupEmgLightEvac = (_tolReturnValueDistCheck[MAX_ANGEL_TOLLERANCE] / LAUTENKLAVIZIMBEL).ToString(THESAURUSINFINITY); ;
+              if (tolGroupEmgLightEvac == THESAURUSINFINITY) return MULTINATIONALLY;
+              return tolGroupEmgLightEvac;
+            }
+            var _tolReturnValueMax = maxTagLength(MAX_ANGEL_TOLLERANCE);
+            textHeight(tolGroupBlkLane, _tolReturnValueMax, WELL_TO_WALL_OFFSET, textIndent());
+            void textHeight(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, Point3d basePt, double WELL_TO_WALL_OFFSET, string repeated_point_distance)
+            {
+              {
+                var TolUniformSideLenth = DrawLineLazy(basePt.X, basePt.Y, basePt.X + WELL_TO_WALL_OFFSET, basePt.Y);
+                var maxBalconyToDeviceplatformDistance = DrawTextLazy(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, THESAURUSSTAMPEDE));
+                Dr.SetLabelStylesForWNote(TolUniformSideLenth, maxBalconyToDeviceplatformDistance);
+                DrawBlockReference(blkName: THESAURUSSUPERFICIAL, basePt: basePt.OffsetX(QUOTATIONPITUITARY), layer: COSTERMONGERING, props: new Dictionary<string, string>() { { THESAURUSSUPERFICIAL, repeated_point_distance } });
+              }
+              if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == THESAURUSARGUMENTATIVE)
+              {
+                var TolUniformSideLenth = DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + maxDownspoutToBalconywashingfloordrain, THESAURUSSTAMPEDE), new Point3d(basePt.X + WELL_TO_WALL_OFFSET, basePt.Y + maxDownspoutToBalconywashingfloordrain, THESAURUSSTAMPEDE));
+                var maxBalconyToDeviceplatformDistance = DrawTextLazy(THESAURUSSHADOWY, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + maxDownspoutToBalconywashingfloordrain + ThWSDStorey.INDEX_TEXT_OFFSET_Y, THESAURUSSTAMPEDE));
+                Dr.SetLabelStylesForWNote(TolUniformSideLenth, maxBalconyToDeviceplatformDistance);
+              }
+            }
+          }
+          var sidewaterbucketXIndent = SIDEWATERBUCKET_Y_INDENT.IndexOf(THESAURUSARGUMENTATIVE);
+          var sidewaterbucketYIndent = SIDEWATERBUCKET_Y_INDENT.Count - THESAURUSHOUSING;
+          static string GetPipeLayer(PipeType MaxBalconyrainpipeToFloordrainDistance)
+          {
+            if (MaxBalconyrainpipeToFloordrainDistance is PipeType.TL) return THUNDERSTRICKEN;
+            if (MaxBalconyrainpipeToFloordrainDistance is PipeType.FL) return THESAURUSADVERSITY;
+            return IsDraiType(MaxBalconyrainpipeToFloordrainDistance) ? THESAURUSCONTROVERSY : INSTRUMENTALITY;
+          }
+          static string GetNoteLayer(PipeType MaxBalconyrainpipeToFloordrainDistance)
+          {
+            return IsDraiType(MaxBalconyrainpipeToFloordrainDistance) ? THESAURUSSTRIPED : CIRCUMCONVOLUTION;
+          }
+          static string GetEQPMLayer(PipeType MaxBalconyrainpipeToFloordrainDistance)
+          {
+            return IsDraiType(MaxBalconyrainpipeToFloordrainDistance) ? THESAURUSJUBILEE : DENDROCHRONOLOGIST;
+          }
+          foreach (var MAX_ANGLE_TOLLERANCE in Enumerable.Range(THESAURUSSTAMPEDE, maxRainpipeToWashmachine))
+          {
+            var _tolReturnValueRange = gpItems[MAX_ANGLE_TOLLERANCE].First();
+            var max_kitchen_to_balcony_distance = gpItems[MAX_ANGLE_TOLLERANCE].SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Labels).ToHashSet();
+            var eMax = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
+            var _parking_stall_group_width_restrict = new List<parking_stall_group_width_restrict>(THESAURUSREPERCUSSION);
+            var MAX_DEVICE_TO_DEVICE = QUOTATIONTRANSFERABLE;
+            var wellToWallOffset = new List<Point3d>();
+            var toiletWellsInterval = new List<Point3d>();
+            var toiletBufferDistance = new List<GRect>();
+            foreach (var MAX_ANGEL_TOLLERANCE in Enumerable.Range(THESAURUSSTAMPEDE, SIDEWATERBUCKET_Y_INDENT.Count).OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
+            {
+              var MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE).OffsetX(MAX_DEVICE_TO_DEVICE);
+              if (_tolReturnValueRange.Outlet is null)
+              {
+                max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.SanPaiMark, () =>
+                {
+                  var eMin = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
+                  if (eMin is THESAURUSSTAMPEDE) return;
+                  if (MAX_ANGEL_TOLLERANCE == eMin)
+                  {
+                    if (_tolReturnValueRange.Runs.TryGet(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING)?.WaterBucket is not null)
+                    {
+                      wellToWallOffset.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED));
+                      toiletWellsInterval.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED - ASSOCIATIONISTS));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONPITUITARY)), CIRCUMCONVOLUTION));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -QUOTATIONPITUITARY)), CIRCUMCONVOLUTION));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFRISKY, -QUOTATIONWITTIG), THESAURUSEXECUTIVE + _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].Storey, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                    }
+                  }
+                });
+              }
+              if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WaterBucket is not null)
+              {
+                var MaxRoomInterval = _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WaterBucket;
+                var toilet_buffer_distance = MaxRoomInterval.Split(THESAURUSHABITAT)[THESAURUSSTAMPEDE];
+                var MAX_CONDENSEPIPE_TO_WASHMACHINE = MaxRoomInterval.Split(THESAURUSHABITAT)[THESAURUSHOUSING];
+                if (toilet_buffer_distance.Contains(THESAURUSPROLONG) || toilet_buffer_distance.Contains(QUOTATIONSPENSERIAN))
+                {
+                  var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
+                  MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(THESAURUSUNDERSTANDING);
+                  if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent) MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(maxDownspoutToBalconywashingfloordrain);
+                  COMMONRADIUS.Add(new(THESAURUSCURDLE, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSBEHOVE)));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-CONSUMMATIVENESS, UNACCEPTABLENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDEPUTIZE, THESAURUSHEARTLESS)), CIRCUMCONVOLUTION));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDEPUTIZE, THESAURUSHEARTLESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONWORSTED, THESAURUSHEARTLESS)), CIRCUMCONVOLUTION));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONWORSTED, THESAURUSHEARTLESS), toilet_buffer_distance, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSVISIBLE, QUOTATIONETHIOPS), MAX_CONDENSEPIPE_TO_WASHMACHINE, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                  wellToWallOffset.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(-THESAURUSBEHOVE));
+                  toiletWellsInterval.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(-THESAURUSBEHOVE + ASSOCIATIONISTS));
+                  MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
+                }
+                else
+                {
+                  var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
+                  if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent) MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(maxDownspoutToBalconywashingfloordrain);
+                  COMMONRADIUS.Add(new(THESAURUSPRECOCIOUS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, PHOSPHORYLATION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMISUNDERSTANDING, THESAURUSINSTITUTE)), CIRCUMCONVOLUTION));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMISUNDERSTANDING, THESAURUSINSTITUTE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINCONCLUSIVE, THESAURUSINSTITUTE)), CIRCUMCONVOLUTION));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINCONCLUSIVE, THESAURUSINSTITUTE), toilet_buffer_distance, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOBIPINNATISECT, CATECHOLAMINERGIC), MAX_CONDENSEPIPE_TO_WASHMACHINE, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                  MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
+                }
+                if (eMax + THESAURUSHOUSING == MAX_ANGEL_TOLLERANCE)
+                {
+                  maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                  if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent)
+                  {
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, maxDownspoutToBalconywashingfloordrain)), INSTRUMENTALITY));
+                  }
+                  if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE - THESAURUSHOUSING].HasLong || _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE - THESAURUSHOUSING].HasShort)
+                  {
+                    var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
+                    MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(-HEIGHT);
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE)), INSTRUMENTALITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE)), INSTRUMENTALITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS)), INSTRUMENTALITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC)), INSTRUMENTALITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), INSTRUMENTALITY));
+                    MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
+                  }
+                  else
+                  {
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -HEIGHT)), INSTRUMENTALITY));
+                  }
+                  maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                  _parking_stall_group_width_restrict.AddRange(maxBalconywashingmachineToBalconybasinline._ParkingStallGroupLengthRestrict());
+                  var _tol_avg_column_dist = maxBalconywashingmachineToBalconybasinline.LaneLineExtendLength().OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).ToList();
+                  if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE) MAX_DEVICE_TO_DEVICE += _tol_avg_column_dist.Last().X - _tol_avg_column_dist.First().X;
+                }
+              }
+              if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].Exists)
+              {
+                {
+                  if (_tolReturnValueRange.PipeType is PipeType.PLTL or PipeType.WLTL)
+                  {
+                    maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                    void maxDeviceplatformArea()
+                    {
+                      COMMONRADIUS.Add(new(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSMOULDER, THESAURUSBEAUTIFY)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION, });
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSEFFULGENT)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSEFFULGENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSINDISPENSABLE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSREPRESSIVE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSREPRESSIVE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSMADNESS)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSMADNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSMADNESS)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSMADNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, CONTRADISTINGUISHED)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, CONTRADISTINGUISHED), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, THESAURUSINDISPENSABLE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSWINDING, THESAURUSBEAUTIFY)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSWINDING, THESAURUSBEAUTIFY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSMOULDER, THESAURUSBEAUTIFY)), THESAURUSCONTROVERSY));
+                      COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                      MIN_BALCONYBASIN_TO_BALCONY.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, INTERNATIONALLY), new(POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), THESAURUSDUBIETY, QUOTATIONBENJAMIN));
+                      MIN_BALCONYBASIN_TO_BALCONY.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSDOMESTIC), new(-POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), CONSECUTIVENESS, QUOTATIONBENJAMIN));
+                      var LineCoincideTolerance = new List<Vector2d> { new Vector2d(-THESAURUSDICTATORIAL, ACANTHORHYNCHUS), new Vector2d(THESAURUSSTAMPEDE, THESAURUSDISCERNIBLE), new Vector2d(-THESAURUSDOMESTIC, THESAURUSSTAMPEDE) };
+                      var _tol_avg_column_dist = LineCoincideTolerance.ToPoint2ds(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.ToPoint2d());
+                      MIN_BALCONYBASIN_TO_BALCONY.Add(new(_tol_avg_column_dist[THESAURUSHOUSING], _tol_avg_column_dist[THESAURUSPERMUTATION], _tol_avg_column_dist[INTROPUNITIVENESS] - _tol_avg_column_dist[THESAURUSPERMUTATION], INTERNALIZATION, QUOTATIONBENJAMIN));
+                    }
+                    if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+                    {
+                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
+                      {
+                        maxDeviceplatformArea();
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSHALLOW, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSHALLOW, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, IMMEASURABLENESS)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, IMMEASURABLENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, ALSOWATERLANDIAN)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, ALSOWATERLANDIAN), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, INTERNATIONALLY)), THUNDERSTRICKEN));
+                      }
+                      else
+                      {
+                        COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                        COMMONRADIUS.Add(new(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION });
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSDISCERNIBLE)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSDISCERNIBLE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INTERNATIONALLY)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
+                        MIN_BALCONYBASIN_TO_BALCONY.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INTERNATIONALLY), new(POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), THESAURUSDUBIETY, QUOTATIONBENJAMIN));
+                        MIN_BALCONYBASIN_TO_BALCONY.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC), new(-POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), CONSECUTIVENESS, QUOTATIONBENJAMIN));
+                      }
+                    }
+                    else if (MAX_ANGEL_TOLLERANCE == eMax)
+                    {
+                      if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent)
+                      {
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, maxDownspoutToBalconywashingfloordrain), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      }
+                    }
+                    else if (MAX_ANGEL_TOLLERANCE == eMax - THESAURUSHOUSING)
+                    {
+                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
+                      {
+                        if (MAX_TOILET_TO_KITCHEN_DISTANCE)
+                        {
+                          COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSOUTLANDISH)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSCOMPLAINT, THESAURUSCONVOY)), THUNDERSTRICKEN));
+                        }
+                        else
+                        {
+                          maxDeviceplatformArea();
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOPALIMBACCHIC, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOPALIMBACCHIC, THESAURUSPREFER)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ALSOPALIMBACCHIC, THESAURUSPREFER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSEQUATION)), THUNDERSTRICKEN));
+                        }
+                      }
+                      else
+                      {
+                        COMMONRADIUS.Add(new(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION });
+                        COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, INTROJECTIONISM), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSEUPHORIA), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, INTROJECTIONISM)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
+                      }
+                    }
+                    else
+                    {
+                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
+                      {
+                        if (MAX_TOILET_TO_KITCHEN_DISTANCE)
+                        {
+                          COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSOUTLANDISH)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSCIRCULAR), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, THESAURUSBUSINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSPRINGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSCONVOY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, THESAURUSREPARATION)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, THESAURUSREPARATION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSBLESSING, THESAURUSREPARATION)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSBLESSING, THESAURUSREPARATION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, QUOTATIONSHELLEY)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSCONVOY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DOCTRINARIANISM, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSGETAWAY)), THUNDERSTRICKEN));
+                        }
+                        else
+                        {
+                          maxDeviceplatformArea();
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, ANTHROPOPHAGINIAN), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSCOMPLAINT, QUOTATIONNAMAQUA)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSEFFICACY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLEGALIZE, PALAEOICHTHYOLOGY)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLEGALIZE, PALAEOICHTHYOLOGY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, IMMEASURABLENESS)), THUNDERSTRICKEN));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, IMMEASURABLENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINFAMOUS, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
+                        }
+                      }
+                      else
+                      {
+                        COMMONRADIUS.Add(new(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION });
+                        COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSGETAWAY)), THUNDERSTRICKEN));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MISAPPREHENSIVE, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(MISAPPREHENSIVE, REPRESENTATIONAL)), THESAURUSSTRIPED));
+                      }
+                    }
+                    maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                    _parking_stall_group_width_restrict.AddRange(maxBalconywashingmachineToBalconybasinline._ParkingStallGroupLengthRestrict().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.LayerName.Contains(THESAURUSPENNILESS)));
+                    {
+                      var _tol_avg_column_dist = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupLengthRestrict().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.LayerName.Contains(THESAURUSPENNILESS)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line).YieldPoints().OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).ToList();
+                      if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE) MAX_DEVICE_TO_DEVICE += _tol_avg_column_dist.Last().X - _tol_avg_column_dist.First().X;
+                    }
+                  }
+                  else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
+                  {
+                    maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                    if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+                    {
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)), THUNDERSTRICKEN));
+                    }
+                    else if (MAX_ANGEL_TOLLERANCE == eMax)
+                    {
+                      if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent)
+                      {
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, maxDownspoutToBalconywashingfloordrain), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
+                      }
+                    }
+                    else if (MAX_ANGEL_TOLLERANCE == eMax - THESAURUSHOUSING)
+                    {
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)), THUNDERSTRICKEN));
+                    }
+                    else
+                    {
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), THUNDERSTRICKEN));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSPRIVILEGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, INCONSIDERABILIS)), THUNDERSTRICKEN));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSREFRACTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDICTATORIAL)), THUNDERSTRICKEN));
+                    }
+                    maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                    _parking_stall_group_width_restrict.AddRange(maxBalconywashingmachineToBalconybasinline._ParkingStallGroupLengthRestrict().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.LayerName.Contains(THESAURUSDEVIANT)));
+                  }
+                  else
+                  {
+                    var h = HEIGHT;
+                    if (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent && MAX_ANGEL_TOLLERANCE == eMax) h = maxDownspoutToBalconywashingfloordrain;
+                    if (MAX_ANGEL_TOLLERANCE != eMax || (MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent && MAX_ANGEL_TOLLERANCE == eMax))
+                    {
+                      maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasLong)
+                      {
+                        if (MAX_ANGEL_TOLLERANCE != sidewaterbucketXIndent)
+                        {
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONAFGHAN, CORYNOCARPACEAE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, ACETYLSALICYLIC)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, PROBLEMATICALNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, THESAURUSSTAMPEDE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                        }
+                      }
+                      else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasShort)
+                      {
+                        if (MAX_ANGEL_TOLLERANCE != sidewaterbucketXIndent)
+                        {
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, COOPERATIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, QUOTATIONBASTARD)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, COOPERATIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, THESAURUSSTAMPEDE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, ALSOMULTIFLORAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSACQUIESCENT, ALSOMULTIFLORAL)), GetNoteLayer(_tolReturnValueRange.PipeType)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, ALSOMULTIFLORAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHESITANCY, THESAURUSUNOCCUPIED)), GetNoteLayer(_tolReturnValueRange.PipeType)));
+                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSCELESTIAL), THESAURUSTENACIOUS, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
+                        }
+                      }
+                      else
+                      {
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, h), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                      }
+                      maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                      _parking_stall_group_width_restrict.AddRange(maxBalconywashingmachineToBalconybasinline._ParkingStallGroupLengthRestrict());
+                      var _tol_avg_column_dist = maxBalconywashingmachineToBalconybasinline.LaneLineExtendLength().OrderByDescending(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).ToList();
+                      if (_tol_avg_column_dist.Count > THESAURUSSTAMPEDE) MAX_DEVICE_TO_DEVICE += _tol_avg_column_dist.Last().X - _tol_avg_column_dist.First().X;
+                    }
+                  }
+                }
+                if (_tolReturnValueRange.PipeType is PipeType.FL && _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin && MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE && MAX_ANGEL_TOLLERANCE != eMax)
+                {
+                  maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                  COMMONRADIUS.Add(new(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
+                  COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY)), THESAURUSADVERSITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, PROMORPHOLOGIST), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY)), THESAURUSADVERSITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY)), THESAURUSADVERSITY));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, THESAURUSEFFICACY), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                  maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                  var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                  max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.Basin, () =>
+                  {
+                    var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
+                    var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-maxBalconybasinToBalcony), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(maxBalconybasinToBalcony)).ToLineString());
+                    if (target is Point _raiseDistanceToStartDefault)
+                    {
+                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                      tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                    }
+                  });
+                }
+                if (MAX_ANGEL_TOLLERANCE == eMax)
+                {
+                  if (_tolReturnValueRange.PipeType == PipeType.Y1L)
+                  {
+                  }
+                  else
+                  {
+                    maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                    var layer = GetPipeLayer(_tolReturnValueRange.PipeType);
+                    if (_tolReturnValueRange.PipeType is PipeType.WLTLFL) layer = THUNDERSTRICKEN;
+                    var canPeopleBeOnRoof = RainSystemDiagramViewModel.Singleton.Params.CouldHavePeopleOnRoof;
+                    COMMONRADIUS.Add(new(THESAURUSNARCOTIC, layer, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, MAX_ANGEL_TOLLERANCE == sidewaterbucketXIndent ? maxDownspoutToBalconywashingfloordrain : THESAURUSSTAMPEDE)) { DynaDict = new() { { QUINQUAGENARIAN, MAX_ANGEL_TOLLERANCE >= sidewaterbucketXIndent ? (canPeopleBeOnRoof ? THESAURUSPARTNER : THESAURUSINEFFECTUAL) : HYPERVENTILATION } } });
+                    maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                    var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                    max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.FixAirBlock, () =>
+                    {
+                      var _parking_stall_group_length_restrict = _parking_stall_group_width_restrict.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.IsVertical(THESAURUSHOUSING)).ToList();
+                      if (_parking_stall_group_length_restrict.Count > THESAURUSSTAMPEDE)
+                      {
+                        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = _parking_stall_group_length_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line).YieldPoints().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).Last();
+                        var _raiseDistanceToStartDefault = tolReturnValueMinRange.LaneOffset().First();
+                        if (_raiseDistanceToStartDefault.Y < MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.Y)
+                        {
+                          tolReturnValueMinRange._LaneLineExtendLength(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN - _raiseDistanceToStartDefault.ToPoint2d());
+                        }
+                      }
+                    });
+                  }
+                }
+                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].CPSCount == THESAURUSPERMUTATION)
+                {
+                  maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                  BALCONY_BUFFER_DISTANCE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, QUOTATIONPITUITARY), VÖLKERWANDERUNG, DENDROCHRONOLOGIST));
+                  BALCONY_BUFFER_DISTANCE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, QUOTATIONPITUITARY), VÖLKERWANDERUNG, DENDROCHRONOLOGIST));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSMAGNETIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER)), INSTRUMENTALITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, THESAURUSENDANGER)), INSTRUMENTALITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER)), INSTRUMENTALITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, QUOTATIONWITTIG)), INSTRUMENTALITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, QUOTATIONWITTIG)), INSTRUMENTALITY));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, THESAURUSDERELICTION), THESAURUSDISREPUTABLE, THESAURUSINVOICE, CONTROVERSIALLY));
+                  maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                  var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                  max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.CondensePipe, () =>
+                  {
+                    var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
+                    var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                    if (target is Point _raiseDistanceToStartDefault)
+                    {
+                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                      tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                    }
+                  });
+                }
+                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].CPSCount == THESAURUSHOUSING)
+                {
+                  maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                  BALCONY_BUFFER_DISTANCE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, QUOTATIONPITUITARY), VÖLKERWANDERUNG, DENDROCHRONOLOGIST));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSMAGNETIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER)), INSTRUMENTALITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER)), INSTRUMENTALITY));
+                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, THESAURUSENDANGER), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, QUOTATIONWITTIG)), INSTRUMENTALITY));
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, THESAURUSGETAWAY), THESAURUSDISREPUTABLE, THESAURUSINVOICE, CONTROVERSIALLY));
+                  maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                  var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                  max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.CondensePipe, () =>
+                  {
+                    var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                    var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
+                    var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                    if (target is Point _raiseDistanceToStartDefault)
+                    {
+                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                      tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                    }
+                  });
+                }
+                if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+                {
+                  max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.Outlet, () =>
+                  {
+                    MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE).OffsetX(MAX_DEVICE_TO_DEVICE);
+                    if (IsRainType(_tolReturnValueRange.PipeType))
+                    {
+                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WPSCount > THESAURUSSTAMPEDE)
+                      {
+                        COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, -THESAURUSBELLOW)));
+                      }
+                    }
+                    else if (IsDraiType(_tolReturnValueRange.PipeType))
+                    {
+                      if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].WPSCount > THESAURUSSTAMPEDE)
+                      {
+                        if ((_tolReturnValueRange.PipeType is PipeType.WL or PipeType.DL or PipeType.FL or PipeType.PL) && !_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin && _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSSTAMPEDE)
+                        {
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-ACETYLSALICYLIC, -THESAURUSHEADWAY)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSFAINTLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSERUDITION)), THESAURUSSTRIPED));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSERUDITION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSERUDITION)), THESAURUSSTRIPED));
+                          COMMONRADIUS.Add(new(THESAURUSSUPERFICIAL, THESAURUSSTRIPED, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSERUDITION)) { PropDict = new() { { THESAURUSSUPERFICIAL, _tolReturnValueRange.WPRadius } } });
+                        }
+                        else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
+                        {
+                          var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
+                          MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE);
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -THESAURUSCADENCE)));
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -CONDESCENDINGLY)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -THESAURUSNEEDLE)), THESAURUSSTRIPED));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSNEEDLE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -THESAURUSNEEDLE)), THESAURUSSTRIPED));
+                          COMMONRADIUS.Add(new(THESAURUSSUPERFICIAL, THESAURUSSTRIPED, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSNEEDLE)) { PropDict = new() { { THESAURUSSUPERFICIAL, _tolReturnValueRange.WPRadius } } });
+                          MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
+                        }
+                        else if (_tolReturnValueRange.PipeType is PipeType.FL)
+                        {
+                          var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
+                          if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin)
+                          {
+                            MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC, THESAURUSSTAMPEDE);
+                          }
+                          else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount > THESAURUSSTAMPEDE)
+                          {
+                            MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONWITTIG, THESAURUSSTAMPEDE);
+                          }
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -THESAURUSCADENCE)));
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -CONDESCENDINGLY)));
+                          var MAX_DEVICE_TO_BALCONY = _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount > THESAURUSSTAMPEDE ? -THESAURUSDISTRIBUTION : THESAURUSSTAMPEDE;
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -THESAURUSNEEDLE + MAX_DEVICE_TO_BALCONY)), THESAURUSSTRIPED));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSNEEDLE + MAX_DEVICE_TO_BALCONY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -THESAURUSNEEDLE + MAX_DEVICE_TO_BALCONY)), THESAURUSSTRIPED));
+                          COMMONRADIUS.Add(new(THESAURUSSUPERFICIAL, THESAURUSSTRIPED, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSNEEDLE + MAX_DEVICE_TO_BALCONY)) { PropDict = new() { { THESAURUSSUPERFICIAL, _tolReturnValueRange.WPRadius } } });
+                          MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
+                        }
+                        else
+                        {
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -THESAURUSCADENCE)));
+                          COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -CONDESCENDINGLY)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -THESAURUSNEEDLE)), THESAURUSSTRIPED));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSNEEDLE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-AUTHORITATIVELY, -THESAURUSNEEDLE)), THESAURUSSTRIPED));
+                          COMMONRADIUS.Add(new(THESAURUSSUPERFICIAL, THESAURUSSTRIPED, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPRETTY, -THESAURUSNEEDLE)) { PropDict = new() { { THESAURUSSUPERFICIAL, _tolReturnValueRange.WPRadius } } });
+                        }
+                      }
+                    }
+                    if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSHOUSING)
+                    {
+                      if (IsRainType(_tolReturnValueRange.PipeType))
+                      {
+                        COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEXCHANGE, -PORTMANTOLOGISM)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
+                        if (MAX_TOILET_TO_KITCHEN_DISTANCE)
+                        {
+                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISAGREEABLE, -THESAURUSCOMPOUND), QUOTATIONBREWSTER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -REACTIONARINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS)), INSTRUMENTALITY));
+                        }
+                        else
+                        {
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new parking_stall_group_width_restrict(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -RETROSPECTIVENESS)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new parking_stall_group_width_restrict(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new parking_stall_group_width_restrict(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -REACTIONARINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new parking_stall_group_width_restrict(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new parking_stall_group_width_restrict(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new parking_stall_group_width_restrict(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG)), INSTRUMENTALITY));
+                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new parking_stall_group_length_restrict(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSCOMPOUND), QUOTATIONBREWSTER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new parking_stall_group_length_restrict(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -INCOMPREHENSIBILIS), IRRESPONSIBLENESS, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                        }
+                        var LineCoincideTolerance = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSBELLOW), new Vector2d(THESAURUSSTAMPEDE, -THESAURUSINHERIT), new Vector2d(-THESAURUSSCINTILLATE, THESAURUSINHERIT) };
+                        var _tol_avg_column_dist = LineCoincideTolerance.ToPoint2ds(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.ToPoint2d());
+                        MIN_BALCONYBASIN_TO_BALCONY.Add(new(_tol_avg_column_dist[THESAURUSHOUSING], _tol_avg_column_dist[INTROPUNITIVENESS], _tol_avg_column_dist[THESAURUSPERMUTATION] - _tol_avg_column_dist[THESAURUSHOUSING], METACOMMUNICATION, THESAURUSINVOICE));
+                      }
+                    }
+                    {
+                      if (IsDraiType(_tolReturnValueRange.PipeType))
+                      {
+                        if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
+                        {
+                          COMMONRADIUS.Add(new(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMARINE, -THESAURUSIMPRACTICABLE)));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, -THESAURUSCOMATOSE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, -THESAURUSPRETTY)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(ALSOMEGACEPHALOUS, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -THESAURUSPRETTY)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLITANY, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSTRAUMATIC, -POLYOXYMETHYLENE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSTRAUMATIC, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, -METROPOLITANATE)), THESAURUSCONTROVERSY));
+                          MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, -METROPOLITANATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSSTAMPEDE)), THESAURUSCONTROVERSY));
+                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSCAPITALISM, -THESAURUSLOITER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                          MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSCAPITALISM, -THESAURUSLAWYER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                        }
+                        else if (_tolReturnValueRange.PipeType is PipeType.TL)
+                        {
+                        }
+                        else
+                        {
+                          var layer = GetPipeLayer(_tolReturnValueRange.PipeType);
+                          if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin)
+                          {
+                            COMMONRADIUS.Add(new(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
+                            COMMONRADIUS.Add(new(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DIFFERENTIATEDNESS, -THESAURUSIMPRACTICABLE)));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSRECONCILE, -THESAURUSPRETTY)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSRECONCILE, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHOMICIDAL, -POLYOXYMETHYLENE)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHOMICIDAL, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -METROPOLITANATE)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -METROPOLITANATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -THESAURUSHYPNOTIC)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, -THESAURUSHYPNOTIC)), layer));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-IMAGINATIVENESS, -THESAURUSLOITER), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-IMAGINATIVENESS, -THESAURUSLAWYER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                          }
+                          else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSPERMUTATION)
+                          {
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(OTHERWORLDLINESS, -THESAURUSPRETTY)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(SCIENTIFICALNESS, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPRETTY)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSISOLATION)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSINCARCERATE)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSINCARCERATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSCADENCE)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSCADENCE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSCADENCE)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONBUBONIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(SCIENTIFICALNESS, -THESAURUSPRETTY)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONBUBONIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONBUBONIC, -THESAURUSISOLATION)), THESAURUSADVERSITY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHEADSTRONG, -THESAURUSCONTEMPT), QUOTATIONDOPPLER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTROMOTIVE, -MERCURIFICATION), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSNECESSITOUS, -THESAURUSMATTER), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                            COMMONRADIUS.Add(new(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSIMPRACTICABLE)));
+                            COMMONRADIUS.Add(new(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSINTRENCH)) { ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, QUOTATIONBARBADOS } }, });
+                            COMMONRADIUS.Add(new(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(REPRESENTATIONAL, -THESAURUSINTRENCH)) { ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, QUOTATIONBARBADOS } }, });
+                          }
+                          else if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSHOUSING)
+                          {
+                            COMMONRADIUS.Add(new(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSINTRENCH)) { ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, QUOTATIONBARBADOS } }, });
+                            COMMONRADIUS.Add(new(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSIMPRACTICABLE)));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(OTHERWORLDLINESS, -THESAURUSPRETTY)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(OTHERWORLDLINESS, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPRETTY)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(TRIGONOCEPHALIC, -THESAURUSISOLATION)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSINCARCERATE)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSINCARCERATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSCADENCE)), THESAURUSADVERSITY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSCADENCE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSCADENCE)), THESAURUSADVERSITY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSABSORBENT, -OLIGOSACCHARIDES), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTROMOTIVE, -MERCURIFICATION), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                          }
+                          else if (_tolReturnValueRange.PipeType is PipeType.PLTL or PipeType.WLTL)
+                          {
+                            COMMONRADIUS.Add(new(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSRECONCILE, -THESAURUSIMPRACTICABLE)));
+                            COMMONRADIUS.Add(new(THESAURUSDENOUNCE, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -THESAURUSHYPNOTIC)) { Rotate = Math.PI / THESAURUSPERMUTATION, Scale = THESAURUSPERMUTATION, });
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE)), THESAURUSCONTROVERSY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY)), THESAURUSCONTROVERSY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSPRETTY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINTEGRITY, -THESAURUSPRETTY)), THESAURUSCONTROVERSY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINTEGRITY, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISTASTEFUL, -POLYOXYMETHYLENE)), THESAURUSCONTROVERSY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDISTASTEFUL, -POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -METROPOLITANATE)), THESAURUSCONTROVERSY));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -METROPOLITANATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDERELICTION, -THESAURUSHYPNOTIC)), THESAURUSCONTROVERSY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPROGRESSIVE, -THESAURUSLOITER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPROGRESSIVE, -THESAURUSLAWYER), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                          }
+                          else
+                          {
+                            COMMONRADIUS.Add(new(THESAURUSLANDMARK, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSHALLUCINATE)));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONCOLERIDGE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY)), layer));
+                            MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSFAINTLY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSFAINTLY)), layer));
+                            MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTROMOTIVE, -THESAURUSHOMICIDAL), IRRESPONSIBLENESS, THESAURUSSTRIPED, CONTROVERSIALLY));
+                          }
+                        }
+                      }
+                      else
+                      {
+                        COMMONRADIUS.Add(new(THESAURUSSUPERFICIAL, CIRCUMCONVOLUTION, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY)) { PropDict = new() { { THESAURUSSUPERFICIAL, _tolReturnValueRange.WPRadius } } });
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG)), INSTRUMENTALITY));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
+                        MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
+                        MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -INCOMPREHENSIBILIS), IRRESPONSIBLENESS, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                        switch (_tolReturnValueRange.Outlet)
+                        {
+                          case THESAURUSINTENTIONAL:
+                            {
+                              if (_tolReturnValueRange.Runs[THESAURUSSTAMPEDE].FDSCount == THESAURUSSTAMPEDE || _tolReturnValueRange.Runs[THESAURUSSTAMPEDE].FDShare)
+                              {
+                                COMMONRADIUS.Add(new(THESAURUSGAUCHE, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSINSINCERE)) { PropDict = new() { { THESAURUSSPECIFICATION, THESAURUSSPECIFICATION } } });
+                              }
+                              else
+                              {
+                                COMMONRADIUS.Add(new(THESAURUSGAUCHE, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PROGNOSTICATORY, -THESAURUSINSINCERE - MISAPPREHENSIVE)) { PropDict = new() { { THESAURUSSPECIFICATION, THESAURUSSPECIFICATION } } });
+                              }
+                            }
+                            break;
+                          case THESAURUSADVENT:
+                            {
+                              COMMONRADIUS.Add(new(THESAURUSEMPHASIS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)));
+                              MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                              MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                              MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSUPPOSITION, -QUOTATION1ASHANKS), CHRISTADELPHIAN, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                            }
+                            break;
+                          case VICISSITUDINOUS:
+                            {
+                              MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                              MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                              MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSUPPOSITION, -QUOTATION1ASHANKS), QUOTATIONSECOND, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                            }
+                            break;
+                          default:
+                            break;
+                        }
+                      }
+                    }
+                  });
+                }
+                if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+                {
+                  if (_tolReturnValueRange.PipeType is not (PipeType.WLTLFL or PipeType.WLTL or PipeType.PLTL))
+                  {
+                    maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                    COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                    MIN_BALCONYBASIN_TO_BALCONY.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC), new(POLYOXYMETHYLENE, THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), THESAURUSDUBIETY, THESAURUSINVOICE));
+                    maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                    var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                    max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.CheckPoint, () =>
+                    {
+                      var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneOffset().First();
+                      var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                      if (target is Point _raiseDistanceToStartDefault)
+                      {
+                        var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint3d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                        tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                      }
+                    });
+                  }
+                }
+                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSPERMUTATION)
+                {
+                  if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+                  {
+                  }
+                  else
+                  {
+                    if (IsRainType(_tolReturnValueRange.PipeType))
+                    {
+                      maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                      COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
+                      COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), });
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSGETAWAY), QUOTATIONBREWSTER, THESAURUSINVOICE, CONTROVERSIALLY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(PSEUDEPIGRAPHOS, -THESAURUSMANIFESTATION), QUOTATIONBREWSTER, THESAURUSINVOICE, CONTROVERSIALLY));
+                      maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                      var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                      max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.FloorDrain, () =>
+                      {
+                        var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
+                        var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                        if (target is Point _raiseDistanceToStartDefault)
+                        {
+                          var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                          tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                        }
+                      });
+                    }
+                    else
+                    {
+                      maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                      COMMONRADIUS.Add(new(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MAXILLOPALATINE, -THESAURUSINTRENCH)) { ScaleEx = new(THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, ACCOMMODATINGLY } }, });
+                      COMMONRADIUS.Add(new(PERSUADABLENESS, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, -THESAURUSINTRENCH)) { ScaleEx = new(THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), DynaDict = new() { { THESAURUSENTERPRISE, ACCOMMODATINGLY } }, });
+                      COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDOMESTIC)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-MAXILLOPALATINE, -THESAURUSINTRENCH), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINDECOROUS, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINDECOROUS, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMISAPPREHEND, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-SYNAESTHETICALLY, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFLUTTER, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFLUTTER, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, -THESAURUSINTRENCH)), THESAURUSADVERSITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFLUTTER, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSALLEGIANCE, -THESAURUSEXPERIMENT)), THESAURUSADVERSITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSALLEGIANCE, -THESAURUSEXPERIMENT), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSINTRENCH)), THESAURUSADVERSITY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSDESTRUCTION), QUOTATIONBREWSTER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-OLIGOMENORRHOEA, -THESAURUSDESTRUCTION), QUOTATIONDOPPLER, THESAURUSSTRIPED, CONTROVERSIALLY));
+                      maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                      var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                      max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.FloorDrain, () =>
+                      {
+                        var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                        var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
+                        var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                        if (target is Point _raiseDistanceToStartDefault)
+                        {
+                          var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                          tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                        }
+                      });
+                    }
+                  }
+                }
+                if (_tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].FDSCount == THESAURUSHOUSING)
+                {
+                  if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+                  {
+                    if (INTRAVASCULARLY)
+                    {
+                      {
+                        var seg1 = new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSOBSERVANCE));
+                        var seg2 = new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -THESAURUSOBSERVANCE));
+                        var pt1 = seg1.StartPoint.ToPoint3d();
+                        var _tol_lane = pt1.OffsetX(seg2.X1 - seg1.X1);
+                        MIN_BALCONYBASIN_TO_BALCONY.Add(new(pt1, _tol_lane, new(THESAURUSSTAMPEDE, -seg2.Length, THESAURUSSTAMPEDE), METACOMMUNICATION, THESAURUSINVOICE));
+                      }
+                      COMMONRADIUS.Add(new(THESAURUSSUPERFICIAL, CIRCUMCONVOLUTION, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY)));
+                      COMMONRADIUS.Add(new(THESAURUSSTRINGENT, THESAURUSDEFAULTER, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDICTATORIAL, -THESAURUSBELLOW)));
+                      COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEXCHANGE, -PORTMANTOLOGISM)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-INCONSIDERABILIS, -THESAURUSDESULTORY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -THESAURUSDESULTORY)), CIRCUMCONVOLUTION));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAYHEM, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAYHEM, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAYHEM, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-QUOTATIONELECTRICIAN, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(QUOTATIONFOREGONE, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSLOITER, -RETROSPECTIVENESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSCINTILLATE, -THESAURUSBELLOW)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSTAMPEDE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONWITTIG)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -REACTIONARINESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDISAGREEABLE, -THESAURUSVIGOROUS)), INSTRUMENTALITY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -QUOTATION1ASHANKS), QUOTATIONSECOND, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -INCOMPREHENSIBILIS), QUOTATIONDOPPLER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSCOMPOUND), QUOTATIONBREWSTER, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                    }
+                  }
+                  else
+                  {
+                    maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                    COMMONRADIUS.Add(new(PERSUADABLENESS, GetEQPMLayer(_tolReturnValueRange.PipeType), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), GetPipeLayer(_tolReturnValueRange.PipeType)));
+                    MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSGETAWAY), QUOTATIONBREWSTER, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
+                    maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                    var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                    max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.FloorDrain, () =>
+                    {
+                      var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                      var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.X).Last();
+                      var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                      if (target is Point _raiseDistanceToStartDefault)
+                      {
+                        var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                        tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                      }
+                    });
+                  }
+                }
+              }
+            }
+            string wellsMaxArea = null, minWellToUrinalDistance = null, maxRoomInterval = null, kitchenBufferDistance = null, maxToiletToKitchenDistance = null, maxToiletToKitchenDistance1 = null;
+            if (_tolReturnValueRange.PipeType is PipeType.PLTL)
+            {
+              var pllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsPL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              var tllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsTL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              if (pllabels.Count == THESAURUSPERMUTATION)
+              {
+                wellsMaxArea = pllabels[THESAURUSSTAMPEDE];
+                minWellToUrinalDistance = pllabels[THESAURUSHOUSING];
+              }
+              else if (pllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = pllabels.Count / THESAURUSPERMUTATION + pllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = pllabels.Count - tol_blk_max_connect;
+                wellsMaxArea = pllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = pllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                wellsMaxArea = pllabels.JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = null;
+              }
+              if (tllabels.Count == THESAURUSPERMUTATION)
+              {
+                maxRoomInterval = tllabels[THESAURUSSTAMPEDE];
+                kitchenBufferDistance = tllabels[THESAURUSHOUSING];
+              }
+              else if (tllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = tllabels.Count / THESAURUSPERMUTATION + tllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = tllabels.Count - tol_blk_max_connect;
+                maxRoomInterval = tllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                kitchenBufferDistance = tllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                maxRoomInterval = tllabels.JoinWith(THESAURUSCAVALIER);
+                kitchenBufferDistance = null;
+              }
+            }
+            else if (_tolReturnValueRange.PipeType is PipeType.WLTL)
+            {
+              var wllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsWL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              var tllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsTL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              if (wllabels.Count == THESAURUSPERMUTATION)
+              {
+                wellsMaxArea = wllabels[THESAURUSSTAMPEDE];
+                minWellToUrinalDistance = wllabels[THESAURUSHOUSING];
+              }
+              else if (wllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = wllabels.Count / THESAURUSPERMUTATION + wllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = wllabels.Count - tol_blk_max_connect;
+                wellsMaxArea = wllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = wllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                wellsMaxArea = wllabels.JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = null;
+              }
+              if (tllabels.Count == THESAURUSPERMUTATION)
+              {
+                maxRoomInterval = tllabels[THESAURUSSTAMPEDE];
+                kitchenBufferDistance = tllabels[THESAURUSHOUSING];
+              }
+              else if (tllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = tllabels.Count / THESAURUSPERMUTATION + tllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = tllabels.Count - tol_blk_max_connect;
+                maxRoomInterval = tllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                kitchenBufferDistance = tllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                maxRoomInterval = tllabels.JoinWith(THESAURUSCAVALIER);
+                kitchenBufferDistance = null;
+              }
+            }
+            else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
+            {
+              var wllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsWL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              var tllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsTL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              var fllabels = ConvertLabelStrings(max_kitchen_to_balcony_distance.Where(IsDraiFL)).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              if (wllabels.Count == THESAURUSPERMUTATION)
+              {
+                wellsMaxArea = wllabels[THESAURUSSTAMPEDE];
+                minWellToUrinalDistance = wllabels[THESAURUSHOUSING];
+              }
+              else if (wllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = wllabels.Count / THESAURUSPERMUTATION + wllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = wllabels.Count - tol_blk_max_connect;
+                wellsMaxArea = wllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = wllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                wellsMaxArea = wllabels.JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = null;
+              }
+              if (tllabels.Count == THESAURUSPERMUTATION)
+              {
+                maxRoomInterval = tllabels[THESAURUSSTAMPEDE];
+                kitchenBufferDistance = tllabels[THESAURUSHOUSING];
+              }
+              else if (tllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = tllabels.Count / THESAURUSPERMUTATION + tllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = tllabels.Count - tol_blk_max_connect;
+                maxRoomInterval = tllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                kitchenBufferDistance = tllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                maxRoomInterval = tllabels.JoinWith(THESAURUSCAVALIER);
+                kitchenBufferDistance = null;
+              }
+              if (fllabels.Count == THESAURUSPERMUTATION)
+              {
+                maxToiletToKitchenDistance = fllabels[THESAURUSSTAMPEDE];
+                maxToiletToKitchenDistance1 = fllabels[THESAURUSHOUSING];
+              }
+              else if (fllabels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = fllabels.Count / THESAURUSPERMUTATION + fllabels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = fllabels.Count - tol_blk_max_connect;
+                maxToiletToKitchenDistance = fllabels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                maxToiletToKitchenDistance1 = fllabels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                maxToiletToKitchenDistance = fllabels.JoinWith(THESAURUSCAVALIER);
+                maxToiletToKitchenDistance1 = null;
+              }
+            }
+            else
+            {
+              var _labels = ConvertLabelStrings(max_kitchen_to_balcony_distance).OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax).ToList();
+              if (_labels.Count == THESAURUSPERMUTATION)
+              {
+                wellsMaxArea = _labels[THESAURUSSTAMPEDE];
+                minWellToUrinalDistance = _labels[THESAURUSHOUSING];
+              }
+              else if (_labels.Count > THESAURUSPERMUTATION)
+              {
+                var tol_blk_max_connect = _labels.Count / THESAURUSPERMUTATION + _labels.Count % THESAURUSPERMUTATION;
+                var _tol_order_side_lane_pt_on_frame = _labels.Count - tol_blk_max_connect;
+                wellsMaxArea = _labels.Take(tol_blk_max_connect).JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = _labels.Skip(tol_blk_max_connect).Take(_tol_order_side_lane_pt_on_frame).JoinWith(THESAURUSCAVALIER);
+              }
+              else
+              {
+                wellsMaxArea = _labels.JoinWith(THESAURUSCAVALIER);
+                minWellToUrinalDistance = null;
+              }
+            }
+            var maxKitchenToRainpipeDistance = new HashSet<int>();
+            var maxBalconyToRainpipeDistance = new HashSet<int>();
+            {
+              void maxDeviceplatformArea()
+              {
+                {
+                  var maxBalconyrainpipeToFloordrainDistance = _tolReturnValueRange.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists && !TolLightRangeSingleSideMax.HasLong);
+                  if (maxBalconyrainpipeToFloordrainDistance > SUPERLATIVENESS)
+                  {
+                    var _tolReturnValueMaxDistance = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists && !TolLightRangeSingleSideMax.HasLong).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
+                    var _tolReturnValueMinRange = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists && !TolLightRangeSingleSideMax.HasLong).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
+                    maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSPERMUTATION);
+                    maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSPERMUTATION);
+                    maxBalconyToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSHOUSING);
+                    maxBalconyToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSHOUSING);
+                    return;
+                  }
+                }
+                {
+                  var maxBalconyrainpipeToFloordrainDistance = _tolReturnValueRange.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists);
+                  if (maxBalconyrainpipeToFloordrainDistance > THESAURUSSTAMPEDE)
+                  {
+                    if (maxBalconyrainpipeToFloordrainDistance == THESAURUSHOUSING)
+                    {
+                      maxKitchenToRainpipeDistance.Add(_tolReturnValueRange.Runs.First(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Index);
+                    }
+                    else
+                    {
+                      var _tolReturnValueMaxDistance = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
+                      var _tolReturnValueMinRange = _tolReturnValueRange.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
+                      if (maxBalconyrainpipeToFloordrainDistance <= INTROPUNITIVENESS)
+                      {
+                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance);
+                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange);
+                      }
+                      else if (maxBalconyrainpipeToFloordrainDistance <= SUPERLATIVENESS)
+                      {
+                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSHOUSING);
+                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSHOUSING);
+                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMaxDistance);
+                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMinRange);
+                      }
+                      else
+                      {
+                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSPERMUTATION);
+                        maxKitchenToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSPERMUTATION);
+                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMaxDistance + THESAURUSHOUSING);
+                        maxBalconyToRainpipeDistance.Add(_tolReturnValueMinRange - THESAURUSHOUSING);
+                      }
+                    }
+                  }
+                }
+              }
+              maxDeviceplatformArea();
+            }
+            var (_tol_group_evca_emg, _) = GetDBTextSize(wellsMaxArea, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+            var (_tol_light_range_single_side_min, _) = GetDBTextSize(minWellToUrinalDistance, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+            var (w3, _) = GetDBTextSize(maxRoomInterval, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+            var (w4, _) = GetDBTextSize(kitchenBufferDistance, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+            var (w5, _) = GetDBTextSize(maxToiletToKitchenDistance, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+            var (w6, _) = GetDBTextSize(maxToiletToKitchenDistance1, THESAURUSENDANGER, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+            var wa = Math.Max(_tol_group_evca_emg, _tol_light_range_single_side_min);
+            var wb = Math.Max(w3, w4);
+            var wc = Math.Max(w5, w6);
+            foreach (var MAX_ANGEL_TOLLERANCE in maxBalconyToRainpipeDistance.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
+            {
+              var MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
+            }
+            if (maxKitchenToRainpipeDistance.Count >= THESAURUSPERMUTATION)
+            {
+              if (maxKitchenToRainpipeDistance.Max() == eMax)
+              {
+                maxKitchenToRainpipeDistance.Remove(maxKitchenToRainpipeDistance.Max());
+              }
+            }
+            foreach (var MAX_ANGEL_TOLLERANCE in maxKitchenToRainpipeDistance.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
+            {
+              var MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = maxTagXposition(MAX_ANGEL_TOLLERANCE, MAX_ANGLE_TOLLERANCE);
+              var _raiseDistanceToStartDefault = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE;
+              if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
+              {
+                MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetY(THESAURUSDOMESTIC);
+              }
+              if (_tolReturnValueRange.PipeType is PipeType.PLTL or PipeType.WLTL)
+              {
+                maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC, THESAURUSFORMULATE)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC - wa, THESAURUSFORMULATE)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSFORMULATE)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE + wb, THESAURUSFORMULATE)), THESAURUSSTRIPED));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC - wa, THESAURUSATTACHMENT), wellsMaxArea, THESAURUSSTRIPED, CONTROVERSIALLY));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSATTACHMENT), maxRoomInterval, THESAURUSSTRIPED, CONTROVERSIALLY));
+                if (minWellToUrinalDistance != null)
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDOMESTIC - wa, THESAURUSHYPNOTIC), minWellToUrinalDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
+                if (kitchenBufferDistance != null)
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSHYPNOTIC), kitchenBufferDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
+                maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.PipeLabel, () =>
+                {
+                  var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                  var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
+                  var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                  if (target is Point _raiseDistanceToStartDefault)
+                  {
+                    var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                    tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                  }
+                });
+              }
+              else if (_tolReturnValueRange.PipeType is PipeType.WLTLFL)
+              {
+                maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSHYPNOTIC, MISAPPREHENSIVE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSDERELICTION)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, THESAURUSDERELICTION), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE + wc, THESAURUSDERELICTION)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSHYPNOTIC, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE, THESAURUSFORMULATE)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE - wa, THESAURUSFORMULATE)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, POLYOXYMETHYLENE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, REPRESENTATIONAL)), THESAURUSSTRIPED));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, REPRESENTATIONAL), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC + wb, REPRESENTATIONAL)), THESAURUSSTRIPED));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE - wa, THESAURUSATTACHMENT), wellsMaxArea, THESAURUSSTRIPED, CONTROVERSIALLY));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFORMULATE - wa, THESAURUSENDANGER), minWellToUrinalDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSCAPITALISM), maxRoomInterval, THESAURUSSTRIPED, CONTROVERSIALLY));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, QUOTATIONCOLERIDGE), kitchenBufferDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, CONSCRIPTIONIST), maxToiletToKitchenDistance, THESAURUSSTRIPED, CONTROVERSIALLY));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSFORMULATE, PHYSIOLOGICALLY), maxToiletToKitchenDistance1, THESAURUSSTRIPED, CONTROVERSIALLY));
+                maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.PipeLabel, () =>
+                {
+                  var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                  var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
+                  var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                  if (target is Point _raiseDistanceToStartDefault)
+                  {
+                    var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                    tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                  }
+                });
+              }
+              else
+              {
+                maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSHYPNOTIC), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSFORMULATE)), GetNoteLayer(_tolReturnValueRange.PipeType)));
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSFORMULATE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC + wa, THESAURUSFORMULATE)), GetNoteLayer(_tolReturnValueRange.PipeType)));
+                MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSATTACHMENT), wellsMaxArea, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
+                if (minWellToUrinalDistance != null)
+                {
+                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDOMESTIC, THESAURUSENDANGER), minWellToUrinalDistance, GetNoteLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
+                }
+                maxBalconywashingmachineToBalconybasinline._LaneOffset();
+                var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
+                max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.PipeLabel, () =>
+                {
+                  var TolUniformSideLenth = GeoFac.CreateGeometry(_parking_stall_group_width_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToArray());
+                  var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN = tolReturnValueMinRange.LaneLineExtendLength().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Y).First();
+                  var target = TolUniformSideLenth.Intersection(new GLineSegment(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(-balconyBufferDistance), MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.OffsetX(balconyBufferDistance)).ToLineString());
+                  if (target is Point _raiseDistanceToStartDefault)
+                  {
+                    var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = _raiseDistanceToStartDefault.ToPoint2d() - MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN;
+                    tolReturnValueMinRange._LaneLineExtendLength(MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN);
+                  }
+                });
+              }
+              MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = _raiseDistanceToStartDefault;
+            }
+            max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.FixPipeVLines, () =>
+            {
+              if (wellToWallOffset.Count + toiletWellsInterval.Count + toiletBufferDistance.Count == THESAURUSSTAMPEDE) return;
+              if (_parking_stall_group_width_restrict.Count == THESAURUSSTAMPEDE) return;
+              var layer = _parking_stall_group_width_restrict.First().LayerName;
+              var _parking_stall_group_length_restrict = _parking_stall_group_width_restrict.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.IsVertical(THESAURUSHOUSING)).ToList();
+              if (_parking_stall_group_length_restrict.Count == THESAURUSSTAMPEDE) return;
+              foreach (var TolLightRangeSingleSideMin in _parking_stall_group_length_restrict)
+              {
+                MAX_BALCONYBASIN_TO_BALCONY.Remove(TolLightRangeSingleSideMin);
+              }
+              var vlines = _parking_stall_group_length_restrict.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Line.ToLineString()).ToList();
+              if (wellToWallOffset.Count > THESAURUSSTAMPEDE && toiletWellsInterval.Count > THESAURUSSTAMPEDE)
+              {
+                var kill = GeoFac.CreateGeometryEx(toiletWellsInterval.Distinct().Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax.ToPoint2D(), UNCONSEQUENTIAL, UNCONSEQUENTIAL).ToPolygon()).ToList());
+                var tolReturnValueRange = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(wellToWallOffset.Distinct().Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax.ToPoint2D(), UNCONSEQUENTIAL, UNCONSEQUENTIAL).ToPolygon()).ToList()));
+                vlines = vlines.Except(tolReturnValueRange).ToList();
+                tolReturnValueRange.AddRange(wellToWallOffset.Distinct().Select(TolLightRangeSingleSideMax => GRect.Create(TolLightRangeSingleSideMax.ToPoint2D(), UNCONSEQUENTIAL, UNCONSEQUENTIAL)).Select(DEFAULT_FIRE_VALVE_WIDTH => new GLineSegment(DEFAULT_FIRE_VALVE_WIDTH.LeftTop, DEFAULT_FIRE_VALVE_WIDTH.RightButtom).ToLineString()));
+                var MinWellToUrinalDistance = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(tolReturnValueRange.ToArray())).ToList()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSHOUSING).ToList();
+                vlines.AddRange(MinWellToUrinalDistance.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).Where(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Intersects(kill)));
+              }
+              if (toiletBufferDistance.Count > THESAURUSSTAMPEDE)
+              {
+                vlines = GeoFac.GetLines(new MultiLineString(vlines.ToArray()).Difference(GeoFac.CreateGeometryEx(toiletBufferDistance.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon()).ToList()))).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToLineString()).ToList();
+              }
+              foreach (var TolUniformSideLenth in GeoFac.GetManyLines(vlines))
+              {
+                MAX_BALCONYBASIN_TO_BALCONY.Add(new(TolUniformSideLenth, layer));
+              }
+            });
+          }
+          max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.Finished, () =>
+          {
+            foreach (var TolLightRangeSingleSideMin in MAX_BALCONYBASIN_TO_BALCONY)
+            {
+              var TolUniformSideLenth = DrawLineSegmentLazy(TolLightRangeSingleSideMin.Line);
+              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.LayerName))
+              {
+                TolUniformSideLenth.Layer = TolLightRangeSingleSideMin.LayerName;
+              }
+              ByLayer(TolUniformSideLenth);
+            }
+            foreach (var TolLightRangeSingleSideMin in BALCONY_BUFFER_DISTANCE)
+            {
+              var maxBalconyrainpipeToFloordrainDistance = DrawCircleLazy(TolLightRangeSingleSideMin.Circle.Center, TolLightRangeSingleSideMin.Circle.Radius);
+              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.LayerName)) maxBalconyrainpipeToFloordrainDistance.Layer = TolLightRangeSingleSideMin.LayerName;
+              ByLayer(maxBalconyrainpipeToFloordrainDistance);
+            }
+            foreach (var TolLightRangeSingleSideMin in MAX_RAINPIPE_TO_WASHMACHINE)
+            {
+              var maxBalconyToDeviceplatformDistance = DrawTextLazy(TolLightRangeSingleSideMin.Text, TolLightRangeSingleSideMin.BasePoint.ToPoint2d());
+              maxBalconyToDeviceplatformDistance.Rotation = TolLightRangeSingleSideMin.Rotation;
+              maxBalconyToDeviceplatformDistance.WidthFactor = THESAURUSDISPASSIONATE;
+              maxBalconyToDeviceplatformDistance.Height = THESAURUSENDANGER;
+              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.LayerName)) maxBalconyToDeviceplatformDistance.Layer = TolLightRangeSingleSideMin.LayerName;
+              if (!string.IsNullOrEmpty(TolLightRangeSingleSideMin.TextStyle)) DrawingQueue.Enqueue(adb => { SetTextStyle(maxBalconyToDeviceplatformDistance, TolLightRangeSingleSideMin.TextStyle); });
+              ByLayer(maxBalconyToDeviceplatformDistance);
+            }
+            foreach (var TolLightRangeSingleSideMin in COMMONRADIUS)
+            {
+              DrawBlockReference(TolLightRangeSingleSideMin.BlockName, TolLightRangeSingleSideMin.BasePoint, layer: TolLightRangeSingleSideMin.LayerName, cb: tolReturnValueRangeTo =>
+              {
+                ByLayer(tolReturnValueRangeTo);
+                if (TolLightRangeSingleSideMin.ScaleEx.HasValue) tolReturnValueRangeTo.ScaleFactors = TolLightRangeSingleSideMin.ScaleEx.Value;
+                {
+                  if (TolLightRangeSingleSideMin.DynaDict != null && tolReturnValueRangeTo.IsDynamicBlock) tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection.Cast<DynamicBlockReferenceProperty>().Where(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.ReadOnly).Join(TolLightRangeSingleSideMin.DynaDict, TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.PropertyName, y => y.Key, (TolLightRangeSingleSideMax, y) => TolLightRangeSingleSideMax.Value = y.Value).Count();
+                }
+              }, props: TolLightRangeSingleSideMin.PropDict, scale: TolLightRangeSingleSideMin.Scale, rotateDegree: TolLightRangeSingleSideMin.Rotate.AngleToDegree());
+            }
+            foreach (var TolLightRangeSingleSideMin in MIN_BALCONYBASIN_TO_BALCONY)
+            {
+              var dim = new AlignedDimension
+              {
+                XLine1Point = TolLightRangeSingleSideMin.Point1,
+                XLine2Point = TolLightRangeSingleSideMin.Point2,
+                DimLinePoint = GeoAlgorithm.MidPoint(TolLightRangeSingleSideMin.Point1, TolLightRangeSingleSideMin.Point2) + TolLightRangeSingleSideMin.Vector,
+                DimensionText = TolLightRangeSingleSideMin.Text,
+                Layer = TolLightRangeSingleSideMin.Layer
+              };
+              ByLayer(dim);
+              DrawEntityLazy(dim);
+            }
+          });
+        }
+        FlushDQ(adb);
+        void handleEntity(Entity maxToiletToCondensepipeDistance, Matrix3d MAX_RAINPIPE_TO_BALCONYFLOORDRAIN, List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance)
+        {
+          if (!IsLayerVisible(maxToiletToCondensepipeDistance)) return;
+          var maxToiletToFloordrainDistance2 = maxToiletToCondensepipeDistance.GetRXClass().DxfName.ToUpper();
+          var TOILET_BUFFER_DISTANCE = maxToiletToCondensepipeDistance.Layer;
+          TOILET_BUFFER_DISTANCE = GetEffectiveLayer(TOILET_BUFFER_DISTANCE);
+          static bool isDLineLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && !layer.Contains(THESAURUSDEVIANT);
+          static bool isVentLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && layer.Contains(THESAURUSDEVIANT);
+          if (!maxToiletToFloordrainDistance2.StartsWith(QUOTATIONCHROMIC))
+          {
+            var bdx = maxToiletToCondensepipeDistance.Bounds;
+            if (bdx.HasValue)
+            {
+              var maxKitchenToBalconyDistance = bdx.Value;
+              maxKitchenToBalconyDistance.TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              if (!max_balconywashingfloordrain_to_rainpipe(maxKitchenToBalconyDistance.ToEnvelope())) return;
+            }
+          }
+          {
+            if (TOILET_BUFFER_DISTANCE is QUOTATIONSTANLEY or THESAURUSDEFAULTER)
+            {
+              if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth)
+              {
+                if (TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
+                {
+                  var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                }
+                return;
+              }
+              else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
+              {
+                foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
+                {
+                  if (maxBalconyToBalconyDistance.Length > THESAURUSSTAMPEDE)
+                  {
+                    var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                  }
+                }
+                return;
+              }
+              else if (maxToiletToCondensepipeDistance is DBText maxBalconyToDeviceplatformDistance)
+              {
+                var repeated_point_distance = maxBalconyToDeviceplatformDistance.TextString;
+                if (!string.IsNullOrWhiteSpace(repeated_point_distance))
+                {
+                  var maxKitchenToBalconyDistance = maxBalconyToDeviceplatformDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                  var ct = new CText() { Text = repeated_point_distance, Boundary = maxKitchenToBalconyDistance };
+                }
+                return;
+              }
+            }
+          }
+          {
+            if (TOILET_BUFFER_DISTANCE is THESAURUSINVOICE)
+            {
+              if (maxToiletToCondensepipeDistance is Spline)
+              {
+                var maxKitchenToBalconyDistance = maxToiletToCondensepipeDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE);
+                return;
+              }
+            }
+          }
+          {
+            if (maxToiletToFloordrainDistance2 == QUOTATIONSWALLOW && TOILET_BUFFER_DISTANCE is THESAURUSINVOICE)
+            {
+              var DEFAULT_FIRE_VALVE_WIDTH = maxToiletToCondensepipeDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, DEFAULT_FIRE_VALVE_WIDTH, MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE);
+            }
+          }
+          {
+            if (maxToiletToCondensepipeDistance is Circle maxBalconyrainpipeToFloordrainDistance && isDrainageLayer(TOILET_BUFFER_DISTANCE))
+            {
+              if (THESAURUSSTAMPEDE < maxBalconyrainpipeToFloordrainDistance.Radius && maxBalconyrainpipeToFloordrainDistance.Radius <= HYPERDISYLLABLE)
+              {
+                var maxKitchenToBalconyDistance = maxBalconyrainpipeToFloordrainDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
+                return;
+              }
+            }
+          }
+          {
+            if (maxToiletToCondensepipeDistance is Circle maxBalconyrainpipeToFloordrainDistance)
+            {
+              if (THESAURUSSTAMPEDE < maxBalconyrainpipeToFloordrainDistance.Radius && maxBalconyrainpipeToFloordrainDistance.Radius <= HYPERDISYLLABLE)
+              {
+                if (isDrainageLayer(maxBalconyrainpipeToFloordrainDistance.Layer))
+                {
+                  var DEFAULT_FIRE_VALVE_WIDTH = maxBalconyrainpipeToFloordrainDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                  _tol_lane_protect(maxToiletToFloordrainDistance, DEFAULT_FIRE_VALVE_WIDTH, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
+                  return;
+                }
+              }
+            }
+          }
+          if (TOILET_BUFFER_DISTANCE is INSTRUMENTALITY)
+          {
+            if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
+            {
+              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_CONDENSEPIPE_DISTANCE);
+              return;
+            }
+            else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
+            {
+              foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
+              {
+                var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_CONDENSEPIPE_DISTANCE);
+              }
+              return;
+            }
+            if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
+            {
+              dynamic o = maxToiletToCondensepipeDistance;
+              var default_fire_valve_length = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_CONDENSEPIPE_DISTANCE);
+              return;
+            }
+          }
+          if (isDLineLayer(TOILET_BUFFER_DISTANCE))
+          {
+            if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
+            {
+              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_KITCHEN_TO_RAINPIPE_DISTANCE);
+              return;
+            }
+            else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
+            {
+              foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
+              {
+                var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_KITCHEN_TO_RAINPIPE_DISTANCE);
+              }
+              return;
+            }
+            if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
+            {
+              dynamic o = maxToiletToCondensepipeDistance;
+              var default_fire_valve_length = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_KITCHEN_TO_RAINPIPE_DISTANCE);
+              return;
+            }
+          }
+          if (isVentLayer(TOILET_BUFFER_DISTANCE))
+          {
+            if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
+            {
+              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_BALCONY_TO_RAINPIPE_DISTANCE);
+              return;
+            }
+            else if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
+            {
+              foreach (var maxBalconyToBalconyDistance in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>())
+              {
+                var default_fire_valve_length = maxBalconyToBalconyDistance.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_BALCONY_TO_RAINPIPE_DISTANCE);
+              }
+              return;
+            }
+            if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
+            {
+              dynamic o = maxToiletToCondensepipeDistance;
+              var default_fire_valve_length = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_BALCONY_TO_RAINPIPE_DISTANCE);
+              return;
+            }
+          }
+          if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
+          {
+            if (TOILET_BUFFER_DISTANCE is THESAURUSSINCERE || TOILET_BUFFER_DISTANCE.Contains(SEROEPIDEMIOLOGY))
+            {
+              foreach (var maxBalconyrainpipeToFloordrainDistance in maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection().OfType<Circle>().Where(IsLayerVisible))
+              {
+                if (maxBalconyrainpipeToFloordrainDistance.Radius > THESAURUSSTAMPEDE && isDrainageLayer(maxBalconyrainpipeToFloordrainDistance.Layer))
+                {
+                  var maxKitchenToBalconyDistance = maxBalconyrainpipeToFloordrainDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
+                }
+              }
+            }
+          }
+          {
+            if (isDrainageLayer(TOILET_BUFFER_DISTANCE) && maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
+            {
+              var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
+              return;
+            }
+          }
+          if (maxToiletToFloordrainDistance2 == THESAURUSWINDFALL)
+          {
+            dynamic o = maxToiletToCondensepipeDistance.AcadObject;
+            var repeated_point_distance = (string)o.DimStyleText + THESAURUSSPECIFICATION + (string)o.VPipeNum;
+            var colle = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
+            var ts = new List<DBText>();
+            foreach (var tolReturnValue0Approx in colle.OfType<Entity>().Where(IsLayerVisible))
+            {
+              if (tolReturnValue0Approx is Line TolUniformSideLenth && isDrainageLayer(TolUniformSideLenth.Layer))
+              {
+                if (TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
+                {
+                  var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                  _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
+                  continue;
+                }
+              }
+              else if (tolReturnValue0Approx.GetRXClass().DxfName.ToUpper() == THESAURUSDURESS)
+              {
+                ts.AddRange(tolReturnValue0Approx.ExplodeToDBObjectCollection().OfType<DBText>().Where(IsLayerVisible));
+                continue;
+              }
+            }
+            if (ts.Count > THESAURUSSTAMPEDE)
+            {
+              GRect maxKitchenToBalconyDistance;
+              if (ts.Count == THESAURUSHOUSING) maxKitchenToBalconyDistance = ts[THESAURUSSTAMPEDE].Bounds.ToGRect();
+              else
+              {
+                maxKitchenToBalconyDistance = GeoFac.CreateGeometry(ts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Bounds.ToGRect()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsValid).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon())).EnvelopeInternal.ToGRect();
+              }
+              maxKitchenToBalconyDistance = maxKitchenToBalconyDistance.TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              var ct = new CText() { Text = repeated_point_distance, Boundary = maxKitchenToBalconyDistance };
+              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
+            }
+            return;
+          }
+          {
+            static bool default_fire_valve_width(string TolLightRangeMin) => !TolLightRangeMin.StartsWith(THESAURUSNOTATION) && !TolLightRangeMin.ToLower().Contains(PERPENDICULARITY) && !TolLightRangeMin.ToUpper().Contains(THESAURUSIMPOSTER);
+            if (maxToiletToCondensepipeDistance is DBText maxBalconyToDeviceplatformDistance && isDrainageLayer(TOILET_BUFFER_DISTANCE) && default_fire_valve_width(maxBalconyToDeviceplatformDistance.TextString))
+            {
+              var maxKitchenToBalconyDistance = maxBalconyToDeviceplatformDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              var ct = new CText() { Text = maxBalconyToDeviceplatformDistance.TextString, Boundary = maxKitchenToBalconyDistance };
+              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
+              return;
+            }
+          }
+          if (maxToiletToFloordrainDistance2 == THESAURUSDURESS)
+          {
+            dynamic o = maxToiletToCondensepipeDistance.AcadObject;
+            string repeated_point_distance = o.Text;
+            if (!string.IsNullOrWhiteSpace(repeated_point_distance))
+            {
+              var ct = new CText() { Text = repeated_point_distance, Boundary = maxToiletToCondensepipeDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN) };
+              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
+            }
+            return;
+          }
+          if (maxToiletToFloordrainDistance2 == THESAURUSINHARMONIOUS)
+          {
+            {
+              dynamic o = maxToiletToCondensepipeDistance.AcadObject;
+              string UpText = o.UpText;
+              string DownText = o.DownText;
+              var MAX_TAG_YPOSITION = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
+              var TolLane = MAX_TAG_YPOSITION.OfType<Line>().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGLineSegment()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsValid).Distinct().ToList();
+              var points = GeoFac.GetAlivePoints(TolLane, THESAURUSHOUSING);
+              var _tol_avg_column_dist = points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+              points = points.Except(GeoFac.CreateIntersectsSelector(_tol_avg_column_dist)(GeoFac.CreateGeometryEx(TolLane.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSHOUSING)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSPERMUTATION).Buffer(THESAURUSHOUSING)).ToList())).Select(_tol_avg_column_dist).ToList(points)).ToList();
+              if (TOILET_BUFFER_DISTANCE is QUOTATIONSTANLEY or THESAURUSDEFAULTER)
+              {
+                if (points.Count == THESAURUSSTAMPEDE) return;
+                string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = null;
+                if (!string.IsNullOrWhiteSpace(UpText) && !string.IsNullOrWhiteSpace(DownText))
+                {
+                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + INTELLECTUALNESS + DownText;
+                }
+                else
+                {
+                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + DownText;
+                }
+                if (string.IsNullOrWhiteSpace(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return;
+                MAX_BASECIRCLE_AREA.Add(GeoFac.CreateGeometry(points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint())).Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                return;
+              }
+              else if (isDrainageLayer(TOILET_BUFFER_DISTANCE))
+              {
+                if (points.Count == THESAURUSSTAMPEDE) return;
+                string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = null;
+                if (!string.IsNullOrWhiteSpace(UpText) && !string.IsNullOrWhiteSpace(DownText))
+                {
+                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + INTELLECTUALNESS + DownText;
+                }
+                else
+                {
+                  MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = UpText + DownText;
+                }
+                if (string.IsNullOrWhiteSpace(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)) return;
+                MAX_DEVICEPLATFORM_AREA.Add(GeoFac.CreateGeometry(points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint())).Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                return;
+              }
+              if (MAX_TOILET_TO_KITCHEN_DISTANCE)
+              {
+                var colle = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
+                {
+                  foreach (var tolReturnValue0Approx in colle.OfType<Entity>().Where(tolReturnValue0Approx => tolReturnValue0Approx.GetRXClass().DxfName.ToUpper() is THESAURUSDURESS or THESAURUSFACILITATE).Where(TolLightRangeSingleSideMax => isDrainageLayer(TolLightRangeSingleSideMax.Layer)).Where(IsLayerVisible))
+                  {
+                    foreach (var maxBalconyToDeviceplatformDistance in tolReturnValue0Approx.ExplodeToDBObjectCollection().OfType<DBText>().Where(TolLightRangeSingleSideMax => !string.IsNullOrWhiteSpace(TolLightRangeSingleSideMax.TextString)).Where(IsLayerVisible))
+                    {
+                      var maxKitchenToBalconyDistance = maxBalconyToDeviceplatformDistance.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                      var ct = new CText() { Text = maxBalconyToDeviceplatformDistance.TextString, Boundary = maxKitchenToBalconyDistance };
+                      if (IsDrainageLabel(ct.Text)) _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
+                    }
+                  }
+                  foreach (var default_fire_valve_length in colle.OfType<Line>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSSTAMPEDE).Where(TolLightRangeSingleSideMax => isDrainageLayer(TolLightRangeSingleSideMax.Layer)).Where(IsLayerVisible).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN)))
+                  {
+                    _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
+                  }
+                }
+              }
+              return;
+            }
+            return;
+          }
+          if (isDrainageLayer(TOILET_BUFFER_DISTANCE))
+          {
+            {
+              if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth)
+              {
+                var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
+                return;
+              }
+            }
+            {
+              if (maxToiletToCondensepipeDistance is Polyline maxToiletToFloordrainDistance1)
+                {
+                  foreach (var TolUniformSideLenth in maxToiletToFloordrainDistance1.ExplodeToDBObjectCollection().OfType<Line>().Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Length > THESAURUSSTAMPEDE))
+                  {
+                    var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                    _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
+                  }
+                  return;
+                }
+            }
+          }
+        }
+        void handleBlockReference(BlockReference tolReturnValueRangeTo, Matrix3d MAX_RAINPIPE_TO_BALCONYFLOORDRAIN, List<KeyValuePair<Geometry, Action>> maxToiletToFloordrainDistance)
+        {
+          if (!tolReturnValueRangeTo.ObjectId.IsValid || !tolReturnValueRangeTo.BlockTableRecord.IsValid) return;
+          if (!tolReturnValueRangeTo.Visible) return;
+          if (IsLayerVisible(tolReturnValueRangeTo))
+          {
+            var _name = tolReturnValueRangeTo.GetEffectiveName() ?? THESAURUSDEPLORE;
+            var toilet_buffer_distance = GetEffectiveBRName(_name);
+            {
+              if (isDrainageLayer(tolReturnValueRangeTo.Layer))
+                if (toilet_buffer_distance.Contains(INTELLECTUALISTS))
+                {
+                  var center = tolReturnValueRangeTo.Bounds.ToGRect().Center.ToPoint3d().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+                  if (toilet_buffer_distance is SUPERINDUCEMENT && tolReturnValueRangeTo.IsDynamicBlock)
+                  {
+                    var props = tolReturnValueRangeTo.DynamicBlockReferencePropertyCollection;
+                    foreach (DynamicBlockReferenceProperty prop in props)
+                    {
+                      if (prop.PropertyName == QUINQUAGENARIAN)
+                      {
+                        var propValue = prop.Value.ToString();
+                        if (!string.IsNullOrEmpty(propValue))
+                        {
+                          max_balconywashingfloordrain_to_balconyfloordrain.Add(center.ToNTSPoint().Tag(propValue));
+                        }
+                        break;
+                      }
+                    }
+                  }
+                  var maxKitchenToBalconyDistance = center.ToGRect(THESAURUSENTREPRENEUR);
+                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE);
+                  return;
+                }
+            }
+            if (toilet_buffer_distance.Contains(THESAURUSTHOROUGHBRED))
+            {
+              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              if (maxKitchenToBalconyDistance.IsValid)
+              {
+                if (maxKitchenToBalconyDistance.Width < POLYOXYMETHYLENE && maxKitchenToBalconyDistance.Height < POLYOXYMETHYLENE)
+                {
+                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE1);
+                }
+              }
+              return;
+            }
+            if (toilet_buffer_distance.Contains(THESAURUSINDULGENT))
+            {
+              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              if (maxKitchenToBalconyDistance.IsValid)
+              {
+                if (maxKitchenToBalconyDistance.Width < POLYOXYMETHYLENE && maxKitchenToBalconyDistance.Height < POLYOXYMETHYLENE)
+                {
+                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_KITCHEN_TO_BALCONY_DISTANCE);
+                }
+              }
+              return;
+            }
+            if (toilet_buffer_distance.Contains(QUOTATIONBITTER))
+            {
+              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              if (maxKitchenToBalconyDistance.IsValid)
+              {
+                if (maxKitchenToBalconyDistance.Width < POLYOXYMETHYLENE && maxKitchenToBalconyDistance.Height < POLYOXYMETHYLENE)
+                {
+                  _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MIN_DEVICEPLATFORM_AREA);
+                }
+              }
+              return;
+            }
+          }
+          var minDeviceplatformArea = adb.Element<BlockTableRecord>(tolReturnValueRangeTo.BlockTableRecord);
+          if (!IsWantedBlock(minDeviceplatformArea)) return;
+          var _fs = new List<KeyValuePair<Geometry, Action>>();
+          foreach (var objId in minDeviceplatformArea)
+          {
+            var dbObj = adb.Element<Entity>(objId);
+            if (dbObj is BlockReference b)
+            {
+              handleBlockReference(b, tolReturnValueRangeTo.BlockTransform.PreMultiplyBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN), _fs);
+            }
+            else
+            {
+              handleEntity(dbObj, tolReturnValueRangeTo.BlockTransform.PreMultiplyBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN), _fs);
+            }
+          }
+          {
+            var MinWellToUrinalDistance = new List<KeyValuePair<Geometry, Action>>();
+            var TolLightRangeSingleSideMin = tolReturnValueRangeTo.XClipInfo();
+            if (TolLightRangeSingleSideMin.IsValid)
+            {
+              TolLightRangeSingleSideMin.TransformBy(tolReturnValueRangeTo.BlockTransform.PreMultiplyBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN));
+              var default_voltage = TolLightRangeSingleSideMin.PreparedPolygon;
+              foreach (var max_rainpipe_to_balconyfloordrain in _fs)
+              {
+                if (default_voltage.Intersects(max_rainpipe_to_balconyfloordrain.Key))
+                {
+                  MinWellToUrinalDistance.Add(max_rainpipe_to_balconyfloordrain);
+                }
+              }
+            }
+            else
+            {
+              foreach (var max_rainpipe_to_balconyfloordrain in _fs)
+              {
+                MinWellToUrinalDistance.Add(max_rainpipe_to_balconyfloordrain);
+              }
+            }
+            maxToiletToFloordrainDistance.AddRange(MinWellToUrinalDistance);
+          }
+        }
+      }
+      return THESAURUSOBSTINACY;
     }
   }
 }

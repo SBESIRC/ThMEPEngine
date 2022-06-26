@@ -70,8 +70,8 @@ namespace ThMEPStructure.StructPlane.Print
             return new HatchPrintConfig
             {
                 //PatternType = HatchPatternType.CustomDefined,
-                PatternName = "钢筋混凝土",
-                //PatternName = "AR-CONC",
+                //PatternName = "钢筋混凝土",
+                PatternName = "AR-CONC",
                 PatternScale = 50.0,
                 LayerName = ThPrintLayerManager.BelowShearWallHatchLayerName,
             };

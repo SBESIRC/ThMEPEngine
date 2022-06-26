@@ -1,4 +1,5 @@
 ﻿using DotNetARX;
+using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -32,34 +33,32 @@ namespace ThCADExtension
                 }
             }
         }
-
         public ThBlockReferenceData(ObjectId blockRef)
         {
-            ObjId = blockRef;
-            Database = blockRef.Database;
-            Position = blockRef.GetBlockPosition();
-            Rotation = blockRef.GetBlockRotation();
-            Normal = blockRef.GetBlockNormal();
-            ScaleFactors = blockRef.GetScaleFactors();
-            BlockLayer = blockRef.GetBlockLayer();
-            EffectiveName = blockRef.GetBlockName();
-            BlockTransform = blockRef.GetBlockTransform();
-            Attributes = blockRef.GetAttributesInBlockReference();
+            Init(blockRef);
             OwnerSpace2WCS = Matrix3d.Identity;
         }
         public ThBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
         {
-            ObjId = blockRef;
-            Database = blockRef.Database;
-            Position = blockRef.GetBlockPosition();
-            Rotation = blockRef.GetBlockRotation();
-            Normal = blockRef.GetBlockNormal();
-            ScaleFactors = blockRef.GetScaleFactors();
-            BlockLayer = blockRef.GetBlockLayer();
-            EffectiveName = blockRef.GetBlockName();
-            BlockTransform = blockRef.GetBlockTransform();
-            Attributes = blockRef.GetAttributesInBlockReference();
+            Init(blockRef);
             OwnerSpace2WCS = transfrom;
+        }
+        private void Init(ObjectId blockRef)
+        {
+            using (var acadDatabase = AcadDatabase.Use(blockRef.Database))
+            {
+                ObjId = blockRef;
+                Database = blockRef.Database;
+                Position = blockRef.GetBlockPosition();
+                Rotation = blockRef.GetBlockRotation();
+                Normal = blockRef.GetBlockNormal();
+                ScaleFactors = blockRef.GetScaleFactors();
+                BlockLayer = blockRef.GetBlockLayer();
+                EffectiveName = blockRef.GetBlockName();
+                BlockTransform = blockRef.GetBlockTransform();
+                Attributes = blockRef.GetAttributesInBlockReference();
+                OwnerSpace2WCS = Matrix3d.Identity;
+            }
         }
     }
 }

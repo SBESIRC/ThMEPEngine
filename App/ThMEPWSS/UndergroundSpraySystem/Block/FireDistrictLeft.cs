@@ -16,10 +16,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
     {
         public Point3d StPt { get; set; }
         public string FloorNum { get; set; }
-        public string Area { get; set; }
-        public Dictionary<int, string> FloorDic { get; set; }
         public TermPoint2 TermPt { get; set; }
         private Matrix3d U2WMat { get; set; }
+
         public FireDistrictLeft(Point3d stPt, TermPoint2 termPoint)
         {
             StPt = stPt;
@@ -27,6 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             TermPt = termPoint;
             U2WMat = Active.Editor.UCS2WCS();
         }
+
         public void InsertBlock(AcadDatabase acadDatabase)
         {
             InsertLine(acadDatabase, StPt, StPt.OffsetXReverse(300), "W-FRPT-SPRL-PIPE");
@@ -159,6 +159,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             solid.TransformBy(U2WMat);
             acadDatabase.CurrentSpace.Add(solid);
         }
+
         private void InsertText(AcadDatabase acadDatabase, Point3d insertPt, string text, string layer = "W-FRPT-SPRL-DIMS", double rotation = 0)
         {
             var dbText = new DBText

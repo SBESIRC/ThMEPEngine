@@ -12,6 +12,7 @@ using NFox.Cad;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -35,7 +36,7 @@ namespace ThMEPElectrical.BlockConvert
                     var convertRuleList = SourceBConvertRules
                         .Where(rule => (rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name))
                         .ToList();
-                    if(convertRuleList.Count > 1)
+                    if (convertRuleList.Count > 1)
                     {
                         convertRule = convertRuleList.Where(rule => ThStringTools.CompareWithChinesePunctuation(data.CurrentVisibilityStateValue(),
                             rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] as string)).First();
@@ -75,48 +76,6 @@ namespace ThMEPElectrical.BlockConvert
                             .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
                             .ToCollection();
                     }
-                    if (entities.Count > 0)
-                    {
-                        return entities.GeometricExtents().CenterPoint();
-                    }
-                    else
-                    {
-                        return blkref.GeometricExtents.CenterPoint();
-                    }
-                }
-                else if (positionMode == ThBConvertInsertMode.TextCenter)
-                {
-                    var entities = new DBObjectCollection();
-                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                    blkref.Explode(entities);
-                    var obbLayer = convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string;
-                    if (string.IsNullOrEmpty(obbLayer))
-                    {
-                        entities = entities.OfType<DBText>().ToCollection();
-                    }
-                    else
-                    {
-                        entities = entities.OfType<DBText>()
-                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
-                            .ToCollection();
-                    }
-                    if (entities.Count > 0)
-                    {
-                        return entities.GeometricExtents().CenterPoint();
-                    }
-                    else
-                    {
-                        return blkref.GeometricExtents.CenterPoint();
-                    }
-                }
-                else if (positionMode == ThBConvertInsertMode.CircleCenter)
-                {
-                    var entities = new DBObjectCollection();
-                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                    blkref.ExplodeWithVisible(entities);
-                    entities = entities.OfType<Circle>()
-                        .Where(e => e.Layer == convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string)
-                        .ToCollection();
                     if (entities.Count > 0)
                     {
                         return entities.GeometricExtents().CenterPoint();
@@ -177,6 +136,82 @@ namespace ThMEPElectrical.BlockConvert
                         throw new NotImplementedException();
                     }
                 }
+                else if (positionMode == ThBConvertInsertMode.CircleCenter)
+                {
+                    var entities = new DBObjectCollection();
+                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                    blkref.ExplodeWithVisible(entities);
+                    entities = entities.OfType<Circle>()
+                        .Where(e => e.Layer == convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string)
+                        .ToCollection();
+                    if (entities.Count > 0)
+                    {
+                        return entities.GeometricExtents().CenterPoint();
+                    }
+                    else
+                    {
+                        return blkref.GeometricExtents.CenterPoint();
+                    }
+                }
+                else if (positionMode == ThBConvertInsertMode.TextCenter)
+                {
+                    var entities = new DBObjectCollection();
+                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                    blkref.Explode(entities);
+                    var obbLayer = convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string;
+                    if (string.IsNullOrEmpty(obbLayer))
+                    {
+                        entities = entities.OfType<DBText>().ToCollection();
+                    }
+                    else
+                    {
+                        entities = entities.OfType<DBText>()
+                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
+                            .ToCollection();
+                    }
+                    if (entities.Count > 0)
+                    {
+                        return entities.GeometricExtents().CenterPoint();
+                    }
+                    else
+                    {
+                        return blkref.GeometricExtents.CenterPoint();
+                    }
+                }
+                else if (positionMode == ThBConvertInsertMode.AxialFlowFan)
+                {
+                    var br = data.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    //如果不是动态块，则返回
+                    if (br == null || !br.IsDynamicBlock)
+                    {
+                        return data.Position;
+                    }
+                    //返回动态块的动态属性
+                    var customProperties = br.DynamicBlockReferencePropertyCollection;
+
+                    var rotation = Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2));
+                    var length = Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_LENGTH));
+                    var offset = new Point3d(0, -length / 2, 0).TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, Point3d.Origin));
+                    var baseVector = new Point3d(offset.X + Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X)),
+                        offset.Y + Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y)), 0)
+                        .TransformBy(Matrix3d.Rotation(data.Rotation * data.ScaleFactors.X * data.ScaleFactors.Y, Vector3d.ZAxis, Point3d.Origin));
+                    return new Point3d(data.Position.X + baseVector.X * data.ScaleFactors.X, data.Position.Y + baseVector.Y * data.ScaleFactors.Y, 0);
+                }
+                else if (positionMode == ThBConvertInsertMode.EquipmentBase)
+                {
+                    var br = data.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    //如果不是动态块，则返回
+                    if (br == null || !br.IsDynamicBlock)
+                    {
+                        return data.Position;
+                    }
+                    //返回动态块的动态属性
+                    var customProperties = br.DynamicBlockReferencePropertyCollection;
+                    var vector = new Point3d(Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X)),
+                        Convert.ToDouble(customProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y)), 0)
+                        .TransformBy(Matrix3d.Rotation(data.Rotation * data.ScaleFactors.X * data.ScaleFactors.Y, Vector3d.ZAxis, Point3d.Origin));
+                    return new Point3d(data.Position.X + vector.X * data.ScaleFactors.X, data.Position.Y + vector.Y * data.ScaleFactors.Y, 0);
+                }
                 else
                 {
                     throw new NotImplementedException();
@@ -196,21 +231,28 @@ namespace ThMEPElectrical.BlockConvert
             return new Polyline();
         }
 
-        public static void AdjustLoadLabel(this BlockReference targetBlock)
+        public static void AdjustLoadLabel(this ThBlockReferenceData targetBlockData)
         {
-            var entities = new DBObjectCollection();
-            var targetBlockData = new ThBlockReferenceData(targetBlock.ObjectId);
-            if (targetBlockData.EffectiveName.Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
+            using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                FilterAndBurst(targetBlock, entities);
-            }
-            else
-            {
-                ThBlockReferenceExtensions.Burst(targetBlock, entities);
-            }
+                var targetBlock = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
+                //如果不是动态块，则返回
+                if (targetBlock == null || !targetBlock.IsDynamicBlock)
+                {
+                    return;
+                }
+                var entities = new DBObjectCollection();
+                if (targetBlockData.EffectiveName.Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
+                {
+                    FilterAndBurst(targetBlock, entities);
+                }
+                else
+                {
+                    ThBlockReferenceExtensions.Burst(targetBlock, entities);
+                }
 
-            if (!targetBlockData.CustomProperties.IsNull())
-            {
+                //返回动态块的动态属性
+                var customProperties = targetBlock.DynamicBlockReferencePropertyCollection;
                 entities = entities.OfType<DBText>().ToCollection();
                 var textMaxWidth = entities.GetMaxWidth();
                 if (targetBlockData.EffectiveName.Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
@@ -221,7 +263,7 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     textMaxWidth = textMaxWidth > 1600 ? ((int)textMaxWidth / 100 * 100 + 500) : 2100;
                 }
-                targetBlockData.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_TABLE_WIDTH, textMaxWidth);
+                customProperties.SetValue(ThBConvertCommon.PROPERTY_TABLE_WIDTH, textMaxWidth);
             }
         }
 

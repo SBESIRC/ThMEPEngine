@@ -170,7 +170,8 @@ namespace TianHua.Electrical.PDS.Service
                                         break;
                                     }
                                 }
-                                if (LoadBlocks.Any(b => b.Value.Position.DistanceTo(blockData.Position) < 1.0))
+                                if (LoadBlocks.Any(b => b.Value.Position.TransformBy(b.Value.OwnerSpace2WCS)
+                                    .DistanceTo(blockData.Position.TransformBy(blockData.OwnerSpace2WCS)) < 1.0))
                                 {
                                     return;
                                 }

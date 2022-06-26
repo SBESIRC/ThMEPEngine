@@ -13,7 +13,6 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
@@ -221,26 +220,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             foreach (var pt in sprayIn.PtDic.Keys)
             {
                 GetNoVerticalLabelDic(pt, ref sprayIn);
-            }
-        }
-
-        private static Point3dEx GetClosedPt(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex)
-        {
-            var rect = vpt._pt.GetRect(150);
-            var objs = dbPtSpatialIndex.SelectCrossingPolygon(rect);
-            if(objs.Count == 0)
-            {
-                return new Point3dEx();
-            }
-            else if(objs.Count == 1)
-            {
-                var pt = (objs[0] as DBPoint).Position;
-                return new Point3dEx(pt);
-            }
-            else
-            {
-                ;
-                return new Point3dEx();
             }
         }
 

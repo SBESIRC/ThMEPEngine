@@ -3,31 +3,50 @@ using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ThMEPEngineCore.IO.SVG;
 
-namespace ThMEPStructure.StructPlane.Service
+namespace ThMEPStructure.Common
 {
-    internal class ThStructurePlaneConfig
+    internal class ThPlaneConfig
     {
+        public PlaneJsonConfig JsonConfig { get; set; }
+        /// <summary>
+        /// 图纸比例
+        /// </summary>
+        public string DrawingScale { get; set; } = "";
+        /// <summary>
+        /// 楼层间距
+        /// </summary>
+        public double FloorSpacing { get; set; } = 100000;
+
         /// <summary>
         /// 传入的IFC文件
+        /// 对应config.json的path
         /// </summary>
-        public string IfcFilePath { get; set; }
+        public string IfcFilePath { get; set; } = "";
         /// <summary>
         /// 输出的Svg文件保存路径
         /// </summary>
-        public string SvgSavePath { get; set; }
+        public string SvgSavePath { get; set; } = "";
         /// <summary>
         /// Log文件保存路径
         /// </summary>
-        public string LogSavePath { get; set; }
+        public string LogSavePath { get; set; } = "";
         /// <summary>
-        /// 当前层名
+        /// 成图类型
+        /// 写到config.json        
         /// </summary>
-        public string CurrentFloor { get; set; }
+        public string ImageType 
+        {
+            get
+            {
+                return DrawingType.GetDrawingType();
+            }
+        } 
         /// <summary>
-        /// 上一层名
+        /// 成图类型
         /// </summary>
-        public string HighFloor { get; set; }
+        public DrawingType DrawingType { get; set; } = DrawingType.Unknown;
         /// <summary>
         /// config.json的完整路径
         /// </summary>
@@ -54,12 +73,16 @@ namespace ThMEPStructure.StructPlane.Service
         {
             get
             {
-                return 
-                    "--config_path " + AddQuotationMarks(ModifyPath(SvgConfigFilePath)) +
-                    " --input_path " + AddQuotationMarks(ModifyPath(IfcFilePath)) +
-                    " --output_path " + AddQuotationMarks(ModifyPath(SvgSavePath)) +
-                    " --log_path " + AddQuotationMarks(ModifyPath(Path.Combine(LogSavePath + "log.txt")));
+                return BuildArgument(SvgConfigFilePath, IfcFilePath, SvgSavePath, LogSavePath);
             }
+        }
+        public string BuildArgument(string svgConfigFilePath,string ifcFilePath,string svgSavePath,string logSavePath)
+        {
+            return
+                   "--config_path " + AddQuotationMarks(ModifyPath(svgConfigFilePath)) +
+                   " --input_path " + AddQuotationMarks(ModifyPath(ifcFilePath)) +
+                   " --output_path " + AddQuotationMarks(ModifyPath(svgSavePath)) +
+                   " --log_path " + AddQuotationMarks(ModifyPath(Path.Combine(logSavePath + "log.txt")));
         }
         private string AddQuotationMarks(string path)
         {
@@ -97,28 +120,54 @@ namespace ThMEPStructure.StructPlane.Service
                 }
             }
         }
-        public ThStructurePlaneConfig()
+        public ThPlaneConfig()
         {
-            IfcFilePath = "";
-            SvgSavePath = "";
-            LogSavePath = "";
+            JsonConfig = new PlaneJsonConfig();
         }
-        public bool Configure()
-        {
-            if (!CheckValid())
-            {
-                return false;
-            }
+        public void Configure()
+        { 
             SetSavePath();
-            return true;
+
+            if(DrawingType == DrawingType.Elevation)
+            {
+                // 对于立面图，Svg保存路径要给绝对路径
+                JsonConfig.SvgConfig.save_path = GetSingleFullSvgSavePath(SvgSavePath, 1, "elevation");
+            }
+            else if(DrawingType == DrawingType.Section)
+            {
+                // 对于剖面图，Svg保存路径要给绝对路径
+                JsonConfig.SvgConfig.save_path = GetSingleFullSvgSavePath(SvgSavePath, 1, "section");
+            }
+            else
+            {
+                JsonConfig.SvgConfig.save_path = SvgSavePath;
+            }
+            JsonConfig.ObjConfig.path = IfcFilePath;
+            JsonConfig.DebugConfig.log_path = LogSavePath;
+            JsonConfig.GlobalConfig.image_type = ImageType;
             //考虑写入权限的问题，暂不写入配置
-            //var svgConfig = ReadJson(SvgConfigFilePath);
-            //if(svgConfig==null)
-            //{
-            //    return;
-            //}
-            //SetValues(svgConfig);
-            //WriteJson(SvgConfigFilePath, svgConfig);
+            var svgConfig = ReadJson(SvgConfigFilePath);
+            if (svgConfig == null)
+            {
+                return;
+            }
+            SetValues(svgConfig,JsonConfig);
+            WriteJson(SvgConfigFilePath, svgConfig);
+        }
+
+        private string GetSingleFullSvgSavePath(string svgSavePath,int floorNo,string type)
+        {
+            if(!string.IsNullOrEmpty(IfcFilePath))
+            { 
+                // 获取Ifc路径
+                var ifcFileName = Path.GetFileNameWithoutExtension(IfcFilePath);
+                var outputSvgName = ifcFileName + "-" + floorNo + "-" + type+".svg";
+                return Path.Combine(svgSavePath, outputSvgName);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         private string GetSvgConfgFilePath()
@@ -168,26 +217,18 @@ namespace ThMEPStructure.StructPlane.Service
             }
         }
 
-        private void SetValues(JObject jObject)
+        private void SetValues(JObject jObject,PlaneJsonConfig jsonConfig)
         {
             try
             {
-                if(!string.IsNullOrEmpty(IfcFilePath))
-                {
-                    jObject["ObjConfig"]["path"] = ModifyPath(IfcFilePath);
-                }
-                if (!string.IsNullOrEmpty(SvgSavePath))
-                {
-                    jObject["SvgConfig"]["save_path"] = SvgSavePath;
-                }
-                if (!string.IsNullOrEmpty(CurrentFloor))
-                {
-                    jObject["ObjConfig"]["current_floor"] = CurrentFloor;
-                }
-                if(!string.IsNullOrEmpty(HighFloor))
-                {
-                    jObject["ObjConfig"]["high_floor"] = HighFloor;
-                }
+                jObject["ObjConfig"]["path"] = ModifyPath(jsonConfig.ObjConfig.path);
+                jObject["ObjConfig"]["current_floor"] = jsonConfig.ObjConfig.current_floor;
+                jObject["ObjConfig"]["high_floor"] = jsonConfig.ObjConfig.high_floor;
+                jObject["SvgConfig"]["save_path"] = ModifyPath(jsonConfig.SvgConfig.save_path);
+                jObject["DebugConfig"]["print_time"] = jsonConfig.DebugConfig.print_time;
+                jObject["DebugConfig"]["log_path"] = ModifyPath(jsonConfig.DebugConfig.log_path);
+                jObject["GlobalConfig"]["image_type"] = jsonConfig.GlobalConfig.image_type;
+                jObject["GlobalConfig"]["cut_position"] = jsonConfig.GlobalConfig.cut_position;
             }
             catch
             {
@@ -249,4 +290,5 @@ namespace ThMEPStructure.StructPlane.Service
             }
         }
     }
+
 }

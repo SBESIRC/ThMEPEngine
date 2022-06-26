@@ -53,6 +53,11 @@ namespace ThMEPStructure.Reinforcement.Model
         /// 迭代增大后的纵筋规格
         /// </summary>
         public string EnhancedReinforce { get; set; } = "";
+        /// <summary>
+        /// 从内置表中读取的配箍率
+        /// </summary>
+
+        public double StirrUpRatio { get; set; }
 
         public abstract void InitAndCalTableSize(string elevation, double tblRowHeight, double scale,out double firstRowH,out double firstRowW);
         public abstract DBObjectCollection Draw(double firstRowH, double firstRowW, Point3d point);

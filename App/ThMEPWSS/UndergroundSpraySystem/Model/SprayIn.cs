@@ -36,8 +36,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<Point3dEx, string> SlashDic { get; set; }//斜点的DN字典对
         public Dictionary<LineSegEx, string> PtDNDic { get; set; }//当前点的DN字典对
         public DBObjectCollection FlowBlocks { get; set; }
+        public List<Point3dEx> AlarmValveStPts { get; set; }//报警阀起点
 
-        public SprayIn(SprayVM _UiConfigs) 
+        public SprayIn(SprayVM _UiConfigs, List<Point3dEx> startPts = null) 
         {
             FloorLength = 80000;
             PipeGap = 1900;
@@ -74,6 +75,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             SlashDic = new Dictionary<Point3dEx, string>();
             PtDNDic = new Dictionary<LineSegEx, string>();
             FlowBlocks = new DBObjectCollection();
+            if(startPts is null)
+            {
+                AlarmValveStPts = new List<Point3dEx>();
+            }
+            else
+            {
+                AlarmValveStPts = startPts;
+            }
         }
     }
 }

@@ -243,10 +243,14 @@
     <Compile Include="IO\ExcelService\NPOIExcelBase.cs" />
     <Compile Include="IO\ExcelService\WriteExcelHelper.cs" />
     <Compile Include="IO\JSON\JsonHelper.cs" />
+    <Compile Include="IO\SVG\ThComponentInfo.cs" />
     <Compile Include="IO\SVG\ThFloorInfo.cs" />
     <Compile Include="IO\SVG\ThArchitectureSVGReader.cs" />
+    <Compile Include="IO\ThTextureMaterialManager.cs" />
+    <Compile Include="IO\ThIfcCategoryManager.cs" />
     <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />
     <Compile Include="IO\SVG\ThStructureSVGReader.cs" />
+    <Compile Include="IO\SVG\ThSvgUtils.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />

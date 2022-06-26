@@ -32,6 +32,9 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection _curtainWall = new DBObjectCollection();
         public ThMEPOriginTransformer Transformer { get; private set; }
         private Action<Database, Point3dCollection> GetData;
+
+        public bool YnExtractShearWall { get; set; } = true;
+
         public ThRoomdata(bool isUseOldMode)
         {
             if (isUseOldMode)
@@ -127,10 +130,8 @@ namespace ThMEPEngineCore.Engine
             var vm = new ThBuildingElementVisitorManager(database);
             var extractor = new ThBuildingElementExtractorEx();
             extractor.Accept(vm.DB3PcArchWallVisitor);
-            extractor.Accept(vm.DB3ArchWallVisitor);
-            extractor.Accept(vm.ShearWallVisitor);
-            extractor.Accept(vm.DB3ColumnVisitor);
-            extractor.Accept(vm.ColumnVisitor);
+            extractor.Accept(vm.DB3ArchWallVisitor);            
+            extractor.Accept(vm.DB3ColumnVisitor);           
             extractor.Accept(vm.DB3DoorMarkVisitor);
             extractor.Accept(vm.DB3DoorStoneVisitor);
             extractor.Accept(vm.DB3WindowVisitor);
@@ -138,6 +139,13 @@ namespace ThMEPEngineCore.Engine
             extractor.Accept(vm.DB3CorniceVisitor);
             extractor.Accept(vm.DB3CurtainWallVisitor);
             extractor.Accept(vm.DB3ShearWallVisitor);
+
+            if(YnExtractShearWall)
+            {
+                extractor.Accept(vm.ColumnVisitor);
+                extractor.Accept(vm.ShearWallVisitor);
+            }
+
             extractor.Extract(database);
             return vm;
         }

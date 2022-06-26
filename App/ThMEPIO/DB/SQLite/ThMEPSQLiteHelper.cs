@@ -11,12 +11,12 @@ namespace ThMEPIO.DB.SQLite
     /// <summary>
     /// SQLiteHelper
     /// </summary>
-    public class SQLiteHelper
+    public class ThMEPSQLiteHelper
     {
         /// <summary>
-        /// Creates a new <see cref="SQLiteHelper"/> instance. The ctor is marked private since all members are static.
+        /// Creates a new <see cref="ThMEPSQLiteHelper"/> instance. The ctor is marked private since all members are static.
         /// </summary>
-        private SQLiteHelper()
+        private ThMEPSQLiteHelper()
         {
             //TODO
         }

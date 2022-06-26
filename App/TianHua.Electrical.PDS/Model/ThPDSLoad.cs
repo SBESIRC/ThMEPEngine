@@ -340,6 +340,7 @@ namespace TianHua.Electrical.PDS.Model
             LoadUID = System.Guid.NewGuid().ToString();
             ID = new ThPDSID();
             LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
+            LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
             LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
             CircuitType = ThPDSCircuitType.None;
             InstalledCapacity = new ThInstalledCapacity();

@@ -16,16 +16,16 @@ namespace ThParkingStall.Core.InterProcess
     {
         #region LayoutParameter(InterParameter)
         public Polygon TotalArea;//总区域
-        public List<LineSegment> SegLines;//初始分割线
+        public List<LineSegment> SegLines;//初始分区线
         public List<Polygon> Buildings;//建筑物，包含坡道
         public List<int> OuterBuildingIdxs = new List<int>(); //可穿建筑物（外围障碍物）的index,包含坡道
         public List<Polygon> BoundingBoxes;//建筑外包框
         public List<Ramp> Ramps;//坡道
 
         public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
-        public List<List<int>> SeglineIndexList ;// 分割线相交关系
-        public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
-        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
+        public List<List<int>> SeglineIndexList ;// 分区线相交关系
+        public List<(bool, bool)> SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
+        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分区线index
         #endregion
         #region ViewModel Parameters
         //平行车位尺寸,长度

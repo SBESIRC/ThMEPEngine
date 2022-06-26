@@ -64,37 +64,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             void UpdateTreeView()
             {
                 var tree = builder.Build(graph);
-                {
-                    void dfs(ThPDSCircuitGraphTreeModel node)
-                    {
-                        foreach (var n in node.DataList)
-                        {
-                            n.Parent = node;
-                            n.Root = tree;
-                            dfs(n);
-                        }
-                    }
-                    dfs(tree);
-                    panel.tv.DataContext = tree;
-                }
+                panel.tv.DataContext = tree;
             }
             var tree = builder.Build(graph);
             static string FixString(string text)
             {
                 if (string.IsNullOrEmpty(text)) return " ";
                 return text;
-            }
-            {
-                void dfs(ThPDSCircuitGraphTreeModel node)
-                {
-                    foreach (var n in node.DataList)
-                    {
-                        n.Parent = node;
-                        n.Root = tree;
-                        dfs(n);
-                    }
-                }
-                dfs(tree);
             }
             var selAllCmd = new RelayCommand(() =>
             {
@@ -125,13 +101,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var batchGenCmd = new RelayCommand(() =>
             {
                 // 获取勾选的节点
-                var vertices = graph.Vertices.ToList();
+                var vertices = graph.Vertices;
                 var nodes = new List<ThPDSProjectGraphNode>();
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.IsChecked == true)
+                    if (node.IsChecked == true && !node.IsRoot)
                     {
-                        nodes.Add(vertices[node.Id]);
+                        nodes.Add(vertices.First(o => o.Load.LoadUID.Equals(node.NodeUID)));
                     }
                     foreach (var n in node.DataList)
                     {
@@ -257,6 +233,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", false);
                     }
                 }
+                if (vm is ThPDSDistributionBoxModel target)
+                {
+                    if (target.IsDualPower)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("Power", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("LowPower", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("HighPower", true);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("Power", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("LowPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSDistributionBoxModel>("HighPower", false);
+                    }
+                }
                 if (vm is ThPDSCircuitModel circuit)
                 {
                     if (circuit.IsDualPower)
@@ -267,14 +258,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("LowPower", false);
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("HighPower", false);
-                    }
-                    if (circuit.LoadType == PDSNodeType.Unkown)
-                    {
-                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", false);
-                    }
-                    else
-                    {
-                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", true);
                     }
                 }
                 if (vm is ThPDSConductorModel conductor)
@@ -317,9 +300,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             ThPDSProjectGraphNode GetCurrentVertice()
             {
-                var id = tv.SelectedItem is ThPDSCircuitGraphTreeModel sel1 ? sel1.Id : (tv.SelectedItem is ThPDSGraphTreeModel sel2 ? sel2.Id : -1);
-                if (id < 0) return null;
-                return graph.Vertices.ToList()[id];
+                if (tv.SelectedItem is ThPDSCircuitGraphTreeModel item)
+                {
+                    return graph.Vertices.FirstOrDefault(o => o.Load.LoadUID.Equals(item.NodeUID));
+                }
+                return null;
             }
             balancedPhaseSequence = () =>
             {
@@ -338,13 +323,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             autoNumbering = () =>
             {
                 // 获取勾选的节点
-                var vertices = graph.Vertices.ToList();
+                var vertices = graph.Vertices;
                 var nodes = new List<ThPDSProjectGraphNode>();
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.IsChecked == true)
+                    if (node.IsChecked == true  && !node.IsRoot)
                     {
-                        nodes.Add(vertices[node.Id]);
+                        nodes.Add(vertices.First(o => o.Load.LoadUID.Equals(node.NodeUID)));
                     }
                     foreach (var n in node.DataList)
                     {
@@ -2109,7 +2094,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     cvs.ContextMenu = new();
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR);
                                     if (m != null)
                                     {
                                         if (conductor != null)
@@ -2127,7 +2112,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor1");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1);
                                     if (m != null)
                                     {
                                         if (conductor1 != null)
@@ -2145,7 +2130,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor2");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2);
                                     if (m != null)
                                     {
                                         if (conductor2 != null)
@@ -2273,7 +2258,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             tree.DataList.Clear();
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
-                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
+                                                if (!node.Equals(vertice))
+                                                    tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
@@ -2315,6 +2301,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                                         if (r == MessageBoxResult.Cancel) return;
                                         ThPDSProjectGraphService.DeleteCircuit(graph, edge);
+                                        UpdateTreeView();
                                         UpdateCanvas();
                                     });
                                 }
@@ -3023,7 +3010,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     cvs.ContextMenu = new();
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR);
                                     if (m != null)
                                     {
                                         if (conductor != null)
@@ -3034,10 +3021,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor1");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1);
                                     if (m != null)
                                     {
                                         if (conductor1 != null)
@@ -3048,10 +3039,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
-                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor2");
+                                    var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2);
                                     if (m != null)
                                     {
                                         if (conductor2 != null)
@@ -3061,6 +3056,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
+                                        }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
                                         }
                                     }
                                 }
@@ -3235,7 +3234,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
-                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID, });
+                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { NodeUID = edge.Circuit.CircuitUID, Name = edge.Circuit.ID.CircuitID, });
                                 }
                                 var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;
@@ -3244,7 +3243,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     foreach (ThPDSCircuitGraphTreeModel m in w.ctl.SelectedItems)
                                     {
-                                        ThPDSProjectGraphService.AssignCircuit2SmallBusbar(vertice, mbb, edges[m.Id]);
+                                        ThPDSProjectGraphService.AssignCircuit2SmallBusbar(vertice, mbb, edges.First(o => o.Circuit.CircuitUID.Equals(m.NodeUID)));
                                     }
                                     UpdateCanvas();
                                 }
@@ -3452,7 +3451,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             {
                                                 Conductor conductor = sc.Conductor;
-                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR);
                                                 if (m != null)
                                                 {
                                                     if (conductor != null)
@@ -3462,6 +3461,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                         var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                                         reg(r, vm);
+                                                    }
+                                                    else
+                                                    {
+                                                        m.Visibility = Visibility.Collapsed;
                                                     }
                                                 }
                                             }

@@ -37,14 +37,22 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
-                var clone = polyline.WashClone();
-                if (clone != null && clone is Polyline)
+                try
                 {
-                    clone.TransformBy(matrix);
-                    results.Add(new ThRawIfcBuildingElementData()
+                    var clone = polyline.WashClone();
+                    if (clone != null && clone is Polyline || clone is Line)
                     {
-                        Geometry = clone,
-                    });
+                        clone.TransformBy(matrix);
+                        results.Add(new ThRawIfcBuildingElementData()
+                        {
+                            Geometry = clone,
+                        });
+                    }
+                }
+                catch
+                {
+                    // 由于传入的矩阵是NonUniform Scale,导致Transform失败
+                    // 暂时这样跳过去
                 }
             }
             return results;
@@ -54,16 +62,24 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(line) && CheckLayerValid(line))
             {
-                var clone = line.WashClone();
-                if (clone != null && clone is Line)
+                try
                 {
-                    clone.TransformBy(matrix);
-                    results.Add(new ThRawIfcBuildingElementData()
+                    var clone = line.WashClone();
+                    if (clone != null && clone is Line)
                     {
-                        Geometry = clone,
-                    });
+                        clone.TransformBy(matrix);
+                        results.Add(new ThRawIfcBuildingElementData()
+                        {
+                            Geometry = clone,
+                        });
+                    }
                 }
-            }
+                catch
+                {
+                    // 由于传入的矩阵是NonUniform Scale,导致Transform失败
+                    // 暂时这样跳过去
+                }
+            }            
             return results;
         }
         private List<ThRawIfcBuildingElementData> HandleCurve(Arc arc, Matrix3d matrix)
@@ -71,16 +87,24 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(arc) && CheckLayerValid(arc))
             {
-                var clone = arc.WashClone();
-                if (clone != null && clone is Arc)
+                try
                 {
-                    clone.TransformBy(matrix);
-                    results.Add(new ThRawIfcBuildingElementData()
+                    var clone = arc.WashClone();
+                    if (clone != null && clone is Arc)
                     {
-                        Geometry = clone,
-                    });
+                        clone.TransformBy(matrix);
+                        results.Add(new ThRawIfcBuildingElementData()
+                        {
+                            Geometry = clone,
+                        });
+                    }
                 }
-            }
+                catch
+                {
+                    // 由于传入的矩阵是NonUniform Scale,导致Transform失败
+                    // 暂时这样跳过去
+                }
+            }                     
             return results;
         }
     }

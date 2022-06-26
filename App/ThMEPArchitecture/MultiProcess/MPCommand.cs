@@ -26,7 +26,7 @@ using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
 using ThMEPEngineCore;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPArchitecture.ParkingStallArrangement;
-using DotNetARX;
+//using DotNetARX;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -65,7 +65,7 @@ namespace ThMEPArchitecture.MultiProcess
         public ThMPArrangementCmd(ParkingStallArrangementViewModel vm)
         {
             CommandName = "THZDCWBZ";
-            ActionName = "手动分割线迭代生成";
+            ActionName = "手动分区线迭代生成";
             ParameterViewModel = vm;
             _CommandMode = CommandMode.WithUI;
         }
@@ -152,6 +152,7 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger?.Information($"地库程序运行结束 \n");
                 DisplayLogger?.Dispose();
                 DisplayLogger2?.Dispose();
+                Active.Document.Save();
             }
         }
 
@@ -181,6 +182,8 @@ namespace ThMEPArchitecture.MultiProcess
             if (!inputvaild) return;
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
                 ParameterStock.RunMode = MultiSolutionList[i];
                 Converter.GetDataWraper(layoutData, ParameterViewModel, false);
                 InterParameter.MultiThread = true;
@@ -202,8 +205,9 @@ namespace ThMEPArchitecture.MultiProcess
                     blk_C.AddToCurrentSpace();
                     DisplayParkingStall.Add(blk_C);
                 }
-                ProcessAndDisplay(orgSolution, i);
+                ProcessAndDisplay(orgSolution, i,stopWatch);
             }
+            
         }
 
         public void Run(AcadDatabase acadDatabase)
@@ -331,8 +335,7 @@ namespace ThMEPArchitecture.MultiProcess
         {
             Logger?.Information("##################################");
             Logger?.Information("迭代模式：");
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+
             int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
             DisplayParkingStall.Add(blk.Clone() as BlockReference);
@@ -351,9 +354,12 @@ namespace ThMEPArchitecture.MultiProcess
             var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
                 ParameterStock.RunMode = MultiSolutionList[i];
                 var addBoundSegLines = AddBoundSegLines && i == 0;
                 var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel, addBoundSegLines);
+                MPGAData.dataWraper = dataWraper;
                 using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
                 {
                     using (MemoryMappedViewStream stream = mmf.CreateViewStream())
@@ -369,7 +375,7 @@ namespace ThMEPArchitecture.MultiProcess
                     {
                         var res = GA.Run2(displayInfo);
                         var best = res.First();
-
+                        MPGAData.Set(best);
                         DisplayParkingStall.Clear();
                         if(i!= 0)
                         {
@@ -381,6 +387,7 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     catch (Exception ex)
                     {
+                        MPGAData.Save();
                         DisplayLogger?.Information(ex.Message);
                         DisplayLogger?.Information("程序出错！");
                         Logger?.Information(ex.Message);
@@ -402,7 +409,7 @@ namespace ThMEPArchitecture.MultiProcess
                                                 InterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = InterParameter.GetSubAreas(solution);
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
-            var layer = "最终分割线";
+            var layer = "最终分区线";
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 if (!acad.Layers.Contains(layer))
@@ -424,10 +431,7 @@ namespace ThMEPArchitecture.MultiProcess
             Logger?.Information(strBest);
             Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-            subAreas.ForEach(area => area.ShowText());
-            DisplayParkingStall.MoveAddedEntities(moveDistance);
-            SubAreaParkingCnt.Clear();
-            ReclaimMemory();
+            if(ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
             if(stopWatch != null)
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
@@ -435,13 +439,69 @@ namespace ThMEPArchitecture.MultiProcess
                 var areaPerStall = ParameterStock.TotalArea  / ParkingStallCount;
                 DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
-                if(displayInfo!=null)
+
+                if(ParameterViewModel.ShowTitle) ShowTitle(ParkingStallCount, areaPerStall, stopWatch.Elapsed.TotalSeconds);
+                if (ParameterViewModel.ShowTable)
+                {
+                    var minY = InterParameter.TotalArea.Coordinates.Min(c => c.Y);
+                    var midX = (InterParameter.TotalArea.Coordinates.Max(c => c.X) +
+                        InterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
+                    TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
+
+                }
+                if (displayInfo!=null)
                 {
                     displayInfo.FinalStalls = $"最大车位数: {ParkingStallCount} ";
                     displayInfo.FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
                     displayInfo.CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
                 }
             }
+            DisplayParkingStall.MoveAddedEntities(moveDistance);
+            SubAreaParkingCnt.Clear();
+            ReclaimMemory();
+        }
+        private void ShowTitle(int ParkingStallCount,double areaPerStall,double TotalSeconds)
+        {
+            string layer = "AI-总指标";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 4);
+            }
+            var MidX = (InterParameter.TotalArea.Coordinates.Max(c => c.X) + InterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
+            var StartY = (InterParameter.TotalArea.Coordinates.Max(c => c.Y) + 20000);
+            var xshift = 12000.0;
+            var textList = new List<Entity>();
+
+            double curr_Y = StartY;
+            var T_str = "运算时间： " + string.Format("{0:N2}", TotalSeconds) + "s";
+            textList.Add(ArrangementInfo.GetText(T_str, MidX - xshift, curr_Y, 2450, layer));
+
+            string Dir_str;
+            if (ParameterStock.RunMode == 0) Dir_str = "排布方向:自动组合";
+            else if (ParameterStock.RunMode == 1) Dir_str = "排布方向:优先横向";
+            else Dir_str = "排布方向:  优先纵向";
+            curr_Y += 2450 + 2000;
+            textList.Add(ArrangementInfo.GetText(Dir_str, MidX - xshift, curr_Y, 2450, layer));
+
+            string CommandType_Str;
+            if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration) CommandType_Str = "模式:手动分区线，无迭代速排";
+            else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration) CommandType_Str = "模式:手动分区线，迭代排布";
+            else CommandType_Str = "模式:  自动分区线，迭代排布";
+            curr_Y += 2450 + 2000;
+            textList.Add(ArrangementInfo.GetText(CommandType_Str, MidX - xshift, curr_Y, 2450, layer));
+
+            string PerStall_Str = "车均面积： " + string.Format("{0:N2}", areaPerStall) + "m" + Convert.ToChar(0x00b2) + "/辆";
+            curr_Y += 3000 + 2500;
+            textList.Add(ArrangementInfo.GetText(PerStall_Str, MidX - xshift, curr_Y, 3000, layer));
+
+            string StallCnt_Str1 = "车位数:";
+            curr_Y += 3000 + 2500;
+            textList.Add(ArrangementInfo.GetText(StallCnt_Str1, MidX - xshift, curr_Y, 3000, layer));
+
+            string StallCnt_Str2 = ParkingStallCount.ToString();
+            textList.Add(ArrangementInfo.GetText(StallCnt_Str2, MidX, curr_Y, 8000, layer));
+            textList.ShowBlock(layer, layer);
         }
         public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData,bool definePriority = true)
         {
@@ -464,8 +524,8 @@ namespace ThMEPArchitecture.MultiProcess
             var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
             if (girdLines.Count < 2)
             {
-                Active.Editor.WriteMessage("块名为：" + blk_Name + "的地库暂不支持自动分割线！\n");
-                Logger?.Information("块名为：" + blk_Name + "的地库暂不支持自动分割线！\n");
+                Active.Editor.WriteMessage("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
+                Logger?.Information("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 return null;
             }
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
@@ -483,7 +543,7 @@ namespace ThMEPArchitecture.MultiProcess
             t_pre = stopWatch.Elapsed.TotalSeconds;
             if(ParameterViewModel.JustCreateSplittersChecked)
             {
-                var layer = "AI自动分割线";
+                var layer = "AI自动分区线";
                 using (AcadDatabase acad = AcadDatabase.Active())
                 {
                     if (!acad.Layers.Contains(layer))
@@ -492,7 +552,7 @@ namespace ThMEPArchitecture.MultiProcess
                 result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
             }
             ReclaimMemory();
-            Logger?.Information($"当前图生成分割线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
+            Logger?.Information($"当前图生成分区线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
             return result;
         }
         private void ReclaimMemory()

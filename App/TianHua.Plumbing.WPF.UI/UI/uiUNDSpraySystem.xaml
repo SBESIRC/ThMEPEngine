@@ -1,4 +1,4 @@
-﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiUNDSpraySystem"
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.UiUNDSpraySystem"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,13 +15,14 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
             <WrapPanel Orientation="Vertical">
-                <cus:ImageButton Content="楼层框定" Name="btnSelectFloor" Height="24" Width="75" TabIndex="1" Click="btnSelectFloor_Click"></cus:ImageButton>
-                <cus:ImageButton x:Name="btnReadStoreys" Content="读取楼层" Height="24" Width="75" Margin="0,5,0,0"  TabIndex="2" Click="btnReadStoreys_Click"></cus:ImageButton>
+                <cus:ImageButton Content="楼层框定" Name="btnSelectFloor" Height="24" Width="75" TabIndex="1" Click="BtnSelectFloor_Click"></cus:ImageButton>
+                <cus:ImageButton x:Name="btnReadStoreys" Content="读取楼层" Height="24" Width="75" Margin="0,5,0,0"  TabIndex="2" Click="BtnReadStoreys_Click"></cus:ImageButton>
             </WrapPanel>
-            <cus:ImageButton Content="参数设置" ImageTextLocation="TextOnly" Name="btnSet" Click="btnSet_Click"  Margin="10,0,0,0" Width="75"  TabIndex="3"></cus:ImageButton>
+            <cus:ImageButton Content="参数设置" ImageTextLocation="TextOnly" Name="btnSet" Click="BtnSet_Click"  Margin="10,0,0,0" Width="75"  TabIndex="3"></cus:ImageButton>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Vertical">
             <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
@@ -33,8 +34,11 @@
         <StackPanel Grid.Row="2" HorizontalAlignment="Center">
             <cus:ImageButton Content="标记喷淋总管" Width="140" Height="24" Margin="0,10,0,10" TabIndex="4" Click="NodeMark_Click"></cus:ImageButton>
         </StackPanel>
+        <StackPanel Grid.Row="3" HorizontalAlignment="Center">
+            <cus:ImageButton Content="报警阀后系统图" Width="140" Height="24" Margin="0,10,0,10" TabIndex="4" Click="AlarmValveSys_Click"></cus:ImageButton>
+        </StackPanel>
         
-        <StackPanel Grid.Row="3" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="4" HorizontalAlignment="Right">
             <cus:ImageButton Content="生成" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>

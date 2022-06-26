@@ -15,10 +15,10 @@ namespace ThMEPEngineCore.Engine
     public class ThRoomOutlineBuilderEngine
     {
         private const double AreaTolerance = 1.0;
-        private const double AngleTolerance = 1.0;
+        private const double AngleTolerance = 2.0;
         private const double BufferDistance = 50.0; //用于处理墙、门、窗、柱等元素之间不相接的Case
         private const double SmallLineLengthTolerance = 1.0;
-        private const double Colliear_Gap_Distance = 2.0;
+        private const double Colliear_Gap_Distance = 10.0;
         public double LineExtendDistance { get; set; } = 10.0;
         public double ArcTessellateLength { get; set; } = 100.0;
         private Matrix3d WcsToUcs { get; set; }
@@ -33,15 +33,24 @@ namespace ThMEPEngineCore.Engine
         {
             // 转成线 + 对线进行合并处理
             var lines = objs.ToLines(ArcTessellateLength);
+
+            // 在坐标设0
+            lines.OfType<Line>().ForEach(l =>
+            {
+                l.StartPoint = new Point3d(l.StartPoint.X, l.StartPoint.Y,0.0);
+                l.EndPoint = new Point3d(l.EndPoint.X, l.EndPoint.Y, 0.0);
+            });
+
             lines = FilterSmallLines(lines, SmallLineLengthTolerance);
             lines = Extend(lines, LineExtendDistance);
             lines = Merge(lines);
+
             // 造面
             Areas = lines.PolygonsEx();
 
             // 后处理
             Areas = PostProcess(Areas);
-        }  
+        } 
         
         public DBObjectCollection PostProcess(DBObjectCollection objs)
         {
@@ -61,17 +70,19 @@ namespace ThMEPEngineCore.Engine
             // 先按角度分度
             var angleGroups = GroupByAngle(lines);
 
-            // 在对角度是0和90度继续分组
+            // 在对角度是0和90度继续分组(暂时取消此操作)
             var groups = new List<DBObjectCollection>();
             foreach (var item in angleGroups)
             {
                 if (item.Key == 0.0)
                 {
-                    groups.AddRange(GroupByYCoordinate(item.Value));
+                    groups.Add(item.Value);
+                    //groups.AddRange(GroupByYCoordinate(item.Value));
                 }
                 else if (item.Key == 90.0)
                 {
-                    groups.AddRange(GroupByXCoordinate(item.Value));
+                    groups.Add(item.Value);
+                    //groups.AddRange(GroupByXCoordinate(item.Value));
                 }
                 else
                 {
@@ -139,9 +150,9 @@ namespace ThMEPEngineCore.Engine
         private List<DBObjectCollection> GroupByYCoordinate(DBObjectCollection xDirLines)
         {
             var results = new List<DBObjectCollection>();
-            var yCoords = xDirLines.OfType<Line>().Select(o => GetUcsPoint(o.StartPoint).Y).Distinct().OrderBy(o=>o).ToList();
+            var yCoords = xDirLines.OfType<Line>().Select(o => GetUcsPoint(o.StartPoint).Y).Distinct().OrderBy(o => o).ToList();
             var groups = xDirLines.OfType<Line>().GroupBy(o => GetCoordGroupKey(yCoords, GetUcsPoint(o.StartPoint).Y));
-            foreach(var group in groups)
+            foreach (var group in groups)
             {
                 results.Add(group.ToCollection());
             }

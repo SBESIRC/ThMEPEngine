@@ -16,7 +16,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
     {
         public int Length { set; get; }//集水井长
         public int Width { set; get; }//集水井宽
-        public bool IsHavePump { set; get; }//是否包含泵
+        //public bool IsHavePump { set; get; }//是否包含泵
         public string EffName { set; get; }//集水井块的名称
         public Point3d Position { set; get; }//集水井位置
         public Polyline WellObb { set; get; }//集水井外包框
@@ -34,7 +34,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                 waterWell = new ThWaterWellModel();
                 var elementInfo = data.Data as WWaterWellElementInfo;
                 waterWell.Geometry = blk;
-                waterWell.IsHavePump = false;
+                //waterWell.IsHavePump = false;
                 waterWell.WellObb = elementInfo.Outline;
                 waterWell.EffName = ThStructureUtils.OriginalFromXref(elementInfo.BlkEffectiveName);
                 waterWell.WellEdge = new List<Tuple<int, int>>();
@@ -586,7 +586,9 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             //需要加 泵数量 / 编号
             if (this.EffName == wellModel.EffName && this.GetWellSize() == wellModel.GetWellSize())
             {
-                if (this.PumpModel != null && wellModel.PumpModel != null && this.PumpModel.VisibilityValue == wellModel.PumpModel.VisibilityValue && this.PumpModel.AttriValue == wellModel.PumpModel.AttriValue)
+                if (this.PumpModel != null && wellModel.PumpModel != null 
+                    && this.PumpModel.VisibilityValue == wellModel.PumpModel.VisibilityValue
+                    && this.PumpModel.AttriValue == wellModel.PumpModel.AttriValue)
                 {
                     return true;
                 }
@@ -599,11 +601,18 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         }
         public bool IsEqual(ThWaterWellModel wellModel)//判断是否同一个集水井
         {
-            if (this.EffName == wellModel.EffName && this.WellObb == wellModel.WellObb)
+            var bReturn = false;
+            //if (this.EffName == wellModel.EffName && this.WellObb == wellModel.WellObb)
+            if (this.EffName == wellModel.EffName)
             {
-                return true;
+                var ptOri = this.WellObb.GetCentroidPoint();
+                var ptNew = wellModel.WellObb.GetCentroidPoint();
+                if (ptOri.IsEqualTo(ptNew, new Tolerance(10, 10)))
+                {
+                    bReturn = true;
+                }
             }
-            return false;
+            return bReturn;
         }
         public double GetAcreage()//获取集水井面积
         {
@@ -615,7 +624,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             string strSize = (Length - 100).ToString() + "*" + (Width - 100).ToString();
             return strSize;
         }
-        
+
         //public void CheckHavePump(ThWaterPumpModel pump)
         //{
         //    if (IsHavePump)
@@ -640,10 +649,10 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
 
         public void CheckHavePumpIndex(ThCADCoreNTSSpatialIndex pumpIndex, Dictionary<int, ThWaterPumpModel> pumpDict)
         {
-            if (IsHavePump)
-            {
-                return;
-            }
+            //if (IsHavePump)
+            //{
+            //    return;
+            //}
             var inWellPump = pumpIndex.SelectCrossingPolygon(WellObb);
             var pumpPoly = inWellPump.OfType<Polyline>().ToList();
             if (pumpPoly.Count > 0)
@@ -651,7 +660,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                 if (pumpPoly.Count == 1)
                 {
                     PumpModel = pumpDict[pumpPoly[0].GetHashCode()];
-                    IsHavePump = true;
+                    //IsHavePump = true;
                 }
                 else
                 {
@@ -670,7 +679,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                     if (maxPumpPoly != null)
                     {
                         PumpModel = pumpDict[maxPumpPoly.GetHashCode()];
-                        IsHavePump = true;
+                        //IsHavePump = true;
                     }
                 }
             }

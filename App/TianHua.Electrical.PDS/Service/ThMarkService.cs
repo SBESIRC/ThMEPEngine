@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Service
         private Dictionary<Entity, ObjectId> TextDic { get; set; }
         private Dictionary<DBPoint, Tuple<List<string>, ObjectId>> PointDic { get; set; }
 
-        public ThMarkService(List<ThPDSEntityInfo> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks,
+        public ThMarkService(Database database, List<ThPDSEntityInfo> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks,
             List<ThPDSEntityInfo> tchDimension)
         {
             var lines = new DBObjectCollection();
@@ -104,7 +104,7 @@ namespace TianHua.Electrical.PDS.Service
                     obb.Vertices().OfType<Point3d>()
                         .ForEach(pt => PointDic.Add(ToDbPoint(pt), Tuple.Create(marks, data.SourceObjectId)));
                 }
-                else if(entity.IsTCHText())
+                else if (entity.IsTCHText())
                 {
                     var text = new DBObjectCollection();
                     entity.Explode(text);
@@ -220,31 +220,44 @@ namespace TianHua.Electrical.PDS.Service
             });
             LineIndex.Update(new DBObjectCollection(), removeLines.ToCollection());
 
-            markBlocks.ForEach(o =>
+            using (var acadDatabase = AcadDatabase.Use(database))
             {
-                if (o.Value.EffectiveName.Equals(ThPDSCommon.LOAD_DETAILS))
+                markBlocks.ForEach(o =>
                 {
-                    var marks = GetTexts(o.Value);
-                    var obb = ThPDSBufferService.Buffer(o.Key, o.Key.Database);
-                    obb.Vertices().OfType<Point3d>().ForEach(pt =>
+                    if (o.Value.EffectiveName.Equals(ThPDSCommon.LOAD_DETAILS))
                     {
-                        PointDic.Add(ToDbPoint(pt), Tuple.Create(marks, o.Value.ObjId));
-                    });
-                }
-                else if (o.Value.EffectiveName.Contains(ThPDSCommon.LOAD_LABELS))
-                {
-                    var value = GetTexts(o.Value);
-                    if (!o.Value.CustomProperties.IsNull() && o.Value.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
-                    {
-                        value.Add(o.Value.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY) as string);
+                        var marks = GetTexts(o.Value);
+                        var obb = ThPDSBufferService.Buffer(o.Key, o.Key.Database);
+                        obb.Vertices().OfType<Point3d>().ForEach(pt =>
+                        {
+                            PointDic.Add(ToDbPoint(pt), Tuple.Create(marks, o.Value.ObjId));
+                        });
                     }
-                    PointDic.Add(ToDbPoint((o.Key as BlockReference).Position), Tuple.Create(value, o.Value.ObjId));
-                }
-                else
-                {
-                    PointDic.Add(ToDbPoint((o.Key as BlockReference).Position), Tuple.Create(GetTexts(o.Value), o.Value.ObjId));
-                }
-            });
+                    else if (o.Value.EffectiveName.Contains(ThPDSCommon.LOAD_LABELS))
+                    {
+                        var value = GetTexts(o.Value);
+                        //获取块参照
+                        var br = o.Value.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                        //如果不是动态块，则返回
+                        if (br == null || !br.IsDynamicBlock)
+                        {
+                            return;
+                        }
+                        //获得动态块的动态属性
+                        var customProperties = br.DynamicBlockReferencePropertyCollection;
+                        if (customProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                        {
+                            value.Add(customProperties.GetValue(ThPDSCommon.POWER_CATEGORY) as string);
+                        }
+                        PointDic.Add(ToDbPoint((o.Key as BlockReference).Position), Tuple.Create(value, o.Value.ObjId));
+                    }
+                    else
+                    {
+                        PointDic.Add(ToDbPoint((o.Key as BlockReference).Position), Tuple.Create(GetTexts(o.Value), o.Value.ObjId));
+                    }
+                });
+            }
+
 
             tchDimension.ForEach(o =>
             {

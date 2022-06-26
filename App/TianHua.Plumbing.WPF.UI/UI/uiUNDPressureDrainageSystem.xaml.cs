@@ -24,6 +24,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (null == viewModel)
                 viewModel = new PressureDrainageSystemDiagramVieModel();
             this.DataContext = viewModel;
+            this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
         /// <summary>
         /// 楼层线间距参数设置
@@ -33,6 +34,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void SetParameter_Click(object sender, RoutedEventArgs e)
         {
             var systemSet = new uiUNDPDrainageSystemSet(viewModel);
+            systemSet.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             var ret = systemSet.ShowDialog();
             if (ret == false) return;
         }
@@ -111,6 +113,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     return;
                 }
                 uiUNDPDrainageSystemInfoCheck infoCheck = new uiUNDPDrainageSystemInfoCheck();
+                infoCheck.Owner = this;
                 var ret = infoCheck.ShowDialog();
                 if (ret == false)
                 {

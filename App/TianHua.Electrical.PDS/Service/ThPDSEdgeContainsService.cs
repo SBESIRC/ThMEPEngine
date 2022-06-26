@@ -58,6 +58,9 @@ namespace TianHua.Electrical.PDS.Service
                     circuitGraph.AddEdge(edge);
                     edgeMap.Remove(e);
                     edgeMap.Add(edge, objectIds);
+                }
+                if (e.Equals(sourceEdge.Last()))
+                {
                     return true;
                 }
             }

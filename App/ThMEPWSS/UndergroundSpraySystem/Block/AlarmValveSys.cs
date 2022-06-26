@@ -2,7 +2,6 @@
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.UndergroundSpraySystem.General;
 using DotNetARX;
 using System;
 using AcHelper;
@@ -17,6 +16,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         private double PipeLength { get; set; }
         public Point3d EndPt { get; set; }
         private Matrix3d U2WMat { get; set; }
+
         public AlarmValveSys(Point3d stPt, int alarmValveIndex, double floorHeight)
         {
             StPt = stPt;
@@ -24,6 +24,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             EndPt = StPt.OffsetY(1550 + PipeLength);
             U2WMat = Active.Editor.UCS2WCS();
         }
+
         public void Insert(AcadDatabase acadDatabase)
         {
             InsertLine(acadDatabase, StPt, StPt.OffsetY(150));

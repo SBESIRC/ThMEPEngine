@@ -784,7 +784,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         double cond_QuitCycle = 0;
                         var unit = _totalPipeLineUnitsByLayerByUnit[i][j];
                         var originalHors = unit.OriginalHorizontalPipes;
-                        var originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(originalHors.Select(e => e.Line.Buffer(1)).ToCollection());
+                        if (originalHors == null) continue;
+                        var originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+                        originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(originalHors.Select(e => e.Line.Buffer(1)).ToCollection());
                         for (int k = 0; k < _pipeLineSystemUnits.Count; k++)
                         {
                             if (unit.VerticalPipes.Count > 0 && _pipeLineSystemUnits[k].PipeLineUnits.Count >= i && _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes.Count > 0)

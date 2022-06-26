@@ -379,6 +379,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\ValveCasing.cs" />
     <Compile Include="UndergroundSpraySystem\Command\FireHydrantAcross.cs" />
+    <Compile Include="UndergroundSpraySystem\Service\AlarmValveSys.cs" />
     <Compile Include="UndergroundSpraySystem\Service\MainLoop3.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />
@@ -836,13 +837,11 @@
     <Compile Include="UndergroundSpraySystem\Model\LoopMarkPt.cs" />
     <Compile Include="UndergroundSpraySystem\Model\PipeDN.cs" />
     <Compile Include="UndergroundSpraySystem\Model\PipeNo.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\PumpText.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayIn.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayOut.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayPipe.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SpraySystem.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Valve.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\Verticalpipe.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BlocksImport.cs" />
     <Compile Include="UndergroundSpraySystem\Service\Branch.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BranchLoop.cs" />

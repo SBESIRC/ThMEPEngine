@@ -337,7 +337,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var cond = false;
                     try
                     {
-                        cond =x.Database != null && x.GetEffectiveName().Contains("套管");
+                        cond =x.Database != null && (x.GetEffectiveName().Equals("套管")|| x.GetEffectiveName().Equals("人防套管"));
                     }
                     catch{/*使用GetEffectiveName()方法和最新ExtractBlock()方法均有问题，使用trycatch筛除掉非目标块*/}
                     return x.ObjectId.IsValid ? x.Layer == "W-BUSH" && cond : x.Layer == "W-BUSH";
@@ -346,6 +346,25 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     if (e.Bounds is Extents3d extent)
                     {
                         this.CollectedData.WrappingPipes.Add(extent);
+                    }
+                }
+                var names = new string[] { "00000093", "00000094", "00000095", "00000096", "00000097" };
+                foreach (var e in Entities.OfType<Entity>().Where(e => e.Layer == "W-BUSH").Where(e => e.ObjectId.IsValid)
+                    .Where(e => IsTianZhengElement(e)))
+                {
+                    var exploded_ents = GetAllEntitiesByExplodingTianZhengElementThoroughly(e);
+                    foreach (var exploded_ent in exploded_ents)
+                    {
+                        if (exploded_ent is BlockReference br)
+                        {
+                            foreach (var name in names)
+                            {
+                                if (br.Name.Contains("public") && br.Name.Contains(name) && br.Bounds is Extents3d extent)
+                                {
+                                    this.CollectedData.WrappingPipes.Add(extent);
+                                }
+                            }
+                        }
                     }
                 }
             }

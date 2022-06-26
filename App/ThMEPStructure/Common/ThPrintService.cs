@@ -29,6 +29,11 @@ namespace ThMEPStructure.Common
                 entity.Layer = config.LayerName;
                 entity.Linetype = config.LineType;
                 entity.LineWeight = config.LineWeight;
+                entity.ColorIndex = config.Color;
+                if(config.LineTypeScale.HasValue)
+                {
+                    entity.LinetypeScale = config.LineTypeScale.Value;
+                }                
                 return objId;
             }
         }
@@ -41,7 +46,7 @@ namespace ThMEPStructure.Common
                 dbText.Layer = config.LayerName;
                 dbText.Height = config.Height;
                 dbText.WidthFactor = config.WidthFactor;
-                dbText.ColorIndex = (int)ColorIndex.BYLAYER;
+                dbText.ColorIndex = config.Color;
                 dbText.TextStyleId = DbHelper.GetTextStyleId(config.TextStyleName);
                 return objId;
             }
@@ -58,7 +63,7 @@ namespace ThMEPStructure.Common
                 oHatch.PatternScale = config.PatternScale;
                 //oHatch.PatternSpace = config.PatternSpace;
                 oHatch.SetHatchPattern(config.PatternType, config.PatternName);
-                oHatch.ColorIndex = (int)ColorIndex.BYLAYER;
+                oHatch.ColorIndex = config.Color;
                 oHatch.Layer = config.LayerName;
                 //oHatch.Transparency = new Autodesk.AutoCAD.Colors.Transparency(77); //30%
                 var hatchId = acadDatabase.ModelSpace.Add(oHatch);

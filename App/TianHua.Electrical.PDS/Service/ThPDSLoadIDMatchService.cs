@@ -36,6 +36,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static int CharMatch(string source, string target)
         {
+            if (string.IsNullOrEmpty(target))
+            {
+                return 0;
+            }
             for (var i = 0; i < source.Count(); i++)
             {
                 if (!target[i].Equals(source[i]))

@@ -27,9 +27,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var results = acadDatabase
-                   .ModelSpace
-                   .OfType<Entity>()
+                var results = acadDatabase.ModelSpace.OfType<Entity>()
                    .Where(o => IsTargetLayer(o.Layer.ToUpper()))
                    .ToList();
 
@@ -107,7 +105,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     TextDbObjs.Add(ent);
                 }
-
             }
         }
 

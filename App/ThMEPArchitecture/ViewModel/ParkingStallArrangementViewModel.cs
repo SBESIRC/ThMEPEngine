@@ -17,18 +17,6 @@ namespace ThMEPArchitecture.ViewModel
     public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
     {
-        private bool _usePolylineAsObstacle = true;
-
-        public bool UsePolylineAsObstacle
-        {
-            get { return _usePolylineAsObstacle; }
-            set
-            {
-                _usePolylineAsObstacle = value;
-                RaisePropertyChanged("UsePolylineAsObstacle");
-            }
-        }
-
         private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
         public CommandTypeEnum CommandType
         {
@@ -63,7 +51,7 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("AddBoundSegLines");
             }
         }
-        //只生成分割线
+        //只生成分区线
         private bool _JustCreateSplittersChecked = false;
 
         public bool JustCreateSplittersChecked
@@ -73,19 +61,6 @@ namespace ThMEPArchitecture.ViewModel
             { 
                 _JustCreateSplittersChecked = value; 
                 RaisePropertyChanged("JustCreateSplittersChecked"); 
-            }
-        }
-
-        //分割线打断调整
-        private bool _OptmizeThenBreakSeg = false;
-
-        public bool OptmizeThenBreakSeg
-        {
-            get { return _OptmizeThenBreakSeg; }
-            set
-            {
-                _OptmizeThenBreakSeg = value;
-                RaisePropertyChanged("OptmizeThenBreakSeg");
             }
         }
 
@@ -99,14 +74,6 @@ namespace ThMEPArchitecture.ViewModel
             { 
                 _LayoutCount = value; 
                 RaisePropertyChanged("LayoutCount"); 
-            }
-        }
-
-        public bool IsComputationParaSetupEnabled
-        {
-            get
-            {
-                return CommandType != CommandTypeEnum.RunWithoutIteration;
             }
         }
 
@@ -374,7 +341,7 @@ namespace ThMEPArchitecture.ViewModel
         }
         private bool _AutoSolution = true;
 
-        public bool AutoSolution
+        public bool AutoSolution//排布方向：自动（多方案）
         {
             get { return _AutoSolution; }
             set
@@ -386,7 +353,7 @@ namespace ThMEPArchitecture.ViewModel
 
         private bool _HorizentalSolution = false;
 
-        public bool HorizontalSolution
+        public bool HorizontalSolution//排布方向：横向优先（多方案）
         {
             get { return _HorizentalSolution; }
             set
@@ -397,7 +364,7 @@ namespace ThMEPArchitecture.ViewModel
         }
         private bool _VerticalSolution = false;
 
-        public bool VerticalSolution
+        public bool VerticalSolution//排布方向：纵向优先（多方案）
         {
             get { return _VerticalSolution; }
             set
@@ -407,15 +374,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
-        public bool IsAdvancedSettingEnabled
-        {
-            get
-            {
-                return CommandRunSpeed.Equals(CommandRunSpeedEnum.Advanced);
-            }
-        }
-
-        private CommandRunSpeedEnum _CommandRunSpeed = CommandRunSpeedEnum.Fast;
+        private CommandRunSpeedEnum _CommandRunSpeed = CommandRunSpeedEnum.General;
         public CommandRunSpeedEnum CommandRunSpeed
         {
             get
@@ -425,34 +384,34 @@ namespace ThMEPArchitecture.ViewModel
                 _CommandRunSpeed = value;
                 if(value == CommandRunSpeedEnum.Fast)
                 {
-                    IterationCount = 5;
-                    PopulationCount = 10;
-                    MaxTimespan = 5;
+                    IterationCount = 30;
+                    PopulationCount = 30;
+                    MaxTimespan = 10;
                 }
                 else if(value == CommandRunSpeedEnum.General)
                 {
-                    IterationCount = 20;
-                    PopulationCount = 50;
+                    IterationCount = 60;
+                    PopulationCount = 80;
                     MaxTimespan = 30;
                 }
                 else if(value == CommandRunSpeedEnum.Slow)//slow
                 {
-                    IterationCount = 60;
-                    PopulationCount = 80;
+                    IterationCount = 200;
+                    PopulationCount = 200;
                     MaxTimespan = 60;
                 }
                 else
                 {
-                    IterationCount = 50;
-                    PopulationCount = 200;
-                    MaxTimespan = 300;
+                    IterationCount = 1;
+                    PopulationCount = 3;
+                    MaxTimespan = 10;
                 }
                 RaisePropertyChanged("CommandRunSpeed");
                 RaisePropertyChanged("IsAdvancedSettingEnabled");
             }
         }
         //迭代次数
-        private int _IterationCount = 5; //fast mode
+        private int _IterationCount = 60; //General mode
         public int IterationCount
         {
             get
@@ -464,7 +423,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //种群数量
-        private int _PopulationCount = 10; //fast mode
+        private int _PopulationCount = 80; //Generalmode
         public int PopulationCount
         {
             get
@@ -476,7 +435,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //最长时间
-        private double _MaxTimespan = 5; //fast mode
+        private double _MaxTimespan = 30; //fast mode
         public double MaxTimespan
         {
             get
@@ -511,7 +470,6 @@ namespace ThMEPArchitecture.ViewModel
         }
 
         private bool _ShowLogs = true;//显示日志，默认为true
-
         public bool ShowLogs
         {
             get { return _ShowLogs; }
@@ -519,6 +477,39 @@ namespace ThMEPArchitecture.ViewModel
             {
                 _ShowLogs = value;
                 RaisePropertyChanged("ShowLogs");
+            }
+        }
+
+        private bool _ShowTitle = true;//显示标题（总指标）
+        public bool ShowTitle
+        {
+            get { return _ShowTitle; }
+            set
+            {
+                _ShowTitle = value;
+                RaisePropertyChanged("ShowTitle");
+            }
+        }
+
+        private bool _ShowSubAreaTitle = false;//显示SubArea标题（分区指标）
+        public bool ShowSubAreaTitle
+        {
+            get { return _ShowSubAreaTitle; }
+            set
+            {
+                _ShowSubAreaTitle = value;
+                RaisePropertyChanged("ShowSubAreaTitle");
+            }
+        }
+
+        private bool _ShowTable = false;//显示标题（总指标）
+        public bool ShowTable
+        {
+            get { return _ShowTable; }
+            set
+            {
+                _ShowTable = value;
+                RaisePropertyChanged("ShowTable");
             }
         }
         public List<int> GetMultiSolutionList()
@@ -672,7 +663,7 @@ namespace ThMEPArchitecture.ViewModel
         public static double BuildingArea;//建筑面积（m^2)
         public static double TotalArea;//地库面积（m^2)
         public static bool ReadHiddenParameter = false;
-        public static int CutTol = 995;//全自动分割线比车道多出的额外距离
+        public static int CutTol = 995;//全自动分区线比车道多出的额外距离
         private static bool Setted = false;
 
         //横向优先_纵向车道计算长度调整_背靠背模块
@@ -724,7 +715,7 @@ namespace ThMEPArchitecture.ViewModel
         public double LayoutScareFactor_SingleVert = 1.0;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public double SingleVertModulePlacementFactor = 1.0;
-        //全自动分割线比车道多出的额外距离
+        //全自动分区线比车道多出的额外距离
         public int CutTol = 995;
         private void Save()
         {

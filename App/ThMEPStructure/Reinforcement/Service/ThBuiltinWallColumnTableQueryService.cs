@@ -133,6 +133,7 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             var component = new ThRectangleEdgeComponent();
             component.Stirrup = GetStirrupSpec(values);
+            component.StirrUpRatio = GetStirrupRatio(values);
             var linkSpecs = GetLinkSpecs(values);
             if (linkSpecs.Count == 1)
             {
@@ -150,6 +151,7 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             var component = new ThLTypeEdgeComponent();
             component.Stirrup = GetStirrupSpec(values);
+            component.StirrUpRatio = GetStirrupRatio(values);
             var linkSpecs = GetLinkSpecs(values);
             if (linkSpecs.Count == 1)
             {
@@ -196,6 +198,7 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             var component = new ThRectangleEdgeComponent();
             component.Stirrup = GetStirrupSpec(values);
+            component.StirrUpRatio = GetStirrupRatio(values);
             var linkSpecs = GetLinkSpecs(values);
             if (linkSpecs.Count == 1)
             {
@@ -365,6 +368,23 @@ namespace ThMEPStructure.Reinforcement.Service
                 .Where(o => o.Item1.Contains(LinkKword))
                 .Select(o => ReplaceZToC(RemoveEmpty(o.Item2)))
                 .ToList();
+        }
+        private double GetStirrupRatio(List<Tuple<string, string>> values)
+        {
+            var result = 0.0;
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (IsPvKeyWord(values[i].Item1))
+                {
+                    var results = GetDoubleValues(values[i].Item2);
+                    if(results.Count ==1)
+                    {
+                        result = results[0];
+                    }
+                    break;
+                }
+            }            
+            return result;
         }
         private string GetStirrupSpec(List<Tuple<string, string>> values)
         {

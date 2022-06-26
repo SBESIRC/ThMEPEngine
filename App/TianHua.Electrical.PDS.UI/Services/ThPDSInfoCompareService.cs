@@ -232,7 +232,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
-                    if (tag is null)
+                    if(edge.Source.Type == Model.PDSNodeType.VirtualLoad)
+                    {
+                        continue;
+                    }
+                    else if (tag is null)
                     {
                         items.Add(new()
                         {
@@ -314,8 +318,17 @@ namespace TianHua.Electrical.PDS.UI.Services
 
                 // CollectionViewSource with group, sort, and filter
                 var cv = CollectionViewSource.GetDefaultView(items);
-                cv.SortDescriptions.Add(new SortDescription("CircuitNumber", ListSortDirection.Ascending));
-                cv.GroupDescriptions.Add(new PropertyGroupDescription("SourcePanelID"));
+                if (cv != null && cv.CanGroup)
+                {
+                    cv.GroupDescriptions.Clear();
+                    cv.GroupDescriptions.Add(new PropertyGroupDescription("SourcePanelID"));
+                }
+                if (cv != null && cv.CanSort)
+                {
+                    cv.SortDescriptions.Clear();
+                    cv.SortDescriptions.Add(new SortDescription("SourcePanelID", ListSortDirection.Ascending));
+                    cv.SortDescriptions.Add(new SortDescription("CircuitNumber", ListSortDirection.Ascending));
+                }
                 panel.CircuitDataGrid.ItemsSource = cv;
                 panel.CircuitSearchBar.SearchStarted += (s, e) =>
                 {
@@ -381,7 +394,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
-                    if (tag is null)
+                    if(node.Type == Model.PDSNodeType.VirtualLoad)
+                    {
+                        continue;
+                    }
+                    else if (tag is null)
                     {
                         items.Add(new()
                         {
@@ -583,8 +600,17 @@ namespace TianHua.Electrical.PDS.UI.Services
 
                 // CollectionViewSource with group, sort, and filter
                 var cv = CollectionViewSource.GetDefaultView(items);
-                cv.SortDescriptions.Add(new SortDescription("LoadId", ListSortDirection.Ascending));
-                cv.GroupDescriptions.Add(new PropertyGroupDescription("LoadType"));
+                if (cv != null && cv.CanGroup)
+                {
+                    cv.GroupDescriptions.Clear();
+                    cv.GroupDescriptions.Add(new PropertyGroupDescription("LoadType"));
+                }
+                if (cv != null && cv.CanSort)
+                {
+                    cv.SortDescriptions.Clear();
+                    cv.SortDescriptions.Add(new SortDescription("LoadType", ListSortDirection.Ascending));
+                    cv.SortDescriptions.Add(new SortDescription("LoadId", ListSortDirection.Ascending));
+                }
                 panel.LoadDataGrid.ItemsSource = cv;
                 panel.LoadSearchBar.SearchStarted += (s, e) =>
                 {

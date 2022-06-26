@@ -16,7 +16,7 @@ namespace ThParkingStall.Core.InterProcess
         public readonly Polygon Area;//该区域的面域
         public readonly List<LineString> Walls;
         public readonly List<LineSegment> VaildLanes;//该区域全部车道线
-        public readonly List<LineString> SegLines;//该区域全部分割线
+        public readonly List<LineString> SegLines;//该区域全部分区线
         public readonly List<Polygon> Buildings; //该区域全部建筑物,包含坡道
         public readonly List<Ramp> Ramps;//该区域全部的坡道
         public readonly List<Polygon> BoundingBoxes;//该区域所有建筑物的bounding box

@@ -46,20 +46,7 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return (string)value;
             }
-        }
-        public static double GetFloorBottomElevation(this Dictionary<string, string> properties)
-        {
-            if(properties.ContainsKey(ThSvgPropertyNameManager.FloorBottomElevationPropertyName))
-            {
-                var value = properties[ThSvgPropertyNameManager.FloorBottomElevationPropertyName];
-                double dValue = 0.0;
-                if(double.TryParse(value,out dValue))
-                {
-                    return dValue;
-                }                
-            }
-            return 0.0;
-        }
+        }       
         public static double GetFloorHeight(this Dictionary<string, string> properties)
         {
             if (properties.ContainsKey(ThSvgPropertyNameManager.FloorElevationPropertyName))

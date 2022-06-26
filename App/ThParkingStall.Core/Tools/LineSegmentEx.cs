@@ -352,5 +352,11 @@ namespace ThParkingStall.Core.Tools
         {
             return coordinates.Min(c => segLine.Distance(c));
         }
+
+        public static bool IsSubSetOf(this LineSegment segLine, LineSegment otherSegLine,double tol = 1.0)
+        {
+            if (otherSegLine.Distance(segLine.P0) < tol && otherSegLine.Distance(segLine.P1) < tol) return true;
+            return false;
+        }
     }
 }
