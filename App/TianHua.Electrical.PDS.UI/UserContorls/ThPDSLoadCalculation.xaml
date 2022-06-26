@@ -3,9 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:data ="clr-namespace:TianHua.Electrical.PDS.UI.Models"
+             xmlns:vm ="clr-namespace:TianHua.Electrical.PDS.UI.ViewModels"
              xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+             xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -17,8 +28,20 @@
         </Grid.RowDefinitions>
         
         <StackPanel Grid.Column="0" Grid.Row="0"  Orientation="Horizontal">
+            <StackPanel.Resources>
+                <vm:ThPDSTransformerVM x:Key="Transformers">
+                </vm:ThPDSTransformerVM>
+            </StackPanel.Resources>
+            <StackPanel.DataContext>
+                <Binding Source="{StaticResource Transformers}" />
+            </StackPanel.DataContext>
             <ComboBox />
-            <ListBox />
+            <ListBox Margin="0" BorderThickness ="0" Style="{StaticResource WrapPanelHorizontalListBox}" ItemsSource="DataList">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.Row="1"  Orientation="Horizontal">
