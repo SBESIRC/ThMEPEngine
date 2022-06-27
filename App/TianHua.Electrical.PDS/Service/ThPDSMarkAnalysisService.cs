@@ -219,6 +219,13 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (!r.Match(str).Success)
                 {
+                    // 过滤电压
+                    if (new Regex(@"[0-9]+[kK]?[vV]{1}").Match(str).Success
+                        && (str.IndexOf('v') == str.Count() - 1 || str.IndexOf('V') == str.Count() - 1))
+                    {
+                        continue;
+                    }
+
                     var value = ThPDSReplaceStringService.ReplaceLastChar(str, "/", "-");
                     var check1 = "W[a-zA-Z]+[-0-9]+";
                     var regex1 = new Regex(@check1);
@@ -639,14 +646,15 @@ namespace TianHua.Electrical.PDS.Service
             out bool frequencyConversion)
         {
             var powers = new List<double>();
-            var check = "[0-9]+[.]?[0-9]{0,}[kK]{1}[wW]{1}";
+            var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
             needCopy = false;
             frequencyConversion = false;
             for (var i = 0; i < infos.Count; i++)
             {
                 var m = r.Match(infos[i]);
-                while (m.Success)
+                while (m.Success && (infos[i].IndexOf(m.Value) + m.Value.Count() + 1 > infos[i].Count() 
+                    || (infos[i][infos[i].IndexOf(m.Value) + m.Value.Count()] < '0' || infos[i][infos[i].IndexOf(m.Value) + m.Value.Count()] > '9')))
                 {
                     infos[i] = infos[i].Replace("/", "");
                     infos[i] = infos[i].Replace(m.Value, "");
