@@ -1061,8 +1061,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     test_lane.P0 = endp;
                     var bdpoints = test_lane.IntersectPoint(Boundary).ToList();
                     var obspoints = new List<Coordinate>();
-                    var lanecarpoints= new List<Coordinate>();
-                    var test_lane_pl = test_lane.Buffer(1);
+                    var lanecarpoints = new List<Coordinate>();
+                    var test_lane_pl = test_lane.Buffer(DisLaneWidth / 2 - 1);
                     var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>();
                     foreach (var cross in obscrossed)
                     {
