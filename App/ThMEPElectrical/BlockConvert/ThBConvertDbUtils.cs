@@ -11,13 +11,22 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var ltr = acadDatabase.Layers.ElementOrDefault(name, true);
-                if (ltr != null)
+                if (ltr == null)
                 {
-                    ltr.IsOff = false;
-                    ltr.IsFrozen = false;
-                    ltr.IsLocked = false;
-                    ltr.IsPlottable = true;
+                    return;
                 }
+
+                // 如果当前图层等于插入图层，暂不处理
+                if (acadDatabase.Database.Clayer.Equals(ltr.ObjectId))
+                {
+                    return;
+                }
+
+                // 设置图层状态
+                ltr.IsOff = false;
+                ltr.IsFrozen = false;
+                ltr.IsLocked = false;
+                ltr.IsPlottable = true;
             }
         }
     }
