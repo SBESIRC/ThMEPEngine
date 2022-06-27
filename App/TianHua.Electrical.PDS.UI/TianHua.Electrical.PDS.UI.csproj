@@ -67,6 +67,7 @@
     <Compile Include="Messages\RatedCurrentChangedMessage.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
+    <Compile Include="Models\ThPDSTransformer.cs" />
     <Compile Include="Models\TreeBuilder.cs" />
     <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
@@ -177,7 +178,9 @@
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
+    <Compile Include="ViewModels\ThPDSLoadCalculationVM.cs" />
     <Compile Include="ViewModels\ThPDSProjectGraphNodeTreeViewVM.cs" />
+    <Compile Include="ViewModels\ThPDSTransformerVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ElecSandboxUI.xaml">
