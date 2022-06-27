@@ -107,6 +107,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" Guid="{9B7D73A4-6EF1-493D-8495-36FA7CE1BA31}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Fizzler.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Debug" Guid="{130CC348-AB59-483A-B244-C1A4F237D4F5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\GongSolutions.WPF.DragDrop.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -218,7 +221,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" Guid="{899F2D51-A9BE-4E58-8919-8054BF47A418}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Fizzler.dll" />
             </Component>
-
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Debug" Guid="{6453C428-8530-4521-A0DD-E653724C4F96}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\GongSolutions.WPF.DragDrop.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -329,6 +334,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" Guid="{5DF91514-756D-4F12-AD76-9C04A6D051A4}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Fizzler.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Debug" Guid="{0AF7245F-0A36-44B1-BD83-1850D2A1CA06}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\GongSolutions.WPF.DragDrop.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -442,6 +450,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Release" Guid="{54D4C601-30E7-4E8A-9DAC-5CC2554B60A0}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Fizzler.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Release" Guid="{F2548D46-E922-4E41-B1E1-15F0EF710203}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\GongSolutions.WPF.DragDrop.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Release="bin\Release-NET40" ?>
@@ -553,6 +564,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Release" Guid="{1E141B60-A877-47B6-86F5-8E18572D72C4}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Fizzler.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Release" Guid="{5AEF4260-4903-4CAC-A3CE-D3A59DF2A0BB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\GongSolutions.WPF.DragDrop.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -663,6 +677,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Release" Guid="{69F46A33-D8C4-4312-8B92-76EAFB73A93A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Fizzler.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Release" Guid="{9F55B39A-566F-4DF0-A111-8C25BAE2750D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\GongSolutions.WPF.DragDrop.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -782,6 +799,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -889,6 +909,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
              xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
              mc:Ignorable="d" 
              Background="White"
@@ -57,7 +58,10 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Row="0" Grid.Column="0">
                 <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                    <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
+                    <TreeView x:Name="tv" ItemsSource="{Binding Root.DataList}" 
+                              dd:DragDrop.IsDragSource="True"
+                              dd:DragDrop.IsDropTarget="True"
+                              dd:DragDrop.DropHandler="{Binding}">
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
                                 <StackPanel Orientation="Horizontal">

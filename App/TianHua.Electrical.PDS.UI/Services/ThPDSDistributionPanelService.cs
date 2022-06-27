@@ -21,6 +21,9 @@ using TianHua.Electrical.PDS.UI.Converters;
 using TianHua.Electrical.PDS.UI.Project.Module;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
 using Microsoft.Toolkit.Mvvm.Input;
+using PDSGraph = QuikGraph.BidirectionalGraph<
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
@@ -41,8 +44,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     {
         List<MenuItem> menuItems;
         ContextMenu ctxMenu;
-        QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-        public void Init(UserContorls.ThPDSDistributionPanel panel)
+
+        public void Init(UserContorls.ThPDSDistributionPanel panel, PDSGraph graph)
         {
             if (graph is null) return;
             var vertices = graph.Vertices.Select(x => new ThPDSVertex { Detail = x.Details, Type = x.Type }).ToList();
@@ -60,13 +63,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             var config = new ThPDSDistributionPanelConfig();
             panel.canvas.DataContext = config;
-            var builder = new ThPDSCircuitGraphTreeBuilder();
-            void UpdateTreeView()
-            {
-                var tree = builder.Build(graph);
-                panel.tv.DataContext = tree;
-            }
-            var tree = builder.Build(graph);
             static string FixString(string text)
             {
                 if (string.IsNullOrEmpty(text)) return " ";
@@ -74,7 +70,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             var selAllCmd = new RelayCommand(() =>
             {
-                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                if (tv.DataContext is not ThPDSProjectGraphNodeTreeViewVM vm) return;
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
                     node.IsChecked = true;
@@ -83,11 +79,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         dfs(n);
                     }
                 }
-                dfs(tree);
+                dfs(vm.Root);
             });
             var unselAllCmd = new RelayCommand(() =>
             {
-                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                if (tv.DataContext is not ThPDSProjectGraphNodeTreeViewVM vm) return;
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
                     node.IsChecked = false;
@@ -96,13 +92,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         dfs(n);
                     }
                 }
-                dfs(tree);
+                dfs(vm.Root);
             });
             var batchGenCmd = new RelayCommand(() =>
             {
                 // 获取勾选的节点
                 var vertices = graph.Vertices;
                 var nodes = new List<ThPDSProjectGraphNode>();
+                if (tv.DataContext is not ThPDSProjectGraphNodeTreeViewVM vm) return;
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
                     if (node.IsChecked == true && !node.IsRoot)
@@ -114,7 +111,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         dfs(n);
                     }
                 }
-                dfs(tree);
+                dfs(vm.Root);
                 if (nodes.Count == 0) return;
 
                 var window = Window.GetWindow(panel);
@@ -188,14 +185,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                 }
             }
-            tv.DataContext = tree;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
             var br = Brushes.Black;
             var pen = new Pen(br, 1);
             tv.SelectedItemChanged += (s, e) =>
             {
-                var vertice = GetCurrentVertice();
+                var vertice = GetCurrentNode(panel.tv, graph);
                 if (vertice is not null)
                 {
                     tv.ContextMenu = treeCmenu;
@@ -298,24 +294,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 pg.SelectedObject = vm ?? new object();
             }
-            ThPDSProjectGraphNode GetCurrentVertice()
-            {
-                if (tv.SelectedItem is ThPDSCircuitGraphTreeModel item)
-                {
-                    return graph.Vertices.FirstOrDefault(o => o.Load.LoadUID.Equals(item.NodeUID));
-                }
-                return null;
-            }
             balancedPhaseSequence = () =>
             {
-                var vertice = GetCurrentVertice();
+                var vertice = GetCurrentNode(panel.tv, graph);
                 if (vertice is null) return;
                 ThPDSProjectGraphService.BalancedPhaseSequence(graph, vertice);
                 UpdateCanvas();
             };
             createBackupCircuit = () =>
             {
-                var vertice = GetCurrentVertice();
+                var vertice = GetCurrentNode(panel.tv, graph);
                 if (vertice is null) return;
                 ThPDSProjectGraphService.CreatBackupCircuit(graph, vertice);
                 UpdateCanvas();
@@ -325,9 +313,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 // 获取勾选的节点
                 var vertices = graph.Vertices;
                 var nodes = new List<ThPDSProjectGraphNode>();
+                if (tv.DataContext is not ThPDSProjectGraphNodeTreeViewVM vm) return;
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.IsChecked == true  && !node.IsRoot)
+                    if (node.IsChecked == true && !node.IsRoot)
                     {
                         nodes.Add(vertices.First(o => o.Load.LoadUID.Equals(node.NodeUID)));
                     }
@@ -336,7 +325,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         dfs(n);
                     }
                 }
-                dfs(tree);
+                dfs(vm.Root);
                 if (nodes.Count == 0) return;
 
                 // 自动编号
@@ -353,7 +342,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 canvas.ContextMenu?.Items?.Clear();
                 canvas.ContextMenu = null;
                 ctxMenu.Items.Clear();
-                var vertice = GetCurrentVertice();
+                var vertice = GetCurrentNode(panel.tv, graph);
                 if (vertice is null) return;
                 config.Current = new(vertice);
                 {
@@ -806,7 +795,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
                             if (info.IsOUVP())
                             {
-                                cb += () => UpdatePropertyGrid(new { Type = "过欠电压保护器", });
                                 var ouvp = GetInputOUVP();
                                 if (ouvp != null)
                                 {
@@ -2287,7 +2275,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 ThPDSProjectGraphService.DistributeLoad(graph, edge, node);
                                             }
-                                            UpdateTreeView();
+                                            UpdateTreeView(panel.tv, graph);
                                             UpdateCanvas();
                                         }
                                     });
@@ -2301,7 +2289,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                                         if (r == MessageBoxResult.Cancel) return;
                                         ThPDSProjectGraphService.DeleteCircuit(graph, edge);
-                                        UpdateTreeView();
+                                        UpdateTreeView(panel.tv, graph);
                                         UpdateCanvas();
                                     });
                                 }
@@ -3941,6 +3929,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             UpdateCanvas();
         }
+
+        private ThPDSProjectGraphNode GetCurrentNode(TreeView tree, PDSGraph graph)
+        {
+            if (tree.SelectedItem is ThPDSCircuitGraphTreeModel item)
+            {
+                return graph.Vertices.FirstOrDefault(o => o.Load.LoadUID.Equals(item.NodeUID));
+            }
+            return null;
+        }
+
+        public void UpdateTreeView(TreeView tree, PDSGraph graph)
+        {
+            tree.DataContext = new ThPDSProjectGraphNodeTreeViewVM(graph);
+        }
+
         private static Path CreateLine(Transform trans, Brush strockBrush, Point st, Point ed)
         {
             var geo = new LineGeometry(st, ed);

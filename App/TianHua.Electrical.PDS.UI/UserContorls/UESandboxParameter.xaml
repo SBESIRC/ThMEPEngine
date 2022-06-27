@@ -8,7 +8,9 @@
     xmlns:cvt="clr-namespace:TianHua.Electrical.PDS.UI.Converters" d:DesignHeight="878" d:DesignWidth="980" mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
-            <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}" />
+            <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
             <cvt:EnumValuesConverter x:Key="EnumValuesConverter"></cvt:EnumValuesConverter>
         </ResourceDictionary>
     </UserControl.Resources>

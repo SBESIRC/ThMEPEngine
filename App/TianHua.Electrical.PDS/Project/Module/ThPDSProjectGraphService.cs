@@ -118,6 +118,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void DeleteCircuit(ProjectGraph graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
         {
+            if (source.IsNull())
+                return;
             var edge = graph.Edges.FirstOrDefault(o => o.Source == source && o.Target == target);
             DeleteCircuit(graph, edge);
         }
