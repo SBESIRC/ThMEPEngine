@@ -211,14 +211,14 @@ namespace TianHua.Electrical.PDS.Service
                     edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                     reversible = false;
                 }
-                else if (ThPDSTerminalPanelService.IsTerminalPanel(edge.Source.Loads[0].LoadTypeCat_2)
-                    && !ThPDSTerminalPanelService.IsTerminalPanel(edge.Target.Loads[0].LoadTypeCat_2))
+                else if (ThPDSTerminalPanelService.IsTerminalPanel(edge.Source)
+                    && !ThPDSTerminalPanelService.IsTerminalPanel(edge.Target))
                 {
                     edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                     reversible = false;
                 }
-                else if (!ThPDSTerminalPanelService.IsTerminalPanel(edge.Source.Loads[0].LoadTypeCat_2)
-                    && ThPDSTerminalPanelService.IsTerminalPanel(edge.Target.Loads[0].LoadTypeCat_2))
+                else if (!ThPDSTerminalPanelService.IsTerminalPanel(edge.Source)
+                    && ThPDSTerminalPanelService.IsTerminalPanel(edge.Target))
                 {
                     reversible = false;
                 }
