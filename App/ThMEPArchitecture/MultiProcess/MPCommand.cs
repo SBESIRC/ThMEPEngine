@@ -38,12 +38,13 @@ using ThMEPArchitecture.ParkingStallArrangement.PostProcess;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Autodesk.AutoCAD.ApplicationServices;
+using ThParkingStall.Core.IO;
 
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThMPArrangementCmd : ThMEPBaseCommand, IDisposable
     {
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
+        public static string LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
 
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
         public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
@@ -51,6 +52,8 @@ namespace ThMEPArchitecture.MultiProcess
 
         public Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
         public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
+
+        public string DrawingName;
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
@@ -75,6 +78,9 @@ namespace ThMEPArchitecture.MultiProcess
         }
         public override void SubExecute()
         {
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+            DrawingName = Path.GetFileName(doc.Name);
+
             System.IO.FileStream emptyStream = new System.IO.FileStream(DisplayLogFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream.Close();
             System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
@@ -90,13 +96,13 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
             .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
-            Logger?.Information($"############################################");
-            Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
-            Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
-            Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
-            Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
-            Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
-            Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
+            //Logger?.Information($"############################################");
+            //Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
+            //Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
+            //Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
+            //Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
+            //Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
+            //Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
             Utils.SetSeed();
             try
             {
@@ -113,9 +119,6 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                     {
-                        Logger?.Information($"无迭代速排");
-                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-
                         using (var docLock = Active.Document.LockDocument())
                         using (AcadDatabase currentDb = AcadDatabase.Active())
                         {
@@ -178,8 +181,13 @@ namespace ThMEPArchitecture.MultiProcess
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
             var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             var layoutData = new LayoutData();
+            var blkName = block.GetEffectiveName();
+            UpdateLogger(blkName);
             var inputvaild = layoutData.Init(block, Logger);
             if (!inputvaild) return;
+            Logger?.Information("块名：" + blkName);
+            Logger?.Information("文件名：" + DrawingName);
+            Logger?.Information("用户名：" + Environment.UserName);
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
                 var stopWatch = new Stopwatch();
@@ -227,14 +235,10 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     var blkName = blk.GetEffectiveName();
                     var displayInfo = new DisplayInfo(blkName);
-                    Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-                    var drawingName = Path.GetFileName(doc.Name);
-                    var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
-                    Logger = new Serilog.LoggerConfiguration().WriteTo
-                            .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    UpdateLogger(blkName);
                     DisplayLogger?.Information("块名: " + blkName);
                     Logger?.Information("块名：" + blkName);
-                    Logger?.Information("文件名：" + drawingName);
+                    Logger?.Information("文件名：" + DrawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     RunABlock(blk, displayInfo,ParameterViewModel.AddBoundSegLines);
                     displayInfos.Add(displayInfo);
@@ -288,14 +292,10 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     var blkName = blk.GetEffectiveName();
                     var displayInfo = new DisplayInfo(blkName);
-                    Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-                    var drawingName = Path.GetFileName(doc.Name);
-                    var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
-                    Logger = new Serilog.LoggerConfiguration().WriteTo
-                            .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    UpdateLogger(blkName);
                     DisplayLogger?.Information("块名: " + blkName);
                     Logger?.Information("块名：" + blkName);
-                    Logger?.Information("文件名：" + drawingName);
+                    Logger?.Information("文件名：" + DrawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData,false);
                     if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, displayInfo,true, autoSegLines, layoutData);
@@ -554,6 +554,18 @@ namespace ThMEPArchitecture.MultiProcess
             ReclaimMemory();
             Logger?.Information($"当前图生成分区线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
             return result;
+        }
+
+        private void UpdateLogger(string blkName)
+        {
+            string modName;
+            if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration) modName = "无迭代_";
+            else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration) modName = "手动迭代_";
+            else modName = "全自动_";
+            var logFileName = Path.Combine(GetPath.GetAppDataPath(), modName + DrawingName.Split('.').First() + '(' + blkName + ')' + ".txt") ;
+            Logger = new Serilog.LoggerConfiguration().WriteTo
+                    .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+
         }
         private void ReclaimMemory()
         {

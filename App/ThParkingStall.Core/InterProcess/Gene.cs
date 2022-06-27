@@ -410,8 +410,8 @@ namespace ThParkingStall.Core.InterProcess
                 if (!Saved)
                 {
                     string path;
-                    if (ProcIndex!= -1) path = Path.Combine(System.IO.Path.GetTempPath(), fileName + ProcIndex.ToString() + ".dat");
-                    else path = Path.Combine(System.IO.Path.GetTempPath(), fileName  + ".dat");
+                    if (ProcIndex!= -1) path = Path.Combine(GetPath.GetDebugPath(), fileName + ProcIndex.ToString() + ".dat");
+                    else path = Path.Combine(GetPath.GetDebugPath(), fileName  + ".dat");
                     // Gain code access to the file that we are going
                     // to write to
                     try
