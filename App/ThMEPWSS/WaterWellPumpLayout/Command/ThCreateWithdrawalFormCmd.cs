@@ -22,6 +22,7 @@ using ThMEPWSS.Pipe;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterWellPumpLayout.Model;
+using ThMEPWSS.WaterWellPumpLayout.Service;
 
 namespace ThMEPWSS.Command
 {
@@ -38,6 +39,7 @@ namespace ThMEPWSS.Command
     {
         WaterWellPumpConfigInfo configInfo;//配置信息
         public ObservableCollection<ThWaterWellConfigInfo> WellConfigInfo { set; get; }
+
         public void Dispose()
         {
 
@@ -89,9 +91,13 @@ namespace ThMEPWSS.Command
                 //整理数据，合并，统计等操作
                 List<FormItem> formItmes = new List<FormItem>();
 
-                foreach (var wellConfig in WellConfigInfo)
+                var wellList = WellConfigInfo.SelectMany(x => x.WellModelList).ToList();
+
+                var localWellConfig = ThWaterWellPumpUtils.MergeWellList(wellList, false);
+
+                foreach (var wellConfig in localWellConfig)
                 {
-                    if (wellConfig.PumpCount=="0")
+                    if (wellConfig.PumpCount == "0")
                     {
                         continue;
                     }

@@ -79,5 +79,37 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
             }
             return deepWellPump;
         }
+
+        public static List<ThWaterWellConfigInfo> MergeWellList(List<ThWaterWellModel> waterWellList, bool notMergeDiffExRef)
+        {
+            //var notMergeDiffExRef = (bool)cbNotMergeDiffExRef.IsChecked;
+
+            var groups = new List<ThWaterWellConfigInfo>();
+            var tmpList = waterWellList.Select(o => o).ToList();
+            while (tmpList.Count > 0)
+            {
+                var first = tmpList.First();
+                var sameTypes = tmpList.Where(o => o.IsSameType(first, notMergeDiffExRef)).ToList();
+
+                ThWaterWellConfigInfo info = new ThWaterWellConfigInfo();
+                info.WellCount = sameTypes.Count;
+                info.WellArea = first.GetAcreage();
+                info.BlockName = first.EffName;
+                info.FullName = first.FullName;
+                info.WellSize = first.GetWellSize();
+                if (first.PumpModel != null)
+                {
+                    info.PumpCount = first.PumpModel.VisibilityValue;
+                    info.PumpNumber = first.PumpModel.AttriValue;
+                }
+                info.WellModelList = sameTypes;
+                //info需要增加 泵数量 编号
+                sameTypes.ForEach(s => tmpList.Remove(s));
+                groups.Add(info);
+            }
+
+            return groups;
+        }
+
     }
 }

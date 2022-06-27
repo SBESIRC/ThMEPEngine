@@ -18,6 +18,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         public int Width { set; get; }//集水井宽
         //public bool IsHavePump { set; get; }//是否包含泵
         public string EffName { set; get; }//集水井块的名称
+        public string FullName { set; get; }//集水井全名
         public Point3d Position { set; get; }//集水井位置
         public Polyline WellObb { set; get; }//集水井外包框
         public BlockReference Geometry { set; get; }//集水井图块数据
@@ -37,6 +38,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                 //waterWell.IsHavePump = false;
                 waterWell.WellObb = elementInfo.Outline;
                 waterWell.EffName = ThStructureUtils.OriginalFromXref(elementInfo.BlkEffectiveName);
+                waterWell.FullName = elementInfo.BlkEffectiveName;
                 waterWell.WellEdge = new List<Tuple<int, int>>();
                 waterWell.WellVertex = new List<Point3d>();
                 waterWell.NearWallEdge = new List<int>();
@@ -581,12 +583,15 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             }
             return false;
         }
-        public bool IsSameType(ThWaterWellModel wellModel)//判断是否是同一类
+        public bool IsSameType(ThWaterWellModel wellModel, bool useFullName)//判断是否是同一类
         {
             //需要加 泵数量 / 编号
-            if (this.EffName == wellModel.EffName && this.GetWellSize() == wellModel.GetWellSize())
+            //notMergeDiffExRef==true =>useFullName=>不同外参的同块名不合并
+            //if (this.EffName == wellModel.EffName && this.GetWellSize() == wellModel.GetWellSize())
+            if ((useFullName && this.FullName == wellModel.FullName && this.GetWellSize() == wellModel.GetWellSize()) ||
+                (!useFullName && this.EffName == wellModel.EffName && this.GetWellSize() == wellModel.GetWellSize()))
             {
-                if (this.PumpModel != null && wellModel.PumpModel != null 
+                if (this.PumpModel != null && wellModel.PumpModel != null
                     && this.PumpModel.VisibilityValue == wellModel.PumpModel.VisibilityValue
                     && this.PumpModel.AttriValue == wellModel.PumpModel.AttriValue)
                 {

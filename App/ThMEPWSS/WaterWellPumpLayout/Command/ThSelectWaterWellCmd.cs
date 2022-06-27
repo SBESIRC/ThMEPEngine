@@ -55,7 +55,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Command
             return waterWellList;
         }
 
-       
+
 
         public override void SubExecute()
         {
@@ -64,6 +64,14 @@ namespace ThMEPWSS.WaterWellPumpLayout.Command
             using (var database = AcadDatabase.Active())
             {
                 var input = Common.Utils.SelectAreas();
+
+                if (input.Count == 0)
+                {
+                    WaterWellList = new List<ThWaterWellModel>();
+                    return;
+                }
+
+
                 //获取集水井
                 WaterWellList = GetWaterWellEntityList(input);
             }
