@@ -91,6 +91,16 @@
     <Compile Include="FloorHeatingCoil\Data\ThHVACHandleNonClosedPolylineService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThWaterSeparatorExtractor.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DataPackage.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DataPreprocess.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DistributionService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DrawPipe.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\EstimateService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\FindPointService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\PolylineProcessService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\RegionModel.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\Run.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\Tools.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingCoilSetting.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingRoom.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />
