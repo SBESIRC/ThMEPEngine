@@ -2300,21 +2300,33 @@ namespace TianHua.Electrical.PDS.Project
             {
                 var breaker = componentFactory.CreatBreaker();
                 regularCircuit.breaker = regularCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                regularCircuit.Conductor = regularCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is LeakageCircuit leakageCircuit)
             {
                 var breaker = componentFactory.CreatResidualCurrentBreaker();
                 leakageCircuit.breaker = leakageCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                leakageCircuit.Conductor = leakageCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is ContactorControlCircuit contactorControlCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 contactorControlCircuit.breaker = contactorControlCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                contactorControlCircuit.Conductor = contactorControlCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is ThermalRelayProtectionCircuit thermalRelayCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 thermalRelayCircuit.breaker = thermalRelayCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                thermalRelayCircuit.Conductor = thermalRelayCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
             {
@@ -2323,6 +2335,9 @@ namespace TianHua.Electrical.PDS.Project
 
                 var breaker1 = componentFactory.CreatBreaker();
                 shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
+
+                var conductor = componentFactory.CreatConductor();
+                shanghaiCTCircuit.Conductor = shanghaiCTCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
             {
@@ -2331,29 +2346,45 @@ namespace TianHua.Electrical.PDS.Project
 
                 var breaker1 = componentFactory.CreatBreaker();
                 shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
+
+                var conductor = componentFactory.CreatConductor();
+                shanghaiMTCircuit.Conductor = shanghaiMTCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_CTInFrontCircuit CTInFrontCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 CTInFrontCircuit.breaker = CTInFrontCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                CTInFrontCircuit.Conductor = CTInFrontCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_MTInFrontCircuit MTInFrontCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 MTInFrontCircuit.breaker = MTInFrontCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                MTInFrontCircuit.Conductor = MTInFrontCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_CTInBehindCircuit CTInBehindCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 CTInBehindCircuit.breaker = CTInBehindCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                CTInBehindCircuit.Conductor = CTInBehindCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_MTInBehindCircuit MTInBehindCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 MTInBehindCircuit.breaker = MTInBehindCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                MTInBehindCircuit.Conductor = MTInBehindCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is FireEmergencyLighting fireEmergencyLighting)
             {
+                edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
             else if (edge.Details.CircuitForm is Motor_DiscreteComponentsCircuit)
             {

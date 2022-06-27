@@ -125,6 +125,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             var breaker = new Breaker(maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
             var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
             breaker.SetRatedCurrent(ratedCurrent);
+            _maxCalculateCurrent =  Math.Max(_maxCalculateCurrent, breaker.GetCascadeRatedCurrent());
             return breaker;
         }
 
@@ -132,7 +133,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             if(_IsEmptyLoad)
                 return null;
-            return new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber,_edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2,_edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+            return new Conductor(_maxCalculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber,_edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2,_edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
         }
 
         public Conductor GetSecondaryCircuitConductor(SecondaryCircuitInfo secondaryCircuitInfo)
@@ -207,6 +208,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             var breaker = new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _isLeakageProtection, true);
             var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
             breaker.SetRatedCurrent(ratedCurrent);
+            _maxCalculateCurrent =  Math.Max(_maxCalculateCurrent, breaker.GetCascadeRatedCurrent());
             return breaker;
         }
 

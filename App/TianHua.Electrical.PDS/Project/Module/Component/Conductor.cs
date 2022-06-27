@@ -330,7 +330,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private void ChooseCrossSectionalArea(double calculateCurrent)
         {
             var Allconfigs = IsWire ? ConductorConfigration.WireConductorInfos : ConductorConfigration.CableConductorInfos;
-            var configs = Allconfigs.Where(o => o.Iset > calculateCurrent).ToList();
+            var configs = Allconfigs.Where(o => o.Iset >= calculateCurrent).ToList();
             if (configs.Count <= 0)
             {
                 throw new NotFoundComponentException("设备库内找不到对应规格的ConductorConfig");
