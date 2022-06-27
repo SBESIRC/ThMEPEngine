@@ -15,7 +15,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         #region ---------- 外部传入 ----------
         private double LampLength { get; set; }
         private DBObjectCollection Arcs { get; set; }
-        private Dictionary<Point3d, double> LightPosDict { get; set; }
+        private Dictionary<Point3d, Tuple<double,string>> LightPosDict { get; set; }
         #endregion
 
         #region ---------- 构建 ----------
@@ -32,7 +32,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public ThCircularArcConflictAvoidService(
             double lampLength,
             DBObjectCollection arcs,
-            Dictionary<Point3d, double> lightPos)
+            Dictionary<Point3d, Tuple<double, string>> lightPos)
         {
             Arcs = arcs;
             LightPosDict = lightPos;
@@ -108,6 +108,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var startLight = FindLight(arc.StartPoint);
             var endLight = FindLight(arc.EndPoint);
+            if(startLight==null || endLight==null )
+            {
+                return null;
+            }
             if(startLight.Length< LampLength/2.0 || endLight.Length < LampLength / 2.0)
             {
                 return null;

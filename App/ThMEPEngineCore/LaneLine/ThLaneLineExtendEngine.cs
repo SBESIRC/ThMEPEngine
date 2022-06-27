@@ -72,6 +72,55 @@ namespace ThMEPEngineCore.LaneLine
             return curves.Cast<Line>().Union(extendedLines).ToCollection();
         }
 
+        /// <summary>
+        /// 延长线并合并
+        /// </summary>
+        /// <param name="curves"></param>
+        /// <returns></returns>
+        public static DBObjectCollection LineExtendAndMerge(DBObjectCollection curves)
+        {
+            var extendedInfo = CreateExtendedLinesEx(curves);
+            var extendedLines = extendedInfo.SelectMany(x => x.Value).ToList();
+            var allLines = curves.Cast<Line>().Union(extendedLines).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(allLines);
+            extendedLines.RemoveAll(o =>
+            {
+                var objs = spatialIndex.SelectFence(o);
+                objs.Remove(o);
+                var exLines = extendedInfo.Where(x => x.Value.Contains(o)).Select(x => x.Key).ToList();
+                foreach (var exLine in exLines)
+                {
+                    objs.Remove(exLine);
+                }
+
+                return !IsProperIntersectsEx(objs, o);
+            });
+
+            var results = new DBObjectCollection();
+            foreach (Line line in curves)
+            {
+                var mergeLine = new DBObjectCollection();
+                extendedInfo[line].ForEach(x =>
+                {
+                    if (extendedLines.Contains(x))
+                    {
+                        mergeLine.Add(x);
+                    }
+                });
+                if(mergeLine.Count > 0)
+                {
+                    mergeLine.Add(line);
+                    ThLaneLineMergeExtension.Merge(mergeLine).OfType<Line>().ForEach(x => results.Add(x));
+                }
+                else
+                {
+                    results.Add(line);
+                }
+            }
+
+            return results;
+        }
+
         private static bool IsProperIntersects(DBObjectCollection lines, Line line)
         {
             // 计算交点

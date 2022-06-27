@@ -61,6 +61,36 @@ namespace ThMEPLighting.Garage.Service.Number
                 }
             }
         }
+
+        public static void Number1(this ThLightGraphService graph, int loopNumber, bool isSingleRowNumber, int defaultStartNumber)
+        {
+            if (graph == null || graph.Links.Count == 0)
+            {
+                return;
+            }
+            foreach (var linkPath in graph.Links)
+            {
+                var findStartIndex = ThFindStartIndexService.Find(graph, linkPath, loopNumber, isSingleRowNumber, defaultStartNumber);
+                if (!findStartIndex.IsFind)
+                {
+                    findStartIndex.StartIndex = defaultStartNumber;
+                }
+                int startIndex = findStartIndex.StartIndex;
+                if (!linkPath.Edges[0].IsDX)
+                {
+                    startIndex = findStartIndex.FindIndex;
+                }
+                if (isSingleRowNumber)
+                {
+                    ThSingleRowLightNumber.Build(linkPath.Edges, loopNumber, startIndex, defaultStartNumber);
+                }
+                else
+                {
+                    ThDoubleRowLightNumber.Build(linkPath.Edges, loopNumber, startIndex, defaultStartNumber);
+                }
+            }
+        }
+
         public static string FormatNumber(int index,int loopCharLength)
         {
             var number = index.ToString().PadLeft(loopCharLength, '0');

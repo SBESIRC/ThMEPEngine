@@ -1,67 +1,36 @@
-﻿using System;
+﻿using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     public class ThCircularArcConnectionBuilder : ThLightWireBuilder, IPrinter
     {
-        #region ----------外部传入----------
-        public Dictionary<string, int> DirectionConfig { get; set; }
-        public Matrix3d CurrentUserCoordinateSystem { get; set; } = Matrix3d.Identity;
-        #endregion
-        public ObjectIdList ObjIds { get; }
-        public DBObjectCollection Wires { get; private set; }
         public ThCircularArcConnectionBuilder(List<ThLightGraphService> graphs) : base(graphs)
         {
-            Wires = new DBObjectCollection();
-            ObjIds = new ObjectIdList();
-            DirectionConfig = new Dictionary<string, int>();
         }
         public override void Build()
         {
             // 布灯点
             LightPositionDict = BuildLightPos();
 
-            // 创建跳接线
-            // 建议允许最大的回路编号是4
-            var jumpWire = CreateJumpWire();
-            Wires = Wires.Union(jumpWire);
-
-            // 创建T型路口的连线
-            //var threewayJumpWire = CreateThreeWayJumpWire();
-            var threewayJumpWire = new DBObjectCollection();
-            Wires = Wires.Union(threewayJumpWire);
-
-            // 创建十字路口的连线
-            //var crossJumpWire = CreateCrossJumpWire();
-            var crossJumpWire = new DBObjectCollection();
-            Wires = Wires.Union(crossJumpWire);
-
-            // 与灯具避梁
-            var avoidService = new ThCircularArcConflictAvoidService(
-                ArrangeParameter.LampLength, Wires, LightPositionDict);
-            avoidService.Avoid();
-            Wires = avoidService.Results;
-
-            // 创建连接线，按照灯长度把灯所在的边打断   
-            var firstEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.EdgePattern==EdgePattern.First).ToList();
-            var secondEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.Second).ToList();
-            var firstLinkWireObjs = CreateLinkWire(firstEdges);
-            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
-            var secondLinkWireObjs = CreateLinkWire(secondEdges);
-            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
-            Wires = Wires.Union(firstLinkWireObjs);
-            Wires = Wires.Union(secondLinkWireObjs);
+            // 连线
+            if (ArrangeParameter.IsSingleRow)
+            {
+                BuildSingleRow(); // 单排布置
+            }
+            else
+            {
+                BuildDoubleRow(); // 双排布置
+            }
 
             // 创建灯文字
             NumberTexts = BuildNumberText(
@@ -71,69 +40,118 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 ArrangeParameter.LightNumberTextWidthFactor);
         }
 
-        private DBObjectCollection CreateJumpWire()
+        private void BuildSingleRow()
         {
-            // 创建图链路上跳接线
+            #region  ---------- 连线 -----------
+            CreateSingleRowJumpWire(Graphs);
+            var branchFilterPaths = new List<BranchLinkFilterPath>();
+            CreateSingleRowBranchCornerJumpWire(Graphs, branchFilterPaths);
+            #endregion
+
+            #region ---------- 过滤 ----------
+            // 创建默认编号连接线
+            AddToLoopWireGroup(DefaultNumbers[0], GetEdges().Select(o => o.Edge).ToCollection());
+            CutLinkWireByLights(DefaultNumbers[0]);
+
+            // 过滤跳接线
+            var jumpWires = FilterJumpWire();
+
+            // 过滤默认编号上的灯线
+            var defaultLinkWires = FilterDefaultLinkWires(DefaultNumbers[0], branchFilterPaths);
+            #endregion
+
+            #region ---------- 后处理 ----------
+            defaultLinkWires = BreakWire(defaultLinkWires);  // 用非默认编号打断默认灯线
+
+            Wires = Wires.Union(defaultLinkWires);           // 收集创建的线
+            Wires = Wires.Union(jumpWires);                  // 收集创建的线   
+            Wires = MergeWire(Wires);                        // 合并线 
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 灯线之间打断
+            Wires = BreakByLights(Wires);                    // 灯线与灯之间相交打断
+            #endregion
+        }
+
+        private void BuildDoubleRow()
+        {
+            #region ---------- 连线 ----------
+            // 创建直段上的跳线(类似于拱形)            
+            CreateSingleRowJumpWire(Graphs);
+
+            // 连接分支
+            var branchFilterPaths = new List<BranchLinkFilterPath>();
+            CreateSingleRowBranchCornerJumpWire(Graphs, branchFilterPaths);
+
+            // 连接跨区的灯连线,跳线
+            var totalEdges = GetEdges();
+            CreateStraitLinkJumpWire(totalEdges);
+            #endregion
+
+            #region ----------- 过滤 ----------
+            // 将1、2线边上的灯线用灯块打断
+            AddToLoopWireGroup(DefaultNumbers[0], GetEdges(totalEdges, EdgePattern.First).Select(o => o.Edge).ToCollection());
+            AddToLoopWireGroup(DefaultNumbers[1], GetEdges(totalEdges, EdgePattern.Second).Select(o => o.Edge).ToCollection());
+            CutLinkWireByLights(DefaultNumbers[0]); // 是为了过滤端部未连接灯的线
+            CutLinkWireByLights(DefaultNumbers[1]); // 是为了过滤端部未连接灯的线
+
+            // 过滤跳接线
+            var jumpWireRes = FilterJumpWire();
+
+            // 过滤默认编号的连接线
+            var default1LinkWires = FilterDefaultLinkWires(DefaultNumbers[0], branchFilterPaths);
+            var default2LinkWires = FilterDefaultLinkWires(DefaultNumbers[1], branchFilterPaths);
+            #endregion
+
+            #region ---------- 后处理 ----------
+            // 收集创建的线
+            var defaultlinkWires = new DBObjectCollection();
+            defaultlinkWires = defaultlinkWires.Union(default1LinkWires);
+            defaultlinkWires = defaultlinkWires.Union(default2LinkWires);
+
+            // 把非默认灯两边打断 
+            defaultlinkWires = BreakWire(defaultlinkWires);
+
+            // 打断 + 合并
+            Wires = Wires.Union(defaultlinkWires);
+            Wires = Wires.Union(jumpWireRes);
+            Wires = MergeWire(Wires);
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
+            Wires = BreakByLights(Wires);
+            #endregion
+        }
+
+        private void CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
+        {
             var results = new DBObjectCollection();
-            Graphs.Cast<ThCdzmLightGraphService>().ForEach(g =>
+            graphs.ForEach(g =>
             {
-                var gLinks = g.Links;
-                var linkService = new ThLightNodeSameLinkService(gLinks);
-                var lightNodeLinks = linkService.FindLightNodeLink2();
-                var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
-                {
-                    DefaultNumbers = this.DefaultNumbers,
-                    CenterSideDicts = this.CenterSideDicts,
-                    DirectionConfig = this.DirectionConfig,
-                    LampLength = this.ArrangeParameter.LampLength,
-                    LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                    Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
-                };
-                jumpWireFactory.Build();
-                lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+                var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
+                var branchBetweenLinks = FindLightNodeLinkOnBetweenBranch(g);
+                branchBetweenLinks = branchBetweenLinks.Where(o => !IsExsited(sameLinks, o)).ToList();
+                BuildSameLink(sameLinks);
+                BuildSameLink(branchBetweenLinks);
+                sameLinks.ForEach(l => AddToLoopWireGroup(l));
+                branchBetweenLinks.ForEach(l => AddToLoopWireGroup(l));
             });
-            return results;
         }
 
-        private DBObjectCollection CreateCrossJumpWire()
+        private void BuildSameLink(List<ThLightNodeLink> lightNodeLinks)
         {
-            var results = new DBObjectCollection();
-            var lightNodeLinks = GetCrossJumpWireLinks();
             var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
             {
-                LampLength = this.ArrangeParameter.LampLength,
                 DefaultNumbers = this.DefaultNumbers,
                 CenterSideDicts = this.CenterSideDicts,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-            };
-            jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.Build();
-            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
-            return results;
-        }
-
-        private DBObjectCollection CreateThreeWayJumpWire()
-        {
-            var results = new DBObjectCollection();
-            var lightNodeLinks = GetThreeWayJumpWireLinks();
-            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
-            {
+                DirectionConfig = this.DirectionConfig,
                 LampLength = this.ArrangeParameter.LampLength,
-                DefaultNumbers = this.DefaultNumbers,
-                CenterSideDicts = this.CenterSideDicts,
                 LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
             };
-            jumpWireFactory.BuildSideLinesSpatialIndex();
             jumpWireFactory.Build();
-            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
-            return results;
         }
 
         public override void Reset()
         {
             ResetObjIds(ObjIds);
         }
-
         public void Print(Database db)
         {
             SetDatabaseDefault(db);

@@ -70,7 +70,8 @@ namespace ThMEPLighting.Garage
                         RegionBorder = o.Clone() as Entity,
                         Transformer = borderTransformer,
                         DxCenterLines = GetRegionLines(newBorder, allLaneLines),
-                        FdxCenterLines = GetRegionLines(newBorder, allFdxLines),                        
+                        FdxCenterLines = GetRegionLines(newBorder, allFdxLines),
+                        SingleRowLines = GetRegionLines(newBorder, allSingleRowCableTrunkingCenterLines),
                         SideLines = newBorder.SpatialFilter(allSideLines).Cast<Line>().ToList(),
                         Texts = newBorder.SpatialFilter(allNumberTexts).Cast<DBText>().ToList(),
                         JumpWires = newBorder.SpatialFilter(allJumpWires).Cast<Curve>().ToList(),
@@ -78,20 +79,6 @@ namespace ThMEPLighting.Garage
                         Lights = newBorder.SpatialFilter(allLightBlks).Cast<BlockReference>().ToList(),
                     };
                     results.Add(regionBorder);
-                    var singleRowCableTrunkingCenterLines = GetRegionLines(
-                        newBorder, allSingleRowCableTrunkingCenterLines);
-                    if(singleRowCableTrunkingCenterLines.Count>0)
-                    {
-                        var subRegionBorder = new ThRegionBorder
-                        {
-                            RegionBorder = o.Clone() as Entity,
-                            Id = regionBorder.Id,
-                            Transformer = borderTransformer,
-                            ForSingleRowCableTrunking = true,
-                            DxCenterLines = singleRowCableTrunkingCenterLines,
-                        };
-                        results.Add(subRegionBorder);
-                    }
                 });
                 #endregion
                 #region -----------移动到原位置-------------
@@ -250,24 +237,6 @@ namespace ThMEPLighting.Garage
             transformer.Reset(objs);
         }
 
-        public static void GetColumns(this List<ThRegionBorder> regionBorders, Database database)
-        {
-            var columnQueryService = new ThQueryColumnService(database);
-            regionBorders.ForEach(b =>
-            {
-                b.Columns = columnQueryService.SelectCrossPolygon(b.RegionBorder);
-            });
-        }
-
-        public static void GetBeams(this List<ThRegionBorder> regionBorders, Database database)
-        {
-            var beamQueryService = new ThQueryBeamService(database);
-            regionBorders.ForEach(b =>
-            {
-                b.Beams = beamQueryService.SelectCrossPolygon(b.RegionBorder);
-            });
-        }
-
         /// <summary>
         /// 获取图纸上所有布置的灯块
         /// </summary>
@@ -335,7 +304,6 @@ namespace ThMEPLighting.Garage
             {
                 Margin = 800,
                 AutoCalculate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoCalculate,
-                AutoGenerate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate,
                 Interval = ThMEPLightingService.Instance.LightArrangeUiParameter.Interval,
                 IsSingleRow = ThMEPLightingService.Instance.LightArrangeUiParameter.IsSingleRow,
                 LoopNumber = ThMEPLightingService.Instance.LightArrangeUiParameter.LoopNumber,
@@ -346,7 +314,6 @@ namespace ThMEPLighting.Garage
             // 自定义
             arrangeParameter.Margin = 800.0;
             arrangeParameter.PaperRatio = 100;
-            arrangeParameter.MinimumEdgeLength = 2500;
             return arrangeParameter;
         }
         public static void SetDatabaseDefaults(this ThCableTrayParameter cableTrayParameter)

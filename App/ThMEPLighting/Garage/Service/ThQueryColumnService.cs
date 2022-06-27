@@ -1,16 +1,17 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Garage.Service.LayoutPoint
+namespace ThMEPLighting.Garage.Service
 {
-    public class ThQueryColumnService
+    public class ThQueryColumnService:IDisposable
     {
         private List<ThIfcColumn> Columns { get; set; }
         private ThMEPOriginTransformer Transformer { get; set; }
@@ -18,6 +19,14 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         {
             Extract(database);
             GetTransformer();
+        }
+        public void Dispose()
+        {
+            Columns
+                .Where(o => o.Outline != null)
+                .Select(o => o.Outline)
+                .ToCollection()
+                .ThDispose();
         }
         private void Extract(Database database)
         {

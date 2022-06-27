@@ -67,13 +67,27 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         public void BuildCrossLinks()
         {
+            // 用于十字区域对角区域的连接
             var shortenDis = LampLength / 2.0 + LampSideIntervalLength;
             OffsetDis3 = OffsetDis2;
             // 绘制十字型连接线
-            LightNodeLinks.Where(l => l.IsCrossLink)
+            LightNodeLinks
+                .Where(l => l.IsCrossLink)
                 .ForEach(l =>
                 {
                     DrawCrossJumpWire(l);
+                });
+        }
+
+        public void BuildStraitLinks()
+        {
+            // 用于十字区域对角区域的连接
+            var shortenDis = LampLength / 2.0 + LampSideIntervalLength;
+            OffsetDis3 = OffsetDis2;
+            // 绘制十字型连接线
+            LightNodeLinks.ForEach(l =>
+                {
+                    DrawStraitJumpWire(l);
                 });
         }
 
@@ -148,34 +162,45 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private List<Curve> Draw(ThLightNodeLink lightNodeLink)
         {
             // 连接两个灯点的边
-            var edges = lightNodeLink.Edges.ToList();
-            // 获取从第一个灯点到第二个灯点之间的路径
-            var pts = FindPathBetweenTwoPos(lightNodeLink.First.Position, lightNodeLink.Second.Position, edges);
-            pts = pts.RemoveNeibourDuplicatedPoints();
-            var path = pts.CreatePolyline(false);
+            var path = CreatePolyline(lightNodeLink.Edges, lightNodeLink.First.Position, lightNodeLink.Second.Position);
 
             // 获取跳接线的偏移方向
             var offsetDir = GetJumpWireDirection(lightNodeLink);
-            if (!offsetDir.HasValue)
+            if (offsetDir.HasValue)
+            {
+                return DrawLinkCurves(path, offsetDir.Value);
+            }
+            else
             {
                 return new List<Curve>();
             }
+        }
 
+        private Polyline CreatePolyline(List<Line> edges,Point3d first,Point3d second)
+        {
+            // 获取从第一个灯点到第二个灯点之间的路径
+            var pts = FindPathBetweenTwoPos(first, second, edges);
+            pts = pts.RemoveNeibourDuplicatedPoints();
+            return pts.CreatePolyline(false);
+        }
+
+        private List<Curve> DrawLinkCurves(Polyline path,Vector3d direction)
+        {
             // 对两个灯点的路径进行Buffer
             var outline = path.BufferPath(OffsetDis2);
 
             // 找出沿着offsetDir方向的路径
-            var lines = FindLinkPath(outline, path.StartPoint, path.EndPoint, offsetDir.Value);
+            var lines = FindLinkPath(outline, path.StartPoint, path.EndPoint, direction);
             if (lines.Count > 0)
             {
                 var dir = lines[0].LineDirection();
-                if (!dir.IsCodirectionalTo(offsetDir.Value, new Tolerance(1.0, 1.0)))
+                if (!dir.IsCodirectionalTo(direction, new Tolerance(1.0, 1.0)))
                 {
                     outline = path.BufferPath(-OffsetDis2);
-                    lines = FindLinkPath(outline, path.StartPoint, path.EndPoint, offsetDir.Value);
+                    lines = FindLinkPath(outline, path.StartPoint, path.EndPoint, direction);
                 }
             }
-            return lines.OfType<Curve>().ToList(); 
+            return lines.OfType<Curve>().ToList();
         }
 
         private void DrawCrossJumpWire(ThLightNodeLink lightNodeLink)
@@ -203,6 +228,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lightNodeLink.JumpWires = lines.Cast<Curve>().ToList();
         }
 
+        private void DrawStraitJumpWire(ThLightNodeLink lightNodeLink)
+        {
+            var startPt = lightNodeLink.First.Position;
+            var endPt = lightNodeLink.Second.Position;
+            lightNodeLink.JumpWires.Add(new Line(startPt, endPt));
+        }
+
         private List<Line> DrawLinkLines(Point3d start,Point3d end,Point3d initBrigePt)
         {
             var results = new List<Line>();
@@ -212,28 +244,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CrossInstallPoints.Add(brigePt);
             return results;
         }
-
-        private List<Line> DrawSpecialCornerJumpWire(Polyline path)
-        {
-            var results = new List<Line>();
-            var firstSeg = path.GetLineSegmentAt(0);
-            var lastSeg = path.GetLineSegmentAt(path.NumberOfVertices-2);
-            var firstLine = new Line(firstSeg.StartPoint,firstSeg.EndPoint);
-            var secondLine = new Line(lastSeg.StartPoint, lastSeg.EndPoint);
-            var pts = firstLine.IntersectWithEx(secondLine, Intersect.ExtendBoth);
-            if(pts.Count==0)
-            {
-                results.Add(new Line(path.GetPoint3dAt(0), path.GetPoint3dAt(path.NumberOfVertices - 1)));
-                return results;
-            }
-            var inters = pts[0];
-            var sp = path.GetPoint3dAt(0);
-            var ep = path.GetPoint3dAt(path.NumberOfVertices-1);
-            var vec1 = sp.GetVectorTo(inters);
-            var vec2 = inters.GetVectorTo(ep);
-            return CreateContinousLines(sp,new List<Vector3d> { vec2, vec1 });
-        }
-
         private List<Line> CreateContinousLines(Point3d pt,List<Vector3d> vecs)
         {
             var results = new List<Line>();

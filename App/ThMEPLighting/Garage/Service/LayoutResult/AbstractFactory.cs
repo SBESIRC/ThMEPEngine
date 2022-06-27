@@ -46,6 +46,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// 文字与偏移线的间隙
         /// </summary>
         public double Gap { get; set; }
+        public Dictionary<Point3d, Tuple<double, string>> LightPositionDict { get; set; }
         #endregion
         public NumberTextFactory(List<ThLightEdge> lightEdges)
         {
@@ -54,8 +55,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             TextHeight = 300.0;
             TextWidthFactor = 0.65;
             LightEdges = lightEdges;
+            LightPositionDict = new Dictionary<Point3d, Tuple<double, string>>();
         }
         public abstract DBObjectCollection Build();
+        protected bool IsExisted(Point3d position, string number, double angle)
+        {
+            return LightPositionDict
+                .Where(o => o.Key.DistanceTo(position) <= ThGarageLightCommon.RepeatedPointDistance)
+                .Where(o => o.Value.Item2 == number)
+                .Where(o => Math.Abs(o.Value.Item1 - angle) <= 1e-4)
+                .Any();
+        }
     }
     public abstract class LightWireFactory
     {
@@ -76,7 +86,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// 中心往两边偏移的1、2号线
         /// </summary>
         public Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; } = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
-        protected ThCADCore.NTS.ThCADCoreNTSSpatialIndex SideLineSpatialIndex { get; set; }
+        protected ThCADCoreNTSSpatialIndex SideLineSpatialIndex { get; set; }
         /// <summary>
         /// 灯编号的跳线要偏移的方向标记
         /// 大于0->相对车道中心线，往外偏；小于零->相对车道中心线，往里偏
@@ -247,6 +257,29 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }
         }
+
+        protected Vector3d? GetAdjacentJumpWireDirection(ThLightNodeLink lightNodeLink)
+        {
+            // 指向车道中心线的方向
+            var firstDir = GetJumpWireDirection(lightNodeLink.First.Position);
+            if (firstDir.HasValue)
+            {
+                return firstDir.Value;
+            }
+            else
+            {
+                var secondDir = GetJumpWireDirection(lightNodeLink.Second.Position);
+                if (secondDir.HasValue)
+                {
+                    return secondDir.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         private Vector3d GetJumpWireDirection(Vector3d vec)
         {
             return vec.GetAlignedDimensionTextDir();
@@ -258,6 +291,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 JumpWireDirectionQuery = new ThJumpWireDirectionQuery(DirectionConfig, CenterSideDicts);
             }
             return JumpWireDirectionQuery.Query(number, position);
+        }
+        protected Vector3d? GetJumpWireDirection(Point3d position)
+        {
+            if (JumpWireDirectionQuery == null)
+            {
+                JumpWireDirectionQuery = new ThJumpWireDirectionQuery(DirectionConfig, CenterSideDicts);
+            }
+            return JumpWireDirectionQuery.Query(position);
         }
         protected Tuple<Point3d, Point3d> CalculateJumpStartEndPt(ThLightNodeLink lightNodeLink)
         {

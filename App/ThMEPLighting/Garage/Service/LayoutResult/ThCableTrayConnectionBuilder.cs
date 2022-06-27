@@ -6,12 +6,11 @@ using Dreambuild.AutoCAD;
 using ThMEPLighting.Common;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
-    public class ThCableTrayConnectionBuilder : ThLightWireBuilder,IPrinter
+    public class ThCableTrayConnectionBuilder : ThLightWireBuilder, IPrinter
     {
         #region ---------- 外部传入 ----------       
         public List<Line> FdxLines { get; set; }
@@ -19,14 +18,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         #endregion
 
         #region ---------- 生成结果 ----------  
-        public ObjectIdList ObjIds { get ; }
+        public ObjectIdList ObjIds { get; }
         private List<Line> CableTraySides { get; set; }
         private List<Line> CableTrayCenters { get; set; }
         private Dictionary<Line, List<Line>> CableTrayGroups { get; set; }
         private Dictionary<Line, List<Line>> CableTrayPorts { get; set; }
         #endregion
 
-        public ThCableTrayConnectionBuilder(List<ThLightGraphService> graphs):base(graphs)
+        public ThCableTrayConnectionBuilder(List<ThLightGraphService> graphs) : base(graphs)
         {
             ObjIds = new ObjectIdList();
             FdxLines = new List<Line>();
@@ -38,9 +37,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         public override void Build()
         {
-
             // 灯线线槽
-            if(YnBuildCableTray)
+            if (YnBuildCableTray)
             {
                 var cableTrayBuildEngine = BuildCableTray();
                 CableTrayCenters = cableTrayBuildEngine.SplitCenters;
@@ -49,28 +47,28 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 CableTrayPorts = cableTrayBuildEngine.CenterWithPorts;
             }
 
-            // 灯编号
-            NumberTexts = BuildNumberText(
-                ArrangeParameter.Width/2.0,
-                ArrangeParameter.LightNumberTextGap,
-                ArrangeParameter.LightNumberTextHeight, 
-                ArrangeParameter.LightNumberTextWidthFactor);
-
             // 布灯点
             LightPositionDict = BuildLightPos();
+
+            // 灯编号
+            NumberTexts = BuildNumberText(
+                ArrangeParameter.Width / 2.0,
+                ArrangeParameter.LightNumberTextGap,
+                ArrangeParameter.LightNumberTextHeight,
+                ArrangeParameter.LightNumberTextWidthFactor);
         }
 
         private List<Line> BuildCrossLinks()
         {
             var results = new List<Line>();
-            if(CenterSideDicts.Count==0 || CenterGroupLines.Count==0)
+            if (CenterSideDicts.Count == 0 || CenterGroupLines.Count == 0)
             {
                 return results;
             }
             var calulator = new ThCrossLinkCalculator(CenterSideDicts, CenterGroupLines);
             var crossLinks = calulator.LinkCableTrayCross();
             crossLinks.ForEach(o => results.AddRange(o));
-            return results.Where(o=>o.Length>1e-6).ToList();
+            return results.Where(o => o.Length > 1e-6).ToList();
         }
 
         private List<Line> BuildTTypeLinks()
@@ -89,14 +87,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private ThCableTrayBuilder BuildCableTray()
         {
             var lines = new List<Line>();
-            var crossLines = BuildCrossLinks();
-            var tTypeLines = BuildTTypeLinks();
+            //var crossLines = BuildCrossLinks();
+            //var tTypeLines = BuildTTypeLinks();
             // 修正lines
-            var crossLinks = new List<Line>();
-            crossLinks.AddRange(crossLines);
-            crossLinks.AddRange(tTypeLines);
+            var crossLinks = new List<Line>();     
             crossLinks.AddRange(FdxLines);
-            var wireDict = CreateWireDict(Graphs.SelectMany(o=>o.GraphEdges).ToList());
+            var wireDict = CreateWireDict(Graphs.SelectMany(o => o.GraphEdges).ToList());
             var wires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength, crossLinks);
 
             lines.AddRange(wires.OfType<Line>());
@@ -106,21 +102,24 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return cableTrayEngine;
         }
 
-        private Dictionary<Line,Point3dCollection> CreateWireDict(List<ThLightEdge> edges)
+        private Dictionary<Line, Point3dCollection> CreateWireDict(List<ThLightEdge> edges)
         {
             var results = new Dictionary<Line, Point3dCollection>();
             edges.ForEach(o =>
             {
                 var pts = new Point3dCollection();
                 o.LightNodes.ForEach(n => pts.Add(n.Position));
-                results.Add(o.Edge, pts);
+                if (!results.ContainsKey(o.Edge))
+                {
+                    results.Add(o.Edge, pts);
+                }
             });
             return results;
         }
 
         private DBObjectCollection CutPortUnLinkWires(
-            Dictionary<Line,Point3dCollection> wireDict,
-            double lampLength,List<Line> fdxLines)
+            Dictionary<Line, Point3dCollection> wireDict,
+            double lampLength, List<Line> fdxLines)
         {
             var handler = new ThCutCableTrayUnlinkWireService(wireDict, lampLength, fdxLines);
             return handler.Cut();
@@ -130,7 +129,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             SetDatabaseDefault(db);
             ObjIds.AddRange(PrintNumberTexts(db));
-            ObjIds.AddRange(YnBuildCableTray?PrintCableTray(db):new ObjectIdList());
+            ObjIds.AddRange(YnBuildCableTray ? PrintCableTray(db) : new ObjectIdList());
             ObjIds.AddRange(PrintLightBlocks(db));
         }
 

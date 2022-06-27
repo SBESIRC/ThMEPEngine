@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service
@@ -13,21 +14,42 @@ namespace ThMEPLighting.Garage.Service
             {
                 return results;
             }
-            double totalTength = splitParameter.Length; //总长
-            double restLength = totalTength % splitParameter.Interval; //剩余
-            if (restLength / 2.0 < splitParameter.Margin)
+            var D = splitParameter.Interval;
+            int N = CalculateN(splitParameter.Length, splitParameter.Interval, splitParameter.Margin);
+            var pts = ToCollection(splitParameter.Segment);
+            var path = pts.CreatePolyline(false);
+            var midPt = path.GetPolylinePt(path.Length/2.0);
+            double step = 0.0;
+            if (N % 2 == 1)
             {
-                //修正
-                restLength += splitParameter.Interval;
+                //奇数盏灯
+                step = D;
+                results.Add(midPt);
             }
-            var forwardLength = restLength / 2.0;
-            while (forwardLength < totalTength)
+            else
             {
-                results.Add(GetDistributePoint(forwardLength, splitParameter.Segment).Value);
-                forwardLength += splitParameter.Interval;
+                //偶数盏灯
+                step = D / 2.0;
+            }
+            double half = path.Length / 2.0;
+            for (int i = 1; i <= N / 2; i++)
+            {
+                var leftPt = path.GetPolylinePt(half - step);
+                var rightPt = path.GetPolylinePt(half + step);
+                results.Insert(0, leftPt);
+                results.Add(rightPt);
+                step += D;
             }
             return results;
         }
+
+        private static Point3dCollection ToCollection(List<Point3d> pts)
+        {
+            var results = new Point3dCollection();
+            pts.ForEach(o => results.Add(o));
+            return results;
+        }
+
         /// <summary>
         /// 只能对直线段分割
         /// </summary>
@@ -114,6 +136,10 @@ namespace ThMEPLighting.Garage.Service
                 n++;
             }
             return n-1;
+        }
+        private static double CalculateD(double l, int n, double margin)
+        {
+            return (l - 2 * margin) / n;
         }
         /// <summary>
         /// 计算N盏灯使用的最小长度

@@ -1,165 +1,460 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
+
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     /// <summary>
     /// 用于连接十字路口的灯
     /// </summary>
-    internal sealed class ThLightNodeCrossLinkService: ThCrossLinkCalculator
+    internal sealed class ThLightNodeCrossLinkService : ThCrossLinkCalculator
     {
-        public ThLightNodeCrossLinkService(List<ThLightEdge> edges, 
-            Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts):base(edges,centerSideDicts)
+        private List<List<Line>> EdgeGroups { get; set; }
+        public ThLightNodeCrossLinkService(List<ThLightEdge> edges,
+            Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts) : base(edges, centerSideDicts)
         {
-            
+            EdgeGroups = new List<List<Line>>();
+            EdgeGroups.AddRange(ThMergeLightLineService.Merge(edges.Where(o => o.EdgePattern == EdgePattern.First).Select(o => o.Edge).ToList()));
+            EdgeGroups.AddRange(ThMergeLightLineService.Merge(edges.Where(o => o.EdgePattern == EdgePattern.Second).Select(o => o.Edge).ToList()));
         }
+
         public List<ThLightNodeLink> LinkCross()
         {
             var results = new List<ThLightNodeLink>();
-            var crosses = GetCrosses();
-            crosses.ForEach(c => results.AddRange(LinkCross(c)));
+            var crosses = CenterLines.GetCrosses();
+            crosses.Where(o => o.Count == 4).ForEach(c => results.AddRange(LinkCrossCorner(c)));
             return results;
         }
-
-        public List<ThLightNodeLink> LineThreeWay()
+        public List<ThLightNodeLink> LinkThreeWay()
         {
             var results = new List<ThLightNodeLink>();
-            var threeWays = GetThreeWays();
-            threeWays = FilterByCenterWithoutSides(threeWays);
-            threeWays.ForEach(o =>
-            {
-                var pairs = GetLinePairs(o);
-                var mainPair = pairs.OrderBy(k => GetLineOuterAngle(k.Item1,k.Item2)).First();
-                if(IsMainBranch(mainPair.Item1, mainPair.Item2))
+            var threeWays = CenterLines.GetThreeWays();
+            threeWays.Where(o => o.Count == 3).ForEach(o =>
                 {
-                    var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
-                    results.AddRange(LinkThreeway(mainPair.Item1, mainPair.Item2, branch));
-                }
+                    var pairs = o.GetLinePairs();
+                    var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
+                    if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
+                    {
+                        var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
+                        results.AddRange(LinkThreewayCross(mainPair.Item1, mainPair.Item2, branch));
+                    }
+                });
+            return results;
+        }
+        public List<ThLightNodeLink> LinkElbow()
+        {
+            // 连接弯头拐角处，
+            var results = new List<ThLightNodeLink>();
+            var elbows = CenterLines.GetElbows();
+            elbows.Where(o => o.Count == 2).ForEach(o =>
+            {
+                results.AddRange(LinkElbowCross(o[0], o[1]));
             });
             return results;
         }
-
-        private Line GetOpposite(Line main,Line branch)
+        private List<ThLightNode> GetLinkNodes(Line line1, Point3d linkPt, List<ThLightEdge> line1Edges)
         {
-            var linkPtRes = main.FindLinkPt(branch);
-            var farawayPt = linkPtRes.Value.GetNextLinkPt(branch.StartPoint,branch.EndPoint);
-            var vec = farawayPt.GetVectorTo(linkPtRes.Value).GetNormal();
-            return new Line(linkPtRes.Value, linkPtRes.Value + vec.MultiplyBy(branch.Length));
+            // 获取可以连接的灯节点
+            var results = new List<ThLightNode>();
+            var line1FarwayPt = linkPt.GetNextLinkPt(line1.StartPoint, line1.EndPoint);
+            var edges = Sort(line1Edges, linkPt, line1FarwayPt);
+            //edges = Filter(edges);
+            var nodes = GetClosestNodes(linkPt, line1FarwayPt,
+                edges.SelectMany(o => o.LightNodes).ToList());
+            return GetDifferntNumberNodes(nodes);
         }
 
-        private List<ThLightNodeLink> LinkCross(List<Line> cross)
+        private List<ThLightNodeLink> LinkCrossCorner(List<Line> cross)
         {
             var results = new List<ThLightNodeLink>();
             var res = Sort(cross);
-            // 对于没有边线的中心线，获取其符合条件的邻居
-            var neibourDict = CreateNeibourDict(res);
-            var allNeibourDict = CreateAllNeibourDict(res);
-
-            // 分区
-            var partitions = CreatePartition(res);
-
-            // 只有分区为偶数
-            if (partitions.Count % 2 == 0)
+            for (int i = 0; i < 4; i++)
             {
-                // 获取中心线附带的边线
-                var sides = new List<Line>();
-                sides.AddRange(GetCenterSides(cross));
-                sides.AddRange(GetCenterSides(allNeibourDict.SelectMany(o=>o.Value).ToList()));
-                // 通过sides找到Edges中的边
-                var edgeLines = sides.SelectMany(o => GetEdges(o)).ToList();
-                // 创建对角区域的灯Link
-                var edges = Edges.Where(o => edgeLines.Contains(o.Edge)).ToList();
-                var half = partitions.Count / 2;
-                var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
-                var bufferTolerance = 1.0; //解决点在区域边界上的问题
-                for (int i = 0; i < half; i++)
+                var first = res[i];
+                var second = res[(i + 1) % 4];
+                results.AddRange(GetLightNodeLinks(first, second));
+            }
+            return results;
+        }
+        private List<ThLightNodeLink> LinkElbowCross(Line first, Line second)
+        {
+            /*          
+             *     |
+             *     | < second
+             *     | 
+             *     ----------
+             *         ^          
+             *       first                  
+             */
+            var results = new List<ThLightNodeLink>();
+            if (IsCrossLink(first, second))
+            {
+                var nodeLinks = GetElblowLightNodeLinks(first, second);
+                results.AddRange(nodeLinks);
+            }
+            return results;
+        }
+        private List<ThLightNodeLink> LinkThreewayCross(Line first, Line second, Line branch)
+        {
+            /*          
+             *            |
+             *            | < branch
+             *            | 
+             *  ---------------------
+             *      ^          ^
+             *   first        second          
+             */
+            var results = new List<ThLightNodeLink>();
+            var firstNodeLinks = new List<ThLightNodeLink>();
+            var secondNodeLinks = new List<ThLightNodeLink>();
+            if (IsCrossLink(first, branch))
+            {
+                firstNodeLinks = GetLightNodeLinks(first, second, branch);
+            }
+            if (IsCrossLink(second, branch))
+            {
+                secondNodeLinks = GetLightNodeLinks(second, first, branch);
+            }
+            results.AddRange(firstNodeLinks);
+            results.AddRange(secondNodeLinks);
+            return results;
+        }
+
+        private List<ThLightNodeLink> GetElblowLightNodeLinks(Line first, Line second)
+        {
+            /*          
+             *  |
+             *  | < second
+             *  | 
+             *  -----------
+             *      ^        
+             *    first            
+             */
+            // 连接由first、second形成的区域内具有相同编号的灯,不跨区
+            // 对可以连接的边是要按条件筛选的，请仔细阅读代码
+            var results = new List<ThLightNodeLink>();
+            var linkPt = first.FindLinkPt(second, ThGarageLightCommon.RepeatedPointDistance);
+            if (!linkPt.HasValue)
+            {
+                return results;
+            }
+            var centers = new List<Line>() { first, second };
+            // 对于没有边线的中心线，获取其符合条件的邻居
+            var neibourDict = CreateNeibourDict(centers);
+
+            var sideEdges = new List<ThLightEdge>();
+            sideEdges.AddRange(GetCenterSideEdges(centers));
+            sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
+
+            // 把有Sides的中心线与其相邻的线合并
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var cornerArea = firstLines.CreateParallelogram(secondLines);
+
+            // 获取与first、second平行的边
+            var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
+
+            var firstEdges = FilterEdges(includeEdges, first, neibourDict);
+            var secondEdges = FilterEdges(includeEdges, second, neibourDict);
+
+            // 寻找可以连接的灯点
+            var firstFarwayPt = linkPt.Value.GetNextLinkPt(first.StartPoint, first.EndPoint);
+            firstEdges = Sort(firstEdges, linkPt.Value, firstFarwayPt);
+            firstEdges = Filter(firstEdges);
+
+            var secondFarwayPt = linkPt.Value.GetNextLinkPt(second.StartPoint, second.EndPoint);
+            secondEdges = Sort(secondEdges, linkPt.Value, secondFarwayPt);
+            secondEdges = Filter(secondEdges);
+
+            if (firstEdges.Count == 0 || secondEdges.Count == 0)
+            {
+                return results;
+            }
+            if (firstEdges[0].EdgePattern == secondEdges[0].EdgePattern)
+            {
+                return results;
+            }
+
+            var firstSecondNodes = new List<ThLightNode>(); // 由 first,second形成的区域包括的灯节点
+            firstSecondNodes.AddRange(GetLinkNodes(first, linkPt.Value, firstEdges));
+            firstSecondNodes.AddRange(GetLinkNodes(second, linkPt.Value, secondEdges));
+
+            // 获取与first、second下方且平行的边
+            var downNodes = new List<ThLightNode>();
+            var downEdges = sideEdges.Where(o => !includeEdges.Select(f => f.Id).Contains(o.Id)).ToList();
+            var firstOuterEdges = FilterEdges(downEdges, first, neibourDict);
+            var secondOuterEdges = FilterEdges(downEdges, second, neibourDict);
+
+            //
+            var firstEdgeLines = firstOuterEdges.SelectMany(o => QueryLink(o.Edge)).ToList();
+            var secondEdgeLines = secondOuterEdges.SelectMany(o => QueryLink(o.Edge)).ToList();
+            downNodes.AddRange(GetEdges(Distinct(firstEdgeLines)).SelectMany(o => o.LightNodes));
+            downNodes.AddRange(GetEdges(Distinct(secondEdgeLines)).SelectMany(o => o.LightNodes));
+
+            results = Link(firstSecondNodes, downNodes);
+            results.ForEach(l => l.CrossIntersectionPt = linkPt.Value);
+            return results;
+        }
+
+        private List<Line> Distinct(List<Line> lines)
+        {
+            var results = new List<Line>();
+            foreach (var line in lines)
+            {
+                if (!results.Contains(line))
                 {
-                    var current = partitions[i];
-                    var currentAdjacentA = MergeNeibour(current.Item1, neibourDict);
-                    var currentAdjacentB = MergeNeibour(current.Item2, neibourDict);
-                    var currentArea = CreateParallelogram(currentAdjacentA, currentAdjacentB);
-                    var currentEdges = GroupEdges(currentArea, edges); // 分组
-                    var currentNodes = GetPartitionCloseNodes(current, currentEdges, currentArea);
-                    var currentNeibourLinkPt = current.Item1.FindLinkPt(current.Item2);
-
-                    var opposite = partitions[i + half];
-                    var oppositeAdjacentA = MergeNeibour(opposite.Item1, neibourDict);
-                    var oppositeAdjacentB = MergeNeibour(opposite.Item2, neibourDict);
-                    var oppositeArea = CreateParallelogram(oppositeAdjacentA, oppositeAdjacentB);
-                    var oppositeEdges = GroupEdges(oppositeArea, edges);
-                    var newOppositeArea = bufferService.Buffer(oppositeArea, bufferTolerance) as Polyline;
-                    var oppositeNodes = GetPartitionCloseNodes(opposite, oppositeEdges, newOppositeArea);
-                    var oppositeNeibourLinkPt = opposite.Item1.FindLinkPt(opposite.Item2);
-
-                    // 添加转接点
-                    var linkRes = Link(currentNodes, oppositeNodes);
-                    if(currentNeibourLinkPt.HasValue)
-                    {
-                        linkRes.ForEach(l => l.CrossIntersectionPt= currentNeibourLinkPt.Value);
-                    }
-                    else if (oppositeNeibourLinkPt.HasValue)
-                    {
-                        linkRes.ForEach(l => l.CrossIntersectionPt= oppositeNeibourLinkPt.Value);
-                    }
-                    results.AddRange(linkRes);
+                    results.Add(line);
                 }
             }
             return results;
         }
-        private List<ThLightNodeLink> LinkThreeway(Line main1,Line main2,Line branch)
+
+        private List<Line> QueryLink(Line line)
         {
-            /*
-                        |
-                        |(branch)
-                        |
-             ___________|___________
-               (main1)     (main2)
-            */
-            var oppositeBranch = GetOpposite(main1, branch);
-            var orders = new List<Line> { main1, branch, main2, oppositeBranch };
-            return LinkCross(orders);
+            foreach (var link in EdgeGroups)
+            {
+                if (link.Contains(line))
+                {
+                    return link;
+                }
+            }
+            return new List<Line>();
         }
 
-        private Dictionary<Line, Line> CreateNeibourDict(List<Line> crosses)
+        private List<ThLightNodeLink> GetLightNodeLinks(Line first, Line second)
         {
-            // 对于中心线没有边线的，获取其共线的邻居
-            var results = new Dictionary<Line, Line>();
-            var centerPt = GetCenter(crosses);
-            if (centerPt.HasValue)
+            /*          
+             *            |
+             *            | < second
+             *            | 
+             *  ---------------------
+             *      ^     |    
+             *   first    |  
+             *            |
+             */
+            // 连接由first、second形成的区域内具有相同编号的灯,不跨区
+            // 对可以连接的边是要按条件筛选的，请仔细阅读代码
+            var results = new List<ThLightNodeLink>();
+            var linkPt = first.FindLinkPt(second, ThGarageLightCommon.RepeatedPointDistance);
+            if (!linkPt.HasValue)
             {
-                crosses.Where(o => IsContains(o)).Where(o => GetCenterSides(o).Count == 0).ForEach(o =>
-                     {
-                        var port = centerPt.Value.GetNextLinkPt(o.StartPoint, o.EndPoint);
-                        var neibour = FindCollinearNeibour(o, port);
-                         if(neibour!=null)
-                         {
-                             results.Add(o, neibour);
-                         }
-                     });
+                return results;
+            }
+            var centers = new List<Line>() { first, second };
+            // 对于没有边线的中心线，获取其符合条件的邻居
+            var neibourDict = CreateNeibourDict(centers);
+
+            var sideEdges = new List<ThLightEdge>();
+            sideEdges.AddRange(GetCenterSideEdges(centers));
+            sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
+
+            // 把有Sides的中心线与其相邻的线合并
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var cornerArea = firstLines.CreateParallelogram(secondLines);
+
+            // 获取与first、second平行的边
+            var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
+            var firstEdges = FilterEdges(includeEdges, first, neibourDict);
+            var secondEdges = FilterEdges(includeEdges, second, neibourDict);
+
+            // 寻找可以连接的灯点
+            var firstFarwayPt = linkPt.Value.GetNextLinkPt(first.StartPoint, first.EndPoint);
+            firstEdges = Sort(firstEdges, linkPt.Value, firstFarwayPt);
+            firstEdges = Filter(firstEdges);
+
+            var secondFarwayPt = linkPt.Value.GetNextLinkPt(second.StartPoint, second.EndPoint);
+            secondEdges = Sort(secondEdges, linkPt.Value, secondFarwayPt);
+            secondEdges = Filter(secondEdges);
+
+            if (firstEdges.Count == 0 || secondEdges.Count == 0)
+            {
+                return results;
+            }
+            if (firstEdges[0].EdgePattern != secondEdges[0].EdgePattern)
+            {
+                return results;
+            }
+
+            return FindCornerStraitLinks(firstEdges, secondEdges);
+        }
+
+        private bool IsCrossLink(Line first, Line second)
+        {
+            /*          
+             *            |
+             *            | < second
+             *            | 
+             *  ---------------------
+             *      ^     |    
+             *   first    |  
+             *            |
+             */
+            // 连接由first、second形成的区域内具有相同编号的灯,不跨区
+            var results = new List<ThLightNodeLink>();
+            var linkPt = first.FindLinkPt(second, ThGarageLightCommon.RepeatedPointDistance);
+            if (!linkPt.HasValue)
+            {
+                return false;
+            }
+            var centers = new List<Line>() { first, second };
+            // 对于没有边线的中心线，获取其符合条件的邻居
+            var neibourDict = CreateNeibourDict(centers);
+
+            var sideEdges = new List<ThLightEdge>();
+            sideEdges.AddRange(GetCenterSideEdges(centers));
+            sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
+
+            // 把有Sides的中心线与其相邻的线合并
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var cornerArea = firstLines.CreateParallelogram(secondLines);
+
+            // 获取与first、second平行的边
+            var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
+            var firstEdges = FilterEdges(includeEdges, first, neibourDict);
+            var secondEdges = FilterEdges(includeEdges, second, neibourDict);
+
+            firstEdges.SelectMany(o => o.LightNodes).Select(o => o.Position);
+
+            var firstFarwayPt = linkPt.Value.GetNextLinkPt(first.StartPoint, first.EndPoint);
+            var secondFarwayPt = linkPt.Value.GetNextLinkPt(second.StartPoint, second.EndPoint);
+            firstEdges = firstEdges.OrderBy(o => o.Edge.GetMidPt().GetProjectPtOnLine(linkPt.Value, firstFarwayPt).DistanceTo(linkPt.Value)).ToList();
+            secondEdges = secondEdges.OrderBy(o => o.Edge.GetMidPt().GetProjectPtOnLine(linkPt.Value, secondFarwayPt).DistanceTo(linkPt.Value)).ToList();
+            if (firstEdges.Count == 0 || secondEdges.Count == 0)
+            {
+                return false;
+            }
+            if (firstEdges.Count == 1 && secondEdges.Count == 1)
+            {
+                return firstEdges[0].EdgePattern != secondEdges[0].EdgePattern;
+            }
+            return true;
+        }
+
+        private bool IsHasIsolatedEdge(List<ThLightEdge> edges)
+        {
+            return edges.GroupBy(o => o.EdgePattern).Where(o => o.ToList().Count == 1).Any();
+        }
+
+        private bool IsElbow(Line first, Line second)
+        {
+            return !first.IsLessThan45Degree(second);
+        }
+
+        private List<ThLightNodeLink> GetLightNodeLinks(Line first, Line second, Line branch)
+        {
+            /*          
+             *            |
+             *            | < branch
+             *            | 
+             *  ---------------------
+             *      ^          ^
+             *   first        second
+             *            
+             */
+            // 连接由first、branch形成的区域与first、second以下的区域进行跨区连接
+            // 对可以连接的边是要按条件筛选的，请仔细阅读代码
+            var results = new List<ThLightNodeLink>();
+            var linkPt = first.FindLinkPt(branch, ThGarageLightCommon.RepeatedPointDistance);
+            if (!linkPt.HasValue)
+            {
+                return results;
+            }
+            var centers = new List<Line>() { first, second, branch };
+            // 对于没有边线的中心线，获取其符合条件的邻居
+            var neibourDict = CreateNeibourDict(centers);
+
+            var sideEdges = new List<ThLightEdge>();
+            sideEdges.AddRange(GetCenterSideEdges(centers));
+            sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
+
+            // 把有Sides的中心线与其相邻的线合并(后期再优化)
+            var firstLines = MergeNeibour(first, neibourDict);
+            var branchLines = MergeNeibour(branch, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+
+            var firstArea = firstLines.CreateParallelogram(branchLines);
+            var firstIncludeEdges = GroupEdges(firstArea, sideEdges); // firstArea包含的边
+
+            var secondArea = secondLines.CreateParallelogram(branchLines);
+            var secondIncludeEdges = GroupEdges(secondArea, sideEdges); // secondArea包含的边
+
+            var firstEdges = FilterEdges(firstIncludeEdges, first, neibourDict);
+            var branchEdges = FilterEdges(firstIncludeEdges, branch, neibourDict);
+
+            var firstBranchNodes = new List<ThLightNode>();
+            firstBranchNodes.AddRange(GetLinkNodes(first, linkPt.Value, firstEdges));
+            firstBranchNodes.AddRange(GetLinkNodes(branch, linkPt.Value, branchEdges));
+
+            // 获取与first、second下方且平行的边
+            var downNodes = new List<ThLightNode>();
+            var downEdges = sideEdges.Where(o => !firstIncludeEdges.Select(f => f.Id).Contains(o.Id) &&
+            !secondIncludeEdges.Select(s => s.Id).Contains(o.Id)).ToList();
+            var downFirstEdges = FilterEdges(downEdges, first, neibourDict);
+            var downSecondEdges = FilterEdges(downEdges, second, neibourDict);
+            downNodes.AddRange(GetLinkNodes(first, linkPt.Value, downFirstEdges));
+            downNodes.AddRange(GetLinkNodes(second, linkPt.Value, downSecondEdges));
+
+            results = Link(firstBranchNodes, downNodes);
+            results.ForEach(l => l.CrossIntersectionPt = linkPt.Value);
+            return results;
+        }
+        private List<ThLightNodeLink> FindCornerStraitLinks(List<ThLightEdge> firstEdges, List<ThLightEdge> secondEdges)
+        {
+            var edges = new List<ThLightEdge>();
+            edges.AddRange(firstEdges);
+            edges.AddRange(secondEdges);
+            var linkPath = new ThLinkPath()
+            {
+                Edges = edges,
+            };
+            var linkService = new ThLightNodeSameLinkService(new List<ThLinkPath> { linkPath });
+            return linkService.FindCornerStraitLinks();
+        }
+
+        private List<ThLightEdge> FilterEdges(List<ThLightEdge> edges, Line center, Dictionary<Line, Line> neibourDict)
+        {
+            var results = new List<ThLightEdge>();
+            results.AddRange(edges.Where(o => o.Direction.IsParallelToEx(center.LineDirection())).ToList());
+            if (neibourDict.ContainsKey(center))
+            {
+                var linkEdges = edges.Where(o => o.Direction.IsParallelToEx(neibourDict[center].LineDirection())).ToList();
+                linkEdges = linkEdges.Where(o => !results.Select(e => e.Id).Contains(o.Id)).ToList();
+                results.AddRange(linkEdges);
             }
             return results;
         }
-
-        private Dictionary<Line, List<Line>> CreateAllNeibourDict(List<Line> crosses)
+        private List<ThLightEdge> Filter(List<ThLightEdge> edges)
         {
-            // 对于中心线没有边线的，获取其共线的邻居
-            var results = new Dictionary<Line, List<Line>>();
-            var centerPt = GetCenter(crosses);
-            if (centerPt.HasValue)
+            // 过滤连续的具有相同EdgePattern的边
+            var results = new List<ThLightEdge>();
+            if (edges.Count > 0)
             {
-                crosses.Where(o => IsContains(o)).Where(o => GetCenterSides(o).Count == 0).ForEach(o =>
+                results.Add(edges[0]);
+                for (int i = 1; i < edges.Count; i++)
                 {
-                    var port = centerPt.Value.GetNextLinkPt(o.StartPoint, o.EndPoint);
-                    var neibours = FindNeibours(o, port);
-                    results.Add(o, neibours);
-                });
+                    if (edges[i].EdgePattern != results[0].EdgePattern)
+                    {
+                        break;
+                    }
+                    if (!edges[i].Edge.FindLinkPt(results.Last().Edge).HasValue)
+                    {
+                        break;
+                    }
+                    results.Add(edges[i]);
+                }
             }
             return results;
         }
@@ -209,74 +504,30 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private Line FindLightNodeEdge(string lightNodeId)
         {
-           return Edges
-                .Where(o => o.LightNodes.Select(n => n.Id).Contains(lightNodeId))
-                .FirstOrDefault().Edge;
+            return Edges
+                 .Where(o => o.LightNodes.Select(n => n.Id).Contains(lightNodeId))
+                 .FirstOrDefault().Edge;
         }
 
-        private List<ThLightNode> GetPartitionCloseNodes(
-            Tuple<Line,Line> partition,List<ThLightEdge> edges,Polyline partitionArea)
+        private List<ThLightNode> GetClosestNodes(Point3d sp, Point3d ep, List<ThLightNode> lightNodes)
         {
-            var results = new List<ThLightNode>();
-            var item1Nodes = GetClosestNodes(partition.Item1, partition.Item2, edges, partitionArea);
-            var item2Nodes = GetClosestNodes(partition.Item2, partition.Item1, edges, partitionArea);
-            results.AddRange(item1Nodes);
-            results.AddRange(item2Nodes);
-            return results;
+            var direction = sp.GetVectorTo(ep).GetNormal();
+            return lightNodes
+                .OrderBy(o => o.Position.GetProjectPtOnLine(sp, ep).DistanceTo(sp))
+                .Where(o =>
+                {
+                    var projectionPt = o.Position.GetProjectPtOnLine(sp, ep);
+                    return sp.GetVectorTo(projectionPt).IsSameDirection(direction) || projectionPt.DistanceTo(sp) <= 1.0;
+                }).ToList();
         }
-
-        private List<ThLightNode> GetClosestNodes(Line adjacentA, Line adjacentB, List<ThLightEdge> edges, Polyline partitionArea)
+        private List<ThLightNode> GetDifferntNumberNodes(List<ThLightNode> lightNodes)
         {
             var results = new List<ThLightNode>();
-            var inters = adjacentA.IntersectWithEx(adjacentB);
-            if (inters.Count == 0)
-            {
-                return results;
-            }
-            var projectionAxis = GetCenterProjectionAxis(adjacentA.StartPoint, adjacentA.EndPoint, inters[0]);
-            var parallels = GetParallels(adjacentA, edges.Select(o => o.Edge).ToList());
-            var parallelEdges = edges.Where(o => parallels.Contains(o.Edge)).ToList();
-            var lightNodes = parallelEdges.SelectMany(o => o.LightNodes).ToList();
-            lightNodes = lightNodes.Where(o=>partitionArea.EntityContains(o.Position)).ToList(); // 过滤在分区里的灯
-
-            lightNodes = lightNodes
-                .OrderByDescending(o=> o.Position.GetProjectPtOnLine(
-                    projectionAxis.Item1, projectionAxis.Item2)
-                .DistanceTo(projectionAxis.Item1)).ToList();
             lightNodes.ForEach(o =>
             {
-                if(!results.Select(r=>r.Number).Contains(o.Number))
+                if (!results.Select(r => r.Number).Contains(o.Number))
                 {
                     results.Add(o);
-                }
-            });
-            return results;
-        }
-
-        private Tuple<Point3d,Point3d> GetCenterProjectionAxis(Point3d lineSp,Point3d lineEp, Point3d cornerPt)
-        {
-            var farwayPt = cornerPt.GetNextLinkPt(lineSp, lineEp);
-            return Tuple.Create(farwayPt, cornerPt);
-        }
-
-        private List<Line> GetParallels(Line line,List<Line> lines)
-        {
-            return lines.Where(o => line.IsParallelToEx(o)).ToList();
-        }
-
-        private List<Line> GetEdges(Line line,double width=1.0)
-        {
-            var lines = EdgeQuery.QueryCollinearLines(line.StartPoint, line.EndPoint, width);
-            return lines.Where(o => line.HasCommon(o)).ToList();
-        }
-        private List<ThLightEdge> GroupEdges(Polyline partition, List<ThLightEdge> edges)
-        {
-            var results = new List<ThLightEdge>();
-            edges.ForEach(e =>
-            {
-                if (e.LightNodes.Select(n => n.Position).Where(n => partition.EntityContains(n)).Any())
-                {
-                    results.Add(e);
                 }
             });
             return results;

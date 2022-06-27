@@ -1,23 +1,22 @@
 ﻿using System;
-using NFox.Cad;
 using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPLighting.Garage.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Model
 {
     public class ThRegionBorder
     {
         public string Id { get; set; }
-        public bool ForSingleRowCableTrunking { get; set; }
         /// <summary>
         /// 布灯的边界Polyline,MPolygon
         /// </summary>
@@ -31,6 +30,11 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public List<Line> FdxCenterLines { get; set; }
         /// <summary>
+        /// 单排线槽先
+        /// 双排布置，绘制的专门用于单槽布置的线
+        /// </summary>
+        public List<Line> SingleRowLines { get; set; }
+        /// <summary>
         /// 梁
         /// </summary>
         public List<ThIfcBeam> Beams { get; set; }
@@ -38,6 +42,20 @@ namespace ThMEPLighting.Garage.Model
         /// 柱
         /// </summary>
         public List<ThIfcColumn> Columns { get; set; }
+        /// <summary>
+        /// 一号线
+        /// </summary>
+        public List<Line> FirstLightingLines { get; set; }
+        /// <summary>
+        /// 二号线
+        /// </summary>
+        public List<Line> SecondLightingLines { get; set; }
+        /// <summary>
+        /// 1号线到2号线的延伸线
+        /// </summary>
+
+        public List<Line> ExtendLines { get; set; }
+
         #region ---------- 收集防火分区内的布灯实体-----------
         /// <summary>
         /// Dwg中区域中已布的灯->
@@ -84,9 +102,13 @@ namespace ThMEPLighting.Garage.Model
             Columns = new List<ThIfcColumn>();
             DxCenterLines = new List<Line>();
             FdxCenterLines = new List<Line>();
+            SingleRowLines = new List<Line>();
             Lights = new List<BlockReference>();
             WcsToUcs = Matrix3d.Identity;
             Id = Guid.NewGuid().ToString();
+            ExtendLines = new List<Line>();
+            FirstLightingLines = new List<Line>();
+            SecondLightingLines = new List<Line>();
         }
 
         public void Transform()
@@ -94,8 +116,8 @@ namespace ThMEPLighting.Garage.Model
             // 移动到原点
             // 若图元离原点非常远（大于1E+10)，精度会受很大影响
             Transformer.Transform(DxCenterLines.ToCollection());
-            Transformer.Transform(FdxCenterLines.ToCollection());
             Transformer.Transform(RegionBorder);
+            Transformer.Transform(FdxCenterLines.ToCollection());
             Columns.ForEach(c => Transformer.Transform(c.Outline));
             Beams.ForEach(c => Transformer.Transform(c.Outline));
 
@@ -124,17 +146,27 @@ namespace ThMEPLighting.Garage.Model
             Transformer.Reset(JumpWires.ToCollection());
             DowngradeOpen();
         }
-        public void Clean()
-        {
-            // 借用车道线的处理方法
-            DxCenterLines = DxCenterLines.Preprocess();
-        }
-
         public void Noding()
         {
-            var cleaner = new ThMEPEngineCore.Service.ThLaneLineCleanService();
-            var objs = cleaner.CleanNoding(DxCenterLines.ToCollection());
-            DxCenterLines = objs.OfType<Line>().ToList();
+            var cleaner = new ThLineNodingService(DxCenterLines, FdxCenterLines, SingleRowLines);
+            cleaner.Noding();
+            DxCenterLines = cleaner.DxLines;
+            FdxCenterLines = cleaner.FdxLines;
+            SingleRowLines = cleaner.SingleRowLines;
+        }
+
+        public void CleanNoding()
+        {
+            DxCenterLines = DxCenterLines.CleanNoding();
+        }
+
+        public void HandleSharpAngle()
+        {
+            var cleaner = new ThSharpAngleHandleService(DxCenterLines, FdxCenterLines, SingleRowLines, 2700);
+            cleaner.Handle();
+            DxCenterLines = cleaner.Dxs.OfType<Line>().ToList();
+            FdxCenterLines = cleaner.Fdxs.OfType<Line>().ToList();
+            SingleRowLines = cleaner.SingleRowLines.OfType<Line>().ToList();
         }
 
         public void Normalize()
@@ -151,19 +183,25 @@ namespace ThMEPLighting.Garage.Model
             // 裁剪并获取框内的车道线
             DxCenterLines = DxCenterLines.Trim(RegionBorder);
             FdxCenterLines = FdxCenterLines.Trim(RegionBorder);
+            SingleRowLines = SingleRowLines.Trim(RegionBorder);
         }
         public void Shorten(double regionBorderBufferDistance)
         {
             // 为了避免线槽和防火卷帘冲突
             // 缩短车道线，和框线保持500的间隙
-            var shortenPara = new ThShortenParameter
+            var newBorder = RegionBorder.BufferEx(-regionBorderBufferDistance);
+            if(newBorder ==null)
             {
-                Border = RegionBorder,
-                DxLines = DxCenterLines,
-                FdxLines = FdxCenterLines,
-                Distance = regionBorderBufferDistance
-            };
-            DxCenterLines = ThShortenLineService.Shorten(shortenPara);
+                return;
+            }
+            DxCenterLines = DxCenterLines.Trim(newBorder);
+            FdxCenterLines = FdxCenterLines.Trim(newBorder);
+            SingleRowLines = SingleRowLines.Trim(newBorder);
+        }
+        public void Merge()
+        {
+            // 借用车道线的处理方法
+            DxCenterLines = ThLaneLineMergeExtension.Merge(DxCenterLines.ToCollection()).OfType<Line>().ToList();
         }
         public List<Curve> Merge(double mergeRange)
         {
@@ -203,5 +241,43 @@ namespace ThMEPLighting.Garage.Model
             SideLines.ForEach(o => o.DowngradeOpen());
             JumpWires.ForEach(o => o.DowngradeOpen());
         }
+        #region ---------- Print ----------
+        public void PrintDxLines()
+        {
+            Print(DxCenterLines);
+        }
+        public void PrintFdxLines()
+        {
+            Print(FdxCenterLines);
+        }
+        public void PrinSingleRowLines()
+        {
+            Print(SingleRowLines);
+        }
+        public void PrintFirstLines()
+        {
+            Print(FirstLightingLines);
+        }
+        public void PrintSecondLines()
+        {
+            Print(SecondLightingLines);
+        }
+        public void PrintExtendLines()
+        {
+            Print(ExtendLines);
+        }
+        private void Print(List<Line> lines)
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                lines.ForEach(l =>
+                {
+                    var newLine = l.Clone() as Line;
+                    acadDb.ModelSpace.Add(newLine);
+                    newLine.SetDatabaseDefaults();
+                });
+            }
+        }
+        #endregion
     }
 }

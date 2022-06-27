@@ -131,6 +131,50 @@ namespace ThMEPLighting.Garage.Service
             return instance.DoMerge(lines);
         }
 
+        public static List<Line> MergeNewLines(List<Line> lines)
+        {
+            var groups = Merge(lines);
+            return groups.SelectMany(o => MergeLines(o)).ToList();
+        }
+
+        private static List<Line> MergeLines(List<Line> lines)
+        {
+            // lines 已经是有序的了
+            var results = new List<Line>();
+            var collinearGroups = new List<List<Line>>();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var links = new List<Line> { lines[i] };
+                int j = i + 1;
+                for (; j < lines.Count; j++)
+                {
+                    if (lines[j].IsCollinear(links.Last(), 1.0) && lines[j].FindLinkPt(links.Last()).HasValue)
+                    {
+                        links.Add(lines[j]);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                i = j - 1;
+                collinearGroups.Add(links);
+            }
+            collinearGroups.ForEach(l =>
+            {
+                if (l.Count == 1)
+                {
+                    results.Add(l[0].Clone() as Line);
+                }
+                else
+                {
+                    var ptPair = l.GetCollinearMaxPts();
+                    results.Add(new Line(ptPair.Item1, ptPair.Item2));
+                }
+            });
+            return results;
+        }
+
         protected List<List<Line>> DoMerge(List<Line> lines)
         {
             var newList = lines.Select(l => l).ToList();
