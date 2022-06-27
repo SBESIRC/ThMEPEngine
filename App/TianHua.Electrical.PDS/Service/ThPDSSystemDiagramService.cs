@@ -281,14 +281,14 @@ namespace TianHua.Electrical.PDS.Service
                     // 插入表尾
                     var tableTable = thisNode.Load.Phase == ThPDSPhase.一相
                         ? ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE : ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE;
-                    if (thisNode.Details.IsDualPower && thisNode.Details.LowPower > 0)
+                    if (thisNode.Details.LoadCalculationInfo.IsDualPower && thisNode.Details.LoadCalculationInfo.LowPower > 0)
                     {
                         var tailInLow = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
-                        assignment.TableTailAssign(activeDb, tailInLow, thisNode, tableObjs, thisNode.Details.LowPower);
+                        assignment.TableTailAssign(activeDb, tailInLow, thisNode, tableObjs, thisNode.Details.LoadCalculationInfo.LowPower);
                         basePoint = new Point3d(basePoint.X, basePoint.Y - 936.3333 * scaleFactor, 0);
                     }
                     var tailInHigh = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
-                    assignment.TableTailAssign(activeDb, tailInHigh, thisNode, tableObjs, thisNode.Details.HighPower);
+                    assignment.TableTailAssign(activeDb, tailInHigh, thisNode, tableObjs, thisNode.Details.LoadCalculationInfo.HighPower);
                     basePoint = new Point3d(basePoint.X, basePoint.Y - 936.3333 * scaleFactor, 0);
 
                     // 计算表身终点

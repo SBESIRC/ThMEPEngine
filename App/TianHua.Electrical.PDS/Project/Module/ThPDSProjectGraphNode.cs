@@ -27,22 +27,22 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public void SetNodeHighPower(double power)
         {
-            if (this.Details.HighPower != power)
+            if (this.Details.LoadCalculationInfo.HighPower != power)
             {
-                this.Details.HighPower = power;
+                this.Details.LoadCalculationInfo.HighPower = power;
                 if (this.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
                 {
                     switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType)
                     {
                         case MeterBoxCircuitType.上海住宅:
                             {
-                                var config = DistributionMeteringConfiguration.ShanghaiResidential.FirstOrDefault(o => o.HighPower >= this.Details.HighPower);
+                                var config = DistributionMeteringConfiguration.ShanghaiResidential.FirstOrDefault(o => o.HighPower >= this.Details.LoadCalculationInfo.HighPower);
                                 if (config.IsNull() || config.Phase == ThPDSPhase.三相)
                                 {
                                     if (this.Load.Phase == ThPDSPhase.一相)
                                     {
                                         this.Load.Phase = ThPDSPhase.三相;
-                                        this.Details.PhaseSequence = PhaseSequence.L123;
+                                        this.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L123;
                                     }
                                 }
                                 else
@@ -50,20 +50,20 @@ namespace TianHua.Electrical.PDS.Project.Module
                                     if (this.Load.Phase == ThPDSPhase.三相)
                                     {
                                         this.Load.Phase = ThPDSPhase.一相;
-                                        this.Details.PhaseSequence = PhaseSequence.L1;
+                                        this.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
                                     }
                                 }
                                 break;
                             }
                         case MeterBoxCircuitType.江苏住宅:
                             {
-                                var config = DistributionMeteringConfiguration.JiangsuResidential.FirstOrDefault(o => o.HighPower >= this.Details.HighPower);
+                                var config = DistributionMeteringConfiguration.JiangsuResidential.FirstOrDefault(o => o.HighPower >= this.Details.LoadCalculationInfo.HighPower);
                                 if (config.IsNull() || config.Phase == ThPDSPhase.三相)
                                 {
                                     if (this.Load.Phase == ThPDSPhase.一相)
                                     {
                                         this.Load.Phase = ThPDSPhase.三相;
-                                        this.Details.PhaseSequence = PhaseSequence.L123;
+                                        this.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L123;
                                     }
                                 }
                                 else
@@ -71,7 +71,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                                     if (this.Load.Phase == ThPDSPhase.三相)
                                     {
                                         this.Load.Phase = ThPDSPhase.一相;
-                                        this.Details.PhaseSequence = PhaseSequence.L1;
+                                        this.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
                                     }
                                 }
                                 break;
@@ -91,9 +91,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public void SetNodeLowPower(double power)
         {
-            if (this.Details.LowPower != power)
+            if (this.Details.LoadCalculationInfo.LowPower != power)
             {
-                this.Details.LowPower = power;
+                this.Details.LoadCalculationInfo.LowPower = power;
                 this.UpdateWithNode(false);
             }
         }
@@ -103,9 +103,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public void SetNodePhaseSequence(PhaseSequence phase)
         {
-            if (this.Details.PhaseSequence != phase)
+            if (this.Details.LoadCalculationInfo.PhaseSequence != phase)
             {
-                this.Details.PhaseSequence = phase;
+                this.Details.LoadCalculationInfo.PhaseSequence = phase;
                 switch (phase)
                 {
                     case PhaseSequence.L1:
@@ -135,9 +135,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="powerFactor"></param>
         public void SetPowerFactor(double powerFactor)
         {
-            if (Load.PowerFactor != powerFactor)
+            if (Details.LoadCalculationInfo.PowerFactor != powerFactor)
             {
-                Load.PowerFactor = powerFactor;
+                Details.LoadCalculationInfo.PowerFactor = powerFactor;
                 this.UpdateWithNode(false);
             }
         }
@@ -148,9 +148,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="powerFactor"></param>
         public void SetDemandFactor(double demandFactor)
         {
-            if (Load.DemandFactor != demandFactor)
+            if (Details.LoadCalculationInfo.HighDemandFactor != demandFactor)
             {
-                Load.DemandFactor = demandFactor;
+                Details.LoadCalculationInfo.HighDemandFactor = demandFactor;
                 this.UpdateWithNode(false);
             }
         }

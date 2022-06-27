@@ -48,12 +48,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             this._edge = edge;
             _IsEmptyLoad = edge.Target.Type==PDSNodeType.Empty;
-            _isDualPower = edge.Target.Details.IsDualPower;
+            _isDualPower = edge.Target.Details.LoadCalculationInfo.IsDualPower;
             _isFireLoad = edge.Target.Load.FireLoad;
-            _lowPower = edge.Target.Details.LowPower;
-            _highPower = edge.Target.Details.HighPower;
-            _calculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
-            _calculateCurrentMagnification = edge.Target.Load.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流放大倍数
+            _lowPower = edge.Target.Details.LoadCalculationInfo.LowPower;
+            _highPower = edge.Target.Details.LoadCalculationInfo.HighPower;
+            _calculateCurrent = edge.Target.Details.LoadCalculationInfo.HighCalculateCurrent;//计算电流
+            _calculateCurrentMagnification = edge.Target.Details.LoadCalculationInfo.HighCalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流放大倍数
             _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
             if (edge.Target.Load.Phase == ThPDSPhase.一相)
             {

@@ -634,10 +634,9 @@ namespace TianHua.Electrical.PDS.Project.Module
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
             node.Load.Phase = defaultPhase;
-            node.Details.PhaseSequence = defaultPhaseSequence;
-            node.Load.KV = node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22;
+            node.Details.LoadCalculationInfo.PhaseSequence = defaultPhaseSequence;
             node.Load.ID.LoadID = defaultLoadID;
-            node.Details.HighPower = defaultPower;
+            node.Details.LoadCalculationInfo.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
             node.Load.SetFireLoad(defaultFireLoad);
             node.Load.SetLocation(new ThPDSLocation() { FloorNumber = floorNumber });
@@ -807,10 +806,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphNode EditorLoad(ThPDSProjectGraphNode node, ThPDSPhase defaultPhase = ThPDSPhase.三相, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "", bool defaultFireLoad = false)
         {
             node.Load.Phase = defaultPhase;
-            node.Details.PhaseSequence = defaultPhase == ThPDSPhase.三相 ? Circuit.PhaseSequence.L123 : Circuit.PhaseSequence.L1;
-            node.Load.KV = node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22;
+            node.Details.LoadCalculationInfo.PhaseSequence = defaultPhase == ThPDSPhase.三相 ? Circuit.PhaseSequence.L123 : Circuit.PhaseSequence.L1;
             node.Load.ID.LoadID = defaultLoadID;
-            node.Details.HighPower = defaultPower;
+            node.Details.LoadCalculationInfo.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
             node.Load.SetFireLoad(defaultFireLoad);
             node.Type = node.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.DistributionPanel ? PDSNodeType.DistributionBox : PDSNodeType.Load;
@@ -826,16 +824,16 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence, floorNumber:node.Load.Location.FloorNumber);
+            var target = CreatNewLoad(node.Load.Phase, node.Details.LoadCalculationInfo.PhaseSequence, floorNumber:node.Load.Location.FloorNumber);
             if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 target.Load.Phase = ThPDSPhase.一相;
-                target.Details.PhaseSequence = Circuit.PhaseSequence.L;
+                target.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L;
             }
             else if (defaultPhase == ThPDSPhase.一相)//三相配电箱搭配一相负载
             {
                 target.Load.Phase = ThPDSPhase.一相;
-                target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+                target.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L1;
             }
             //Step  2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
@@ -853,7 +851,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence, floorNumber: node.Load.Location.FloorNumber);
+            var target = CreatNewLoad(node.Load.Phase, node.Details.LoadCalculationInfo.PhaseSequence, floorNumber: node.Load.Location.FloorNumber);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:获取对应的CircuitFormOutType
@@ -865,7 +863,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             if (type.Contains("消防应急照明回路"))
             {
                 target.Load.Phase = ThPDSPhase.一相;
-                target.Details.PhaseSequence = Circuit.PhaseSequence.L;
+                target.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L;
                 newEdge.Circuit.ID.Description = "疏散照明/指示灯";
             }
             return newEdge;
@@ -981,9 +979,9 @@ namespace TianHua.Electrical.PDS.Project.Module
                 if (node.Details.MiniBusbars[smallBusbar].Count == 1)
                 {
                     smallBusbar.Phase = edge.Target.Load.Phase;
-                    smallBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
+                    smallBusbar.PhaseSequence = edge.Target.Details.LoadCalculationInfo.PhaseSequence;
                 }
-                else if (smallBusbar.PhaseSequence != edge.Target.Details.PhaseSequence || edge.Target.Details.PhaseSequence == Circuit.PhaseSequence.L123)
+                else if (smallBusbar.PhaseSequence != edge.Target.Details.LoadCalculationInfo.PhaseSequence || edge.Target.Details.LoadCalculationInfo.PhaseSequence == Circuit.PhaseSequence.L123)
                 {
                     smallBusbar.Phase = ThPDSPhase.三相;
                     smallBusbar.PhaseSequence = Circuit.PhaseSequence.L123;
@@ -991,7 +989,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 else
                 {
                     smallBusbar.Phase = ThPDSPhase.一相;
-                    smallBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
+                    smallBusbar.PhaseSequence = edge.Target.Details.LoadCalculationInfo.PhaseSequence;
                 }
 
                 node.CheckWithMiniBusbar(smallBusbar);
@@ -1161,21 +1159,21 @@ namespace TianHua.Electrical.PDS.Project.Module
                 return CircuitFormOutType.热继电器保护;
             else if (circuitName == "计量(上海)")
             {
-                if (edge.Target.Details.HighPower < 100)
+                if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
                     return CircuitFormOutType.配电计量_上海直接表;
                 else
                     return CircuitFormOutType.配电计量_上海CT;
             }
             else if (circuitName == "计量(表在前)")
             {
-                if (edge.Target.Details.HighPower < 100)
+                if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
                     return CircuitFormOutType.配电计量_直接表在前;
                 else
                     return CircuitFormOutType.配电计量_CT表在前;
             }
             else if (circuitName == "计量(表在后)")
             {
-                if (edge.Target.Details.HighPower < 100)
+                if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
                     return CircuitFormOutType.配电计量_直接表在后;
                 else
                     return CircuitFormOutType.配电计量_CT表在后;
@@ -1187,7 +1185,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //消防
                     if (edge.Target.Load.FireLoad)
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                         {
                             return CircuitFormOutType.电动机_分立元件;
                         }
@@ -1209,7 +1207,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
                     else
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
                         {
                             return CircuitFormOutType.电动机_分立元件;
                         }
@@ -1235,7 +1233,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //消防
                     if (edge.Target.Load.FireLoad)
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                         {
                             return CircuitFormOutType.电动机_CPS;
                         }
@@ -1257,7 +1255,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
                     else
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
                         {
                             return CircuitFormOutType.电动机_CPS;
                         }

@@ -368,16 +368,6 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSID ID { get; set; }
 
         /// <summary>
-        /// 额定电压
-        /// </summary>
-        public double KV { get; set; }
-
-        /// <summary>
-        /// 计算电流
-        /// </summary>
-        public double CalculateCurrent { get; set; }
-
-        /// <summary>
         /// 一级负载类型
         /// </summary>
         public ThPDSLoadTypeCat_1 LoadTypeCat_1 { get; set; }

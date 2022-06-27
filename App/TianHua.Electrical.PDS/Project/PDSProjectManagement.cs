@@ -27,39 +27,8 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void PushGraphData(DwgGraph graph)
         {
-            var ProjectGraph = new ProjectGraph();
-            var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
-            graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
-            foreach (var node in graph.TopologicalSort())
-            {
-                var edges = graph.OutEdges(node).ToList();
-                while (edges.Count > 0)
-                {
-                    var edge = edges.First();
-                    var SameGroupEdges = edges.Where(o => o.Circuit.CircuitUID == edge.Circuit.CircuitUID);
-                    if (SameGroupEdges.Count() >= 2)//分支干线
-                    {
-                        var virtualNode = new ThPDSProjectGraphNode();
-                        virtualNode.Type = PDSNodeType.VirtualLoad;
-                        virtualNode.Load = new ThPDSLoad();
-                        virtualNode.Load.SetLocation(edge.Target.Loads[0].Location);
-                        virtualNode.Load.InstalledCapacity = new ThInstalledCapacity();
-                        virtualNode.Details.LowPower = edges.Sum(o => VertexDir[o.Target].Details.LowPower);
-                        virtualNode.Details.HighPower = edges.Sum(o => VertexDir[o.Target].Details.HighPower);
-                        virtualNode.Details.IsDualPower = edges.Any(o => VertexDir[o.Target].Details.IsDualPower);
-                        ProjectGraph.AddVertex(virtualNode);
-                        ProjectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], virtualNode) { Circuit = edge.Circuit });
-                        SameGroupEdges.ForEach(o => ProjectGraph.AddEdge(new ThPDSProjectGraphEdge(virtualNode, VertexDir[o.Target]) { Circuit = o.Circuit }));
-                        edges.RemoveAll(o => SameGroupEdges.Contains(o));
-                    }
-                    else
-                    {
-                        ProjectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], VertexDir[edge.Target]) { Circuit = edge.Circuit });
-                        edges.Remove(edge);
-                    }
-                }
-            }
-            _project.graphData = ProjectGraph.CreatPDSProjectGraph();
+            var projectGraph = BuildProjectGraph(graph);
+            _project.graphData = projectGraph.CreatPDSProjectGraph();
             PDSProjectExtend.CalculateProjectInfo();
             _project.DataChanged?.Invoke();
         }
@@ -69,22 +38,17 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void SecondaryPushGraphData(DwgGraph graph)
         {
-            var ProjectGraph = new ProjectGraph();
-            var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
-            graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
-            graph.Edges.ForEach(o => ProjectGraph.AddEdge(
-                new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
-                ));
+            var projectGraph = BuildProjectGraph(graph);
             if (!_project.graphData.IsNull() && _project.graphData.Graph.Vertices.Count() > 0)
             {
                 _project.graphData.Graph.Vertices.ForEach(node =>
                 {
-                    node.Load.InstalledCapacity.IsDualPower = node.Details.IsDualPower;
-                    node.Load.InstalledCapacity.LowPower = node.Load.InstalledCapacity.LowPower > 0 ? node.Details.LowPower : 0;
-                    node.Load.InstalledCapacity.HighPower = node.Load.InstalledCapacity.HighPower > 0 ? node.Details.HighPower : 0;
+                    node.Load.InstalledCapacity.IsDualPower = node.Details.LoadCalculationInfo.IsDualPower;
+                    node.Load.InstalledCapacity.LowPower = node.Load.InstalledCapacity.LowPower > 0 ? node.Details.LoadCalculationInfo.LowPower : 0;
+                    node.Load.InstalledCapacity.HighPower = node.Load.InstalledCapacity.HighPower > 0 ? node.Details.LoadCalculationInfo.HighPower : 0;
                 });
                 ThPDSGraphCompareService compareService = new ThPDSGraphCompareService();
-                compareService.Diff(_project.graphData.Graph, ProjectGraph);
+                compareService.Diff(_project.graphData.Graph, projectGraph);
                 _project.DataChanged?.Invoke();
             }
             else
@@ -99,23 +63,18 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static ProjectGraph ProjectUpdateToDwg(DwgGraph graph)
         {
-            var ProjectGraph = new ProjectGraph();
-            var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
-            graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
-            graph.Edges.ForEach(o => ProjectGraph.AddEdge(
-                new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
-                ));
+            var projectGraph = BuildProjectGraph(graph);
             if (!_project.graphData.IsNull() && _project.graphData.Graph.Vertices.Count() > 0)
             {
                 _project.graphData.Graph.Vertices.ForEach(node =>
                 {
-                    node.Load.InstalledCapacity.IsDualPower = node.Details.IsDualPower;
-                    node.Load.InstalledCapacity.LowPower = node.Load.InstalledCapacity.LowPower > 0 ? node.Details.LowPower : 0;
-                    node.Load.InstalledCapacity.HighPower = node.Load.InstalledCapacity.HighPower > 0 ? node.Details.HighPower : 0;
+                    node.Load.InstalledCapacity.IsDualPower = node.Details.LoadCalculationInfo.IsDualPower;
+                    node.Load.InstalledCapacity.LowPower = node.Load.InstalledCapacity.LowPower > 0 ? node.Details.LoadCalculationInfo.LowPower : 0;
+                    node.Load.InstalledCapacity.HighPower = node.Load.InstalledCapacity.HighPower > 0 ? node.Details.LoadCalculationInfo.HighPower : 0;
                 });
                 ThPDSGraphCompareService compareService = new ThPDSGraphCompareService();
-                compareService.Diff(ProjectGraph, _project.graphData.Graph);
-                return ProjectGraph;
+                compareService.Diff(projectGraph, _project.graphData.Graph);
+                return projectGraph;
             }
             else
             {
@@ -124,27 +83,67 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
+        private static ProjectGraph BuildProjectGraph(DwgGraph graph)
+        {
+            var projectGraph = new ProjectGraph();
+            var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
+            graph.Vertices.ForEach(o => projectGraph.AddVertex(VertexDir[o]));
+            foreach (var node in graph.TopologicalSort())
+            {
+                var edges = graph.OutEdges(node).ToList();
+                while (edges.Count > 0)
+                {
+                    var edge = edges.First();
+                    var SameGroupEdges = edges.Where(o => o.Circuit.CircuitUID == edge.Circuit.CircuitUID);
+                    if (SameGroupEdges.Count() >= 2)//分支干线
+                    {
+                        var virtualNode = new ThPDSProjectGraphNode();
+                        virtualNode.Type = PDSNodeType.VirtualLoad;
+                        virtualNode.Load = new ThPDSLoad();
+                        virtualNode.Load.SetLocation(edge.Target.Loads[0].Location);
+                        virtualNode.Load.InstalledCapacity = new ThInstalledCapacity();
+                        virtualNode.Details.LoadCalculationInfo.LowPower = edges.Sum(o => VertexDir[o.Target].Details.LoadCalculationInfo.LowPower);
+                        virtualNode.Details.LoadCalculationInfo.HighPower = edges.Sum(o => VertexDir[o.Target].Details.LoadCalculationInfo.HighPower);
+                        virtualNode.Details.LoadCalculationInfo.IsDualPower = edges.Any(o => VertexDir[o.Target].Details.LoadCalculationInfo.IsDualPower);
+                        projectGraph.AddVertex(virtualNode);
+                        projectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], virtualNode) { Circuit = edge.Circuit });
+                        SameGroupEdges.ForEach(o => projectGraph.AddEdge(new ThPDSProjectGraphEdge(virtualNode, VertexDir[o.Target]) { Circuit = o.Circuit }));
+                        edges.RemoveAll(o => SameGroupEdges.Contains(o));
+                    }
+                    else
+                    {
+                        projectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], VertexDir[edge.Target]) { Circuit = edge.Circuit });
+                        edges.Remove(edge);
+                    }
+                }
+            }
+            return projectGraph;
+        }
+
         public static ThPDSProjectGraphNode CreatProjectNode(ThPDSCircuitGraphNode node)
         {
             var newNode = new ThPDSProjectGraphNode();
             newNode.Type = node.NodeType;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
+            var load = node.Loads[0];
             if (node.Loads.Count > 1)
             {
                 //多负载必定单功率
                 newNode.Load.InstalledCapacity.HighPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.HighPower);
-                newNode.Details.HighPower = newNode.Load.InstalledCapacity.HighPower;
+                newNode.Details.LoadCalculationInfo.HighPower = newNode.Load.InstalledCapacity.HighPower;
                 newNode.Load.InstalledCapacity.IsDualPower = false;
-                newNode.Details.IsDualPower = false;
+                newNode.Details.LoadCalculationInfo.IsDualPower = false;
             }
             else
             {
-                var load = node.Loads[0];
                 newNode.Load.InstalledCapacity = load.InstalledCapacity;
-                newNode.Details.LowPower = load.InstalledCapacity.LowPower;
-                newNode.Details.HighPower = load.InstalledCapacity.HighPower;
-                newNode.Details.IsDualPower = load.InstalledCapacity.IsDualPower;
+                newNode.Details.LoadCalculationInfo.LowPower = load.InstalledCapacity.LowPower;
+                newNode.Details.LoadCalculationInfo.HighPower = load.InstalledCapacity.HighPower;
+                newNode.Details.LoadCalculationInfo.IsDualPower = load.InstalledCapacity.IsDualPower;
             }
+            newNode.Details.LoadCalculationInfo.LowDemandFactor = load.DemandFactor;
+            newNode.Details.LoadCalculationInfo.HighDemandFactor = load.DemandFactor;
+            newNode.Details.LoadCalculationInfo.PowerFactor = load.PowerFactor;
             return newNode;
         }
 

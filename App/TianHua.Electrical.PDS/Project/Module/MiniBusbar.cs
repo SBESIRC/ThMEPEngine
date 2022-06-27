@@ -42,7 +42,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 计算电流
         /// </summary>
-        public double CalculateCurrent { get; set; }
+        public double CalculateCurrent => Math.Round(Power * DemandFactor / (PowerFactor * (Phase == ThPDSPhase.三相 ? Math.Sqrt(3) * 0.38 : 0.22)), 2);
 
         /// <summary>
         /// 级联电流额定值

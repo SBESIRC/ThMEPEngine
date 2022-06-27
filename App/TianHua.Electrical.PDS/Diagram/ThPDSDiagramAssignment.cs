@@ -420,9 +420,9 @@ namespace TianHua.Electrical.PDS.Diagram
             // Pn
             CellAssign(table.Cells[0, 1], power);
             // Kx
-            CellAssign(table.Cells[0, 5], node.Load.DemandFactor);
+            CellAssign(table.Cells[0, 5], node.Details.LoadCalculationInfo.HighDemandFactor);
             // cos(\Phi)
-            CellAssign(table.Cells[0, 12], node.Load.PowerFactor);
+            CellAssign(table.Cells[0, 12], node.Details.LoadCalculationInfo.PowerFactor);
         }
 
         private void CellAssign(Cell cell, double value)
@@ -446,20 +446,20 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 相序
             var phaseSequence = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_PHSAE).First();
-            phaseSequence.TextString = edge.Target.Details.PhaseSequence.GetDescription();
+            phaseSequence.TextString = edge.Target.Details.LoadCalculationInfo.PhaseSequence.GetDescription();
 
             // 功率
             var power = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_POWER).ToList();
             if (power.Count == 1)
             {
-                power[0].TextString = edge.Target.Details.HighPower == 0 ? "" : edge.Target.Details.HighPower.ToString();
+                power[0].TextString = edge.Target.Details.LoadCalculationInfo.HighPower == 0 ? "" : edge.Target.Details.LoadCalculationInfo.HighPower.ToString();
             }
             else
             {
                 var lowPower = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_LOW_POWER).First();
-                lowPower.TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
+                lowPower.TextString = edge.Target.Details.LoadCalculationInfo.LowPower == 0 ? "" : edge.Target.Details.LoadCalculationInfo.LowPower.ToString();
                 var highPower = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_HIGH_POWER).First();
-                highPower.TextString = edge.Target.Details.HighPower == 0 ? "" : edge.Target.Details.HighPower.ToString();
+                highPower.TextString = edge.Target.Details.LoadCalculationInfo.HighPower == 0 ? "" : edge.Target.Details.LoadCalculationInfo.HighPower.ToString();
             }
 
             // 负载编号

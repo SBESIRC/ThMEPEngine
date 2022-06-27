@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double Power
         {
-            get => _node.Details.HighPower;
+            get => _node.Details.LoadCalculationInfo.HighPower;
             set
             {
                 _node.SetNodeHighPower(value);
@@ -47,7 +47,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double LowPower
         {
-            get => _node.Details.LowPower;
+            get => _node.Details.LoadCalculationInfo.LowPower;
             set
             {
                 _node.SetNodeLowPower(value);
@@ -62,7 +62,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double HighPower
         {
-            get => _node.Details.HighPower;
+            get => _node.Details.LoadCalculationInfo.HighPower;
             set
             {
                 _node.SetNodeHighPower(value);
@@ -85,7 +85,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
-            get => _node.Load.DemandFactor;
+            get => _node.Details.LoadCalculationInfo.HighDemandFactor;
             set
             {
                 _node.SetDemandFactor(value);
@@ -99,7 +99,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
-            get => _node.Load.PowerFactor;
+            get => _node.Details.LoadCalculationInfo.PowerFactor;
             set
             {
                 _node.SetPowerFactor(value);
@@ -113,7 +113,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("计算电流")]
         public string CalculateCurrent
         {
-            get => string.Format("{0}", _node.Load.CalculateCurrent);
+            get => string.Format("{0}", _node.Details.LoadCalculationInfo.HighCalculateCurrent);
         }
 
         [Category("配电箱参数")]
@@ -156,6 +156,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public bool IsDualPower => _node.Details.IsDualPower;
+        public bool IsDualPower => _node.Details.LoadCalculationInfo.IsDualPower;
     }
 }

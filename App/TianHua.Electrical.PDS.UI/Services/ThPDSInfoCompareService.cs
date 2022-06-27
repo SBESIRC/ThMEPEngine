@@ -513,15 +513,15 @@ namespace TianHua.Electrical.PDS.UI.Services
                         if (dataTag.TagP)
                         {
                             string hint = string.Empty;
-                            if (!node.Details.IsDualPower && !dataTag.TarP.IsDualPower)
+                            if (!node.Details.LoadCalculationInfo.IsDualPower && !dataTag.TarP.IsDualPower)
                             {
-                                hint = string.Format("功率由{0}kW调整到{1}kW", dataTag.TarP.HighPower, node.Details.HighPower);
+                                hint = string.Format("功率由{0}kW调整到{1}kW", dataTag.TarP.HighPower, node.Details.LoadCalculationInfo.HighPower);
                             }
                             else
                             {
                                 hint = string.Format("功率由{0}kW调整到{1}kW；功率由{2}kW调整到{3}kW",
-                                    dataTag.TarP.HighPower, node.Details.HighPower,
-                                    dataTag.TarP.LowPower, node.Details.LowPower);
+                                    dataTag.TarP.HighPower, node.Details.LoadCalculationInfo.HighPower,
+                                    dataTag.TarP.LowPower, node.Details.LoadCalculationInfo.LowPower);
                             }
                             items.Add(new()
                             {
@@ -713,13 +713,13 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                if (Node.Details.IsDualPower)
+                if (Node.Details.LoadCalculationInfo.IsDualPower)
                 {
-                    return string.Format("{0}/{1}", Node.Details.HighPower, Node.Details.LowPower);
+                    return string.Format("{0}/{1}", Node.Details.LoadCalculationInfo.HighPower, Node.Details.LoadCalculationInfo.LowPower);
                 }
                 else
                 {
-                    return string.Format("{0}", Node.Details.HighPower);
+                    return string.Format("{0}", Node.Details.LoadCalculationInfo.HighPower);
                 }
             }
         }

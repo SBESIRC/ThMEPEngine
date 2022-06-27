@@ -95,9 +95,9 @@ namespace TianHua.Electrical.PDS.Engine
                     }
 
                     // 设备功率
-                    var loadPower = (node.Details.LowPower == 0
-                        ? "" : (node.Details.LowPower.ToString() + "/"))
-                        + node.Details.HighPower.ToString() + "kW";
+                    var loadPower = (node.Details.LoadCalculationInfo.LowPower == 0
+                        ? "" : (node.Details.LoadCalculationInfo.LowPower.ToString() + "/"))
+                        + node.Details.LoadCalculationInfo.HighPower.ToString() + "kW";
 
                     // 主备关系
                     var primaryAndSpareAvail = node.Load.PrimaryAvail == 0
