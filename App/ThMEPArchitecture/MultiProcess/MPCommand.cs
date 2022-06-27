@@ -139,6 +139,7 @@ namespace ThMEPArchitecture.MultiProcess
                             RunWithAutoSegLine(currentDb);
                     }
                 }
+                Active.Document.Save();
             }
             catch (Exception ex)
             {
@@ -155,7 +156,6 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger?.Information($"地库程序运行结束 \n");
                 DisplayLogger?.Dispose();
                 DisplayLogger2?.Dispose();
-                Active.Document.Save();
             }
         }
 
