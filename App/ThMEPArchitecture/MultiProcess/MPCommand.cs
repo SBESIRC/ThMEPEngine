@@ -139,6 +139,7 @@ namespace ThMEPArchitecture.MultiProcess
                             RunWithAutoSegLine(currentDb);
                     }
                 }
+                TableTools.EraseOrgTable();
                 Active.Document.Save();
             }
             catch (Exception ex)

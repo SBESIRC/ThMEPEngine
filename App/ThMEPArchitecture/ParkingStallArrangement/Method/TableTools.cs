@@ -21,12 +21,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     {
         static bool TableImported = false;
         static string FilePath = ThCADCommon.ParkingStallTablePath();
+        //static string FilePath = "C://Users//zhangwenxuan//Desktop//地库指标表格.dwg";
         static Table _OrgTable;
         static Table OrgTable { get { return _OrgTable; } }
         static Point3d OrgMidPt;
         static List<double> LisA;
         static List<double> LisR;
-        public static void ShowTables(Point3d NewMidPt,int ParkingStallCnt,string layer = "AI-指标表")
+        public static void ShowTables(Point3d NewMidPt, int ParkingStallCnt, string layer = "AI-指标表")
         {
             if (!TableImported) Import(layer);
             //Table table;
@@ -56,7 +57,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 ImportBlock();
             }
             var extend = ((Extents3d)(OrgTable.Bounds));
-            OrgMidPt = new Point3d((extend.MinPoint.X+ extend.MaxPoint.X)/2, extend.MaxPoint.Y, 0);
+            OrgMidPt = new Point3d((extend.MinPoint.X + extend.MaxPoint.X) / 2, extend.MaxPoint.Y, 0);
             UpdateList();
             TableImported = true;
         }
@@ -99,13 +100,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return results;
             }
         }
-        private static Table GetTable(AcadDatabase acdb,ObjectIdCollection objIDs)
+        private static Table GetTable(AcadDatabase acdb, ObjectIdCollection objIDs)
         {
             foreach (var id in objIDs)
             {
                 return acdb.Element<Table>((ObjectId)id, true);
             }
-            
+
             return null;
         }
         private static void ImportBlock()
@@ -188,7 +189,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var R = GetRValue(a);
             table.Cells[1, 7].TextString = string.Format("{0:N2}", R);
             double Z;
-            if(columnWidth > 7.799999)
+            if (columnWidth > 7.799999)
             {
                 Z = (columnWidth - 7.8) * 0.27 / 0.1;
             }
@@ -198,7 +199,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             table.Cells[7, 7].TextString = string.Format("{0:N2}", Z);
 
-            if(ParameterStock.TotalArea >=20000)//设备房修正值
+            if (ParameterStock.TotalArea >= 20000)//设备房修正值
             {
                 table.Cells[14, 7].TextString = table.Cells[15, 11].TextString;
             }
@@ -230,6 +231,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var trans_a = prop * (trans_a_end - trans_a_start) + trans_a_start;
             return Math.Tan(trans_a);
 
+        }
+        public static void EraseOrgTable()
+        {
+            using (var tr = new OpenCloseTransaction())
+            {
+                _OrgTable.UpgradeOpen();
+                _OrgTable.Erase();
+                _OrgTable.DowngradeOpen();
+            }
         }
     }
 }
