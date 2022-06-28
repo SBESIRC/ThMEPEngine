@@ -27,6 +27,8 @@ namespace TianHua.Electrical.PDS.Project
 
         public ProjectGlobalConfiguration projectGlobalConfiguration;
 
+        public THPDSSubstationMap substationMap;
+
         private bool InitializedState;
 
         public Action DataChanged;
@@ -39,6 +41,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             if (!InitializedState)
             {
+                substationMap = new THPDSSubstationMap();
                 this.LoadGlobalConfig();
                 InitializedState = true;
             }

@@ -35,6 +35,7 @@
     <Compile Include="Project\Module\LowVoltageCabinet\PowerReceivingCabinet.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeExtension.cs" />
     <Compile Include="Project\Module\THPDSSubstation.cs" />
+    <Compile Include="Project\Module\THPDSSubstationMap.cs" />
     <Compile Include="Project\PDSProjectManagement.cs" />
     <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
     <Compile Include="Service\ThPDSLoadIDMatchService.cs" />

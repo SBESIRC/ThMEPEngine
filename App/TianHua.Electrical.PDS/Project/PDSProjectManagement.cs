@@ -105,6 +105,9 @@ namespace TianHua.Electrical.PDS.Project
                         virtualNode.Details.LoadCalculationInfo.LowPower = edges.Sum(o => VertexDir[o.Target].Details.LoadCalculationInfo.LowPower);
                         virtualNode.Details.LoadCalculationInfo.HighPower = edges.Sum(o => VertexDir[o.Target].Details.LoadCalculationInfo.HighPower);
                         virtualNode.Details.LoadCalculationInfo.IsDualPower = edges.Any(o => VertexDir[o.Target].Details.LoadCalculationInfo.IsDualPower);
+                        virtualNode.Details.LoadCalculationInfo.LowDemandFactor = edges.GroupBy(o => VertexDir[o.Target].Details.LoadCalculationInfo.LowDemandFactor).OrderByDescending(o => o.Count()).First().Key;
+                        virtualNode.Details.LoadCalculationInfo.HighDemandFactor = virtualNode.Details.LoadCalculationInfo.LowDemandFactor;
+                        virtualNode.Details.LoadCalculationInfo.PowerFactor = 0.8;
                         projectGraph.AddVertex(virtualNode);
                         projectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], virtualNode) { Circuit = edge.Circuit });
                         SameGroupEdges.ForEach(o => projectGraph.AddEdge(new ThPDSProjectGraphEdge(virtualNode, VertexDir[o.Target]) { Circuit = o.Circuit }));
