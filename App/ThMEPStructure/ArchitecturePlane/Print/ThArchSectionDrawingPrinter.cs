@@ -8,6 +8,8 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.ArchitecturePlane.Service;
 using ThMEPStructure.Common;
+using System;
+using ThMEPStructure.Model.Printer;
 
 namespace ThMEPStructure.ArchitecturePlane.Print
 {
@@ -226,16 +228,22 @@ namespace ThMEPStructure.ArchitecturePlane.Print
 
         private ObjectIdCollection PrintHatch(Database db, Entity entity, string materialName)
         {
-            var config = ThSectionMaterialMapConfig.GetHatchPrintConfig(materialName);
-            if (config == null)
+            var configPair = ThSectionMaterialMapConfig.GetHatchPrintConfig(materialName);
+            if (configPair == null)
             {
                 return new ObjectIdCollection();
             }
             else
             {
-                return PrintHatch(db, entity, config);
+                if (PrintParameter.DrawingScale == "1:100" && materialName != ThTextureMaterialManager.THSteelConcrete )
+                {
+                    // 不要填充
+                    configPair = new Tuple<HatchPrintConfig, PrintConfig>(null, configPair.Item2);
+                }                
+                return PrintHatch(db, entity, configPair);
             }
         }
+
         private ObjectIdCollection PrintHeadText(Database database)
         {
             var flrRange = FlrBottomEle.GetFloorRange(FloorInfos);

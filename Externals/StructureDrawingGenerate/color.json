@@ -3,5 +3,9 @@
     "IfcColumn":{"r":0.2,"g":0.5,"b":0.5,"a":1,"h":0},
     "IfcSlab":{"r":0.7,"g":0.2,"b":0.2,"a":1,"h":1},
     "IfcWall":{"r":0.7,"g":0.2,"b":0.2,"a":1,"h":0},
-    "IfcWallStandardCase":{"r":0.2,"g":0.2,"b":0.7,"a":1,"h":0}
+    "IfcWallStandardCase":{"r":0.2,"g":0.2,"b":0.7,"a":1,"h":0},
+    "IfcDoor":{"r":0.2,"g":0.2,"b":0.7,"a":1,"h":0},
+    "IfcWindow":{"r":0.2,"g":0.2,"b":0.7,"a":1,"h":0},
+    "IfcRailing":{"r":0.2,"g":0.2,"b":0.7,"a":1,"h":0},
+    "IfcBuildingElementProxy":{"r":0.2,"g":0.2,"b":0.7,"a":1,"h":0}
 }

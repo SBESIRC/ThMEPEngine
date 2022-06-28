@@ -16,6 +16,7 @@ using ThMEPStructure.ArchitecturePlane.Print;
 using ThMEPStructure.ArchitecturePlane.Service;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
+using DotNetARX;
 
 namespace ThMEPStructure
 {
@@ -217,6 +218,7 @@ namespace ThMEPStructure
                 if(printer!=null)
                 {
                     printer.Print(Active.Database);
+                    Active.Document.SendCommand("HatchToBack", "\n");
                 } 
             }
         }
@@ -257,7 +259,7 @@ namespace ThMEPStructure
         public void THAUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
-            pofo.Filter = "Ifc files (*.ifc)|*.ifc";
+            pofo.Filter = "Ifc files (*.ifc)|*.ifc";     
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
@@ -296,15 +298,16 @@ namespace ThMEPStructure
                     DrawingScale = "1:100",
                     DrawingType = drawingType,
                 };
+                config.JsonConfig.SvgConfig.image_size = null;
 
                 if (drawingType == DrawingType.Section)
                 {
-                    var ppo = new PromptDoubleOptions("\n请输入裁剪位置");
-                    ppo.AllowArbitraryInput = true;
-                    ppo.AllowNegative = true;
-                    ppo.AllowNone = false;
-                    ppo.AllowZero = true;
-                    var pdr = Active.Editor.GetDouble(ppo);
+                    var pio = new PromptIntegerOptions("\n请输入裁剪位置");
+                    pio.AllowArbitraryInput = true;
+                    pio.AllowNegative = true;
+                    pio.AllowNone = false;
+                    pio.AllowZero = true;
+                    var pdr = Active.Editor.GetInteger(pio);
                     if(pdr.Status == PromptStatus.OK)
                     {
                         config.JsonConfig.GlobalConfig.cut_position = pdr.Value;

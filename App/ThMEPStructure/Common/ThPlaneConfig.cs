@@ -229,6 +229,7 @@ namespace ThMEPStructure.Common
                 jObject["DebugConfig"]["log_path"] = ModifyPath(jsonConfig.DebugConfig.log_path);
                 jObject["GlobalConfig"]["image_type"] = jsonConfig.GlobalConfig.image_type;
                 jObject["GlobalConfig"]["cut_position"] = jsonConfig.GlobalConfig.cut_position;
+                jObject["SvgConfig"]["image_size"] = jsonConfig.SvgConfig.image_size;
             }
             catch
             {

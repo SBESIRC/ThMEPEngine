@@ -39,7 +39,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             {
                 PatternScale = 50.1,
                 //PatternName = "QD_AERATEDCONCRETE",
-                PatternName = "AR-CONC",
+                PatternName = "加气混凝土",
                 LayerName = ThArchPrintLayerManager.AEWALLHACH,
             };
             var outlineConfig = new PrintConfig

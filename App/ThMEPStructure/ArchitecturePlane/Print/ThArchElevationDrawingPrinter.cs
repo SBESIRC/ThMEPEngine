@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
+using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.ArchitecturePlane.Service;
-using ThMEPStructure.Common;
 
 namespace ThMEPStructure.ArchitecturePlane.Print
 {
@@ -29,6 +29,12 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             // 打印对象
             PrintGeos(database, Geos);
 
+            // 创建门文字编号标注
+            AppendToObjIds(PrintDoorMarks(database, ComponentInfos.Where(o => o.Type.IsDoor()).ToList()));
+
+            // 创建窗户编号标注
+            AppendToObjIds(PrintWindowMarks(database, ComponentInfos.Where(o => o.Type.IsWindow()).ToList()));
+
             // 打印标题,结果存于ObjIds中
             PrintHeadText(database);
         }
@@ -37,30 +43,12 @@ namespace ThMEPStructure.ArchitecturePlane.Print
         {
             using (var acadDb = AcadDatabase.Use(db))
             {
-                var doorComponents = new List<ThComponentInfo>();
-                var windowComponents = new List<ThComponentInfo>();
-
                 // 打印到图纸中
                 geos.ForEach(o =>
                 {
                     // 立面图不分图层
                     AppendToObjIds(PrintElev3(db, o.Boundary as Curve));
-                    string category = o.Properties.GetCategory(); //type
-                    if (category == ThIfcCategoryManager.WindowCategory)
-                    {
-                        windowComponents.Add(ParseComponentInfo(o.Properties));
-                    }
-                    else if(category == ThIfcCategoryManager.DoorCategory)
-                    {
-                        doorComponents.Add(ParseComponentInfo(o.Properties));
-                    }
                 });
-
-                // 创建门文字编号标注
-                AppendToObjIds(PrintDoorMarks(db, doorComponents));
-
-                // 创建窗户编号标注
-                AppendToObjIds(PrintWindowMarks(db, windowComponents));
             }
         }
 

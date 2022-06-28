@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.ArchitecturePlane.Print;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPStructure.ArchitecturePlane
 {
@@ -91,6 +92,55 @@ namespace ThMEPStructure.ArchitecturePlane
         {
             var printers = PrintToCad(svgFiles);
             Layout(printers.Select(o => o.ObjIds).ToList());
+            SetLayerOrder(printers.Select(o => o.ObjIds).ToList());
+            if (IsIncludeHatch(printers.Select(o => o.ObjIds).ToList()))
+            {
+                Active.Document.SendCommand("HatchToBack" + "\n");
+            }
+        }
+
+        private void SetLayerOrder(List<ObjectIdCollection> floorObjIds)
+        {
+            //AE-WALL＞AE-WIND＞AE-DOOR-INSD＞AE-FNSH＞AE-HDWR＞AE-FLOR
+            //线重合时，根据优先级进行图层前后置，以来保证图面显示效果。
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var layerPriority = new List<string> { ThArchPrintLayerManager.AEWALL, ThArchPrintLayerManager.AEWIND,
+            ThArchPrintLayerManager.AEDOORINSD,ThArchPrintLayerManager.AEFNSH,ThArchPrintLayerManager.AEHDWR,
+            ThArchPrintLayerManager.AEFLOR};
+
+                // build dict
+                var dict = new Dictionary<string, ObjectIdCollection>();
+                floorObjIds.ForEach(o =>
+                {
+                    o.OfType<ObjectId>().ForEach(e =>
+                    {
+                        var entity = acadDb.Element<Entity>(e, true);
+
+                        if (dict.ContainsKey(entity.Layer))
+                        {
+                            dict[entity.Layer].Add(e);
+                        }
+                        else
+                        {
+                            var objIds = new ObjectIdCollection() { e };
+                            dict.Add(entity.Layer, objIds);
+                        }
+                    });
+                });
+
+                var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId);
+                var btrModelSpace = acadDb.Element<BlockTableRecord>(bt[BlockTableRecord.ModelSpace]);
+                var dot = acadDb.Element<DrawOrderTable>(btrModelSpace.DrawOrderTableId, true);
+
+                layerPriority.ForEach(layer =>
+                {
+                    if (dict.ContainsKey(layer))
+                    {
+                        dot.MoveToBottom(dict[layer]);
+                    }
+                });
+            }
         }
 
         private void Clear()
@@ -228,6 +278,21 @@ namespace ThMEPStructure.ArchitecturePlane
                         entity.TransformBy(mt);
                     });
                 }
+            }
+        }
+
+        private bool IsIncludeHatch(List<ObjectIdCollection> floorObjIds)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                for(int i=0;i< floorObjIds.Count;i++)
+                {
+                    if (floorObjIds[i].OfType<ObjectId>().Where(id => acadDb.Element<Entity>(id) is Hatch).Any())
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
         }
 
