@@ -14,18 +14,45 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Mep.UI.Command;
 using ThMEPEngineCore.Model.Common;
+using ThControlLibraryWPF.ControlUtils;
 
 namespace TianHua.Mep.UI.ViewModel
 {
-    public class ThExtractRoomOutlineVM
+    public class ThExtractRoomOutlineVM : NotifyPropertyChangedBase
     {
         private readonly string AIWallLayer = "AI-墙线";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
-        public bool YnExtractShearWall { get; set; }
+        private bool ynExtractShearWall;
+        private bool ynUseSuperBoundary;
+        public bool YnExtractShearWall
+        {
+            get =>  ynExtractShearWall;
+            set
+            {
+                if (value != ynExtractShearWall)
+                {
+                    ynExtractShearWall = value;
+                    OnPropertyChanged(nameof(YnExtractShearWall));
+                }
+            }
+        }
+        public bool YnUseSuperBoundary
+        {
+            get => ynUseSuperBoundary;
+            set
+            {
+                if (value != ynUseSuperBoundary)
+                {
+                    ynUseSuperBoundary = value;
+                    OnPropertyChanged(nameof(YnUseSuperBoundary));
+                }
+            }
+        }
         public ThExtractRoomOutlineVM()
         {            
             LayerInfos = new ObservableCollection<ThLayerInfo>(LoadLayers());
-            YnExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
+            ynExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
+            ynUseSuperBoundary = ThExtratRoomOutlineConfig.Instance.YnUseSuperBoundary;
         }
         public void ExtractWalls()
         {
@@ -47,25 +74,55 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void BuildRoomOutline()
         {
-            var wallLines = GetWallLines();
+            var wallLines = GetWallLines(); // get entities in modeslspace
             SetFocusToDwgView();
             if (wallLines.Count==0)
-            {                
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THKJSQ");
+            {           
+                if(ynUseSuperBoundary)
+                {
+                    SuperBoundary(wallLines);
+                }
+                else
+                {
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THKJSQ");
+                }
             }
             else
             {
-                using (var docLock = Active.Document.LockDocument())
-                using (var cmd = new ThPickRoomCmd(wallLines))
+                if(ynUseSuperBoundary)
                 {
-                    cmd.Execute();
+                    SuperBoundary(wallLines);
+                }
+                else
+                {
+                    PickRoom(wallLines);
                 }
             }
         }
+
+        private void PickRoom(DBObjectCollection wallLines)
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var cmd = new ThPickRoomCmd(wallLines))
+            {
+                cmd.Execute();
+            }
+        }
+
+        private void SuperBoundary(DBObjectCollection wallLines)
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var cmd = new ThSuperBoundaryCmd(wallLines))
+            {
+                cmd.Execute();
+            }
+        }
+
         public void Confirm()
         {
             SaveLayers();
-            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = YnExtractShearWall;
+            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = ynExtractShearWall;
+            ThExtratRoomOutlineConfig.Instance.YnUseSuperBoundary = ynUseSuperBoundary;
         }
         public void SelectLayer()
         {
@@ -267,5 +324,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public List<ThLayerInfo> LayerInfos { get; set; }
         public bool YnExtractShearWall { get; set; } = true;
+        public bool YnUseSuperBoundary { get; set; } = true;
     }
 }
