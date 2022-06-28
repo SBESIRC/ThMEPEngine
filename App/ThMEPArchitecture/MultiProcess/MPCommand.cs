@@ -132,6 +132,7 @@ namespace ThMEPArchitecture.MultiProcess
                         }
                     }
                     //TableTools.EraseOrgTable();
+                    TableTools.hideOrgTable();
                     Active.Document.Save();
                 }
             }
