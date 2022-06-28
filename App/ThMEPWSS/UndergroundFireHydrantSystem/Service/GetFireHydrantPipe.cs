@@ -405,6 +405,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 GetBranchType3(pt, ref fireHydrantSysOut, stPt, branchDic[pt], ValveDic, fireHydrantSysIn, pipeLength);
                             }
                         }
+                        else if(type1Nums==2)
+                        {
+                            GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn, pipeLength);
+                            GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][1], ValveDic, fireHydrantSysIn, pipeLength+1250);
+
+                        }
                         else
                         {
                             GetBranchType02(pt, ref fireHydrantSysOut, stPt, branchDic[pt], ValveDic, fireHydrantSysIn, pipeLength);
@@ -651,7 +657,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt4 = pt1.OffsetX(pipeLength);
             double floorHeight = fireHydrantSysIn.FloorHeight;
             var pt5 = pt4.OffsetY(-floorHeight * 0.58);
-            var pt6 = pt1.OffsetY(-floorHeight * 0.58);
+            var pt6 = pt5.OffsetX(-800);
             var lineList = new List<Line>
             {
                 new Line(pt4, pt5),
