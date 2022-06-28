@@ -32,7 +32,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     try
                     {
                         double valveGapX = 50;
-                        int fireAreaIndex = 0;//当前支管的防火分区index
+                        int alarmValveIndex = 0;//报警阀index
                         int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
                         GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
@@ -56,20 +56,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                                 var type = sprayIn.PtTypeDic[pt];
                                 var alValveGap = alarmGap;
-                                //if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
-                                //{
-                                //    sprayIn.PtTypeDic[pt] = "Branch";
-                                //    type = sprayIn.PtTypeDic[pt];
-                                //}
-                                //if (type.Equals("Branch"))
-                                //{
-                                //    if (spraySystem.BranchPtDic.ContainsKey(pt))
-                                //    {
-                                //        spraySystem.BranchPtDic.Remove(pt);
-                                //    }
-                                //    sprayOut.PipeLine.Add(new Line(ePt1, ePt1.OffsetY(1200)));
-                                //    spraySystem.BranchPtDic.Add(pt, ePt1.OffsetY(1200));
-                                //}
+
                                 if (type.Contains("AlarmValve"))
                                 {
                                     if (firstAlarmValve)
@@ -78,9 +65,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                         firstAlarmValve = false;
                                     }
                                     nextPt = curPt.OffsetX(alValveGap);
-                                    AddAlarmValve(sprayOut, spraySystem, sprayIn, fireAreaIndex, ePt2, ref nextPt, ref curPt, ref valveFlag, pt);
-
-                                    CountfireAreaNums(pt, spraySystem, sprayIn, ref fireAreaIndex);//统计防火分区的数目
+                                    AddAlarmValve(sprayOut, spraySystem, sprayIn, alarmValveIndex, ePt2, ref nextPt, ref curPt, ref valveFlag, pt);
+                                    if(!spraySystem.SubLoopAlarmsDic.ContainsKey(pt))
+                                    {
+                                        spraySystem.SubLoopAlarmsDic.Add(pt, new List<int>() { alarmValveNums });
+                                    }
+                                    alarmValveIndex++;
                                 }
 
                                 if (type.Equals("SignalValve"))
@@ -207,7 +197,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
         }
 
-        private static void AddAlarmValve(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, int fireAreaIndex, Point3d ePt2, ref Point3d nextPt, ref Point3d curPt, ref bool valveFlag, Point3dEx pt)
+        private static void AddAlarmValve(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, int alarmValveIndex, Point3d ePt2, ref Point3d nextPt, ref Point3d curPt, ref bool valveFlag, Point3dEx pt)
         {
             double floorHeight = sprayIn.FloorHeight;
             double alarmGap = sprayIn.PipeGap;
@@ -224,7 +214,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 curPt = new Point3d(nextPt.X, nextPt.Y, 0);
                 nextPt = nextPt.OffsetX(alarmGap);
             }
-            var alarmValve = new AlarmValveSys(insertPt, fireAreaIndex, floorHeight);
+            var alarmValve = new AlarmValveSys(insertPt, alarmValveIndex, floorHeight);
             spraySystem.BranchPtDic.Add(pt, alarmValve.EndPt);
             sprayOut.AlarmValves.Add(alarmValve);//插入湿式报警阀平面
             AddAlarmText(sprayOut, sprayIn, pt, insertPt);//添加报警阀编号

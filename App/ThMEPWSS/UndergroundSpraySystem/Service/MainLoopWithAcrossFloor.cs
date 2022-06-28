@@ -515,12 +515,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
             else
             {
-                var waterPumpNum = GetWaterPumpNum(curPt, spraySystem, sprayIn);//水泵接合器数目
                 if (spraySystem.SubLoopBranchPtDic.ContainsKey(curPt))
                 {
                     var branchNums = spraySystem.SubLoopBranchDic[curPt];//支路数
-                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000)));
-                    stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000);
+                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap)));
+                    stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap);
                 }
 
                 sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
@@ -534,7 +533,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     foreach (var num in spraySystem.SubLoopFireAreasDic[curPt])
                     {
-                        fireNums += num;
+                        fireNums += Math.Max(num,1);
                     }
                     pt = pt.OffsetX(fireNums * 5500 - 2500 * branchLoopNums + 1500);
                 }
@@ -604,12 +603,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
             else
             {
-                var waterPumpNum = GetWaterPumpNum(curPt, spraySystem, sprayIn);//水泵接合器数目
                 if (spraySystem.SubLoopBranchPtDic.ContainsKey(curPt))
                 {
                     var branchNums = spraySystem.SubLoopBranchDic[curPt];//支路数
-                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000)));
-                    stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000);
+                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap)));
+                    stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap);
                 }
 
                 

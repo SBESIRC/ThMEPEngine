@@ -88,14 +88,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 spraySystem.SubLoopPtDic.Remove(curPt);
             }
 
-            var alarmNums = 0;
+            var alarmNums = 0;//报警阀数目
             var branchLoopNums = 0;
             var fireNums = 0;
             if (spraySystem.SubLoopAlarmsDic.ContainsKey(curPt))
             {
                 foreach (var num in spraySystem.SubLoopAlarmsDic[curPt])
                 {
-                    alarmNums += num;
+                    if (num == 0)
+                    {
+                        alarmNums += 1;
+                    }
+                    else
+                    {
+                        alarmNums += num;
+                    }
                     branchLoopNums += 1;
                 }
             }
@@ -109,32 +116,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
             else
             {
-                var waterPumpNum = 0;//水泵接合器数目
-                if (spraySystem.SubLoopBranchPtDic.ContainsKey(curPt))
-                {
-                    foreach (var bpt in spraySystem.SubLoopBranchPtDic[curPt])
-                    {
-                        if (spraySystem.BranchDic.ContainsKey(bpt))
-                        {
-                            if (spraySystem.BranchDic[bpt].Count == 1)//单支路
-                            {
-                                var tpt = spraySystem.BranchDic[bpt][0];
-                                if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
-                                {
-                                    if (sprayIn.TermPtTypeDic[tpt] == 3)//支路末端是水泵接合器
-                                    {
-                                        waterPumpNum++;
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-
-                    var branchNums = spraySystem.SubLoopBranchDic[curPt];//支路数
-                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000)));
-                    stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000);
-                }
                 sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
                 spraySystem.BranchLoopPtDic.Add(curPt, stPt.OffsetY(-height));//保存支环的起始点
                 pt = spraySystem.TempSubLoopStartPt;

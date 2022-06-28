@@ -127,7 +127,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             ;
             Draw.throughPtsInOtherFloor(ptsls);
             return MainLoopDeal.MainLoopDfs(ptsls, sprayIn);//判断其他楼层是否存在主环
-            //Draw.MainLoopsInOtherFloor(acadDatabase, mainLoops);
         }
 
 

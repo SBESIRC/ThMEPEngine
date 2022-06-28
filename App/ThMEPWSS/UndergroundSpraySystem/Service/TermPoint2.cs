@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
         public string PipeNumber2 { get; set; }//标注
-        public int Type { get; set; }//1 防火分区; 2 立管; 3 水泵接合器; 4 其他
+        public int Type { get; set; }//1 防火分区; 2 跨层立管; 3 水泵接合器; 4 其他立管; 5 无立管末端
         public bool HasSignalValve { get; set; }//存在信号阀
         public bool HasFlow { get; set; }//存在水流指示器
         private double Tolerance { get; set; }//容差
@@ -57,6 +57,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 return;
             }
             var adjs = sprayIn.LeadLineDic[StartLine];
+            adjs.OrderBy(l=> Math.Abs(Math.Sin(l.Angle)));
             TextLine = adjs[0];
         }
 
@@ -154,17 +155,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 Type = 2;
                 return;
             }
-            //if(PipeNumber.Trim().StartsWith("ZP") && !acrossFloor)
-            //{
-            //    Type = 2;
-            //    return;
-            //}
             if(PipeNumber.Contains("水泵接合器"))
             {
                 Type = 3;
                 return;
             }
-            Type = 4;
+            foreach(var vpt in sprayIn.Verticals)
+            {
+                if(vpt._pt.DistanceTo(PtEx._pt)<100)
+                {
+                    Type = 4;
+                    break;
+                }
+            }
+            Type = 5;
         }
     }
 }
