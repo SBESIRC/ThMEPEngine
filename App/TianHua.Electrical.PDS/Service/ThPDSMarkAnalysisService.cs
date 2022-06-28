@@ -650,7 +650,7 @@ namespace TianHua.Electrical.PDS.Service
                 var regex2 = new Regex(@"[0-9]W[0-9]{3}[-][0-9]");
                 infos.ForEach(str =>
                 {
-                    if (str.Contains(tarPanelID))
+                    if (!string.IsNullOrEmpty(tarPanelID) && str.Contains(tarPanelID))
                     {
                         return;
                     }

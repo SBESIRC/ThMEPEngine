@@ -150,8 +150,10 @@ namespace TianHua.Electrical.PDS.Service
                 var service = new ThPDSMarkAnalysisService();
                 objectIds.Add(LoadBlocks[entity].ObjId);
                 var frame = ThPDSBufferService.Buffer(entity, database);
-                var marks = markService.GetMarks(frame);
-                var load = service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[entity], ref attributesCopy);
+                var marks = markService.GetMarks(frame, true);
+                objectIds.AddRange(marks.ObjectIds);
+                var textFilter = marks.Texts.Where(t => t.IndexOf("WL") == 0).ToList();
+                var load = service.LoadMarkAnalysis(textFilter, distBoxKey, LoadBlocks[entity], ref attributesCopy);
                 load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
                 load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
                 load.SetOnLightingCableTray(true);

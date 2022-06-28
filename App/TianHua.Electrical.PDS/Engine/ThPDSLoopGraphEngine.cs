@@ -20,6 +20,7 @@ using System.IO;
 using CircuitGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode,
     TianHua.Electrical.PDS.Model.ThPDSCircuitGraphEdge<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode>>;
 using ThMEPEngineCore.Model.Electrical;
+using GeometryExtensions;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -184,7 +185,7 @@ namespace TianHua.Electrical.PDS.Engine
                             }
                             else
                             {
-                                GeometryMap.Add(block, block.BlockOBB());
+                                GeometryMap.Add(block, obb);
                             }
                         }
                     }
@@ -411,9 +412,9 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 FindGraph(null, cabletray);
             }
-            foreach (var cabletray in DistBoxFrames)
+            foreach (var distBox in DistBoxFrames)
             {
-                FindGraph(null, cabletray);
+                FindGraph(null, distBox);
             }
             foreach (var cabletray in CableTrays)
             {
