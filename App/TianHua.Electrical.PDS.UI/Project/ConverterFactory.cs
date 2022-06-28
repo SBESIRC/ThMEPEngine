@@ -10,5 +10,10 @@ namespace TianHua.Electrical.PDS.UI.Project
             PDSProjectVM.Instance.InformationMatchViewModel = new InformationMatchViewModel(PDSProject.Instance.graphData.Graph);
             PDSProjectVM.Instance.GlobalParameterViewModel = new GlobalParameterViewModel(PDSProject.Instance.projectGlobalConfiguration);
         }
+
+        public static void ConvertToGlobalParameterViewModel()
+        {
+            PDSProjectVM.Instance.GlobalParameterViewModel = new GlobalParameterViewModel(PDSProject.Instance.projectGlobalConfiguration);
+        }
     }
 }

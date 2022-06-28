@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using TianHua.Electrical.PDS.Project.Module;
-using TianHua.Electrical.PDS.UI.Project.Module.Component;
+using TianHua.Electrical.PDS.UI.Project;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         public UESandboxParameter()
         {
             InitializeComponent();
-            DataContext = Project.PDSProjectVM.Instance.GlobalParameterModel;
+            DataContext = new ThPDSUESandboxParameterModel();
         }
         private void btnImportSetting(object sender, RoutedEventArgs e)
         {
@@ -23,12 +23,13 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             var result = dlg.ShowDialog();
             if (result == true)
             {
+                // 导入数据
                 ThPDSProjectGraphService.ImportGlobalConfiguration(dlg.FileName);
+
+                // 界面更新
+                ConverterFactory.ConvertToGlobalParameterViewModel();
+                DataContext = new ThPDSUESandboxParameterModel();
             }
-        }
-        private void btnSaveSetting(object sender, RoutedEventArgs e)
-        {
-            ThPDSProjectGraphService.GlobalConfigurationUpdate();
         }
         private void btnExportSetting(object sender, RoutedEventArgs e)
         {
@@ -44,6 +45,10 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
                 var fileName = dlg.SafeFileName;
                 ThPDSProjectGraphService.ExportGlobalConfiguration(filePathUrl, fileName);
             }
+        }
+        private void btnApplySetting(object sender, RoutedEventArgs e)
+        {
+            ThPDSProjectGraphService.GlobalConfigurationUpdate();
         }
     }
 }
