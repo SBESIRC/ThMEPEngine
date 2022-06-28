@@ -106,41 +106,34 @@ namespace ThMEPArchitecture.MultiProcess
             Utils.SetSeed();
             try
             {
-                if(_CommandMode == CommandMode.WithoutUI)
+                using (var docLock = Active.Document.LockDocument())
+                using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Logger?.Information($"DEbug--读取复现");
-                    using (var docLock = Active.Document.LockDocument())
-                    using (AcadDatabase currentDb = AcadDatabase.Active())
+
+
+                    if (_CommandMode == CommandMode.WithoutUI)
                     {
-                        RunDebug();
+                         Logger?.Information($"DEbug--读取复现");
+                         RunDebug();
                     }
-                }
-                else
-                {
-                    if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
+                    else
                     {
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                         {
                             RunDirect(currentDb);
                         }
-                    }
-                    else if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
-                    {
-
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
+                        {
                             Run(currentDb);
-                    }
-                    else 
-                    {
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        }
+                        else
+                        {
                             RunWithAutoSegLine(currentDb);
+                        }
                     }
+                    //TableTools.EraseOrgTable();
+                    Active.Document.Save();
                 }
-                TableTools.EraseOrgTable();
-                Active.Document.Save();
             }
             catch (Exception ex)
             {

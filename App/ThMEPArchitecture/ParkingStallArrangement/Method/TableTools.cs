@@ -19,49 +19,66 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
     public static class TableTools
     {
-        static bool TableImported = false;
+        static bool Imported = false;
+        static bool ListUpdated = false;
         static string FilePath = ThCADCommon.ParkingStallTablePath();
         //static string FilePath = "C://Users//zhangwenxuan//Desktop//地库指标表格.dwg";
-        static Table _OrgTable;
-        static Table OrgTable { get { return _OrgTable; } }
         static Point3d OrgMidPt;
         static List<double> LisA;
         static List<double> LisR;
         public static void ShowTables(Point3d NewMidPt, int ParkingStallCnt, string layer = "AI-指标表")
         {
-            if (!TableImported) Import(layer);
-            //Table table;
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var table = OrgTable.Clone() as Table;
+                var table = CreateTableFromSupport(layer);
                 var blkID = acdb.CurrentSpace.ObjectId.InsertBlockReference("AI-指标表", "Introduction", new Point3d(0, 0, 0), new Scale3d(1), 0.0, 0);
                 var br = acdb.Element<BlockReference>(blkID);
                 var vector = new Vector3d(NewMidPt.X - OrgMidPt.X, NewMidPt.Y - OrgMidPt.Y, 0);
                 table.TransformBy(Matrix3d.Displacement(vector));
                 br.TransformBy(Matrix3d.Displacement(vector));
                 table.UpdateTable(ParkingStallCnt);
-                table.AddToCurrentSpace();
                 DisplayParkingStall.Add(br);
                 DisplayParkingStall.Add(table);
             }
         }
 
-        private static void Import(string layer = "AI-指标表")
+        private static ObjectId DeepClone(ObjectId id)
+        {
+            using (var acadDB = Linq2Acad.AcadDatabase.Active())
+            {
+                var ids = new ObjectIdCollection() { id };
+                var mapping = new IdMapping();
+                acadDB.Database.DeepCloneObjects(ids, acadDB.ModelSpace.ObjectId, mapping, false);
+                if (mapping[id].IsCloned)
+                {
+                    return mapping[id].Value;
+                }
+                else
+                {
+                    return ObjectId.Null;
+                }
+            }
+        }
+        private static Table CreateTableFromSupport(string layer = "AI-指标表")
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 if (!acdb.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acdb.Database, layer, 0);
-                var objIDs = ImportTables(FilePath);
-                _OrgTable = GetTable(acdb, objIDs);
-                ImportBlock();
+                var objIDs = ImportTables(FilePath, false);
+                var table = GetTable(acdb, objIDs);
+                if (!Imported)
+                {
+                    ImportBlock();
+                    var extend = ((Extents3d)(table.Bounds));
+                    OrgMidPt = new Point3d((extend.MinPoint.X + extend.MaxPoint.X) / 2, extend.MaxPoint.Y, 0);
+                    Imported = true;
+                }
+                return table;
             }
-            var extend = ((Extents3d)(OrgTable.Bounds));
-            OrgMidPt = new Point3d((extend.MinPoint.X + extend.MaxPoint.X) / 2, extend.MaxPoint.Y, 0);
-            UpdateList();
-            TableImported = true;
         }
-        private static ObjectIdCollection ImportTables(string fileName)
+
+        private static ObjectIdCollection ImportTables(string fileName,bool OnlyList = false)
         {
             var results = new ObjectIdCollection();
             var tableIds = new ObjectIdCollection();
@@ -81,13 +98,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         foreach (var objId in btr)
                         {
                             var entity = tr.GetObject(objId, OpenMode.ForRead) as Entity;
-                            if (entity is Table)
+                            if (entity is Table table)
                             {
+                                UpdateList(table);
                                 tableIds.Add(entity.Id);
                             }
                         }
                     }
                 }
+                if(OnlyList) return tableIds;
                 var db = Active.Database;
                 var targetModelSpaceId = SymbolUtilityServices.GetBlockModelSpaceId(db);
                 var mapping = new IdMapping();
@@ -119,16 +138,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        private static void UpdateList()
+        private static void UpdateList(Table table)
         {
             LisA = new List<double>();
             LisR = new List<double>();
             int start = 9;
-            int end = OrgTable.Columns.Count;
+            int end = table.Columns.Count;
             for (int i = start; i < end; i++)
             {
-                LisA.Add(ParseDoubleFromString(OrgTable.Cells[1, i].TextString.Split(';').Last().Replace("}", "")));
-                LisR.Add(double.Parse(OrgTable.Cells[2, i].TextString.Split(';').Last()));
+                LisA.Add(ParseDoubleFromString(table.Cells[1, i].TextString.Split(';').Last().Replace("}", "")));
+                LisR.Add(double.Parse(table.Cells[2, i].TextString.Split(';').Last()));
             }
 
         }
@@ -211,7 +230,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static double GetRValue(double a)
         {
-            if (!TableImported) Import();
+            if (!ListUpdated) ImportTables(FilePath,true);
             double prop;
             for (int i = 0; i < LisA.Count - 1; i++)
             {
@@ -231,15 +250,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var trans_a = prop * (trans_a_end - trans_a_start) + trans_a_start;
             return Math.Tan(trans_a);
 
-        }
-        public static void EraseOrgTable()
-        {
-            using (var tr = new OpenCloseTransaction())
-            {
-                _OrgTable.UpgradeOpen();
-                _OrgTable.Erase();
-                _OrgTable.DowngradeOpen();
-            }
         }
     }
 }
