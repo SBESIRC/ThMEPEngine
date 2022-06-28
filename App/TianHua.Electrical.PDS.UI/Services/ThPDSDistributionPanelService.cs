@@ -11,6 +11,7 @@ using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Models;
@@ -509,7 +510,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             yield return path;
                         }
                         {
-                            leftTemplates.FirstOrDefault(x => x.Tag as string == "A型应急照明集中电源")?.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = Project.PDSProjectVM.Instance.GlobalParameterModel, Path = new PropertyPath(nameof(Project.PDSProjectVM.Instance.GlobalParameterModel.CentralizedPowerContent)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                            {
+                                var m = leftTemplates.FirstOrDefault(x => x.Tag as string == "A型应急照明集中电源");
+                                if (m != null)
+                                {
+                                    m.UnicodeString = FixString(ThPDSComponentContentExtension.CentralizedPowerContent());
+                                }
+                            }
                             {
                                 var circuitNumbers = Service.ThPDSCircuitNumberSeacher.Seach(vertice, graph);
                                 var str = string.Join(",", circuitNumbers);

@@ -11,7 +11,6 @@ namespace TianHua.Electrical.PDS.UI.Project
 {
     public class ThPDSUESandboxParameterModel : NotifyPropertyChangedBase
     {
-        public string CentralizedPowerContent => ThPDSComponentContentExtension.CentralizedPowerContent();
         public ThPDSConductorUsageModel[] ConductorUsages => _ConductorUsages.Skip(1).ToArray();
         private ThPDSConductorUsageModel[] _ConductorUsages { get; } = new ConductorUse[]
         {
