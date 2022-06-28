@@ -152,14 +152,27 @@ namespace ThMEPStructure.ArchitecturePlane
         private List<string> Sort(List<string> svgFiles)
         {
             //svgFiles已经经过合理性检查
-            //C: \Users\XXXX\AppData\Local\Temp\0407-1-Floor_1-Floor_2.svg
-            var ifcFileName = Config.IfcFileName.ToUpper();
+            //C: \Users\XXXX\AppData\Local\Temp\6#建筑结构合模-7-17F.svg
             return svgFiles.OrderBy(o =>
             {
                 var fileName = Path.GetFileNameWithoutExtension(o);
-                var restStr = fileName.Substring(ifcFileName.Length + 1);
-                var strs = restStr.Split('-');
-                return int.Parse(strs[0].Trim());
+                var strs = fileName.Split('-');
+                if(strs.Length>2)
+                {
+                    var str = strs[strs.Length - 2];                    
+                    if(IsInteger(str))
+                    {
+                        return int.Parse(str.Trim());
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                else
+                {
+                    return -1;
+                }
             }).ToList();
         }
 

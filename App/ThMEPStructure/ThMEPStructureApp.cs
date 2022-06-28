@@ -226,7 +226,7 @@ namespace ThMEPStructure
         public void THSMUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ydb文件");
-            pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc";
+            pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc|Ifc files (*.get)|*.get";
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
@@ -259,7 +259,7 @@ namespace ThMEPStructure
         public void THAUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
-            pofo.Filter = "Ifc files (*.ifc)|*.ifc";     
+            pofo.Filter = "Ifc files (*.ifc)|*.ifc|Ifc files (*.get)|*.get";     
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
