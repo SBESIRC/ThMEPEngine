@@ -67,11 +67,7 @@ namespace ThMEPHVAC
                 };
 
                 //dataQuery.Transform(transformer);
-                dataQuery.ProcessDoorData();
-                dataQuery.CraeteRoomSapceModel();
-                dataQuery.ProcessWaterSeparator();
-                dataQuery.CreateFurnitureObstacle();
-                dataQuery.CreateRoomSet();
+                dataQuery.ProcessData();
                 dataQuery.Print();
                 //dataQuery.Reset(transformer);
 
