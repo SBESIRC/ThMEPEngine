@@ -168,6 +168,7 @@
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Command\ThPickRoomCmd.cs" />
+    <Compile Include="Command\ThSuperBoundaryCmd.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Config\ThExtractBeamConfig.cs" />
     <Compile Include="Config\ThRegularMatchingService.cs" />

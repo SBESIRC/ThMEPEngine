@@ -5,7 +5,6 @@ using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
-using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore;
 using ThMEPWSS.Command;
@@ -14,18 +13,31 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Mep.UI.Command;
 using ThMEPEngineCore.Model.Common;
+using ThControlLibraryWPF.ControlUtils;
 
 namespace TianHua.Mep.UI.ViewModel
 {
-    public class ThExtractRoomOutlineVM
+    public class ThExtractRoomOutlineVM : NotifyPropertyChangedBase
     {
         private readonly string AIWallLayer = "AI-墙线";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
-        public bool YnExtractShearWall { get; set; }
+        private bool ynExtractShearWall;
+        public bool YnExtractShearWall
+        {
+            get =>  ynExtractShearWall;
+            set
+            {
+                if (value != ynExtractShearWall)
+                {
+                    ynExtractShearWall = value;
+                    OnPropertyChanged(nameof(YnExtractShearWall));
+                }
+            }
+        }        
         public ThExtractRoomOutlineVM()
         {            
             LayerInfos = new ObservableCollection<ThLayerInfo>(LoadLayers());
-            YnExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
+            ynExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
         }
         public void ExtractWalls()
         {
@@ -47,25 +59,27 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void BuildRoomOutline()
         {
-            var wallLines = GetWallLines();
+            var wallLines = GetWallLines(); // get entities in modeslspace
             SetFocusToDwgView();
-            if (wallLines.Count==0)
-            {                
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THKJSQ");
-            }
-            else
+            if(wallLines.Count>0)
             {
-                using (var docLock = Active.Document.LockDocument())
-                using (var cmd = new ThPickRoomCmd(wallLines))
-                {
-                    cmd.Execute();
-                }
+                SuperBoundary(wallLines);
             }
         }
+
+        private void SuperBoundary(DBObjectCollection wallLines)
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var cmd = new ThSuperBoundaryCmd(wallLines))
+            {
+                cmd.Execute();
+            }
+        }
+
         public void Confirm()
         {
             SaveLayers();
-            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = YnExtractShearWall;
+            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = ynExtractShearWall;            
         }
         public void SelectLayer()
         {
