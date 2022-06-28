@@ -1,13 +1,14 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
 using QuikGraph;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -17,7 +18,6 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Electrical;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
-using System.IO;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -83,8 +83,8 @@ namespace TianHua.Electrical.PDS.Engine
 
                         // 创建移动到原点的类
                         // 测试使用
-                        // var transformerPt = new Point3d();
-                        var transformerPt = storeysGeometry[0].StartPoint;
+                        var transformerPt = new Point3d();
+                        //var transformerPt = storeysGeometry[0].StartPoint;
                         var transformer = new ThMEPOriginTransformer(transformerPt);
 
                         EntitiesTransform(transformer, storeysGeometry.ToCollection());
