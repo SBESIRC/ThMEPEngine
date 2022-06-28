@@ -27,11 +27,13 @@ namespace TianHua.Electrical.PDS.Engine
 
         private List<ThPDSEdgeMap> EdgeMapList;
 
+        private List<THPDSSubstation> SubstationList;
+
         public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> Execute(List<Database> databases)
         {
             NodeMapList = new List<ThPDSNodeMap>();
             EdgeMapList = new List<ThPDSEdgeMap>();
-
+            SubstationList = new List<THPDSSubstation>();
             // 记录所有图纸中的图
             var graphList = new List<BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>();
             var cableTrayNode = new ThPDSCircuitGraphNode
@@ -183,6 +185,7 @@ namespace TianHua.Electrical.PDS.Engine
                             graphEngine.CreatGraph();
                             graphEngine.UnionEdge();
                             graphEngine.UnionLightingEdge();
+                            graphEngine.AnalsisPowerTransformer(SubstationList);
                             graphEngine.CopyAttributes();
                             graphEngine.AssignDefaultDescription();
                             var storeyBasePoint = new Point3d(storey.Data.Position.X + (double)storey.Data.CustomProperties.GetValue("基点 X"),
@@ -191,6 +194,8 @@ namespace TianHua.Electrical.PDS.Engine
 
                             var graph = graphEngine.GetGraph();
                             graphList.Add(graph);
+
+                            SubstationList = graphEngine.GetSubstations();
 
                             //// 处理标准层
                             //var graphs = graphEngine.HandleMultiBuilding();
@@ -215,6 +220,7 @@ namespace TianHua.Electrical.PDS.Engine
             var unionEngine = new ThPDSGraphUnionEngine(EdgeMapList);
             unionEngine.GraphUnion(graphList, cableTrayNode);
             unionEngine.SplitSeriesConnection();
+            unionEngine.UnionSubstation(SubstationList);
             return unionEngine.UnionGraph;
         }
 
@@ -267,6 +273,11 @@ namespace TianHua.Electrical.PDS.Engine
         public List<ThPDSEdgeMap> GetEdgeMapList()
         {
             return EdgeMapList;
+        }
+
+        public List<THPDSSubstation> GetSubstationList()
+        {
+            return SubstationList;
         }
     }
 }

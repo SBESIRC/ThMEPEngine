@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project;
+using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -42,6 +43,9 @@ namespace TianHua.Electrical.PDS.Service
             });
 
             var descriptionAssign = true;
+            var numRegex = new Regex(@"[0-9]+");
+            var powerTransformerCircuitRegex = new Regex(@"[0-9]?W[0-9]{1}[0-9]{2}-[0-9]{1,2}");
+            var powerTransformerRegex = new Regex(@"[0-9]?W[0-9]{1}[0-9]{2}");
             foreach (var str in marks)
             {
                 if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
@@ -56,7 +60,6 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         if (strClean.Contains("~"))
                         {
-                            var numRegex = new Regex(@"[0-9]+");
                             var match = numRegex.Match(strClean);
                             if (match.Success)
                             {
@@ -74,8 +77,6 @@ namespace TianHua.Electrical.PDS.Service
                         }
                         else
                         {
-
-                            var numRegex = new Regex(@"[0-9]+");
                             var match = numRegex.Match(strClean);
                             while (match.Success)
                             {
@@ -84,20 +85,34 @@ namespace TianHua.Electrical.PDS.Service
                             }
                         }
                     }
-                    else if (!string.IsNullOrEmpty(strClean) && descriptionAssign)
+                    else
                     {
-                        thPDSDistBox.ID.Description = strClean;
-                        descriptionAssign = false;
+                        var match = powerTransformerCircuitRegex.Match(strClean);
+                        if (match.Success)
+                        {
+                            while (match.Success)
+                            {
+                                var powerTransformer = powerTransformerRegex.Match(match.Value).Value;
+                                var circuitId = match.Value.Replace(powerTransformer, "").Replace("-", "");
+                                thPDSDistBox.ID.PowerTransformerCircuitList.Add(Tuple.Create(powerTransformer, circuitId));
+                                match = match.NextMatch();
+                            }
+                        }
+                        else if (!string.IsNullOrEmpty(strClean) && Regex.IsMatch(strClean, @"[\u4e00-\u9fa5]") && descriptionAssign)
+                        {
+                            thPDSDistBox.ID.Description = strClean;
+                            descriptionAssign = false;
+                        }
                     }
                 }
             }
 
             thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
 
-            if (thPDSDistBox.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel
+            if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
                 && thPDSDistBox.InstalledCapacity.HighPower == 0.0)
             {
-                thPDSDistBox.InstalledCapacity.HighPower = AnalyseResidentialPower(marks);
+                ResidentialPanelHandle(thPDSDistBox, marks);
             }
 
             // 处理无标注时识别ACa不准确的情况
@@ -110,6 +125,40 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             return thPDSDistBox;
+        }
+
+        /// <summary>
+        /// 住户配电箱的部分特殊处理
+        /// </summary>
+        /// <param name="distBox"></param>
+        /// <param name="marks"></param>
+        private void ResidentialPanelHandle(ThPDSLoad distBox, List<string> marks)
+        {
+            distBox.InstalledCapacity.HighPower = AnalyseResidentialPower(marks);
+            if (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType.Equals(MeterBoxCircuitType.上海住宅)
+             || PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType.Equals(MeterBoxCircuitType.国标_表在断路器前)
+             || PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType.Equals(MeterBoxCircuitType.国标_表在断路器后))
+            {
+                if (distBox.InstalledCapacity.HighPower < 12)
+                {
+                    distBox.Phase = ThPDSPhase.一相;
+                }
+                else
+                {
+                    distBox.Phase = ThPDSPhase.三相;
+                }
+            }
+            else if (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType.Equals(MeterBoxCircuitType.江苏住宅))
+            {
+                if (distBox.InstalledCapacity.HighPower <= 20)
+                {
+                    distBox.Phase = ThPDSPhase.一相;
+                }
+                else
+                {
+                    distBox.Phase = ThPDSPhase.三相;
+                }
+            }
         }
 
         /// <summary>
@@ -540,6 +589,15 @@ namespace TianHua.Electrical.PDS.Service
             return circuit;
         }
 
+        public ThPDSCircuit CircuitMarkAnalysis(Tuple<string, string> powerTransformerNumber)
+        {
+            var circuit = new ThPDSCircuit();
+            circuit.ID.SourcePanelIDList.Add(powerTransformerNumber.Item1);
+            circuit.ID.CircuitIDList.Add(powerTransformerNumber.Item2);
+
+            return circuit;
+        }
+
         public ThPDSCircuit CircuitMarkAnalysis(List<string> srcPanelID, List<string> circuitID)
         {
             var id = CreateCircuitID(srcPanelID, circuitID);
@@ -588,10 +646,8 @@ namespace TianHua.Electrical.PDS.Service
 
             if (doSearch)
             {
-                var check1 = "W[a-zA-Z]+[-0-9]+";
-                var regex1 = new Regex(@check1);
-                var check2 = "[0-9]W[0-9]{3}[-][0-9]";
-                var regex2 = new Regex(@check2);
+                var regex1 = new Regex(@"W[a-zA-Z]+[-0-9]+");
+                var regex2 = new Regex(@"[0-9]W[0-9]{3}[-][0-9]");
                 infos.ForEach(str =>
                 {
                     if (str.Contains(tarPanelID))
@@ -653,7 +709,7 @@ namespace TianHua.Electrical.PDS.Service
             for (var i = 0; i < infos.Count; i++)
             {
                 var m = r.Match(infos[i]);
-                while (m.Success && (infos[i].IndexOf(m.Value) + m.Value.Count() + 1 > infos[i].Count() 
+                while (m.Success && (infos[i].IndexOf(m.Value) + m.Value.Count() + 1 > infos[i].Count()
                     || (infos[i][infos[i].IndexOf(m.Value) + m.Value.Count()] < '0' || infos[i][infos[i].IndexOf(m.Value) + m.Value.Count()] > '9')))
                 {
                     infos[i] = infos[i].Replace("/", "");

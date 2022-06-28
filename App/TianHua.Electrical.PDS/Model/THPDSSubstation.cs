@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet;
 
-namespace TianHua.Electrical.PDS.Project.Module
+namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
     /// 变电所
@@ -14,6 +13,12 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         public THPDSSubstation()
         {
+            Transformers = new List<THPDSTransformer>();
+        }
+
+        public THPDSSubstation(string substationID)
+        {
+            SubstationID = substationID;
             Transformers = new List<THPDSTransformer>();
         }
 
@@ -35,25 +40,32 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         public THPDSTransformer()
         {
-            LowVoltageCabinets = new List<PDSBaseLowVoltageCabinet>();
+            LowVoltageCabinets = new List<PDSLowVoltageCabinet>();
         }
 
         /// <summary>
         /// 变压器ID
         /// </summary>
         public string TransformerID { get; set; }
-        
+
         /// <summary>
         /// 低压柜
         /// </summary>
-        public List<PDSBaseLowVoltageCabinet> LowVoltageCabinets { get; set; }
+        public List<PDSLowVoltageCabinet> LowVoltageCabinets { get; set; }
+    }
+
+    public class PDSLowVoltageCabinet
+    {
+        public PDSLowVoltageCabinet() 
+        {
+            Edges = new List<ThPDSLowVoltageCabinetEdge>();
+        }
 
         /// <summary>
-        /// 计算低压柜选型
+        /// 低压柜ID
         /// </summary>
-        public void CalculateLowVoltageCabinetSelection()
-        {
-            LowVoltageCabinets = new List<PDSBaseLowVoltageCabinet>();//等后续逻辑
-        }
+        public string LowVoltageCabinetID { get; set; }
+
+        public List<ThPDSLowVoltageCabinetEdge> Edges { get; set; }
     }
 }

@@ -30,6 +30,8 @@ namespace TianHua.Electrical.PDS.Engine
     {
         private ThPDSCircuitGraph PDSGraph;
 
+        private List<THPDSSubstation> Substations;
+
         private Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> NodeMap;
 
         private Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> EdgeMap;
@@ -199,6 +201,8 @@ namespace TianHua.Electrical.PDS.Engine
                 };
                 CableTrayNode = cableTrayNode;
                 PDSGraph.Graph.AddVertex(CableTrayNode);
+
+                Substations = new List<THPDSSubstation>();
             }
         }
 
@@ -1670,6 +1674,100 @@ namespace TianHua.Electrical.PDS.Engine
                 var sourcePanelId = PDSGraph.Graph.InEdges(otherLoads[0]).First().Circuit.ID.SourcePanelID;
                 CreateLightingEdge(targets, sourcePanelId);
             }
+        }
+
+        public void AnalsisPowerTransformer(List<THPDSSubstation> substations)
+        {
+            Substations = substations;
+            PDSGraph.Graph.Vertices.ForEach(vertex =>
+            {
+                if (vertex.NodeType != PDSNodeType.DistributionBox)
+                {
+                    return;
+                }
+
+                var regex = new Regex(@"[0-9]?W");
+                vertex.Loads[0].ID.PowerTransformerCircuitList.ForEach(circuit =>
+                {
+                    var match = regex.Match(circuit.Item1);
+                    if (match.Success)
+                    {
+                        var leftover = circuit.Item1.Replace(match.Value, "");
+                        var str = match.Value.Replace("W", "");
+                        string substationID;
+                        if (string.IsNullOrEmpty(str))
+                        {
+                            substationID = "1";
+                        }
+                        else
+                        {
+                            substationID = Convert.ToInt32(str).ToString();
+                        }
+                        var substationList = Substations.Where(o => o.SubstationID.Equals(substationID)).ToList();
+                        THPDSSubstation substation;
+                        if (substationList.Count == 0)
+                        {
+                            substation = new THPDSSubstation
+                            {
+                                SubstationID = substationID,
+                            };
+                            Substations.Add(substation);
+                        }
+                        else
+                        {
+                            substation = substationList.First();
+                        }
+
+                        var transformerID = substationID + "T" + leftover[0].ToString();
+                        var transformerList = substation.Transformers.Where(o => o.TransformerID.Equals(transformerID)).ToList();
+                        THPDSTransformer transformer;
+                        if (transformerList.Count == 0)
+                        {
+                            transformer = new THPDSTransformer
+                            {
+                                TransformerID = transformerID,
+                            };
+                            substation.Transformers.Add(transformer);
+                        }
+                        else
+                        {
+                            transformer = transformerList.First();
+                        }
+
+                        var lowVoltageCabinetID = substationID + "L" + leftover;
+                        var lowVoltageCabinetList = transformer.LowVoltageCabinets.Where(o => o.LowVoltageCabinetID.Equals(lowVoltageCabinetID)).ToList();
+                        PDSLowVoltageCabinet lowVoltageCabinet;
+                        if (lowVoltageCabinetList.Count == 0)
+                        {
+                            lowVoltageCabinet = new PDSLowVoltageCabinet
+                            {
+                                LowVoltageCabinetID = lowVoltageCabinetID,
+                            };
+                            transformer.LowVoltageCabinets.Add(lowVoltageCabinet);
+                        }
+                        else
+                        {
+                            lowVoltageCabinet = lowVoltageCabinetList.First();
+                        }
+
+                        var edgeList = lowVoltageCabinet.Edges.Where(o => o.CircuitNumber.Equals(lowVoltageCabinetID + "-" + circuit.Item2)).ToList();
+                        if (edgeList.Count == 0)
+                        {
+                            lowVoltageCabinet.Edges.Add(new ThPDSLowVoltageCabinetEdge
+                            {
+                                SourceLowVoltageCabinetID = lowVoltageCabinetID,
+                                CircuitID = circuit.Item2,
+                                Target = vertex,
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        public List<THPDSSubstation> GetSubstations()
+        {
+            return Substations;
         }
 
         private void CreateLightingEdge(List<ThPDSCircuitGraphNode> targets, ThPDSCircuitGraphNode distBox)

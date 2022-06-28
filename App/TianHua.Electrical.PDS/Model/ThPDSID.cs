@@ -15,6 +15,7 @@ namespace TianHua.Electrical.PDS.Model
             DefaultDescription = "";
             CircuitIDList = new List<string> { "" };
             SourcePanelIDList = new List<string> { "" };
+            PowerTransformerCircuitList = new List<Tuple<string, string>>();
             Storeys = new List<int>();
         }
 
@@ -146,6 +147,11 @@ namespace TianHua.Electrical.PDS.Model
                 return circuitNumber;
             }
         }
+
+        /// <summary>
+        /// 变压器回路编号系列
+        /// </summary>
+        public List<Tuple<string, string>> PowerTransformerCircuitList { get; set; }
 
         /// <summary>
         /// 楼层序列

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
+﻿using System.Linq;
+using System.Collections.Generic;
+
 using QuikGraph;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
@@ -231,6 +232,26 @@ namespace TianHua.Electrical.PDS.Engine
                     map.EdgeMap.Add(newEdge, map.EdgeMap[edge]);
                     map.EdgeMap.Remove(edge);
                 }
+            });
+        }
+
+        public void UnionSubstation(List<THPDSSubstation> substationList)
+        {
+            substationList.ForEach(substation =>
+            {
+                substation.Transformers.ForEach(transform =>
+                {
+                    transform.LowVoltageCabinets.ForEach(lowVoltageCabinet =>
+                    {
+                        lowVoltageCabinet.Edges.ForEach(edge =>
+                        {
+                            if (IsContains(UnionGraph, edge.Target, out var originalNode))
+                            {
+                                edge.Target = originalNode;
+                            }
+                        });
+                    });
+                });
             });
         }
 

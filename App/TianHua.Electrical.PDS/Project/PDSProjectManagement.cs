@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 推送Data数据
         /// </summary>
-        public static void PushGraphData(DwgGraph graph)
+        public static void PushGraphData(DwgGraph graph, List<THPDSSubstation> substationList)
         {
             var projectGraph = BuildProjectGraph(graph);
             _project.graphData = projectGraph.CreatPDSProjectGraph();

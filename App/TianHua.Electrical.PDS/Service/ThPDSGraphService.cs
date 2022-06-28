@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
@@ -187,6 +188,21 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
+        public static ThPDSCircuitGraphNode CreatePowerTransformer(string loadID)
+        {
+            var node = new ThPDSCircuitGraphNode();
+            node.NodeType = PDSNodeType.PowerTransformer;
+            node.Loads.Add(new ThPDSLoad
+            {
+                ID = new ThPDSID
+                {
+                    LoadID = loadID,
+                },
+            });
+
+            return node;
+        }
+
         // circuitAssign参数是否是必须的，存疑
         /// <summary>
         /// circuitAssign为true表示可以通过节点身上的回路编号给回路赋值
@@ -282,6 +298,15 @@ namespace TianHua.Electrical.PDS.Service
             {
                 ThPDSLayerService.Assign(edge.Target.Loads[0]);
             }
+            return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode powerTransformer,
+            ThPDSCircuitGraphNode target, Tuple<string, string> powerTransformerNumber)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(powerTransformer, target);
+            var service = new ThPDSMarkAnalysisService();
+            edge.Circuit = service.CircuitMarkAnalysis(powerTransformerNumber);
             return edge;
         }
 
