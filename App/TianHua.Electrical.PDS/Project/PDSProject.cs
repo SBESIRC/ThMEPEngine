@@ -49,16 +49,17 @@ namespace TianHua.Electrical.PDS.Project
             }
             if (string.IsNullOrEmpty(url))
             {
-                //Creat New Project
                 this.graphData = new ProjectGraph().CreatPDSProjectGraph();
                 PDSProjectExtend.CalculateProjectInfo();
-                this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
                 instance.DataChanged?.Invoke();
+                this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
+                instance.GlobalConfigurationChanged?.Invoke();
             }
             else
             {
                 PDSProjectManagement.ImportProject(url);
                 instance.DataChanged?.Invoke();
+                instance.GlobalConfigurationChanged?.Invoke();
             }
         }
 

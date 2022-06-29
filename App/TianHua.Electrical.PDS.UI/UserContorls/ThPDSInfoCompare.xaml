@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
     xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
-    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
     xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter" mc:Ignorable="d" FontSize="14" Background="White" d:DesignHeight="1000" d:DesignWidth="1000">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -19,11 +18,11 @@
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding ValidateCmd}">绘图标准校核</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CompareCmd}">对比平面信息</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CreateCmd}">创建非平面负载</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding UpdateCmd}">更新修改到平面</cus:ImageButton>
+            <Button Margin="3" Command="{Binding ValidateCmd}">绘图标准校核</Button>
+            <Button Margin="3" Command="{Binding CompareCmd}">对比平面信息</Button>
+            <Button Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</Button>
+            <Button Margin="3" Command="{Binding CreateCmd}">创建非平面负载</Button>
+            <Button Margin="3" Command="{Binding UpdateCmd}">更新修改到平面</Button>
         </StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -42,9 +41,9 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <cus:ImageButton Height="25" Grid.Row="0" Grid.Column="0" Command="{Binding ReadAndRegenCmd}" Margin="3" Style="{x:Null}">读取并新建项目</cus:ImageButton>
+                <Button Grid.Row="0" Grid.Column="0" Command="{Binding ReadAndRegenCmd}" Margin="3">读取并新建项目</Button>
                 <Border Grid.Row="1" Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                    <ListBox x:Name="lbx" Style="{x:Null}" ItemsSource="{Binding DataList}">
+                    <ListBox x:Name="lbx" ItemsSource="{Binding DataList}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -69,7 +68,7 @@
                         <hc:SearchBar Name="CircuitSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="CircuitDataGrid" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
+                        <DataGrid x:Name="CircuitDataGrid" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -135,7 +134,7 @@
                         <hc:SearchBar Name="LoadSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="LoadDataGrid" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
+                        <DataGrid x:Name="LoadDataGrid" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>

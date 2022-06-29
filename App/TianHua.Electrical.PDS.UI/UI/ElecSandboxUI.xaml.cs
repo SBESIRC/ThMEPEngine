@@ -40,7 +40,6 @@ namespace TianHua.Electrical.PDS.UI.UI
         /// <exception cref="NotImplementedException"></exception>
         public void LoadProject()
         {
-            //加载项目
             ThPDSProjectGraphService.ImportProject("");
         }
 
@@ -54,16 +53,11 @@ namespace TianHua.Electrical.PDS.UI.UI
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("干线编辑界面", new ThPDSMainBusPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("低压柜编辑界面", new ThPDSLowPressurePanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("高压压柜编辑界面", new ThPDSHighPressurePanel()));
-            var dft = new Models.UTableItem("全局参数设置界面", new UESandboxParameter());
-            topTableItemViewModel.FunctionTableItems.Add(dft);
-            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare().Init()));
+            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("全局参数设置界面", new UESandboxParameter()));
+            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("成果导出界面", new ThPDSExport()));
             tabTopFunction.DataContext = topTableItemViewModel;
-            tabTopFunction.SelectedItem = dft;
-            if (tabTopFunction.SelectedItem is null)
-            {
-                tabTopFunction.SelectedIndex = topTableItemViewModel.FunctionTableItems.IndexOf(dft);
-            }
+            tabTopFunction.SelectedIndex = 1;
         }
         #endregion
 
@@ -74,7 +68,6 @@ namespace TianHua.Electrical.PDS.UI.UI
         }
         private void btnOpenProject_Click(object sender, RoutedEventArgs e)
         {
-            //ImportProject
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.Filter = "Project (.PDSProject)|*.pdsProject"; // Filter files by extension
             dlg.DefaultExt = ".PDSProject"; // Default file extension

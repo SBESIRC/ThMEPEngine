@@ -49,8 +49,6 @@ namespace TianHua.Electrical.PDS.UI.Services
         public void Init(ThPDSInfoCompare panel)
         {
             {
-                var hasDataError = false;
-                var regenCount = 0L;
                 var vm = new ThPDSInfoCompareViewModel()
                 {
                     CompareCmd = new RelayCommand(() =>
@@ -63,14 +61,13 @@ namespace TianHua.Electrical.PDS.UI.Services
                         new ThPDSSecondaryPushDataService().Push(databases.ToList());
                         PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                         UpdateView(panel);
-                    }, () => !hasDataError),
-                    AcceptCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
+                    }),
                     CreateCmd = new RelayCommand(() =>
                     {
                         var w = new ThPDSCreateLoad() { Width = 250, Height = 250, WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen, };
                         w.ShowDialog();
                         UpdateView(panel);
-                    }, () => !hasDataError || regenCount > 1),
+                    }),
                     UpdateCmd = new RelayCommand(() =>
                     {
                         // 切回CAD画布
@@ -78,29 +75,24 @@ namespace TianHua.Electrical.PDS.UI.Services
 
                         // 发送命令更新图纸
                         CommandHandlerBase.ExecuteFromCommandLine(false, "THPDSUPDATEDWG");
-                    }, () => !hasDataError || regenCount > 1),
+                    }),
+                    ValidateCmd = new RelayCommand(() =>
+                    {
+                        new ThPDSGraphVerifyService().Verify(Graph);
+                        UpdateView(panel);
+                    }),
+                    ReadAndRegenCmd = new RelayCommand(() =>
+                    {
+                        if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                        var databases = tree.DataList
+                        .Where(x => x.IsChecked == true)
+                        .Select(x => ((Document)x.Tag).Database);
+                        if (!databases.Any()) return;
+                        new ThPDSPushDataService().Push(databases.ToList());
+                        PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
+                        UpdateView(panel);
+                    }),
                 };
-                vm.ValidateCmd = new RelayCommand(() =>
-                {
-                    new ThPDSGraphVerifyService().Verify(Graph);
-                    UpdateView(panel);
-                });
-                vm.ReadAndRegenCmd = new RelayCommand(() =>
-                {
-                    if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                    var databases = tree.DataList
-                    .Where(x => x.IsChecked == true)
-                    .Select(x => ((Document)x.Tag).Database);
-                    if (!databases.Any()) return;
-                    new ThPDSPushDataService().Push(databases.ToList());
-                    PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
-                    UpdateView(panel);
-                    vm.CompareCmd.NotifyCanExecuteChanged();
-                    vm.AcceptCmd.NotifyCanExecuteChanged();
-                    vm.CreateCmd.NotifyCanExecuteChanged();
-                    vm.UpdateCmd.NotifyCanExecuteChanged();
-                    ++regenCount;
-                });
                 panel.DataContext = vm;
             }
             {
@@ -346,48 +338,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                         }
                     };
                 };
-
-                //// Column header clicked
-                //// http://www.scottlogic.co.uk/blog/colin/2008/12/wpf-datagrid-detecting-clicked-cell-and-row/
-                //panel.CircuitDataGrid.MouseRightButtonUp += (s, e) =>
-                //{
-                //    DependencyObject dep = (DependencyObject)e.OriginalSource;
-
-                //    // iteratively traverse the visual tree
-                //    while ((dep != null) &&
-                //    dep is not DataGridCell &&
-                //    dep is not DataGridColumnHeader)
-                //    {
-                //        dep = VisualTreeHelper.GetParent(dep);
-                //    }
-
-                //    if (dep == null)
-                //        return;
-
-                //    if (dep is DataGridColumnHeader columnHeader)
-                //    {
-                //        DataGridColumn column = columnHeader.Column;
-                //        if ((string)column.Header == "回路编号")
-                //        {
-                //            ListSortDirection direction = (column.SortDirection != ListSortDirection.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending;
-                //            ICollectionView cv = CollectionViewSource.GetDefaultView(panel.CircuitDataGrid.ItemsSource);
-                //            if (cv != null && cv.CanSort == true)
-                //            {
-                //                using (cv.DeferRefresh())
-                //                {
-                //                    cv.SortDescriptions.Clear();
-                //                    cv.SortDescriptions.Add(new SortDescription("回路编号", ListSortDirection.Descending));
-                //                }
-                //            }
-                //        }
-                //    }
-
-                //    if (dep is DataGridCell)
-                //    {
-                //        DataGridCell cell = dep as DataGridCell;
-                //        // do something
-                //    }
-                //};
             }
             {
                 var items = new ObservableCollection<LoadDiffItem>();
