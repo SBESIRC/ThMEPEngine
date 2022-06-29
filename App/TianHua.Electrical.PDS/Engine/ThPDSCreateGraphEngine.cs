@@ -83,8 +83,8 @@ namespace TianHua.Electrical.PDS.Engine
 
                         // 创建移动到原点的类
                         // 测试使用
-                        var transformerPt = new Point3d();
-                        //var transformerPt = storeysGeometry[0].StartPoint;
+                        // var transformerPt = new Point3d();
+                        var transformerPt = storeysGeometry[0].StartPoint;
                         var transformer = new ThMEPOriginTransformer(transformerPt);
 
                         EntitiesTransform(transformer, storeysGeometry.ToCollection());

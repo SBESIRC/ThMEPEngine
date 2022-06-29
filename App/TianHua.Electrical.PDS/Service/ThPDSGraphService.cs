@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
-using TianHua.Electrical.PDS.Engine;
+using ThMEPEngineCore.Algorithm;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Engine;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -139,7 +139,7 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
-        public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
+        public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, Curve cableTray, ThMarkService markService,
             List<string> distBoxKey, List<ObjectId> objectIds, ref string attributesCopy)
         {
             var node = new ThPDSCircuitGraphNode();
@@ -156,7 +156,7 @@ namespace TianHua.Electrical.PDS.Service
                 var load = service.LoadMarkAnalysis(textFilter, distBoxKey, LoadBlocks[entity], ref attributesCopy);
                 load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
                 load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
-                load.SetOnLightingCableTray(true);
+                load.SetOnLightingCableTray(true, cableTray);
                 loads.Add(load);
             }
 

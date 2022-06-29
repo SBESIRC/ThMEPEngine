@@ -28,6 +28,7 @@
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Diagram\ThPDSMotorInfoService.cs" />
     <Compile Include="Model\ThPDSFilterBlockInfo.cs" />
+    <Compile Include="Model\ThPDSLightingCableTray.cs" />
     <Compile Include="Model\ThPDSLowVoltageCabinetEdge.cs" />
     <Compile Include="Model\THPDSSubstation.cs" />
     <Compile Include="Project\Module\Configure\DistributionMeteringConfiguration.cs" />
