@@ -56,9 +56,15 @@ namespace TianHua.Electrical.PDS.Service
                     if (location.ReferenceDWG.Equals(referenceDWG))
                     {
                         Application.DocumentManager.MdiActiveDocument = doc;
-                        var extents = new Extents3d(
-                            location.MinPoint.PDSPoint3dToPoint3d(), 
-                            location.MaxPoint.PDSPoint3dToPoint3d());
+
+                        // Zoom
+                        var scaleFactor = 2500.0;
+                        var minPoint = new Point3d(location.BasePoint.X - scaleFactor, location.BasePoint.Y - scaleFactor, 0);
+                        var maxPoint = new Point3d(location.BasePoint.X + scaleFactor, location.BasePoint.Y + scaleFactor, 0);
+                        COMTool.ZoomWindow(minPoint, maxPoint);
+
+                        // 高亮
+                        var extents = new Extents3d(location.MinPoint.PDSPoint3dToPoint3d(), location.MaxPoint.PDSPoint3dToPoint3d());
                         ClearTransientGraphics();
                         AddToTransient(extents.ToRectangle());
                     }

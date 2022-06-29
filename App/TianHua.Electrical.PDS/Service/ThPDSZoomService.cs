@@ -2,10 +2,9 @@
 using System.Linq;
 
 using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
 using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.ApplicationServices;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
@@ -62,7 +61,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 return;
             }
-            if(location.BasePoint.EqualsTo(new ThPDSPoint3d(0.01,0.01)))
+            if (location.BasePoint.EqualsTo(new ThPDSPoint3d(0.01, 0.01)))
             {
                 Active.Editor.WriteLine("无法Zoom至指定负载");
                 return;
@@ -77,11 +76,9 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         Application.DocumentManager.MdiActiveDocument = doc;
                         var scaleFactor = 2500.0;
-                        var minPoint = new Point3d(location.BasePoint.X - scaleFactor,
-                                                   location.BasePoint.Y - scaleFactor, 0);
-                        var maxPoint = new Point3d(location.BasePoint.X + scaleFactor,
-                                                   location.BasePoint.Y + scaleFactor, 0);
-                        Active.Editor.ZoomWindow(minPoint, maxPoint);
+                        var minPoint = new Point3d(location.BasePoint.X - scaleFactor, location.BasePoint.Y - scaleFactor, 0);
+                        var maxPoint = new Point3d(location.BasePoint.X + scaleFactor, location.BasePoint.Y + scaleFactor, 0);
+                        COMTool.ZoomWindow(minPoint, maxPoint);
                     }
                 }
             }

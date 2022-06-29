@@ -224,7 +224,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
-                    if(edge.Source.Type == Model.PDSNodeType.VirtualLoad)
+                    if (edge.Source.Type == Model.PDSNodeType.VirtualLoad)
                     {
                         continue;
                     }
@@ -344,7 +344,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
-                    if(node.Type == Model.PDSNodeType.VirtualLoad)
+                    if (node.Type == Model.PDSNodeType.VirtualLoad)
                     {
                         continue;
                     }
@@ -585,8 +585,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (panel.LoadDataGrid.SelectedItem == null) return;
                     var item = panel.LoadDataGrid.SelectedItem as LoadDiffItem;
-                    var zoomService = new ThPDSZoomService();
-                    zoomService.ImmediatelyZoom(item.Node);
                     TransientService.ClearTransientGraphics();
                     TransientService.AddToTransient(item.Node);
                 };
