@@ -131,8 +131,8 @@ namespace ThMEPArchitecture.MultiProcess
                             RunWithAutoSegLine(currentDb);
                         }
                     }
-                    //TableTools.EraseOrgTable();
-                    TableTools.hideOrgTable();
+                    TableTools.EraseOrgTable();
+                    //TableTools.hideOrgTable();
                     Active.Document.Save();
                 }
             }

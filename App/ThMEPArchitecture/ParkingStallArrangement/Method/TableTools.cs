@@ -20,8 +20,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     public static class TableTools
     {
         static bool TableImported = false;
-        static string FilePath = ThCADCommon.ParkingStallTablePath();
-        //static string FilePath = "C://Users//zhangwenxuan//Desktop//地库指标表格.dwg";
+        //static string FilePath = ThCADCommon.ParkingStallTablePath();
+        static string FilePath = "C://Users//zhangwenxuan//Desktop//地库指标表格.dwg";
         static Table _OrgTable;
         static Table OrgTable { get { return _OrgTable; } }
         static Point3d OrgMidPt;
@@ -237,15 +237,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                //_OrgTable.UpgradeOpen();
+                //_OrgTable.Erase();
+                //_OrgTable.DowngradeOpen();
                 if (!acdb.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acdb.Database, layer, 0);
                 _OrgTable.Layer = layer;
+
                 var id = DbHelper.GetLayerId(layer);
                 id.QOpenForWrite<LayerTableRecord>(l =>
                 {
                     l.IsOff = true;
                     l.IsFrozen = true;
                 });
+            }
+        }
+        public static void EraseOrgTable()
+        {
+            if (TableImported)
+            {
+                _OrgTable.UpgradeOpen();
+                _OrgTable.Erase();
+                _OrgTable.DowngradeOpen();
+                TableImported = false;
             }
         }
     }
