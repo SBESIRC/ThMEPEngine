@@ -102,6 +102,29 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "四级", 400, 300));
             results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "四级", 400, 350));
             results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "四级", 400, 400));
+
+            // 增补
+            results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "一级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "一级", 400, 150, false));
+
+            results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "二级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "二级", 400, 150, false));
+     
+            results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "三级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "三级", 400, 150, false));
+
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "一级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "一级", 400, 150, false));
+
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "二级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "二级", 400, 150, false));
+
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "三级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "三级", 400, 150, false));
+        
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "四级", 400, 130, false));
+            results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "四级", 400, 150, false));
+
             return results;
         }
         private List<ThHuaRunLTypeComponentSpecInfo> GetLTypeSpecInfos()
@@ -134,6 +157,34 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 350, 350, 350, 300, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 350, 350, 350, 400, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 350, 350, 350, 500, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 450, false));
             #endregion
             #region ---------- YBZ二级 ----------
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 300));
@@ -162,6 +213,34 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 350, 350, 350, 300, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 350, 350, 350, 400, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 350, 350, 350, 500, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 450, false));
             #endregion
             #region ---------- YBZ三级 ----------
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 300));
@@ -190,6 +269,34 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 250,false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 350, 350, 350, 300, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 350, 350, 350, 400, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 350, 350, 350, 500, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 450, false));
             #endregion
             #region ---------- GBZ一级 ----------
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 300));
@@ -219,6 +326,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 300));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 350, 350, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 350, 350, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 350, 350, 450, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 450, false));
             #endregion
             #region ---------- GBZ二级 ----------
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 300));
@@ -248,6 +384,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 300));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 350, 350, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 350, 350, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 350, 350, 450, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 450, false));
             #endregion
             #region ---------- GBZ三级 ----------
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 300));
@@ -277,6 +442,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 300));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 350, 350, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 350, 350, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 350, 350, 450, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 450, false));
             #endregion
             #region ---------- GBZ四级 ----------
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 300));
@@ -306,6 +500,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 300));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 400));
             results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 500));
+
+            // 增补
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 250,false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 450, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 550, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 550, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 350, 350, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 350, 350, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 350, 350, 450, false));
+
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 250, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 350, false));
+            results.Add(new ThHuaRunLTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 450, false));
             #endregion
             return results; 
         }
@@ -340,6 +563,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 1200));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 1400));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 1600));
+
+            // 增补
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 730,false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 350, 350, 350, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 350, 350, 350, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 350, 350, 350, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 1350, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "一级", 400, 400, 400, 1550, false));
             #endregion
             #region ---------- YBZ二级 ----------
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 780));
@@ -369,6 +621,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 1200));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 1400));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 1600));
+
+            // 增补
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 730, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 350, 350, 350, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 350, 350, 350, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 350, 350, 350, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 1350, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "二级", 400, 400, 400, 1550, false));
             #endregion
             #region ---------- YBZ三级 ----------
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 780));
@@ -398,6 +679,35 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 1200));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 1400));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 1600));
+
+            // 增补
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 730, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 350, 350, 350, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 350, 350, 350, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 350, 350, 350, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 1350, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("YBZ", "三级", 400, 400, 400, 1550, false));
             #endregion
             #region ---------- GBZ一级 ----------
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 780));
@@ -425,6 +735,33 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 1000));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 1200));
+
+            //
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 730, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 350, 350, 900, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 350, 350, 1100, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "一级", 300, 400, 400, 1150, false));
             #endregion
             #region ---------- GBZ二级 ----------
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 780));
@@ -452,6 +789,33 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 1000));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 1200));
+
+            // 增补
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 730, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 350, 350, 900, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 350, 350, 1100, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "二级", 300, 400, 400, 1150, false));
             #endregion
             #region ---------- GBZ三级 ----------
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 780));
@@ -479,6 +843,33 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 1000));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 1200));
+
+            // 增补
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 730, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 350, 350, 900, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 350, 350, 1100, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "三级", 300, 400, 400, 1150, false));
             #endregion
             #region ---------- GBZ四级 ----------
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 780));
@@ -506,6 +897,33 @@ namespace ThMEPStructure.Reinforcement.Service
 
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 1000));
             results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 1200));
+
+            // 增补
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 730, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 930, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 1130, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 180, 1330, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 750, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 1150, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 200, 200, 1350, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 800, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 1000, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 1200, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 250, 250, 1400, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 850, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 1050, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 1250, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 300, 300, 1450, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 350, 350, 900, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 350, 350, 1100, false));
+
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 950, false));
+            results.Add(new ThHuaRunTTypeComponentSpecInfo("GBZ", "四级", 300, 400, 400, 1150, false));
             #endregion
             return results;
         }
@@ -519,10 +937,12 @@ namespace ThMEPStructure.Reinforcement.Service
         /// <summary>
         /// 抗震等级
         /// </summary>
-        public string AntiSeismicGrade { get; set; }   
-        public ThHuaRunComponentSpecInfo(string code,string antiSeismicGrade)
+        public string AntiSeismicGrade { get; set; }
+        public bool IsStandard { get; private set; }
+        public ThHuaRunComponentSpecInfo(string code,string antiSeismicGrade,bool isStandard=true)
         {
             this.Code = code;
+            IsStandard = isStandard;
             this.AntiSeismicGrade = antiSeismicGrade;
         }
     }
@@ -530,7 +950,7 @@ namespace ThMEPStructure.Reinforcement.Service
     {
         public int Hc { get; set; }
         public int Bw { get; set; }
-        public ThHuaRunRectComponentSpecInfo(string code, string antiSeismicGrade,int hc,int bw):base(code, antiSeismicGrade)
+        public ThHuaRunRectComponentSpecInfo(string code, string antiSeismicGrade,int hc,int bw, bool isStandard=true) :base(code, antiSeismicGrade, isStandard)
         {
             this.Hc = hc;
             this.Bw = bw;
@@ -542,8 +962,8 @@ namespace ThMEPStructure.Reinforcement.Service
         public int Bw { get; set; }
         public int Bf { get; set; }
         public int Hc2 { get; set; }
-        public ThHuaRunLTypeComponentSpecInfo(string code, string antiSeismicGrade, int hc1, int bw, int bf, int hc2) 
-            : base(code, antiSeismicGrade)
+        public ThHuaRunLTypeComponentSpecInfo(string code, string antiSeismicGrade, int hc1, int bw, int bf, int hc2, bool isStandard = true) 
+            : base(code, antiSeismicGrade, isStandard)
         {
             this.Hc1 = hc1;
             this.Bw = bw;
@@ -557,8 +977,8 @@ namespace ThMEPStructure.Reinforcement.Service
         public int Bw { get; set; }
         public int Bf { get; set; }
         public int Hc2 { get; set; }
-        public ThHuaRunTTypeComponentSpecInfo(string code, string antiSeismicGrade, int hc1, int bw, int bf, int hc2)
-            : base(code, antiSeismicGrade)
+        public ThHuaRunTTypeComponentSpecInfo(string code, string antiSeismicGrade, int hc1, int bw, int bf, int hc2, bool isStandard = true)
+            : base(code, antiSeismicGrade, isStandard)
         {
             this.Hc1 = hc1;
             this.Bw = bw;
