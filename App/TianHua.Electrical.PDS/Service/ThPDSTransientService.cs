@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.Service
             }
             if (location.BasePoint.EqualsTo(new ThPDSPoint3d(0.01, 0.01)))
             {
-                Active.Editor.WriteLine("无法高亮显示指定负载");
+                Active.Editor.WriteLine("无法Zoom至指定负载");
                 return;
             }
             foreach (Document doc in Application.DocumentManager)

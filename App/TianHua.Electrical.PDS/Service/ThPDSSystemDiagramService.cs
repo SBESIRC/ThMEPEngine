@@ -91,9 +91,9 @@ namespace TianHua.Electrical.PDS.Service
                 var anotherStartPoint = new Point3d(basePoint.X + 36300 * scaleFactor, basePoint.Y, 0);
                 var residue = ThPDSCommon.INNER_TOLERANCE - 1000.0;
 
-                foreach (var thisNode in Graph.Vertices)
+                foreach (var thisNode in Nodes.Distinct())
                 {
-                    if (!Nodes.Contains(thisNode))
+                    if (!Graph.Vertices.Contains(thisNode))
                     {
                         continue;
                     }
