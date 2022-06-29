@@ -328,7 +328,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                             //boxcrossed = CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
                             //修改，有的背靠背模块第二模块没有生成carmoudle只生成车道线，对这种背靠背车位的过滤
                             var carcrossed= CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
-                            if (mindistance == DisCarAndHalfLaneBackBack)
+                            if (mindistance == DisCarAndHalfLaneBackBack && ScareEnabledForBackBackModule)
                             {
                                 var iniboxpl = PolyFromLines(boxsplit, boxsplittest);
                                 foreach (var car_cross in carcrossed)
