@@ -10844,6 +10844,8 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSCHUCKLE = 2290;
         public const int THESAURUSKIDNAP = 2470;
         public const int THESAURUSINAUDIBLE = 1506;
+        public const string UNCEREMONIOUSNESS = "NOTE";
+        public const string THESAURUSFLABBY = "DIMS";
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -10943,6 +10945,7 @@ cb: tolReturnValueRangeTo =>
         static bool isRainLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSABJURE);
         static bool isDraiLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSREMNANT);
         static bool isDrainageLayer(string layer) => isRainLayer(layer) || isDraiLayer(layer);
+        static bool isLabelLayer(string layer) => isDrainageLayer(layer) || layer.EndsWith(UNCEREMONIOUSNESS) || layer.EndsWith(THESAURUSFLABBY);
         static string GetEffectiveLayer(string TOILET_BUFFER_DISTANCE)
         {
           return GetEffectiveName(TOILET_BUFFER_DISTANCE);
@@ -13696,7 +13699,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                 MAX_BASECIRCLE_AREA.Add(GeoFac.CreateGeometry(points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint())).Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
                 return;
               }
-              else if (isDrainageLayer(TOILET_BUFFER_DISTANCE))
+              else if (isLabelLayer(TOILET_BUFFER_DISTANCE))
               {
                 if (points.Count == THESAURUSSTAMPEDE) return;
                 string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = null;
