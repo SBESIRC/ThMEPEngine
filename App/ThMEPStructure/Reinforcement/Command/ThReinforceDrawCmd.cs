@@ -307,6 +307,17 @@ namespace ThMEPStructure.Reinforcement.Command
                             var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value, specDict, o.StirrupRatio,
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
                                 ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
+                            if(edgeComponent ==null)
+                            {
+                                // 查看是不是增补规格
+                                if (IsSupplySpec(o))
+                                {
+                                    // 把bw or hc2 增大 50
+                                    edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value + 50, specDict, o.StirrupRatio,
+                                ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
+                                ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
+                                }
+                            }
                             if(edgeComponent!=null)
                             {
                                 SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
@@ -318,6 +329,17 @@ namespace ThMEPStructure.Reinforcement.Command
                             var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value, specDict,
                                 ThWallColumnReinforceConfig.Instance.WallLocation,
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade);
+                            if (edgeComponent == null)
+                            {
+                                // 查看是不是增补规格
+                                if (IsSupplySpec(o))
+                                {
+                                    // 把bw or hc2 增大 50
+                                    edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value + 50, specDict,
+                                        ThWallColumnReinforceConfig.Instance.WallLocation,
+                                        ThWallColumnReinforceConfig.Instance.AntiSeismicGrade);
+                                }
+                            }
                             if (edgeComponent != null)
                             {
                                 SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
@@ -497,6 +519,46 @@ namespace ThMEPStructure.Reinforcement.Command
             {
                 return null;
             }
+        }
+        private bool IsSupplySpec(EdgeComponentExtractInfo info)
+        {
+            if (info.ShapeCode == ShapeCode.Rect)
+            {
+                var hcSize = info.QuerySpec(ThHuaRunSecAnalysisService.HcKword);
+                var bwSize = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
+                if(hcSize.HasValue && bwSize.HasValue)
+                {
+                    return ThHuaRunDataManager.Instance.IsSupplyRectSpec(ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
+                    info.ComponentType.ToString(),hcSize.Value, bwSize.Value);
+                }
+            }
+            else if (info.ShapeCode == ShapeCode.L)
+            {
+                var hc1Size = info.QuerySpec(ThHuaRunSecAnalysisService.Hc1Kword);
+                var hc2Size = info.QuerySpec(ThHuaRunSecAnalysisService.Hc2Kword);
+                var bwSize = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
+                var bfSize = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
+                if(hc1Size.HasValue && hc2Size.HasValue && bwSize.HasValue && bfSize.HasValue)
+                {
+                    return ThHuaRunDataManager.Instance.IsSupplyLTypeSpec(ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
+                        info.ComponentType.ToString(),hc1Size.Value, bwSize.Value, hc2Size.Value, bfSize.Value);
+                }
+            }
+            else if (info.ShapeCode == ShapeCode.T)
+            {
+                var hc1Size = info.QuerySpec(ThHuaRunSecAnalysisService.Hc1Kword);
+                var hc2sSize = info.QuerySpec(ThHuaRunSecAnalysisService.Hc2sKword);
+                var hc2lSize = info.QuerySpec(ThHuaRunSecAnalysisService.Hc2lKword);
+                var bfSize = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
+                var bwSize = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
+                if (hc1Size.HasValue && hc2sSize.HasValue && hc2lSize.HasValue && bfSize.HasValue && bwSize.HasValue)
+                {
+                    int hc2 = hc2sSize.Value + hc2lSize.Value + bfSize.Value;
+                    return ThHuaRunDataManager.Instance.IsSupplyTTypeSpec(ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
+                        info.ComponentType.ToString(),hc1Size.Value, bwSize.Value, hc2, bfSize.Value);
+                }
+            }
+            return false;
         }
     }
 }
