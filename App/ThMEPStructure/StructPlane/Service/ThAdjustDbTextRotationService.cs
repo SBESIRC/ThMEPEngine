@@ -16,7 +16,7 @@ namespace ThMEPStructure.StructPlane.Service
         {
             var ang = Vector3d.XAxis.GetAngleTo(direction).RadToAng();
             ang %= 180.0;
-            if(ang<= angTolerance || Math.Abs(ang-180.0)<= angTolerance)
+            if(Math.Abs(ang) <= angTolerance || Math.Abs(ang-180.0)<= angTolerance)
             {
                 // 水平
                 text.Rotation = 0.0;
@@ -26,7 +26,7 @@ namespace ThMEPStructure.StructPlane.Service
                 // 水平
                 text.Rotation = Math.PI/2.0;
             }
-            else if(ang>0.0 && ang<90.0)
+            else if((direction.X>0 && direction.Y>0.0) || (direction.X < 0 && direction.Y < 0.0))
             {
                 // 1、3象限
                 text.Rotation = ang.AngToRad();
@@ -34,7 +34,7 @@ namespace ThMEPStructure.StructPlane.Service
             else
             {
                 //文字2、4象限
-                text.Rotation = ang.AngToRad()+Math.PI;
+                text.Rotation = Math.PI*2.0 - ang.AngToRad();
             }
         }
     }

@@ -61,6 +61,10 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     output = proc.StandardOutput.ReadToEnd();
                 }
+                else
+                {
+                    output = proc.StandardError.ReadToEnd();
+                }
             }
         }
         

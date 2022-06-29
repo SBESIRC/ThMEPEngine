@@ -319,7 +319,7 @@ namespace ThMEPStructure.StructPlane.Service
                                 dbText.TextString = spec+ elevation;
                             }
 
-                            // svg文字是在原点生成
+                            // svg转换的文字角度是0
                             Vector3d textMoveDir = new Vector3d();
                             if(o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
                             {
