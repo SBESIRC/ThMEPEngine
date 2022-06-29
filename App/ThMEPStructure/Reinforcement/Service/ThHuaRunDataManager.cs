@@ -51,6 +51,21 @@ namespace ThMEPStructure.Reinforcement.Service
                 o.Bf == bf)
                 .ToList();
         }
+        public bool IsSupplyRectSpec(string antiSeismicGrade, string code, int hc, int bw)
+        {
+            var specs = QueryRect(antiSeismicGrade, code, hc, bw);
+            return specs.Where(o => o.IsStandard == false).Any();
+        }
+        public bool IsSupplyLTypeSpec(string antiSeismicGrade, string code, int hc1, int bw, int hc2, int bf)
+        {
+            var specs = QueryLType(antiSeismicGrade, code, hc1, bw, hc2, bf);
+            return specs.Where(o => o.IsStandard == false).Any();
+        }
+        public bool IsSupplyTTypeSpec(string antiSeismicGrade, string code, int hc1, int bw, int hc2, int bf)
+        {
+            var specs = QueryTType(antiSeismicGrade, code, hc1, bw, hc2, bf);
+            return specs.Where(o => o.IsStandard == false).Any();
+        }
         private List<ThHuaRunRectComponentSpecInfo> GetRectSpecInfos()
         {
             var results = new List<ThHuaRunRectComponentSpecInfo>();
