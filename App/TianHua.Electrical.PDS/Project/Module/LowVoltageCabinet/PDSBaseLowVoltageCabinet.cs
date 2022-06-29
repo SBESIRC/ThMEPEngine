@@ -11,6 +11,6 @@ namespace TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet
     /// </summary>
     public abstract class PDSBaseLowVoltageCabinet
     {
-
+        public string LowVoltageCabinetID { get; set; }
     }
 }

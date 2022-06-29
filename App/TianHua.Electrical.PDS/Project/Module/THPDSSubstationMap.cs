@@ -12,11 +12,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 变电所至一级负载映射
         /// </summary>
-        private Dictionary<ThPDSProjectGraphNode, Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>> _substationMap;
+        private Dictionary<ThPDSProjectGraphNode, List<Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>>> _substationMap;
 
         public THPDSSubstationMap()
         {
-            _substationMap = new Dictionary<ThPDSProjectGraphNode, Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>>();
+            _substationMap = new Dictionary<ThPDSProjectGraphNode, List<Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>>>();
         }
 
         public void Clear()
@@ -45,11 +45,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (_substationMap.ContainsKey(node))
             {
-                _substationMap[node] = (substation,transformer, lowVoltageCabinet).ToTuple();
+                _substationMap[node].Add((substation, transformer, lowVoltageCabinet).ToTuple());
             }
             else
             {
-                _substationMap.Add(node, (substation, transformer, lowVoltageCabinet).ToTuple());
+                _substationMap.Add(node, new List<Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>>() { (substation, transformer, lowVoltageCabinet).ToTuple() });
             }
         }
 
@@ -65,7 +65,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
             else
             {
-                return _substationMap.Where(o => substation.Equals(o.Value.Item1) && transformer.Equals(o.Value.Item2) && lowVoltageCabinet.Equals(o.Value.Item3)).Select(o => o.Key).ToList();
+                return _substationMap.Where(map => map.Value.Any(o => substation.Equals(o.Item1) && transformer.Equals(o.Item2) && lowVoltageCabinet.Equals(o.Item3))).Select(o => o.Key).ToList();
             }
         }
 
@@ -75,12 +75,12 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 return GetNodes(substation);
             }
-            return _substationMap.Where(o => substation.Equals(o.Value.Item1) && transformer.Equals(o.Value.Item2)).Select(o => o.Key).ToList();
+            return _substationMap.Where(map => map.Value.Any(o => substation.Equals(o.Item1) && transformer.Equals(o.Item2))).Select(o => o.Key).ToList();
         }
 
         public List<ThPDSProjectGraphNode> GetNodes(THPDSProjectSubstation substation)
         {
-            return _substationMap.Where(o => substation.Equals(o.Value.Item1)).Select(o => o.Key).ToList();
+            return _substationMap.Where(map => map.Value.Any(o => substation.Equals(o.Item1))).Select(o => o.Key).ToList();
         }
     }
 }
