@@ -484,6 +484,7 @@ namespace TianHua.Electrical.PDS.Project
             }
             else if (edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ElectricalMeterPanel)
             {
+                var LeakageProtection = new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName);
                 switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType)
                 {
                     case MeterBoxCircuitType.上海住宅:
@@ -491,13 +492,18 @@ namespace TianHua.Electrical.PDS.Project
                             edge.Details.CircuitForm = specifyComponentFactory.GetShanghaiMTCircuit();
                             if (edge.Details.CircuitForm.IsNull())
                             {
-                                edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
+                                var circuit = new DistributionMetering_ShanghaiMTCircuit()
                                 {
                                     breaker2 = componentFactory.CreatBreaker(),
                                     meter = componentFactory.CreatMeterTransformer(),
                                     breaker1 = componentFactory.CreatBreaker(),
                                     Conductor = componentFactory.CreatConductor(),
                                 };
+                                if(LeakageProtection)
+                                {
+                                    circuit.breaker2.SetBreakerType(ComponentType.组合式RCD);
+                                }
+                                edge.Details.CircuitForm = circuit;
                             }
                             break;
                         }
@@ -506,33 +512,48 @@ namespace TianHua.Electrical.PDS.Project
                             edge.Details.CircuitForm = specifyComponentFactory.GetMTInFrontCircuit();
                             if (edge.Details.CircuitForm.IsNull())
                             {
-                                edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
+                                var circuit = new DistributionMetering_MTInFrontCircuit()
                                 {
                                     meter = componentFactory.CreatMeterTransformer(),
                                     breaker = componentFactory.CreatBreaker(),
                                     Conductor = componentFactory.CreatConductor(),
                                 };
+                                if (LeakageProtection)
+                                {
+                                    circuit.breaker.SetBreakerType(ComponentType.组合式RCD);
+                                }
+                                edge.Details.CircuitForm = circuit;
                             }
                             break;
                         }
                     case MeterBoxCircuitType.国标_表在断路器前:
                         {
-                            edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
+                            var circuit = new DistributionMetering_CTInFrontCircuit()
                             {
                                 meter = componentFactory.CreatMeterTransformer(),
                                 breaker = componentFactory.CreatBreaker(),
                                 Conductor = componentFactory.CreatConductor(),
                             };
+                            if (LeakageProtection)
+                            {
+                                circuit.breaker.SetBreakerType(ComponentType.组合式RCD);
+                            }
+                            edge.Details.CircuitForm = circuit;
                             break;
                         }
                     case MeterBoxCircuitType.国标_表在断路器后:
                         {
-                            edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
+                            var circuit = new DistributionMetering_CTInBehindCircuit()
                             {
                                 meter = componentFactory.CreatCurrentTransformer(),
                                 breaker = componentFactory.CreatBreaker(),
                                 Conductor = componentFactory.CreatConductor(),
                             };
+                            if (LeakageProtection)
+                            {
+                                circuit.breaker.SetBreakerType(ComponentType.组合式RCD);
+                            }
+                            edge.Details.CircuitForm = circuit;
                             break;
                         }
                     default:
@@ -1159,7 +1180,18 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void BalancedPhaseSequence(this List<ThPDSProjectGraphNode> nodes)
         {
-            if (nodes.Count == 1)
+            if(nodes.All(o => o.Details.LoadCalculationInfo.HighPower == nodes[0].Details.LoadCalculationInfo.HighPower))
+            {
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    nodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
+                    if (++i < nodes.Count)
+                        nodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2;
+                    if (++i < nodes.Count)
+                        nodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3;
+                }
+            }
+            else if (nodes.Count == 1)
             {
                 nodes[0].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
             }
