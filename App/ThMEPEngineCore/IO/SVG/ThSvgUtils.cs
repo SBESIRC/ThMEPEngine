@@ -54,6 +54,9 @@ namespace ThMEPEngineCore.IO.SVG
                         hasELEVATION = true;
                         floorInfo.Height = item.Value;
                         break;
+                    case "DESCRIPTION": // 存放的是楼层高度
+                        floorInfo.Description = item.Value;
+                        break;
                 }
             }
             if(hasFLOORNAME && hasFLOORNO && hasSTDFLRNO && hasBOTTOMELEVATION && hasELEVATION)
