@@ -164,7 +164,7 @@ namespace ThMEPEngineCore
             {
                 acdb.Database.CreateAIRoomOutlineLayer();
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+                Active.Document.SendStringToExecute("_Pline ", true, false, true);
             }
         }
 
@@ -178,7 +178,7 @@ namespace ThMEPEngineCore
             {
                 acdb.Database.CreateAIRoomSplitlineLayer();
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+                Active.Document.SendStringToExecute("_Pline ", true, false, true);
             }
         }
 

@@ -45,7 +45,7 @@ namespace TianHua.Electrical.UI.EarthingGrid
                     ThEarthingGridDataService.Instance.AIAreaInternalColorIndex);
                 acdb.Database.SetCurrentLayer(ThEarthingGridDataService.Instance.AIAreaInternalLayer);
                 acdb.Database.SetLayerColor(ThEarthingGridDataService.Instance.AIAreaInternalLayer, 1);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+                Active.Document.SendStringToExecute("_Pline ", true, false, true);
             }
         }
         public void DrawOutterOutline()
@@ -58,7 +58,7 @@ namespace TianHua.Electrical.UI.EarthingGrid
                     ThEarthingGridDataService.Instance.AIAreaExternalColorIndex);
                 acdb.Database.SetCurrentLayer(ThEarthingGridDataService.Instance.AIAreaExternalLayer);
                 acdb.Database.SetLayerColor(ThEarthingGridDataService.Instance.AIAreaExternalLayer, 2);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+                Active.Document.SendStringToExecute("_Pline ", true, false, true);
             }
         }
         public void DrawEarthingGrid()
