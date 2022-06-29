@@ -69,7 +69,6 @@
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
     <Compile Include="Models\TreeBuilder.cs" />
     <Compile Include="Models\TreeNode.cs" />
-    <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
     <Compile Include="Project\Module\Component\ThPDSATSEModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />

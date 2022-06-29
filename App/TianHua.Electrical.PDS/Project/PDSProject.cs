@@ -33,6 +33,8 @@ namespace TianHua.Electrical.PDS.Project
 
         public Action DataChanged;
 
+        public Action GlobalConfigurationChanged;
+
         /// <summary>
         /// 加载项目
         /// </summary>
@@ -57,6 +59,15 @@ namespace TianHua.Electrical.PDS.Project
             {
                 PDSProjectManagement.ImportProject(url);
                 instance.DataChanged?.Invoke();
+            }
+        }
+
+        public void LoadGlobalConfiguration(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                PDSProjectManagement.ImportGlobalConfiguration(url);
+                instance.GlobalConfigurationChanged?.Invoke();
             }
         }
     }

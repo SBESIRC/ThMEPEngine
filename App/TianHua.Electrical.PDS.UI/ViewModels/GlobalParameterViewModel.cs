@@ -1,16 +1,17 @@
 ﻿using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public class GlobalParameterViewModel : NotifyPropertyChangedBase
     {
-        public GlobalParameterViewModel(ProjectGlobalConfiguration projectGlobalConfiguration)
+        public ProjectGlobalConfiguration Configuration
         {
-            _configuration = projectGlobalConfiguration;
+            get
+            {
+                return PDSProject.Instance.projectGlobalConfiguration;
+            }
         }
-
-        private readonly ProjectGlobalConfiguration _configuration;
-        public ProjectGlobalConfiguration Configuration => _configuration;
     }
 }

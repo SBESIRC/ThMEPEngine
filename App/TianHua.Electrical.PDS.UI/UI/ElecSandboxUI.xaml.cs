@@ -4,9 +4,7 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using System.ComponentModel;
 using ThControlLibraryWPF.CustomControl;
-using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module;
-using TianHua.Electrical.PDS.UI.Project;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.UserContorls;
 
@@ -40,13 +38,10 @@ namespace TianHua.Electrical.PDS.UI.UI
         /// 加载项目文件
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
-        public void LoadProject(string url = null)
+        public void LoadProject()
         {
-            //订阅Project数据改变事件
-            PDSProject.Instance.DataChanged += PDSProjectVM.Instance.ProjectDataChanged;
-
             //加载项目
-            PDSProject.Instance.Load(url);
+            ThPDSProjectGraphService.ImportProject("");
         }
 
         #region 初始化信息
