@@ -3,32 +3,18 @@ using System.Linq;
 using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
+using DotNetARX;
 using ThCADCore.NTS;
 using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Command;
 using ThMEPEngineCore.CAD;
-using System.Runtime.InteropServices;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.Command
 {
     public class ThSuperBoundaryCmd : ThMEPBaseCommand, IDisposable
     {
-        [System.Security.SuppressUnmanagedCodeSecurity]
-        [DllImport("accore.dll", EntryPoint = "acedCmd", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int acedCmd(IntPtr vlist);
-
-        [DllImport("accore.dll", EntryPoint = "acedCommand")]
-        private static extern int acedCommand(IntPtr vlist);
-
-        ////CAD2008和2008以前版本中的EntryPoint名称和2009以及2009之后的版本不一样
-        //[DllImport("accore.dll", CharSet = CharSet.Auto, EntryPoint = "?acedPostCommand@@YAHPB_W@Z", CallingConvention = CallingConvention.Cdecl)]
-        //private static extern int acedPostCommand(string strExpr);
-        //CAD2008之后的版本中
-        [DllImport("accore.dll", CharSet = CharSet.Auto, EntryPoint = "?acedPostCommand@@YAHPEB_W@Z", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int acedPostCommand(string strExpr);
-
         private DBObjectCollection ModelSpaceEnties { get; set; }
         private DBObjectCollection CollectObjs { get; set; }
         public ThSuperBoundaryCmd(DBObjectCollection modelSpaceEnties)
@@ -52,7 +38,7 @@ namespace ThMEPWSS.Command
             Active.Editor.SetImpliedSelection(ModelSpaceEnties.OfType<Entity>().Select(o => o.ObjectId).ToArray());
 
             Active.Database.ObjectAppended += Database_ObjectAppended;
-            acedPostCommand("SBND_PICK ");
+            Active.Editor.PostCommand("SBND_PICK ");
             Active.Database.ObjectAppended -= Database_ObjectAppended;
 
             var roomBoundaries = GetRoomBoundaries(CollectObjs);
