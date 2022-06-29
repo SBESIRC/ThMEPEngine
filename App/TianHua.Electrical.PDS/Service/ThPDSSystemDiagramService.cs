@@ -67,8 +67,8 @@ namespace TianHua.Electrical.PDS.Service
         private void Draw()
         {
             using (var docLock = Active.Document.LockDocument())
-            using (var activeDb = AcadDatabase.Active())
             using (var configDb = AcadDatabase.Open(ThCADCommon.PDSDiagramDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (var activeDb = AcadDatabase.Active())
             {
                 if (!ThPDSSelectPointService.TrySelectPoint(out var selectPoint, "\n选择图纸基点"))
                 {
@@ -372,7 +372,6 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     }
                 }
-                Active.Editor.Regen();
             }
         }
 
