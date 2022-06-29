@@ -336,9 +336,18 @@ namespace ThParkingStall.Core.MPartitionLayout
                                     var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car_cross, iniboxpl, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
                                     if (g is Polygon)
                                     {
-                                        var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth - g.Area) > 1;
-                                        if (cond_area)
+                                        var cond_area = Math.Round(g.Area) <= (DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth;
+                                        var cond_type = true;
+                                        var existed_index = Cars.Select(e => e.Polyline).ToList().IndexOf(car_cross);
+                                        if (existed_index >= 0)
                                         {
+                                            cond_type = Cars[existed_index].CarLayoutMode != 1;
+                                        }
+                                        else cond_type = false;
+                                        //var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth - g.Area) > 1;
+                                        if (!cond_area)
+                                        {
+                                            //0628该情况应为是加感叹号相反条件，之前判断条件相反，在一个很长的有点凹的两根车道线相错很少的case发现。
                                             boxcrossed.Add(car_cross);
                                         }
                                     }
@@ -1303,34 +1312,41 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (crossedcarsc.Count == 0) cond = true;
                     else
                     {
-                        if (crossedcarsc.Count == 1 && ScareEnabledForBackBackModule)
+                        if (crossedcarsc.Count >= 1 && ScareEnabledForBackBackModule)
                         {
-                            var crossed_back_car=crossedcarsc[0];
-                            var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
-                            if (g is Polygon)
+                            foreach (var crossed_back_car in crossedcarsc)
                             {
-                                var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack)*2 * DisVertCarWidth - g.Area) < 1
-                                    || g.Area< (DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth;
-                                var infos = Cars.Select(e => e.Polyline).ToList();
-                                var exist_index= infos.IndexOf(crossed_back_car);
-                                if (Cars[exist_index].CarLayoutMode == 0 && cond_area)
+                                var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
+                                if (g is Polygon)
                                 {
-                                    found_backback = true;
-                                    var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
-                                    var car_exist_transform = PolyFromLines(car_exist_iniedge, car_exist_iniedge.Translation(Cars[exist_index].Vector.Normalize() * DisVertCarLengthBackBack));
-                                    Cars[exist_index].Polyline = car_exist_transform;
-                                    Cars[exist_index].CarLayoutMode = 2;
-                                    var carspots_index = CarSpots.IndexOf(crossed_back_car);
-                                    CarSpots[carspots_index] = car_exist_transform;
-                                    CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
+                                    var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth - g.Area) < 1
+                                        || g.Area < (DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth;
+                                    var infos = Cars.Select(e => e.Polyline).ToList();
+                                    var exist_index = infos.IndexOf(crossed_back_car);
+                                    if (exist_index == -1)
+                                    {
+                                        cond = false;
+                                        break;
+                                    }
+                                    if (Cars[exist_index].CarLayoutMode == 0 && cond_area)
+                                    {
+                                        found_backback = true;
+                                        var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
+                                        var car_exist_transform = PolyFromLines(car_exist_iniedge, car_exist_iniedge.Translation(Cars[exist_index].Vector.Normalize() * DisVertCarLengthBackBack));
+                                        Cars[exist_index].Polyline = car_exist_transform;
+                                        Cars[exist_index].CarLayoutMode = 2;
+                                        var carspots_index = CarSpots.IndexOf(crossed_back_car);
+                                        CarSpots[carspots_index] = car_exist_transform;
+                                        CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
 
-                                    s = new LineSegment(seg);
-                                    s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
-                                    car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
-                                    carsc = car.Clone();
-                                    carsc = carsc.Scale(ScareFactorForCollisionCheck);
+                                        s = new LineSegment(seg);
+                                        s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
+                                        car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
+                                        carsc = car.Clone();
+                                        carsc = carsc.Scale(ScareFactorForCollisionCheck);
+                                    }
+                                    else if (Cars[exist_index].CarLayoutMode == 1 || !cond_area) cond = false;
                                 }
-                                else cond = false;
                             }
                         }
                         else cond = false;

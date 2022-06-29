@@ -16,6 +16,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             //删除一些重复的、相邻很近可删除其中一条的车道线并进行合并处理
             RemoveDuplicatedAndInvalidLanes(ref lanes);
+            //交点打断
+            lanes = GetLinesByInterruptingIntersections(lanes);
             //用Sindexes,Eindexes表示连接关系
             List<int> Sindexes = new List<int>();
             List<int> Eindexes = new List<int>();
@@ -26,8 +28,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             RelocateLanes(ref lanes, obsvertice, Sindexes, Eindexes);
             //删除未连接车道线的末尾多余部分
             RemoveInvalidPartsOfEndLanes(ref lanes, cars, Sindexes, Eindexes);
-            //交点打断
-            lanes = GetLinesByInterruptingIntersections(lanes);
+            ////交点打断
+            //lanes = GetLinesByInterruptingIntersections(lanes);
         }
         public static void RemoveDuplicatedAndInvalidLanes(ref List<LineSegment> lanes)
         {

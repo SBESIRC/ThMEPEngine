@@ -70,6 +70,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                 DisVertCarLengthBackBack = DisVertCarLength;
                 DisCarAndHalfLaneBackBack = DisCarAndHalfLane;
             }
+            else
+            {
+                DisVertCarLengthBackBack = 5100;
+                DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
+                DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
+            }
         }
         public List<LineString> Walls;
         public List<Polygon> Obstacles;

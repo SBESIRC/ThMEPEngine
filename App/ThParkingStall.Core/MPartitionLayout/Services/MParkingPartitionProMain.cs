@@ -323,7 +323,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
                 var line_align_backback_rest = new LineSegment();
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
-                    , ref line_align_backback_rest, true, false, false, false,true, true, true, align_backback_for_align_rest, false, true, false, false, false, true);
+                    , ref line_align_backback_rest, true, false, false, false,true, true, true, align_backback_for_align_rest, false, true, false,true, false, true);
                 align_backback_for_align_rest = false;
                 if (line_align_backback_rest.Length > 0)
                 {
