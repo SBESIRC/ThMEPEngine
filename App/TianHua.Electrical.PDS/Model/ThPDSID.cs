@@ -133,7 +133,7 @@ namespace TianHua.Electrical.PDS.Model
             get
             {
                 var circuitNumber = new List<string>();
-                for (var i = 0; i < CircuitIDList.Count; i++)
+                for (var i = 0; i < CircuitIDList.Count && i < SourcePanelIDList.Count; i++)
                 {
                     if (!string.IsNullOrEmpty(SourcePanelIDList[i]) && !string.IsNullOrEmpty(CircuitIDList[i]))
                     {

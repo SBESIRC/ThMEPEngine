@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
 using AcHelper;
 using Linq2Acad;
 using QuikGraph;
-using System.Linq;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module;
@@ -188,8 +190,7 @@ namespace TianHua.Electrical.PDS.Service
                             var circuitData = new ThPDSControlCircuitData();
                             var controlEdges = ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o).GetSortedEdges().ToList();
                             circuitData.CircuitUID = controlEdges[0].Circuit.CircuitUID;
-                            var dataList = circuitDatas
-                                .Where(data => data.CircuitUID.Equals(circuitData.CircuitUID)).ToList();
+                            var dataList = circuitDatas.Where(data => data.CircuitUID.Equals(circuitData.CircuitUID)).ToList();
                             if (dataList.Count > 0)
                             {
                                 circuitData.BelongToCPS = dataList[0].BelongToCPS;
@@ -562,8 +563,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<List<ThPDSProjectGraphEdge>> MotorCircuitSort(List<ThPDSProjectGraphEdge> motorCircuit)
         {
-            var result = new List<List<ThPDSProjectGraphEdge>>();
-            result.Add(new List<ThPDSProjectGraphEdge>());
+            var result = new List<List<ThPDSProjectGraphEdge>>
+            {
+                new List<ThPDSProjectGraphEdge>(),
+            };
             result[0].Add(motorCircuit[0]);
             for (var i = 1; i < motorCircuit.Count; i++)
             {
@@ -597,8 +600,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<List<ThPDSProjectGraphEdge>> PrimarySpareSort(List<ThPDSProjectGraphEdge> motorCircuit)
         {
-            var result = new List<List<ThPDSProjectGraphEdge>>();
-            result.Add(new List<ThPDSProjectGraphEdge>());
+            var result = new List<List<ThPDSProjectGraphEdge>>
+            {
+                new List<ThPDSProjectGraphEdge>(),
+            };
             result[0].Add(motorCircuit[0]);
             for (var i = 1; i < motorCircuit.Count; i++)
             {
@@ -622,8 +627,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<List<ThPDSProjectGraphEdge>> DualPowerSort(List<ThPDSProjectGraphEdge> motorCircuit)
         {
-            var result = new List<List<ThPDSProjectGraphEdge>>();
-            result.Add(new List<ThPDSProjectGraphEdge>());
+            var result = new List<List<ThPDSProjectGraphEdge>>
+            {
+                new List<ThPDSProjectGraphEdge>(),
+            };
             result[0].Add(motorCircuit[0]);
             for (var i = 1; i < motorCircuit.Count; i++)
             {

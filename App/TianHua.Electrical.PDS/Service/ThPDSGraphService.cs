@@ -347,6 +347,22 @@ namespace TianHua.Electrical.PDS.Service
             return edge;
         }
 
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,
+            ThPDSCircuitGraphNode target, string srcPanelID, string circuitID)
+        {
+            var srcPanelIDList = new List<string>
+            {
+                "",
+                srcPanelID,
+            };
+            var circuitIDList = new List<string>
+            {
+                "",
+                circuitID,
+            };
+            return UnionEdge(source, target, srcPanelIDList, circuitIDList);
+        }
+
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> EdgeClone(ThPDSCircuitGraphNode sourceNode,
             ThPDSCircuitGraphNode targetNode, ThPDSCircuit circuit, string source, string target)
         {

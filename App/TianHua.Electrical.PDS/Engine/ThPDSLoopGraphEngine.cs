@@ -198,7 +198,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                 PDSGraph = new ThPDSCircuitGraph
                 {
-                    Graph = new BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>()
+                    Graph = new CircuitGraph()
                 };
                 CableTrayNode = cableTrayNode;
                 PDSGraph.Graph.AddVertex(CableTrayNode);
@@ -540,8 +540,19 @@ namespace TianHua.Electrical.PDS.Engine
                 var polyline = ThPDSBufferService.Buffer(curve, 100.1);
                 // 首先遍历从桥架搭出去的线
                 var results = FindNextLine(curve, polyline).OfType<Curve>();
+                if (results.Count() == 0)
+                {
+                    return;
+                }
+                var reducePolyline = ThPDSBufferService.Buffer(curve);
+                var reduceResults = FindNextLine(curve, reducePolyline).OfType<Curve>();
                 foreach (var findCurve in results)
                 {
+                    if (!findCurve.IsIntersects(curve) && !reduceResults.Contains(findCurve))
+                    {
+                        continue;
+                    }
+
                     var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false))
                         < ThPDSCommon.ALLOWABLE_TOLERANCE;
                     var IsEnd = findCurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findCurve.EndPoint, false))
@@ -863,6 +874,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
             if (textList.Count == 0)
             {
+                logos.Texts.AddRange(newNode.Loads[0].ID.CircuitNumberList);
                 textList.Add(logos.Texts);
             }
 
@@ -1500,7 +1512,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GetGraph()
+        public CircuitGraph GetGraph()
         {
             return PDSGraph.Graph;
         }

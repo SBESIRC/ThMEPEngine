@@ -1,23 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using QuikGraph;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
-using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
-using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 
 namespace TianHua.Electrical.PDS.Diagram
 {
@@ -392,7 +392,7 @@ namespace TianHua.Electrical.PDS.Diagram
             });
 
             var texts = objs.OfType<DBText>().ToList();
-            if(reservedComponent is CurrentTransformer ct)
+            if (reservedComponent is CurrentTransformer ct)
             {
                 var ctText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CT)).First();
                 ctText.TextString = ct.Content();
@@ -404,7 +404,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_MT)).First();
                 mtText.TextString = mt.Content();
             }
-            else if(reservedComponent is OUVP ouvp)
+            else if (reservedComponent is OUVP ouvp)
             {
                 var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_OUVP)).First();
                 mtText.TextString = ouvp.Content();
@@ -790,7 +790,6 @@ namespace TianHua.Electrical.PDS.Diagram
                                 CTText.TextString = ct.Content();
                                 MTText.TextString = ct.ContentMT();
                             }
-                                
                         }
 
                         // 元器件2
