@@ -448,9 +448,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 var diss = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P0));
                                 if (diss.Count() > 0)
                                 {
+                                    var collisionD = CollisionD;
+                                    CollisionD = 300;
                                     var dis = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P0)).First().Distance(splitnw.P0);
                                     var disc = CollisionD - dis >= 0 ? CollisionD - dis : 0;
                                     splitnw = new LineSegment(splitnw.P0.Translation(Vector(splitnw).Normalize() * disc), splitnw.P1);
+                                    CollisionD = collisionD;
                                 }
 
                                 pls = ConvertSpecialCollisionCheckRegionForLane(splitnw, lane.Vec.Normalize(), false);
@@ -484,9 +487,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 diss = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P1));
                                 if (diss.Count() > 0)
                                 {
+                                    var collisionD = CollisionD;
+                                    CollisionD = 300;
                                     var dis = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P1)).First().Distance(splitnw.P1);
                                     var disc = CollisionD - dis >= 0 ? CollisionD - dis : 0;
                                     splitnw = new LineSegment(splitnw.P0, splitnw.P1.Translation(-Vector(splitnw).Normalize() * disc));
+                                    CollisionD = collisionD;
                                 }
                             }
                             if (splitnw.Length < minlength) continue;
@@ -501,6 +507,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private Polygon ConvertSpecialCollisionCheckRegionForLane(LineSegment line, Vector2D vec, bool isstart = true)
         {
+            var collisionD = CollisionD;
+            CollisionD = 300;
             var pt = line.P0;
             var v = -Vector(line).Normalize();
             if (!isstart)
@@ -518,6 +526,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             pt = pt.Translation(-v * CollisionD);
             points.Add(pt);
             var pl = PolyFromPoints(points.ToList());
+            CollisionD = collisionD;
             return pl;
         }
         private bool CloseToWall(Coordinate point,LineSegment line)
@@ -1260,6 +1269,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                             {
                                 var p = crosscars[i].Coordinates.OrderBy(t => t.Distance(line.P0)).First();
                                 var ponline_ex = line.ClosestPoint(p, true);
+                                if (line.ClosestPoint(ponline_ex, false).Distance(ponline_ex) > 0) continue;
                                 var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
                                 line_align_backback_rest = new LineSegment(line.P0, line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)));
                                 line_align_backback_rest = line_align_backback_rest.Translation(-vec.Normalize() * DisLaneWidth / 2);
