@@ -1082,8 +1082,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                         var overlap = false;
                         foreach (var lane in OutEnsuredLanes)
                         {
-                            var cond_a = lane.ClosestPoint(lanes[i].Line.P0,true).Distance(lanes[i].Line.P0) < 1;
-                            var cond_b = lane.ClosestPoint(lanes[i].Line.P1,true).Distance(lanes[i].Line.P1) < 1;
+                            var cond_a = lane.ClosestPoint(lanes[i].Line.P0,false).Distance(lanes[i].Line.P0) < 1;
+                            var cond_b = lane.ClosestPoint(lanes[i].Line.P1,false).Distance(lanes[i].Line.P1) < 1;
                             if (cond_a && cond_b)
                             {
                                 overlap = true;
@@ -1109,8 +1109,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var overlap = false;
                     foreach (var lane in OutEnsuredLanes)
                     {
-                        var cond_a = lane.ClosestPoint(lanes[i].Line.P0,true).Distance(lanes[i].Line.P0) < 1;
-                        var cond_b = lane.ClosestPoint(lanes[i].Line.P1,true).Distance(lanes[i].Line.P1) < 1;
+                        var cond_a = lane.ClosestPoint(lanes[i].Line.P0,false).Distance(lanes[i].Line.P0) < 1;
+                        var cond_b = lane.ClosestPoint(lanes[i].Line.P1,false).Distance(lanes[i].Line.P1) < 1;
                         if (cond_a && cond_b)
                         {
                             overlap = true;
@@ -1132,6 +1132,17 @@ namespace ThParkingStall.Core.MPartitionLayout
                             break;
                         }
                     }
+                    if (!found)
+                    {
+                        if (OutBoundary.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1 || !OutBoundary.Contains(lanes[i].Line.P1))
+                        {
+                            OutEnsuredLanes.Add(lanes[i].Line);
+                            found = true;
+                            lanes.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
                 }
                 if (!found) break;
             }

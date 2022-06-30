@@ -256,6 +256,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                 if (IsConnectedToLane(lanes[i].Line, false))
                     lanes[i].Line = new LineSegment(lanes[i].Line.P1, lanes[i].Line.P0);
                 var endp = lanes[i].Line.P1;
+                if (Boundary.ClosestPoint(endp).Distance(endp) < 0.1 && Boundary.ClosestPoint(endp).Distance(endp) > 0)
+                {
+                    lanes[i].Line.P1 = Boundary.ClosestPoint(endp);
+                    continue;
+                }
+                else if (Boundary.ClosestPoint(endp).Distance(endp) == 0) continue;
                 var laneSdl = LineSegmentSDL(endp, Vector(lanes[i].Line).Normalize(), 10000);
                 var laneSdlbuffer = laneSdl.Buffer(DisLaneWidth / 2);
                 var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(laneSdlbuffer).Cast<Polygon>().ToList();
@@ -543,14 +549,17 @@ namespace ThParkingStall.Core.MPartitionLayout
                     l.P1 = l.P1.Translation(-Vector(l).Normalize() * 10);
                     bf = l.Buffer(DisLaneWidth / 2 - 1);
                     bf = bf.Scale(ScareFactorForCollisionCheck);
-                    foreach (var wl in Walls)
-                    {
-                        if (bf.IntersectPoint(wl).Count() > 0)
-                        {
-                            result = false;
-                            break;
-                        }
-                    }
+                    //20220630modified
+                    //foreach (var wl in Walls)
+                    //{
+                    //    if (bf.IntersectPoint(wl).Count() > 0)
+                    //    {
+                    //        result = false;
+                    //        break;
+                    //    }
+                    //}
+                    if(bf.IntersectPoint(OutBoundary).Count()>0)
+                        result = false;
                     return result;
                 })
                 .Where(e => Boundary.Contains(e.MidPoint))
