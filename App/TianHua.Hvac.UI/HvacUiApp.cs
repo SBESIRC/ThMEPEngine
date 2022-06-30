@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
 using TianHua.Hvac.UI.Command;
 using TianHua.Hvac.UI.EQPMFanSelect.EventMonitor;
+using TianHua.Hvac.UI.SmokeProofSystemUI;
 using TianHua.Hvac.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -176,6 +177,17 @@ namespace TianHua.Hvac.UI
             EQPMUIServices.Instance.SelectFanBlock();
         }
 
+        SmokeCalculateUI smokeCalculateUI;
+        [CommandMethod("TIANHUACAD", "THSMKPS", CommandFlags.Modal)]
+        public void ThWSSUI()
+        {
+            if (smokeCalculateUI != null && smokeCalculateUI.IsLoaded)
+            {
+                return;
+            }
+            smokeCalculateUI = new SmokeCalculateUI();
+            AcadApp.ShowModelessWindow(smokeCalculateUI);
+        }
         #region 风机选型的相关事件
         private void EQPMSelectAddEvents() 
         {

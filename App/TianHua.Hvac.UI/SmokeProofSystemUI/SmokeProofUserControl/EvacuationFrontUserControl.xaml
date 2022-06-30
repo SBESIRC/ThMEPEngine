@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl.EvacuationFrontUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="695" d:DesignWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.ColumnSpan="3" Margin="5,0,5,0">基本信息</Label>
+        <Label Grid.Row="1" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">疏散门（前室）</Label>
+        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5,0,5,0">
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="+" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+                                 x:Name="btnAddRowCopy"
+                                 Click="btnAddRowCopy_Click" />
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="-" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+                                 IsEnabled="{Binding HaveSelectItem,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                                 x:Name="btnDelRow" Click="btnDelRow_Click"/>
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="∧" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+                                 IsEnabled="{Binding HaveSelectItem,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                                 x:Name="btnMoveUpRow" Click="btnMoveUpRow_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="∨" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+                                 IsEnabled="{Binding HaveSelectItem,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                                 x:Name="btnMoveDownRow" Click="btnMoveDownRow_Click"/>
+        </StackPanel>
+        <TabControl Name="FloorTab" ItemsSource="{Binding ListTabControl, NotifyOnSourceUpdated=True}" Grid.Row="2" Grid.ColumnSpan="3"
+                    HorizontalAlignment="Left" Height="230" Margin="10,10,10,10" VerticalAlignment="Top" Width="380">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Label Content="{Binding FloorName}"></Label>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <DataGrid ItemsSource="{Binding FloorInfoItems,Mode=TwoWay}" AutoGenerateColumns="False" RowHeight="25" SelectedItem="{Binding SelectInfoData, NotifyOnSourceUpdated=True}"
+                              CellEditEnding="DataGrid_CellEditEnding">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="门宽（m）" Width="*" Binding="{Binding DoorWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" IsReadOnly="False" >
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="门高（m）" Width="*" Binding="{Binding DoorHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" IsReadOnly="False" >
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="数量（扇）" Width="*" Binding="{Binding DoorNum, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" IsReadOnly="False" >
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+        <Label Grid.Row="3" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">计算结果</Label>
+        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Margin="10,5,0,0">
+            <TextBox Text="{Binding OpenDorrAirSupply, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="22" TabIndex="1"/>
+            <Label>m^3/h</Label>
+        </StackPanel>
+    </Grid>
+</UserControl>

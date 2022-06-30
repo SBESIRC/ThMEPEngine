@@ -42,6 +42,7 @@
     <Compile Include="Command\IndoorFanCheck.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
     <Compile Include="Command\IndoorFanPlace.cs" />
+    <Compile Include="Command\SmokeProofSystemCmd.cs" />
     <Compile Include="Command\ThHvacFanTypeSelectCmd.cs" />
     <Compile Include="Command\ThHvacIndoorFanExportCmd.cs" />
     <Compile Include="Common\PretreatmentPolyline.cs" />
@@ -283,6 +284,7 @@
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
     <Compile Include="ThModelExtractionVisitor.cs" />
+    <Compile Include="ThSmokeProofSystemCmd.cs" />
     <Compile Include="ViewModel\AirPortParameterVM.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -379,6 +381,8 @@
       <Version>2.0.4</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SmokeProofSystem\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

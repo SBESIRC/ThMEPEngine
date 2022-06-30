@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl.CheckValueUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="140" d:DesignWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="5,5,0,2.5">
+            <Label>查表值：</Label>
+            <TextBox Text="{Binding CheckTableVal, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <Label>m^3/h</Label>
+        </StackPanel>
+        <Border BorderBrush="Black" BorderThickness="1,1,0,1" Grid.Column="0" Grid.Row="1" Margin="5,0,0,0">
+            <Label HorizontalAlignment="Center">系统负担高度（m）</Label>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="1" Grid.Row="1" Margin="0,0,5,0">
+            <Label HorizontalAlignment="Center">加压送风量（m^3/h）</Label>
+        </Border>
+        <Border BorderBrush="Gray" BorderThickness="1,0,0,1" Grid.Column="0" Grid.Row="2" Margin="5,0,0,0">
+            <Label HorizontalAlignment="Center" Content="24&lt;h≤50"></Label>
+        </Border>
+        <Border BorderBrush="Gray" BorderThickness="1,0,1,1" Grid.Column="1" Grid.Row="2" Margin="0,0,5,0">
+            <Label HorizontalAlignment="Center" Content="{Binding MiddleWind}"></Label>
+        </Border>
+        <Border BorderBrush="Gray" BorderThickness="1,0,0,1" Grid.Column="0" Grid.Row="3" Margin="5,0,0,0">
+            <Label HorizontalAlignment="Center" Content="50&lt;h≤100"></Label>
+        </Border>
+        <Border BorderBrush="Gray" BorderThickness="1,0,1,1" Grid.Column="1" Grid.Row="3" Margin="0,0,5,0">
+            <Label HorizontalAlignment="Center" Content="{Binding HighWind}"></Label>
+        </Border>
+        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="2" Margin="5,2.5,0,2.5">
+            <Label TextElement.FontWeight="Bold">最终值：</Label>
+            <TextBox Name="txtFinalVal" Text="{Binding FinalValue, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"
+                     IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <Label>m^3/h</Label>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -193,8 +193,11 @@ namespace ThMEPWSS.Command
                     foreach (ObjectId obj in status.Value.GetObjectIds())
                     {
                         var plBack = acadDatabase.Element<Polyline>(obj);
-                        var plFrame = ThMEPFrameService.Normalize(plBack);
-                        polys.Add(plFrame);
+                        if (plBack.Area > 10)
+                        {
+                            var plFrame = ThMEPFrameService.Normalize(plBack);
+                            polys.Add(plFrame);
+                        }
                     }
                 }
 
