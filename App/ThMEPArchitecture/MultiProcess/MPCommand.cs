@@ -400,18 +400,9 @@ namespace ThMEPArchitecture.MultiProcess
 
         private void ProcessAndDisplay(MPChromosome solution,int SolutionID = 0 ,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
         {
-            var moveDistance = SolutionID*2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) - 
+            var moveDistance = SolutionID * 2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 InterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = InterParameter.GetSubAreas(solution);
-            var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
-            var layer = "最终分区线";
-            using (AcadDatabase acad = AcadDatabase.Active())
-            {
-                if (!acad.Layers.Contains(layer))
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
-                MPEX.HideLayer(layer);
-            }
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
@@ -426,8 +417,18 @@ namespace ThMEPArchitecture.MultiProcess
             Logger?.Information(strBest);
             Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-            if(ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
-            if(stopWatch != null)
+            var layer = "最终分区线";
+            var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
+            finalSegLines.AddRange(mParkingPartition.OutEnsuredLanes);
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                MPEX.HideLayer(layer);
+            }
+            if (ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
+            if (stopWatch != null)
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");

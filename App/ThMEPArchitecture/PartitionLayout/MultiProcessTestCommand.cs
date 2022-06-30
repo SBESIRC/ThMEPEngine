@@ -144,18 +144,18 @@ namespace ThMEPArchitecture.PartitionLayout
             layout.DisplayCars();
             layout.DisplayLanes();
 
-            foreach (var lane in mParkingPartitionPro.OutEnsuredLanes)
-            {
-                var line = lane.ToDbLine();
-                line.ColorIndex = 92;
-                line.AddToCurrentSpace();
-            }
-            foreach (var lane in mParkingPartitionPro.OutUnsuredLanes)
-            {
-                var line = lane.ToDbLine();
-                line.ColorIndex = 241;
-                line.AddToCurrentSpace();
-            }
+            //foreach (var lane in mParkingPartitionPro.OutEnsuredLanes)
+            //{
+            //    var line = lane.ToDbLine();
+            //    line.ColorIndex = 92;
+            //    line.AddToCurrentSpace();
+            //}
+            //foreach (var lane in mParkingPartitionPro.OutUnsuredLanes)
+            //{
+            //    var line = lane.ToDbLine();
+            //    line.ColorIndex = 241;
+            //    line.AddToCurrentSpace();
+            //}
         }
 
         public static void write_test(MParkingPartitionPro mParkingPartitionPro)
