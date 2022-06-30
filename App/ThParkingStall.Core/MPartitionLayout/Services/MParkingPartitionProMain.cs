@@ -303,8 +303,18 @@ namespace ThParkingStall.Core.MPartitionLayout
                     points = new List<Coordinate>();
                     points.AddRange(Boundary.IntersectPoint(laneSdl.ToLineString()));
                 }
-                var splits = SplitLine(laneSdl, points);
-                if (splits.Count > 0)
+                var splits = SplitLine(laneSdl, points).Where(e =>
+                {
+                    var split_bf = e.Buffer(DisLaneWidth / 2 - 1);
+                    foreach (var cross in obscrossed)
+                        if (cross.IntersectPoint(split_bf).Count() > 0) return false;
+                    foreach (var cross in CarSpatialIndex.SelectCrossingGeometry(laneSdlbuffer).Cast<Polygon>())
+                    {
+                        if (cross.IntersectPoint(split_bf).Count() > 0) return false;
+                    }
+                    return true;
+                });
+                if (splits.Count() > 0)
                 {
                     var split = splits.First();
                     if (/*split.Length > 10 && */split.Length < 10000)
