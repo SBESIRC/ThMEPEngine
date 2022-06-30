@@ -23,6 +23,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         private double _calculateCurrent;//计算电流
         private double _calculateCurrentMagnification;//计算电流
         private string _polesNum;//级数
+        private bool _isSubmersiblePump;//潜水泵
 
         /// <summary>
         /// 断路器配置
@@ -61,6 +62,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             }
             _characteristics = "";//瞬时脱扣器类型
             _tripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out _characteristics);//脱扣器类型
+            _isSubmersiblePump = _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.SubmersiblePump;
         }
 
         public PDSBaseOutCircuit GetMotorCircuit(Type type)
@@ -104,7 +106,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_DiscreteComponentsCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_DiscreteComponentsInfos : MotorConfiguration.NonFire_DiscreteComponentsInfos;
-            var config = configs.First(o => o.InstalledCapacity > _highPower);
+            var config = configs.First(o => o.InstalledCapacity >= _highPower);
             _breakerConfig = config.CB;
             _contactorConfig = config.QAC;
             _thermalRelayConfig = config.KH;
@@ -124,7 +126,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_CPSCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_CPSInfos : MotorConfiguration.NonFire_CPSInfos;
-            var config = configs.First(o => o.InstalledCapacity > _highPower);
+            var config = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = config.CPS;
             _conductorConfig = config.Conductor;
             CircuitForm.cps = CreatCPS();
@@ -140,7 +142,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_DiscreteComponentsStarTriangleStartInfos : MotorConfiguration.NonFire_DiscreteComponentsStarTriangleStartInfos;
-            var config = configs.First(o => o.InstalledCapacity > _highPower);
+            var config = configs.First(o => o.InstalledCapacity >= _highPower);
             _breakerConfig = config.CB;
             CircuitForm.breaker = CreatBreaker();
             _contactorConfig = config.QAC1;
@@ -166,7 +168,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_CPSStarTriangleStartCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_CPSStarTriangleStartInfos : MotorConfiguration.NonFire_CPSStarTriangleStartInfos;
-            var config = configs.First(o => o.InstalledCapacity > _highPower);
+            var config = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = config.CPS;
             CircuitForm.cps = CreatCPS();
             _contactorConfig = config.QAC1;
@@ -193,8 +195,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             //}
             var CircuitForm = new TwoSpeedMotor_CPSYYCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_TwoSpeedMotor_CPSInfos : MotorConfiguration.NonFire_TwoSpeedMotor_CPSInfos;
-            var lowConfig = configs.First(o => o.InstalledCapacity > _lowPower);
-            var highConfig = configs.First(o => o.InstalledCapacity > _highPower);
+            var lowConfig = configs.First(o => o.InstalledCapacity >= _lowPower);
+            var highConfig = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = lowConfig.CPS;
             CircuitForm.cps1 = CreatCPS();
             _conductorConfig = lowConfig.Conductor1;
@@ -219,8 +221,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             //}
             var CircuitForm = new TwoSpeedMotor_CPSDYYCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_TwoSpeedMotor_CPSInfos : MotorConfiguration.NonFire_TwoSpeedMotor_CPSInfos;
-            var lowConfig = configs.First(o => o.InstalledCapacity > _lowPower);
-            var highConfig = configs.First(o => o.InstalledCapacity > _highPower);
+            var lowConfig = configs.First(o => o.InstalledCapacity >= _lowPower);
+            var highConfig = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = lowConfig.CPS;
             CircuitForm.cps1 = CreatCPS();
             _conductorConfig = lowConfig.Conductor1;
@@ -247,8 +249,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             //}
             var twoSpeedMotorConfigs = _isFireLoad ? MotorConfiguration.Fire_TwoSpeedMotor_DiscreteComponentsYYCircuitInfos : MotorConfiguration.Fire_TwoSpeedMotor_DiscreteComponentsYYCircuitInfos;
             var discreteComponentsConfigs = _isFireLoad ? MotorConfiguration.Fire_DiscreteComponentsInfos : MotorConfiguration.NonFire_DiscreteComponentsInfos;
-            var lowConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity > _lowPower);
-            var highConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity > _highPower);
+            var lowConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity >= _lowPower);
+            var highConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity >= _highPower);
             var twoSpeedMotorConfig = twoSpeedMotorConfigs.First(o => o.InstalledCapacity > _highPower);
 
             var CircuitForm = new TwoSpeedMotor_DiscreteComponentsYYCircuit();
@@ -282,8 +284,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             //}
             var twoSpeedMotorConfigs = _isFireLoad ? MotorConfiguration.Fire_TwoSpeedMotor_DiscreteComponentsDYYCircuitInfos : MotorConfiguration.Fire_TwoSpeedMotor_DiscreteComponentsDYYCircuitInfos;
             var discreteComponentsConfigs = _isFireLoad ? MotorConfiguration.Fire_DiscreteComponentsInfos : MotorConfiguration.NonFire_DiscreteComponentsInfos;
-            var lowConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity > _lowPower);
-            var highConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity > _highPower);
+            var lowConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity >= _lowPower);
+            var highConfig = discreteComponentsConfigs.First(o => o.InstalledCapacity >= _highPower);
             var twoSpeedMotorConfig = twoSpeedMotorConfigs.First(o => o.InstalledCapacity > _highPower);
 
             var CircuitForm = new TwoSpeedMotor_DiscreteComponentsDYYCircuit();
@@ -347,12 +349,18 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatBreaker()
         {
-            return new Breaker(_breakerConfig);
+            var breaker = new Breaker(_breakerConfig);
+            if (_isSubmersiblePump)
+                breaker.SetBreakerType(ComponentType.组合式RCD);
+            return breaker;
         }
 
         private Breaker CreatBreaker(List<string> config)
         {
-            return new Breaker(config, _tripDevice, _characteristics);
+            var breaker = new Breaker(config, _tripDevice, _characteristics);
+            if (_isSubmersiblePump)
+                breaker.SetBreakerType(ComponentType.组合式RCD);
+            return breaker;
         }
 
         public override Conductor CreatConductor()
@@ -432,7 +440,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatResidualCurrentBreaker()
         {
-            throw new NotImplementedException();
+            var breaker = new Breaker(_breakerConfig);
+            breaker.SetBreakerType(ComponentType.组合式RCD);
+            return breaker;
+        }
+
+        private Breaker CreatResidualCurrentBreaker(List<string> config)
+        {
+            var breaker = new Breaker(config, _tripDevice, _characteristics);
+            breaker.SetBreakerType(ComponentType.组合式RCD);
+            return breaker;
         }
 
         public override OUVP CreatOUVP()
