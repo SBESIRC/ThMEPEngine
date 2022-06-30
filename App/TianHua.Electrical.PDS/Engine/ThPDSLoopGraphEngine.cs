@@ -576,6 +576,13 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         return;
                     }
+                    if (x is BlockReference block)
+                    {
+                        if (polyline.Distance(block.Position) > 100.0)
+                        {
+                            return;
+                        }
+                    }
                     var attributesCopy = "";
                     var objectIds = new List<ObjectId>();
                     var newNode = ThPDSGraphService.CreateNode(x, Database, curve, MarkService, DistBoxKey,

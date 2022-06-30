@@ -271,14 +271,25 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var objs = new DBObjectCollection();
                 o.Entity.Explode(objs);
-                var basePoint = new Point3d();
+                var basePoint = new List< Point3d>();
                 if (ThMEPTCHService.IsTCHWireDim2(o.Entity))
                 {
-                    basePoint = objs.OfType<Line>().First().GetCenter();
+                    if (objs.OfType<Line>().Count()>0)
+                    {
+                        basePoint.Add(objs.OfType<Line>().First().GetCenter());
+                    }
                 }
                 else if (ThMEPTCHService.IsTCHMULTILEADER(o.Entity))
                 {
-                    basePoint = objs.OfType<Polyline>().First().GetCenter();
+                    if (objs.OfType<Polyline>().Count() > 0)
+                    {
+                        basePoint.Add(objs.OfType<Polyline>().First().GetCenter());
+                    }
+                    else if(objs.OfType<Line>().Count() > 0)
+                    {
+                        basePoint.Add(objs.OfType<Line>().First().StartPoint);
+                        basePoint.Add(objs.OfType<Line>().First().EndPoint);
+                    }
                 }
                 var textList = new List<string>();
                 objs.OfType<Entity>().ForEach(e =>
@@ -290,7 +301,7 @@ namespace TianHua.Electrical.PDS.Service
                         textList.Add(text.OfType<DBText>().First().TextString);
                     }
                 });
-                PointDic.Add(ToDbPoint(basePoint), Tuple.Create(textList, o.SourceObjectId));
+                basePoint.ForEach(p => PointDic.Add(ToDbPoint(p), Tuple.Create(textList, o.SourceObjectId)));
             });
 
             PointIndex = new ThCADCoreNTSSpatialIndex(PointDic.Keys.ToCollection());
