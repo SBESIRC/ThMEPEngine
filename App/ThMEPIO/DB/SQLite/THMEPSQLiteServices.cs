@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 
 namespace ThMEPIO.DB.SQLite
@@ -9,6 +10,24 @@ namespace ThMEPIO.DB.SQLite
         public THMEPSQLiteServices(string filePath)
         {
             _connecttion = new SQLiteConnection($"Data Source = {filePath};Version = 3;");
+        }
+        public void ClearTables(List<string> tableNames) 
+        {
+            foreach (var name in tableNames) 
+            {
+                ClearTable(name);
+            }
+        }
+        public void ClearTable(string tableName)
+        {
+            var sql = $"DELETE FROM {tableName}";
+            ExecuteNonQuery(sql);
+        }
+        public void CloseConnect() 
+        {
+            if (null == _connecttion || _connecttion.State == ConnectionState.Closed)
+                return;
+            _connecttion.Close();
         }
 
         public DataTable ExecuteDataTable(string tableName)

@@ -83,8 +83,7 @@ namespace ThMEPEngineCore.IO.JSON
                 Dictionary<string, object> dictionary = new Dictionary<string, object>();  //实例化一个参数集合
                 foreach (DataColumn dataColumn in dt.Columns)
                 {
-                    string s_value = dataRow[dataColumn.ColumnName].ToString();
-
+                    var s_value = dataRow[dataColumn.ColumnName];
                     dictionary.Add(dataColumn.ColumnName, s_value);
                 }
                 arrayList.Add(dictionary); //ArrayList集合中添加键值

@@ -56,6 +56,32 @@ namespace ThMEPIFC
             ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
             Tgl2IfcService.GenerateIfcModelAndSave(project, Path.ChangeExtension(tgl, "ifc"));
         }
+        [CommandMethod("TIANHUACAD", "THDB2IFC", CommandFlags.Modal)]
+        public void THDBL2IFC()
+        {
+            // 拾取TGL DB文件
+            var filePath = OpenDBFile();
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+
+            // 读入并解析TGL XML文件
+            var service = new ThTCHArchDBService(filePath);
+            var project = service.TCHDBDataToProject();
+            if (project == null)
+            {
+                return;
+            }
+
+            // 读入DWG数据
+            var dwgService = new ThTGL2IFCDWGService();
+            dwgService.LoadDWG(Active.Database, project);
+
+            // 转换并保存IFC数据
+            ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
+            Tgl2IfcService.GenerateIfcModelAndSave(project, Path.ChangeExtension(filePath, "ifc"));
+        }
 
         [CommandMethod("TIANHUACAD", "THTGL2DWG", CommandFlags.Modal)]
         public void THTGL2DWG()
@@ -98,6 +124,14 @@ namespace ThMEPIFC
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "TGL XML|*.xml"; // Filter files by extension
+            var result = dlg.ShowDialog();
+            return (result == DialogResult.OK) ? dlg.FileName : string.Empty;
+        }
+        private string OpenDBFile()
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.DefaultExt = ".db"; // Default file extension
+            dlg.Filter = "TGL DB|*.db"; // Filter files by extension
             var result = dlg.ShowDialog();
             return (result == DialogResult.OK) ? dlg.FileName : string.Empty;
         }

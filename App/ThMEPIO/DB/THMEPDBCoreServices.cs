@@ -17,5 +17,7 @@ namespace ThMEPIO.DB
 
         //增删改
         int ExecuteNonQuery(string sql);
+        //关闭连接
+        void CloseConnect();
     }
 }

@@ -5,8 +5,8 @@ using DotNetARX;
 using System.Collections.Generic;
 using System.IO;
 using ThCADExtension;
+using ThMEPIO.DB.SQLite;
 using ThMEPTCH.Data;
-using ThMEPTCH.Data.IO;
 
 namespace ThMEPTCH.TCHDrawServices
 {
@@ -14,7 +14,7 @@ namespace ThMEPTCH.TCHDrawServices
     {
         public string TCHDBPath;
         public string TCHTemplateDBPath;
-        protected ThSQLiteHelper DBHelper;
+        protected THMEPSQLiteServices DBHelper;
         protected List<string> ClearDataTables;
         protected abstract string CmdName { get; }
         public TCHDrawServiceBase()
@@ -32,12 +32,11 @@ namespace ThMEPTCH.TCHDrawServices
             if (File.Exists(TCHDBPath))
                 File.Delete(TCHDBPath);
             File.Copy(TCHTemplateDBPath, TCHDBPath);
-            DBHelper = new ThSQLiteHelper(TCHDBPath);
+            DBHelper = new THMEPSQLiteServices(TCHDBPath);
         }
         public virtual void DrawExecute(bool sendImpTCHCmd =true)
         {
             InitTCHDatabase();
-            OpenDBConnect();
             ClearDBTableHistoricalData();
             WriteModelToTCHDatabase();
             CloseDBConnect();
@@ -61,20 +60,14 @@ namespace ThMEPTCH.TCHDrawServices
         protected void WriteModelToTCH(object tchTableModel,string tableName,ref ulong dataId) 
         {
             var pointSqlStr = ThSQLHelper.TabelModelToSqlString(tableName, tchTableModel);
-            DBHelper.Execute(pointSqlStr);
+            DBHelper.ExecuteNonQuery(pointSqlStr);
             dataId = dataId + 1;
-        }
-        protected void OpenDBConnect()
-        {
-            if (null == DBHelper)
-                return;
-            DBHelper.Conn();
         }
         protected void CloseDBConnect(bool delHelper = false)
         {
             if (null == DBHelper)
                 return;
-            DBHelper.CloseConnect(delHelper);
+            DBHelper.CloseConnect();
             if (delHelper)
                 DBHelper = null;
         }
@@ -100,6 +93,5 @@ namespace ThMEPTCH.TCHDrawServices
             Active.Editor.AcedCmd(args);
 #endif
         }
-
     }
 }
