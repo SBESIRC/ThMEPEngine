@@ -2,17 +2,18 @@
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.Model;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
     public class ThDrawTCHReducing
     {
         private ulong subSysId;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
         private TCHReducingParam reducingParam;
         private ThDrawTCHFlanges flangesService;
 
-        public ThDrawTCHReducing(ThSQLiteHelper sqliteHelper, ulong subSysId)
+        public ThDrawTCHReducing(THMEPSQLiteServices sqliteHelper, ulong subSysId)
         {
             this.subSysId = subSysId;
             this.sqliteHelper = sqliteHelper;
@@ -21,7 +22,6 @@ namespace ThMEPHVAC.TCH
 
         public void Draw(List<LineGeoInfo> reducingInfos, Matrix3d mat, double mainHeight, double elevation, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var mmElevation = elevation * 1000;
             foreach (var reducing in reducingInfos)
             {
@@ -56,7 +56,7 @@ namespace ThMEPHVAC.TCH
                 flangesService.Draw(endP + centerEleDisVec, -eEndParam.normalVector, smallWidth, sHeight, ref gId);
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
 
         private void GetReducingInfo(LineGeoInfo reducing, 
@@ -105,7 +105,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + reducingParam.computeType.ToString() + "'," +
                                   "'" + reducingParam.angle.ToString() + "'," +
                                   "'" + reducingParam.length.ToString() + "')";
-            sqliteHelper.Query<TCHReducingParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
     }
 }

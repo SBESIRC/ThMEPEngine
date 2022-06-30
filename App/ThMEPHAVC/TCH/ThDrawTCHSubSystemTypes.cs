@@ -1,18 +1,19 @@
-﻿namespace ThMEPHVAC.TCH
+﻿using ThMEPIO.DB.SQLite;
+
+namespace ThMEPHVAC.TCH
 {
     public class ThDrawTCHSubSystemTypes
     {
         private TCHSubSystemParam subSystemParam;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
 
-        public ThDrawTCHSubSystemTypes(ThSQLiteHelper sqliteHelper)
+        public ThDrawTCHSubSystemTypes(THMEPSQLiteServices sqliteHelper)
         {
             this.sqliteHelper = sqliteHelper;
         }
 
         public void InsertSubSystem(ref ulong gId)
         {
-            sqliteHelper.Conn();
             foreach (string subSys in ThTCHCommonTables.subSystems)
             {
                 subSystemParam = new TCHSubSystemParam()
@@ -26,9 +27,9 @@
                                      "'" + subSystemParam.Name + "'," +
                                      "'" + subSystemParam.remark + "')";
 
-                sqliteHelper.Query<TCHSubSystemParam>(recordDuct);
+                sqliteHelper.ExecuteNonQuery(recordDuct);
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
     }
 }

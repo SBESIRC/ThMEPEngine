@@ -3,6 +3,7 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Model;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
@@ -10,10 +11,10 @@ namespace ThMEPHVAC.TCH
     {
         private ulong subSysId;
         private TCHElbowParam elbowParam;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
         private ThDrawTCHFlanges flangesService;
 
-        public ThDrawTCHElbow(ThSQLiteHelper sqliteHelper, ulong subSysId)
+        public ThDrawTCHElbow(THMEPSQLiteServices sqliteHelper, ulong subSysId)
         {
             this.subSysId = subSysId;
             this.sqliteHelper = sqliteHelper;
@@ -22,7 +23,6 @@ namespace ThMEPHVAC.TCH
 
         public void Draw(EntityModifyParam info, Matrix3d mat, double mainHeight, double elevation, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var mmElevation = elevation * 1000;
             RecordElbowInfo(ref gId);
             GetElbowInfo(info, mat, out Point3d srtP, out Point3d endP, out Vector3d srtVec, out Vector3d endVec, out string elbowW);
@@ -52,7 +52,7 @@ namespace ThMEPHVAC.TCH
             flangesService.Draw(srtP + centerEleDisVec, sEndParam.normalVector, w, h, ref gId);
             flangesService.Draw(endP + centerEleDisVec, eEndParam.normalVector, w, h, ref gId);
             ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
 
         private void GetElbowInfo(EntityModifyParam info,
@@ -98,7 +98,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + elbowParam.type.ToString() + "'," +
                                   "'" + elbowParam.radRatio.ToString() + "'," +
                                   "'" + elbowParam.segments.ToString() + "')";
-            sqliteHelper.Query<TCHElbowParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
     }
 }

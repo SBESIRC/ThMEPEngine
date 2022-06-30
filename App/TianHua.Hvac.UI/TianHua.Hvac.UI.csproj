@@ -311,6 +311,10 @@
       <Project>{b49b0155-f4a7-4928-a539-66882a6ec79a}</Project>
       <Name>ThMEPHVAC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPIO\ThMEPIO.csproj">
+      <Project>{81ca0abb-8e13-4e53-99b6-56baaf2f7bd9}</Project>
+      <Name>ThMEPIO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
       <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>
       <Name>TianHua.EquipmentSelection</Name>
@@ -497,9 +501,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
       <Version>7.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="sqlite-net-pcl">
-      <Version>1.8.116</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
     public class ThDrawTCHFlanges
     {
         private TCHFlangesParam flangesParam;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
 
-        public ThDrawTCHFlanges(ThSQLiteHelper sqliteHelper)
+        public ThDrawTCHFlanges(THMEPSQLiteServices sqliteHelper)
         {
             this.sqliteHelper = sqliteHelper;
         }
@@ -65,7 +66,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + flangesParam.type.ToString() + "'," +
                                   "'" + flangesParam.thickness.ToString() + "'," +
                                   "'" + flangesParam.skirtSize.ToString() + "')";
-            sqliteHelper.Query<TCHFlangesParam>(record);
+            sqliteHelper.ExecuteNonQuery(record);
         }
     }
 }

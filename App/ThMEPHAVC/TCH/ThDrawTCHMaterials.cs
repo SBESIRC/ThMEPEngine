@@ -1,18 +1,19 @@
-﻿namespace ThMEPHVAC.TCH
+﻿using ThMEPIO.DB.SQLite;
+
+namespace ThMEPHVAC.TCH
 {
     public class ThDrawTCHMaterials
     {
         private TCHMaterialsParam materialsParam;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
 
-        public ThDrawTCHMaterials(ThSQLiteHelper sqliteHelper)
+        public ThDrawTCHMaterials(THMEPSQLiteServices sqliteHelper)
         {
             this.sqliteHelper = sqliteHelper;
         }
 
         public void InsertMaterials(ref ulong gId)
         {
-            sqliteHelper.Conn();
             foreach (string material in ThTCHCommonTables.materials)
             {
                 materialsParam = new TCHMaterialsParam()
@@ -25,9 +26,9 @@
                                      " VALUES ('" + materialsParam.ID.ToString() + "'," +
                                      "'" + materialsParam.Name + "'," +
                                      "'" + materialsParam.type.ToString() + "')";
-                var a = sqliteHelper.Query<TCHMaterialsParam>(recordDuct);
+                var a = sqliteHelper.ExecuteNonQuery(recordDuct);
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
     }
 }

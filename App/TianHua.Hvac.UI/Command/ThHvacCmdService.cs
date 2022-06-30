@@ -183,7 +183,7 @@ namespace TianHua.Hvac.UI.Command
             var tchService = new ThTCHDrawFactory(curDbPath);
             tchService.materialsService.InsertMaterials(ref gId);
             tchService.subSystemService.InsertSubSystem(ref gId);
-            tchService.sqliteHelper.db.Close();
+            tchService.sqliteHelper.CloseConnect();
         }
 
         private void TransFanParamToPortParam(PortParam portParam, FanParam fanParam, Point3d srtP, Line realSrtOftLine)
