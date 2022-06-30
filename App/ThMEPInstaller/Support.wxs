@@ -135,6 +135,12 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" Guid="{0C6C85D4-7FD5-4C0E-9574-99EF27C36B35}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" Source="$(var.AutoloaderContentsPath)\Support\地库指标表格.dwg" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PAT_Reinforced_Concrete" Guid="{64870D04-02FD-4FD5-829F-9D6D7A126DAA}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PAT_Reinforced_Concrete" Source="$(var.AutoloaderContentsPath)\Support\钢筋混凝土.pat" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" Guid="{3A4804C4-979C-4633-9E0E-CF2FD79D86C2}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" Source="$(var.AutoloaderContentsPath)\Support\加气混凝土.pat" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -304,6 +310,8 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_Template_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Reinforced_Concrete" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" />
         </ComponentGroup>
     </Fragment>
 </Wix>
