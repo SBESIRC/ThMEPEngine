@@ -21,27 +21,29 @@ namespace ThMEPHVAC.EQPMFanSelect
             var pr = Active.Editor.GetPoint("\n请输入插入点");
             if (pr.Status == PromptStatus.OK)
             {
+                var ucsXVector = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis;
+                var angle = Vector3d.XAxis.GetAngleTo(ucsXVector, Vector3d.ZAxis);
                 for (int i = 0; i < dataModel.ListVentQuan.Count; i++)
                 {
                     var number = dataModel.ListVentQuan[i];
                     // 以指定点作为起始点（UCS），沿着X轴方向间隔5000放置图块
                     var insertPt = pr.Value + Vector3d.XAxis * 5000 * i;
                     var position = insertPt.TransformBy(Active.Editor.UCS2WCS());
-                    InsertModel(dataModel, cFanModel, number, position);
+                    InsertModel(dataModel, cFanModel, number, position, angle);
                 }
             }
         }
-        public static ObjectId InsertModel(FanDataModel dataModel,FanDataModel cFanModel, int number, Point3d pt)
+        public static ObjectId InsertModel(FanDataModel dataModel,FanDataModel cFanModel, int number, Point3d pt,double rotation)
         {
             string blockName = BlockLayerName(dataModel, out string layerName);
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var objId = Active.Database.InsertModel(blockName, layerName, dataModel.Attributes());
+                var objId = Active.Database.InsertModel(blockName, layerName, dataModel.Attributes(), rotation);
                 SetBlockValue(objId, dataModel, cFanModel, number);
                 // 设置风机图块位置
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
                 blockRef.TransformBy(Matrix3d.Displacement(pt - objId.GetModelBasePoint()));
-
+                ChangeBlockTextAttrAngle(objId, rotation);
                 // 返回风机图块
                 return objId;
             }
@@ -229,6 +231,16 @@ namespace ThMEPHVAC.EQPMFanSelect
             if (null == xData || xDataBase == null)
                 return;
             blockId.SetModelIdentifier(dataModel.XDataValueList(xDataBase.Number, dataModel, blockId.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
+        }
+        private static void ChangeBlockTextAttrAngle(ObjectId blockId,double angle)
+        {
+            var block = blockId.GetDBObject<BlockReference>();
+            // 遍历块参照的属性
+            foreach (ObjectId attId in block.AttributeCollection)
+            {
+                AttributeReference attRef = attId.GetDBObject<AttributeReference>();
+                attRef.Rotation = angle;
+            }
         }
     }
 }

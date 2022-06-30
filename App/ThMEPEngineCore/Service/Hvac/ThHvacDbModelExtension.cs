@@ -11,7 +11,7 @@ namespace ThMEPEngineCore.Service.Hvac
 {
     public static class ThHvacDbModelExtension
     {
-        public static ObjectId InsertModel(this Database database, string name, string layer, Dictionary<string, string> attNameValues)
+        public static ObjectId InsertModel(this Database database, string name, string layer, Dictionary<string, string> attNameValues,double angle =0)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.Service.Hvac
                     name,
                     Point3d.Origin,
                     new Scale3d(1.0),
-                    0.0, 
+                    angle, 
                     attNameValues);
             }
         }
