@@ -54,7 +54,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display));
             }
-            if (false)
+            if (display)
             {
                 var walls = new List<LineString>();
                 var cars = new List<InfoCar>();
@@ -96,7 +96,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 
                 return cars.Count;
             }
-            if (display)
+            if (false)
             {
                 var walls = new List<LineString>();
                 var cars = new List<InfoCar>();
