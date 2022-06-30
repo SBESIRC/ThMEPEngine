@@ -15,6 +15,7 @@ using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using DwgGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode, TianHua.Electrical.PDS.Model.ThPDSCircuitGraphEdge<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode>>;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -27,9 +28,35 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void PushGraphData(DwgGraph graph, List<THPDSSubstation> substationList)
         {
-            var projectGraph = BuildProjectGraph(graph);
+            var verticesMap = CreatCircuitVerticesMap(graph.Vertices);
+            var projectGraph = BuildProjectGraph(graph, verticesMap);
             _project.graphData = projectGraph.CreatPDSProjectGraph();
             PDSProjectExtend.CalculateProjectInfo();
+            _project.substations.Clear();
+            _project.substationMap.Clear();
+            foreach (var substation in substationList)
+            {
+                var projectSubstation = new THPDSProjectSubstation();
+                projectSubstation.SubstationID = substation.SubstationID;
+                foreach (var transformer in substation.Transformers)
+                {
+                    var projectTransformer = new THPDSProjectTransformer();
+                    projectTransformer.TransformerID = transformer.TransformerID;
+                    foreach (var lowVoltageCabinet in transformer.LowVoltageCabinets)
+                    {
+                        var projectLowVoltageCabinet = new FeederCabinet();
+                        projectLowVoltageCabinet.LowVoltageCabinetID = lowVoltageCabinet.LowVoltageCabinetID;
+                        projectTransformer.LowVoltageCabinets.Add(projectLowVoltageCabinet);
+                        foreach (var item in lowVoltageCabinet.Edges)
+                        {
+                            _project.substationMap.AddMap(projectSubstation, projectTransformer, projectLowVoltageCabinet, verticesMap[item.Target]);
+                        }
+                        projectTransformer.LowVoltageCabinets.Add(projectLowVoltageCabinet);
+                    }
+                    projectSubstation.Transformers.Add(projectTransformer);
+                }
+                _project.substations.Add(projectSubstation);
+            }
             _project.DataChanged?.Invoke();
         }
 
@@ -38,7 +65,8 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void SecondaryPushGraphData(DwgGraph graph)
         {
-            var projectGraph = BuildProjectGraph(graph);
+            var verticesMap = CreatCircuitVerticesMap(graph.Vertices);
+            var projectGraph = BuildProjectGraph(graph, verticesMap);
             if (!_project.graphData.IsNull() && _project.graphData.Graph.Vertices.Count() > 0)
             {
                 _project.graphData.Graph.Vertices.ForEach(node =>
@@ -63,7 +91,8 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static ProjectGraph ProjectUpdateToDwg(DwgGraph graph)
         {
-            var projectGraph = BuildProjectGraph(graph);
+            var verticesMap = CreatCircuitVerticesMap(graph.Vertices);
+            var projectGraph = BuildProjectGraph(graph, verticesMap);
             if (!_project.graphData.IsNull() && _project.graphData.Graph.Vertices.Count() > 0)
             {
                 _project.graphData.Graph.Vertices.ForEach(node =>
@@ -83,11 +112,15 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
-        private static ProjectGraph BuildProjectGraph(DwgGraph graph)
+        private static Dictionary<ThPDSCircuitGraphNode,ThPDSProjectGraphNode> CreatCircuitVerticesMap(IEnumerable<ThPDSCircuitGraphNode> vertices)
+        {
+            return vertices.ToDictionary(key => key, value => CreatProjectNode(value));
+        }
+
+        private static ProjectGraph BuildProjectGraph(DwgGraph graph, Dictionary<ThPDSCircuitGraphNode, ThPDSProjectGraphNode> vertexDir)
         {
             var projectGraph = new ProjectGraph();
-            var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
-            graph.Vertices.ForEach(o => projectGraph.AddVertex(VertexDir[o]));
+            graph.Vertices.ForEach(o => projectGraph.AddVertex(vertexDir[o]));
             foreach (var node in graph.TopologicalSort())
             {
                 var edges = graph.OutEdges(node).ToList();
@@ -102,20 +135,20 @@ namespace TianHua.Electrical.PDS.Project
                         virtualNode.Load = new ThPDSLoad();
                         virtualNode.Load.SetLocation(edge.Target.Loads[0].Location);
                         virtualNode.Load.InstalledCapacity = new ThInstalledCapacity();
-                        virtualNode.Details.LoadCalculationInfo.LowPower = edges.Sum(o => VertexDir[o.Target].Details.LoadCalculationInfo.LowPower);
-                        virtualNode.Details.LoadCalculationInfo.HighPower = edges.Sum(o => VertexDir[o.Target].Details.LoadCalculationInfo.HighPower);
-                        virtualNode.Details.LoadCalculationInfo.IsDualPower = edges.Any(o => VertexDir[o.Target].Details.LoadCalculationInfo.IsDualPower);
-                        virtualNode.Details.LoadCalculationInfo.LowDemandFactor = edges.GroupBy(o => VertexDir[o.Target].Details.LoadCalculationInfo.LowDemandFactor).OrderByDescending(o => o.Count()).First().Key;
+                        virtualNode.Details.LoadCalculationInfo.LowPower = edges.Sum(o => vertexDir[o.Target].Details.LoadCalculationInfo.LowPower);
+                        virtualNode.Details.LoadCalculationInfo.HighPower = edges.Sum(o => vertexDir[o.Target].Details.LoadCalculationInfo.HighPower);
+                        virtualNode.Details.LoadCalculationInfo.IsDualPower = edges.Any(o => vertexDir[o.Target].Details.LoadCalculationInfo.IsDualPower);
+                        virtualNode.Details.LoadCalculationInfo.LowDemandFactor = edges.GroupBy(o => vertexDir[o.Target].Details.LoadCalculationInfo.LowDemandFactor).OrderByDescending(o => o.Count()).First().Key;
                         virtualNode.Details.LoadCalculationInfo.HighDemandFactor = virtualNode.Details.LoadCalculationInfo.LowDemandFactor;
                         virtualNode.Details.LoadCalculationInfo.PowerFactor = 0.8;
                         projectGraph.AddVertex(virtualNode);
-                        projectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], virtualNode) { Circuit = edge.Circuit });
-                        SameGroupEdges.ForEach(o => projectGraph.AddEdge(new ThPDSProjectGraphEdge(virtualNode, VertexDir[o.Target]) { Circuit = o.Circuit }));
+                        projectGraph.AddEdge(new ThPDSProjectGraphEdge(vertexDir[edge.Source], virtualNode) { Circuit = edge.Circuit });
+                        SameGroupEdges.ForEach(o => projectGraph.AddEdge(new ThPDSProjectGraphEdge(virtualNode, vertexDir[o.Target]) { Circuit = o.Circuit }));
                         edges.RemoveAll(o => SameGroupEdges.Contains(o));
                     }
                     else
                     {
-                        projectGraph.AddEdge(new ThPDSProjectGraphEdge(VertexDir[edge.Source], VertexDir[edge.Target]) { Circuit = edge.Circuit });
+                        projectGraph.AddEdge(new ThPDSProjectGraphEdge(vertexDir[edge.Source], vertexDir[edge.Target]) { Circuit = edge.Circuit });
                         edges.Remove(edge);
                     }
                 }
@@ -147,6 +180,7 @@ namespace TianHua.Electrical.PDS.Project
             newNode.Details.LoadCalculationInfo.LowDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.HighDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.PowerFactor = load.PowerFactor;
+            newNode.Details.LoadCalculationInfo.LoadCalculationGrade = load.Phase == ThPDSPhase.三相 ? LoadCalculationGrade.一级 : LoadCalculationGrade.三级;
             return newNode;
         }
 

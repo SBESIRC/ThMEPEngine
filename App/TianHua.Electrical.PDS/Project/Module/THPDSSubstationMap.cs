@@ -12,11 +12,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 变电所至一级负载映射
         /// </summary>
-        private Dictionary<ThPDSProjectGraphNode, Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>> _substationMap;
+        private List<SubstationMapInfo> _substationMap;
 
         public THPDSSubstationMap()
         {
-            _substationMap = new Dictionary<ThPDSProjectGraphNode, Tuple<THPDSProjectSubstation, THPDSProjectTransformer, PDSBaseLowVoltageCabinet>>();
+            _substationMap = new List<SubstationMapInfo>();
         }
 
         public void Clear()
@@ -43,21 +43,29 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="node">负载</param>
         public void AddMap(THPDSProjectSubstation substation, THPDSProjectTransformer transformer, PDSBaseLowVoltageCabinet lowVoltageCabinet, ThPDSProjectGraphNode node)
         {
-            if (_substationMap.ContainsKey(node))
-            {
-                _substationMap[node] = (substation,transformer, lowVoltageCabinet).ToTuple();
-            }
-            else
-            {
-                _substationMap.Add(node, (substation, transformer, lowVoltageCabinet).ToTuple());
-            }
+            _substationMap.Add(new SubstationMapInfo() { Node = node, Substation = substation, Transformer = transformer, LowVoltageCabinet = lowVoltageCabinet });
         }
 
         public List<ThPDSProjectGraphNode> GetNodes(THPDSProjectSubstation substation, THPDSProjectTransformer transformer, PDSBaseLowVoltageCabinet lowVoltageCabinet)
         {
+            return GetMapInfos(substation, transformer, lowVoltageCabinet).Select(o => o.Node).ToList();
+        }
+
+        public List<ThPDSProjectGraphNode> GetNodes(THPDSProjectSubstation substation, THPDSProjectTransformer transformer)
+        {
+            return GetMapInfos(substation, transformer).Select(o => o.Node).ToList();
+        }
+
+        public List<ThPDSProjectGraphNode> GetNodes(THPDSProjectSubstation substation)
+        {
+            return GetMapInfos(substation).Select(o => o.Node).ToList();
+        }
+
+        public List<SubstationMapInfo> GetMapInfos(THPDSProjectSubstation substation, THPDSProjectTransformer transformer, PDSBaseLowVoltageCabinet lowVoltageCabinet)
+        {
             if (lowVoltageCabinet.IsNull())
             {
-                return GetNodes(substation, transformer);
+                return GetMapInfos(substation, transformer);
             }
             else if (transformer.IsNull())
             {
@@ -65,22 +73,30 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
             else
             {
-                return _substationMap.Where(o => substation.Equals(o.Value.Item1) && transformer.Equals(o.Value.Item2) && lowVoltageCabinet.Equals(o.Value.Item3)).Select(o => o.Key).ToList();
+                return _substationMap.Where(o => substation.Equals(o.Substation) && transformer.Equals(o.Transformer) && lowVoltageCabinet.Equals(o.LowVoltageCabinet)).ToList();
             }
         }
 
-        public List<ThPDSProjectGraphNode> GetNodes(THPDSProjectSubstation substation, THPDSProjectTransformer transformer)
+        public List<SubstationMapInfo> GetMapInfos(THPDSProjectSubstation substation, THPDSProjectTransformer transformer)
         {
             if (transformer.IsNull())
             {
-                return GetNodes(substation);
+                return GetMapInfos(substation);
             }
-            return _substationMap.Where(o => substation.Equals(o.Value.Item1) && transformer.Equals(o.Value.Item2)).Select(o => o.Key).ToList();
+            return _substationMap.Where(o => substation.Equals(o.Substation) && transformer.Equals(o.Transformer)).ToList();
         }
 
-        public List<ThPDSProjectGraphNode> GetNodes(THPDSProjectSubstation substation)
+        public List<SubstationMapInfo> GetMapInfos(THPDSProjectSubstation substation)
         {
-            return _substationMap.Where(o => substation.Equals(o.Value.Item1)).Select(o => o.Key).ToList();
+            return _substationMap.Where(o => substation.Equals(o.Substation)).ToList();
         }
+    }
+
+    public class SubstationMapInfo
+    {
+        public ThPDSProjectGraphNode Node { get; set; }
+        public THPDSProjectSubstation Substation { get; set; }
+        public THPDSProjectTransformer Transformer { get; set; }
+        public PDSBaseLowVoltageCabinet LowVoltageCabinet { get; set; }
     }
 }

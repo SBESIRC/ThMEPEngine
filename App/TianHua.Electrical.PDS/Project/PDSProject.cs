@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
@@ -27,6 +28,8 @@ namespace TianHua.Electrical.PDS.Project
 
         public ProjectGlobalConfiguration projectGlobalConfiguration;
 
+        public List<THPDSProjectSubstation> substations;
+
         public THPDSSubstationMap substationMap;
 
         private bool InitializedState;
@@ -43,6 +46,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             if (!InitializedState)
             {
+                substations = new List<THPDSProjectSubstation>();
                 substationMap = new THPDSSubstationMap();
                 this.LoadGlobalConfig();
                 InitializedState = true;

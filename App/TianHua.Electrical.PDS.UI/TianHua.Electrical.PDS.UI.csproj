@@ -161,6 +161,7 @@
       <DependentUpon>ThPDSSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\GlobalParameterViewModel.cs" />
+    <Compile Include="ViewModels\LoadCalculationViewModel.cs" />
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
     <Compile Include="ViewModels\ThPDSBlockViewModel.cs" />
@@ -173,6 +174,7 @@
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
+    <Compile Include="ViewModels\THPDSLoadCalculationVM.cs" />
     <Compile Include="ViewModels\ThPDSProjectGraphNodeTreeViewVM.cs" />
   </ItemGroup>
   <ItemGroup>

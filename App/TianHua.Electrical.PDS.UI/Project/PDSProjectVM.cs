@@ -21,6 +21,7 @@ namespace TianHua.Electrical.PDS.UI.Project
         #region ViewModel 集合
         public GlobalParameterViewModel GlobalParameterViewModel { get; set; } = new();
         public InformationMatchViewModel InformationMatchViewModel { get; set; } = new();
+        public LoadCalculationViewModel LoadCalculationViewModel { get; set; } = new();
         #endregion
     }
 }

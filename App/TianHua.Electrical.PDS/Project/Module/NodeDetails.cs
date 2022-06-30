@@ -88,12 +88,18 @@ namespace TianHua.Electrical.PDS.Project.Module
         public LoadCalculationInfo()
         {
             PhaseSequence = PhaseSequence.L123;
+            LoadCalculationGrade = LoadCalculationGrade.一级;
         }
 
         /// <summary>
         /// 相序
         /// </summary>
         public PhaseSequence PhaseSequence { get; set; }
+
+        /// <summary>
+        /// 负荷等级
+        /// </summary>
+        public LoadCalculationGrade LoadCalculationGrade { get; set; }
 
         private double KV => PhaseSequence == PhaseSequence.L123 ? 0.38 : 0.22;
 
