@@ -207,5 +207,11 @@ namespace ThMEPEngineCore.CAD
                 .Where(e => !e.IsDisposed)
                 .ForEach(e => e.Dispose());
         }
+        public static double ParallelDistanceTo(this Line first,Line second)
+        {
+            // first is parallel second
+            var projectionPt = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            return first.StartPoint.DistanceTo(projectionPt);
+        }
     }
 }

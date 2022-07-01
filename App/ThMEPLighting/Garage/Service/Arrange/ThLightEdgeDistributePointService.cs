@@ -33,14 +33,15 @@ namespace ThMEPLighting.Garage.Service.Arrange
         public void Distribute()
         {
             // 布点
-            var linePoints = new Dictionary<Line, List<Point3d>>();
             var points = LayoutPoints();
+            var linePoints = new Dictionary<Line, List<Point3d>>();
             linePoints = ThQueryPointService.Query(points, Union(GetEdges(FirstLightEdges), GetEdges(SecondLightEdges)));
             linePoints = Sort(linePoints);
 
             // 优化布置的点
-            var optimizer = new ThLayoutPointOptimizeService(linePoints, ArrangeParameter.FilterPointDistance);
-            optimizer.Optimize();
+            // 因为1、2号线在拐弯和分支的地方被裁剪了，无需再处理了
+            //var optimizer = new ThLayoutPointOptimizeService(linePoints, ArrangeParameter.FilterPointDistance);
+            //optimizer.Optimize();
 
             FirstLightEdges.ForEach(f =>
             {

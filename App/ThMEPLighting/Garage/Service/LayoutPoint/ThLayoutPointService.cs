@@ -84,7 +84,7 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             return results;
         }
 
-        protected List<Tuple<Point3d, Vector3d>> GetL2LayoutPointByPass(List<Tuple<Point3d,Vector3d>> L1LayoutPoints,List<Line> L1Lines, List<Line> L2Lines)
+        protected List<Tuple<Point3d, Vector3d>> GetL2LayoutPointByPass(List<Tuple<Point3d, Vector3d>> L1LayoutPoints, List<Line> L1Lines, List<Line> L2Lines)
         {
             // 把L1布置的点偏移到L2上
             var results = new List<Tuple<Point3d, Vector3d>>();
@@ -92,19 +92,21 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             var firstPairService = new ThFirstSecondPairService(L1Lines, L2Lines, DoubleRowOffsetDis);
             L1Lines.ForEach(l =>
             {
+                var seconds = firstPairService.Query(l).Where(s => Math.Abs(l.ParallelDistanceTo(s) - DoubleRowOffsetDis) <= 2.0);
                 l1LinePointDic[l].ForEach(p =>
                 {
-                    foreach (var second in firstPairService.Query(l))
+                    foreach (Line second in seconds)
                     {
                         var position = p.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
-                        if (position.IsPointOnCurve(second,1.0) && IsFitToInstall(position,
+                        if (position.IsPointOnCurve(second, 1.0) && IsFitToInstall(position,
                             second.StartPoint, second.EndPoint))
                         {
-                            results.Add(Tuple.Create(position,second.LineDirection()));
+                            results.Add(Tuple.Create(position, second.LineDirection()));
                             break;
                         }
                     }
                 });
+                
             });
             return results;
         }

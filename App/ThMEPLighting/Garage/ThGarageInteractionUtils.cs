@@ -78,6 +78,13 @@ namespace ThMEPLighting.Garage
                         CenterLines = newBorder.SpatialFilter(allCenterLines).Cast<Line>().ToList(),
                         Lights = newBorder.SpatialFilter(allLightBlks).Cast<BlockReference>().ToList(),
                     };
+
+                    // 将获取到的灯线、非灯线Z坐标归零
+                    regionBorder.RegionBorder.ProjectOntoXYPlane();
+                    regionBorder.DxCenterLines.ForEach(l => l.ProjectOntoXYPlane());
+                    regionBorder.FdxCenterLines.ForEach(l => l.ProjectOntoXYPlane());
+                    regionBorder.SingleRowLines.ForEach(l => l.ProjectOntoXYPlane());
+
                     results.Add(regionBorder);
                 });
                 #endregion
@@ -99,6 +106,7 @@ namespace ThMEPLighting.Garage
                 return results;
             }
         }
+
         private static Point3d GetBorderBasePt(this Entity regionBorder)
         {
             return regionBorder is Polyline poly ? poly.StartPoint :
