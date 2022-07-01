@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.4)" SizeToContent="Manual" Height="730"
+              Title="车位自动排布(2.5)" SizeToContent="Manual" Height="680"
               Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -149,32 +149,30 @@
                                 <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">慢速(10分钟)</RadioButton>
                             </StackPanel>
                         </StackPanel>
-                        <Label></Label>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="SpeedGroup" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandRunSpeed, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="高级设置："/>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding AdvancedSettingVisibility}">
+                        <RadioButton GroupName="SpeedGroup" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandRunSpeed, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="高级："/>
                         <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsAdvancedSettingEnabled}" RenderTransformOrigin="0.474,-0.205">
-                            <Label Content="迭代次数："/>
+                            <Label Content="代数"/>
                             <TextBox Width="30" Margin="0,5,5,5" Text="{Binding IterationCount}"/>
-                            <Label Content="种群数量："/>
+                            <Label Content="种群"/>
                             <TextBox Width="30" Margin="0,5,5,5" Text="{Binding PopulationCount}"/>
-                            <Label Content="最长时间："/>
-                            <TextBox Width="40" Margin="0,5,5,5" Text="{Binding MaxTimespan}"/>
-                            <Label Content="分钟"/>
+                            <Label Content="时间"/>
+                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding MaxTimespan}"/>
+                            <!--<Label Content="分钟"/>-->
+                            <Label Content="进程"/>
+                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding ProcessCount}"/>
+                            <Label Content="线程"/>
+                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding ThreadCount}"/>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsEnabled="{Binding UseMultiProcess}">
-                        <Label Content="进程数量："/>
-                        <TextBox Width="30" Margin="0,5,5,5" Text="{Binding ProcessCount}"/>
-                        <Label Content="进程内线程数量："/>
-                        <TextBox Width="30" Margin="0,5,5,5" Text="{Binding ThreadCount}"/>
-                    </StackPanel>
+
                 </StackPanel>
             </StackPanel>
-            <StackPanel Margin="0,10,5,5">
+            <StackPanel Margin="0,0,5,5">
                 <StackPanel Orientation="Horizontal">
                     <Label></Label>
-                    <Button Name="btnRun" Width="40" FontSize="16" FontWeight="Bold" Click="btnRun_Click">运行</Button>
+                    <Button Name="btnRun" Width="40" Height="25" FontSize="16" FontWeight="Bold" Click="btnRun_Click">运行</Button>
                     <StackPanel Orientation="Horizontal">
                         <Label Margin="20,0,0,5" Content="信息打印:"/>
                         <CheckBox Margin="0,0,5,5" Height="15"  IsChecked="{Binding ShowTitle}">总指标</CheckBox>

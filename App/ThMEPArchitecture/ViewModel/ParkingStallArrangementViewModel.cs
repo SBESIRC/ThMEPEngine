@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPArchitecture.ViewModel
@@ -30,6 +31,20 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         private bool _UseMultiProcess = true;
+
+        private Visibility _AdvancedSettingVisibility = Visibility.Collapsed;
+        public Visibility AdvancedSettingVisibility 
+        { 
+            get
+            {
+                return _AdvancedSettingVisibility;
+            }
+            set
+            {
+                _AdvancedSettingVisibility = value;
+                RaisePropertyChanged("AdvancedSettingVisibility");
+            }
+        } 
 
         public bool UseMultiProcess
         {

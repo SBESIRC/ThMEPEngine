@@ -32,6 +32,14 @@ namespace TianHua.Architecture.WPI.UI.UI
             {
                 _ViewModel = new ParkingStallArrangementViewModel();
             }
+            if (ParameterStock.ReadHiddenParameter)
+            {
+                _ViewModel.AdvancedSettingVisibility = Visibility.Visible;
+            }
+            else
+            {
+                _ViewModel.AdvancedSettingVisibility = Visibility.Collapsed;
+            }
             DataContext = _ViewModel;
             InitializeComponent();
         }

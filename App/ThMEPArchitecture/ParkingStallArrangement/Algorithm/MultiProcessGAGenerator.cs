@@ -251,7 +251,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
 
             DisplayLogger?.Information($"预计代数: {IterationCount}\t");
-            DisplayLogger?.Information($"种群数量: {PopulationSize}\t");
+            //DisplayLogger?.Information($"种群数量: {PopulationSize}\t");
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -274,7 +274,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 //MutexEndList.ForEach(mutex => mutex.ReleaseMutex());
                 Logger?.Information($"进程数: {ProcessCount }");
-                DisplayLogger?.Information($"进程数: {ProcessCount }\t");
+                //DisplayLogger?.Information($"进程数: {ProcessCount }\t");
                 Logger?.Information($"进程启动用时: {stopWatch.Elapsed.TotalSeconds }");
                 var t_pre = stopWatch.Elapsed.TotalSeconds;
                 var pop = CreateFirstPopulation();
