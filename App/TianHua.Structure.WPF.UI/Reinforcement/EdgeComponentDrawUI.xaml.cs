@@ -48,7 +48,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
 
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
-            drawVM.Clear();
+            drawVM.ClearTable();
             ReSetTable1ItemsSource();
         }
 
@@ -66,9 +66,23 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
 
         private void btnDraw_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
-            drawVM.Draw();
-            this.Close();
+            if (drawVM.IsNeedMerge)
+            {
+                MessageBox.Show("请先进行归并操作！");
+                return;
+            }
+
+            if (drawVM.EdgeComponents.Count==0)
+            {
+                MessageBox.Show("没有要绘制的记录，请点击【选择】按钮进行识别！");
+                return;
+            }            
+            else
+            {
+                this.Hide();
+                drawVM.Draw();
+                this.Close();
+            }
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
