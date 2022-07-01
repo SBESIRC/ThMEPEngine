@@ -540,27 +540,26 @@ namespace TianHua.Electrical.PDS.Engine
                 var polyline = ThPDSBufferService.Buffer(curve, 100.1);
                 // 首先遍历从桥架搭出去的线
                 var results = FindNextLine(curve, polyline).OfType<Curve>();
-                if (results.Count() == 0)
+                if (results.Count() > 0)
                 {
-                    return;
-                }
-                var reducePolyline = ThPDSBufferService.Buffer(curve);
-                var reduceResults = FindNextLine(curve, reducePolyline).OfType<Curve>();
-                foreach (var findCurve in results)
-                {
-                    if (!findCurve.IsIntersects(curve) && !reduceResults.Contains(findCurve))
+                    var reducePolyline = ThPDSBufferService.Buffer(curve);
+                    var reduceResults = FindNextLine(curve, reducePolyline).OfType<Curve>();
+                    foreach (var findCurve in results)
                     {
-                        continue;
-                    }
+                        if (!findCurve.IsIntersects(curve) && !reduceResults.Contains(findCurve))
+                        {
+                            continue;
+                        }
 
-                    var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false))
-                        < ThPDSCommon.ALLOWABLE_TOLERANCE;
-                    var IsEnd = findCurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findCurve.EndPoint, false))
-                        < ThPDSCommon.ALLOWABLE_TOLERANCE;
-                    //都不相邻即无关系，都相邻即近似平行，都不符合
-                    if (IsStart != IsEnd)
-                    {
-                        PrepareNavigate(CableTrayNode, new List<Entity>(), curve, findCurve, onLightingCableTray, curve);
+                        var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false))
+                            < ThPDSCommon.ALLOWABLE_TOLERANCE;
+                        var IsEnd = findCurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findCurve.EndPoint, false))
+                            < ThPDSCommon.ALLOWABLE_TOLERANCE;
+                        //都不相邻即无关系，都相邻即近似平行，都不符合
+                        if (IsStart != IsEnd)
+                        {
+                            PrepareNavigate(CableTrayNode, new List<Entity>(), curve, findCurve, onLightingCableTray, curve);
+                        }
                     }
                 }
 
