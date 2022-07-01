@@ -347,7 +347,7 @@ namespace TianHua.Electrical.PDS.Model
             InstalledCapacity = new ThInstalledCapacity();
             AttributesCopy = "";
             Phase = ThPDSPhase.三相;
-            DemandFactor = 1.0;
+            DemandFactor = 0.8;
             PowerFactor = 0.85;
             FireLoadWithNull = ThPDSFireLoad.Unknown;
             LocationList = new List<ThPDSLocation>();

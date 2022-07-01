@@ -89,6 +89,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             PhaseSequence = PhaseSequence.L123;
             LoadCalculationGrade = LoadCalculationGrade.一级;
+            LowDemandFactor = 0.8;
+            HighDemandFactor = 0.8;
+            PowerFactor = 0.85;
         }
 
         /// <summary>
