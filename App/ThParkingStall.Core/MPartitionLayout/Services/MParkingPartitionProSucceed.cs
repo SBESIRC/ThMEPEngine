@@ -712,39 +712,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             count += ((int)Math.Floor((ea.Length - DisLaneWidth / 2-DisPillarLength*2) / DisVertCarWidth));
             count += ((int)Math.Floor((eb.Length - DisLaneWidth / 2- DisPillarLength * 2) / DisVertCarWidth));
 
-    //        var pa = PolyFromPoints(new List<Coordinate>() { lane.P0, lane.P0.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
-    //            pta.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane), pta });
-    //        if (pa.Area > 0)
-    //        {
-    //            if (ClosestPointInVertLines(ea.P0, ea, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-    //                Math.Abs(ClosestPointInVertLines(ea.P1, ea, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-    //                ea.Length < DisLaneWidth / 2 + DisVertCarWidth * 4)
-    //            {
-    //                count = 0;
-    //            }
-    //            else
-    //            {
-    //                plys.Add(pa);
-    //                generatedcount++;
-    //            }
-    //        }
-    //        var pb = PolyFromPoints(new List<Coordinate>() { lane.P1, lane.P1.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
-    //             ptb.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),ptb});
-    //        if (pb.Area > 0)
-    //        {
-    //            if (ClosestPointInVertLines(eb.P0, eb, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-    //                Math.Abs(ClosestPointInVertLines(eb.P1, eb, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-    //eb.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
-    //            {
-    //                count = 0;
-    //            }
-    //            else
-    //            {
-    //                plys.Add(pb);
-    //                generatedcount++;
-    //            }
-    //        }
-
             return count;
         }
         private PerpModlues ConstructPerpModules(Vector2D vec, List<LineSegment> ilanes)
@@ -945,18 +912,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             var compare = new LocCarComparer();
             locCars = locCars.Distinct(compare);
             CarSpots = locCars.Select(e => e.Car).ToList();
-            //for (int i = 1; i < CarSpots.Count; i++)
-            //{
-            //    for (int j = 0; j < i; j++)
-            //    {
-            //        if (CarSpots[i].Envelope.Centroid.Coordinate.Distance(CarSpots[j].Envelope.Centroid.Coordinate) < 1000)
-            //        {
-            //            CarSpots.RemoveAt(i);
-            //            i--;
-            //            break;
-            //        }
-            //    }
-            //}
         }
         private void RemoveCarsIntersectedWithBoundary()
         {
