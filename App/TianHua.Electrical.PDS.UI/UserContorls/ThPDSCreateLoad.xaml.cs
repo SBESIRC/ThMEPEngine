@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Mvvm.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.WpfServices;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -82,6 +85,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         {
             double.TryParse(defaultPower.Text, out var v);
             new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower:v /*defaultPower: double.Parse(defaultPower.Text)*/, defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
+            WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnInsert Click"));
             Close();
         }
 
@@ -89,6 +93,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         {
             double.TryParse(defaultPower.Text, out var v);
             Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph.AddVertex(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower:v ,/*defaultPower: double.Parse(defaultPower.Text),*/ defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
+            WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnSave Click"));
             Close();
         }
     }
