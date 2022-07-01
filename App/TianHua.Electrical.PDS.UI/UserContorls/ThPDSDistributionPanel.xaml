@@ -30,7 +30,7 @@
         <Grid Grid.Row="0" Grid.Column="0">
             <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="3">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}" Width="10000" Height="10000">
+                    <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}">
                         <Canvas.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
@@ -49,35 +49,43 @@
             </Border>
         </Grid>
         <Grid Grid.Row="0" Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"></RowDefinition>
-                <RowDefinition Height="2*"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <Grid Grid.Row="0" Grid.Column="0">
-                <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                    <TreeView x:Name="tv" ItemsSource="{Binding Root.DataList}" 
+            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"></RowDefinition>
+                        <RowDefinition Height="2*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="0" Grid.Column="0" Margin="3">
+                        <TreeView x:Name="tv" ItemsSource="{Binding Root.DataList}" 
                               dd:DragDrop.IsDragSource="True"
                               dd:DragDrop.IsDropTarget="True"
                               dd:DragDrop.DropHandler="{Binding}">
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
-                                <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
-                                    <TextBlock Text="{Binding Name}"/>
-                                </StackPanel>
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
-                </Border>
-            </Grid>
-            <Grid Grid.Row="1" Grid.Column="0">
-                <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                    <hc:PropertyGrid x:Name="propertyGrid" />
-                </Border>
-            </Grid>
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </StackPanel>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </Grid>
+                    <Grid Grid.Row="1" Grid.Column="0" Margin="3">
+                        <hc:PropertyGrid x:Name="propertyGrid" Margin="0,10,0,0"/>
+                    </Grid>
+                    <GridSplitter 
+                        Height="10" 
+                        HorizontalAlignment="Stretch" 
+                        Margin="3" 
+                        VerticalAlignment="Top" 
+                        ResizeDirection="Rows" 
+                        ShowsPreview="True"
+                        Grid.Row="1"/>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
