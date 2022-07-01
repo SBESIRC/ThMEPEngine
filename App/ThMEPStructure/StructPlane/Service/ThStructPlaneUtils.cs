@@ -6,11 +6,15 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.SVG;
+using ThMEPEngineCore.IO;
+using Linq2Acad;
+using ThCADExtension;
 
 namespace ThMEPStructure.StructPlane.Service
 {
     internal static class ThStructPlaneUtils
     {
+        private const string CantiSlabName = "CantiSlab";
         public static string GetFillColor(this Dictionary<string, object> properties)
         {
             var value = properties.GetPropertyValue(ThSvgPropertyNameManager.FillColorPropertyName);
@@ -26,6 +30,18 @@ namespace ThMEPStructure.StructPlane.Service
         public static string GetLineType(this Dictionary<string, object> properties)
         {
             var value = properties.GetPropertyValue(ThSvgPropertyNameManager.LineTypePropertyName);
+            if (value == null)
+            {
+                return "";
+            }
+            else
+            {
+                return (string)value;
+            }
+        }
+        public static string GetName(this Dictionary<string, object> properties)
+        {
+            var value = properties.GetPropertyValue(ThSvgPropertyNameManager.NamePropertyName);
             if (value == null)
             {
                 return "";
@@ -257,6 +273,47 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     return new Vector3d();
                 }
+            }
+        }
+        public static bool IsTenThickSlab(this string content)
+        {
+            var values = content.GetDoubles();
+            if (values.Count == 1)
+            {
+                return Math.Abs(values[0] - 10.0) <= 1e-4;
+            }
+            return false;
+        }
+        public static bool IsCantiSlab(this Dictionary<string, object> properties)
+        {
+            return properties.GetName().ToUpper().StartsWith(CantiSlabName.ToUpper());
+        }
+        public static bool IsSlab(this Dictionary<string, object> properties)
+        {
+            return properties.GetCategory() == ThIfcCategoryManager.SlabCategory;
+        }
+        public static void Import(Database database)
+        {
+            using (var acadDb = AcadDatabase.Use(database))
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.StructPlanePath(), DwgOpenMode.ReadOnly, false))
+            {
+                // 导入图层
+                ThPrintLayerManager.AllLayers.ForEach(layer =>
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), true);
+                });
+
+                // 导入样式
+                ThPrintStyleManager.AllTextStyles.ForEach(style =>
+                {
+                    acadDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(style), false);
+                });
+
+                // 导入块
+                ThPrintBlockManager.AllBlockNames.ForEach(b =>
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(b), true);
+                });
             }
         }
     }

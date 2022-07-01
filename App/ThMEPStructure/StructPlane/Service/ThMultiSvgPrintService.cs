@@ -6,12 +6,15 @@ using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.IO.SVG;
 
 namespace ThMEPStructure.StructPlane.Service
 {
     internal class ThMultiSvgPrintService
     {
+        private double LtScale = 500;
+        private int Measurement = 0;
         private Database AcadDb { get; set; }
         private double FloorSpacing { get; set; } = 100000;
         private List<string> SvgFiles { get; set; }
@@ -22,6 +25,15 @@ namespace ThMEPStructure.StructPlane.Service
         }
         public void Print()
         {
+            if(SvgFiles.Count==0)
+            {
+                return;
+            }
+            // 从模板导入要打印的图层
+            AcadDb.Import();
+            // 设置系统变量
+            SetSysVariables();
+
             var printers = PrintToCad();
             Layout(printers.Select(o=>o.ObjIds).ToList());
             InsertBasePoint();
@@ -116,5 +128,10 @@ namespace ThMEPStructure.StructPlane.Service
             });
             return results;
         }
+        private void SetSysVariables()
+        {
+            acadApp.Application.SetSystemVariable("LTSCALE", LtScale);
+            acadApp.Application.SetSystemVariable("MEASUREMENT", Measurement);
+        }        
     }
 }
