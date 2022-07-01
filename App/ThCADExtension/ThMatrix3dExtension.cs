@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADExtension
 {
@@ -96,7 +96,7 @@ namespace ThCADExtension
             rotate = Matrix3d.Rotation(zAngle, Vector3d.ZAxis, Point3d.Origin);
 
             var identity = Matrix3d.Identity.ToArray();
-            var mirrorTemp = mat.PreMultiplyBy(rotate.Inverse());
+            var mirrorTemp = mat.PostMultiplyBy(rotate.Inverse());
             identity[0] = Math.Sign(mirrorTemp[0, 0]);
             identity[5] = Math.Sign(mirrorTemp[1, 1]);
             mirror = new Matrix3d(identity);
