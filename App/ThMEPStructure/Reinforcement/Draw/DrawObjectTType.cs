@@ -412,28 +412,32 @@ namespace ThMEPStructure.Reinforcement.Draw
                             if (idx1 != -1)
                             {
                                 CIndexList.Add(idx1);
+                                int idx2 = Helper.FindPairPoint(points, idx1, 2);
+                                if (idx2 != -1)
+                                {
+                                    CIndexList.Add(idx2);
+                                }
                             }
                             CIndexList.Add(2);
                             CIndexList.Add(3);
-                            int idx2 = Helper.FindPairPoint(points, idx1, 2);
-                            if (idx2 != -1)
-                            {
-                                CIndexList.Add(idx2);
-                            }
+                            
+                            
                             CIndexList.Add(4);
                             CIndexList.Add(5);
                             int idx3 = Helper.FindClosePoint(points, 5, 6, 6);
                             if (idx3 != -1)
                             {
                                 CIndexList.Add(idx3);
+                                int idx4 = Helper.FindPairPoint(points, idx3, 2);
+                                if (idx4 != -1)
+                                {
+                                    CIndexList.Add(idx4);
+                                }
                             }
                             CIndexList.Add(6);
                             CIndexList.Add(7);
-                            int idx4 = Helper.FindPairPoint(points, idx3, 2);
-                            if (idx4 != -1)
-                            {
-                                CIndexList.Add(idx4);
-                            }
+                            
+                            
                             CIndexList.Add(8);
                         }
                         else if (num == 14)
@@ -444,28 +448,30 @@ namespace ThMEPStructure.Reinforcement.Draw
                             if (idx1 != -1)
                             {
                                 CIndexList.Add(idx1);
+                                int idx2 = Helper.FindPairPoint(points, idx1, 2);
+                                if (idx2 != -1)
+                                {
+                                    CIndexList.Add(idx2);
+                                }
                             }
                             CIndexList.Add(2);
                             CIndexList.Add(3);
-                            int idx2 = Helper.FindPairPoint(points, idx1, 2);
-                            if (idx2 != -1)
-                            {
-                                CIndexList.Add(idx2);
-                            }
+                           
                             CIndexList.Add(4);
                             CIndexList.Add(5);
                             int idx3 = Helper.FindClosePoint(points, 5, 6, 6);
                             if (idx3 != -1)
                             {
                                 CIndexList.Add(idx3);
+                                int idx4 = Helper.FindPairPoint(points, idx3, 2);
+                                if (idx4 != -1)
+                                {
+                                    CIndexList.Add(idx4);
+                                }
                             }
                             CIndexList.Add(6);
                             CIndexList.Add(7);
-                            int idx4 = Helper.FindPairPoint(points, idx3, 2);
-                            if (idx4 != -1)
-                            {
-                                CIndexList.Add(idx4);
-                            }
+                           
                             CIndexList.Add(8);
                             CIndexList.Add(9);
                         }
@@ -477,28 +483,30 @@ namespace ThMEPStructure.Reinforcement.Draw
                             if (idx1 != -1)
                             {
                                 CIndexList.Add(idx1);
+                                int idx2 = Helper.FindPairPoint(points, idx1, 2);
+                                if (idx2 != -1)
+                                {
+                                    CIndexList.Add(idx2);
+                                }
                             }
                             CIndexList.Add(2);
                             CIndexList.Add(3);
-                            int idx2 = Helper.FindPairPoint(points, idx1, 2);
-                            if (idx2 != -1)
-                            {
-                                CIndexList.Add(idx2);
-                            }
+                           
                             CIndexList.Add(4);
                             CIndexList.Add(5);
                             int idx3 = Helper.FindClosePoint(points, 5, 6, 6);
                             if (idx3 != -1)
                             {
                                 CIndexList.Add(idx3);
+                                int idx4 = Helper.FindPairPoint(points, idx3, 2);
+                                if (idx4 != -1)
+                                {
+                                    CIndexList.Add(idx4);
+                                }
                             }
                             CIndexList.Add(6);
                             CIndexList.Add(7);
-                            int idx4 = Helper.FindPairPoint(points, idx3, 2);
-                            if (idx4 != -1)
-                            {
-                                CIndexList.Add(idx4);
-                            }
+                           
                             CIndexList.Add(8);
                             CIndexList.Add(9);
                             int idx5 = Helper.FindClosePoint(points, 0, 1, 0);
