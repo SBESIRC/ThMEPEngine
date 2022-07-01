@@ -65,7 +65,7 @@
                         <hc:SearchBar Name="CircuitSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="CircuitDataGrid" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
+                        <DataGrid x:Name="CircuitDataGrid" AutoGenerateColumns="False" Style="{DynamicResource DataGrid.Small}" SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -131,7 +131,7 @@
                         <hc:SearchBar Name="LoadSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="LoadDataGrid" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
+                        <DataGrid x:Name="LoadDataGrid" AutoGenerateColumns="False" Style="{DynamicResource DataGrid.Small}" SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>

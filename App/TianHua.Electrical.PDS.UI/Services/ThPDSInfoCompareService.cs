@@ -59,8 +59,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                         .Select(x => ((Document)x.Tag).Database);
                         if (!databases.Any()) return;
                         new ThPDSSecondaryPushDataService().Push(databases.ToList());
-                        PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
-                        UpdateView(panel);
                     }),
                     CreateCmd = new RelayCommand(() =>
                     {
@@ -89,8 +87,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                         .Select(x => ((Document)x.Tag).Database);
                         if (!databases.Any()) return;
                         new ThPDSPushDataService().Push(databases.ToList());
-                        PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
-                        UpdateView(panel);
                     }),
                 };
                 panel.DataContext = vm;
