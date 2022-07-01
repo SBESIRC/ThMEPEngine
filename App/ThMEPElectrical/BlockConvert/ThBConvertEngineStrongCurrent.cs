@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -165,6 +166,9 @@ namespace ThMEPElectrical.BlockConvert
                 var srcBlockDataPosition = srcBlockData.GetNewBasePoint(true).TransformBy(srcBlockData.OwnerSpace2WCS);
                 var offset = targetBlockDataPosition.GetVectorTo(srcBlockDataPosition);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
+
+                // Z值归零
+                blockReference.ProjectOntoXYPlane();
                 targetBlockData.Position = blockReference.Position;
             }
         }
