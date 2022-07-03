@@ -74,14 +74,14 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding CircuitId}" Header="回路编号">
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding CircuitId}" Header="回路编号">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Background" Value="{Binding Background}"></Setter>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding CircuitType}" Header="回路类型">
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding CircuitType}" Header="回路类型">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Background" Value="{Binding Background}"></Setter>
@@ -140,14 +140,14 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding LoadId}" Header="负载编号">
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding LoadId}" Header="负载编号">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Background" Value="{Binding Background}"></Setter>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding LoadPower}" Header="负载功率">
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding LoadPower}" Header="负载功率">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Background" Value="{Binding Background}"></Setter>
