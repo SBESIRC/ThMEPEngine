@@ -19,7 +19,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
     class EstimateService
     {
-        static double ComputeTotalDistance(List<TopoTree> idTree, int doorIdEnd, int doorIdStart)
+        static double ComputeTotalDistance(List<TopoTreeNode> idTree, int doorIdEnd, int doorIdStart)
         {
             double distante = 0;
                

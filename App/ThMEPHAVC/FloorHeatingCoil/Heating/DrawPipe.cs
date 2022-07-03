@@ -14,7 +14,7 @@ using ThCADExtension;
 
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
-//using ThMEPHVAC.PassageWay;
+using ThMEPHVAC.FloorHeatingCoil.PassageWay;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
@@ -23,7 +23,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<SingleRegion> RegionList = ProcessedData.RegionList;
         public List<SingleDoor> DoorList = ProcessedData.DoorList;
         public List<SinglePipe> SinglePipeList = ProcessedData.PipeList;
-        static public Dictionary<Tuple<int, int>, List<Point3d>> DoorPipeToPointMap = ProcessedData.DoorPipeToPointMap;
+        public Dictionary<Tuple<int, int>, List<Point3d>> DoorPipeToPointMap = ProcessedData.DoorPipeToPointMap;
 
         public DrawPipe()
         {
@@ -60,14 +60,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     Point3d circleCenter = pipeIn[0] + vec0 / 2;
                     double radius = vec0.Length / 2;
                     
-                    DrawUtils.ShowGeometry(circleCenter, "l1Input", 10, lineWeightNum: 30, (int)radius, "C");
+                    DrawUtils.ShowGeometry(circleCenter, "l1Input1", 170, lineWeightNum: 30, (int)radius, "C");
 
 
-                    //PipeInput pipeInput = new PipeInput(circleCenter, radius);
-                    //RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInput, -Parameter.SuggestDistanceWall*2);
+                    PipeInput pipeInput = new PipeInput(circleCenter, radius);
+                    RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInput, -Parameter.SuggestDistanceWall * 2);
 
 
-                    ////if (i == 16) 
+                    ////if (i == 16)
                     ////{
                     ////    DrawUtils.ShowGeometry(nowRegion.ClearedPl, "l1testPl", 10, 30);
                     ////    DrawUtils.ShowGeometry(circleCenter, "l1testPoints", 5, lineWeightNum: 30, (int)radius, "C");
@@ -75,11 +75,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     //// calculate pipeline
 
-                    //roomPipeGenerator.CalculatePipeline();
-                    //// show result
-                    //var show = roomPipeGenerator.skeleton;
+                    roomPipeGenerator.CalculatePipeline();
+                    // show result
+                    var show = roomPipeGenerator.skeleton;
 
-                    //show.ForEach(x => DrawUtils.ShowGeometry(x, "l1RoomPipe", 10, 30));
+                    show.ForEach(x => DrawUtils.ShowGeometry(x, "l1RoomPipe", 10, 30));
                 }
                 else 
                 {
@@ -189,12 +189,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     main_index = pins.Count - 1 - main_index;
 
                     //pins.ForEach(x => DrawUtils.ShowGeometry(x, "l1Input", 7, lineWeightNum: 30, 30, "C"));
-                    //pouts.ForEach(x => DrawUtils.ShowGeometry(x, "l1Input", 7, lineWeightNum: 30, 30, "C"));
+                   // pouts.ForEach(x => DrawUtils.ShowGeometry(x, "l1Input", 7, lineWeightNum: 30, 30, "C"));
 
                     for (int a = 0; a < pins.Count; a++) 
                     {
-                        DrawUtils.ShowGeometry(pins[a], "l1Input", 10, lineWeightNum: 30, (int)pins_buffer[a], "C");
-                        DrawUtils.ShowGeometry(pouts[a], "l1Input", 10, lineWeightNum: 30, (int)pouts_buffer[a], "C");
+                        DrawUtils.ShowGeometry(pins[a], "l1Input2", 10, lineWeightNum: 30, (int)pins_buffer[a], "C");
+                    }
+
+                    for (int a = 0; a < pouts.Count; a++)
+                    {
+                        DrawUtils.ShowGeometry(pouts[a], "l1Out2", 8, lineWeightNum: 30, (int)pouts_buffer[a], "C");
                     }
 
                     //PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pins, pouts, pins_buffer, pouts_buffer, main_index);
@@ -202,7 +206,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //var show = passagePipeGenerator.skeleton;
                     //show.ForEach(x => DrawUtils.ShowGeometry(x, "l1passingPipe", 2, 30));
                 }
-                
             }
         }
     }

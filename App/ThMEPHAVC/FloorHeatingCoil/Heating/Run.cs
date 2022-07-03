@@ -14,46 +14,56 @@ using ThCADExtension;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
 using ThMEPHVAC.FloorHeatingCoil.Data;
+using ThMEPHVAC.FloorHeatingCoil.Model;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
     class Run
     {
         //输入数据
-        public RawData rawData0;
+        public List<RawData>  rawDataList = new List<RawData>();
 
         public Run(ThFloorHeatingDataProcessService dataQuery)
         {
-        
+
             //全局变量设定
-            //ParameterSetting(dataPass0);
+            ParameterSetting();
 
             //处理输入数据
-            this.rawData0= new RawData(dataQuery);
-
+            List<ThRoomSetModel> roomSet = dataQuery.RoomSet;
+            for (int i = 0; i < roomSet.Count; i++) 
+            {
+                RawData singleRawdata = new RawData(roomSet[i]);
+                this.rawDataList.Add(singleRawdata);
+            }
         }
 
         public void Pipeline()
         {
-            //数据处理
-            DataPreprocess dataPreprocess = new DataPreprocess(rawData0);
-            dataPreprocess.Pipeline();
 
-            //提取处理后的数据
-            DistributionService distributionService = new DistributionService();
-            distributionService.Pipeline();
+            for (int i = 0; i < rawDataList.Count; i++)
+            {
+                //数据处理
+                RawData rawData0 = rawDataList[i]; 
+                DataPreprocess dataPreprocess = new DataPreprocess(rawData0);
+                dataPreprocess.Pipeline();
 
-            //
-            FindPointService findPointService = new FindPointService();
-            findPointService.Pipeline();
+                //提取处理后的数据
+                DistributionService distributionService = new DistributionService();
+                distributionService.Pipeline();
 
-            //
-            DrawPipe drawPipe = new DrawPipe();
-            drawPipe.Pipeline();
+                //
+                FindPointService findPointService = new FindPointService();
+                findPointService.Pipeline();
+
+                //
+                DrawPipe drawPipe = new DrawPipe();
+                drawPipe.Pipeline();
+            }
         }
 
 
-        private void ParameterSetting(DataPass dataPass0)
+        private void ParameterSetting()
         {
             ////全局变量设定
             //Info.Type = dataPass0.LayoutObject;
@@ -62,8 +72,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //Info.AllowDoorInPaking = !dataPass0.AvoidParking;
 
             ////根据全局参数修改数据
-            //Info.Radius = Info.OriginRadius + 500;
-            //Info.SearchRadius = Info.OriginRadius - 300;
+            Parameter.TotalLength = 120000;
         }
 
         class DataPass

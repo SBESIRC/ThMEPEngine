@@ -11,6 +11,8 @@ using Linq2Acad;
 using ThMEPEngineCore.Diagnostics;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
 
@@ -18,7 +20,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
     class PolylineProcessService
     {
-        //
+        //基础Polyline操作 
         public static Polyline CreateBoundary(Point3d center, double shortSide, double longSide, Vector3d dir)
         {
             var tol = new Tolerance(10, 10);
@@ -39,7 +41,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             return boundary;
         }
-
 
         public static void GetRecInfo(Polyline rec, ref Point3d center, ref Vector3d ShortDir,ref Vector3d LongSide,ref Vector3d ShortSide)
         {
@@ -81,6 +82,27 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             boundary.Closed = true;
             boundary.AddVertexAt(0, pt0.ToPoint2D(), 0, 0, 0);
             boundary.AddVertexAt(1, pt1.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(2, pt2.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(3, pt3.ToPoint2D(), 0, 0, 0);
+
+            return boundary;
+        }
+
+        public static Polyline CreateRectangle3(Point3d pt0, Point3d pt1, double length, double length2)
+        {
+            Vector3d dir = pt1 - pt0;
+            Vector3d clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
+
+            Point3d pt2 = pt1 + clockwise270 * length;
+            Point3d pt3 = pt0 + clockwise270 * length;
+            Point3d pt4 = pt0 - clockwise270 * length2;
+            Point3d pt5 = pt1 - clockwise270 * length2;
+
+
+            var boundary = new Polyline();
+            boundary.Closed = true;
+            boundary.AddVertexAt(0, pt4.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(1, pt5.ToPoint2D(), 0, 0, 0);
             boundary.AddVertexAt(2, pt2.ToPoint2D(), 0, 0, 0);
             boundary.AddVertexAt(3, pt3.ToPoint2D(), 0, 0, 0);
 
@@ -167,7 +189,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Vector3d line1 = pt1 - pt0;
                 Vector3d line2 = pt2 - pt1;
                 Vector3d line3 = pt3 - pt2;
-                if (line1.Length < Parameter.ClearThreshold && line3.Length < Parameter.ClearThreshold)
+                double dProduct = line1.DotProduct(line3);
+                
+
+                if (line1.Length < Parameter.ClearThreshold && line3.Length < Parameter.ClearThreshold && dProduct < 0)
                 {
                     deleteList.Add(i);
                     deleteList.Add((i + num - 1) % num);
@@ -187,13 +212,206 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     newClearedPl.RemoveVertexAt(i);
                 }
             }
-            
+
             //第四筛
+            deleteList.Clear();
+            num = newClearedPl.NumberOfVertices;
+            Dictionary<int, Point3d> insertMap = new Dictionary<int, Point3d>();
+            for (int i = 0; i < num;)
+            {
+                Point3d pt0 = newClearedPl.GetPoint3dAt(i);
+                var pt1 = newClearedPl.GetPoint3dAt((i + 1) % num);
+                var pt2 = newClearedPl.GetPoint3dAt((i + 2) % num);
+                var pt3 = newClearedPl.GetPoint3dAt((i + 3) % num);
+                var pt4 = newClearedPl.GetPoint3dAt((i + 4) % num);
+
+                var pt5 = newClearedPl.GetPoint3dAt((i + 5) % num);
+                var ptf1 = newClearedPl.GetPoint3dAt((i + num - 1) % num);
+
+                Vector3d vec1 = pt1 - pt0;
+                Vector3d vec2 = pt2 - pt1;
+                Vector3d vec3 = pt3 - pt2;
+                Vector3d vec4 = pt4 - pt3;
+
+                int find = 0;
+                
+                if (vec2.Length < Parameter.ClearThreshold && vec3.Length < Parameter.ClearThreshold) 
+                {
+                    double angle = vec2.GetAngleTo(vec3, Vector3d.ZAxis);
+                    if ( angle < 1.5 *Math.PI + 0.1 && angle > 1.5 *Math.PI - 0.1) 
+                    {
+                        if (vec1.Length > vec4.Length) 
+                        {
+                            Line lineStart = new Line(pt1, pt1 + vec2.GetNormal() * Parameter.ClearExtendLength);
+                            Vector3d endVec = pt5 - pt4;
+                            Line lineEnd = new Line(pt4- endVec.GetNormal() * Parameter .ClearThreshold *2, pt5 + endVec.GetNormal() * Parameter.ClearThreshold * 2);
+                            List<Point3d> intersectionList = lineStart.Intersect(lineEnd, Intersect.OnBothOperands);
+                            if (intersectionList.Count > 0)
+                            {
+                                Point3d intersectionPoint  = intersectionList.FindByMin(x => x.DistanceTo(pt1));
+                      
+                                deleteList.Add((i + 2) % num);
+                                deleteList.Add((i + 3) % num);
+                                deleteList.Add((i + 4) % num);
+
+                                insertMap.Add(i+2,intersectionPoint);
+                                find = 1;
+                            }               
+                        }
+                        else   //vec1.Length < vec4.Length
+                        {
+                            Line lineStart = new Line(pt3, pt3 - vec3.GetNormal() * Parameter.ClearExtendLength);
+                            Vector3d endVec = pt0 - ptf1;
+                            Line lineEnd = new Line(ptf1 - endVec.GetNormal() * Parameter.ClearThreshold * 2, pt0 + endVec.GetNormal() * Parameter.ClearThreshold * 2);
+                            List<Point3d> intersectionList = lineStart.Intersect(lineEnd, Intersect.OnBothOperands);
+                            if (intersectionList.Count > 0)
+                            {
+                                Point3d intersectionPoint = intersectionList.FindByMin(x => x.DistanceTo(pt3));
+
+                                deleteList.Add((i) % num);
+                                deleteList.Add((i + 1) % num);
+                                deleteList.Add((i + 2) % num);
+
+                                insertMap.Add((i + num) % num, intersectionPoint);
+                                find = 1;
+                            }
+                        }
+                    }
+                }
+
+                if (find == 1) i = i + 4;
+                else i++;
+            }
+            List<int> insertList = insertMap.Keys.ToList();
+            for (int i = num - 1; i >= 0; i--)
+            {
+                if (deleteList.Contains(i))
+                {
+                    newClearedPl.RemoveVertexAt(i);
+                }
+                if (insertList.Contains(i)) 
+                {
+                    newClearedPl.AddVertexAt(i, insertMap[i].ToPoint2D(),0,0,0);
+                }
+            }
+
+
+            //第五筛
+            deleteList.Clear();
+            insertMap.Clear();
+            insertList.Clear();
+            num = newClearedPl.NumberOfVertices;
+            for (int i = 0; i < num;)
+            {
+                Point3d pt0 = newClearedPl.GetPoint3dAt(i);
+                var pt1 = newClearedPl.GetPoint3dAt((i + 1) % num);
+                var pt2 = newClearedPl.GetPoint3dAt((i + 2) % num);
+                var pt3 = newClearedPl.GetPoint3dAt((i + 3) % num);
+                var pt4 = newClearedPl.GetPoint3dAt((i + 4) % num);
+
+                Vector3d vec1 = pt1 - pt0;
+                Vector3d vec2 = pt2 - pt1;
+                Vector3d vec3 = pt3 - pt2;
+                Vector3d vec4 = pt4 - pt3;
+
+                int find = 0;
+                double angle = vec1.GetAngleTo(vec2, Vector3d.ZAxis);
+
+                if (vec2.Length < Parameter.ClearThreshold && angle < 1.5 * Math.PI + 0.1  && angle > 1.5 * Math.PI - 0.1)
+                {
+                    Line lineStart = new Line(pt0, pt0 + vec1.GetNormal() * Parameter.ClearExtendLength);
+                    Line lineEnd = new Line(pt3 - vec4.GetNormal() * Parameter.ClearThreshold * 2, pt4 + vec4.GetNormal() * Parameter.ClearThreshold * 2);
+                    List<Point3d> intersectionList = lineStart.Intersect(lineEnd, Intersect.OnBothOperands);
+                    if (intersectionList.Count > 0)
+                    {
+                        Point3d intersectionPoint = intersectionList.FindByMin(x => x.DistanceTo(pt1));
+
+                        deleteList.Add((i + 1) % num);
+                        deleteList.Add((i + 2) % num);
+                        deleteList.Add((i + 3) % num);
+
+                        insertMap.Add((i+1)%num, intersectionPoint);
+                        find = 1;
+                    }
+                }
+                if (find == 1) i = i + 3;
+                else i++;
+            }
+            insertList = insertMap.Keys.ToList();
+            for (int i = num - 1; i >= 0; i--)
+            {
+                if (deleteList.Contains(i))
+                {
+                    newClearedPl.RemoveVertexAt(i);
+                }
+                if (insertList.Contains(i))
+                {
+                    newClearedPl.AddVertexAt(i, insertMap[i].ToPoint2D(), 0, 0, 0);
+                }
+            }
+
+
+            deleteList.Clear();
+            insertMap.Clear();
+            insertList.Clear();
+            num = newClearedPl.NumberOfVertices;
+            for (int i = num-1; i >= 0;)
+            {
+                Point3d pt0 = newClearedPl.GetPoint3dAt(i);
+                var pt1 = newClearedPl.GetPoint3dAt((i - 1 + num) % num);
+                var pt2 = newClearedPl.GetPoint3dAt((i - 2 + num) % num);
+                var pt3 = newClearedPl.GetPoint3dAt((i - 3 + num) % num);
+                var pt4 = newClearedPl.GetPoint3dAt((i - 4 + num) % num);
+
+                Vector3d vec1 = pt1 - pt0;
+                Vector3d vec2 = pt2 - pt1;
+                Vector3d vec3 = pt3 - pt2;
+                Vector3d vec4 = pt4 - pt3;
+
+                int find = 0;
+                double angle = vec1.GetAngleTo(vec2, Vector3d.ZAxis);
+
+                if (vec2.Length < Parameter.ClearThreshold && angle < 0.5 * Math.PI + 0.1 && angle > 0.5 * Math.PI - 0.1)
+                {
+                    Line lineStart = new Line(pt0, pt0 + vec1.GetNormal() * Parameter.ClearExtendLength);
+                    Line lineEnd = new Line(pt3 - vec4.GetNormal() * Parameter.ClearThreshold * 2, pt4 + vec4.GetNormal() * Parameter.ClearThreshold * 2);
+                    List<Point3d> intersectionList = lineStart.Intersect(lineEnd, Intersect.OnBothOperands);
+                    if (intersectionList.Count > 0)
+                    {
+                        Point3d intersectionPoint = intersectionList.FindByMin(x => x.DistanceTo(pt1));
+
+                        deleteList.Add((i - 1 + num) % num);
+                        deleteList.Add((i - 2 + num) % num);
+                        deleteList.Add((i - 3 + num) % num);
+
+                        insertMap.Add((i - 3+ num) % num, intersectionPoint);
+                        find = 1;
+                    }
+                }
+                if (find == 1) i = i - 3;
+                else i--;
+            }
+            insertList = insertMap.Keys.ToList();
+            for (int i = num - 1; i >= 0; i--)
+            {
+                if (deleteList.Contains(i))
+                {
+                    newClearedPl.RemoveVertexAt(i);
+                }
+                if (insertList.Contains(i))
+                {
+                    newClearedPl.AddVertexAt(i, insertMap[i].ToPoint2D(), 0, 0, 0);
+                }
+            }
+
+            //return
             return newClearedPl;
         }
 
         static public void ClearPolyline(ref Polyline newClearedPl) 
         {
+            if (!newClearedPl.IsCCW()) newClearedPl.ReverseCurve();
+            
             List<int> deleteList = new List<int>();
             int num = newClearedPl.NumberOfVertices;
 

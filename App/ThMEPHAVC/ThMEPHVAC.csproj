@@ -96,6 +96,7 @@
     <Compile Include="FloorHeatingCoil\Heating\DistributionService.cs" />
     <Compile Include="FloorHeatingCoil\Heating\DrawPipe.cs" />
     <Compile Include="FloorHeatingCoil\Heating\EstimateService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\ExhaustiveDistribution.cs" />
     <Compile Include="FloorHeatingCoil\Heating\FindPointService.cs" />
     <Compile Include="FloorHeatingCoil\Heating\PolylineProcessService.cs" />
     <Compile Include="FloorHeatingCoil\Heating\RegionModel.cs" />
@@ -105,6 +106,17 @@
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingRoom.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThRoomSetModel.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\BufferPoly.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\data\PipeInput.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\MainPipeIntersector.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\model\BufferTreeNode.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\model\PipeSegment.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\NomalPipeIntersector.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\PassagePipeGenerator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\PassageWayUtils.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\RoomPipeGenerator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\test.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\PassageShowUtils.cs" />
     <Compile Include="FloorHeatingCoil\Service\LineStringEx.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThGeomUtil.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThMEPHVACCommonUtils.cs" />

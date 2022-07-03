@@ -80,36 +80,48 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             //输出结果
             SaveResults();
-
         }
 
         public void ReadPureData()
         {
-            //
+            //处理Room
             foreach (ThFloorHeatingRoom a in rawData1.Room)
             {
                 Polyline pl = a.RoomBoundary.Shell();
                 RegionObbs.Add(pl);
             }
-            foreach (Polyline b in rawData1.Door)
-            {
-                Door1Obbs.Add(b.Clone() as Polyline);
-            }
-            foreach (Polyline c in rawData1.RoomSeparateLine)
-            {
-                Door2Line.Add(c);
-                var pls = ThCADCoreNTSOperation.BufferFlatPL(c, 20).OfType<Polyline>().ToList();
-                var pl = pls.OrderByDescending(x => x.Area).First();
-                Door2Obbs.Add(pl);
-            }
-
-            //建立空间索引
             ThCADCoreNTSSpatialIndex originalRegionIndex = new ThCADCoreNTSSpatialIndex(RegionObbs.ToCollection());
             ProcessedData.RegionIndex = originalRegionIndex;
             for (int i = 0; i < RegionObbs.Count; i++)
             {
                 RegionToIndex.Add(RegionObbs[i], i);
             }
+
+            //处理门
+
+            foreach (Polyline b in rawData1.Door)
+            {
+                Door1Obbs.Add(b.Clone() as Polyline);
+            }
+            
+            ThCADCoreNTSSpatialIndex originalDoorIndex = new ThCADCoreNTSSpatialIndex(Door1Obbs.ToCollection());
+           
+            foreach (Polyline c in rawData1.RoomSeparateLine)
+            {
+                //var bigBuffers = ThCADCoreNTSOperation.BufferFlatPL(c, 100).OfType<Polyline>().ToList();
+                //var bigBuffer = bigBuffers.OrderByDescending(x => x.Area).First();
+
+                //if (originalDoorIndex.SelectCrossingPolygon(bigBuffer).Count > 0) continue;
+                if (c.Length < 200) continue;
+                Door2Line.Add(c);
+                var pls = ThCADCoreNTSOperation.BufferFlatPL(c, 20).OfType<Polyline>().ToList();
+                var pl = pls.OrderByDescending(x => x.Area).First();
+                Door2Obbs.Add(pl);
+            }
+            
+
+            //建立空间索引
+            
 
             //
             RegionConnection = new List<List<Connection>>(new List<Connection>[RegionObbs.Count]);
@@ -206,9 +218,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             foreach (Polyline doorPl in door1Obbs)
             {
-                List<int> FoundRegionId = new List<int>();
+                List<int> foundRegionId = new List<int>();
 
                 List<Polyline> selectRooms = ProcessedData.RegionIndex.SelectCrossingPolygon(doorPl).OfType<Polyline>().ToList();
+                if (selectRooms.Count < 2) continue;
+
                 foreach (Polyline room in selectRooms)
                 {
                     var roomObj = new DBObjectCollection();
@@ -217,22 +231,68 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     Polyline overlapArea = room.Intersection(roomObj).OfType<Polyline>().FindByMax(x => x.Area);
                     if (overlapArea.Area > Parameter.ConnectionThresholdArea)
                     {
-                        FoundRegionId.Add(RegionToIndex[room]);
+                        foundRegionId.Add(RegionToIndex[room]);
                     }
                 }
 
-                if (FoundRegionId.Count != 2)
+                //if (FoundRegionId.Count != 2)
+                //{
+                //    //Thread.SpinWait(100000);
+                //    continue;
+                //}
+                //else
+                //{
+                //    int region0 = FoundRegionId[0];
+                //    int region1 = FoundRegionId[1];
+
+                //    //互相连通
+                //    RegionConnection[region0].Add(new Connection(doorPl, region1));
+                //    RegionConnection[region1].Add(new Connection(doorPl, region0));
+                //}
+
+                if (foundRegionId.Count < 2)
                 {
                     Thread.SpinWait(100000);
+                    continue;
                 }
-                else
+                else 
                 {
-                    int region0 = FoundRegionId[0];
-                    int region1 = FoundRegionId[1];
+                    if (foundRegionId.Contains(2)) 
+                    {
+                        int stop = 0;
+                    }
 
-                    //互相连通
-                    RegionConnection[region0].Add(new Connection(doorPl, region1));
-                    RegionConnection[region1].Add(new Connection(doorPl, region0));
+                    List<Line> foundDoorLine = new List<Line>();
+                    for (int i = 0; i < foundRegionId.Count; i++) 
+                    {
+                        int nowRegionId = foundRegionId[i];
+                        Line doorLine = regionObbs[nowRegionId].Trim(doorPl).OfType<Polyline>().ToList().FindByMax(x=>x.Length).ToLines().FindByMax(x =>x.Length);
+
+                        DrawUtils.ShowGeometry(doorLine, "l1tmpPl", 10, lineWeightNum: 30);
+                        foundDoorLine.Add(doorLine);
+                    }
+
+
+                    for (int j = 0; j < foundRegionId.Count - 1; j++)
+                    {
+                        for (int k = j + 1; k < foundRegionId.Count; k++)
+                        {
+                            int region0 = foundRegionId[j];
+                            int region1 = foundRegionId[k];
+
+                            if (Math.Min(foundDoorLine[j].Length,foundDoorLine[k].Length) > Parameter.ConnectionThresholdLength) 
+                            {
+                                int isFound = 0;
+                                Polyline newDoorPl = GetNewDoorPolyline(doorPl,foundDoorLine[j], foundDoorLine[k],ref isFound);
+                                if (isFound == 1) 
+                                {
+                                    RegionConnection[region0].Add(new Connection(newDoorPl, region1));
+                                    RegionConnection[region1].Add(new Connection(newDoorPl, region0));
+                                    DrawUtils.ShowGeometry(newDoorPl, "l1newDoorPl", 8, lineWeightNum: 30);
+                                }
+                            } 
+                        }
+                    }
                 }
             }
         }
@@ -273,9 +333,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 if (FoundRegionId.Count < 2)
                 {
                     Thread.SpinWait(100000);
+                    continue;
                 }
                 else
                 {
+                    if (FoundRegionId.Contains(MainRegionId)) 
+                    {
+                        int stop = 0;
+                    }
+
                     for (int j = 0; j < FoundRegionId.Count - 1; j++)
                     {
                         for (int k = j+1 ; k < FoundRegionId.Count; k++)
@@ -288,9 +354,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                             //Polyline overlapLine = FoundDoorLine[k].Trim(bufferedLine).OfType<Polyline>().ToList().First();
                             var overlapLineList = bufferedLine.Trim(FoundDoorLine[k]).OfType<Polyline>().ToList();
                             Polyline overlapLine = new Polyline();
-                            if (overlapLineList.Count == 0)
+
+                            if (bufferedLine.Contains(FoundDoorLine[k])) 
                             {
                                 overlapLine = FoundDoorLine[k];
+                            }
+                            else if (overlapLineList.Count == 0)
+                            {
+                                continue;
+                                //overlapLine = FoundDoorLine[k];
                             }
                             else
                             {
@@ -299,9 +371,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                             if (overlapLine.Length > Parameter.ConnectionThresholdLength)
                             {
+                                //if (IsRepetition(region0, region1)) continue;
                                 var newDoorPl = ThCADCoreNTSOperation.BufferFlatPL(overlapLine, 20).OfType<Polyline>().ToList().FindByMax(x => x.Area);
                                 RegionConnection[region0].Add(new Connection(newDoorPl, region1));
                                 RegionConnection[region1].Add(new Connection(newDoorPl, region0));
+                                DrawUtils.ShowGeometry(newDoorPl, "l1newDoorPl", 8, lineWeightNum: 30);
                             }
                         }
                     }
@@ -309,6 +383,76 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
+        public Polyline GetNewDoorPolyline(Polyline originalDoorPl, Line line0, Line line1, ref int IsFound) 
+        {
+            Polyline newPl = new Polyline();
+            int index0 = -1;
+            int index1 = -1;
+            Vector3d dir0 = line0.EndPoint - line0.StartPoint;
+            Vector3d dir1 = line1.EndPoint - line1.StartPoint;
+            double shortSide = 0;
+            PolylineProcessService.ClearPolyline(ref originalDoorPl);
+
+            int num = originalDoorPl.NumberOfVertices;
+            for (int i = 0; i < num; i++)
+            {
+                var pt1 = originalDoorPl.GetPoint3dAt(i);
+                var pt2 = originalDoorPl.GetPoint3dAt((i + 1) % num);
+                Line nowLine = new Line(pt1, pt2);
+                Vector3d dir = pt2 - pt1;
+                
+                if (nowLine.Length < Parameter.ConnectionThresholdLength) 
+                {
+                    shortSide = nowLine.Length;
+                    continue;
+                }
+
+                if (nowLine.DistanceTo(line0.StartPoint,false) < Parameter.SmallTolerance && nowLine.DistanceTo(line0.EndPoint,false) < Parameter.SmallTolerance) 
+                {
+                    index0 = i;
+                    double angle = dir.GetAngleTo(dir0, Vector3d.ZAxis);
+                    if (angle > 0.1 && angle < 2 * Math.PI - 0.1) line0 = new Line(line0.EndPoint,line0.StartPoint); 
+                }
+                if (nowLine.DistanceTo(line1.StartPoint,false) < Parameter.SmallTolerance && nowLine.DistanceTo(line1.EndPoint,false) < Parameter.SmallTolerance)
+                {
+                    index1 = i;
+                    double angle = dir.GetAngleTo(dir1, Vector3d.ZAxis);
+                    if (angle > 0.1 && angle < 2 * Math.PI - 0.1) line1 = new Line(line1.EndPoint, line1.StartPoint);
+                }
+            }
+
+            if (Math.Min(index1, index0) == -1 || index0 == index1)
+            {
+                IsFound = 0;
+                return newPl;
+            }
+            else 
+            {
+                IsFound = 1;
+                if (line0.Length < line1.Length)
+                {
+                    newPl = PolylineProcessService.CreateRectangle2(line0.StartPoint, line0.EndPoint, shortSide);
+                    return newPl;
+                }
+                else 
+                {
+                    newPl = PolylineProcessService.CreateRectangle2(line1.StartPoint, line1.EndPoint, shortSide);
+                    return newPl;
+                }
+            }
+
+            return newPl;
+        } 
+
+        public bool IsRepetition(int region0 ,int region1) 
+        {
+            bool flag = false;
+            foreach (var connection in RegionConnection[region0]) 
+            {
+                if (connection.RegionId == region1) return true;
+            }
+            return flag;
+        }
         //整理拓扑关系,建图
         public void CreateGraph()
         {
@@ -380,6 +524,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     }
                     else  //如果曾访问过这一Region
                     {
+                        if (RegionList[nowId].ExportMap.ContainsKey(RegionList[nextRegionId])) continue;
+
                         SingleDoor newDoor = new SingleDoor(doorCount, RegionList[nowId], RegionList[nextRegionId], doorObb);
                         DoorList.Add(newDoor);
                         doorCount++;
@@ -396,6 +542,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public void ModelProcess()
         {
             //处理Region
+            List<int> deleteList = new List<int>();
+            for (int i = 0; i < RegionList.Count; i++) 
+            {
+                if (RegionList[i] == null) 
+                {
+                    deleteList.Add(i);
+                }
+            }
+            for (int i = deleteList.Count - 1; i >= 0; i--) 
+            {
+                RegionList.RemoveAt(deleteList[i]);
+            }
+
             RegionList = RegionList.OrderBy(x => x.RegionId).ToList();
             foreach (SingleRegion sr in RegionList)
             {
@@ -442,18 +601,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 //DrawUtils.ShowGeometry(upLine, "l1DoorLine", 3, lineWeightNum: 30);
                 int reverse = 0;
                 int index = 0;
-                FindPosition(upLine, sd.UpstreamRegion.ClearedPl, ref index,ref reverse);
+                FindPosition(upLine, sd.UpstreamRegion.ClearedPl, ref index, ref reverse);
                 sd.UpLineIndex = index;
-                if (reverse == 1)
-                {
-                    sd.UpFirst = upLine.EndPoint;
-                    sd.UpSecond = upLine.StartPoint;
-                }
-                else 
-                {
-                    sd.UpFirst = upLine.StartPoint;
-                    sd.UpSecond = upLine.EndPoint;
-                }
+                if (reverse == 1) upLine = new Line(upLine.EndPoint, upLine.StartPoint);
                 //门的下部
                 Line downLine = DoorToPoint3d(bufferedDoor, sd.DownstreamRegion.ClearedPl);
                 //DrawUtils.ShowGeometry(downLine, "l1DoorLine", 3, lineWeightNum: 30);
@@ -461,19 +611,21 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 index = 0;
                 FindPosition(downLine, sd.DownstreamRegion.ClearedPl, ref index, ref reverse);
                 sd.DownLineIndex = index;
-                if (reverse == 1)
-                {
-                    sd.DownFirst = downLine.EndPoint;
-                    sd.DownSecond = downLine.StartPoint;
-                }
-                else
-                {
-                    sd.DownFirst = downLine.StartPoint;
-                    sd.DownSecond = downLine.EndPoint;
-                }
+                if (reverse == 1) downLine = new Line(downLine.EndPoint, downLine.StartPoint);
+
+                CheckDoorLineFound(ref upLine, ref downLine, sd);
+
+                sd.UpFirst = upLine.StartPoint;
+                sd.UpSecond = upLine.EndPoint;
+   
+                sd.DownFirst = downLine.StartPoint;
+                sd.DownSecond = downLine.EndPoint;
+                
             }
 
         }
+
+        
 
         //修正门的大小
         public void ResizeTheDoor() 
@@ -525,6 +677,26 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     nowDoor.CCWDistance = DoorToDoorDistanceMap[nowDoor.DoorId, upDoorId].CCWDistance;
                 }
             }
+        }
+
+        //Check
+        public void CheckDoorLineFound(ref Line upLine,ref Line downLine, SingleDoor sd) 
+        {
+            //出现没对齐情况
+            if (Math.Max(downLine.Length, upLine.Length) - Math.Min(downLine.Length, upLine.Length) > 15)
+            {
+                if (downLine.Length > upLine.Length) ParallelLineClipping(ref upLine, ref downLine);
+                else ParallelLineClipping(ref downLine,ref upLine);
+            }
+        }
+        public void ParallelLineClipping(ref Line line0,ref Line line1) 
+        {
+            DrawUtils.ShowGeometry(line1, "l1test", 2, lineWeightNum: 30);
+            Polyline test0 = PolylineProcessService.CreateRectangle3(line0.EndPoint, line0.StartPoint,Parameter.DoorBufferValue*2,Parameter.DoorBufferValue);
+            DrawUtils.ShowGeometry(test0, "l1ParallelLineClipping", 150, lineWeightNum: 30);
+            List<Polyline> newLine1List = test0.Trim(line1).OfType<Polyline>().ToList();
+            Line newLine1 = newLine1List.FindByMax(x => x.Length).ToLines().ToList().FindByMax(x =>x.Length);
+            line1 = newLine1;
         }
 
         public Line DoorToPoint3d(Polyline doorObb, Polyline regionObb)
@@ -593,16 +765,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Line doorLine = new Line(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
             Point3d start = rawData1.WaterSeparator.StartPts[0];
             Point3d end = rawData1.WaterSeparator.StartPts.Last();
-            Vector3d waterDir = new Vector3d(0, -1, 0);
+            Vector3d waterDir = rawData1.WaterSeparator.Dir;
 
-            Point3d newStart = start + waterDir.GetNormal() * Parameter.WaterSeparatorDis;
-            Point3d newEnd = end + waterDir.GetNormal() * Parameter.WaterSeparatorDis;
-            Line line0 = new Line(start, newStart);
-            Line line1 = new Line(end, newEnd);
-            Point3d doorFirst = line0.Intersect(regionObb, Intersect.OnBothOperands).FindByMin(x=>x.DistanceTo(start));
-            Point3d doorSecond = line1.Intersect(regionObb, Intersect.OnBothOperands).FindByMin(x => x.DistanceTo(end));
-            doorLine = new Line(doorFirst, doorSecond);
-
+            //Point3d newStart = start + waterDir.GetNormal() * Parameter.WaterSeparatorDis;
+            //Point3d newEnd = end + waterDir.GetNormal() * Parameter.WaterSeparatorDis;
+            //Line line0 = new Line(start, newStart);
+            //Line line1 = new Line(end, newEnd);
+            //Point3d doorFirst = line0.Intersect(regionObb, Intersect.OnBothOperands).FindByMin(x=>x.DistanceTo(start));
+            //Point3d doorSecond = line1.Intersect(regionObb, Intersect.OnBothOperands).FindByMin(x => x.DistanceTo(end));
+            //DrawUtils.ShowGeometry(doorFirst, "l1WaterPoint", 5, lineWeightNum: 30, 30, "C");
+            //DrawUtils.ShowGeometry(doorSecond, "l1WaterPoint", 5, lineWeightNum: 30, 30, "C");
+            //doorLine = new Line(doorFirst, doorSecond);
+            doorLine = new Line(start, end);
             return doorLine;
         }
 
@@ -613,7 +787,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             int index = 0;
             int reverse = 0;
-            FindPosition(downLine, sd.DownstreamRegion.ClearedPl, ref index, ref reverse);
+            //FindPosition(downLine, sd.DownstreamRegion.ClearedPl, ref index, ref reverse);
             sd.DownLineIndex = index;
             if (reverse == 1)
             {
@@ -661,6 +835,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     SingleDoor upDoor = tmpSingleDoors[j];
                     int upDoorId = SingleDoorToIndex[upDoor];
                     if (upDoorId == i) continue;
+                    if (upDoorId == 0) 
+                    {
+                        //Point3d
+                        DoorToDoorDistanceMap[i, upDoorId] = new DoorToDoorDistance(i, upDoorId, 2000 , 1, 2000, 1);
+                    }
                     // ccw
                     double ccwLength = 0;
                     int ccwTurning = 0;
@@ -835,6 +1014,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             ProcessedData.RegionList = RegionList;
             ProcessedData.DoorList = DoorList;
             ProcessedData.DoorToDoorDistanceMap = DoorToDoorDistanceMap;
+            ProcessedData.RegionConnection = RegionConnection;
         }
     }
 

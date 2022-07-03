@@ -21,6 +21,7 @@ using ThMEPHVAC.FloorHeatingCoil.Cmd;
 using ThMEPHVAC.FloorHeatingCoil.Data;
 using ThMEPHVAC.FloorHeatingCoil.Service;
 using ThMEPHVAC.FloorHeatingCoil.Model;
+using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 {
@@ -95,7 +96,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 ///
 
                 //过程写在这里
-
+                Run run0 = new Run(dataQuery);
+                run0.Pipeline();
 
                 /////////////
 

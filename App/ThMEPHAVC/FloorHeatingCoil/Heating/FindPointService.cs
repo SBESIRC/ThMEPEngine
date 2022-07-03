@@ -117,7 +117,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         double offset = 0;
                         Point3d leftPoint = ptList[(nowDoor.UpLineIndex-1 + ptList.Count)%ptList.Count];
                         Vector3d leftDis = leftPoint - nowDoor.UpFirst;
-                        if (leftDis.Length < Parameter.SuggestDistanceWall * Parameter.IgnoreWall) 
+                        if (leftDis.Length < Parameter.SuggestDistanceRoom)  //如果过于靠近墙面且有相邻出口，则考虑内缩。
                         {
                             offset = leftAdjacentPipeNum * 2 * nowDoor.UpstreamRegion.SuggestDist;
                         }
@@ -128,7 +128,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         double offset = 0;
                         Point3d rightPoint = ptList[(nowDoor.UpLineIndex + 1) % ptList.Count];
                         Vector3d rightDis = rightPoint - nowDoor.UpSecond;
-                        if (rightDis.Length < Parameter.SuggestDistanceWall * Parameter.IgnoreWall)
+                        if (rightDis.Length < Parameter.SuggestDistanceRoom)
                         {
                             offset = rightAdjacentPipeNum * 2 * nowDoor.UpstreamRegion.SuggestDist;
                         }

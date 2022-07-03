@@ -253,6 +253,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                         againstWallLength = againstWallLength + (int)((3000 - distance) / 100 * Info.DistanceWeight);
                         if (distance == 0) 
                         { distance = 0; }
+
+                        //消防栓尽量不排中间，如果一定要排柱子中间，优先级下降2
                         if (searchPoint0.BasePointPosition[i] == 1) { againstWallLength = againstWallLength - 2; }
 
 
@@ -409,8 +411,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     FireCompareModel fireCompareModelsa = fireCompareModelsMix1[0];
                     FireCompareModel fireCompareModelsb = fireCompareModelsMix1[1];
                     if (fireCompareModelsa.fireCenterPoint.DistanceTo(fireCompareModelsb.fireCenterPoint) < 300
-                        && fireCompareModelsa.doorOpenDir + fireCompareModelsb.doorOpenDir == 1
-                        ) 
+                        && fireCompareModelsa.doorOpenDir + fireCompareModelsb.doorOpenDir == 1) 
                     {
                         if (overlappedAreaDoor[fireCompareModelsa] > overlappedAreaDoor[fireCompareModelsb]) 
                         {

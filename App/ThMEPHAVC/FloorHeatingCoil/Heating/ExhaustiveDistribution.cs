@@ -18,44 +18,52 @@ using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
-
-    class DistributionService
+    class ExhaustiveDistribution
     {
         //外部变量
         public List<SingleRegion> RegionList = ProcessedData.RegionList;
         public List<SingleDoor> DoorList = ProcessedData.DoorList;
         public DoorToDoorDistance[,] DoorToDoorDistanceMap = ProcessedData.DoorToDoorDistanceMap;
         //public List<List<Connection>> RegionConnection = ProcessedData.RegionConnection;
-
-        ////成员变量
-        public List<TopoTreeNode> SingleTopoTree;
-        Dictionary<int, int> RegionToNode = new Dictionary<int, int>();
         Dictionary<int, double> RegionUsedLength = new Dictionary<int, double>();
-        public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
 
-        //树的遍历
-        public List<int> RegionPostOrder = new List<int>();
+        //结果存储
+        public List<SinglePipe> SinglePipeList = new List<SinglePipe>();
+        public Dictionary<int, List<FeasibleSolution>> FeasibleSolutionMap = new Dictionary<int, List<FeasibleSolution>>(); 
+
+        //最外层穷举-树的结构
+        public List<List<TopoTreeNode>> TopoTreeList = new List<List<TopoTreeNode>>();
+        public List<Dictionary<int, int>> RegionToNodeList = new List<Dictionary<int, int>>();
+
+        //固定树结构后的共用变量
+        public List<TopoTreeNode> NowSingleTopoTree;
+        Dictionary<int, int> RegionToNode = new Dictionary<int, int>();
+        
+        //public List<int> RegionPostOrder = new List<int>();
+
+        public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
 
         //结果存储
         public Dictionary<int, List<SubScheme>> RegionSchemeMap = new Dictionary<int, List<SubScheme>>();
-        //public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
-        public List<SinglePipe> SinglePipeList = new List<SinglePipe>();
 
-        public DistributionService()
+        public ExhaustiveDistribution()
         {
 
         }
 
         public void Pipeline()
         {
-            //构造当前用到的树
-            CreateNowTree();
+            //构造拓扑树列表;
+            CreateTopoTreeList();
+   
+            for (int i = 0; i < TopoTreeList.Count; i++)
+            {
+                NowSingleTopoTree = TopoTreeList[i];
+                RegionToNode = RegionToNodeList[i];
 
-            //分配管道
-            Distribute();
-
-            //优化
-            Optimization();
+                //针对当前的拓扑树，搜索分配管道的可行解
+                CreateFeasibleSolutionList();
+            }
 
             //保存结果
             SaveResults();
@@ -64,13 +72,37 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             PrintResults();
         }
 
+
+        public void CreateTopoTreeList()
+        {
+            CreateIdTree();
+        }
+
+        public List<FeasibleSolution> CreateFeasibleSolutionList() 
+        {
+            List<FeasibleSolution> tmpFeasibleSolutions = new List<FeasibleSolution>();
+
+            //区分大小过道
+
+            //先对子节点进行排列组合
+            
+            //分配大过道，Level从大到小分配，直接贪心，能并则并。
+
+            //分配小过道
+
+            //选择优化/不优化
+
+            return tmpFeasibleSolutions;
+        }
+
+
         //预处理
         //Idtree 完全满足拓扑关系,与原来的List<SingleRegion>不完全相同。
-        void CreateNowTree()
+        void CreateIdTree()
         {
             //TopoTreeList = new List<TopoTree>(new TopoTree[RegionList.Count]);
-            SingleTopoTree = new List<TopoTreeNode>();
-            RegionToNode = new Dictionary<int, int>();
+            TopoTreeList = new List<TopoTreeNode>();
+            RegionToTree = new Dictionary<int, int>();
             Queue<int> topoIdQueue = new Queue<int>();
             List<int> visited = new List<int>();
             //int nowIndex = 0; 
@@ -78,20 +110,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             for (int i = 0; i < RegionList.Count; i++)
             {
                 visited.Add(0);
-                RegionToNode.Add(i, -1);
+                RegionToTree.Add(i, -1);
             }
 
             visited[0] = 1;
 
             topoIdQueue.Enqueue(0);
-            TopoTreeNode tmpNode = new TopoTreeNode(0, RegionList[0].Level, 0, 0);
-            RegionToNode[0] = SingleTopoTree.Count;
-            SingleTopoTree.Add(tmpNode);
+            TopoTreeNode tmpTree = new TopoTreeNode(0, RegionList[0].Level, 0, 0);
+            RegionToTree[0] = TopoTreeList.Count;
+            TopoTreeList.Add(tmpTree);
 
             while (topoIdQueue.Count > 0)
             {
                 int topoIndex = topoIdQueue.Dequeue();
-                int regionId = SingleTopoTree[topoIndex].NodeId;
+                int regionId = TopoTreeList[topoIndex].NodeId;
                 //int treeIndex = regionToTree[regionId]; 
                 List<int> childIdList = new List<int>();
                 for (int i = 0; i < RegionList[regionId].ChildRegion.Count; i++)
@@ -100,16 +132,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     if (visited[childRegionId] == 0)
                     {
                         visited[childRegionId] = 1;
-                        tmpNode = new TopoTreeNode(childRegionId, RegionList[childRegionId].Level, regionId, RegionList[regionId].ExportMap[RegionList[childRegionId]].DoorId);
-                        RegionToNode[childRegionId] = SingleTopoTree.Count;
-                        SingleTopoTree.Add(tmpNode);
+                        tmpTree = new TopoTreeNode(childRegionId, RegionList[childRegionId].Level, regionId, RegionList[regionId].ExportMap[RegionList[childRegionId]].DoorId);
+                        RegionToTree[childRegionId] = TopoTreeList.Count;
+                        TopoTreeList.Add(tmpTree);
                         //
                         childIdList.Add(childRegionId);
                         //
-                        topoIdQueue.Enqueue(RegionToNode[childRegionId]);
+                        topoIdQueue.Enqueue(RegionToTree[childRegionId]);
                     }
                 }
-                SingleTopoTree[topoIndex].ChildIdList = childIdList;
+                TopoTreeList[topoIndex].ChildIdList = childIdList;
             }
         }
 
@@ -121,7 +153,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         void Distribute()
         {
             //开始迭代
-            List<List<int>> levelOrderRegion = TopoTreeNode.LevelOrder(SingleTopoTree);
+            List<List<int>> levelOrderRegion = TopoTreeNode.LevelOrder(TopoTreeList);
             int level = levelOrderRegion.Count - 1;
             for (; level >= 0; level--)  //level >=0 
             {
@@ -132,7 +164,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 for (int i = 0; i < levelOrderRegion[level].Count; i++)
                 {
                     int topoIndex = levelOrderRegion[level][i];
-                    TopoTreeNode nowNode = SingleTopoTree[topoIndex];
+                    TopoTreeNode nowNode = TopoTreeList[topoIndex];
                     int regionId = nowNode.NodeId;
 
                     if (regionId == 2)
@@ -155,15 +187,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
 
-            TmpPipeList = RegionSchemeMap[0][0].TmpPipeList; 
+            TmpPipeList = RegionSchemeMap[0][0].TmpPipeList;
         }
 
         void CreateTmpPipe(int regionId)
         {
             //整理需要的数据
-            int topoIndex = RegionToNode[regionId];
+            int topoIndex = RegionToTree[regionId];
             SingleRegion nowRegion = RegionList[regionId];
-            int fatherId = SingleTopoTree[topoIndex].FatherId;
+            int fatherId = TopoTreeList[topoIndex].FatherId;
             SingleRegion fatherRegion = RegionList[fatherId];
             SingleDoor upDoor = nowRegion.EntranceMap[fatherRegion];
             int upDoorId = upDoor.DoorId;
@@ -226,9 +258,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         void MergePipesMode0(int regionId)
         {
             //获取常用变量
-            int topoIndex = RegionToNode[regionId];
+            int topoIndex = RegionToTree[regionId];
             SingleRegion nowRegion = RegionList[regionId];
-            int fatherId = SingleTopoTree[topoIndex].FatherId;
+            int fatherId = TopoTreeList[topoIndex].FatherId;
             SingleRegion fatherRegion = RegionList[fatherId];
             SingleDoor upDoor = nowRegion.EntranceMap[fatherRegion];
             int upDoorId = upDoor.DoorId;
@@ -434,21 +466,21 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
 
             //如果始终没有分配过主导管道，此时主导管道单独存在于最右侧
-            if (nowRegionDistributed == 0) 
+            if (nowRegionDistributed == 0)
             {
-                for (int i = 0; i < tmpPipesCopy.Count - 1; i++) 
+                for (int i = 0; i < tmpPipesCopy.Count - 1; i++)
                 {
                     TmpPipe nowPipeCopy = tmpPipesCopy[i].Copy();
 
-                    nowPipeCopy.Regularization(SingleTopoTree, RegionToNode);
+                    nowPipeCopy.Regularization(TopoTreeList, RegionToTree);
                     int pipeTreeId = nowPipeCopy.RegionToPipeTree[regionId];
 
                     double minlength = Parameter.TotalLength;
                     int isleft = 0;
-                    for (int j = 0; j < nowPipeCopy.PipeTreeList[pipeTreeId].ChildRegionIdList.Count; j++) 
+                    for (int j = 0; j < nowPipeCopy.PipeTreeList[pipeTreeId].ChildRegionIdList.Count; j++)
                     {
                         int downRegionId = nowPipeCopy.PipeTreeList[pipeTreeId].ChildRegionIdList[j];
-                        int downDoorId = SingleTopoTree[RegionToNode[downRegionId]].UpDoorId;
+                        int downDoorId = TopoTreeList[RegionToTree[downRegionId]].UpDoorId;
                         if (DoorToDoorDistanceMap[downDoorId, upDoorId].CCWDistance > DoorToDoorDistanceMap[downDoorId, upDoorId].CWDistance)
                         {
                             if (DoorToDoorDistanceMap[downDoorId, upDoorId].CWDistance < minlength)
@@ -457,7 +489,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                 isleft = 1;
                             }
                         }
-                        else 
+                        else
                         {
                             if (DoorToDoorDistanceMap[downDoorId, upDoorId].CCWDistance < minlength)
                             {
@@ -468,7 +500,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     }
 
                     if (isleft == 1) continue;
-                    else 
+                    else
                     {
                         TmpPipe nowRegionPipe = tmpPipesCopy.Last();
                         tmpPipesCopy.Insert(i, nowRegionPipe);
@@ -515,8 +547,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             List<SubScheme> subSchemes = new List<SubScheme>();
             SingleRegion nowRegion = RegionList[regionId];
-            int topoId = RegionToNode[regionId];
-            TopoTreeNode nowNode = SingleTopoTree[topoId];
+            int topoId = RegionToTree[regionId];
+            TopoTreeNode nowNode = TopoTreeList[topoId];
 
             for (int i = 0; i < nowNode.ChildIdList.Count; i++)
             {
@@ -536,7 +568,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             foreach (var pipe in bestTmpPipeList)
             {
-                pipe.CreatePipeTree(SingleTopoTree, RegionToNode);
+                pipe.CreatePipeTree(TopoTreeList, RegionToTree);
                 pipe.GetLeftRegionIdList();
                 pipe.GetRightRegionIdList();
             }
@@ -576,7 +608,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         for (int j = 0; j < nowAdjacentPipe.DomainIdList.Count; j++)
                         {
                             int regionId = nowAdjacentPipe.DomainIdList[j];
-                            int topoId = RegionToNode[regionId];
+                            int topoId = RegionToTree[regionId];
                             List<TmpPipe> testPipesList = bestTmpPipeList.Copy();
 
                             //区分左右
@@ -622,7 +654,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             bool flag = false;
 
-            if(IsPipeRegionConnect(getPipe, regionId) == 1)
+            if (IsPipeRegionConnect(getPipe, regionId) == 1)
             {
                 if (dir == 0) //左侧管线移动给右侧管线
                 {
@@ -633,13 +665,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     if (providePipe.LeftRegionIdList.Contains(regionId)) flag = true;
                 }
             }
-            
+
 
 
             return flag;
         }
 
-        public int IsPipeRegionConnect(TmpPipe nowPipe, int regionId) 
+        public int IsPipeRegionConnect(TmpPipe nowPipe, int regionId)
         {
             int flag = 0;
             List<int> connectionList = new List<int>();
@@ -652,22 +684,22 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //    connectionList.Add(sr.RegionId);
             //}
 
-            int topoIndex = RegionToNode[regionId];
-            connectionList.Add(SingleTopoTree[topoIndex].FatherId);
-            connectionList.AddRange(SingleTopoTree[topoIndex].ChildIdList);
+            int topoIndex = RegionToTree[regionId];
+            connectionList.Add(TopoTreeList[topoIndex].FatherId);
+            connectionList.AddRange(TopoTreeList[topoIndex].ChildIdList);
 
-            for (int i= 0;i< nowPipe.RegionIdList.Count;i++) 
+            for (int i = 0; i < nowPipe.RegionIdList.Count; i++)
             {
-                if (connectionList.Contains(nowPipe.RegionIdList[i])) 
+                if (connectionList.Contains(nowPipe.RegionIdList[i]))
                 {
                     flag = 1;
                     continue;
-                }                
+                }
             }
             return flag;
         }
 
-        public bool IsPipeIndexExchange(TmpPipe pipe1, TmpPipe pipe2 ,int isLeftOld) 
+        public bool IsPipeIndexExchange(TmpPipe pipe1, TmpPipe pipe2, int isLeftOld)
         {
             bool flag = false;
 
@@ -678,28 +710,28 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             if (RegionList[region1].Level > RegionList[region2].Level)
             {
-                int topoIndex1 = RegionToNode[region1];
-                TopoTreeNode nowNode = SingleTopoTree[topoIndex1];
-                TopoTreeNode fatherNode = SingleTopoTree[RegionToNode[nowNode.FatherId]];
-                if (DoorToDoorDistanceMap[nowNode.UpDoorId, fatherNode.UpDoorId].CCWDistance > DoorToDoorDistanceMap[nowNode.UpDoorId, fatherNode.UpDoorId].CWDistance)
+                int topoIndex1 = RegionToTree[region1];
+                TopoTreeNode nowNode = TopoTreeList[topoIndex1];
+                TopoTreeNode fatherTree = TopoTreeList[RegionToTree[nowNode.FatherId]];
+                if (DoorToDoorDistanceMap[nowNode.UpDoorId, fatherTree.UpDoorId].CCWDistance > DoorToDoorDistanceMap[nowNode.UpDoorId, fatherTree.UpDoorId].CWDistance)
                 {
                     isLeftNow = 1;
                 }
                 else isLeftNow = -1;
             }
-            else if (RegionList[region1].Level < RegionList[region2].Level) 
+            else if (RegionList[region1].Level < RegionList[region2].Level)
             {
-                int topoIndex2 = RegionToNode[region2];
-                TopoTreeNode nowNode = SingleTopoTree[topoIndex2];
-                TopoTreeNode fatherNode = SingleTopoTree[RegionToNode[nowNode.FatherId]];
-                if (DoorToDoorDistanceMap[nowNode.UpDoorId, fatherNode.UpDoorId].CCWDistance > DoorToDoorDistanceMap[nowNode.UpDoorId, fatherNode.UpDoorId].CWDistance)
+                int topoIndex2 = RegionToTree[region2];
+                TopoTreeNode nowNode = TopoTreeList[topoIndex2];
+                TopoTreeNode fatherTree = TopoTreeList[RegionToTree[nowNode.FatherId]];
+                if (DoorToDoorDistanceMap[nowNode.UpDoorId, fatherTree.UpDoorId].CCWDistance > DoorToDoorDistanceMap[nowNode.UpDoorId, fatherTree.UpDoorId].CWDistance)
                 {
                     isLeftNow = -1;
                 }
                 else isLeftNow = 1;
             }
 
-            if (isLeftNow * isLeftOld < 0) 
+            if (isLeftNow * isLeftOld < 0)
             {
                 flag = true;
             }
@@ -719,15 +751,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 move = 1;
                 newMinLength = Math.Min(newAdPipe.TotalLength, newNowPipe.TotalLength);
-                newNowPipe.Regularization(SingleTopoTree,RegionToNode);
-                newAdPipe.Regularization(SingleTopoTree,RegionToNode);
+                newNowPipe.Regularization(TopoTreeList, RegionToTree);
+                newAdPipe.Regularization(TopoTreeList, RegionToTree);
 
-                if (!IsPipeIndexExchange(newNowPipe, newAdPipe,nowAdjacentPipe - nowIndex))
+                if (!IsPipeIndexExchange(newNowPipe, newAdPipe, nowAdjacentPipe - nowIndex))
                 {
                     testPipesList[nowIndex] = newNowPipe;
                     testPipesList[nowAdjacentPipe] = newAdPipe;
                 }
-                else 
+                else
                 {
                     testPipesList[nowIndex] = newAdPipe;
                     testPipesList[nowAdjacentPipe] = newNowPipe;
@@ -751,7 +783,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 if (!newPipe.RegionIdList.Contains(id)) newPipe.RegionIdList.Add(id);
             }
-            newPipe.CreatePipeTree(SingleTopoTree, RegionToNode);
+            newPipe.CreatePipeTree(TopoTreeList, RegionToTree);
 
             newPipe.TotalLength = ComputePipeTreeLength(newPipe);
 
@@ -764,9 +796,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             newPipe.DomainIdList = oldPipe.DomainIdList;
             newPipe.DomainIdList.Remove(regionId);
-            newPipe.DomainIdListToRegionIdList(SingleTopoTree, RegionToNode);
+            newPipe.DomainIdListToRegionIdList(TopoTreeList, RegionToTree);
 
-            newPipe.CreatePipeTree(SingleTopoTree, RegionToNode);
+            newPipe.CreatePipeTree(TopoTreeList, RegionToTree);
 
             newPipe.TotalLength = ComputePipeTreeLength(newPipe);
 
@@ -776,12 +808,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<int> GetPassingRegion(int domainRegionId)
         {
             List<int> passingRegionIdList = new List<int>();
-            int topoId = RegionToNode[domainRegionId];
+            int topoId = RegionToTree[domainRegionId];
             while (true)
             {
-                passingRegionIdList.Add(SingleTopoTree[topoId].NodeId);
+                passingRegionIdList.Add(TopoTreeList[topoId].NodeId);
                 if (topoId == 0) break;
-                topoId = RegionToNode[SingleTopoTree[topoId].FatherId];
+                topoId = RegionToTree[TopoTreeList[topoId].FatherId];
             }
             return passingRegionIdList;
         }
@@ -795,8 +827,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 int nowRegion = idQueue.Dequeue();
                 PipeTreeNode nowNode = tmpPipe.PipeTreeList[tmpPipe.RegionToPipeTree[nowRegion]];
-                int topoId = RegionToNode[nowRegion];
-                int upUpDoorId = SingleTopoTree[topoId].UpDoorId;
+                int topoId = RegionToTree[nowRegion];
+                int upUpDoorId = TopoTreeList[topoId].UpDoorId;
 
                 if (tmpPipe.DomainIdList.Contains(nowRegion))
                 {
@@ -807,8 +839,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     int childId = nowNode.ChildRegionIdList[0];
                     idQueue.Enqueue(childId);
-                    int childTopoId = RegionToNode[childId];
-                    int upDoorId = SingleTopoTree[childTopoId].UpDoorId;
+                    int childTopoId = RegionToTree[childId];
+                    int upDoorId = TopoTreeList[childTopoId].UpDoorId;
                     totalLength += DoorToDoorDistanceMap[upDoorId, upUpDoorId].EstimatedDistance * 2;
                 }
                 else
@@ -817,8 +849,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     foreach (int childId in nowNode.ChildRegionIdList)
                     {
                         idQueue.Enqueue(childId);
-                        int childTopoId = RegionToNode[childId];
-                        int upDoorId = SingleTopoTree[childTopoId].UpDoorId;
+                        int childTopoId = RegionToTree[childId];
+                        int upDoorId = TopoTreeList[childTopoId].UpDoorId;
 
                         double nowLength = DoorToDoorDistanceMap[upDoorId, upUpDoorId].EstimatedDistance * 2;
                         if (nowLength > maxLength)
@@ -844,7 +876,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 TmpPipe nowPipe = tmpPipeList[i];
 
                 //init
-                nowPipe.RegionIdListToDoorIdList(SingleTopoTree, RegionToNode);
+                nowPipe.RegionIdListToDoorIdList(TopoTreeList, RegionToTree);
 
                 //保存pipe
                 SinglePipe newPipe = new SinglePipe(i);
@@ -928,8 +960,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             while (true)
             {
                 int upRegionId = DoorList[nowDoorId].UpstreamRegion.RegionId;
-                int topoIndex = RegionToNode[upRegionId];
-                int upDoorId = SingleTopoTree[topoIndex].UpDoorId;
+                int topoIndex = RegionToTree[upRegionId];
+                int upDoorId = TopoTreeList[topoIndex].UpDoorId;
 
                 distante += DoorToDoorDistanceMap[nowDoorId, upDoorId].EstimatedDistance;
                 int nowPosition = -1;
@@ -963,46 +995,46 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public void Distribute2()
         {
             List<TmpPipe> tmpRoomPipes = new List<TmpPipe>();
-            Dictionary<int,TmpPipe> bigTmpPassingPipes = new Dictionary<int, TmpPipe>();
+            Dictionary<int, TmpPipe> bigTmpPassingPipes = new Dictionary<int, TmpPipe>();
             Dictionary<int, TmpPipe> smallTmpPassingPipes = new Dictionary<int, TmpPipe>();
 
-            for (int i = 0; i < SingleTopoTree.Count; i++)
+            for (int i = 0; i < TopoTreeList.Count; i++)
             {
-                if (SingleTopoTree[i].ChildIdList.Count == 0)
+                if (TopoTreeList[i].ChildIdList.Count == 0)
                 {
-                    tmpRoomPipes.Add(CreateNewPipe2(SingleTopoTree[i]));
+                    tmpRoomPipes.Add(CreateNewPipe2(TopoTreeList[i]));
                 }
                 else
                 {
-                    TmpPipe newPipe = CreateNewPipe2(SingleTopoTree[i]);
+                    TmpPipe newPipe = CreateNewPipe2(TopoTreeList[i]);
                     if (newPipe.DownstreamLength < Parameter.SmallPassingThreshold)
                     {
-                        smallTmpPassingPipes.Add(SingleTopoTree[i].NodeId, newPipe);
+                        smallTmpPassingPipes.Add(TopoTreeList[i].NodeId, newPipe);
                     }
                     else
                     {
-                        bigTmpPassingPipes.Add(SingleTopoTree[i].NodeId, newPipe);
+                        bigTmpPassingPipes.Add(TopoTreeList[i].NodeId, newPipe);
                     }
                 }
             }
 
             //整理管道
             List<int> postOrderList = new List<int>();
-            TopoTreeNode.PostOrder(SingleTopoTree, RegionToNode, SingleTopoTree[0], ref postOrderList);
+            TopoTreeNode.PostOrder(TopoTreeList, RegionToTree, TopoTreeList[0], ref postOrderList);
             Dictionary<int, int> regionToIndex = new Dictionary<int, int>();
-            for (int i = 0; i < postOrderList.Count; i++) 
+            for (int i = 0; i < postOrderList.Count; i++)
             {
-                regionToIndex.Add(postOrderList[i] , i);
+                regionToIndex.Add(postOrderList[i], i);
             }
             tmpRoomPipes.OrderBy(x => regionToIndex[x.DomainIdList[0]]);
-            for (int i = 0; i < tmpRoomPipes.Count; i++) 
+            for (int i = 0; i < tmpRoomPipes.Count; i++)
             {
-                tmpRoomPipes[i].Regularization(SingleTopoTree,RegionToNode);
+                tmpRoomPipes[i].Regularization(TopoTreeList, RegionToTree);
             }
 
             //开始迭代
             int stop = 0;
-            while (stop == 0) 
+            while (stop == 0)
             {
                 List<TmpPipe> sortPipeList = new List<TmpPipe>();
                 sortPipeList.AddRange(bigTmpPassingPipes.Values.ToList());
@@ -1014,19 +1046,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
-        public TmpPipe CreateNewPipe2(TopoTreeNode topoTree) 
+        public TmpPipe CreateNewPipe2(TopoTreeNode topoTree)
         {
             int regionId = topoTree.NodeId;
             SingleRegion nowRegion = RegionList[regionId];
             int upDoorId = topoTree.UpDoorId;
             SingleDoor upDoor = DoorList[topoTree.UpDoorId];
-            
+
             //生产管道
             TmpPipe tmpPipe = new TmpPipe(0);
             tmpPipe.RegionIdList.Add(regionId);
             //tmpPipe.DoorIdList.Add(upDoorId);
             tmpPipe.DomainIdList.Add(regionId);
-            tmpPipe.DownstreamLength =RegionUsedLength[regionId];
+            tmpPipe.DownstreamLength = RegionUsedLength[regionId];
             RegionUsedLength.Add(regionId, nowRegion.UsedPipeLength);
             tmpPipe.UpstreamLength = ComputeTotalDistance(upDoorId, 0) * 2;
             tmpPipe.TotalLength = tmpPipe.UpstreamLength + tmpPipe.DownstreamLength;
@@ -1088,302 +1120,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
-        
+
     }
 
-    class SubScheme
+
+    class FeasibleSolution
     {
-        public int RegionId = -1;
-        public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
-        public SubScheme(int regionId)
+        public List<TmpPipe> tmpPipes = new List<TmpPipe>();
+        public double minPipeLength = 1000000;
+
+        public FeasibleSolution() { }
+        public FeasibleSolution(List<TmpPipe> tmpPipes) 
         {
-            RegionId = regionId;
+            tmpPipes = tmpPipes;
         }
     }
 
-    class TmpPipe
-    {
-        public int InternalId = -1;
-        public double TotalLength = 0;
-        public List<int> DomainIdList = new List<int>();
-
-
-        //可生成的属性
-        public List<int> RegionIdList = new List<int>();
-        public List<int> DoorIdList = new List<int>();
-        
-        //非必要属性
-        public double UpstreamLength = 0;
-        public double DownstreamLength = 0;
-        
-        //管道树属性
-        public List<PipeTreeNode> PipeTreeList = new List<PipeTreeNode>();
-        public List<int> LeftRegionIdList = new List<int>();
-        public List<int> RightRegionIdList = new List<int>();
-        public Dictionary<int, int> RegionToPipeTree = new Dictionary<int, int>();
-
-        public TmpPipe(int iid)
-        {   
-            InternalId = iid;
-        }
-
-        public void CreatePipeTree(List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree) 
-        {
-            PipeTreeList.Clear();
-            RegionToPipeTree.Clear();
-            List<int> sortedRegionIdList = RegionIdList.OrderBy(x => regionToTree[x]).ToList();
-            for (int i = 0; i < sortedRegionIdList.Count; i++) 
-            {
-                int topoId = regionToTree[sortedRegionIdList[i]];
-                List<int> childRegionIdList = new List<int>();
-                for (int j = 0; j < treeList[topoId].ChildIdList.Count; j++) 
-                {
-                    int childId = treeList[topoId].ChildIdList[j];
-                    if (RegionIdList.Contains(childId)) childRegionIdList.Add(childId);
-                }
-                int fatherRegionId = treeList[topoId].FatherId;
-                PipeTreeNode nowPipeTree = new PipeTreeNode(sortedRegionIdList[i], fatherRegionId, treeList[topoId].Level);
-                RegionToPipeTree.Add(sortedRegionIdList[i], PipeTreeList.Count);
-                nowPipeTree.ChildRegionIdList = childRegionIdList;
-                PipeTreeList.Add(nowPipeTree);
-            }
-        }
-
-        public void Regularization(List<TopoTreeNode> topoTreeList, Dictionary<int, int> regionToTree) 
-        {
-            DomainIdListToRegionIdList(topoTreeList, regionToTree);
-            CreatePipeTree(topoTreeList, regionToTree);
-            GetLeftRegionIdList();
-            GetRightRegionIdList();
-        }
-
-        public void DomainIdListToRegionIdList(List<TopoTreeNode> topoTreeList, Dictionary<int, int> regionToTree) 
-        {
-            RegionIdList.Clear();
-
-            List<int> visited = new List<int>();
-            for (int i = 0; i < topoTreeList.Count; i++)
-            {
-                visited.Add(0);
-            }
-
-            for (int i = 0; i < DomainIdList.Count; i++)
-            {
-                List<int> nowPassingList = GetPassingRegion(DomainIdList[i], topoTreeList, regionToTree);
-                for (int j = 0; j < nowPassingList.Count; j++)
-                {
-                    if (visited[nowPassingList[j]] == 0)
-                    {
-                        visited[nowPassingList[j]] = 1;
-                        RegionIdList.Add(nowPassingList[j]);
-                    }
-                }
-            }          
-        }
-
-        public void RegionIdListToDoorIdList(List<TopoTreeNode> topoTreeList, Dictionary<int, int> regionToTree) 
-        {
-            DoorIdList.Clear();
-            for (int i = 0; i < RegionIdList.Count; i++) 
-            {
-                int topoId = regionToTree[RegionIdList[i]];
-                DoorIdList.Add(topoTreeList[topoId].UpDoorId);
-            }
-        }
-
-        public void GetLeftRegionIdList()
-        {
-            LeftRegionIdList.Clear();
-            int nowPipeTreeIndex = 0;
-
-            while (true) 
-            {
-                LeftRegionIdList.Add(PipeTreeList[nowPipeTreeIndex].NowRegionId);
-                if (PipeTreeList[nowPipeTreeIndex].ChildRegionIdList.Count > 0)
-                {
-                    int leftChildId = PipeTreeList[nowPipeTreeIndex].ChildRegionIdList.First();
-                    nowPipeTreeIndex = RegionToPipeTree[leftChildId];
-                }
-                else 
-                {
-                    break;
-                }
-            }
-        }
-
-        public void GetRightRegionIdList()
-        {
-            RightRegionIdList.Clear();
-            int nowPipeTreeIndex = 0;
-
-            while (true)
-            {
-                RightRegionIdList.Add(PipeTreeList[nowPipeTreeIndex].NowRegionId);
-                if (PipeTreeList[nowPipeTreeIndex].ChildRegionIdList.Count > 0)
-                {
-                    int rightChildId = PipeTreeList[nowPipeTreeIndex].ChildRegionIdList.Last();
-                    nowPipeTreeIndex = RegionToPipeTree[rightChildId];
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        public List<int> GetPassingRegion(int domainRegionId ,List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree)
-        {
-            List<int> passingRegionIdList = new List<int>();
-            int topoId = regionToTree[domainRegionId];
-            while (true)
-            {
-                passingRegionIdList.Add(treeList[topoId].NodeId);
-                if (topoId == 0) break;
-                topoId = regionToTree[treeList[topoId].FatherId];
-            }
-            return passingRegionIdList;
-        }
-
-    }
-
-    class TopoTreeNode
-    {
-        public int NodeId = -1;
-        public int Level = -1;
-        public int FatherId = -1;
-        public int UpDoorId = -1;
-        public List<int> ChildIdList = new List<int>();
-
-        public TopoTreeNode(int nodeId, int level, int fatherId, int upDoorId)
-        {
-            this.NodeId = nodeId;
-            this.Level = level;
-            this.FatherId = fatherId;
-            this.UpDoorId = upDoorId;
-            //this.ChildId = childId;
-        }
-
-        static public List<List<int>> levelOrder(List<TopoTreeNode> treeNode)
-        {
-
-            //层次遍历
-            Queue<int> queue = new Queue<int>();
-            List<List<int>> list = new List<List<int>>();
-            TopoTreeNode parentNode = treeNode[0];
-
-            queue.Enqueue(parentNode.NodeId);
-            while (queue.Count > 0)
-            {
-                //出一个，进n个
-                //出一个
-                int nodeId = queue.Dequeue();
-                list[0].Add(nodeId);
-                //进n个
-                //List<IdTree> childens = node.ChildId;
-                //for (IdTree childNode : childens)
-                //{
-                //    queue.add(childNode);
-                //}
-            }
-            return list;
-        }
-
-        static public List<List<int>> LevelOrder(List<TopoTreeNode> treeNode)
-        {
-            List<List<int>> list = new List<List<int>>();
-            int nowLevel = 0;
-            List<int> tmpList = new List<int>();
-            for (int i = 0; i < treeNode.Count; i++)
-            {
-                tmpList.Add(i);
-                if (i == treeNode.Count - 1 || treeNode[i + 1].Level > nowLevel)
-                {
-                    List<int> newList = new List<int>(tmpList);
-                    list.Add(newList);
-                    nowLevel++;
-                    tmpList.Clear();
-                }
-            }
-            return list;
-        }
-        
-        static public void PostOrder(List<TopoTreeNode> treeList, Dictionary<int,int> regionToTree, TopoTreeNode topoTree, ref List<int> postOrderList)
-        {
-            for (int i = 0; i < topoTree.ChildIdList.Count; i++) 
-            {
-                int childRegionId = topoTree.ChildIdList[i];
-                TopoTreeNode childTree = treeList[regionToTree[childRegionId]];
-                TopoTreeNode.PostOrder(treeList, regionToTree, childTree, ref postOrderList);
-            }
-            postOrderList.Add(topoTree.NodeId);
-        }
-    }
-
-    class PipeTreeNode
-    {
-        public int Level = -1;
-        public int NowRegionId = -1;
-        public int FatherRegionId = -1;
-        public List<int> ChildRegionIdList = new List<int>();
-        public PipeTreeNode(int nowRegion, int fatherRegion,int level) 
-        {
-            NowRegionId = nowRegion;
-            FatherRegionId = fatherRegion;
-            Level = level;
-        }
-    }
-
-    class CompareModel 
-    {
-        public double MinLength;
-        public List<TmpPipe> TmpPipeList;
-
-        public CompareModel(List<TmpPipe> tmpPipes, double minLength) 
-        {
-            this.TmpPipeList = tmpPipes;
-            this.MinLength = minLength;
-        }
-
-        public CompareModel(List<TmpPipe> tmpPipes)
-        {
-            this.TmpPipeList = tmpPipes;
-            this.MinLength = tmpPipes.FindByMin(x => x.TotalLength).TotalLength;
-        }
-    }
-
-    ////废弃
-
-    //class MergeElement
-    //{
-    //    int Id = -1;
-    //    int IsPassing = 0;
-    //    List<int> AdjacentId = new List<int>();
-    //    double InRegionDistance = 0;
-
-    //    public MergeElement() 
-    //    {
-
-    //    }
-    //}
-
-    //class DistanceStorage 
-    //{
-    //    public double upPassagewayLength = 0;
-    //    public double downPassagewayLength = 0;
-    //    public double anticlockwiseLength = 0;
-    //    public double clockwiseLength = 0;
-    //}
-
-
-    //    foreach (int id in passingRegionIdLIst)
-    //{
-    //    if (newPipe.RegionIdList.Contains(id)) 
-    //    {
-    //        int index = oldPipe.RegionToPipeTree[regionId];
-    //        if (!newPipe.DomainIdList.Contains(id) && oldPipe.PipeTreeList[index].ChildRegionIdList.Count< 2) 
-    //        {
-    //            newPipe.RegionIdList.Remove(id);
-    //        }
-    //    }
-    //}
 }
