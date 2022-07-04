@@ -7,7 +7,7 @@
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
              mc:Ignorable="d" Title="新建负载"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="215" d:DesignWidth="265" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -20,8 +20,8 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
-            <Button Width="100" Click="btnInsert">插入到平面</Button>
-            <Button Width="100" Click="btnSave">保存修改</Button>
+            <Button Margin="3" Click="btnInsert">插入到平面</Button>
+            <Button Margin="3" Click="btnSave">保存修改</Button>
         </StackPanel>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
