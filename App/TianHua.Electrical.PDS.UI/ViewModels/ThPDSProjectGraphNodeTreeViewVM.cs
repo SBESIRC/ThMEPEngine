@@ -78,34 +78,40 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 {
                     if (CanAcceptChildren(targetItem.Parent))
                     {
-                        // 数据更新
-                        var targetNode = GetProjectGraphNode(sourceItem, _graph);
                         var oldsourceNode = GetProjectGraphNode(sourceItem.Parent, _graph);
                         var newSourceNode = GetProjectGraphNode(targetItem.Parent, _graph);
-                        ThPDSProjectGraphService.DeleteCircuit(_graph, oldsourceNode, targetNode);
-                        ThPDSProjectGraphService.SpecifyConnectionCircuit(_graph, newSourceNode, targetNode);
-
-                        // 界面更新
-                        sourceItem.Parent.DataList.Remove(sourceItem);
-                        targetItem.Parent.DataList.Add(sourceItem);
-                        sourceItem.Parent = targetItem.Parent;
+                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        {
+                            var targetNode = GetProjectGraphNode(sourceItem, _graph);
+                            ThPDSProjectGraphService.DeleteCircuit(_graph, oldsourceNode, targetNode);
+                            ThPDSProjectGraphService.SpecifyConnectionCircuit(_graph, newSourceNode, targetNode);
+                        }
+                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        {
+                            sourceItem.Parent.DataList.Remove(sourceItem);
+                            targetItem.Parent.DataList.Add(sourceItem);
+                            sourceItem.Parent = targetItem.Parent;
+                        }
                     }
                 }
                 else
                 {
                     if (CanAcceptChildren(targetItem))
                     {
-                        // 数据更新
-                        var targetNode = GetProjectGraphNode(sourceItem, _graph);
                         var oldsourceNode = GetProjectGraphNode(sourceItem.Parent, _graph);
                         var newSourceNode = GetProjectGraphNode(targetItem, _graph);
-                        ThPDSProjectGraphService.DeleteCircuit(_graph, oldsourceNode, targetNode);
-                        ThPDSProjectGraphService.SpecifyConnectionCircuit(_graph, newSourceNode, targetNode);
-
-                        // 界面更新
-                        sourceItem.Parent.DataList.Remove(sourceItem);
-                        targetItem.DataList.Add(sourceItem);
-                        sourceItem.Parent = targetItem;
+                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        {
+                            var targetNode = GetProjectGraphNode(sourceItem, _graph);
+                            ThPDSProjectGraphService.DeleteCircuit(_graph, oldsourceNode, targetNode);
+                            ThPDSProjectGraphService.SpecifyConnectionCircuit(_graph, newSourceNode, targetNode);
+                        }
+                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        {
+                            sourceItem.Parent.DataList.Remove(sourceItem);
+                            targetItem.DataList.Add(sourceItem);
+                            sourceItem.Parent = targetItem;
+                        }
                     }
                 }
             }
