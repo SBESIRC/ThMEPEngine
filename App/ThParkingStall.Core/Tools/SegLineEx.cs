@@ -532,7 +532,9 @@ namespace ThParkingStall.Core.Tools
             var VerticalDirection = segline.IsVertical();
             var pts = segline.GetIntSecPointWithWall(Area);
             var IntSecPoints = GetAllIntSecPs(idx, seglines);
-            var BasePt = seglines[idx].ToLineString().Intersection(Area).Get<LineString>().OrderBy(lstr => lstr.Length).Last().Centroid;
+            var intSections = seglines[idx].ToLineString().Intersection(Area).Get<LineString>().OrderBy(lstr => lstr.Length);
+            if (intSections.Count() == 0) return null;  
+            var BasePt = intSections.Last().Centroid;
             Point Spt =null;
             Point Ept = null;
             LineSegment vaildLane;
