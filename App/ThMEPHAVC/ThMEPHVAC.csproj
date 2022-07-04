@@ -147,6 +147,7 @@
     <Compile Include="Service\ThAirSpeedCalculator.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
     <Compile Include="Service\ThMEPHAVCDataManager.cs" />
+    <Compile Include="Service\ThMepHAVCUtils.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
@@ -282,9 +283,19 @@
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
+    <Compile Include="ThMEPHVACStaticService.cs" />
     <Compile Include="ThModelExtractionVisitor.cs" />
     <Compile Include="ThSmokeProofSystemCmd.cs" />
     <Compile Include="ViewModel\AirPortParameterVM.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\EvacuationFrontViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\EvacuationWalkViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\FireElevatorFrontRoomViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\SeparateOrSharedNaturalViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\SeparateOrSharedWindViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\SmokeCalculateViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\StaircaseNoWindViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\StaircaseWindViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\ThSmokeProofMappingModel\SmokeCalculateMappingModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

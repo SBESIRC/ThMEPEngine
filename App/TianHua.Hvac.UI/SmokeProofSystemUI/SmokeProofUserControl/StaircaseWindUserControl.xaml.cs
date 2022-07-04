@@ -13,7 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels;
+using ThMEPHVAC;
+using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 
 namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 {
@@ -22,12 +23,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
     /// </summary>
     public partial class StaircaseWindUserControl : UserControl
     {
-        static StaircaseWindViewModel staircaseWindViewModel;
-        public delegate void CheckValue(double minvalue, double maxvalue);
         public StaircaseWindUserControl()
         {
             InitData();
-            this.DataContext = staircaseWindViewModel;
+            this.DataContext = ThMEPHVACStaticService.Instance.staircaseWindViewModel;
             InitializeComponent();
         }
 
@@ -36,11 +35,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         /// </summary>
         public void InitData()
         {
-            if (staircaseWindViewModel == null)
+            if (ThMEPHVACStaticService.Instance.staircaseWindViewModel == null)
             {
-                staircaseWindViewModel = new StaircaseWindViewModel();
-                staircaseWindViewModel.checkValue = new CheckValue(CheckLjValue);
-                staircaseWindViewModel.ListTabControl = new ObservableCollection<TabControlInfo>()
+                ThMEPHVACStaticService.Instance.staircaseWindViewModel = new StaircaseWindViewModel();
+                ThMEPHVACStaticService.Instance.staircaseWindViewModel.ListTabControl = new ObservableCollection<TabControlInfo>()
                 {
                     new TabControlInfo()
                     {
@@ -55,7 +53,9 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                         FloorName = "楼层三",
                     },
                 };
+                ThMEPHVACStaticService.Instance.staircaseWindViewModel.SelectTabControlIndex = 0;
             }
+            ThMEPHVACStaticService.Instance.staircaseWindViewModel.checkValue = new CheckValue(CheckLjValue);
         }
 
         /// <summary>
@@ -66,8 +66,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void btnAddRowCopy_Click(object sender, RoutedEventArgs e)
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
-            sltItem.FloorInfoItems.Add(new FloorInfo());
-            staircaseWindViewModel.RefreshData();
+            sltItem.FloorInfoItems.Add(new FloorInfo(true));
+            ThMEPHVACStaticService.Instance.staircaseWindViewModel.RefreshData();
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
             sltItem.FloorInfoItems.Remove(sltItem.SelectInfoData);
-            staircaseWindViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.staircaseWindViewModel.RefreshData();
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            staircaseWindViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.staircaseWindViewModel.RefreshData();
         }
 
         /// <summary>
@@ -146,11 +146,11 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void CheckLjValue(double minvalue, double maxvalue)
         {
             this.txtResult.Text = "";
-            if (staircaseWindViewModel.FloorType != FloorTypeEnum.lowFloor)
+            if (ThMEPHVACStaticService.Instance.staircaseWindViewModel.FloorType != FloorTypeEnum.lowFloor)
             {
-                if (staircaseWindViewModel.OverAk > 3.2)
+                if (ThMEPHVACStaticService.Instance.staircaseWindViewModel.OverAk > 3.2)
                 {
-                    if (staircaseWindViewModel.LjTotal < minvalue)
+                    if (ThMEPHVACStaticService.Instance.staircaseWindViewModel.LjTotal < minvalue)
                     {
                         this.txtResult.Text = "计算值不满足规范";
                         this.txtResult.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
@@ -163,7 +163,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                 }
                 else
                 {
-                    if (staircaseWindViewModel.LjTotal < 0.75 * minvalue)
+                    if (ThMEPHVACStaticService.Instance.staircaseWindViewModel.LjTotal < 0.75 * minvalue)
                     {
                         this.txtResult.Text = "计算值不满足规范";
                         this.txtResult.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));

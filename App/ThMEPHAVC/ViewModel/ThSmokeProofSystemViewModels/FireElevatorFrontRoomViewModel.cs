@@ -1,30 +1,30 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
-using static TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl.SeparateOrSharedNaturalUserControl;
 
-namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
+namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    class SeparateOrSharedNaturalViewModel : NotifyPropertyChangedBase
+    public class FireElevatorFrontRoomViewModel : NotifyPropertyChangedBase
     {
+        [JsonIgnore]
         public CheckValue checkValue;
+        public FireElevatorFrontRoomViewModel()
+        {
+        }
+
         /// <summary>
         /// 这是AK的值
         /// </summary>
         public double OverAk { get; set; }
 
         /// <summary>
-        /// 这是AL的值
+        /// 系统负担高度
         /// </summary>
-        public double OverAl { get; set; }
-
-        public int AAAA = 42400, BBBB = 44700;
-        public int CCCC = 45000, DDDD = 48600;
-
         private FloorTypeEnum _floorType;
         public FloorTypeEnum FloorType
         {
@@ -33,9 +33,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             set
             {
                 _floorType = value;
-                MiddleWind = "31800-44700";
-                HighWind = "33750-48600";
-                RefreshData();
+                MiddleWind = "26550-36900";
+                HighWind = "27825-40200";
                 this.RaisePropertyChanged();
             }
         }
@@ -43,8 +42,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         /// <summary>
         /// 系统楼层数
         /// </summary>
-        private double _floorNum;
-        public double FloorNum
+        private int _floorNum;
+        public int FloorNum
         {
             get { return _floorNum; }
             set
@@ -58,8 +57,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         /// <summary>
         /// 截面长
         /// </summary>
-        private string _sectionLength;
-        public string SectionLength
+        private double _sectionLength;
+        public double SectionLength
         {
             get { return _sectionLength; }
             set
@@ -73,8 +72,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         /// <summary>
         /// 截面宽
         /// </summary>
-        private string _sectionWidth;
-        public string SectionWidth
+        private double _sectionWidth;
+        public double SectionWidth
         {
             get { return _sectionWidth; }
             set
@@ -107,11 +106,11 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         {
             get
             {
+                //double Ak = 0.0;
                 OverAk = 0;
-                OverAl = 0;
-                bool HasValidDoorInFloor = false;
                 int ValidFloorCount = 0;
-                foreach (var floor in FrontRoomTabControl)
+                bool HasValidDoorInFloor = false;
+                foreach (var floor in ListTabControl)
                 {
                     foreach (var door in floor.FloorInfoItems)
                     {
@@ -128,41 +127,12 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
                     }
                     HasValidDoorInFloor = false;
                 }
-                int ValidStairCount = 0;
-                HasValidDoorInFloor = false;
-                foreach (var floor in StairRoomTabControl)
-                {
-                    foreach (var door in floor.FloorInfoItems)
-                    {
-                        if (door.DoorNum * door.DoorHeight * door.DoorWidth == 0)
-                        {
-                            continue;
-                        }
-                        OverAl += door.DoorWidth * door.DoorHeight * door.DoorNum;
-                        HasValidDoorInFloor = true;
-                    }
-                    if (HasValidDoorInFloor)
-                    {
-                        ValidStairCount++;
-                    }
-                    HasValidDoorInFloor = false;
-                }
-
                 if (ValidFloorCount != 0)
                 {
                     OverAk = OverAk / ValidFloorCount;
                 }
-                if (ValidStairCount != 0)
-                {
-                    OverAl = OverAl / ValidStairCount;
-                }
-                if (OverAk == 0)
-                {
-                    return 0;
-                }
-                double V = 0.6 * (OverAl / OverAk + 1);
                 OverAk = Math.Round(OverAk, 2);
-                OverAl = Math.Round(OverAl, 2);
+                int V = 1;
                 return Math.Round(OverAk * V * Math.Min(FloorNum, 3) * 3600);
             }
             set
@@ -189,29 +159,29 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         }
 
         /// <summary>
-        /// 疏散门（前室）tab
+        /// tab页
         /// </summary>
-        private ObservableCollection<TabControlInfo> _frontRoomTabControl = new ObservableCollection<TabControlInfo>();
-        public ObservableCollection<TabControlInfo> FrontRoomTabControl
+        private ObservableCollection<TabControlInfo> _listTabControl = new ObservableCollection<TabControlInfo>();
+        public ObservableCollection<TabControlInfo> ListTabControl
         {
-            get { return _frontRoomTabControl; }
+            get { return _listTabControl; }
             set
             {
-                _frontRoomTabControl = value;
+                _listTabControl = value;
                 this.RaisePropertyChanged();
             }
         }
 
         /// <summary>
-        /// 疏散门（楼梯间）tab
+        /// 选中的tabcontrol
         /// </summary>
-        private ObservableCollection<TabControlInfo> _stairRoomTabControl = new ObservableCollection<TabControlInfo>();
-        public ObservableCollection<TabControlInfo> StairRoomTabControl
+        private int _selectTabControlIndex;
+        public int SelectTabControlIndex
         {
-            get { return _stairRoomTabControl; }
+            get { return _selectTabControlIndex; }
             set
             {
-                _stairRoomTabControl = value;
+                _selectTabControlIndex = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -225,7 +195,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             VentilationLeakage = VentilationLeakage;
             LjTotal = LjTotal;
             FinalValue = FinalValue;
-            checkValue(AAAA);
+            //checkValue();
         }
 
         /*查表数据*/
@@ -283,5 +253,162 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+    }
+
+    public class TabControlInfo : NotifyPropertyChangedBase
+    {
+        /// <summary>
+        /// 楼层名
+        /// </summary>
+        private string _floorName;
+        public string FloorName
+        {
+            get { return _floorName; }
+            set
+            {
+                _floorName = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<FloorInfo> _floorInfoItems = new ObservableCollection<FloorInfo>();
+        public ObservableCollection<FloorInfo> FloorInfoItems
+        {
+            get { return _floorInfoItems; }
+            set
+            {
+                _floorInfoItems = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private FloorInfo _selectInfo { get; set; }
+        public FloorInfo SelectInfoData
+        {
+            get { return _selectInfo; }
+            set
+            {
+                _selectInfo = value;
+                this.RaisePropertyChanged();
+            }
+        }
+    }
+
+    public class FloorInfo : NotifyPropertyChangedBase
+    {
+        public FloorInfo() { }
+        public FloorInfo(bool Init)
+        {
+            if (Init)
+            {
+                SetBlockScaleListType();
+            }
+        }
+
+        /// <summary>
+        ///  门形式
+        /// </summary>
+        private UListItemData _doorType { get; set; }
+        public UListItemData DoorType
+        {
+            get { return _doorType; }
+            set
+            {
+                _doorType = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<UListItemData> _doorTypeList = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> DoorTypeList
+        {
+            get { return _doorTypeList; }
+            set
+            {
+                _doorTypeList = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private void SetBlockScaleListType()
+        {
+            DoorTypeList.Add(new UListItemData("单开门", 0, 1));
+            DoorTypeList.Add(new UListItemData("双开门", 1, 2));
+            DoorType = DoorTypeList[1];
+        }
+
+        /// <summary>
+        /// 门宽
+        /// </summary>
+        private double _doorWidth;
+        public double DoorWidth
+        {
+            get { return _doorWidth; }
+            set
+            {
+                _doorWidth = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 门高
+        /// </summary>
+        private double _doorHeight;
+        public double DoorHeight
+        {
+            get { return _doorHeight; }
+            set
+            {
+                _doorHeight = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 门数量
+        /// </summary>
+        private double _doorNum;
+        public double DoorNum
+        {
+            get { return _doorNum; }
+            set
+            {
+                _doorNum = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 门缝宽
+        /// </summary>
+        private double _doorSpace;
+        public double DoorSpace
+        {
+            get { return _doorSpace; }
+            set
+            {
+                _doorSpace = value;
+                this.RaisePropertyChanged();
+            }
+        }
+    }
+
+    public enum FloorTypeEnum
+    {
+        /// <summary>
+        /// x<=24
+        /// </summary>
+        lowFloor = 0,
+
+        /// <summary>
+        /// 24<x<=50
+        /// </summary>
+        middleFloor = 1,
+
+        /// <summary>
+        /// 50<x<=100
+        /// </summary>
+        highFloor = 2,
     }
 }

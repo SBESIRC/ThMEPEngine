@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Runtime;
 using TianHua.Hvac.UI.Command;
 using TianHua.Hvac.UI.EQPMFanSelect.EventMonitor;
 using TianHua.Hvac.UI.SmokeProofSystemUI;
+using TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofEventMonitor;
 using TianHua.Hvac.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -15,12 +16,14 @@ namespace TianHua.Hvac.UI
         {
             AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
             EQPMSelectAddEvents();
+            SmokeProofAddEvents();
         }
 
         public void Terminate()
         {
             AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
             EQPMSelectRemoveEvents();
+            SmokeProofRemoveEvents();
         }
         private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
@@ -183,6 +186,7 @@ namespace TianHua.Hvac.UI
         {
             if (smokeCalculateUI != null && smokeCalculateUI.IsLoaded)
             {
+                smokeCalculateUI.InitData();
                 return;
             }
             smokeCalculateUI = new SmokeCalculateUI();
@@ -206,6 +210,21 @@ namespace TianHua.Hvac.UI
             AcadApp.DocumentManager.DocumentLockModeChangeVetoed -= EQPMEventMonitor.DocumentManager_DocumentLockModeChangeVetoed;
             EQPMEventMonitor.UnSubscribeToObjectOverrule();
             EQPMEventMonitor.UnSubscribeToDocumentEvents();
+        }
+        #endregion
+
+        #region 正压送风平面的相关事件
+        private void SmokeProofAddEvents()
+        {
+            AcadApp.BeginDoubleClick += SmokeProofEventMonitor.Application_BeginDoubleClick;
+            AcadApp.DocumentManager.DocumentLockModeChanged += SmokeProofEventMonitor.DocumentManager_DocumentLockModeChanged;
+            AcadApp.DocumentManager.DocumentLockModeChangeVetoed += SmokeProofEventMonitor.DocumentManager_DocumentLockModeChangeVetoed;
+        }
+        private void SmokeProofRemoveEvents()
+        {
+            AcadApp.BeginDoubleClick -= SmokeProofEventMonitor.Application_BeginDoubleClick;
+            AcadApp.DocumentManager.DocumentLockModeChanged -= SmokeProofEventMonitor.DocumentManager_DocumentLockModeChanged;
+            AcadApp.DocumentManager.DocumentLockModeChangeVetoed -= SmokeProofEventMonitor.DocumentManager_DocumentLockModeChangeVetoed;
         }
         #endregion
     }

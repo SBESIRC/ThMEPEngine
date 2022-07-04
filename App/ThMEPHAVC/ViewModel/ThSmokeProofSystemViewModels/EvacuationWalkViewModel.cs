@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 
-namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
+namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    class EvacuationWalkViewModel : NotifyPropertyChangedBase
+    public class EvacuationWalkViewModel : NotifyPropertyChangedBase
     {
         /// <summary>
         /// 风量
@@ -39,6 +39,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             set
             {
                 _areaNet = value;
+                WindVolume = WindVolume;
                 this.RaisePropertyChanged();
             }
         }
@@ -56,6 +57,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             set
             {
                 _airVolSpec = value;
+                WindVolume = WindVolume;
                 this.RaisePropertyChanged();
             }
         }

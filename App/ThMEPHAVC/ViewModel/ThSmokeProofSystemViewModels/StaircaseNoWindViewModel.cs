@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
-using static TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl.StaircaseNoWindUserControl;
 
-namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
+namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    class StaircaseNoWindViewModel : NotifyPropertyChangedBase
+    public class StaircaseNoWindViewModel : NotifyPropertyChangedBase
     {
+        [JsonIgnore]
         public CheckValue checkValue;
         /// <summary>
         /// 这是AK的值
@@ -246,6 +247,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
                 }
                 return ValidFloorCount == 0 ? leakarea : leakarea / ValidFloorCount;
             }
+            set
+            {
+                this.RaisePropertyChanged();
+            }
         }
 
         /// <summary>
@@ -263,6 +268,20 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         }
 
         /// <summary>
+        /// 选中的tabcontrol
+        /// </summary>
+        private int _selectTabControlIndex;
+        public int SelectTabControlIndex
+        {
+            get { return _selectTabControlIndex; }
+            set
+            {
+                _selectTabControlIndex = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// 刷新计算数据
         /// </summary>
         public void RefreshData()
@@ -272,7 +291,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             VentilationLeakage = VentilationLeakage;
             LjTotal = LjTotal;
             FinalValue = FinalValue;
-            checkValue(AAAA, BBBB);
+            if (checkValue != null)
+            {
+                checkValue(AAAA, BBBB);
+            }
         }
 
         /// <summary>

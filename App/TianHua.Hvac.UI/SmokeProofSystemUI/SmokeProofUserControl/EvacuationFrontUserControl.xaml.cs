@@ -13,7 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels;
+using ThMEPHVAC;
+using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 
 namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 {
@@ -22,11 +23,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
     /// </summary>
     public partial class EvacuationFrontUserControl : UserControl
     {
-        static EvacuationFrontViewModel evacuationFrontViewModel;
         public EvacuationFrontUserControl()
         {
             InitData();
-            this.DataContext = evacuationFrontViewModel;
+            this.DataContext = ThMEPHVACStaticService.Instance.evacuationFrontViewModel;
             InitializeComponent();
         }
 
@@ -35,10 +35,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         /// </summary>
         public void InitData()
         {
-            if (evacuationFrontViewModel == null)
+            if (ThMEPHVACStaticService.Instance.evacuationFrontViewModel == null)
             {
-                evacuationFrontViewModel = new EvacuationFrontViewModel();
-                evacuationFrontViewModel.ListTabControl = new ObservableCollection<TabControlInfo>()
+                ThMEPHVACStaticService.Instance.evacuationFrontViewModel = new EvacuationFrontViewModel();
+                ThMEPHVACStaticService.Instance.evacuationFrontViewModel.ListTabControl = new ObservableCollection<TabControlInfo>()
                 {
                     new TabControlInfo()
                     {
@@ -53,6 +53,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                         FloorName = "楼层三",
                     },
                 };
+                ThMEPHVACStaticService.Instance.evacuationFrontViewModel.SelectTabControlIndex = 0;
             }
         }
 
@@ -64,8 +65,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void btnAddRowCopy_Click(object sender, RoutedEventArgs e)
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
-            sltItem.FloorInfoItems.Add(new FloorInfo());
-            evacuationFrontViewModel.RefreshData();
+            sltItem.FloorInfoItems.Add(new FloorInfo(true));
+            ThMEPHVACStaticService.Instance.evacuationFrontViewModel.RefreshData();
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
             sltItem.FloorInfoItems.Remove(sltItem.SelectInfoData);
-            evacuationFrontViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.evacuationFrontViewModel.RefreshData();
         }
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            evacuationFrontViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.evacuationFrontViewModel.RefreshData();
         }
     }
 }

@@ -73,7 +73,8 @@
                                  x:Name="btnMoveDownRow" Click="btnMoveDownRow_Click"/>
         </StackPanel>
         <TabControl Name="FloorTab" ItemsSource="{Binding FrontRoomTabControl, NotifyOnSourceUpdated=True}" Grid.Row="5" Grid.ColumnSpan="3"
-                    HorizontalAlignment="Left" Height="230" Margin="10,10,10,10" VerticalAlignment="Top" Width="380">
+                    HorizontalAlignment="Left" Height="230" Margin="10,10,10,10" VerticalAlignment="Top" Width="380"
+                    SelectedIndex="{Binding SelectTabControlIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <Label Content="{Binding FloorName}"></Label>
@@ -88,7 +89,8 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <ComboBox ItemsSource="{Binding DoorTypeList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
-                                          SelectedItem="{Binding DoorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                          SelectedItem="{Binding DoorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedIndex="{Binding DoorType.Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                                         </ComboBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

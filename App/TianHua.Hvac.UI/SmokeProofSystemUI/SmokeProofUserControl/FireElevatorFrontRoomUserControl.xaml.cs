@@ -13,7 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels;
+using ThMEPHVAC;
+using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 
 namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 {
@@ -22,12 +23,11 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
     /// </summary>
     public partial class FireElevatorFrontRoomUserControl : UserControl
     {
-        static FireElevatorFrontRoomViewModel fireElevatorFrontRoomViewModel;
         public delegate void CheckValue(double minvalue, double maxvalue);
         public FireElevatorFrontRoomUserControl()
         {
             InitData();
-            this.DataContext = fireElevatorFrontRoomViewModel;
+            this.DataContext = ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel;
             InitializeComponent();
         }
 
@@ -36,11 +36,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         /// </summary>
         public void InitData()
         {
-            if (fireElevatorFrontRoomViewModel == null)
+            if (ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel == null)
             {
-                fireElevatorFrontRoomViewModel = new FireElevatorFrontRoomViewModel();
-                //fireElevatorFrontRoomViewModel.checkValue = new CheckValue(CheckLjValue);
-                fireElevatorFrontRoomViewModel.ListTabControl = new ObservableCollection<TabControlInfo>()
+                ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel = new FireElevatorFrontRoomViewModel();
+                ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.ListTabControl = new ObservableCollection<TabControlInfo>()
                 {
                     new TabControlInfo()
                     {
@@ -55,6 +54,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                         FloorName = "楼层三",
                     },
                 };
+                ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.SelectTabControlIndex = 0;
             }
         }
 
@@ -66,8 +66,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void btnAddRowCopy_Click(object sender, RoutedEventArgs e)
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
-            sltItem.FloorInfoItems.Add(new FloorInfo());
-            fireElevatorFrontRoomViewModel.RefreshData();
+            sltItem.FloorInfoItems.Add(new FloorInfo(true));
+            ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.RefreshData();
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
             sltItem.FloorInfoItems.Remove(sltItem.SelectInfoData);
-            fireElevatorFrontRoomViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.RefreshData();
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            fireElevatorFrontRoomViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.RefreshData();
         }
 
         /// <summary>
@@ -146,11 +146,11 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void CheckLjValue(double minvalue)
         {
             this.txtResult.Text = "";
-            if (fireElevatorFrontRoomViewModel.FloorType != FloorTypeEnum.lowFloor)
+            if (ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.FloorType != FloorTypeEnum.lowFloor)
             {
-                if (fireElevatorFrontRoomViewModel.OverAk > 3.2)
+                if (ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.OverAk > 3.2)
                 {
-                    if (fireElevatorFrontRoomViewModel.LjTotal < minvalue)
+                    if (ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.LjTotal < minvalue)
                     {
                         this.txtResult.Text = "计算值不满足规范";
                         this.txtResult.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
@@ -163,7 +163,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                 }
                 else
                 {
-                    if (fireElevatorFrontRoomViewModel.LjTotal < 0.75 * minvalue)
+                    if (ThMEPHVACStaticService.Instance.fireElevatorFrontRoomViewModel.LjTotal < 0.75 * minvalue)
                     {
                         this.txtResult.Text = "计算值不满足规范";
                         this.txtResult.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));

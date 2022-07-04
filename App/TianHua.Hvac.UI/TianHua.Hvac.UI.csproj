@@ -145,6 +145,7 @@
     <Compile Include="SmokeProofSystemUI\SmokeCalculateUI.xaml.cs">
       <DependentUpon>SmokeCalculateUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofEventMonitor\SmokeProofEventMonitor.cs" />
     <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\CheckValueUserControl.xaml.cs">
       <DependentUpon>CheckValueUserControl.xaml</DependentUpon>
     </Compile>
@@ -169,14 +170,7 @@
     <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\StaircaseWindUserControl.xaml.cs">
       <DependentUpon>StaircaseWindUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SmokeProofSystemUI\ViewModels\EvacuationFrontViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\EvacuationWalkViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\FireElevatorFrontRoomViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\SeparateOrSharedNaturalViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\SeparateOrSharedWindViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\SmokeCalculateViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\StaircaseNoWindViewModel.cs" />
-    <Compile Include="SmokeProofSystemUI\ViewModels\StaircaseWindViewModel.cs" />
+    <Compile Include="SmokeProofSystemUI\ViewModelConverters\SmkViewModelConverter.cs" />
     <Compile Include="ThHvacUIService.cs" />
     <Compile Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml.cs">
       <DependentUpon>uiWaterPipeConnectWidget.xaml</DependentUpon>

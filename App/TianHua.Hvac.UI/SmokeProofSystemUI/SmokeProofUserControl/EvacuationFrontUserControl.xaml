@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              mc:Ignorable="d" 
-             d:DesignHeight="695" d:DesignWidth="400">
+             d:DesignHeight="800" d:DesignWidth="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -37,7 +37,8 @@
                                  x:Name="btnMoveDownRow" Click="btnMoveDownRow_Click"/>
         </StackPanel>
         <TabControl Name="FloorTab" ItemsSource="{Binding ListTabControl, NotifyOnSourceUpdated=True}" Grid.Row="2" Grid.ColumnSpan="3"
-                    HorizontalAlignment="Left" Height="230" Margin="10,10,10,10" VerticalAlignment="Top" Width="380">
+                    HorizontalAlignment="Left" Height="230" Margin="10,10,10,10" VerticalAlignment="Top" Width="380"
+                    SelectedIndex="{Binding SelectTabControlIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <Label Content="{Binding FloorName}"></Label>

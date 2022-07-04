@@ -13,7 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels;
+using ThMEPHVAC;
+using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 
 namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 {
@@ -22,12 +23,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
     /// </summary>
     public partial class SeparateOrSharedNaturalUserControl : UserControl
     {
-        public delegate void CheckValue(double minvalue);
-        static SeparateOrSharedNaturalViewModel sqparateOrSharedNaturalViewModel;
         public SeparateOrSharedNaturalUserControl()
         {
             InitData();
-            this.DataContext = sqparateOrSharedNaturalViewModel;
+            this.DataContext = ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel;
             InitializeComponent();
         }
 
@@ -36,10 +35,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         /// </summary>
         public void InitData()
         {
-            if (sqparateOrSharedNaturalViewModel == null)
+            if (ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel == null)
             {
-                sqparateOrSharedNaturalViewModel = new SeparateOrSharedNaturalViewModel();
-                sqparateOrSharedNaturalViewModel.FrontRoomTabControl = new ObservableCollection<TabControlInfo>()
+                ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel = new SeparateOrSharedNaturalViewModel();
+                ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.FrontRoomTabControl = new ObservableCollection<TabControlInfo>()
                 {
                     new TabControlInfo()
                     {
@@ -54,7 +53,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                         FloorName = "楼层三",
                     },
                 };
-                sqparateOrSharedNaturalViewModel.StairRoomTabControl = new ObservableCollection<TabControlInfo>()
+                ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.StairRoomTabControl = new ObservableCollection<TabControlInfo>()
                 {
                     new TabControlInfo()
                     {
@@ -69,8 +68,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                         FloorName = "楼层三",
                     },
                 };
-                sqparateOrSharedNaturalViewModel.checkValue = new CheckValue(CheckLjValue);
+                ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.FrontRoomTabControlIndex = 0;
+                ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.StairRoomTabControlIndex = 0;
             }
+            ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.checkValue = new CheckValue(CheckLjValue);
         }
 
         /// <summary>
@@ -81,8 +82,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void btnAddRowCopy_Click(object sender, RoutedEventArgs e)
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
-            sltItem.FloorInfoItems.Add(new FloorInfo());
-            sqparateOrSharedNaturalViewModel.RefreshData();
+            sltItem.FloorInfoItems.Add(new FloorInfo(true));
+            ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.RefreshData();
         }
 
         /// <summary>
@@ -94,7 +95,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         {
             var sltItem = this.FloorTab.SelectedItem as TabControlInfo;
             sltItem.FloorInfoItems.Remove(sltItem.SelectInfoData);
-            sqparateOrSharedNaturalViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.RefreshData();
         }
 
         /// <summary>
@@ -156,8 +157,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         private void btnAddStairRowCopy_Click(object sender, RoutedEventArgs e)
         {
             var sltItem = this.StairTab.SelectedItem as TabControlInfo;
-            sltItem.FloorInfoItems.Add(new FloorInfo());
-            sqparateOrSharedNaturalViewModel.RefreshData();
+            sltItem.FloorInfoItems.Add(new FloorInfo(true));
+            ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.RefreshData();
         }
 
         /// <summary>
@@ -169,7 +170,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         {
             var sltItem = this.StairTab.SelectedItem as TabControlInfo;
             sltItem.FloorInfoItems.Remove(sltItem.SelectInfoData);
-            sqparateOrSharedNaturalViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.RefreshData();
         }
 
         /// <summary>
@@ -225,7 +226,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            sqparateOrSharedNaturalViewModel.RefreshData();
+            ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.RefreshData();
         }
 
         /// <summary>
@@ -233,14 +234,14 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         /// </summary>
         /// <param name="minvalue"></param>
         /// <param name="maxvalue"></param>
-        private void CheckLjValue(double minvalue)
+        private void CheckLjValue(double minvalue, double maxvalue)
         {
             this.txtResult.Text = "";
-            if (sqparateOrSharedNaturalViewModel.FloorType != FloorTypeEnum.lowFloor)
+            if (ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.FloorType != FloorTypeEnum.lowFloor)
             {
-                if (sqparateOrSharedNaturalViewModel.OverAk > 3.2)
+                if (ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.OverAk > 3.2)
                 {
-                    if (sqparateOrSharedNaturalViewModel.LjTotal < minvalue)
+                    if (ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.LjTotal < minvalue)
                     {
                         this.txtResult.Text = "计算值不满足规范";
                         this.txtResult.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
@@ -253,7 +254,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                 }
                 else
                 {
-                    if (sqparateOrSharedNaturalViewModel.LjTotal < 0.75 * minvalue)
+                    if (ThMEPHVACStaticService.Instance.separateOrSharedNaturalViewModel.LjTotal < 0.75 * minvalue)
                     {
                         this.txtResult.Text = "计算值不满足规范";
                         this.txtResult.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));

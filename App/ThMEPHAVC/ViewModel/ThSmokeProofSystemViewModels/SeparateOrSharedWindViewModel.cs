@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
-using static TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl.SeparateOrSharedWindUserControl;
 
-namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
+namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    class SeparateOrSharedWindViewModel : NotifyPropertyChangedBase
+    public class SeparateOrSharedWindViewModel : NotifyPropertyChangedBase
     {
+        [JsonIgnore]
         public CheckValue checkValue;
         /// <summary>
         /// 这是AK的值
@@ -58,8 +59,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         /// <summary>
         /// 截面长
         /// </summary>
-        private string _sectionLength;
-        public string SectionLength
+        private double _sectionLength;
+        public double SectionLength
         {
             get { return _sectionLength; }
             set
@@ -73,8 +74,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         /// <summary>
         /// 截面宽
         /// </summary>
-        private string _sectionWidth;
-        public string SectionWidth
+        private double _sectionWidth;
+        public double SectionWidth
         {
             get { return _sectionWidth; }
             set
@@ -173,6 +174,20 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
         }
 
         /// <summary>
+        /// 选中的tabcontrol
+        /// </summary>
+        private int _selectTabControlIndex;
+        public int SelectTabControlIndex
+        {
+            get { return _selectTabControlIndex; }
+            set
+            {
+                _selectTabControlIndex = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// 刷新计算数据
         /// </summary>
         public void RefreshData()
@@ -181,7 +196,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             VentilationLeakage = VentilationLeakage;
             LjTotal = LjTotal;
             FinalValue = FinalValue;
-            checkValue(AAAA, BBBB);
+            if (checkValue != null)
+            {
+                checkValue(AAAA, BBBB);
+            }
         }
 
         /*查表数据*/

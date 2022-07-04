@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              mc:Ignorable="d" 
-             d:DesignHeight="695" d:DesignWidth="400">
+             d:DesignHeight="800" d:DesignWidth="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -41,7 +41,7 @@
         </StackPanel>
         <Label Grid.Row="4" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">计算结果</Label>
         <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" Margin="10,5,0,0">
-            <TextBox Name="txtResult" Text="{Binding WindVolume, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <TextBox Name="txtResult" Text="{Binding WindVolume, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" IsEnabled="False"/>
             <Label>m^3/h</Label>
         </StackPanel>
     </Grid>

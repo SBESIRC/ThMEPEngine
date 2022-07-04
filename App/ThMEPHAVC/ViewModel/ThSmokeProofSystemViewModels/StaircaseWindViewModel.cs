@@ -1,16 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
-using static TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl.StaircaseWindUserControl;
 
-namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
+namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    class StaircaseWindViewModel : NotifyPropertyChangedBase
+    public delegate void CheckValue(double minvalue, double maxvalue);
+    public class StaircaseWindViewModel : NotifyPropertyChangedBase
     {
+        [JsonIgnore]
         public CheckValue checkValue;
         /// <summary>
         /// 这是AK的值
@@ -172,6 +174,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
                 }
                 return ValidFloorCount == 0 ? leakarea : leakarea / ValidFloorCount;
             }
+            set
+            {
+                this.RaisePropertyChanged();
+            }
         }
 
         /// <summary>
@@ -214,7 +220,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             VentilationLeakage = VentilationLeakage;
             LjTotal = LjTotal;
             FinalValue = FinalValue;
-            checkValue(AAAA, BBBB);
+            if (checkValue != null)
+            {
+                checkValue(AAAA, BBBB);
+            }
         }
 
         /// <summary>
@@ -252,6 +261,20 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             set
             {
                 _listTabControl = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 选中的tabcontrol
+        /// </summary>
+        private int _selectTabControlIndex;
+        public int SelectTabControlIndex
+        {
+            get { return _selectTabControlIndex; }
+            set
+            {
+                _selectTabControlIndex = value;
                 this.RaisePropertyChanged();
             }
         }

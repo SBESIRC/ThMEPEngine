@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 
-namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
+namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    class EvacuationFrontViewModel : NotifyPropertyChangedBase
+    public class EvacuationFrontViewModel : NotifyPropertyChangedBase
     {
         /// <summary>
         /// 这是AK的值
@@ -66,6 +66,20 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels
             set
             {
                 _listTabControl = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 选中的tabcontrol
+        /// </summary>
+        private int _selectTabControlIndex;
+        public int SelectTabControlIndex
+        {
+            get { return _selectTabControlIndex; }
+            set
+            {
+                _selectTabControlIndex = value;
                 this.RaisePropertyChanged();
             }
         }

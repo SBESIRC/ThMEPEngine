@@ -12,7 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TianHua.Hvac.UI.SmokeProofSystemUI.ViewModels;
+using ThMEPHVAC;
+using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 
 namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
 {
@@ -21,11 +22,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
     /// </summary>
     public partial class EvacuationWalkUserControl : UserControl
     {
-        EvacuationWalkViewModel evacuationWalkViewModel;
         public EvacuationWalkUserControl()
         {
             InitData();
-            this.DataContext = evacuationWalkViewModel;
+            this.DataContext = ThMEPHVACStaticService.Instance.evacuationWalkViewModel;
             InitializeComponent();
         }
 
@@ -34,9 +34,9 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
         /// </summary>
         public void InitData()
         {
-            if (evacuationWalkViewModel == null)
+            if (ThMEPHVACStaticService.Instance.evacuationWalkViewModel == null)
             {
-                evacuationWalkViewModel = new EvacuationWalkViewModel();
+                ThMEPHVACStaticService.Instance.evacuationWalkViewModel = new EvacuationWalkViewModel();
             }
         }
     }
