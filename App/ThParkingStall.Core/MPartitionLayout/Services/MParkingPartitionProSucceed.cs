@@ -1295,6 +1295,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
                                 if (g is Polygon)
                                 {
+                                    var segs_g_short = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e,seg)).First();
+                                    if (Math.Round(segs_g_short.Length) > (DisVertCarLength - DisVertCarLengthBackBack)*2)
+                                    {
+                                        cond = false;
+                                        break;
+                                    }
                                     var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth - g.Area) < 1
                                         || g.Area < (DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth;
                                     var infos = Cars.Select(e => e.Polyline).ToList();

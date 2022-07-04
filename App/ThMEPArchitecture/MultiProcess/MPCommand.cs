@@ -419,12 +419,14 @@ namespace ThMEPArchitecture.MultiProcess
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
             var layer = "最终分区线";
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
-            finalSegLines.AddRange(mParkingPartition.OutEnsuredLanes);
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 if (!acad.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                var outSegLines = finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList();
+                outSegLines.AddRange(mParkingPartition.OutEnsuredLanes.Select(l => l.ToDbLine(50, layer)).Cast<Entity>());
+                outSegLines.ShowBlock(layer, layer);
+                //finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
                 MPEX.HideLayer(layer);
             }
             if (ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
