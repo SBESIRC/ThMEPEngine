@@ -357,7 +357,6 @@
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThDoorOpeningExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThExtractorBase.cs" />
-    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="IO\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
@@ -520,7 +519,6 @@
     <Compile Include="IO\GeoJSON\Features\ThGeometryFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThShearWallFeatureCollection.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
-    <Compile Include="IO\GeoJSON\ThBeamGeoJsonReader.cs" />
     <Compile Include="IO\GeoJSON\ThGeometryJsonWriter.cs" />
     <Compile Include="IO\GeoJSON\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\GeoJSON\ThBeamGeoJsonWriter.cs" />
