@@ -109,8 +109,7 @@ namespace ThMEPArchitecture.MultiProcess
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-
-
+                    var saved = true;
                     if (_CommandMode == CommandMode.WithoutUI)
                     {
                          Logger?.Information($"DEbug--读取复现");
@@ -120,6 +119,7 @@ namespace ThMEPArchitecture.MultiProcess
                     {
                         if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                         {
+                            saved = false;
                             RunDirect(currentDb);
                         }
                         else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
@@ -133,7 +133,8 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     TableTools.EraseOrgTable();
                     //TableTools.hideOrgTable();
-                    Active.Document.Save();
+                    if(saved)
+                        Active.Document.Save();
                 }
             }
             catch (Exception ex)
