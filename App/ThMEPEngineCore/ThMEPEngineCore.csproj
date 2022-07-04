@@ -254,6 +254,7 @@
     <Compile Include="IO\SVG\ThStructureSVGReader.cs" />
     <Compile Include="IO\SVG\ThSvgUtils.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
+    <Compile Include="IO\WKT\ThGeometryWKTWriter.cs" />
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
