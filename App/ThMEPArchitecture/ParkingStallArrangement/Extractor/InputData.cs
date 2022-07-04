@@ -10,6 +10,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.ApplicationServices;
 using System.IO;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
+using ThMEPArchitecture.MultiProcess;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 {
     public static class InputData
@@ -26,6 +28,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             else
             {
+                ThMPArrangementCmd.DisplayLogger.Information("选择的地库对象不是一个块！");
                 Active.Editor.WriteMessage("选择的地库对象不是一个块！");
                 return null;
             }
@@ -74,6 +77,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     objs.Add(blk);
                 }
             }
+            if(objs.Count == 0) ThMPArrangementCmd.DisplayLogger.Information("选择的元素中不包含块");
             return objs;
         }
         public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger = null,bool CheckSeglines = true)

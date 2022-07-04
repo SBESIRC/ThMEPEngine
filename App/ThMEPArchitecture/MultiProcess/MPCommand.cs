@@ -50,7 +50,7 @@ namespace ThMEPArchitecture.MultiProcess
         public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
 
-        public Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
+        public static Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
         public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
 
         public string DrawingName;
@@ -520,6 +520,7 @@ namespace ThMEPArchitecture.MultiProcess
             var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
             if (girdLines.Count < 2)
             {
+                DisplayLogger.Information("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 Active.Editor.WriteMessage("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 Logger?.Information("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 return null;
