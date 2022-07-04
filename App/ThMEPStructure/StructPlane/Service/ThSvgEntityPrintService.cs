@@ -455,25 +455,27 @@ namespace ThMEPStructure.StructPlane.Service
         }
         private void FilterCantiSlabAndMark(List<ThGeometry> geos)
         {
-            // 过滤空调板及其标注
-            var cantiGeos = geos.Where(o => o.Properties.IsSlab() && o.Properties.IsCantiSlab());
-
-            var cantislabTextGeos = geos
-                .Where(o => o.Properties.IsSlab() && o.Boundary is DBText)
-                .Where(o =>
+            // 找到空调板
+            var cantiGeos = geos.Where(o => o.Properties.IsSlab() && o.Properties.IsCantiSlab()).ToList();
+            // 找到楼板文字
+            var slabTextGeos = geos.Where(o => o.Properties.IsSlab() && o.Boundary is DBText).ToList();
+            // 找到包含在空调板里的文字
+            var cantislabTextGeos = slabTextGeos.Where(o =>
+            {
+                if (o.Boundary is DBText dbText)
                 {
-                    if(o.Boundary is DBText dbText)
-                    {
-                        return cantiGeos.Where(cg => cg.Boundary.EntityContains(dbText.Position)).Any();
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                });
+                    return cantiGeos.Where(cg => cg.Boundary.EntityContains(dbText.Position)).Any();
+                }
+                else
+                {
+                    return false;
+                }
+            }).ToList();
 
-            cantiGeos.ForEach(o => geos.Remove(o));
-            cantislabTextGeos.ForEach(o => geos.Remove(o));
+
+            // 移除
+            geos = geos.Where(o => !cantiGeos.Contains(o)).ToList();
+            geos = geos.Where(o => !cantislabTextGeos.Contains(o)).ToList();
         }
     }
 }

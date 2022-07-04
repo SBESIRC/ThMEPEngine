@@ -30,7 +30,7 @@ namespace ThMEPStructure.StructPlane.Service
                 return;
             }
             // 从模板导入要打印的图层
-            AcadDb.Import();
+            ThStructPlaneUtils.Import(AcadDb);
             // 设置系统变量
             SetSysVariables();
 
@@ -76,41 +76,6 @@ namespace ThMEPStructure.StructPlane.Service
                                        0.0);
                 }
             }
-        }
-
-        private Extents2d ToExtents2d(ObjectIdCollection objIds)
-        {
-            var extents = new Extents2d();
-            double minX=double.MaxValue,minY = double.MaxValue, 
-                maxX = double.MinValue, maxY = double.MinValue;
-            using (var acadDb = AcadDatabase.Use(AcadDb))
-            {
-                objIds.OfType<ObjectId>().ForEach(o =>
-                {
-                    var entity = acadDb.Element<Entity>(o);
-                    if(entity!=null && !entity.IsErased && entity.GeometricExtents!=null)
-                    {
-                        if(entity.GeometricExtents.MinPoint.X< minX)
-                        {
-                            minX = entity.GeometricExtents.MinPoint.X;
-                        }
-                        if (entity.GeometricExtents.MinPoint.Y < minY)
-                        {
-                            minY = entity.GeometricExtents.MinPoint.Y;
-                        }
-                        if (entity.GeometricExtents.MaxPoint.X > maxX)
-                        {
-                            maxX = entity.GeometricExtents.MaxPoint.X;
-                        }
-                        if (entity.GeometricExtents.MaxPoint.Y > maxY)
-                        {
-                            maxY = entity.GeometricExtents.MaxPoint.Y;
-                        }
-                    }
-                });
-                extents= new Extents2d(minX,minY,maxX,maxY);    
-            }
-            return extents;
         }
 
         private List<ThSvgEntityPrintService> PrintToCad()
