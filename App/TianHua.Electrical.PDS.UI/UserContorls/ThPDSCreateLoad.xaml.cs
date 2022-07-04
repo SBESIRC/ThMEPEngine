@@ -1,22 +1,12 @@
-﻿using Microsoft.Toolkit.Mvvm.Messaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using TianHua.Electrical.PDS.Project.Module;
+using System.Windows.Controls;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
-using TianHua.Electrical.PDS.UI.WpfServices;
+using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -84,16 +74,22 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         private void btnInsert(object sender, RoutedEventArgs e)
         {
             double.TryParse(defaultPower.Text, out var v);
-            new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower:v /*defaultPower: double.Parse(defaultPower.Text)*/, defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
+            new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: v /*defaultPower: double.Parse(defaultPower.Text)*/, defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
             WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnInsert Click"));
             Close();
         }
-
         private void btnSave(object sender, RoutedEventArgs e)
         {
-            double.TryParse(defaultPower.Text, out var v);
-            Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph.AddVertex(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower:v ,/*defaultPower: double.Parse(defaultPower.Text),*/ defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
-            WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnSave Click"));
+            if (double.TryParse(defaultPower.Text, out var v))
+            {
+                ThPDSProjectGraphService.CreatNewLoad(
+                    defaultLoadID: defaultLoadID.Text,
+                    defaultPower: v,
+                    defaultDescription: defaultDescription.Text,
+                    defaultFireLoad: defaultFireLoad.IsChecked == true,
+                    imageLoadType: ImageLoadType);
+                WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnSave Click"));
+            }
             Close();
         }
     }
