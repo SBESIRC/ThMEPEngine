@@ -189,7 +189,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void GeneratePerpModules()
         {
             double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
-            var lanes = GeneratePerpModuleLanes(mindistance, DisBackBackModulus, true, null, true);
+            var lanes = GeneratePerpModuleLanes(mindistance, DisBackBackModulus, true, null, true, null, true);
             GeneratePerpModuleBoxes(lanes);
         }
         public void GenerateCarsInModules()
@@ -428,10 +428,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             double generate_lane_length;
             double max_length = -1;
             var isCurDirection = false;
+            var para_lanes_add=new List<LineSegment>();
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var _paras = new GenerateLaneParas();
-                var length = GenerateIntegralModuleLanesForUniqueLaneOptimizedByRealLength(ref _paras, i, true);
+                var length = GenerateIntegralModuleLanesForUniqueLaneOptimizedByRealLength(ref _paras, i, ref para_lanes_add, true);
+                para_lanes_add.AddRange(_paras.LanesToAdd.Select(e => e.Line));
                 switch (LayoutMode)
                 {
                     case 0:
@@ -474,7 +476,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             generate_lane_length = max_length;
             return generate_lane_length;
         }
-        private double CalculateModuleLanes(ref GenerateLaneParas paras, int i, bool allow_through_build = true, bool isBackBackModule = true)
+        private double CalculateModuleLanes(ref GenerateLaneParas paras, int i, ref List<LineSegment> para_lanes_add, bool allow_through_build = true, bool isBackBackModule = true)
         {
             double generate_lane_length = -1;
             var lane = IniLanes[i].Line;
@@ -665,7 +667,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (isBackBackModule)
                     {
                         //背靠背
-                        CalculateBackBackLength(obsplits, lane, vec, carBoxesStrTree, ref generate_lane_length, i, ref paras, ref quitcycle, ref generate);
+                        CalculateBackBackLength(obsplits, lane, vec, carBoxesStrTree, ref generate_lane_length, i, ref paras, ref quitcycle, ref generate,ref para_lanes_add);
                     }
                     else
                     {
@@ -829,7 +831,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             return true;
         }
         private void CalculateBackBackLength(IEnumerable<LineSegment> obsplits, LineSegment lane, Vector2D vec, STRtree<Polygon> carBoxesStrTree
-            , ref double generate_lane_length, int i, ref GenerateLaneParas paras, ref bool quitcycle, ref bool generate)
+            , ref double generate_lane_length, int i, ref GenerateLaneParas paras, ref bool quitcycle, ref bool generate,ref List<LineSegment> para_lanes_add)
         {
             foreach (var slit in obsplits)
             {
@@ -1077,7 +1079,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     //generate_lane_length = split.Length;
                     double dis_to_move = 0;
                     LineSegment perpLine = new LineSegment(new Coordinate(0, 0), new Coordinate(0, 0));
-                    if (HasParallelLaneForwardExisted(split, vec, /*28700 - 15700*/DisLaneWidth / 2 + DisVertCarWidth * 2, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine))
+                    if (HasParallelLaneForwardExisted(split, vec, /*28700 - 15700*//*20220704*/DisLaneWidth / 2 + DisVertCarWidth * 2/*DisLaneWidth+DisVertCarLength*/, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine,ref para_lanes_add))
                     {
                         paras.CarBoxPlusToAdd[paras.CarBoxPlusToAdd.Count - 1].IsSingleForParallelExist = true;
                         var existBoxes = CarBoxesPlus.Where(e => e.IsSingleForParallelExist).Select(e => e.Box);
@@ -1133,11 +1135,12 @@ namespace ThParkingStall.Core.MPartitionLayout
         private double GenerateSingleModuleLanesForUniqueLaneOptimizedByRealLength(ref GenerateLaneParas paras, int i, bool allow_through_build = true)
         {
             //return -1;
-            return CalculateModuleLanes(ref paras,i,allow_through_build,false);
+            var para_lanes_add = new List<LineSegment>();
+            return CalculateModuleLanes(ref paras,i, ref para_lanes_add, allow_through_build,false);
         }
-        private double GenerateIntegralModuleLanesForUniqueLaneOptimizedByRealLength(ref GenerateLaneParas paras, int i, bool allow_through_build = true)
+        private double GenerateIntegralModuleLanesForUniqueLaneOptimizedByRealLength(ref GenerateLaneParas paras, int i,ref List<LineSegment> para_lanes_add, bool allow_through_build = true)
         {
-            return CalculateModuleLanes(ref paras, i, allow_through_build);        
+            return CalculateModuleLanes(ref paras,  i, ref para_lanes_add, allow_through_build);        
         }
         private double GenerateAdjacentLanesOptimizedByRealLength(ref GenerateLaneParas paras)
         {
@@ -1367,7 +1370,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             double dis_to_move = 0;
             var perpLine = new LineSegment();
             double dis_connected_double = 0;
-            if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move, ref perpLine)) return generate_lane_length;
+            var para_lanes_add = new List<LineSegment>();
+            if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move, ref perpLine, ref para_lanes_add)) return generate_lane_length;
             if (IsConnectedToLaneDouble(iniobsplit) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
             if (IsConnectedToLaneDouble(iniobsplit))
             {

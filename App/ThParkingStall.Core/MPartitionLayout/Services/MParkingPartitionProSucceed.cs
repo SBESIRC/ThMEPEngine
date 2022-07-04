@@ -126,16 +126,22 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
         }
         private bool HasParallelLaneForwardExisted(LineSegment line, Vector2D vec, double maxlength, double minlength, ref double dis_to_move
-           , ref LineSegment prepLine)
+           , ref LineSegment prepLine,ref List<LineSegment> paras_lines)
         {
             var lperp = LineSegmentSDL(line.MidPoint.Translation(vec * 100), vec, maxlength);
             var lins = IniLanes.Where(e => IsParallelLine(line, e.Line))
                 .Where(e => e.Line.IntersectPoint(lperp).Count() > 0)
                 .Where(e => e.Line.Length > line.Length / 3)
                 .OrderBy(e => line.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint))
-                .Select(e => e.Line);
-            lins = lins.Where(e => e.ClosestPoint(line.MidPoint).Distance(line.MidPoint) > minlength);
-            if (lins.Count() == 0) return false;
+                .Select(e => e.Line).ToList();
+            lins.AddRange(paras_lines.Where(e => IsParallelLine(line, e))
+                .Where(e => e.IntersectPoint(lperp).Count() > 0)
+                .Where(e => e.Length > line.Length / 3)
+                .OrderBy(e => line.ClosestPoint(e.MidPoint).Distance(e.MidPoint))
+                .Select(e => e)
+                );
+            lins = lins.Where(e => e.ClosestPoint(line.MidPoint).Distance(line.MidPoint) > minlength).ToList();
+            if (lins.Count == 0) return false;
             else
             {
                 var lin = lins.First();
@@ -250,7 +256,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             LaneBufferSpatialIndex.Update(LaneBoxes.Cast<Geometry>().ToList(), new List<Geometry>());
         }
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true
-        , Lane specialLane = null,bool check_adj_collision=false, List<Lane> rlanes=null)
+        , Lane specialLane = null,bool check_adj_collision=false, List<Lane> rlanes=null,bool transform_start_edge_for_perp_module=false)
         {
             var pillarSpatialIndex = new MNTSSpatialIndex(Pillars);
             var lanes = new List<Lane>();
@@ -408,6 +414,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                             var split = slit;
                             split = split.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
                             split = split.Translation(-lane.Vec.Normalize() * mindistance);
+                            if (transform_start_edge_for_perp_module && split.Length > DisLaneWidth / 2 + DisVertCarLength)
+                            {
+                                if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)
+                                    split.P0 = split.P0.Translation(Vector(split).Normalize() * (DisLaneWidth / 2 + DisVertCarLength));
+                            }
                             if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)
                                 split.P0 = split.P0.Translation(Vector(split).Normalize() * DisLaneWidth / 2);
                             if (ClosestPointInVertLines(split.P1, split, IniLanes.Select(e => e.Line)) < 10)
