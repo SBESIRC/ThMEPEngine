@@ -3886,9 +3886,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 if (circuit.IsDualPower)
                 {
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("Power", false);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("LowPower", true);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("HighPower", true);
                 }
                 else
                 {
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("Power", true);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("LowPower", false);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("HighPower", false);
                 }
@@ -3901,10 +3904,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite1", false);
                             ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite2", false);
+                            ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("BridgeLaying", true);
                         }
                         break;
                     case ConductorLayingPath.ViaConduit:
                         {
+                            ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite1", true);
+                            ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite2", true);
                             ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("BridgeLaying", false);
                         }
                         break;
@@ -3914,20 +3920,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", false);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("NumberOfPhaseWire", true);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCrossSectionalArea", true);
                 }
                 else if (conductor.ComponentType == ComponentType.ControlConductor)
                 {
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", true);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", true);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("NumberOfPhaseWire", false);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCrossSectionalArea", false);
                 }
-            }
-            if (vm is ThPDSCircuitModel circuitVM)
-            {
-                pg.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
-            }
-            else
-            {
-                BindingOperations.ClearBinding(pg, UIElement.IsEnabledProperty);
             }
             pg.SelectedObject = vm ?? new object();
         }
