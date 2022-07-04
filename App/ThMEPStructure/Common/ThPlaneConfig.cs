@@ -230,6 +230,12 @@ namespace ThMEPStructure.Common
                 jObject["GlobalConfig"]["image_type"] = jsonConfig.GlobalConfig.image_type;
                 jObject["GlobalConfig"]["cut_position"] = jsonConfig.GlobalConfig.cut_position;
                 jObject["SvgConfig"]["image_size"] = jsonConfig.SvgConfig.image_size;
+                jObject["GlobalConfig"]["eye_dir"]["x"] = jsonConfig.GlobalConfig.eye_dir.x;
+                jObject["GlobalConfig"]["eye_dir"]["y"] = jsonConfig.GlobalConfig.eye_dir.y;
+                jObject["GlobalConfig"]["eye_dir"]["z"] = jsonConfig.GlobalConfig.eye_dir.z;
+                jObject["GlobalConfig"]["up"]["x"] = jsonConfig.GlobalConfig.up.x;
+                jObject["GlobalConfig"]["up"]["y"] = jsonConfig.GlobalConfig.up.y;
+                jObject["GlobalConfig"]["up"]["z"] = jsonConfig.GlobalConfig.up.z;
             }
             catch
             {

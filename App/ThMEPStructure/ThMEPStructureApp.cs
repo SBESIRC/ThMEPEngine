@@ -276,16 +276,24 @@ namespace ThMEPStructure
                 }
 
                 var drawingType = DrawingType.Unknown;
-                switch(result1.StringResult)
+                var eye_dir = new Direction();
+                var up = new Direction();
+                switch (result1.StringResult)
                 {
                     case "平面图":
                         drawingType = DrawingType.Plan;
+                        eye_dir = new Direction(0, 0, -1);
+                        up = new Direction(0, 1, 0);
                         break;
                     case "立面图":
                         drawingType = DrawingType.Elevation;
+                        eye_dir = new Direction(0, -1, 0);
+                        up = new Direction(0, 0, 1);
                         break;
                     case "剖面图":
                         drawingType = DrawingType.Section;
+                        eye_dir = new Direction(-1, 0, 0);
+                        up = new Direction(0, 0, 1);
                         break;
                     default:
                         break;
@@ -299,6 +307,8 @@ namespace ThMEPStructure
                     DrawingType = drawingType,
                 };
                 config.JsonConfig.SvgConfig.image_size = null;
+                config.JsonConfig.GlobalConfig.eye_dir = eye_dir;
+                config.JsonConfig.GlobalConfig.up = up;
 
                 if (drawingType == DrawingType.Section)
                 {
