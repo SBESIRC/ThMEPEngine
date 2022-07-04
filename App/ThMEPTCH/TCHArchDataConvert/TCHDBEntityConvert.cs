@@ -301,12 +301,12 @@ namespace ThMEPTCH.TCHArchDataConvert
         }
         ThTCHDoor DoorEntityToTCHDoor(DoorEntity entity)
         {
-            var newDoor = new ThTCHDoor(entity.MidPoint, entity.Width,entity.Height,entity.Thickness,entity.Angle);
+            var newDoor = new ThTCHDoor(entity.MidPoint, entity.Width,entity.Height,entity.Thickness,entity.Rotation);
             return newDoor;
         }
         ThTCHWindow WindowEntityToTCHWindow(WindowEntity entity)
         {
-            var newWindow = new ThTCHWindow(entity.MidPoint, entity.Width, entity.Height, entity.Thickness, entity.Angle);
+            var newWindow = new ThTCHWindow(entity.MidPoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
             return newWindow;
         }
         WallEntity TArchWallToEntityWall(TArchWall arch,double leftSpOffSet,double leftEpOffSet,double rightSpOffSet,double rightEpOffSet) 
@@ -408,10 +408,10 @@ namespace ThMEPTCH.TCHArchDataConvert
             DoorEntity entity = new DoorEntity();
             entity.MidPoint = new Point3d(arch.BasePointX, arch.BasePointY, arch.BasePointZ);
             entity.TextPoint = new Point3d(arch.TextPointX, arch.TextPointY, arch.TextPointZ);
+            entity.Rotation = arch.Rotation;
             var normal = Vector3d.ZAxis;
-            var leftDir = (entity.TextPoint-entity.MidPoint).GetNormal();
-            var dir = normal.CrossProduct(leftDir);
-            entity.Angle = Vector3d.XAxis.GetAngleTo(dir, normal);
+            var dir = Vector3d.XAxis.RotateBy(entity.Rotation, normal);
+            var leftDir = normal.CrossProduct(dir).GetNormal();
             var sp = entity.MidPoint - dir.MultiplyBy(arch.Width / 2);
             var ep = entity.MidPoint + dir.MultiplyBy(arch.Width / 2);
             var spLeft = sp + leftDir.MultiplyBy(arch.Thickness/2);
@@ -435,12 +435,10 @@ namespace ThMEPTCH.TCHArchDataConvert
             var entity = new WindowEntity();
             entity.MidPoint = new Point3d(arch.BasePointX, arch.BasePointY, arch.BasePointZ);
             entity.TextPoint = new Point3d(arch.TextPointX, arch.TextPointY, arch.TextPointZ);
+            entity.Rotation = arch.Rotation;
             var normal = Vector3d.ZAxis;
-            var leftDir = (entity.TextPoint - entity.MidPoint);
-            leftDir = new Vector3d(leftDir.X, leftDir.Y, 0);
-            leftDir = leftDir.GetNormal();
-            var dir = normal.CrossProduct(leftDir);
-            entity.Angle = Vector3d.XAxis.GetAngleTo(dir, normal);
+            var dir = Vector3d.XAxis.RotateBy(entity.Rotation,normal);
+            var leftDir = normal.CrossProduct(dir).GetNormal();
             var sp = entity.MidPoint - dir.MultiplyBy(arch.Width / 2);
             var ep = entity.MidPoint + dir.MultiplyBy(arch.Width / 2);
             var spLeft = sp + leftDir.MultiplyBy(arch.Thickness / 2);
@@ -461,11 +459,11 @@ namespace ThMEPTCH.TCHArchDataConvert
         }
         ThTCHOpening WallDoorOpening(WallEntity wallEntity, DoorEntity doorEntity) 
         {
-            return  new ThTCHOpening(doorEntity.MidPoint, doorEntity.Width, doorEntity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, doorEntity.Angle); 
+            return  new ThTCHOpening(doorEntity.MidPoint, doorEntity.Width, doorEntity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, doorEntity.Rotation); 
         }
         ThTCHOpening WallWindowOpening(WallEntity wallEntity, WindowEntity entity)
         {
-            return new ThTCHOpening(entity.MidPoint, entity.Width, entity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, entity.Angle);
+            return new ThTCHOpening(entity.MidPoint, entity.Width, entity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, entity.Rotation);
         }
     }
     class WallEntity 
@@ -526,8 +524,7 @@ namespace ThMEPTCH.TCHArchDataConvert
         public string Id { get; }
         public Point3d MidPoint { get; set; }
         public Point3d TextPoint { get; set; }
-        public Vector3d XVector { get; set; }
-        public double Angle { get; set; }
+        public double Rotation { get; set; }
         public MPolygon OutLine { get; set; }
         public double Thickness { get; set; }
         public double Width { get; set; }
@@ -556,8 +553,7 @@ namespace ThMEPTCH.TCHArchDataConvert
         public string Id { get; }
         public Point3d MidPoint { get; set; }
         public Point3d TextPoint { get; set; }
-        public Vector3d XVector { get; set; }
-        public double Angle { get; set; }
+        public double Rotation { get; set; }
         public MPolygon OutLine { get; set; }
         public double Thickness { get; set; }
         public double Width { get; set; }

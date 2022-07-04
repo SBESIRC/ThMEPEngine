@@ -39,5 +39,6 @@
         public int Kind { get; set; }
         public string SubKind { get; set; }
         public string StyleID { get; set; }
+        public double Rotation { get; set; }
     }
 }
