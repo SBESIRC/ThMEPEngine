@@ -1,6 +1,6 @@
 ﻿namespace ThMEPElectrical.BlockConvert
 {
-    public class ThBConvertBlockNameService
+    public static class ThBConvertBlockNameService
     {
         public static bool BlockNameEquals(string sourceStr, string targetStr)
         {
@@ -15,7 +15,7 @@
             }
         }
 
-        private static string KeepChinese(string str)
+        public static string KeepChinese(this string str)
         {
             //声明存储结果的字符串
             var chineseString = "";

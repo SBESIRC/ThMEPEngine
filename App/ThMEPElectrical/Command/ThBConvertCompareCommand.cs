@@ -87,7 +87,9 @@ namespace ThMEPElectrical.Command
                 service.Convert(manager, srcNames, targetNames, new List<ThBlockReferenceData>(), false);
 
                 var compareService = new ThBConvertCompareService();
-                compareService.Compare(currentDb.Database, targetBlocks, service.ObjectIds);
+                var models = compareService.Compare(currentDb.Database, targetBlocks, service.ObjectIds);
+
+                compareService.Print(currentDb.Database, models);
 
                 UpdateLayerSettings(ThBConvertCommon.HIDING_LAYER);
             }

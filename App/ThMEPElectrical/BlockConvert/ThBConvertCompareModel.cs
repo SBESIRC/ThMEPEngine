@@ -5,6 +5,11 @@ namespace ThMEPElectrical.BlockConvert
     public class ThBConvertCompareModel
     {
         /// <summary>
+        /// 图元database
+        /// </summary>
+        public Database Database { get; set; }
+
+        /// <summary>
         /// 源图纸图元ID
         /// </summary>
         public ObjectId SourceID { get; set; }
