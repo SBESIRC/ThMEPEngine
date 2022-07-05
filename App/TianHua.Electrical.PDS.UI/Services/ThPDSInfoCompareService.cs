@@ -198,6 +198,10 @@ namespace TianHua.Electrical.PDS.UI.Services
                     if (!databases.Any()) return;
                     new ThPDSPushDataService().Push(databases.ToList());
                 }),
+                RefreshUICmd = new RelayCommand(() =>
+                {
+                    UpdateView(panel);
+                }),
             };
         }
 
@@ -610,6 +614,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             public RelayCommand AcceptCmd { get; set; }
             public RelayCommand CreateCmd { get; set; }
             public RelayCommand UpdateCmd { get; set; }
+            public RelayCommand RefreshUICmd { get; set; }
             public RelayCommand ReadAndRegenCmd { get; set; }
         }
     }
