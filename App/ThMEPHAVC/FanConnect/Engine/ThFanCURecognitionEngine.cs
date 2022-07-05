@@ -1,4 +1,8 @@
-﻿using Linq2Acad;
+﻿using System;
+using AcHelper;
+using Linq2Acad;
+using System.Linq;
+using ThCADExtension;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.FanConnect.Model;
@@ -8,38 +12,39 @@ namespace ThMEPHVAC.FanConnect.Engine
 {
     public class ThFanCURecognitionEngine
     {
-        public List<ThFanCUModel> Extract(Database database, int sysType)
+        public List<ThFanCUModel> ExtractEditor(int sysType)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var retModel = new List<ThFanCUModel>();
-                var Results = acadDatabase.ModelSpace.OfType<BlockReference>();
-                foreach (var blk in Results)
-                {
-                    var blkName = blk.GetEffectiveName();
-                    if (sysType == 0)//水系统
-                    {
-                        if (blkName == "AI-FCU(两管制)" ||
-                            blkName == "AI-FCU(四管制)" ||
-                            blkName == "AI-吊顶式空调箱")
-                        {
-                            retModel.Add(ThFanConnectUtils.GetFanFromBlockReference(blk));
-                        }
-                        else if (blkName == "AI-水管断线")
-                        {
-                            retModel.Add(ThFanConnectUtils.GetFanFromBlockReference(blk));
-                        }
-                    }
-                    else if (sysType == 1)//冷媒系统
-                    {
-                        if (blkName == "AI-中静压VRF室内机(风管机)" ||
-                            blkName == "AI-VRF室内机(四面出风型)")
-                        {
-                            retModel.Add(ThFanConnectUtils.GetFanFromBlockReference(blk));
-                        }
-                    }
-                }
-                return retModel;
+                return Active.Editor.FilterBlocks(BlockNames(sysType))
+                    .Select(o => acadDatabase.ElementOrDefault<BlockReference>(o))
+                    .Where(o => o != null)
+                    .Select(o => ThFanConnectUtils.GetFanFromBlockReference(o))
+                    .ToList();
+            }
+        }
+
+        private List<string> BlockNames(int sysType)
+        {
+            if (sysType == 0)//水系统
+            {
+                return new List<string> {
+                    "AI-水管断线",
+                    "AI-FCU(两管制)",
+                    "AI-FCU(四管制)",
+                    "AI-吊顶式空调箱",
+                };
+            }
+            else if (sysType == 1)//冷媒系统
+            {
+                return new List<string> {
+                    "AI-VRF室内机(四面出风型)",
+                    "AI-中静压VRF室内机(风管机)",
+                };
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
         }
     }

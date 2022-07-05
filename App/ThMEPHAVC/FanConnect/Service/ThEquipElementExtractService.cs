@@ -1,18 +1,14 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
+using GeometryExtensions;
 using ThMEPEngineCore.CAD;
-using ThMEPHVAC.FanConnect.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.FanConnect.Model;
+using ThMEPHVAC.FanConnect.Engine;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -20,12 +16,8 @@ namespace ThMEPHVAC.FanConnect.Service
     {
         public static List<ThFanCUModel> GetFCUModels(int sysType)
         {
-            using (var database = AcadDatabase.Active())
-            {
-                var fcuEngine = new ThFanCURecognitionEngine();
-                var retFcu = fcuEngine.Extract(database.Database, sysType);
-                return retFcu;
-            }
+            var fcuEngine = new ThFanCURecognitionEngine();
+            return fcuEngine.ExtractEditor(sysType);
         }
         public static List<Line> GetFanPipes(Point3d startPt)
         {
@@ -40,10 +32,10 @@ namespace ThMEPHVAC.FanConnect.Service
                 int colorIndex = 0;
                 if (psr.Status == PromptStatus.OK)
                 {
-                    foreach(var id in psr.Value.GetObjectIds())
+                    foreach (var id in psr.Value.GetObjectIds())
                     {
                         var entity = database.Element<Entity>(id);
-                        if(entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
+                        if (entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
                         {
                             layer = entity.Layer;
                             colorIndex = entity.ColorIndex;
@@ -55,9 +47,9 @@ namespace ThMEPHVAC.FanConnect.Service
 
                 var tmpLines = database.ModelSpace.OfType<Entity>();//.Where(o => o.Layer.Contains(layer) && o.ColorIndex == colorIndex).ToList();
 
-                foreach(var l in tmpLines)
+                foreach (var l in tmpLines)
                 {
-                    if(l.Layer.ToUpper() == layer && l.ColorIndex == colorIndex)
+                    if (l.Layer.ToUpper() == layer && l.ColorIndex == colorIndex)
                     {
                         if (l is Line)
                         {
@@ -74,8 +66,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retLines;
             }
         }
-        //获取水管平面
-        public static List<Line> GetFanPipes(Point3d startPt,bool isCodeAndHotPipe,bool isCWPipe)
+        public static List<Line> GetFanPipes(Point3d startPt, bool isCodeAndHotPipe, bool isCWPipe)
         {
 
             using (var database = AcadDatabase.Active())
@@ -135,7 +126,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 var tmpLines = database.ModelSpace.OfType<Entity>();
                 foreach (var line in tmpLines)
                 {
-                    if(line.Layer == layer)
+                    if (line.Layer == layer)
                     {
                         if (line is Line)
                         {
@@ -166,7 +157,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 var retData = new List<Entity>();
                 var tmpEntity = database.ModelSpace.OfType<Entity>();//.Where(o => IsSPMLayer(o, layer)).ToList();
-                foreach(var ent in tmpEntity)
+                foreach (var ent in tmpEntity)
                 {
                     if (ent.Layer.ToUpper() == layer)
                     {
@@ -196,7 +187,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 var tmpEntity = database.ModelSpace.OfType<Entity>();//.Where(o => IsSPMLayer(o, layer)).ToList();
                 foreach (var ent in tmpEntity)
                 {
-                    if(ent.Layer.ToUpper() == layer)
+                    if (ent.Layer.ToUpper() == layer)
                     {
                         if (ent is DBText)
                         {
