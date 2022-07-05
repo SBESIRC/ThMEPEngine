@@ -702,7 +702,7 @@ namespace TianHua.Electrical.PDS.Service
             out bool frequencyConversion)
         {
             var powers = new List<double>();
-            var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
+            var check = "[0-9]*[.]?[0-9]*[/]?[0-9]+[.]?[0-9]*[kK]?[wW]{1}";
             var r = new Regex(@check);
             needCopy = false;
             frequencyConversion = false;
@@ -712,21 +712,37 @@ namespace TianHua.Electrical.PDS.Service
                 while (m.Success && (infos[i].IndexOf(m.Value) + m.Value.Count() + 1 > infos[i].Count()
                     || (infos[i][infos[i].IndexOf(m.Value) + m.Value.Count()] < '0' || infos[i][infos[i].IndexOf(m.Value) + m.Value.Count()] > '9')))
                 {
-                    infos[i] = infos[i].Replace("/", "");
                     infos[i] = infos[i].Replace(m.Value, "");
+                    infos[i] = infos[i].Replace("/", "");
                     frequencyConversion = infos[i].Contains(ThPDSCommon.FREQUENCY_CONVERSION);
                     var result = m.Value.Replace("k", "");
                     result = result.Replace("K", "");
                     result = result.Replace("w", "");
                     result = result.Replace("W", "");
-                    if (!m.Value.Contains("k") && !m.Value.Contains("K"))
+                    var value = result.Split("/".ToCharArray()).ToList();
+                    value.ForEach(x =>
                     {
-                        powers.Add(double.Parse(result) / 1000.0);
-                    }
-                    else
-                    {
-                        powers.Add(double.Parse(result));
-                    }
+                        if (string.IsNullOrEmpty(x))
+                        {
+                            return;
+                        }
+
+                        if (!m.Value.Contains("k") && !m.Value.Contains("K"))
+                        {
+                            if (double.TryParse(x, out var xValue))
+                            {
+                                powers.Add(xValue / 1000.0);
+                            }
+                        }
+                        else
+                        {
+                            if (double.TryParse(x, out var xValue))
+                            {
+                                powers.Add(xValue);
+                            }
+                        }
+                    });
+
                     var numRegex = new Regex(@"[1-9][xX]");
                     var numMatch = numRegex.Match(infos[i]);
                     if (numMatch.Success)
@@ -779,11 +795,17 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         if (!m.Value.Contains("k") && !m.Value.Contains("K"))
                         {
-                            powers.Add(double.Parse(x) / 1000.0);
+                            if (double.TryParse(x, out var xValue))
+                            {
+                                powers.Add(xValue / 1000.0);
+                            }
                         }
                         else
                         {
-                            powers.Add(double.Parse(x));
+                            if (double.TryParse(x, out var xValue))
+                            {
+                                powers.Add(xValue);
+                            }
                         }
                     });
 
