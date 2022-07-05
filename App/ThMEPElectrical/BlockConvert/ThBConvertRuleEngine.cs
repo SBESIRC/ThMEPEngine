@@ -107,6 +107,36 @@ namespace ThMEPElectrical.BlockConvert
                 target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT] =
                     string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
 
+                // 来源专业
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY] = StringFilter(table.Rows[row][column].ToString());
+
+                // 设备类型
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT] = StringFilter(table.Rows[row][column].ToString());
+
+                // 位置
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_POSITION] = 
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
+
+                // 负载编号
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_ID] =
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
+
+                // 负载电量
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_POWER] =
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
+
+                // 负载用途
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_DESCRIPTION] =
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
+
+                // 主备关系
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_RELATIONSHIP] =
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
+
+                // 电源类别
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_POWER_SUPPLY] =
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
+
                 // 创建映射规则
                 rules.Add(new ThBConvertRule()
                 {

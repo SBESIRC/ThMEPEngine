@@ -8,12 +8,20 @@
         public const double default_fire_valve_length = 320.0;
 
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_NAME = "块名";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_POSITION = "位置";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER = "目标图层";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_ID = "负载编号";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL = "内含图块";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY = "来源专业";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT = "设备类型";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_POWER = "负载电量";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_RELATIONSHIP = "主备关系";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_POWER_SUPPLY = "电源类别";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_POSITION_MODE = "计算模式";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER = "外形图层";
+        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_DESCRIPTION = "负载用途";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT = "旋转矫正";
 
         public const string PROPERTY_LOAD_FILP = "翻转状态1";
@@ -58,5 +66,7 @@
 
         public const string SINGLE_SUBMERSIBLE_PUMP = "单台潜水泵";
         public const string MANUAL_ACTUATOR_OF_SMOKE_EXHAUST_VALVE = "手动执行机构";
+
+        public const string HIDING_LAYER = "AI-提资比对";
     }
 }

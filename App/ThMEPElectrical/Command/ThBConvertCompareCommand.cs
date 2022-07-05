@@ -13,10 +13,12 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPElectrical.BlockConvert;
+using ThMEPEngineCore.Engine;
+using System.Linq;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThBConvertCommand : ThMEPBaseCommand, IDisposable
+    public class ThBConvertCompareCommand : ThMEPBaseCommand, IDisposable
     {
 
         /// <summary>
@@ -48,7 +50,7 @@ namespace ThMEPElectrical.Command
         /// 构造函数
         /// </summary>
         /// <param name="mode"></param>
-        public ThBConvertCommand()
+        public ThBConvertCompareCommand()
         {
             CommandName = "THTZZH";
             ActionName = "提资转换";
@@ -82,7 +84,33 @@ namespace ThMEPElectrical.Command
                 var targetNames = new List<string>();
                 var manager = service.ReadFile(srcNames, targetNames);
                 var targetBlocks = service.TargetBlockExtract(targetNames);
-                service.Convert(manager, srcNames, targetNames, targetBlocks, true);
+                service.Convert(manager, srcNames, targetNames, new List<ThBlockReferenceData>(), false);
+
+                var compareService = new ThBConvertCompareService();
+                compareService.Compare(currentDb.Database, targetBlocks, service.ObjectIds);
+
+                UpdateLayerSettings(ThBConvertCommon.HIDING_LAYER);
+            }
+        }
+
+        private void UpdateLayerSettings(string name)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var ltr = acadDatabase.Layers.ElementOrDefault(name, true);
+                if (ltr == null)
+                {
+                    return;
+                }
+
+                // 如果当前图层等于插入图层，暂不处理
+                if (acadDatabase.Database.Clayer.Equals(ltr.ObjectId))
+                {
+                    return;
+                }
+
+                // 设置图层状态
+                ltr.IsFrozen = true;
             }
         }
     }

@@ -44,8 +44,11 @@
     <Compile Include="AFAS\Utils\ThAFASSelectFrameUtil.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
+    <Compile Include="BlockConvert\ThBConvertBlockNameService.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
+    <Compile Include="BlockConvert\ThBConvertCompareModel.cs" />
+    <Compile Include="BlockConvert\ThBConvertCompareService.cs" />
     <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />
@@ -60,6 +63,7 @@
     <Compile Include="BlockConvert\ThBConvertRule.cs" />
     <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertService.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockExtractionEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
@@ -108,6 +112,7 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\ThBConvertCompareCommand.cs" />
     <Compile Include="Command\ThElectricalLoadCalculationCommand.cs" />
     <Compile Include="Command\ThInsertRoomFunctionCmd.cs" />
     <Compile Include="Command\TxtStrucInfoCommand.cs" />
