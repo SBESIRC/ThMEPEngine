@@ -42,6 +42,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                 SingleRegion nowRegion = RegionList[i];
 
+                //修改
                 if (nowRegion.ChildRegion.Count == 0 || nowRegion.PassingPipeList.Count == 1)
                 {
                     double buffer_dis = -nowRegion.SuggestDist;
