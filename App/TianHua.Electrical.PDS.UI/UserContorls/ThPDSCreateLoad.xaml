@@ -20,8 +20,8 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
-            <Button Margin="3" Click="btnInsert">插入到平面</Button>
-            <Button Margin="3" Click="btnSave">保存修改</Button>
+            <Button Margin="3" Click="btnCancel_Click" IsCancel="True">取消</Button>
+            <Button Margin="3" Click="btnOK_Click" IsDefault="True">确定</Button>
         </StackPanel>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">

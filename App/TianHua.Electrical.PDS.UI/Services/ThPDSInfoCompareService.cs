@@ -173,8 +173,10 @@ namespace TianHua.Electrical.PDS.UI.Services
                 CreateCmd = new RelayCommand(() =>
                 {
                     var w = new ThPDSCreateLoad();
-                    w.ShowDialog();
-                    UpdateView(panel);
+                    if (AcadApp.ShowModalWindow(w) == true)
+                    {
+                        UpdateView(panel);
+                    }
                 }),
                 UpdateCmd = new RelayCommand(() =>
                 {

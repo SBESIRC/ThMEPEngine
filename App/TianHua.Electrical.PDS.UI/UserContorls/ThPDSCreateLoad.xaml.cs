@@ -3,10 +3,8 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
-using TianHua.Electrical.PDS.UI.Models;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using TianHua.Electrical.PDS.Engine;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -71,26 +69,25 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
                 return ImageLoadType.None;
             }
         }
-        private void btnInsert(object sender, RoutedEventArgs e)
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            double.TryParse(defaultPower.Text, out var v);
-            new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: v /*defaultPower: double.Parse(defaultPower.Text)*/, defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
-            WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnInsert Click"));
-            Close();
+            //
         }
-        private void btnSave(object sender, RoutedEventArgs e)
+
+        private void btnOK_Click(object sender, RoutedEventArgs e)
         {
             if (double.TryParse(defaultPower.Text, out var v))
             {
-                ThPDSProjectGraphService.CreatNewLoad(
+                var node = ThPDSProjectGraphService.CreatNewLoad(
                     defaultLoadID: defaultLoadID.Text,
                     defaultPower: v,
                     defaultDescription: defaultDescription.Text,
                     defaultFireLoad: defaultFireLoad.IsChecked == true,
                     imageLoadType: ImageLoadType);
-                WeakReferenceMessenger.Default.Send(new GraphNodeAddMessage("btnSave Click"));
+                var engine = new ThPDSAddDimensionEngine();
+                engine.AddDimension(node);
             }
-            Close();
         }
     }
 }
