@@ -28,6 +28,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThElectricalPDSTestApp.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnitLite">
+      <Version>3.13.3</Version>
+    </PackageReference>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
