@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,20 +38,35 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                 var pipeLst = group.ToList();
                 pipeLst.ForEach(x =>
                 {
-                    if (x.printCircle != null && !x.HasReservedPlug)
+                    if (x.IsFloorDrainPipe)
                     {
-                        PrintPipeCircle(x.printCircle, originTransformer);
-                        x.route = GeometryUtils.ShortenPolyline(x.route, 50, true);
+                        PrintPipeFloorDraining(x.route.StartPoint, originTransformer);
+                        x.route = GeometryUtils.ShortenPolylineByCircle(x.route, new Circle(x.route.StartPoint, Vector3d.ZAxis, 75 * scale), true);
                     }
-                    else if (x.originCircle != null)
+                    else
                     {
-                        x.route = GeometryUtils.ShortenPolyline(x.route, x.originCircle.Radius, true);
+                        if (x.printCircle != null && !x.HasReservedPlug)
+                        {
+                            PrintPipeCircle(x.printCircle, originTransformer);
+                            x.route = GeometryUtils.ShortenPolyline(x.route, 50, true);
+                        }
+                        else if (x.originCircle != null)
+                        {
+                            x.route = GeometryUtils.ShortenPolyline(x.route, x.originCircle.Radius, true);
+                        }
                     }
                 });
                 var pipes = pipeLst.Select(x => { originTransformer.Reset(x.route); return x.route; }).ToList();
                 InsertBlockService.scaleNum = scale;
                 InsertBlockService.InsertConnectPipe(pipes, layer, null);
             }
+        }
+
+        private static void PrintPipeFloorDraining(Point3d pt, ThMEPOriginTransformer originTransformer)
+        {
+            var transPt = originTransformer.Reset(pt);
+            var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(transPt, Vector3d.YAxis) };
+            InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.FloorDrainingLayerName, ThWSSCommon.FloorDrainingBlockName);
         }
 
         private static void PrintPipeCircle(Circle circle, ThMEPOriginTransformer originTransformer)

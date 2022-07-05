@@ -49,13 +49,36 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var dir = (secPt - lastPt).GetNormal();
                 var moveDir = Vector3d.ZAxis.CrossProduct(dir);
                 var startDisTemp = startDis;
-                if (Vector3d.YAxis.DotProduct(moveDir) > 0)
+                var angle = dir.GetAngleTo(Vector3d.YAxis);             //和y轴10°以内认为是竖直线，竖直线标注在左侧，横线标注在上侧
+                if (angle > Math.PI)
                 {
-                    moveDir = -moveDir;
-                    startDisTemp = 0;
+                    angle = angle - Math.PI;
+                }
+                if (angle > Math.PI / 2)
+                {
+                    angle = Math.PI - angle;
+                }
+                if (angle < 10.0 / 180.0 * Math.PI)
+                {
+                    if (dir.Y > 0)
+                    {
+                        moveDir = -moveDir;
+                        startDisTemp = 0;
+                    }
+                }
+                else
+                {
+                    if (dir.X > 0)
+                    {
+                        moveDir = -moveDir;
+                        startDisTemp = 0;
+                    }
                 }
                 var sPt = lastPt + dir * startDisTemp;// + moveDir * moveDis;
-                sPt = originTransformer.Reset(sPt);
+                if (route.verticalPipeType != VerticalPipeType.CondensatePipe)
+                {
+                    sPt = originTransformer.Reset(sPt);
+                }
                 layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(sPt, -moveDir));
             }
 

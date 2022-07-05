@@ -35,6 +35,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <StackPanel  Grid.Row="0">
@@ -130,11 +131,18 @@
             <cus:ImageButton Content="⊕" Tag="浴缸" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
         <Grid   Grid.Row="17">
+            <WrapPanel Orientation="Vertical" Height="25" VerticalAlignment="Bottom">
+                <Label Content="地漏"></Label>
+            </WrapPanel>
+            <cus:ImageButton Content="->" Tag="地漏" ImageTextLocation="TextOnly"  PreviewMouseLeftButtonDown="btnSet_MouseDown" Click="btnSet_Click"  Margin="90,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+            <cus:ImageButton Content="⊕" Tag="地漏" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+        </Grid>
+        <Grid   Grid.Row="18">
             <WrapPanel Orientation="Vertical">
                 <Label Content="其他" Label.FontWeight ="Bold"></Label>
             </WrapPanel>
         </Grid>
-        <Grid   Grid.Row="18">
+        <Grid   Grid.Row="19">
             <WrapPanel Orientation="Vertical">
                 <Label Content="集水井"></Label>
             </WrapPanel>
@@ -142,14 +150,14 @@
             <cus:ImageButton Content="⊕" Tag="集水井" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
 
-        <Grid   Grid.Row="19">
+        <Grid   Grid.Row="20">
             <WrapPanel Orientation="Vertical">
                 <Label Content="非机械车位"></Label>
             </WrapPanel>
             <cus:ImageButton Content="->" Tag="非机械车位" ImageTextLocation="TextOnly"  PreviewMouseLeftButtonDown="btnSet_MouseDown" Click="btnSet_Click"  Margin="90,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
             <cus:ImageButton Content="⊕" Tag="非机械车位" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
-        <Grid   Grid.Row="20">
+        <Grid   Grid.Row="21">
             <WrapPanel Orientation="Vertical">
                 <Label Content="机械车位"></Label>
             </WrapPanel>
@@ -157,14 +165,14 @@
             <cus:ImageButton Content="⊕" Tag="机械车位" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
 
-        <Grid   Grid.Row="21">
+        <Grid   Grid.Row="22">
             <WrapPanel Orientation="Vertical">
                 <Label Content="空调内机--挂机"></Label>
             </WrapPanel>
             <cus:ImageButton Content="->" Tag="空调内机--挂机" ImageTextLocation="TextOnly"  PreviewMouseLeftButtonDown="btnSet_MouseDown" Click="btnSet_Click"  Margin="90,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
             <cus:ImageButton Content="⊕" Tag="空调内机--挂机" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
-        <Grid   Grid.Row="22">
+        <Grid   Grid.Row="23">
             <WrapPanel Orientation="Vertical">
                 <Label Content="空调内机--柜机"></Label>
             </WrapPanel>
@@ -172,7 +180,7 @@
             <cus:ImageButton Content="⊕" Tag="空调内机--柜机" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
         
-        <Grid   Grid.Row="23">
+        <Grid   Grid.Row="24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="66*"/>

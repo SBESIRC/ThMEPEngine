@@ -204,7 +204,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 holeConnectLines.AddRange(CreateRouteHelper.CreateConnectLineHoles(connectLine, lineDis));
                 foreach (var line in connectLine)
                 {
-                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
+                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe, pipe.IsFloorDrainPipe);
                     if (pipe.IsEuiqmentPipe)
                     {
                         route.printCircle = pipe.PipeCircle;

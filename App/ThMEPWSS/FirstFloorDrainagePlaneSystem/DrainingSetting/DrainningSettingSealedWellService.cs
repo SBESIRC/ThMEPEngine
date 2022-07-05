@@ -15,7 +15,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
     public class DrainningSettingSealedWellService : DraningSettingService
     {
         double radius = 400;
-        double scale = 0.5;
         double moveLength = 500;
         public DrainningSettingSealedWellService(List<RouteModel> _pipes, ThMEPOriginTransformer _originTransformer)
         {
@@ -48,7 +47,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
         /// <param name="pipes"></param>
         private void GetRainwaterInlet(List<RouteModel> pipes)
         {
-            double allLength = moveLength + radius * 2 * scale;
+            double allLength = moveLength * scale + radius * 2 * scale;
             var inletPts = new List<KeyValuePair<Point3d, Vector3d>>();
             var routes = new List<Polyline>();
             foreach (var pipe in pipes)
@@ -58,11 +57,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
                 var dir = (secP - sp).GetNormal();
                 var firRoute = new Polyline();
                 firRoute.AddVertexAt(0, sp.ToPoint2D(), 0, 0, 0);
-                firRoute.AddVertexAt(1, (sp + dir * moveLength).ToPoint2D(), 0, 0, 0);
+                firRoute.AddVertexAt(1, (sp + dir * moveLength * scale).ToPoint2D(), 0, 0, 0);
                 originTransformer.Reset(firRoute);
                 routes.Add(firRoute);
                 var transPt = originTransformer.Reset(sp);
-                inletPts.Add(new KeyValuePair<Point3d, Vector3d>(transPt + dir * (moveLength + radius * scale), Vector3d.YAxis));
+                inletPts.Add(new KeyValuePair<Point3d, Vector3d>(transPt + dir * (moveLength * scale + radius * scale), Vector3d.YAxis));
                 pipe.route = GeometryUtils.ShortenPolyline(pipe.route, allLength, true);
                 originTransformer.Reset(pipe.route);
                 routes.Add(pipe.route); 
