@@ -197,11 +197,7 @@ namespace ThMEPEngineCore.IO.SVG
 
         private ThGeometry CreateThGeometry(Entity boundary, Dictionary<string, object> properties)
         {
-            return new ThGeometry()
-            {
-                Boundary = boundary,
-                Properties = properties,
-            };
+            return ThGeometry.Create(boundary, properties);
         }
     }
 }

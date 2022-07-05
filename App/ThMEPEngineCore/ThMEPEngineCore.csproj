@@ -241,6 +241,7 @@
     <Compile Include="GridOperation\Utils\GridLineExtendService.cs" />
     <Compile Include="GridOperation\Utils\GridLineMergeService.cs" />
     <Compile Include="GridOperation\Utils\GridLineSimplifyService.cs" />
+    <Compile Include="Interface\IThGeometryWriter.cs" />
     <Compile Include="IO\ExcelService\ExcelHelper.cs" />
     <Compile Include="IO\ExcelService\NPOIExcelBase.cs" />
     <Compile Include="IO\ExcelService\WriteExcelHelper.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="IO\SVG\ThStructureSVGReader.cs" />
     <Compile Include="IO\SVG\ThSvgUtils.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
+    <Compile Include="IO\WKT\ThGeometryWKTWriter.cs" />
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
@@ -357,7 +359,6 @@
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThDoorOpeningExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThExtractorBase.cs" />
-    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="IO\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
@@ -520,7 +521,6 @@
     <Compile Include="IO\GeoJSON\Features\ThGeometryFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThShearWallFeatureCollection.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
-    <Compile Include="IO\GeoJSON\ThBeamGeoJsonReader.cs" />
     <Compile Include="IO\GeoJSON\ThGeometryJsonWriter.cs" />
     <Compile Include="IO\GeoJSON\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\GeoJSON\ThBeamGeoJsonWriter.cs" />

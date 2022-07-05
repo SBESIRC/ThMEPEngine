@@ -16,11 +16,7 @@ namespace ThMEPEngineCore.IO.SVG
     {
         public static ThGeometry CreateThGeometry(this Entity boundary, Dictionary<string, object> properties)
         {
-            return new ThGeometry()
-            {
-                Boundary = boundary,
-                Properties = properties,
-            };
+            return ThGeometry.Create(boundary, properties);
         }
         public static ThFloorInfo ParseFloorInfo(this SvgCustomAttributeCollection svgCustomAttributes)
         {

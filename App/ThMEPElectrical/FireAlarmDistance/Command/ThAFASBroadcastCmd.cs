@@ -124,7 +124,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                     ThMEPLoggingService.WriteToFile(path, outJson);
                 }
 
-                var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
+                var features = ThMEPGeoJSONService.Export2NTSFeatures(outJson);
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
                 ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0JsonOutput", 212, 30, 200));
 

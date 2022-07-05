@@ -1,10 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
-using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
-using NetTopologySuite.IO;
 using NetTopologySuite.Features;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -15,16 +12,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
 {
     public class ThAFASDistanceLayoutService
     {
-        public static FeatureCollection Export2NTSFeatures(string geojson)
-        {
-            var serializer = GeoJsonSerializer.Create();
-            using (var stringReader = new StringReader(geojson))
-            using (var jsonReader = new JsonTextReader(stringReader))
-            {
-                return serializer.Deserialize<FeatureCollection>(jsonReader);
-            }
-        }
-
         public static List<Point3d> ConvertGeom(FeatureCollection features)
         {
             var pts = new List<Point3d>();
