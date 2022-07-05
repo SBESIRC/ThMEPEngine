@@ -59,7 +59,7 @@ namespace TianHua.Electrical.UI
                     return;
                 }
                 // 执行命令
-                var cmd = new ThBConvertCommand()
+                var cmd = new ThBConvertCompareCommand()
                 {
                     Scale = uiCapitalConverter.Parameter.BlkScaleValue,
                     FrameStyle = uiCapitalConverter.Parameter.BlkFrameValue,
