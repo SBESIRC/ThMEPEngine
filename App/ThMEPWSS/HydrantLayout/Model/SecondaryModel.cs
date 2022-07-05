@@ -43,6 +43,10 @@ namespace ThMEPWSS.HydrantLayout.Model
         public double againstWallLength = 0;
         public int doorGood = 0;
 
+        //单柱子新晋指标
+        public double PositionScore = 0;
+        public double DoorScore = 0;
+
         //绘图属性
         public double ShortSide = Info.ShortSide;
         public double LongSide = Info.LongSide;

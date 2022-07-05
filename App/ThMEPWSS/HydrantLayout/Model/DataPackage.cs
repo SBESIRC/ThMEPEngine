@@ -84,6 +84,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static int Type = 2;
         public static int Mode = 2;
         public static bool AllowDoorInPaking = true;
+        public static bool ColumnCenterOK = true;
 
         //搜索范围
         public static double OriginRadius = 3000;

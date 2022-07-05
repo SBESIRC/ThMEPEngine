@@ -37,7 +37,7 @@ namespace ThMEPWSS.HydrantLayout.Service
         //这个是给消火栓找柱子用的
         public List<Polyline> LeanWallList = new List<Polyline>();
 
-        //这个给消火栓的柱子用的，判断左 中 右（0，1，2）
+        //这个给消火栓的柱子用的，判断左 中 右（0，1，2） 逆右 -1 ， 顺左 3
         public List<int> BasePointPosition = new List<int>();
 
         public SearchPoint(MPolygon mp, Point3d centerPoint)
@@ -353,6 +353,121 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(dirOut);
                             LeanWallList.Add(cl);
                             BasePointPosition.Add(2);
+                        }
+                    }
+                }
+            }
+        }
+
+        //锁方向
+        public void FindColumnPoint12(out List<Point3d> basePointList, out List<Vector3d> dirList)
+        {
+            LeanWallList.Clear();
+            basePointList = new List<Point3d>();
+            dirList = new List<Vector3d>();
+
+            foreach (var cl in Columns)
+            {
+                //Point3d center = cl.GetCentroidPoint();
+
+                List<int> index = new List<int>();
+                Dictionary<int, double> dis = new Dictionary<int, double>();
+                
+                for (int i = 0; i < cl.NumberOfVertices; i++)
+                {
+                    Point3d start = cl.GetPoint3dAt(i);
+                    Point3d end = cl.GetPoint3dAt((i + 1) % cl.NumberOfVertices);
+                    Vector3d dir01 = end - start;
+
+                    if (dir01.Length < 10) continue;
+                    Point3d mid = start + 0.5 * dir01;
+                    index.Add(i);
+                    dis.Add(i,mid.DistanceTo(CenterPoint));
+                }
+
+                int mainIndex = index.OrderBy(x => dis[x]).ToList().First();
+                int leftIndex = (mainIndex + index.Count - 1) % index.Count;
+                int rightIndex = (mainIndex + 1) % index.Count;
+                   
+                for (int i = 0; i < cl.NumberOfVertices; i++)
+                {
+                    Point3d start = cl.GetPoint3dAt(i);
+                    Point3d end = cl.GetPoint3dAt((i + 1) % cl.NumberOfVertices);
+                    Vector3d dir01 = end - start;
+                    Vector3d dirOut = new Vector3d(-dir01.Y, dir01.X, dir01.Z).GetNormal();
+
+                    if (i == mainIndex) 
+                    {
+                        Point3d mid = start + 0.5 * dir01;
+                        //Polyline probe = CreateBoundaryService.CreateBoundary(center, 1500, 190, dirOut);
+
+                        Polyline vpMid = CreateBoundaryService.CreateBoundary(mid + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpMid, Frame, ProcessedData.ParkingIndex))
+                        {
+                            if (IsVPBlocked(mid, dirOut, Frame))
+                            {
+                                basePointList.Add(mid);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(1);
+                            }
+                        }
+
+                        Point3d left = start + Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpLeft = CreateBoundaryService.CreateBoundary(left + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpLeft, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(left, dirOut, Frame))
+                            {
+                                basePointList.Add(left);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(0);
+                            }
+                        }
+
+                        Point3d right = end - Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpRight = CreateBoundaryService.CreateBoundary(right + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpRight, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(right, dirOut, Frame))
+                            {
+                                basePointList.Add(right);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(2);
+                            }
+                        }
+                    }
+
+                    if (i == leftIndex) 
+                    {
+                        Point3d right = end - Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpRight = CreateBoundaryService.CreateBoundary(right + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpRight, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(right, dirOut, Frame))
+                            {
+                                basePointList.Add(right);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(-1);
+                            }
+                        }
+                    }
+                    if (i == rightIndex)
+                    {
+                        Point3d left = start + Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpLeft = CreateBoundaryService.CreateBoundary(left + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpLeft, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(left, dirOut, Frame))
+                            {
+                                basePointList.Add(left);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(3);
+                            }
                         }
                     }
                 }

@@ -93,18 +93,37 @@ namespace ThMEPWSS.HydrantLayout.Engine
             List<Point3d> basePointList;
             List<Vector3d> dirList;
 
+            
+
             //寻找第一优先级定位点并测试摆放
             searchPoint0.FindTurningPoint(out basePointList, out dirList);
             FirstPriorityTest(basePointList, dirList);
 
+           
+
+
             //寻找第二优先级定位点并测试摆放
             if (Done == false)
             {
-                searchPoint0.FindColumnPoint(out basePointList, out dirList);
-                SecondPriorityTest(basePointList, dirList);
+                //测试第三优先级是否存在点位
+                List<Point3d> basePointTest3 = new List<Point3d>();
+                List<Vector3d> dirListTest3 = new List<Vector3d>();
                 searchPoint0.FindOtherPoint(out basePointList, out dirList);
-                ThirdPriorityTest(basePointList, dirList);
-                FindBest();
+
+                //只存在柱子
+                if (basePointTest3.Count == 0)
+                {
+                    searchPoint0.FindColumnPoint12(out basePointList, out dirList);
+                    SecondPriorityTest(basePointList, dirList);
+                }
+                else 
+                {
+                    searchPoint0.FindColumnPoint(out basePointList, out dirList);
+                    SecondPriorityTest(basePointList, dirList);
+                    //searchPoint0.FindOtherPoint(out basePointList, out dirList);
+                    ThirdPriorityTest(basePointList, dirList);
+                    FindBest();
+                }
             }
 
             ////寻找第三优先级定位点并测试摆放
@@ -285,6 +304,109 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 double overlappedArea = 0;
                                 if (!doorGood) overlappedArea = IndexCompute.ComputeOverlapArea(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
                                 
+                                FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLengthB, j, doorGood);
+
+                                overlappedAreaDoor.Add(fireCompareModeltmp, overlappedArea);
+                                fireCompareModelsMix1.Add(fireCompareModeltmp);
+                            }
+                        }
+                    }
+                }
+            }
+            //test
+
+            //寻找最优
+            ////fireCompareModels0.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance);
+            //fireCompareModels0 = fireCompareModels0.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ThenBy(x => x.doorGood).ToList();
+            //if (fireCompareModels0.Count > 0)
+            //{
+            //    Done = true;
+            //    FireCompareModel fireCompareModelbest = fireCompareModels0[0];
+            //    Polyline drawFire = CreateBoundaryService.CreateBoundary(fireCompareModelbest.fireCenterPoint, Info.ShortSide, Info.LongSide, fireCompareModelbest.fireDir);
+            //    //Polyline drawFire = CreateBoundaryService.CreateBoundary(new Point3d(411898,722948,0), Info.ShortSide, Info.LongSide,new Vector3d(0,1,0));
+            //    DrawUtils.ShowGeometry(drawFire, "l1fire", 2, lineWeightNum: 30);
+            //    fireCompareModelbest.Draw();
+            //}
+        }
+
+        private void SecondPriorityTestOnlyColumn(List<Point3d> basePointList, List<Vector3d> dirList)
+        {
+            //可行解存放处
+            List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
+
+            //开始循环
+            for (int i = 0; i < basePointList.Count; i++)
+            {
+                if (searchPoint0.BasePointPosition[i] == 1 && ) continue;
+
+                var fireHydrant0 = new FireHydrant(basePointList[i], dirList[i], ShortSide, LongSide, Info.Mode);
+                Polyline vpPl = fireHydrant0.GetRiserObb();
+                List<Polyline> fireObbList = fireHydrant0.GetFireObbList();
+                //if (i == 0)
+                //{
+                //    fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
+                //}
+                List<int> feasibleTypeList = new List<int>();
+
+                switch (Mode)
+                {
+                    case 2: { feasibleTypeList = new List<int> { 0,1,4,5,6,7,8,9 }; break; }
+                    case 1: { feasibleTypeList = new List<int> { 0,1,4,5,6,7}; break; }
+                    case 0: { feasibleTypeList = new List<int> { 6, 7, 8, 9 }; break; }
+                }
+
+                for (int k = 0; k < feasibleTypeList.Count; k++)
+                {
+                    int j = feasibleTypeList[k];
+
+                    if (searchPoint0.BasePointPosition[i] == 0 && j == 8) continue;
+                    if (searchPoint0.BasePointPosition[i] == 2 && j == 9) continue;
+
+                    if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
+                    {
+                        List<Polyline> doorAreaList = fireHydrant0.GetDoorAreaObbList(j);
+                        //doorAreaList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1doorarea", 10));
+
+                        double distance = fireHydrant0.TFireCenterPointList[j].DistanceTo(CenterPoint);
+                        double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, searchPoint0.LeanWallList[i]);
+                        double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], searchPoint0.LeanWallList[i]);
+                        int againstWallLength = (int)(againstWallLength0 + againstWallLength1) / 100;
+                        //double againstWallLength = 200;
+                        againstWallLength = againstWallLength + (int)((3000 - distance) / 100 * Info.DistanceWeight);
+                        if (distance == 0)
+                        { distance = 0; }
+                        if (searchPoint0.BasePointPosition[i] == 1) { againstWallLength = againstWallLength - 2; }
+
+
+                        for (int k = 0; k < doorAreaList.Count; k++)
+                        {
+                            // 固定开门方向
+                            if ((k == 0) && (searchPoint0.BasePointPosition[i] == 2)) continue;
+                            if ((k == 1) && (searchPoint0.BasePointPosition[i] == 0)) continue;
+
+                            //是否允许在车位上开门
+                            if (!Info.AllowDoorInPaking)
+                            {
+                                if (!FeasibilityCheck.IsFireFeasible(doorAreaList[k], LeanWall.Shell()))
+                                {
+                                    continue;
+                                }
+                            }
+
+                            if (FeasibilityCheck.IsDoorFeasible(doorAreaList[k], LeanWall.Shell())) //如果门没有被阻挡,找到一个可以摆放的模型
+                            {
+                                Point3d fireCenter = new Point3d();
+                                Vector3d fireDir = new Vector3d();
+                                fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
+                                double againstWallLengthB = againstWallLength;
+
+                                //检验开门遮挡
+                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
+                                if (doorGood) againstWallLengthB = againstWallLengthB + 2;
+
+                                double overlappedArea = 0;
+                                if (!doorGood) overlappedArea = IndexCompute.ComputeOverlapArea(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
+
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLengthB, j, doorGood);
 
                                 overlappedAreaDoor.Add(fireCompareModeltmp, overlappedArea);
