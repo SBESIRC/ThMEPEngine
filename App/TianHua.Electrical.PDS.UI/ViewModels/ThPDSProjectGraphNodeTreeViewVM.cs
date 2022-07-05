@@ -80,13 +80,13 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     {
                         var oldsourceNode = GetProjectGraphNode(sourceItem.Parent, _graph);
                         var newSourceNode = GetProjectGraphNode(targetItem.Parent, _graph);
-                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        if (!object.ReferenceEquals(oldsourceNode, newSourceNode))
                         {
                             var targetNode = GetProjectGraphNode(sourceItem, _graph);
                             ThPDSProjectGraphService.DeleteCircuit(_graph, oldsourceNode, targetNode);
                             ThPDSProjectGraphService.SpecifyConnectionCircuit(_graph, newSourceNode, targetNode);
                         }
-                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        if (!object.ReferenceEquals(oldsourceNode, newSourceNode))
                         {
                             sourceItem.Parent.DataList.Remove(sourceItem);
                             targetItem.Parent.DataList.Add(sourceItem);
@@ -100,13 +100,13 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     {
                         var oldsourceNode = GetProjectGraphNode(sourceItem.Parent, _graph);
                         var newSourceNode = GetProjectGraphNode(targetItem, _graph);
-                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        if (!object.ReferenceEquals(oldsourceNode, newSourceNode))
                         {
                             var targetNode = GetProjectGraphNode(sourceItem, _graph);
                             ThPDSProjectGraphService.DeleteCircuit(_graph, oldsourceNode, targetNode);
                             ThPDSProjectGraphService.SpecifyConnectionCircuit(_graph, newSourceNode, targetNode);
                         }
-                        if (object.ReferenceEquals(oldsourceNode, newSourceNode))
+                        if (!object.ReferenceEquals(oldsourceNode, newSourceNode))
                         {
                             sourceItem.Parent.DataList.Remove(sourceItem);
                             targetItem.DataList.Add(sourceItem);
