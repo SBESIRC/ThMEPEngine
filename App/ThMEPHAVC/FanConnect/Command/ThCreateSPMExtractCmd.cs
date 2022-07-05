@@ -1,21 +1,14 @@
 ﻿using System;
+using NFox.Cad;
+using AcHelper;
 using Linq2Acad;
-using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Command;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
-using DotNetARX;
-using ThMEPEngineCore.LaneLine;
-using ThMEPEngineCore.Service;
-using NFox.Cad;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using AcHelper;
 
 namespace ThMEPHVAC.FanConnect.Command
 {
@@ -35,7 +28,7 @@ namespace ThMEPHVAC.FanConnect.Command
         {
             try
             {
-                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (var doclock = Active.Document.LockDocument())
                 using (var database = AcadDatabase.Active())
                 {
                     ThFanConnectUtils.ImportBlockFile();
@@ -53,7 +46,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    if(pipes.ToCollection().Polygonize().Count > 0)
+                    if (pipes.ToCollection().Polygonize().Count > 0)
                     {
                         Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
                         return;
@@ -78,7 +71,7 @@ namespace ThMEPHVAC.FanConnect.Command
                         return;
                     }
                     var badLines = handlePipeService.GetBadLine(tmpTree, mt);
-                    var rightLines = handlePipeService.GetRightLine(tmpTree,mt);//已经处理好的线
+                    var rightLines = handlePipeService.GetRightLine(tmpTree, mt);//已经处理好的线
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                     {
@@ -97,7 +90,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
                     }
-                    if(ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                    if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
                         double fanWidth = 600;
                         //if(ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
@@ -106,7 +99,7 @@ namespace ThMEPHVAC.FanConnect.Command
                         //}
                         foreach (var fcu in fcus)
                         {
-                            if(fcu.IsConnected)
+                            if (fcu.IsConnected)
                                 ThFanConnectUtils.UpdateFan(fcu, fanWidth);
                         }
                     }
