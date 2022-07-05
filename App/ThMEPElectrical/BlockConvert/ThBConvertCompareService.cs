@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using NFox.Cad;
@@ -18,13 +19,29 @@ namespace ThMEPElectrical.BlockConvert
     {
         public double AllowTolence = 500.0;
 
-        public List<ThBConvertCompareModel> Compare(Database database, List<ThBlockReferenceData> targetBlocks, List<ObjectId> objectIds)
+        public Database Database { get; set; }
+
+        public List<ThBlockReferenceData> TargetBlocks { get; set; }
+
+        public List<Tuple<ObjectId, string>> ObjectIds { get; set; }
+
+        public List<ThBConvertCompareModel> CompareModels { get; set; }
+
+        public ThBConvertCompareService(Database database, List<ThBlockReferenceData> targetBlocks, List<Tuple<ObjectId, string>> objectIds)
         {
-            using (var currentDb = AcadDatabase.Use(database))
+            Database = database;
+            TargetBlocks = targetBlocks;
+            ObjectIds = objectIds;
+            CompareModels = new List<ThBConvertCompareModel>();
+        }
+
+        public void Compare()
+        {
+            using (var currentDb = AcadDatabase.Use(Database))
             {
                 var searchedIds = new List<ObjectId>();
-                var sourceEntites = targetBlocks.Select(o => currentDb.Element<BlockReference>(o.ObjId, true)).ToList();
-                var targetEntites = objectIds.Select(o => currentDb.Element<BlockReference>(o, true)).ToList();
+                var sourceEntites = TargetBlocks.Select(o => currentDb.Element<BlockReference>(o.ObjId, true)).ToList();
+                var targetEntites = ObjectIds.Select(o => currentDb.Element<BlockReference>(o.Item1, true)).ToList();
 
                 var sourceEntitiesMap = EntitiesMap(sourceEntites);
                 var targetEntitiesMap = EntitiesMap(targetEntites);
@@ -32,7 +49,6 @@ namespace ThMEPElectrical.BlockConvert
                 var sourceIndex = new ThCADCoreNTSSpatialIndex(sourceEntitiesMap.Select(o => o.Key).ToCollection());
                 var targetIndex = new ThCADCoreNTSSpatialIndex(targetEntitiesMap.Select(o => o.Key).ToCollection());
 
-                var results = new List<ThBConvertCompareModel>();
                 sourceEntitiesMap.ForEach(o =>
                 {
                     var result = new ThBConvertCompareModel
@@ -40,7 +56,7 @@ namespace ThMEPElectrical.BlockConvert
                         Database = currentDb.Database,
                         SourceID = o.Value.ObjectId,
                     };
-                    results.Add(result);
+                    CompareModels.Add(result);
                     searchedIds.Add(o.Value.ObjectId);
 
                     var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
@@ -72,11 +88,9 @@ namespace ThMEPElectrical.BlockConvert
                         TargetID = o.Value.ObjectId,
                         Type = ThBConvertCompareType.Add,
                     };
-                    results.Add(result);
+                    CompareModels.Add(result);
                     searchedIds.Add(o.Value.ObjectId);
                 });
-
-                return results;
             }
         }
 
@@ -90,13 +104,13 @@ namespace ThMEPElectrical.BlockConvert
             return result;
         }
 
-        public void Print(Database database, List<ThBConvertCompareModel> models)
+        public void Print()
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Use(Database))
             {
-                if (models.Count > 0 && acadDatabase.Database.Equals(models[0].Database))
+                if (CompareModels.Count > 0 && acadDatabase.Database.Equals(CompareModels[0].Database))
                 {
-                    models.ForEach(model =>
+                    CompareModels.ForEach(model =>
                     {
                         switch (model.Type)
                         {
@@ -149,6 +163,38 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     var obb = block.ToOBB();
                     ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex);
+                }
+            }
+        }
+
+        public void Update()
+        {
+            using (var currentDb = AcadDatabase.Use(Database))
+            {
+                var sourceEntites = TargetBlocks.Select(o => currentDb.Element<BlockReference>(o.ObjId, true)).ToList();
+                sourceEntites.ForEach(o => o.Erase());
+
+                ObjectIds.ForEach(o =>
+                {
+                    ThBConvertDbUtils.UpdateLayerSettings(o.Item2);
+                    var block = currentDb.Element<Entity>(o.Item1, true);
+                    block.Layer = o.Item2;
+                });
+
+                var ltr = currentDb.Layers.ElementOrDefault(ThBConvertCommon.HIDING_LAYER, true);
+                if (ltr == null)
+                {
+                    return;
+                }
+
+                var idCollection = new ObjectIdCollection
+                {
+                    ltr.Id,
+                };
+                currentDb.Database.Purge(idCollection);
+                if (idCollection.Count > 0)
+                {
+                    ltr.Erase();
                 }
             }
         }

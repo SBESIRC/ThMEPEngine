@@ -59,7 +59,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         public bool ConvertManualActuator { get; set; }
 
-        public List<ObjectId> ObjectIds { get; set; }
+        public List<Tuple<ObjectId, string>> ObjectIds { get; set; }
 
         public ThBConvertService(AcadDatabase currentDb, Polyline frame, ConvertMode mode, ConvertCategory category, double scale,
             string frameStyle, bool convertManualActuator)
@@ -71,7 +71,7 @@ namespace ThMEPElectrical.BlockConvert
             Scale = scale;
             FrameStyle = frameStyle;
             ConvertManualActuator = convertManualActuator;
-            ObjectIds = new List<ObjectId>();
+            ObjectIds = new List<Tuple<ObjectId, string>>();
         }
 
         public ThBConvertManager ReadFile(List<string> srcNames, List<string> targetNames)
@@ -115,7 +115,7 @@ namespace ThMEPElectrical.BlockConvert
                     targetNames.AddRange(str.Split(','));
                 }
             });
-                return manager;
+            return manager;
         }
 
         public List<ThBlockReferenceData> TargetBlockExtract(List<string> targetNames)
@@ -168,8 +168,7 @@ namespace ThMEPElectrical.BlockConvert
                     var block = rule.Transformation.Item1;
                     var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                     var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
-                    srcBlocks.Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
-                        .Where(o =>
+                    srcBlocks.Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName).Where(o =>
                     {
                         // 仅转换指定外参上的图块
                         var name = "";
@@ -241,14 +240,15 @@ namespace ThMEPElectrical.BlockConvert
 
                             // 获取需要导入的块名、图层，导入目标图块
                             var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                            string targetBlockLayer;
+                            var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
+                            string targetBlockLayerSetting;
                             if (setLayer)
                             {
-                                targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
+                                targetBlockLayerSetting = targetBlockLayer;
                             }
                             else
                             {
-                                targetBlockLayer = ThBConvertCommon.HIDING_LAYER;
+                                targetBlockLayerSetting = ThBConvertCommon.HIDING_LAYER;
                             }
                             if (FrameStyle == ThBConvertCommon.LABEL_STYLE_BORDERLESS
                                 && (targetBlockName == ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION || targetBlockName == ThBConvertCommon.BLOCK_LOAD_DIMENSION))
@@ -261,7 +261,7 @@ namespace ThMEPElectrical.BlockConvert
                             }
 
                             CurrentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
-                            CurrentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
+                            CurrentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayerSetting), false);
 
                             // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                             // 修正插入动态块的图层顺序
@@ -371,8 +371,8 @@ namespace ThMEPElectrical.BlockConvert
                                 {
                                     if (!id.IsErased)
                                     {
-                                        engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayer);
-                                        ObjectIds.Add(id);
+                                        engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayerSetting);
+                                        ObjectIds.Add(Tuple.Create(id, targetBlockLayer));
                                     }
                                 });
                             }
