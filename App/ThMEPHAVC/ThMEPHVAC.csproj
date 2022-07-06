@@ -141,6 +141,7 @@
     <Compile Include="IO\ThPortParameterJsonReader.cs" />
     <Compile Include="LoadCalculation\Command\ThExportExcelCmd.cs" />
     <Compile Include="Model\ThAirPortParameter.cs" />
+    <Compile Include="Model\ThDuctPortsRegexUtils.cs" />
     <Compile Include="Model\ThFGDXParameter.cs" />
     <Compile Include="ParameterService\FanSelectTypeParameter.cs" />
     <Compile Include="ParameterService\IndoorFanParameter.cs" />

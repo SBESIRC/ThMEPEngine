@@ -439,7 +439,7 @@ namespace ThMEPHVAC.Model
                     {
                         pl.CreatePolygon(p.ToPoint2D(), 4, 10);
                     }
-                    var airVolume = GetAirVolume(id.GetAttributeInBlockReference("风量"));
+                    var airVolume = ThDuctPortsRegexUtils.GetAirVolume(id.GetAttributeInBlockReference("风量"));
                     dicPlToPort.Add(pl, new PortModifyParam() { portAirVolume = airVolume, pos = p, portRange = portRange, portHeight = portHeight, portWidth = portWidth, rotateAngle = rotateAngle, handle = id.Handle });
                 }
             }
@@ -513,7 +513,7 @@ namespace ThMEPHVAC.Model
                         if (!sidePortHandle.ContainsKey(p))
                         {
                             pl.CreatePolygon(p.ToPoint2D(), 4, 10);
-                            var airVolume = GetAirVolume(id.GetAttributeInBlockReference("风量")) * 2;
+                            var airVolume = ThDuctPortsRegexUtils.GetAirVolume(id.GetAttributeInBlockReference("风量")) * 2;
                             dicPlToPort.Add(pl, new PortModifyParam() { portAirVolume = airVolume, pos = p, portRange = portRange, portHeight = portHeight, portWidth = portWidth, rotateAngle = rotateAngle, handle = id.Handle });
                             sidePortHandle.Add(p, new List<Handle>() { id.Handle });
                         }
@@ -523,7 +523,7 @@ namespace ThMEPHVAC.Model
                     else
                     {
                         pl.CreatePolygon(p.ToPoint2D(), 4, 10);
-                        var airVolume = GetAirVolume(id.GetAttributeInBlockReference("风量"));
+                        var airVolume = ThDuctPortsRegexUtils.GetAirVolume(id.GetAttributeInBlockReference("风量"));
                         dicPlToPort.Add(pl, new PortModifyParam() { portAirVolume = airVolume, pos = p, portRange = portRange, portHeight = portHeight, portWidth = portWidth, rotateAngle = rotateAngle, handle = id.Handle });
                     }
                 }
@@ -565,7 +565,7 @@ namespace ThMEPHVAC.Model
                     portBound.CreatePolygon(centerP.ToPoint2D(), 4, extLen);
                     var polygon = new DBObjectCollection() { portBound }.BuildMPolygon();
                     portBounds.Add(polygon);
-                    var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));
+                    var airVolume = ThDuctPortsRegexUtils.GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));
                     dicPlToAirVolume.Add(polygon.GetHashCode(), 
                         new PortInfo() { portAirVolume = airVolume, position = centerP, id = port.Id, effectiveName = ThHvacCommon.AI_PORT });
                 }
@@ -596,7 +596,7 @@ namespace ThMEPHVAC.Model
                     portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
                     var polygon = new DBObjectCollection() { portBound }.BuildMPolygon();
                     portBounds.Add(polygon);
-                    var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量")) * 2; // 一对侧风口
+                    var airVolume = ThDuctPortsRegexUtils.GetAirVolume(port.Id.GetAttributeInBlockReference("风量")) * 2; // 一对侧风口
                     dicPlToAirVolume.Add(polygon.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
                 }
                 else
@@ -620,7 +620,7 @@ namespace ThMEPHVAC.Model
                 }
                 bound.CreatePolygon(p.ToPoint2D(), 4, len);
                 var strVolume = blk.Id.GetAttributeInBlockReference("风量");
-                double airVolume = GetAirVolume(strVolume);
+                double airVolume = ThDuctPortsRegexUtils.GetAirVolume(strVolume);
                 var polygon = new DBObjectCollection() { bound }.BuildMPolygon();
                 portBounds.Add(polygon);
                 dicPlToAirVolume.Add(polygon.GetHashCode(), 
@@ -697,14 +697,6 @@ namespace ThMEPHVAC.Model
             foreach (Line l in t)
                 lines.Add(l);
             return lines;
-        }
-
-        private static double GetAirVolume(string s)
-        {
-            if (s.IsNullOrEmpty())
-                return 0;
-            var str = s.Split('m');
-            return str.Count() > 0 ? Double.Parse(str[0]) : 0;
         }
     }
 }
