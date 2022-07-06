@@ -13601,7 +13601,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           }
           if (maxToiletToFloordrainDistance2 is DISORGANIZATION)
           {
-            if (TOILET_BUFFER_DISTANCE is THESAURUSSINCERE || TOILET_BUFFER_DISTANCE.Contains(SEROEPIDEMIOLOGY))
+            if (TOILET_BUFFER_DISTANCE is THESAURUSSINCERE || TOILET_BUFFER_DISTANCE.Contains(SEROEPIDEMIOLOGY) || isDrainageLayer(TOILET_BUFFER_DISTANCE))
             {
               foreach (var maxBalconyrainpipeToFloordrainDistance in maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection().OfType<Circle>().Where(IsLayerVisible))
               {
