@@ -38,19 +38,22 @@ using ThMEPArchitecture.ParkingStallArrangement.PostProcess;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Autodesk.AutoCAD.ApplicationServices;
+using ThParkingStall.Core.IO;
 
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThMPArrangementCmd : ThMEPBaseCommand, IDisposable
     {
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
+        public static string LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
 
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
         public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
 
-        public Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
+        public static Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
         public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
+
+        public string DrawingName;
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
@@ -75,6 +78,9 @@ namespace ThMEPArchitecture.MultiProcess
         }
         public override void SubExecute()
         {
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+            DrawingName = Path.GetFileName(doc.Name);
+
             System.IO.FileStream emptyStream = new System.IO.FileStream(DisplayLogFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream.Close();
             System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
@@ -90,51 +96,45 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
             .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
-            Logger?.Information($"############################################");
-            Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
-            Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
-            Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
-            Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
-            Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
-            Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
+            //Logger?.Information($"############################################");
+            //Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
+            //Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
+            //Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
+            //Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
+            //Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
+            //Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
             Utils.SetSeed();
             try
             {
-                if(_CommandMode == CommandMode.WithoutUI)
+                using (var docLock = Active.Document.LockDocument())
+                using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Logger?.Information($"DEbug--读取复现");
-                    using (var docLock = Active.Document.LockDocument())
-                    using (AcadDatabase currentDb = AcadDatabase.Active())
+                    var saved = true;
+                    if (_CommandMode == CommandMode.WithoutUI)
                     {
-                        RunDebug();
+                         Logger?.Information($"DEbug--读取复现");
+                         RunDebug();
                     }
-                }
-                else
-                {
-                    if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
+                    else
                     {
-                        Logger?.Information($"无迭代速排");
-                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                         {
+                            saved = false;
                             RunDirect(currentDb);
                         }
-                    }
-                    else if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
-                    {
-
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
+                        {
                             Run(currentDb);
-                    }
-                    else 
-                    {
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        }
+                        else
+                        {
                             RunWithAutoSegLine(currentDb);
+                        }
                     }
+                    TableTools.EraseOrgTable();
+                    //TableTools.hideOrgTable();
+                    if(saved)
+                        Active.Document.Save();
                 }
             }
             catch (Exception ex)
@@ -152,7 +152,6 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger?.Information($"地库程序运行结束 \n");
                 DisplayLogger?.Dispose();
                 DisplayLogger2?.Dispose();
-                Active.Document.Save();
             }
         }
 
@@ -178,8 +177,13 @@ namespace ThMEPArchitecture.MultiProcess
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
             var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             var layoutData = new LayoutData();
+            var blkName = block.GetEffectiveName();
+            UpdateLogger(blkName);
             var inputvaild = layoutData.Init(block, Logger);
             if (!inputvaild) return;
+            Logger?.Information("块名：" + blkName);
+            Logger?.Information("文件名：" + DrawingName);
+            Logger?.Information("用户名：" + Environment.UserName);
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
                 var stopWatch = new Stopwatch();
@@ -227,14 +231,10 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     var blkName = blk.GetEffectiveName();
                     var displayInfo = new DisplayInfo(blkName);
-                    Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-                    var drawingName = Path.GetFileName(doc.Name);
-                    var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
-                    Logger = new Serilog.LoggerConfiguration().WriteTo
-                            .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    UpdateLogger(blkName);
                     DisplayLogger?.Information("块名: " + blkName);
                     Logger?.Information("块名：" + blkName);
-                    Logger?.Information("文件名：" + drawingName);
+                    Logger?.Information("文件名：" + DrawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     RunABlock(blk, displayInfo,ParameterViewModel.AddBoundSegLines);
                     displayInfos.Add(displayInfo);
@@ -288,14 +288,10 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     var blkName = blk.GetEffectiveName();
                     var displayInfo = new DisplayInfo(blkName);
-                    Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-                    var drawingName = Path.GetFileName(doc.Name);
-                    var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
-                    Logger = new Serilog.LoggerConfiguration().WriteTo
-                            .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    UpdateLogger(blkName);
                     DisplayLogger?.Information("块名: " + blkName);
                     Logger?.Information("块名：" + blkName);
-                    Logger?.Information("文件名：" + drawingName);
+                    Logger?.Information("文件名：" + DrawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
                     var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData,false);
                     if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, displayInfo,true, autoSegLines, layoutData);
@@ -405,18 +401,9 @@ namespace ThMEPArchitecture.MultiProcess
 
         private void ProcessAndDisplay(MPChromosome solution,int SolutionID = 0 ,Stopwatch stopWatch = null, DisplayInfo displayInfo=null)
         {
-            var moveDistance = SolutionID*2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) - 
+            var moveDistance = SolutionID * 2 * (InterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 InterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = InterParameter.GetSubAreas(solution);
-            var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
-            var layer = "最终分区线";
-            using (AcadDatabase acad = AcadDatabase.Active())
-            {
-                if (!acad.Layers.Contains(layer))
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
-                MPEX.HideLayer(layer);
-            }
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
@@ -431,8 +418,20 @@ namespace ThMEPArchitecture.MultiProcess
             Logger?.Information(strBest);
             Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-            if(ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
-            if(stopWatch != null)
+            var layer = "最终分区线";
+            var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                var outSegLines = finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList();
+                outSegLines.AddRange(mParkingPartition.OutEnsuredLanes.Select(l => l.ToDbLine(50, layer)).Cast<Entity>());
+                outSegLines.ShowBlock(layer, layer);
+                //finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                MPEX.HideLayer(layer);
+            }
+            if (ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
+            if (stopWatch != null)
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");
@@ -524,6 +523,7 @@ namespace ThMEPArchitecture.MultiProcess
             var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
             if (girdLines.Count < 2)
             {
+                DisplayLogger.Information("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 Active.Editor.WriteMessage("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 Logger?.Information("块名为：" + blk_Name + "的地库暂不支持自动分区线！\n");
                 return null;
@@ -554,6 +554,18 @@ namespace ThMEPArchitecture.MultiProcess
             ReclaimMemory();
             Logger?.Information($"当前图生成分区线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
             return result;
+        }
+
+        private void UpdateLogger(string blkName)
+        {
+            string modName;
+            if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration) modName = "无迭代_";
+            else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration) modName = "手动迭代_";
+            else modName = "全自动_";
+            var logFileName = Path.Combine(GetPath.GetAppDataPath(), modName + DrawingName.Split('.').First() + '(' + blkName + ')' + ".txt") ;
+            Logger = new Serilog.LoggerConfiguration().WriteTo
+                    .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+
         }
         private void ReclaimMemory()
         {

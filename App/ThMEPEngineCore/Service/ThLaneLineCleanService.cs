@@ -54,7 +54,6 @@ namespace ThMEPEngineCore.Service
             extendedLines = ThLaneLineEngine.Noding(extendedLines);
             extendedLines = ThLaneLineEngine.CleanZeroCurves(extendedLines);
 
-
             return extendedLines;
         }
     }

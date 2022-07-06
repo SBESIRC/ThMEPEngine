@@ -70,6 +70,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                 DisVertCarLengthBackBack = DisVertCarLength;
                 DisCarAndHalfLaneBackBack = DisCarAndHalfLane;
             }
+            else
+            {
+                DisVertCarLengthBackBack = 5100;
+                DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
+                DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
+            }
         }
         public List<LineString> Walls;
         public List<Polygon> Obstacles;
@@ -135,7 +141,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double STRTreeCount = 10;
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();
         public List<LineSegment> OutUnsuredLanes = new List<LineSegment>();
-        public static bool DisplayFinal = true;
+        public static bool DisplayFinal = false;
         public static int LayoutMode = ((int)LayoutDirection.LENGTH);
         public static double LayoutScareFactor_Intergral = 0.7;
         public static double LayoutScareFactor_Adjacent = 0.7;

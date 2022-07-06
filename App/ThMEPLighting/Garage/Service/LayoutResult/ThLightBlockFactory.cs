@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Dreambuild.AutoCAD;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
@@ -10,11 +11,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
     public class ThLightBlockFactory : LightWireFactory
     {
         private List<ThLightEdge> LightEdges { get; set; }
-        public  Dictionary<Point3d, double> Results { get; set; }
+        public Dictionary<Point3d, Tuple<double,string>> Results { get; set; }
         public ThLightBlockFactory(List<ThLightEdge> lightEdges)
         {
             LightEdges = lightEdges;
-            Results = new Dictionary<Point3d, double>();
+            Results = new Dictionary<Point3d, Tuple<double, string>>();
         }
         public override void Build()
         {
@@ -25,11 +26,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 {   
                     if (!string.IsNullOrEmpty(n.Number) && !Results.ContainsKey(n.Position))
                     {
-                        Results.Add(n.Position, m.Edge.Angle);
+                        Results.Add(n.Position, Tuple.Create(normalLine.Angle, n.Number));
                     }
                 });
             });
-
         }
     }
 }

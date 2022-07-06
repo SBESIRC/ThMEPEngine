@@ -161,7 +161,7 @@ namespace ThParkingStall.Core.InterProcess
             {
                 if(vaildLanes[i] != null) Splitters.Add(newSegLines[i]);
             }
-            return (newSegLines, vaildLanes);
+            return (Splitters, vaildLanes);
         }
         private static List<LineSegment> MergeSegLines(List<LineSegment> SegLines,out List<List<int>> seglineIndexListNew,out List<(bool, bool)> seglineToBoundNew)
         {

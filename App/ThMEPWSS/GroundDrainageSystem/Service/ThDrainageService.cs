@@ -1,26 +1,18 @@
 ﻿namespace ThMEPWSS.Pipe.Service
 {
-    using TypeDescriptor = System.ComponentModel.TypeDescriptor;
     using System;
     using System.Linq;
     using System.Text;
-    using System.Reflection;
     using System.Collections.Generic;
-    using System.Windows.Forms;
     using ThMEPWSS.JsonExtensionsNs;
     using static ThMEPWSS.Assistant.DrawUtils;
-    using Autodesk.AutoCAD.EditorInput;
     using AcHelper;
     using Autodesk.AutoCAD.Geometry;
     using Linq2Acad;
     using ThMEPWSS.Pipe.Model;
-    using ThMEPWSS.Pipe.Engine;
     using Autodesk.AutoCAD.DatabaseServices;
-    using System.Diagnostics;
-    using Autodesk.AutoCAD.ApplicationServices;
     using Dreambuild.AutoCAD;
     using DotNetARX;
-    using Autodesk.AutoCAD.Internal;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.ExtensionsNs;
@@ -28,26 +20,12 @@
     using ThMEPWSS.Pipe.Service;
     using NFox.Cad;
     using Autodesk.AutoCAD.Colors;
-    using System.Runtime.Remoting;
-    using System.IO;
-    using Autodesk.AutoCAD.Runtime;
     using ThMEPWSS.Pipe;
-    using Newtonsoft.Json;
     using System.Text.RegularExpressions;
     using ThCADExtension;
-    using System.Collections;
-    using ThCADCore.NTS.IO;
-    using Newtonsoft.Json.Linq;
     using ThMEPEngineCore.Engine;
     using NetTopologySuite.Geometries;
-    using NetTopologySuite.Operation.Linemerge;
-    using Microsoft.CSharp;
-    using System.CodeDom.Compiler;
-    using System.Linq.Expressions;
-    using ThMEPEngineCore.Algorithm;
-    using ThMEPWSS.ReleaseNs;
     using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
-    using ThMEPWSS.Diagram.ViewModel;
     using static THDrainageService;
 
     public class RainSystemCadData

@@ -156,13 +156,15 @@ namespace ThCADCore.NTS
             }
             else if (shell != null && holes.Count > 0)
             {
-                List<LinearRing> holeRings = new List<LinearRing>();
-                holes.ForEach(o =>
+                if (shell.ToNTSLineString() is LinearRing shellRing)
                 {
-                    holeRings.Add(o.ToNTSLineString() as LinearRing);
-                });
-                LinearRing shellLinearRing = shell.ToNTSLineString() as LinearRing;
-                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(shellLinearRing, holeRings.ToArray());
+                    var holeRings = holes.Select(h => h.ToNTSLineString()).OfType<LinearRing>().ToArray();
+                    return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(shellRing, holeRings);
+                }
+                else
+                {
+                    return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+                }
             }
             else
             {

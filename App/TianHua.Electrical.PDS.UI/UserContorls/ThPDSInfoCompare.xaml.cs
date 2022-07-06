@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
+using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.UI.Services;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
@@ -21,15 +9,15 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
     /// </summary>
     public partial class ThPDSInfoCompare : UserControl
     {
-        ThPDSInfoCompareService Service = new();
+        private readonly ThPDSInfoCompareService Service = new();
         public ThPDSInfoCompare()
         {
             InitializeComponent();
-        }
-        public ThPDSInfoCompare Init()
-        {
             Service.Init(this);
-            return this;
+            PDSProject.Instance.DataChanged += () =>
+            {
+                Service.UpdateView(this);
+            };
         }
     }
 }

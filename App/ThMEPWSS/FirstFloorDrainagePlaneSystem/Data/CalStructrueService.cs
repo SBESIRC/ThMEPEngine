@@ -382,6 +382,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 }
                 else
                 {
+                    if (model.EnumEquipmentType == EnumEquipmentType.floorDrain)
+                    {
+                        vModel.IsFloorDrainPipe = true;
+                    }
                     vModel.PipeType = VerticalPipeType.WasteWaterPipe;
                 }
                 resModels.Add(vModel);

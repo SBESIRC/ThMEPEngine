@@ -181,6 +181,7 @@
     <Compile Include="StructPlane\Print\ThStairLineMarkPrinter.cs" />
     <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
     <Compile Include="StructPlane\Service\ThAdjustDbTextRotationService.cs" />
+    <Compile Include="StructPlane\Service\ThBeamMarkParseTool.cs" />
     <Compile Include="StructPlane\Service\ThBuildStairSlabLineService.cs" />
     <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
     <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />

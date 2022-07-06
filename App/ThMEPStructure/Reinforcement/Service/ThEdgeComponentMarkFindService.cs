@@ -82,7 +82,7 @@ namespace ThMEPStructure.Reinforcement.Service
                                 if(firstFilters.Count==1)
                                 {
                                     reinforceContent = firstFilters.OfType<DBText>().First().TextString;
-                                    isCal = IsCalculationLayer(GetLayer(reinforceTexts.OfType<DBText>().First()));
+                                    isCal = IsCalculationLayer(GetLayer(firstFilters.OfType<DBText>().First()));
                                 }
                                 else if(firstFilters.Count>0)
                                 {

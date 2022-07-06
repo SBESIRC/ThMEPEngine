@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.Model;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
@@ -11,16 +12,16 @@ namespace ThMEPHVAC.TCH
         private TCHDuctDimensionsParam ductDimensionParam;
         private TCHDuctDimContentsParam ductContentsParam;
         private ulong subSysId;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
         private const double lineLimition = 100;
-        public ThDrawTCHDuct(ThSQLiteHelper sqliteHelper, ulong subSysId)
+        public ThDrawTCHDuct(THMEPSQLiteServices sqliteHelper, ulong subSysId)
         {
             this.subSysId = subSysId;
             this.sqliteHelper = sqliteHelper;
         }
         public void DrawVerticalPipe(List<SegInfo> segInfos, Matrix3d mat, ref ulong gId)
         {
-            sqliteHelper.Conn();
+            //sqliteHelper.Conn();
             foreach (var seg in segInfos)
             {
                 RecordDuctInfo(seg.airVolume, ref gId);
@@ -52,11 +53,10 @@ namespace ThMEPHVAC.TCH
                 };
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
         public void DrawPortVerticalPipe(List<SegInfo> segInfos, Matrix3d mat, ThMEPHVACParam param, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var mmElevation = param.elevation * 1000;
             var mainHeight = ThMEPHVACService.GetHeight(param.inDuctSize);
             foreach (var seg in segInfos)
@@ -92,11 +92,10 @@ namespace ThMEPHVAC.TCH
                 };
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
-            sqliteHelper.db.Close(); 
+            sqliteHelper.CloseConnect(); 
         }
         public void DrawVTDuct(List<SegInfo> segInfos, Matrix3d mat, bool isTextSide, ThMEPHVACParam param, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var gap = ThTCHCommonTables.flgThickness * 0.5;
             foreach (var seg in segInfos)
             {
@@ -130,11 +129,10 @@ namespace ThMEPHVAC.TCH
                 };
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
         public void DrawDuct(List<SegInfo> segInfos, Matrix3d mat, bool isTextSide, ThMEPHVACParam param, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var gap = ThTCHCommonTables.flgThickness * 0.5;
             var mmElevation = param.elevation * 1000;
             var mainHeight = ThMEPHVACService.GetHeight(param.inDuctSize);
@@ -171,7 +169,7 @@ namespace ThMEPHVAC.TCH
                 };
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
 
         private void GetTextInfo(SegInfo seg, bool isTextSide, out double angle, out Point3d p)
@@ -227,7 +225,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + ductDimensionParam.eleType.ToString() + "'," +
                                   "'" + ductDimensionParam.textAngle.ToString() + "'," +
                                   "'" + ductDimensionParam.scale.ToString() + "')";
-            sqliteHelper.Query<TCHDuctDimensionsParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
 
         private void RecordDuctInfo(double airVolume, ref ulong gId)
@@ -258,7 +256,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + ductParam.Soft.ToString() + "'," +
                                   "'" + ductParam.Bulge.ToString() + "'," +
                                   "'" + ductParam.AirLoad.ToString() + "')";
-            sqliteHelper.Query<TCHDuctParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
         private void RecordDuctDimContents(ref ulong gId)
         {
@@ -278,7 +276,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + ductContentsParam.haveAirVolume.ToString() + "'," +
                                   "'" + ductContentsParam.haveVelocity.ToString() + "'," +
                                   "'" + ductContentsParam.wayResis.ToString() + "')";
-            sqliteHelper.Query<TCHDuctDimContentsParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
         private static void GetWidthAndHeight(string size, out double width, out double height)
         {

@@ -22,6 +22,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach (var pt in sprayIn.PtDic.Keys)
             {
+                if(pt._pt.DistanceTo(new Point3d(1666461.3, 952521.8,0))<10)
+                {
+                    ;
+                }
+                if (pt._pt.DistanceTo(new Point3d(1666812.1, 952522.2,0)) < 10)
+                {
+                    ;
+                }
                 bool flag = false;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {

@@ -26,6 +26,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         private string LayerLinkCharater = "、";
         private static List<DBObjectCollection> ComponentBoundaries { get; set; }
         private List<List<EdgeComponentExtractInfo>> GroupResults { get; set; }
+        public bool IsNeedMerge { get; private set; } = false;
         public EdgeComponentDrawVM()
         {
             DrawModel = new EdgeComponentDrawModel();
@@ -57,6 +58,10 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 if(cmd.IsSuccess)
                 {
                     Clear();
+                    if(cmd.ExtractInfos.Count>0)
+                    {
+                        IsNeedMerge = true;
+                    }
                     cmd.ExtractInfos.ForEach(o => EdgeComponents.Add(o));
                     var obbs = cmd.ExtractInfos
                         .Select(o => o.EdgeComponent)
@@ -68,9 +73,14 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 }
             };
         }
-        public void Clear()
+        private void Clear()
         {
             EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
+        }
+        public void ClearTable()
+        {
+            Clear();
+            IsNeedMerge = false;
         }
         public void Merge()
         {
@@ -112,6 +122,9 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                     }
                 });
             }
+
+            // 做完合并后，关闭此选项
+            IsNeedMerge = false;
         }
         public void Draw()
         {
@@ -122,6 +135,8 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 cmd.ExtractInfoGroups = GroupResults;
                 DrawModel.SetConfig(); // 把参数传递配置中
                 cmd.Execute();
+                // 做完绘制后，关闭此选项
+                IsNeedMerge = false;
             }
         }
         public void SetWallColumnLayer()

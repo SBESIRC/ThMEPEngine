@@ -3,22 +3,22 @@ using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.Model;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
     public class ThDrawTCHDimension : ThDrawDimension
     {
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
         private TCHDimensionParam dimensionParam;
         private TCHDimSegmentParam dimensionSegParam;
-        public ThDrawTCHDimension(ThSQLiteHelper sqliteHelper)
+        public ThDrawTCHDimension(THMEPSQLiteServices sqliteHelper)
         {
             this.sqliteHelper = sqliteHelper;
         }
 
         public void DrawDimension(List<EndlineInfo> segInfos, PortParam portParam, ref ulong gId)
         {
-            sqliteHelper.Conn();
             foreach (var endline in segInfos)
             {
                 foreach (var seg in endline.endlines.Values)
@@ -26,7 +26,7 @@ namespace ThMEPHVAC.TCH
                     InsertDirDimension(seg, portParam.srtPoint, ref gId);
                 }
             }
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
         private void MirrorDimension(ref double angle, ref Point3d firstDimPos, EndlineSegInfo seg)
         {
@@ -77,7 +77,7 @@ namespace ThMEPHVAC.TCH
                                  " VALUES ('" + dimensionSegParam.ID.ToString() + "'," +
                                  "'" + dimensionSegParam.nextSegmentID.ToString() + "'," +
                                  "'" + dimensionSegParam.dimLength.ToString() + "')";
-            sqliteHelper.Query<TCHDimensionParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
         private void RecordDimensionInfo(ref ulong gId, ulong segmentID, Point3d firstDimPos, double angle)
         {
@@ -101,7 +101,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + dimensionParam.rotation.ToString() + "'," +
                                   "'" +  dimensionParam.dist2DimLine.ToString() + "'," +
                                   "'" +  dimensionParam.scale.ToString() + "')";
-            sqliteHelper.Query<TCHDimensionParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
     }
 }

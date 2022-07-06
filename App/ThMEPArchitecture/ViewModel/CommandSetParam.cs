@@ -19,7 +19,7 @@ namespace ThMEPArchitecture.ViewModel
         {
             try
             {
-                ParameterStock.ReadHiddenParameter = true;
+                ParameterStock.ReadHiddenParameter = !ParameterStock.ReadHiddenParameter;
             }
             catch (Exception ex)
             {

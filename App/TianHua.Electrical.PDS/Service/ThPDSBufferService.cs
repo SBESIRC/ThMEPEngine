@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NetTopologySuite.Operation.Buffer;
+using Autodesk.AutoCAD.DatabaseServices;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Extension;
 using ThMEPEngineCore.CAD;
+using ThMEPElectrical.SystemDiagram.Extension;
+using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -82,6 +86,16 @@ namespace TianHua.Electrical.PDS.Service
                 //不支持其他的数据类型
                 throw new NotSupportedException();
             }
+        }
+
+        public static List<Polyline> CableTrayBuffer(this DBObjectCollection objs, double distance)
+        {
+            var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
+            {
+                JoinStyle = NTSJoinStyle.Mitre,
+                EndCapStyle = EndCapStyle.Square,
+            });
+            return buffer.GetResultGeometry(distance).ToDbCollection().OfType<Polyline>().ToList();
         }
     }
 }

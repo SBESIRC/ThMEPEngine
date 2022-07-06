@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Model;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
@@ -12,10 +13,10 @@ namespace ThMEPHVAC.TCH
     {
         private ulong subSysId;
         private TCHTeeParam teeParam;
-        private ThSQLiteHelper sqliteHelper;
+        private THMEPSQLiteServices sqliteHelper;
         private ThDrawTCHFlanges flangesService;
 
-        public ThDrawTCHTee(ThSQLiteHelper sqliteHelper, ulong subSysId)
+        public ThDrawTCHTee(THMEPSQLiteServices sqliteHelper, ulong subSysId)
         {
             this.subSysId = subSysId;
             this.sqliteHelper = sqliteHelper;
@@ -24,7 +25,6 @@ namespace ThMEPHVAC.TCH
 
         public void Draw(EntityModifyParam info, Matrix3d mat, double mainHeight, double elevation, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var mmElevation = elevation * 1000;
             var points = info.portWidths.Keys.ToList();
             var type = ThDuctPortsShapeService.GetTeeType(info.centerP, points[1], points[2]);
@@ -75,7 +75,7 @@ namespace ThMEPHVAC.TCH
             };
             flangesService.Draw(otherP + centerEleDisVec, param3.normalVector, oWidth, oHeight, ref gId);
             ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { param1, param2, param3});
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
 
         private void GetTeeInfo(EntityModifyParam info, Matrix3d mat, TeeType type, out TeeInfo teeInfo, out Point3d mainP, out Point3d branchP, out Point3d otherP)
@@ -153,7 +153,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + teeParam.materialID.ToString() + "'," +
                                   "'" + teeParam.type.ToString() + "'," +
                                   "'" + teeParam.radRatio.ToString() + "')";
-            sqliteHelper.Query<TCHTeeParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
     }
 }

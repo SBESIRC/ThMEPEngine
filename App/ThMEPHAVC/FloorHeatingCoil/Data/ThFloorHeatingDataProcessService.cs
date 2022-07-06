@@ -39,6 +39,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         //----private
         private List<Polyline> Door { get; set; } = new List<Polyline>();
+        private List<MPolygon> RoomBoundary { get; set; } = new List<MPolygon>();
         private List<ThFloorHeatingRoom> Room { get; set; } = new List<ThFloorHeatingRoom>();
         private List<ThFloorHeatingWaterSeparator> WaterSeparator { get; set; } = new List<ThFloorHeatingWaterSeparator>();
         private List<Polyline> FurnitureObstacle { get; set; } = new List<Polyline>();
@@ -52,13 +53,39 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         }
 
-        public void ProcessDoorData()
+        public void ProcessData()
+        {
+            ProcessDoorData();
+            ProcessRoomData();
+            ProcessWaterSeparator();
+            ProcessFurnitureObstacle();
+            ProcessSeparatorLine();
+
+            CraeteRoomSapceModel();
+            CreateRoomSet();
+        }
+
+        private void ProcessDoorData()
         {
             var doorExtractor = InputExtractors.Where(o => o is ThFloorHeatingDoorExtractor).First() as ThFloorHeatingDoorExtractor;
             doorExtractor.Doors.ForEach(x => Door.Add(x.Outline as Polyline));
         }
-
-        public void ProcessWaterSeparator()
+        private void ProcessRoomData()
+        {
+            var roomExtractor = InputExtractors.Where(o => o is ThFloorHeatingRoomExtractor).First() as ThFloorHeatingRoomExtractor;
+            foreach (var room in roomExtractor.Rooms)
+            {
+                if (room.Boundary is Polyline pl)
+                {
+                    RoomBoundary.Add(ThMPolygonTool.CreateMPolygon(pl));
+                }
+                else if (room.Boundary is MPolygon mpl)
+                {
+                    RoomBoundary.Add(mpl);
+                }
+            }
+        }
+        private void ProcessWaterSeparator()
         {
             foreach (var waterSeparator in WaterSeparatorData)
             {
@@ -67,7 +94,62 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             }
         }
 
-        public void CraeteRoomSapceModel()
+        private void ProcessFurnitureObstacle()
+        {
+            foreach (var obstacle in FurnitureObstacleData)
+            {
+                var blk = obstacle.Outline as BlockReference;
+                var pl = ThGeomUtil.GetVisibleOBB(blk);
+                FurnitureObstacle.Add(pl);
+            }
+
+            FurnitureObstacle.AddRange(FurnitureObstacleDataTemp);
+        }
+        private void ProcessSeparatorLine()
+        {
+            var tol = 0.5;
+            var objSelect = new DBObjectCollection();
+            Door.ForEach(x => objSelect.Add(x));
+            var objIndex = new ThCADCoreNTSSpatialIndex(objSelect);
+
+            var separateLineTemp = new List<Line>();
+            RoomSeparateLine = RoomSeparateLine.Where(x => RoomBoundary.Where(r => r.Contains(x) || r.Intersects(x)).Any()).ToList();
+
+            foreach (var separateL in RoomSeparateLine)
+            {
+                //var extendL = separateL.ExtendLine(50);
+                //var obj = objIndex.SelectFence(extendL);
+                //var doorCross = obj.OfType<Polyline>().ToList();
+                var objL = new List<Line>();
+                var doorContain = Door.Where(x => x.Contains(separateL)).Any();
+                if (doorContain)
+                {
+                    objL.Add(separateL);
+                }
+                else
+                {
+                    var doorCross2 = Door.Where(x => x.Intersects(separateL)).ToList();
+                    foreach (var d in doorCross2)
+                    {
+                        var objTrim = d.Trim(separateL);
+                        var trimL = ThDrawTool.GetLines(objTrim);
+
+                        objL.AddRange(trimL);
+                    }
+                }
+
+                var lenthInDoor = objL.Select(x => x.Length).Sum();
+                var rate = lenthInDoor / separateL.Length;
+                if (rate > tol)
+                {
+                    separateLineTemp.Add(separateL);
+                }
+            }
+
+            RoomSeparateLine.RemoveAll(x => separateLineTemp.Contains(x));
+        }
+
+        private void CraeteRoomSapceModel()
         {
             var separateRooms = SeparateRoomWithLine();
 
@@ -81,9 +163,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 var markString = markInRoom.Select(x => x.Text).Distinct().ToList();
                 newRoom.SetName(markString);
 
+                //这里有问题，如果一个大厅被分割了但是suggest只有一个
                 var suggestDist = GetSuggestDist(room);
                 newRoom.SetSuggestDist(suggestDist);
-
 
                 Room.Add(newRoom);
             }
@@ -101,21 +183,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         private List<MPolygon> SeparateRoomWithLine()
         {
             var boundary = new List<LineString>();
-            var roomExtractor = InputExtractors.Where(o => o is ThFloorHeatingRoomExtractor).First() as ThFloorHeatingRoomExtractor;
-            foreach (var room in roomExtractor.Rooms)
+
+            foreach (var room in RoomBoundary)
             {
-                if (room.Boundary is Polyline pl)
-                {
-                    var bound = pl.ToNTSLineString();
-                    boundary.Add(bound);
-                }
-                else if (room.Boundary is MPolygon mpl)
-                {
-                    var bound = mpl.Shell().ToNTSLineString();
-                    var holes = mpl.Holes().Select(x => x.ToNTSLineString());
-                    boundary.Add(bound);
-                    boundary.AddRange(holes);
-                }
+                var bound = room.Shell().ToNTSLineString();
+                var holes = room.Holes().Select(x => x.ToNTSLineString());
+                boundary.Add(bound);
+                boundary.AddRange(holes);
             }
 
             var separate = RoomSeparateLine.Select(x => x.ExtendLine(50)).ToList();
@@ -131,27 +205,26 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             return newRoom;
         }
 
-        public void CreateFurnitureObstacle()
-        {
-            foreach (var obstacle in FurnitureObstacleData)
-            {
-                var blk = obstacle.Outline as BlockReference;
-                var pl = ThGeomUtil.GetVisibleOBB(blk);
-                FurnitureObstacle.Add(pl);
-            }
 
-            FurnitureObstacle.AddRange(FurnitureObstacleDataTemp);
-        }
-
-        public void CreateRoomSet()
+        private void CreateRoomSet()
         {
+            var objSelect = new DBObjectCollection();
+            Door.ForEach(x => objSelect.Add(x));
+            Room.ForEach(x => objSelect.Add(x.RoomBoundary));
+            WaterSeparator.ForEach(x => objSelect.Add(x.OBB));
+            RoomSeparateLine.ForEach(x => objSelect.Add(x));
+            FurnitureObstacle.ForEach(x => objSelect.Add(x));
+
+            var objIndex = new ThCADCoreNTSSpatialIndex(objSelect);
+
             foreach (var frame in RoomSetFrame)
             {
-                var door = Door.Where(x => frame.Contains(x)).ToList();
-                var room = Room.Where(x => frame.Contains(x.RoomBoundary)).ToList();
-                var waterSeparator = WaterSeparator.Where(x => frame.Contains(x.OBB)).FirstOrDefault();
-                var roomSeparateline = RoomSeparateLine.Where(x => frame.Contains(x)).ToList();
-                var obstacle = FurnitureObstacle.Where(x => frame.Contains(x)).ToList();
+                var selectObj = objIndex.SelectCrossingPolygon(frame);
+                var door = Door.Where(x => selectObj.Contains(x)).ToList();
+                var room = Room.Where(x => selectObj.Contains(x.RoomBoundary)).ToList();
+                var waterSeparator = WaterSeparator.Where(x => selectObj.Contains(x.OBB)).FirstOrDefault();
+                var roomSeparateline = RoomSeparateLine.Where(x => selectObj.Contains(x));
+                var obstacle = FurnitureObstacle.Where(x => selectObj.Contains(x));
 
                 var roomset = new ThRoomSetModel();
                 roomset.Frame = frame;

@@ -8,7 +8,9 @@
     xmlns:cvt="clr-namespace:TianHua.Electrical.PDS.UI.Converters" d:DesignHeight="878" d:DesignWidth="980" mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
-            <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}" />
+            <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
             <cvt:EnumValuesConverter x:Key="EnumValuesConverter"></cvt:EnumValuesConverter>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -301,7 +303,7 @@
                     <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Right">
                         <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnImportSet" Click="btnImportSetting"></cus:ImageButton>
                         <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnExportSet" Click="btnExportSetting"></cus:ImageButton>
-                        <cus:ImageButton Content="保存设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnSaveSetting"></cus:ImageButton>
+                        <cus:ImageButton Content="应用设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnApplySetting"></cus:ImageButton>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

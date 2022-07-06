@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
+﻿using System.Linq;
+using System.Collections.Generic;
+
 using QuikGraph;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
@@ -42,9 +43,45 @@ namespace TianHua.Electrical.PDS.Engine
                 });
             });
 
+            // 将无连接关系的散点加入到图中
+            graphList.ForEach(graph =>
+            {
+                graph.Vertices.ForEach(vertex =>
+                {
+                    if (vertex.NodeType != PDSNodeType.CableCarrier
+                        && graph.OutDegree(vertex) == 0 && graph.InDegree(vertex) == 0)
+                    {
+                        if (!IsContains(UnionGraph, vertex, out var originalSourceNode))
+                        {
+                            UnionGraph.AddVertex(vertex);
+                        }
+                    }
+                });
+            });
+
+            UnionGraph.Vertices.ForEach(vertex =>
+            {
+                if (vertex.Loads[0].ID.CircuitNumberList.Count == 1)
+                {
+                    return;
+                }
+
+                for (var i = 1; i < vertex.Loads[0].ID.SourcePanelIDList.Count; i++)
+                {
+                    var sourcePanel = UnionGraph.Vertices.Where(v => v.Loads[0].ID.LoadID.Equals(vertex.Loads[0].ID.SourcePanelIDList[i])).ToList();
+                    if (sourcePanel.Count == 1)
+                    {
+                        var edge = ThPDSGraphService.UnionEdge(sourcePanel[0], vertex, vertex.Loads[0].ID.SourcePanelIDList[i],
+                            vertex.Loads[0].ID.CircuitIDList[i]);
+                        edge.Circuit.ViaCableTray = true;
+                        addEdgeList.Add(edge);
+                    }
+                }
+            });
+
             for (var i = 0; i < cabletrayEdgeList.Count; i++)
             {
-                var srcpanelID = cabletrayEdgeList[i].Circuit.ID.SourcePanelIDList;
+                var srcPanelID = cabletrayEdgeList[i].Circuit.ID.SourcePanelIDList;
                 var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitIDList;
                 var circuitNumber = cabletrayEdgeList[i].Circuit.ID.CircuitNumber;
                 if (string.IsNullOrEmpty(circuitNumber))
@@ -52,17 +89,23 @@ namespace TianHua.Electrical.PDS.Engine
                     continue;
                 }
 
-                for (var j = 0; j < cabletrayEdgeList.Count; j++)
+                var j = 0;
+                for (; j < cabletrayEdgeList.Count; j++)
                 {
+                    if (j == i)
+                    {
+                        continue;
+                    }
+
                     var otherDistBoxID = "";
                     if (cabletrayEdgeList[j].Target.Loads.Count > 0)
                     {
                         otherDistBoxID = cabletrayEdgeList[j].Target.Loads[0].ID.LoadID;
                     }
-                    if (!string.IsNullOrEmpty(otherDistBoxID) && srcpanelID.Last().Equals(otherDistBoxID))
+                    if (!string.IsNullOrEmpty(otherDistBoxID) && srcPanelID.Last().Equals(otherDistBoxID))
                     {
                         var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
-                            srcpanelID, circuitID);
+                            srcPanelID, circuitID);
                         edge.Circuit.ViaCableTray = true;
                         if (cabletrayEdgeList[i].Circuit.ViaConduit || cabletrayEdgeList[j].Circuit.ViaConduit)
                         {
@@ -96,6 +139,21 @@ namespace TianHua.Electrical.PDS.Engine
                         break;
                     }
                 }
+
+                if (j == cabletrayEdgeList.Count)
+                {
+                    var sourcePanel = UnionGraph.Vertices.Where(v => v.Loads[0].ID.LoadID.Equals(srcPanelID.Last())).ToList();
+                    if (sourcePanel.Count == 1)
+                    {
+                        var edge = ThPDSGraphService.UnionEdge(sourcePanel[0], cabletrayEdgeList[i].Target, srcPanelID, circuitID);
+                        edge.Circuit.ViaCableTray = true;
+                        if (cabletrayEdgeList[i].Circuit.ViaConduit)
+                        {
+                            edge.Circuit.ViaConduit = true;
+                        }
+                        addEdgeList.Add(edge);
+                    }
+                }
             }
 
             cabletrayEdgeList.ForEach(edge =>
@@ -105,6 +163,7 @@ namespace TianHua.Electrical.PDS.Engine
                     UnionGraph.AddVertex(edge.Target);
                 }
             });
+
             addEdgeList.ForEach(edge =>
             {
                 var sourceCheck = IsContains(UnionGraph, edge.Source, out var originalSourceNode);
@@ -133,22 +192,6 @@ namespace TianHua.Electrical.PDS.Engine
                         UnionGraph.AddEdge(newEdge);
                     }
                 }
-            });
-
-            // 将无连接关系的散点加入到图中
-            graphList.ForEach(graph =>
-            {
-                graph.Vertices.ForEach(vertex =>
-                {
-                    if (vertex.NodeType != PDSNodeType.CableCarrier
-                        && graph.OutDegree(vertex) == 0 && graph.InDegree(vertex) == 0)
-                    {
-                        if (!IsContains(UnionGraph, vertex, out var originalSourceNode))
-                        {
-                            UnionGraph.AddVertex(vertex);
-                        }
-                    }
-                });
             });
 
             UnionGraph.Edges.ForEach(edge =>
@@ -231,6 +274,26 @@ namespace TianHua.Electrical.PDS.Engine
                     map.EdgeMap.Add(newEdge, map.EdgeMap[edge]);
                     map.EdgeMap.Remove(edge);
                 }
+            });
+        }
+
+        public void UnionSubstation(List<THPDSSubstation> substationList)
+        {
+            substationList.ForEach(substation =>
+            {
+                substation.Transformers.ForEach(transform =>
+                {
+                    transform.LowVoltageCabinets.ForEach(lowVoltageCabinet =>
+                    {
+                        lowVoltageCabinet.Edges.ForEach(edge =>
+                        {
+                            if (IsContains(UnionGraph, edge.Target, out var originalNode))
+                            {
+                                edge.Target = originalNode;
+                            }
+                        });
+                    });
+                });
             });
         }
 

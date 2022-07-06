@@ -18,19 +18,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public PDSBaseInCircuit CircuitFormType { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
 
+        public LoadCalculationInfo LoadCalculationInfo { get; set; }
         /// <summary>
         /// 是否已统计
         /// </summary>
         public bool IsStatistical { get; set; }
-
-
-        /// <summary>
-        /// 是否是双功率
-        /// </summary>
-        public bool IsDualPower { get; set; }
-        
-        public double LowPower { get; set; }
-        public double HighPower { get; set; }
 
         /// <summary>
         /// 级联电流额定值
@@ -44,11 +36,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 允许断路器切换成隔离开关
         /// </summary>
         public bool AllowBreakerSwitch { get; set; }
-
-        /// <summary>
-        /// 相序
-        /// </summary>
-        public PhaseSequence PhaseSequence { get; set; }
 
         public SurgeProtectionDeviceType SurgeProtection { get; set; }
 
@@ -76,7 +63,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
-            PhaseSequence = PhaseSequence.L123;
+            LoadCalculationInfo = new LoadCalculationInfo();
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
             AllowBreakerSwitch = false;
@@ -89,6 +76,164 @@ namespace TianHua.Electrical.PDS.Project.Module
             else
             {
                 BoxInstallationType = BoxInstallationType.挂墙明装;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 负荷计算信息
+    /// </summary>
+    public class LoadCalculationInfo
+    {
+        public LoadCalculationInfo()
+        {
+            PhaseSequence = PhaseSequence.L123;
+            LoadCalculationGrade = LoadCalculationGrade.一级;
+            LowDemandFactor = 0.8;
+            HighDemandFactor = 0.8;
+            PowerFactor = 0.85;
+        }
+
+        /// <summary>
+        /// 相序
+        /// </summary>
+        public PhaseSequence PhaseSequence { get; set; }
+
+        /// <summary>
+        /// 负荷等级
+        /// </summary>
+        public LoadCalculationGrade LoadCalculationGrade { get; set; }
+
+        private double KV => PhaseSequence == PhaseSequence.L123 ? 0.38 : 0.22;
+
+        /// <summary>
+        /// 是否是双功率
+        /// </summary>
+        public bool IsDualPower { get; set; }
+
+        /// <summary>
+        /// 低功率-只有双功率时才起效
+        /// </summary>
+        public double LowPower { get; set; }
+
+        /// <summary>
+        /// 高功率-只有双功率时才起效 / 单功率的平时功率
+        /// </summary>
+        public double HighPower { get; set; }
+
+        /// <summary>
+        /// 需要系数-只有双功率时才起效
+        /// Kx
+        /// </summary>
+        public double LowDemandFactor { get; set; }
+
+        /// <summary>
+        /// 需要系数/消防需要系数-只有双功率时才起效
+        /// Kx
+        /// </summary>
+        public double HighDemandFactor { get; set; }
+
+        /// <summary>
+        /// 功率因数
+        /// cosφ
+        /// </summary>
+        public double PowerFactor { get; set; }
+
+        /// <summary>
+        /// 有功功率
+        /// Pc
+        /// </summary>
+        public double LowActivePower
+        {
+            get 
+            { 
+                return LowDemandFactor * LowPower;
+            }
+        }
+
+        /// <summary>
+        /// 有功功率
+        /// Pc
+        /// </summary>
+        public double HighActivePower
+        {
+            get
+            {
+                return HighDemandFactor * HighPower;
+            }
+        }
+
+        private double φ => Math.Acos(PowerFactor);
+
+        /// <summary>
+        /// 无功功率
+        /// Qc
+        /// </summary>
+        public double LowReactivePower
+        {
+            get
+            {
+                return Math.Round(Math.Tan(φ) * LowActivePower, 2);
+            }
+        }
+
+        /// <summary>
+        /// 无功功率
+        /// Qc
+        /// </summary>
+        public double HighReactivePower
+        {
+            get
+            {
+                return Math.Round(Math.Tan(φ) * HighActivePower, 2);
+            }
+        }
+
+        /// <summary>
+        /// 视在功率
+        /// Sc
+        /// </summary>
+        public double LowApparentPower
+        {
+            get
+            {
+                return Math.Round(LowActivePower / PowerFactor, 2);
+            }
+        }
+
+        /// <summary>
+        /// 视在功率
+        /// Sc
+        /// </summary>
+        public double HighApparentPower
+        {
+            get
+            {
+                return Math.Round(HighActivePower / PowerFactor, 2);
+            }
+        }
+
+        /// <summary>
+        /// 计算电流
+        /// Ic
+        /// </summary>
+        public double LowCalculateCurrent
+        {
+            get
+            {
+                return Math.Round(LowPower * LowDemandFactor / (PowerFactor * KV * (PhaseSequence == PhaseSequence.L123 ? Math.Sqrt(3) : 1)), 2);
+            }
+        }
+
+        /// <summary>
+        /// 计算电流
+        /// Ic
+        /// </summary>
+        public double HighCalculateCurrent
+        {
+            get
+            {
+                return Math.Round(HighPower * HighDemandFactor / (PowerFactor * KV * (PhaseSequence == PhaseSequence.L123 ? Math.Sqrt(3) : 1)), 2);
             }
         }
     }

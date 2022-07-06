@@ -40,16 +40,16 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         protected bool IsLinkWall(Point3d edgeSp,Point3d edgeEp)
         {
-            var bufferL = ThReinforcementUtils.WallColumnBufferLength+1.0;
+            var bufferL = ThReinforcementUtils.WallColumnBufferLength+2.0;
             var dir = (edgeEp - edgeSp).GetNormal();
-            var newEdgeSp = edgeSp - dir.MultiplyBy(1.0);
-            var newEdgeEp = edgeEp + dir.MultiplyBy(1.0);
+            var newEdgeSp = edgeSp - dir.MultiplyBy(2.0);
+            var newEdgeEp = edgeEp + dir.MultiplyBy(2.0);
             var perpendVec = dir.GetPerpendicularVector();
             var pts = new Point3dCollection();
             pts.Add(newEdgeSp + perpendVec.MultiplyBy(bufferL));
-            pts.Add(newEdgeEp + perpendVec.MultiplyBy(bufferL));
-            pts.Add(newEdgeSp - perpendVec.MultiplyBy(bufferL));
+            pts.Add(newEdgeEp + perpendVec.MultiplyBy(bufferL));          
             pts.Add(newEdgeEp - perpendVec.MultiplyBy(bufferL));
+            pts.Add(newEdgeSp - perpendVec.MultiplyBy(bufferL));
             var outLine = pts.CreatePolyline();
             // 与边垂直的线
             bool isLink = Query(outLine)

@@ -101,7 +101,7 @@ namespace TianHua.Mep.UI.ViewModel
                     if (pner.ObjectId != ObjectId.Null)
                     {
                         var entity = acdb.Element<Entity>(pner.ObjectId);
-                        if (entity is Curve)
+                        if (entity is Curve || entity is Mline)
                         {
                             return entity.Layer;
                         }

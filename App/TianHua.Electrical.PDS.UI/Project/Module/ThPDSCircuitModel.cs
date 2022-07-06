@@ -52,7 +52,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double Power
         {
-            get => _edge.Target.Details.HighPower;
+            get => _edge.Target.Details.LoadCalculationInfo.HighPower;
             set
             {
                 _edge.Target.SetNodeHighPower(value);
@@ -67,7 +67,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double LowPower
         {
-            get => _edge.Target.Details.LowPower;
+            get => _edge.Target.Details.LoadCalculationInfo.LowPower;
             set
             {
                 _edge.Target.SetNodeLowPower(value);
@@ -82,7 +82,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double HighPower
         {
-            get => _edge.Target.Details.HighPower;
+            get => _edge.Target.Details.LoadCalculationInfo.HighPower;
             set
             {
                 _edge.Target.SetNodeHighPower(value);
@@ -96,7 +96,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSCircuitPhaseSequenceEnumPropertyEditor), typeof(PropertyEditorBase))]
         public PhaseSequence PhaseSequence
         {
-            get => _edge.Target.Details.PhaseSequence;
+            get => _edge.Target.Details.LoadCalculationInfo.PhaseSequence;
             set
             {
                 _edge.Target.SetNodePhaseSequence(value);
@@ -144,7 +144,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
-            get => _edge.Target.Load.DemandFactor;
+            get => _edge.Target.Details.LoadCalculationInfo.HighDemandFactor;
             set
             {
                 _edge.Target.SetDemandFactor(value);
@@ -158,7 +158,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
-            get => _edge.Target.Load.PowerFactor;
+            get => _edge.Target.Details.LoadCalculationInfo.PowerFactor;
             set
             {
                 _edge.Target.SetPowerFactor(value);
@@ -172,7 +172,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Category("配电回路参数")]
         public string CalculateCurrent
         {
-            get => string.Format("{0}", _edge.Target.Load.CalculateCurrent);
+            get => string.Format("{0}", _edge.Target.Details.LoadCalculationInfo.HighCalculateCurrent);
         }
 
         [Browsable(false)]
@@ -188,6 +188,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public bool IsDualPower => _edge.Target.Details.IsDualPower;
+        public bool IsDualPower => _edge.Target.Details.LoadCalculationInfo.IsDualPower;
     }
 }

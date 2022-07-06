@@ -32,9 +32,5 @@ namespace ThMEPLighting.Garage.Model
         /// 自动计算回路数量
         /// </summary>
         public bool AutoCalculate { get; set; }
-        /// <summary>
-        /// 自动生成灯
-        /// </summary>
-        public bool AutoGenerate { get; set; } 
     }
 }

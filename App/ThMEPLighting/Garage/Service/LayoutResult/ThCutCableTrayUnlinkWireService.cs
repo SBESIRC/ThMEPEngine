@@ -110,7 +110,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 if (fdxIntersectPts.Count>0)
                 {
                     var fdxCloseSp = fdxIntersectPts.OfType<Point3d>().OrderBy(p => line.StartPoint.DistanceTo(p)).First();
-                    if(ThGeometryTool.IsPointOnLine(newSp, portPt, fdxCloseSp, PointTolerance, PointTolerance))
+                    if(ThGeometryTool.IsPointOnLine(newSp, portPt, fdxCloseSp, PointTolerance))
                     {
                         newSp = fdxCloseSp;
                     }
@@ -133,7 +133,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 if (fdxIntersectPts.Count > 0)
                 {
                     var fdxCloseEp = fdxIntersectPts.OfType<Point3d>().OrderBy(p => line.EndPoint.DistanceTo(p)).First();
-                    if (ThGeometryTool.IsPointOnLine(newEp, portPt, fdxCloseEp, PointTolerance, PointTolerance))
+                    if (ThGeometryTool.IsPointOnLine(newEp, portPt, fdxCloseEp, PointTolerance))
                     {
                         newEp = fdxCloseEp;
                     }

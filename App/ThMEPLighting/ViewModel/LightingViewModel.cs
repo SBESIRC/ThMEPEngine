@@ -323,7 +323,7 @@ namespace ThMEPLighting.ViewModel
             }
         }
 
-        string _LayoutMode = "按柱跨布置";
+        string _LayoutMode = "等间距布置";
         public string LayoutMode
         {
             get => _LayoutMode;

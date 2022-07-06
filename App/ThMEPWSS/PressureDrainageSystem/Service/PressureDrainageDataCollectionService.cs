@@ -533,6 +533,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         li.Layer = layer;
                         this.CollectedData.HorizontalPipes.Add(new Horizontal(li));
                     }
+                    else if (e is Polyline pl && pl.Length>0)
+                    {
+                        var segs = pl.GetEdges();
+                        foreach (var seg in segs)
+                        {
+                            var li = new Line(seg.StartPoint.ToPoint2d().ToPoint3d(), seg.EndPoint.ToPoint2d().ToPoint3d());
+                            li.Layer = layer;
+                            CollectedData.HorizontalPipes.Add(new Horizontal(li));
+                        }
+                    }
                     else if (PressureDrainageUtils.IsTianZhengElement(e) && PressureDrainageUtils.TryConvertToLineSegment(e, out Line convertedLine) && convertedLine.Length > 0)
                     {
                         var explodedLine = e.ExplodeToDBObjectCollection().OfType<Line>().Where(k => k.Length > 0).ToList();

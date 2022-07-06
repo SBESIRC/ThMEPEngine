@@ -42,14 +42,7 @@ namespace ThMEPStructure.StructPlane.Service
                 }
                 var properties = subGeos.First().Properties;
                 var polygons = BuildArea(subGeos.Select(o => o.Boundary).ToCollection());
-                polygons.OfType<Entity>().ForEach(o =>
-                {
-                    results.Add(new ThGeometry()
-                    {
-                        Boundary = o,
-                        Properties = properties,
-                    });
-                });
+                results.AddRange(polygons.OfType<Entity>().Select(o => ThGeometry.Create(o, properties)));
             }
             return results;
         }

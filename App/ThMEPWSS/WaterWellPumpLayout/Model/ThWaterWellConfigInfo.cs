@@ -13,6 +13,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         public double WellArea { set; get; }//集水井面积
         public string PumpCount { set; get; }//泵数量
         public string BlockName { set; get; }//图块名称
+        public string FullName { get; set; }//图块全名
         public string WellSize { set; get; }//集水井尺寸
         public string PumpNumber { set; get; }//泵编号
         public List<ThWaterWellModel> WellModelList { set; get; }//集水井Model
@@ -23,6 +24,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
             IsDisplay = false;
             WellArea = 0.00;
             BlockName = "";
+            FullName = "";
             WellSize = "0*0";
             PumpNumber = "--";
             WellModelList = new List<ThWaterWellModel>();

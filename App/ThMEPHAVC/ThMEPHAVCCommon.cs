@@ -49,5 +49,12 @@ namespace ThMEPHVAC
                 .Where(o => o.Boundary.EntityContains(wcsPt))
                 .ToList();
         }
+
+        //正压送风平面
+        public const string SMOKE_PROOF_BLOCK_NAME = "AI-防烟计算";
+        public const string SMOKE_PROOF_LAYER_NAME = "AI-房间功能";
+
+        //xdata
+        public const string RegAppName_SmokeProof = "THCAD_SMOKE_PROOF";
     }
 }

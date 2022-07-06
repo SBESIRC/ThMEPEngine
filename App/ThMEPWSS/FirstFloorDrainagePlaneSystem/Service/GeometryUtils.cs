@@ -340,6 +340,42 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         }
 
         /// <summary>
+        /// 用圆将polyline末端切掉
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Polyline ShortenPolylineByCircle(Polyline polyline, Circle circle, bool shortStart = false)
+        {
+            polyline = polyline.DPSimplify(1);
+            var intersectPt = circle.IntersectWithEx(polyline).Cast<Point3d>().FirstOrDefault();
+            if (intersectPt != null)
+            {
+                if (shortStart)
+                {
+                    polyline.ReverseCurve();
+                }
+                Polyline resPoly = new Polyline();
+                for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+                {
+                    var pt = polyline.GetPoint3dAt(i);
+                    if (circle.EntityContains(pt))
+                    {
+                        resPoly.AddVertexAt(resPoly.NumberOfVertices, intersectPt.ToPoint2D(), 0, 0, 0);
+                        break;
+                    }
+                    resPoly.AddVertexAt(resPoly.NumberOfVertices, pt.ToPoint2D(), 0, 0, 0);
+                }
+                if (shortStart)
+                {
+                    resPoly.ReverseCurve();
+                }
+                return resPoly;
+            }
+            return polyline;
+        }
+
+        /// <summary>
         /// 从起点开始沿一定长度间断polyline
         /// </summary>
         /// <param name="poly"></param>

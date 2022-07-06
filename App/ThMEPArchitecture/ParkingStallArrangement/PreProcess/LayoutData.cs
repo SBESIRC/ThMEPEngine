@@ -25,6 +25,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 using ThMEPEngineCore.Algorithm;
+using ThMEPArchitecture.MultiProcess;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
@@ -87,9 +88,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //SegLines = SegLines.RemoveDuplicated(10);
             if (checkVaild)
             {
-                if (SegLines.Count == 0)
+                if (SegLines.Count < 2)
                 {
-                    Active.Editor.WriteLine("未提取到分区线，请检查图层以及线的类型（直线）");
+                    ThMPArrangementCmd.DisplayLogger.Information("分区线个数至少为2，请检查图层以及线的类型（直线）");
+                    Active.Editor.WriteLine("分区线个数至少为2，请检查图层以及线的类型（直线）");
                     return false;
                 }
                 bool Isvaild = SegLineVaild();
@@ -124,6 +126,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Explode(basement);
             if(CAD_WallLines.Count == 0)
             {
+                ThMPArrangementCmd.DisplayLogger.Information("地库边界不存在或者不闭合！");
                 Active.Editor.WriteMessage("地库边界不存在或者不闭合！");
                 return false;
             }
@@ -133,6 +136,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var RampPolgons = UpdateWallLine();
             UpdateRamps(RampPolgons);
             UpdateObstacles();
+            if (Obstacles.Count == 0)
+            {
+                ThMPArrangementCmd.DisplayLogger.Information("未提取到建筑物！请检查建筑物图层以线型(多段线)，并且确保多段线闭合");
+                Active.Editor.WriteMessage("未提取到建筑物！请检查建筑物图层以及线型(多段线)，并且确保多段线闭合");
+                return false;
+            }
             UpdateAnchors();
             Buildings = RampPolgons;
             Buildings.AddRange(Obstacles);
@@ -418,6 +427,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     if (X_dif / Y_dif > tol)
                     {
+                        ThMPArrangementCmd.DisplayLogger.Information("发现非正交分区线 ！");
                         Logger?.Information("发现非正交分区线 ！\n");
                         Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分区线不符合要求\n");
                         Active.Editor.WriteMessage("发现非正交分区线 ！\n");
@@ -460,8 +470,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     string message;
                     if (beforeMove) message = "该分区线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
-                    else message = "移动后，该分区线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
+                    else message = "自动调整后，该分区线只有" + intsecPtCnts.ToString() + "个交点" + "\n";
                     Logger?.Information(message);
+                    ThMPArrangementCmd.DisplayLogger.Information(message);
                     Active.Editor.WriteMessage(message);
                     SegLines[i].MarkLineSeg(true);
                     return false;
@@ -487,6 +498,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     var initDist = rst.Min(geo => geo.Distance(seglstr));
                     if (!ExistWidthSatisfied(i, initDist))
                     {
+                        ThMPArrangementCmd.DisplayLogger.Information("分区线范围不够车道净宽！");
                         Logger?.Information("分区线范围不够车道净宽！\n");
                         Active.Editor.WriteMessage("分区线范围不够车道净宽！\n");
                         SegLines[i].MarkLineSeg(true);
@@ -537,6 +549,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 var rst = BoundarySpatialIndex.SelectCrossingGeometry(rect);
                 if (rst.Count > 0)
                 {
+                    ThMPArrangementCmd.DisplayLogger.Information("自动调整后分区线净宽仍然不够！");
                     Logger?.Information("自动调整后分区线净宽仍然不够！\n");
                     Active.Editor.WriteMessage("自动调整后分区线净宽仍然不够！ \n");
                     SegLines[i].MarkLineSeg(true);
@@ -567,6 +580,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                     if (j == curCount - 1)
                     {
+                        ThMPArrangementCmd.DisplayLogger.Information("分区线未互相连接 ！");
                         Logger?.Information("分区线未互相连接 ！\n");
                         Active.Editor.WriteMessage("分区线未互相连接！ \n");
                         if (CheckedLines.Count < 3)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NFox.Cad;
 using Linq2Acad;
 using ThCADExtension;
@@ -12,7 +11,6 @@ using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.StructPlane.Print;
 using ThMEPEngineCore.IO.SVG;
-using ThMEPEngineCore.CAD;
 using ThMEPStructure.Model.Printer;
 using ThMEPStructure.Common;
 
@@ -301,21 +299,31 @@ namespace ThMEPStructure.StructPlane.Service
                         }
                         else if (category == "IfcBeam")
                         {
-                            if (IsEqualElevation(dbText.TextString))
+                            var decription = o.Properties.GetDescription();
+                            if(string.IsNullOrEmpty(decription))
                             {
-                                dbText.TextString = GetBeamSpec(dbText.TextString);
+                                if (dbText.TextString.IsEqualElevation(FlrHeight))
+                                {
+                                    dbText.TextString = dbText.TextString.GetBeamSpec();
+                                }
+                                else
+                                {
+                                    // update to BG 
+                                    dbText.TextString = dbText.TextString.UpdateBGElevation(FlrHeight);
+                                }
                             }
                             else
                             {
-                                // update to BG 
-                                dbText.TextString = UpdateBGElevation(dbText.TextString);
-                            } 
+                                var spec = dbText.TextString.GetBeamSpec();
+                                var elevation = decription.GetObliqueBeamBGElevation();
+                                dbText.TextString = spec+ elevation;
+                            }
 
-                            // svg文字是在原点生成
+                            // svg转换的文字角度是0
                             Vector3d textMoveDir = new Vector3d();
                             if(o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
                             {
-                                textMoveDir = ToVector(o.Properties[ThSvgPropertyNameManager.DirPropertyName].ToString());
+                                textMoveDir = o.Properties.GetDirection().ToVector();
                             }
                             if(textMoveDir.Length==0.0)
                             {
@@ -421,108 +429,6 @@ namespace ThMEPStructure.StructPlane.Service
             return false;
         }
 
-        private Vector3d ToVector(string vecContent)
-        {
-            if(string.IsNullOrEmpty(vecContent))
-            {
-                return new Vector3d();
-            }
-            else
-            {
-                var values = vecContent.Split(',');
-                if(values.Length==2)
-                {
-                    double value1 = 0.0,value2 =0.0;
-                    if (double.TryParse(values[0], out value1) &&
-                       double.TryParse(values[1], out value2))
-                    {
-                        return new Vector3d(value1, value2, 0);
-                    }
-                    else
-                    {
-                        return new Vector3d();
-                    }
-                }
-                else
-                {
-                    return new Vector3d();
-                }
-            }
-        }
-
-        private string UpdateBGElevation(string elevation)
-        {
-            // 200x530(BG+5.670) 
-            var spec = GetBeamSpec(elevation);
-            var bg = GetElevation(elevation);
-            if(bg.HasValue)
-            {
-                var minus = (bg.Value - FlrHeight)/1000.0; //mm to m
-                if(minus>=0)
-                {
-                    return spec + "(BG+" + minus.ToString("0.000")+")";
-                }
-                else
-                {
-                    return spec + "(BG" + minus.ToString("0.000") + ")";
-                }
-            }
-            else
-            {
-                return elevation;
-            }
-        }
-        private string GetBeamSpec(string beamElevation)
-        {
-            // 200x530(BG+5.670) 
-            var newElevation = beamElevation.Replace("（","(");
-            var firstIndex = newElevation.IndexOf('(');
-            if (firstIndex > 0)
-            {
-                return newElevation.Substring(0, firstIndex);
-            }
-            else
-            {
-                return newElevation;
-            }
-        }
-        private double? GetElevation(string elevation)
-        {
-            string pattern1 = @"[+-]{1}\s{0,}\d+[.]?\d+";
-            var mt1 = Regex.Matches(elevation, pattern1);
-            if (mt1.Count == 1)
-            {
-                var value = mt1[0].Value;
-                string pattern2 = @"\d+[.]?\d+";
-                var mt2 = Regex.Matches(value, pattern2);
-                double plus = 1.0;
-                var firstChar = value[0];
-                if (firstChar == '-')
-                {
-                    plus *= -1.0;
-                }
-                if (mt2.Count == 1)
-                {
-                    var dValue = double.Parse(mt2[0].Value);
-                    dValue *= plus;
-                    dValue *= 1000.0; // m To mm
-                    return dValue;
-                }
-            }
-            return null;
-        }
-        private bool IsEqualElevation(string beamBGMark)
-        {
-            var elevation = GetElevation(beamBGMark);
-            if(elevation.HasValue)
-            {
-                return Math.Abs(elevation.Value - FlrHeight) <= 1.0;
-            }
-            else
-            {
-                return false;
-            }
-        }
         private List<string> GetSlabElevations(List<ThGeometry> geos)
         {
             var groups = geos

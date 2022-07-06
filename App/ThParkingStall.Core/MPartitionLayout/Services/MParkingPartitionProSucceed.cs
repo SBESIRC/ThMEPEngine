@@ -112,17 +112,36 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else return false;
             }
         }
+        private bool IsConnectedToLane(LineSegment line, bool Startpoint,List<LineSegment> lanes)
+        {
+            if (Startpoint)
+            {
+                if (ClosestPointInVertLines(line.P0, line, lanes) < 10) return true;
+                else return false;
+            }
+            else
+            {
+                if (ClosestPointInVertLines(line.P1, line, lanes.Select(e => e)) < 10) return true;
+                else return false;
+            }
+        }
         private bool HasParallelLaneForwardExisted(LineSegment line, Vector2D vec, double maxlength, double minlength, ref double dis_to_move
-           , ref LineSegment prepLine)
+           , ref LineSegment prepLine,ref List<LineSegment> paras_lines)
         {
             var lperp = LineSegmentSDL(line.MidPoint.Translation(vec * 100), vec, maxlength);
             var lins = IniLanes.Where(e => IsParallelLine(line, e.Line))
                 .Where(e => e.Line.IntersectPoint(lperp).Count() > 0)
                 .Where(e => e.Line.Length > line.Length / 3)
                 .OrderBy(e => line.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint))
-                .Select(e => e.Line);
-            lins = lins.Where(e => e.ClosestPoint(line.MidPoint).Distance(line.MidPoint) > minlength);
-            if (lins.Count() == 0) return false;
+                .Select(e => e.Line).ToList();
+            lins.AddRange(paras_lines.Where(e => IsParallelLine(line, e))
+                .Where(e => e.IntersectPoint(lperp).Count() > 0)
+                .Where(e => e.Length > line.Length / 3)
+                .OrderBy(e => line.ClosestPoint(e.MidPoint).Distance(e.MidPoint))
+                .Select(e => e)
+                );
+            lins = lins.Where(e => e.ClosestPoint(line.MidPoint).Distance(line.MidPoint) > minlength).ToList();
+            if (lins.Count == 0) return false;
             else
             {
                 var lin = lins.First();
@@ -237,7 +256,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             LaneBufferSpatialIndex.Update(LaneBoxes.Cast<Geometry>().ToList(), new List<Geometry>());
         }
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true
-        , Lane specialLane = null,bool check_adj_collision=false, List<Lane> rlanes=null)
+        , Lane specialLane = null,bool check_adj_collision=false, List<Lane> rlanes=null,bool transform_start_edge_for_perp_module=false)
         {
             var pillarSpatialIndex = new MNTSSpatialIndex(Pillars);
             var lanes = new List<Lane>();
@@ -315,7 +334,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                             //boxcrossed = CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
                             //修改，有的背靠背模块第二模块没有生成carmoudle只生成车道线，对这种背靠背车位的过滤
                             var carcrossed= CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
-                            if (mindistance == DisCarAndHalfLaneBackBack)
+                            if (mindistance == DisCarAndHalfLaneBackBack && ScareEnabledForBackBackModule)
                             {
                                 var iniboxpl = PolyFromLines(boxsplit, boxsplittest);
                                 foreach (var car_cross in carcrossed)
@@ -323,9 +342,18 @@ namespace ThParkingStall.Core.MPartitionLayout
                                     var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car_cross, iniboxpl, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
                                     if (g is Polygon)
                                     {
-                                        var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth - g.Area) > 1;
-                                        if (cond_area)
+                                        var cond_area = Math.Round(g.Area) <= (DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth;
+                                        var cond_type = true;
+                                        var existed_index = Cars.Select(e => e.Polyline).ToList().IndexOf(car_cross);
+                                        if (existed_index >= 0)
                                         {
+                                            cond_type = Cars[existed_index].CarLayoutMode != 1;
+                                        }
+                                        else cond_type = false;
+                                        //var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth - g.Area) > 1;
+                                        if (!cond_area)
+                                        {
+                                            //0628该情况应为是加感叹号相反条件，之前判断条件相反，在一个很长的有点凹的两根车道线相错很少的case发现。
                                             boxcrossed.Add(car_cross);
                                         }
                                     }
@@ -386,6 +414,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                             var split = slit;
                             split = split.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
                             split = split.Translation(-lane.Vec.Normalize() * mindistance);
+                            if (transform_start_edge_for_perp_module && split.Length > DisLaneWidth / 2 + DisVertCarLength)
+                            {
+                                if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)
+                                    split.P0 = split.P0.Translation(Vector(split).Normalize() * (DisLaneWidth / 2 + DisVertCarLength));
+                            }
                             if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)
                                 split.P0 = split.P0.Translation(Vector(split).Normalize() * DisLaneWidth / 2);
                             if (ClosestPointInVertLines(split.P1, split, IniLanes.Select(e => e.Line)) < 10)
@@ -426,9 +459,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 var diss = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P0));
                                 if (diss.Count() > 0)
                                 {
+                                    var collisionD = CollisionD;
+                                    CollisionD = 300;
                                     var dis = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P0)).First().Distance(splitnw.P0);
                                     var disc = CollisionD - dis >= 0 ? CollisionD - dis : 0;
                                     splitnw = new LineSegment(splitnw.P0.Translation(Vector(splitnw).Normalize() * disc), splitnw.P1);
+                                    CollisionD = collisionD;
                                 }
 
                                 pls = ConvertSpecialCollisionCheckRegionForLane(splitnw, lane.Vec.Normalize(), false);
@@ -462,9 +498,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 diss = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P1));
                                 if (diss.Count() > 0)
                                 {
+                                    var collisionD = CollisionD;
+                                    CollisionD = 300;
                                     var dis = points.Select(pt => splitnw.ClosestPoint(pt, true)).OrderBy(pt => pt.Distance(splitnw.P1)).First().Distance(splitnw.P1);
                                     var disc = CollisionD - dis >= 0 ? CollisionD - dis : 0;
                                     splitnw = new LineSegment(splitnw.P0, splitnw.P1.Translation(-Vector(splitnw).Normalize() * disc));
+                                    CollisionD = collisionD;
                                 }
                             }
                             if (splitnw.Length < minlength) continue;
@@ -479,6 +518,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private Polygon ConvertSpecialCollisionCheckRegionForLane(LineSegment line, Vector2D vec, bool isstart = true)
         {
+            var collisionD = CollisionD;
+            CollisionD = 300;
             var pt = line.P0;
             var v = -Vector(line).Normalize();
             if (!isstart)
@@ -496,6 +537,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             pt = pt.Translation(-v * CollisionD);
             points.Add(pt);
             var pl = PolyFromPoints(points.ToList());
+            CollisionD = collisionD;
             return pl;
         }
         private bool CloseToWall(Coordinate point,LineSegment line)
@@ -680,39 +722,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             LineSegment ea = new LineSegment(lane.P0, pta);
             count += ((int)Math.Floor((ea.Length - DisLaneWidth / 2-DisPillarLength*2) / DisVertCarWidth));
             count += ((int)Math.Floor((eb.Length - DisLaneWidth / 2- DisPillarLength * 2) / DisVertCarWidth));
-
-    //        var pa = PolyFromPoints(new List<Coordinate>() { lane.P0, lane.P0.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
-    //            pta.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane), pta });
-    //        if (pa.Area > 0)
-    //        {
-    //            if (ClosestPointInVertLines(ea.P0, ea, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-    //                Math.Abs(ClosestPointInVertLines(ea.P1, ea, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-    //                ea.Length < DisLaneWidth / 2 + DisVertCarWidth * 4)
-    //            {
-    //                count = 0;
-    //            }
-    //            else
-    //            {
-    //                plys.Add(pa);
-    //                generatedcount++;
-    //            }
-    //        }
-    //        var pb = PolyFromPoints(new List<Coordinate>() { lane.P1, lane.P1.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
-    //             ptb.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),ptb});
-    //        if (pb.Area > 0)
-    //        {
-    //            if (ClosestPointInVertLines(eb.P0, eb, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-    //                Math.Abs(ClosestPointInVertLines(eb.P1, eb, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-    //eb.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
-    //            {
-    //                count = 0;
-    //            }
-    //            else
-    //            {
-    //                plys.Add(pb);
-    //                generatedcount++;
-    //            }
-    //        }
 
             return count;
         }
@@ -914,18 +923,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             var compare = new LocCarComparer();
             locCars = locCars.Distinct(compare);
             CarSpots = locCars.Select(e => e.Car).ToList();
-            //for (int i = 1; i < CarSpots.Count; i++)
-            //{
-            //    for (int j = 0; j < i; j++)
-            //    {
-            //        if (CarSpots[i].Envelope.Centroid.Coordinate.Distance(CarSpots[j].Envelope.Centroid.Coordinate) < 1000)
-            //        {
-            //            CarSpots.RemoveAt(i);
-            //            i--;
-            //            break;
-            //        }
-            //    }
-            //}
         }
         private void RemoveCarsIntersectedWithBoundary()
         {
@@ -1032,112 +1029,90 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private void ClassifyLanesForLayoutFurther()
         {
-            for (int i = 0; i < IniLanes.Count; i++)
-            {
-                var overlap = false;
-                foreach (var lane in OriginalLanes)
-                {
-                    var cond_a = lane.ClosestPoint(IniLanes[i].Line.P0).Distance(IniLanes[i].Line.P0) < 1;
-                    var cond_b = lane.ClosestPoint(IniLanes[i].Line.P1).Distance(IniLanes[i].Line.P1) < 1;
-                    if (cond_a && cond_b)
-                    {
-                        overlap = true;
-                        break;
-                    }
-                }
-                if (overlap) continue;
-                if (IsConnectedToLaneDouble(IniLanes[i].Line))
-                {
-                    OutEnsuredLanes.Add(IniLanes[i].Line);
-                }
-                else
-                {
-                    var test_lane = new LineSegment(IniLanes[i].Line);
-                    if (IsConnectedToLane(test_lane, false))
-                        test_lane = new LineSegment(test_lane.P1, test_lane.P0);
-                    var lane_clone = new LineSegment(test_lane);
-                    var endp = test_lane.P1.Translation(-Vector(test_lane).Normalize() * 1000);
-                    test_lane.P1 = test_lane.P1.Translation(Vector(test_lane).Normalize() * MaxLength);
-                    test_lane.P0 = endp;
-                    var bdpoints = test_lane.IntersectPoint(Boundary).ToList();
-                    var obspoints = new List<Coordinate>();
-                    var lanecarpoints= new List<Coordinate>();
-                    var test_lane_pl = test_lane.Buffer(1);
-                    var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>();
-                    foreach (var cross in obscrossed)
-                    {
-                        obspoints.AddRange(test_lane.IntersectPoint(cross));
-                    }
-                    foreach (var box in BuildingBoxes)
-                    {
-                        obspoints.AddRange(test_lane.IntersectPoint(box));
-                    }
-                    var carcrossed=CarSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>().ToList();
-                    //carcrossed.AddRange(LaneBufferSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>());
-                    foreach (var cross in carcrossed)
-                    {
-                        lanecarpoints.AddRange(test_lane.IntersectPoint(cross));
-                    }
-                    var tmpLanes = IniLanes.Select(e => e.Line).Where(e => IsPerpLine(e, test_lane));
-                    foreach (var cross in tmpLanes)
-                    {
-                        lanecarpoints.AddRange(test_lane.IntersectPoint(cross.Buffer(1)));
-                    }
-                    bdpoints = bdpoints.OrderBy(e => e.Distance(test_lane.P0)).ToList();
-                    obspoints = obspoints.OrderBy(e => e.Distance(test_lane.P0)).ToList();
-                    lanecarpoints = lanecarpoints.OrderBy(e => e.Distance(test_lane.P0)).ToList();
-                    var dis_bd = bdpoints.Count > 0 ? bdpoints.First().Distance(test_lane.P0) : double.PositiveInfinity;
-                    var dis_obs = obspoints.Count > 0 ? obspoints.First().Distance(test_lane.P0) : double.PositiveInfinity;
-                    var dis_lane = lanecarpoints.Count > 0 ? lanecarpoints.First().Distance(test_lane.P0) : double.PositiveInfinity;
-                    if (dis_bd < dis_obs && dis_bd < dis_lane)
-                    {
-                        lane_clone.P1 = lane_clone.P1.Translation(Vector(lane_clone).Normalize() * (dis_bd-1000));
-                        OutEnsuredLanes.Add(lane_clone);
-                    }
-                    else if (dis_obs < dis_bd)
-                    {
-                        if (dis_lane>MaxLength)
-                        {
-                            OutUnsuredLanes.Add(lane_clone);
-                        }
-                        else
-                        {
-                            //穿过障碍物，还有车道线
-                        }
-                    }
-                    else { }
-                }
-            }
+            ProcessLanes(ref IniLanes);
+            OutEnsuredLanes.AddRange(OriginalLanes);
 
+            var lanes=IniLanes.Select(e => e).ToList();
+            var found = false;
             while (true)
             {
-                var found = false;
-                var resultLanes = new List<LineSegment>();
-                resultLanes.AddRange(OriginalLanes);
-                resultLanes.AddRange(OutEnsuredLanes);
-                resultLanes.AddRange(OutUnsuredLanes);
-                for (int i = 0; i < OutEnsuredLanes.Count; i++)
+                found = false;
+                //拿双边连接的车道线
+                bool found_connected_double = false;
+                while (true)
                 {
-                    if (!(ClosestPointInVertLines(OutEnsuredLanes[i].P0, OutEnsuredLanes[i], resultLanes) < 10
-                        || ClosestPointInVertLines(OutEnsuredLanes[i].P1, OutEnsuredLanes[i], resultLanes) < 10))
+                    found_connected_double = false;
+                    for (int i = 0; i < lanes.Count; i++)
                     {
-                        OutEnsuredLanes.RemoveAt(i);
-                        i--;
+                        //筛重合
+                        var overlap = false;
+                        foreach (var lane in OutEnsuredLanes)
+                        {
+                            var cond_a = lane.ClosestPoint(lanes[i].Line.P0,false).Distance(lanes[i].Line.P0) < 1;
+                            var cond_b = lane.ClosestPoint(lanes[i].Line.P1,false).Distance(lanes[i].Line.P1) < 1;
+                            if (cond_a && cond_b)
+                            {
+                                overlap = true;
+                                break;
+                            }
+                        }
+                        if (overlap) continue;
+                        if (!IsConnectedToLaneDouble(lanes[i].Line)) continue;
+                        if (!IsConnectedToLane(lanes[i].Line, true, OutEnsuredLanes)) continue;
+                        if (!IsConnectedToLane(lanes[i].Line, false, OutEnsuredLanes)) continue;
+                        found_connected_double = true;
                         found = true;
+                        OutEnsuredLanes.Add(lanes[i].Line);
+                        lanes.RemoveAt(i);
+                        break;
                     }
+                    if (!found_connected_double) break;
                 }
-                for (int i = 0; i < OutUnsuredLanes.Count; i++)
+                //拿一端连接墙的车道线
+                for (int i = 0; i < lanes.Count; i++)
                 {
-                    if (!(ClosestPointInVertLines(OutUnsuredLanes[i].P0, OutUnsuredLanes[i], resultLanes) < 10
-                        || ClosestPointInVertLines(OutUnsuredLanes[i].P1, OutUnsuredLanes[i], resultLanes) < 10))
+                    //筛重合
+                    var overlap = false;
+                    foreach (var lane in OutEnsuredLanes)
                     {
-                        OutUnsuredLanes.RemoveAt(i);
-                        i--;
-                        found = true;
+                        var cond_a = lane.ClosestPoint(lanes[i].Line.P0,false).Distance(lanes[i].Line.P0) < 1;
+                        var cond_b = lane.ClosestPoint(lanes[i].Line.P1,false).Distance(lanes[i].Line.P1) < 1;
+                        if (cond_a && cond_b)
+                        {
+                            overlap = true;
+                            break;
+                        }
                     }
+                    if (overlap) continue;
+                    if (IsConnectedToLane(lanes[i].Line, false, OutEnsuredLanes))
+                        lanes[i].Line = new LineSegment(lanes[i].Line.P1, lanes[i].Line.P0);
+                    if (!IsConnectedToLane(lanes[i].Line, true, OutEnsuredLanes)) continue;
+                    foreach (var wall in Walls)
+                    {
+                        if (wall.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1)
+                        {
+                            OutEnsuredLanes.Add(lanes[i].Line);
+                            found = true;
+                            lanes.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (OutBoundary.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1 || !OutBoundary.Contains(lanes[i].Line.P1))
+                        {
+                            OutEnsuredLanes.Add(lanes[i].Line);
+                            found = true;
+                            lanes.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
                 }
                 if (!found) break;
-            } 
+            }
+            OriginalLanes.ForEach(e => OutEnsuredLanes.Remove(e));
         }
         private void InsuredForTheCaseOfoncaveBoundary()
         {
@@ -1271,6 +1246,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                             {
                                 var p = crosscars[i].Coordinates.OrderBy(t => t.Distance(line.P0)).First();
                                 var ponline_ex = line.ClosestPoint(p, true);
+                                if (line.ClosestPoint(ponline_ex, false).Distance(ponline_ex) > 0) continue;
                                 var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
                                 line_align_backback_rest = new LineSegment(line.P0, line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)));
                                 line_align_backback_rest = line_align_backback_rest.Translation(-vec.Normalize() * DisLaneWidth / 2);
@@ -1323,34 +1299,47 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (crossedcarsc.Count == 0) cond = true;
                     else
                     {
-                        if (crossedcarsc.Count == 1 && ScareEnabledForBackBackModule)
+                        if (crossedcarsc.Count >= 1 && ScareEnabledForBackBackModule)
                         {
-                            var crossed_back_car=crossedcarsc[0];
-                            var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
-                            if (g is Polygon)
+                            foreach (var crossed_back_car in crossedcarsc)
                             {
-                                var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack)*2 * DisVertCarWidth - g.Area) < 1
-                                    || g.Area< (DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth;
-                                var infos = Cars.Select(e => e.Polyline).ToList();
-                                var exist_index= infos.IndexOf(crossed_back_car);
-                                if (Cars[exist_index].CarLayoutMode == 0 && cond_area)
+                                var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
+                                if (g is Polygon && g.Area > 0)
                                 {
-                                    found_backback = true;
-                                    var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
-                                    var car_exist_transform = PolyFromLines(car_exist_iniedge, car_exist_iniedge.Translation(Cars[exist_index].Vector.Normalize() * DisVertCarLengthBackBack));
-                                    Cars[exist_index].Polyline = car_exist_transform;
-                                    Cars[exist_index].CarLayoutMode = 2;
-                                    var carspots_index = CarSpots.IndexOf(crossed_back_car);
-                                    CarSpots[carspots_index] = car_exist_transform;
-                                    CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
+                                    var segs_g_short = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e, seg)).First();
+                                    if (Math.Round(segs_g_short.Length) > (DisVertCarLength - DisVertCarLengthBackBack) * 2)
+                                    {
+                                        cond = false;
+                                        break;
+                                    }
+                                    var cond_area = Math.Abs((DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth - g.Area) < 1
+                                        || g.Area < (DisVertCarLength - DisVertCarLengthBackBack) * 2 * DisVertCarWidth;
+                                    var infos = Cars.Select(e => e.Polyline).ToList();
+                                    var exist_index = infos.IndexOf(crossed_back_car);
+                                    if (exist_index == -1)
+                                    {
+                                        cond = false;
+                                        break;
+                                    }
+                                    if (Cars[exist_index].CarLayoutMode == 0 && cond_area)
+                                    {
+                                        found_backback = true;
+                                        var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
+                                        var car_exist_transform = PolyFromLines(car_exist_iniedge, car_exist_iniedge.Translation(Cars[exist_index].Vector.Normalize() * DisVertCarLengthBackBack));
+                                        Cars[exist_index].Polyline = car_exist_transform;
+                                        Cars[exist_index].CarLayoutMode = 2;
+                                        var carspots_index = CarSpots.IndexOf(crossed_back_car);
+                                        CarSpots[carspots_index] = car_exist_transform;
+                                        CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
 
-                                    s = new LineSegment(seg);
-                                    s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
-                                    car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
-                                    carsc = car.Clone();
-                                    carsc = carsc.Scale(ScareFactorForCollisionCheck);
+                                        s = new LineSegment(seg);
+                                        s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
+                                        car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
+                                        carsc = car.Clone();
+                                        carsc = carsc.Scale(ScareFactorForCollisionCheck);
+                                    }
+                                    else if (Cars[exist_index].CarLayoutMode == 1 || !cond_area) cond = false;
                                 }
-                                else cond = false;
                             }
                         }
                         else cond = false;

@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Model;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
@@ -11,10 +12,10 @@ namespace ThMEPHVAC.TCH
     {
         private ulong subSysId;
         private TCHCrossParam crossParam;
-        private ThSQLiteHelper sqliteHelper; 
+        private THMEPSQLiteServices sqliteHelper; 
         private ThDrawTCHFlanges flangesService;
 
-        public ThDrawTCHCross(ThSQLiteHelper sqliteHelper, ulong subSysId)
+        public ThDrawTCHCross(THMEPSQLiteServices sqliteHelper, ulong subSysId)
         {
             this.subSysId = subSysId;
             this.sqliteHelper = sqliteHelper;
@@ -23,7 +24,6 @@ namespace ThMEPHVAC.TCH
 
         public void Draw(EntityModifyParam info, Matrix3d mat, double mainHeight, double elevation, ref ulong gId)
         {
-            sqliteHelper.Conn();
             var mmElevation = elevation * 1000;
             RecordCrossInfo(ref gId);
             GetCrossInfo(info, mat, out CrossInfo crossInfo, out Point3d mainBigP, out Point3d mainSmallP, out Point3d sideOutterP, out Point3d sideInnerP);
@@ -86,7 +86,7 @@ namespace ThMEPHVAC.TCH
             };
             flangesService.Draw(sideOutterP + centerEleDisVec, param3.normalVector, outterWidth, outterHeight, ref gId);
             ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { param1, param2, param3, param4 });
-            sqliteHelper.db.Close();
+            sqliteHelper.CloseConnect();
         }
         private void GetCrossInfo(EntityModifyParam info, Matrix3d mat, out CrossInfo crossInfo, out Point3d mainBigP, out Point3d mainSmallP, out Point3d sideOutterP, out Point3d sideInnerP)
         {
@@ -192,7 +192,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + crossParam.materialID.ToString() + "'," +
                                   "'" + crossParam.type.ToString() + "'," +
                                   "'" + crossParam.radRatio.ToString() + "')";
-            sqliteHelper.Query<TCHCrossParam>(recordDuct);
+            sqliteHelper.ExecuteNonQuery(recordDuct);
         }
     }
 }

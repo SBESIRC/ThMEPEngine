@@ -142,7 +142,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     holeConnectLines.AddRange(CreateRouteHelper.CreateConnectLineHoles(connectLine, lineDis));
                     var line = CreateRouteHelper.MergeRouteLine(connectLine.First(), pipeLine.Value);
-                    RouteModel route = new RouteModel(line, pipeLine.Key.PipeType, pipeLine.Key.Position, pipeLine.Key.IsEuiqmentPipe);
+                    RouteModel route = new RouteModel(line, pipeLine.Key.PipeType, pipeLine.Key.Position, pipeLine.Key.IsEuiqmentPipe, pipeLine.Key.IsFloorDrainPipe);
                     if (pipeLine.Key.IsEuiqmentPipe)
                     {
                         route.printCircle = pipeLine.Key.PipeCircle;

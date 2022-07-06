@@ -141,6 +141,36 @@
       <DependentUpon>RoomFunctionConfig.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SmokeProofSystemUI\Converters\RadioUiValueConverter.cs" />
+    <Compile Include="SmokeProofSystemUI\SmokeCalculateUI.xaml.cs">
+      <DependentUpon>SmokeCalculateUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofEventMonitor\SmokeProofEventMonitor.cs" />
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\CheckValueUserControl.xaml.cs">
+      <DependentUpon>CheckValueUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\EvacuationFrontUserControl.xaml.cs">
+      <DependentUpon>EvacuationFrontUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\EvacuationWalkUserControl.xaml.cs">
+      <DependentUpon>EvacuationWalkUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\FireElevatorFrontRoomUserControl.xaml.cs">
+      <DependentUpon>FireElevatorFrontRoomUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\SeparateOrSharedNaturalUserControl.xaml.cs">
+      <DependentUpon>SeparateOrSharedNaturalUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\SeparateOrSharedWindUserControl.xaml.cs">
+      <DependentUpon>SeparateOrSharedWindUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\StaircaseNoWindUserControl.xaml.cs">
+      <DependentUpon>StaircaseNoWindUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\SmokeProofUserControl\StaircaseWindUserControl.xaml.cs">
+      <DependentUpon>StaircaseWindUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmokeProofSystemUI\ViewModelConverters\SmkViewModelConverter.cs" />
     <Compile Include="ThHvacUIService.cs" />
     <Compile Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml.cs">
       <DependentUpon>uiWaterPipeConnectWidget.xaml</DependentUpon>
@@ -275,6 +305,10 @@
       <Project>{b49b0155-f4a7-4928-a539-66882a6ec79a}</Project>
       <Name>ThMEPHVAC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPIO\ThMEPIO.csproj">
+      <Project>{81ca0abb-8e13-4e53-99b6-56baaf2f7bd9}</Project>
+      <Name>ThMEPIO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
       <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>
       <Name>TianHua.EquipmentSelection</Name>
@@ -357,6 +391,42 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="SmokeProofSystemUI\SmokeCalculateUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\CheckValueUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\EvacuationFrontUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\EvacuationWalkUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\FireElevatorFrontRoomUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\SeparateOrSharedNaturalUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\SeparateOrSharedWindUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\StaircaseNoWindUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmokeProofSystemUI\SmokeProofUserControl\StaircaseWindUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -426,9 +496,6 @@
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
       <Version>7.1.2</Version>
     </PackageReference>
-    <PackageReference Include="sqlite-net-pcl">
-      <Version>1.8.116</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\删除.png" />
@@ -443,5 +510,6 @@
     <Resource Include="Images\选择.png" />
     <Resource Include="Images\风机型号.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

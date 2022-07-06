@@ -32,6 +32,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     try
                     {
                         double valveGapX = 50;
+                        int alarmValveIndex = 0;//报警阀index
                         int fireAreaIndex = 0;//当前支管的防火分区index
                         int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
@@ -80,14 +81,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                         firstAlarmValveVisited = true;
                                     }
                                     nextPt = curPt.OffsetX(alValveGap);
-                                    AddAlarmValve(sprayOut, spraySystem, sprayIn, fireAreaIndex, ePt2, ref nextPt, ref curPt, ref valveFlag, pt);
+                                    AddAlarmValve(sprayOut, spraySystem, sprayIn, alarmValveIndex, ePt2, ref nextPt, ref curPt, ref valveFlag, pt);
 
-                                    CountfireAreaNums(pt, spraySystem, sprayIn, ref fireAreaIndex);//统计防火分区的数目
                                     visitedAlarmValveNums++;
                                     if (visitedAlarmValveNums == alarmValveNums)//遍历到最后一个报警阀
                                     {
                                         lastValveVisited = true;
                                     }
+                                    alarmValveIndex++;
                                 }
 
                                 if (type.Equals("SignalValve") && firstAlarmValveVisited && !lastValveVisited)

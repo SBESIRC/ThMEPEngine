@@ -1,20 +1,20 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using AcHelper;
 using NFox.Cad;
-using System.Linq;
+using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using System.Text.RegularExpressions;
 
 namespace ThMEPLighting.Garage
 {
@@ -31,6 +31,14 @@ namespace ThMEPLighting.Garage
             {
                 return false;
             }
+        }
+        public static bool IsLessThan45Degree(this Line first, Line second)
+        {
+            return IsLessThan45Degree(first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint);
+        }
+        public static double CalculateTwoLineOuterAngle(this Line first, Line second)
+        {
+            return CalculateTwoLineOuterAngle(first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint);
         }
         public static double CalculateTwoLineOuterAngle(Point3d firstStart, Point3d firstEnd, Point3d secondStart, Point3d secondEnd)
         {
@@ -148,10 +156,10 @@ namespace ThMEPLighting.Garage
                 var lines = curves.ToCollection();
                 var cleanInstance = new ThLaneLineCleanService();
                 lines = cleanInstance.CleanNoding(lines);
-                return lines.Cast<Line>().ToList();
+                return lines.OfType<Line>().ToList();
             }
         }
-        public static List<Line> Merge(this List<Line> curves)
+        public static List<Line> CleanNoding(this List<Line> curves)
         {
             if (curves.Count == 0)
             {
@@ -161,9 +169,15 @@ namespace ThMEPLighting.Garage
             {
                 var lines = curves.ToCollection();
                 var cleanInstance = new ThLaneLineCleanService();
-                lines = cleanInstance.Clean(lines);
-                return lines.Cast<Line>().ToList();
+                lines = cleanInstance.CleanNoding(lines);
+                return lines.OfType<Line>().ToList();
             }
+        }
+
+        public static bool IsCollinear(this Line first, Line second, double tolerance)
+        {
+            return ThGeometryTool.IsCollinearEx(
+                first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint, tolerance);
         }
         /// <summary>
         /// 减去一根线上重叠的线
@@ -181,7 +195,7 @@ namespace ThMEPLighting.Garage
             });
             if (pts.Count > 0)
             {
-                var splitLines =  line.Split(pts);
+                var splitLines = line.Split(pts);
                 // 分割的线与传入的重叠线有重叠，
                 return splitLines.OfType<Line>().Where(l =>
                 {
@@ -207,31 +221,31 @@ namespace ThMEPLighting.Garage
         /// <param name="line"></param>
         /// <param name="pts">分割点，点要在线上</param>
         /// <returns></returns>
-        public static List<Line> Split(this Line line,List<Point3d> pts)
+        public static List<Line> Split(this Line line, List<Point3d> pts)
         {
             var results = new List<Line>();
             var newPts = pts.Where(p => ThGeometryTool.IsPointInLine(line.StartPoint, line.EndPoint, p, 0.0))
-                .OrderBy(p=>p.DistanceTo(line.StartPoint)).ToList();
+                .OrderBy(p => p.DistanceTo(line.StartPoint)).ToList();
             var startPt = line.StartPoint;
-            for (int i=0;i<newPts.Count;i++)
+            for (int i = 0; i < newPts.Count; i++)
             {
-                if(startPt.DistanceTo(newPts[i])>1e-6)
+                if (startPt.DistanceTo(newPts[i]) > 1e-6)
                 {
                     results.Add(new Line(startPt, newPts[i]));
                 }
                 startPt = newPts[i];
             }
-            if(startPt.DistanceTo(line.EndPoint) > 1e-6)
+            if (startPt.DistanceTo(line.EndPoint) > 1e-6)
             {
                 results.Add(new Line(startPt, line.EndPoint));
             }
             return results;
         }
 
-        public static List<Point3d> Distinct(this List<Point3d> pts,Tolerance tolerance)
+        public static List<Point3d> Distinct(this List<Point3d> pts, Tolerance tolerance)
         {
             var results = new List<Point3d>();
-            while (pts.Count>0)
+            while (pts.Count > 0)
             {
                 results.Add(pts[0]);
                 pts.RemoveAt(0);
@@ -247,13 +261,13 @@ namespace ThMEPLighting.Garage
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool IsAntiClockwise(this Vector3d a,Vector3d b)
+        public static bool IsAntiClockwise(this Vector3d a, Vector3d b)
         {
             var x1 = a.X;
             var y1 = a.Y;
             var x2 = b.X;
             var y2 = b.Y;
-            var value = x1*y2 - x2*y1;
+            var value = x1 * y2 - x2 * y1;
             return value > 0.0;
         }
         /// <summary>
@@ -276,7 +290,7 @@ namespace ThMEPLighting.Garage
         /// </summary>
         /// <param name="lineVec"></param>
         /// <returns></returns>
-        public static Vector3d GetAlignedDimensionTextDir(this Vector3d lineVec,double tolerance=1e-6)
+        public static Vector3d GetAlignedDimensionTextDir(this Vector3d lineVec, double tolerance = 1e-6)
         {
             // 参照对齐标注的文字方向
             if (lineVec.IsCodirectionalTo(Vector3d.YAxis, new Tolerance(tolerance, tolerance)) ||
@@ -310,9 +324,9 @@ namespace ThMEPLighting.Garage
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        public static Polyline ToPolyline(this List<Line> edges,double tolerance=1.0)
+        public static Polyline ToPolyline(this List<Line> edges, double tolerance = 1.0)
         {
-            if(edges.Count==0)
+            if (edges.Count == 0)
             {
                 return new Polyline();
             }
@@ -323,13 +337,14 @@ namespace ThMEPLighting.Garage
             }
             else
             {
-                var linkPt = edges[0].FindLinkPt(edges[1],tolerance);
-                if(!linkPt.HasValue)
+                var linkPt = edges[0].FindLinkPt(edges[1], tolerance);
+                if (!linkPt.HasValue)
                 {
-                    return new Polyline();
+                    var pts = new Point3dCollection { edges[0].StartPoint, edges[0].EndPoint };
+                    return pts.CreatePolyline(false);
                 }
                 else
-                {                    
+                {
                     var startPt = linkPt.Value.GetNextLinkPt(edges[0].StartPoint, edges[0].EndPoint);
                     var pts = new Point3dCollection() { startPt };
                     for (int i = 0; i < edges.Count; i++)
@@ -346,7 +361,7 @@ namespace ThMEPLighting.Garage
         public static Polyline Reverse(this Polyline polyline)
         {
             var pts = new Point3dCollection();
-            for(int i=polyline.NumberOfVertices-1;i>=0;i--)
+            for (int i = polyline.NumberOfVertices - 1; i >= 0; i--)
             {
                 pts.Add(polyline.GetPoint3dAt(i));
             }
@@ -417,11 +432,11 @@ namespace ThMEPLighting.Garage
             }
             return false;
         }
-        public static bool GeometryContains(this List<Line> lines ,Line line, Tolerance tolerance)
+        public static bool GeometryContains(this List<Line> lines, Line line, Tolerance tolerance)
         {
-            for(int i=0;i< lines.Count;i++)
+            for (int i = 0; i < lines.Count; i++)
             {
-                if(line.IsGeometryEqual(lines[i], tolerance))
+                if (line.IsGeometryEqual(lines[i], tolerance))
                 {
                     return true;
                 }
@@ -484,16 +499,15 @@ namespace ThMEPLighting.Garage
             //单位化、修正方向
             return lines.Select(o => ThGarageLightUtils.NormalizeLaneLine(o)).ToList();
         }
-        
-        public static Tuple<Line, Point3d> FindPriorityStart(this List<Line> lines,double tolerance=1.0)
+        public static Tuple<Line, Point3d> FindPriorityStart(this List<Line> lines, double tolerance = 1.0)
         {
             var instance = ThQueryLineService.Create(lines);
             for (int i = 0; i < lines.Count; i++)
             {
                 var current = lines[i];
-                var querys  = instance.Query(current.StartPoint, tolerance);
+                var querys = instance.Query(current.StartPoint, tolerance);
                 querys.Remove(current);
-                if(querys.Count==0)
+                if (querys.Count == 0)
                 {
                     return Tuple.Create(current, current.StartPoint);
                 }
@@ -509,21 +523,6 @@ namespace ThMEPLighting.Garage
             }
             return null;
         }
-        public static List<Tuple<Curve, Curve, Curve>> Offset(this List<Curve> curves, double offsetDis)
-        {
-            //中心线、1号边、2号边
-            var results = new List<Tuple<Curve, Curve, Curve>>();
-            curves.ForEach(o =>
-            {
-                if (o.GetLength() >= 10) //忽略小的短线
-                {
-                    var instance = ThOffsetLineService.Offset(o, offsetDis);
-                    results.Add(Tuple.Create(o, instance.First, instance.Second));
-                }
-            });
-            return results;
-        }
-
         public static Point3dCollection RemoveNeibourDuplicatedPoints(this Point3dCollection pts, double tolerance = 1.0)
         {
             // pts是一段Polyline的点集合， 移除相邻的重复点
@@ -546,29 +545,28 @@ namespace ThMEPLighting.Garage
             }
             return result;
         }
-
-        public static Polyline BufferPath(this Polyline path, double offsetDis,bool isSingle=true)
+        public static Polyline BufferPath(this Polyline path, double offsetDis, bool isSingle = true)
         {
             var poly = new Polyline();
-            if(path.Length<1.0)
+            if (path.Length < 1.0)
             {
                 return poly;
             }
             var objs = new DBObjectCollection() { path };
-            var res = isSingle?objs.SingleSidedBuffer(offsetDis):objs.Buffer(offsetDis);
+            var res = isSingle ? objs.SingleSidedBuffer(offsetDis) : objs.Buffer(offsetDis);
             if (res.Count > 0)
             {
                 poly = res.OfType<Polyline>().OrderByDescending(o => o.Area).First();
             }
             return poly;
         }
-        public static DBObjectCollection Query(this Point3d pt, 
+        public static DBObjectCollection Query(this Point3d pt,
             ThCADCoreNTSSpatialIndex spatialIndex, double envelopLength = 1.0)
         {
             var envelop = ThDrawTool.CreateSquare(pt, envelopLength);
             return spatialIndex.SelectCrossingPolygon(envelop);
         }
-        public static DBObjectCollection Delete(this ThRegionBorder border,ThLightArrangeParameter arrangeParameter,Database db)
+        public static DBObjectCollection Delete(this ThRegionBorder border, ThLightArrangeParameter arrangeParameter, Database db)
         {
             using (AcadDatabase acadDb = AcadDatabase.Use(db))
             {
@@ -606,6 +604,149 @@ namespace ThMEPLighting.Garage
         public static bool IsOppositeDirection(this Vector3d first, Vector3d second)
         {
             return first.DotProduct(second) < 0.0;
+        }
+        public static void ThDispose(this DBObjectCollection dbObjs)
+        {
+            dbObjs.OfType<DBObject>().ToList().ForEach(o => o.Dispose());
+        }
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
+        {
+            var dict = new Dictionary<TKey, TValue>();
+            var dictAsIDictionary = (IDictionary<TKey, TValue>)dict;
+            foreach (var property in keyValuePairs)
+            {
+                (dictAsIDictionary).Add(property);
+            }
+            return dict;
+        }
+        public static Point3d GetPolylinePt(this Polyline polyline, double distance)
+        {
+            return polyline.GetPointAtDist(distance);
+        }
+        public static bool IsOn(this Point3d pt, Curve curve, double tolerance = 0.0001)
+        {
+            return pt.DistanceTo(curve.GetClosestPointTo(pt, false)) <= tolerance;
+        }
+        /// <summary>
+        /// 判断点在线的左边
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="sp"></param>
+        /// <param name="ep"></param>
+        /// <returns></returns>
+        public static bool IsLeftOfLine(this Point3d pt, Point3d sp, Point3d ep)
+        {
+            double tmpx = (sp.X - ep.X) / (sp.Y - ep.Y) * (pt.Y - ep.Y) + ep.X;
+            if (tmpx > pt.X)//当tmpx>p.x的时候，说明点在线的左边，小于在右边，等于则在线上。
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断点在线的右边
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="sp"></param>
+        /// <param name="ep"></param>
+        /// <returns></returns>
+        public static bool IsRightOfLine(this Point3d pt, Point3d sp, Point3d ep)
+        {
+            double tmpx = (sp.X - ep.X) / (sp.Y - ep.Y) * (pt.Y - ep.Y) + ep.X;
+            if (tmpx < pt.X)//当tmpx<p.x的时候，说明点在线的右边，小于在左边，等于则在线上。
+                return true;
+            return false;
+        }
+
+        public static List<Line> CleanNoding(List<Line> lightLines, List<Line> nonLightLines, List<Line> singleRowLines)
+        {
+            var resultsCollection = new DBObjectCollection();
+
+            // 线优化处理
+            LineSimplify(lightLines).OfType<Line>().ToList().ForEach(o => resultsCollection.Add(o));
+            LineSimplify(nonLightLines).OfType<Line>().ToList().ForEach(o => resultsCollection.Add(o));
+            LineSimplify(singleRowLines).OfType<Line>().ToList().ForEach(o => resultsCollection.Add(o));
+
+            resultsCollection = ThLaneLineExtendEngine.LineExtendAndMerge(resultsCollection);
+            resultsCollection = ThLaneLineEngine.Noding(resultsCollection);
+            resultsCollection = ThLaneLineEngine.CleanZeroCurves(resultsCollection);
+
+            return resultsCollection.OfType<Line>().ToList();
+        }
+
+        private static DBObjectCollection LineSimplify(List<Line> lines)
+        {
+            var results = ThLaneLineEngine.Explode(lines.ToCollection());
+            results = ThLaneLineMergeExtension.Merge(results);
+            return results;
+        }
+
+        public static Entity BufferEx(this Entity polygon, double distance)
+        {
+            var objs = new DBObjectCollection();
+            if (polygon is Polyline polyline)
+            {
+                objs = polyline.Buffer(distance * -1.0);
+            }
+            else if (polygon is MPolygon mPolyggon)
+            {
+                objs = mPolyggon.Buffer(distance * -1.0, true);
+            }
+
+            // 按面积从大到小排序
+            var res = objs.OfType<Entity>().Where(o =>
+            {
+                if (o is Polyline poly)
+                {
+                    return poly.Area > 1.0;
+                }
+                else if (o is MPolygon mPolyggon)
+                {
+                    return mPolyggon.Area > 1.0;
+                }
+                else
+                {
+                    return false;
+                }
+            }).OrderByDescending(o =>
+            {
+                if (o is Polyline poly)
+                {
+                    return poly.Area;
+                }
+                else
+                {
+                    return (o as MPolygon).Area;
+                }
+            });
+
+            return res.Count() > 0 ? res.First() : null;
+        }
+
+        public static DBObjectCollection Break(this DBObjectCollection wires, DBObjectCollection lights)
+        {
+            var results = new DBObjectCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lights);
+            wires.OfType<Line>().ForEach(e =>
+            {
+                var lines = Query(spatialIndex, e);
+                lines = lines.Where(l =>
+                ThGeometryTool.IsCollinearEx(e.StartPoint, e.EndPoint, l.StartPoint, l.EndPoint)).ToList();
+                var res = e.Difference(lines);
+                res.ForEach(l => results.Add(l));
+            });
+            return results;
+        }
+        private static List<Line> Query(ThCADCoreNTSSpatialIndex spatialIndex, Line line)
+        {
+            var poly = ThDrawTool.ToRectangle(line.StartPoint, line.EndPoint, 2.0);
+            var objs = spatialIndex.SelectCrossingPolygon(poly);
+            return objs.OfType<Line>().ToList();
+        }
+        public static List<Line> SelectCrossingEntities(this Polyline searchFrame,ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            var results = new List<Line>();
+            results.AddRange(spatialIndex.SelectCrossingPolygon(searchFrame).OfType<Line>());
+            results.AddRange(spatialIndex.SelectFence(searchFrame).OfType<Line>());
+            return results.Distinct().ToList();
         }
     }
 }

@@ -93,196 +93,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             SubLoopGet(ref visited, sprayIn, spraySystem);
             foreach (var branchLoop in spraySystem.BranchLoops)
             {
-                var alarmNums = 0;//支路数
-                var fireAreaNums = 0;//防火分区数
-
-                for (int i = 1; i < branchLoop.Count - 1; i++)
-                {
-
-                    var pt = branchLoop[i];
-
-                    if (sprayIn.PtTypeDic[branchLoop[i]].Contains("AlarmValve"))
-                    {
-                        alarmNums += 1;
-                        var termPts = new List<Point3dEx>();
-                        var valvePts = new List<Point3dEx>();
-                        var flowPts = new List<Point3dEx>();
-                        Queue<Point3dEx> q = new Queue<Point3dEx>();
-                        q.Enqueue(pt);
-                        HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
-                        visited.Add(pt);
-                        while (q.Count > 0)
-                        {
-                            var curPt = q.Dequeue();
-                            if (sprayIn.PtTypeDic.ContainsKey(curPt))
-                            {
-                                if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
-                                {
-                                    flowPts.Add(pt);
-                                }
-                            }
-                            if (sprayIn.ThroughPt.Contains(curPt))//当前点是楼层穿越点
-                            {
-                                termPts.Add(curPt);
-                                sprayIn.CurThroughPt.AddItem(curPt);
-                                continue;
-                            }
-                            var adjs = sprayIn.PtDic[curPt];
-                            if (adjs.Count == 1)
-                            {
-                                termPts.Add(curPt);
-                                continue;
-                            }
-
-                            foreach (var adj in adjs)
-                            {
-                                if (branchLoop.Contains(adj))
-                                    continue;
-
-                                if (visited2.Contains(adj))
-                                {
-                                    continue;
-                                }
-
-                                visited2.Add(adj);
-                                q.Enqueue(adj);
-                            }
-                        }
-                        if (termPts.Count != 0)
-                        {
-                            foreach (var tpt in termPts)
-                            {
-                                if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
-                                {
-                                    if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
-                                    {
-                                        fireAreaNums += 1;
-                                    }
-                                }
-                            }
-                            if (spraySystem.BranchDic.ContainsKey(pt))
-                            {
-                                continue;
-                            }
-                            spraySystem.BranchDic.Add(pt, termPts);
-
-                        }
-                    }
-                    else if (sprayIn.PtDic[branchLoop[i]].Count == 3)
-                    {
-                        var termPts = new List<Point3dEx>();
-                        var valvePts = new List<Point3dEx>();
-                        var flowPts = new List<Point3dEx>();
-                        Queue<Point3dEx> q = new Queue<Point3dEx>();
-                        q.Enqueue(pt);
-                        HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
-                        visited.Add(pt);
-                        while (q.Count > 0)
-                        {
-                            var curPt = q.Dequeue();
-                            if (sprayIn.PtTypeDic.ContainsKey(curPt))
-                            {
-                                if (sprayIn.PtTypeDic[curPt].Contains("Valve"))
-                                {
-                                    valvePts.Add(pt);
-                                }
-                                if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
-                                {
-                                    flowPts.Add(pt);
-                                }
-                            }
-                            if (sprayIn.ThroughPt.Contains(curPt))//当前点是楼层穿越点
-                            {
-                                termPts.Add(curPt);
-                                sprayIn.CurThroughPt.AddItem(curPt);
-                                continue;
-                            }
-                            var adjs = sprayIn.PtDic[curPt];
-                            if (adjs.Count == 1)
-                            {
-                                termPts.Add(curPt);
-                                continue;
-                            }
-
-                            foreach (var adj in adjs)
-                            {
-                                if (branchLoop.Contains(adj))
-                                    continue;
-
-                                if (visited2.Contains(adj))
-                                {
-                                    continue;
-                                }
-
-                                visited2.Add(adj);
-                                q.Enqueue(adj);
-                            }
-                        }
-                        if (spraySystem.BranchDic.ContainsKey(pt))
-                        {
-                            continue;
-                        }
-                        spraySystem.BranchDic.Add(pt, termPts);
-                    }
-                }
-
-                foreach (var spt in branchLoop)//每个支路起点
-                {
-                    if (sprayIn.PtDic[spt].Count == 3)
-                    {
-                        if (!spraySystem.BranchDic.ContainsKey(spt))
-                        {
-                            continue;
-                        }
-                        foreach (var ept in spraySystem.BranchDic[spt])//每个支路终点
-                        {
-                            var tempPath = new List<Point3dEx>();
-                            var visited2 = new HashSet<Point3dEx>();
-                            bool hasValve = false;
-                            bool hasFlow = false;
-                            var stopwatch = new Stopwatch();
-                            stopwatch.Start();
-                            bool flag = false;
-                            BranchDeal2.DfsBranch(spt, spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag);
-                            if (hasValve)
-                            {
-                                spraySystem.ValveDic.Add(ept);
-                            }
-                            if (hasFlow)
-                            {
-                                spraySystem.FlowDIc.Add(ept);
-                            }
-                        }
-                    }
-                }
-
+                BfsBranch(out int alarmNums, out int fireAreaNums, branchLoop, visited, sprayIn, spraySystem);
+                BfsBranchAcross(branchLoop, sprayIn, spraySystem);
 
                 foreach (var subLoop in spraySystem.SubLoops)
                 {
-                    if (subLoop.Contains(branchLoop.Last()))
-                    {
-                        if (spraySystem.SubLoopAlarmsDic.ContainsKey(subLoop.First()))
-                        {
-                            spraySystem.SubLoopAlarmsDic[subLoop.First()].Add(alarmNums);
-                            spraySystem.SubLoopFireAreasDic[subLoop.First()].Add(fireAreaNums);
-                        }
-                        else
-                        {
-                            spraySystem.SubLoopAlarmsDic.Add(subLoop.First(), new List<int>() { alarmNums });
-                            spraySystem.SubLoopFireAreasDic.Add(subLoop.First(), new List<int>() { fireAreaNums });
-                        }
-
-                        if (spraySystem.SubLoopAlarmsDic.ContainsKey(subLoop.Last()))
-                        {
-                            spraySystem.SubLoopAlarmsDic[subLoop.Last()].Add(alarmNums);
-                            spraySystem.SubLoopFireAreasDic[subLoop.Last()].Add(fireAreaNums);
-                        }
-                        else
-                        {
-                            spraySystem.SubLoopAlarmsDic.Add(subLoop.Last(), new List<int>() { alarmNums });
-                            spraySystem.SubLoopFireAreasDic.Add(subLoop.Last(), new List<int>() { fireAreaNums });
-                        }
-                    }
+                    SubLoopAdd(spraySystem, subLoop, branchLoop, alarmNums, fireAreaNums);
                 }
                 foreach (var branchLoopPt in branchLoop)
                 {
@@ -294,6 +110,155 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
             }
         }
+
+        public static void BfsBranch(out int alarmNums, out int fireAreaNums, List<Point3dEx> branchLoop, 
+            HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
+        {
+            alarmNums = 0;
+            fireAreaNums = 0;
+            for (int i = 1; i < branchLoop.Count - 1; i++)
+            {
+
+                var pt = branchLoop[i];
+
+                if (sprayIn.PtTypeDic[branchLoop[i]].Contains("AlarmValve"))
+                {
+                    bool hasFireArea = false;
+                    alarmNums += 1;
+                    var termPts = new List<Point3dEx>();
+                    var valvePts = new List<Point3dEx>();
+                    var flowPts = new List<Point3dEx>();
+                    Queue<Point3dEx> q = new Queue<Point3dEx>();
+                    q.Enqueue(pt);
+                    HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
+                    visited.Add(pt);
+                    while (q.Count > 0)
+                    {
+                        var curPt = q.Dequeue();
+                        if (sprayIn.PtTypeDic.ContainsKey(curPt))
+                        {
+                            if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
+                            {
+                                flowPts.Add(pt);
+                            }
+                        }
+                        if (sprayIn.ThroughPt.Contains(curPt))//当前点是楼层穿越点
+                        {
+                            termPts.Add(curPt);
+                            sprayIn.CurThroughPt.AddItem(curPt);
+                            continue;
+                        }
+                        var adjs = sprayIn.PtDic[curPt];
+                        if (adjs.Count == 1)
+                        {
+                            termPts.Add(curPt);
+                            continue;
+                        }
+
+                        foreach (var adj in adjs)
+                        {
+                            if (branchLoop.Contains(adj))
+                                continue;
+
+                            if (visited2.Contains(adj))
+                            {
+                                continue;
+                            }
+
+                            visited2.Add(adj);
+                            q.Enqueue(adj);
+                        }
+                    }
+                    if (termPts.Count != 0)
+                    {
+                        foreach (var tpt in termPts)
+                        {
+                            if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
+                            {
+                                if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
+                                {
+                                    hasFireArea = true;
+                                    fireAreaNums += 1;
+                                }
+                            }
+                        }
+                        if (!hasFireArea)
+                        {
+                            fireAreaNums += 1;
+                        }
+                        if (spraySystem.BranchDic.ContainsKey(pt))
+                        {
+                            continue;
+                        }
+                        spraySystem.BranchDic.Add(pt, termPts);
+
+                    }
+                }
+            }
+        }
+
+
+        public static void BfsBranchAcross(List<Point3dEx> branchLoop, SprayIn sprayIn, SpraySystem spraySystem)
+        {
+            foreach (var spt in branchLoop)//每个支路起点
+            {
+                if (sprayIn.PtDic[spt].Count == 3)
+                {
+                    if (!spraySystem.BranchDic.ContainsKey(spt))
+                    {
+                        continue;
+                    }
+                    foreach (var ept in spraySystem.BranchDic[spt])//每个支路终点
+                    {
+                        var tempPath = new List<Point3dEx>();
+                        var visited2 = new HashSet<Point3dEx>();
+                        bool hasValve = false;
+                        bool hasFlow = false;
+                        var stopwatch = new Stopwatch();
+                        stopwatch.Start();
+                        bool flag = false;
+                        BranchDeal2.DfsBranch(spt, spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag);
+                        if (hasValve)
+                        {
+                            spraySystem.ValveDic.Add(ept);
+                        }
+                        if (hasFlow)
+                        {
+                            spraySystem.FlowDIc.Add(ept);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void SubLoopAdd(SpraySystem spraySystem, List<Point3dEx> subLoop, List<Point3dEx> branchLoop, int alarmNums, int fireAreaNums)
+        {
+            if (subLoop.Contains(branchLoop.Last()))
+            {
+                if (spraySystem.SubLoopAlarmsDic.ContainsKey(subLoop.First()))
+                {
+                    spraySystem.SubLoopAlarmsDic[subLoop.First()].Add(alarmNums);
+                    spraySystem.SubLoopFireAreasDic[subLoop.First()].Add(fireAreaNums);
+                }
+                else
+                {
+                    spraySystem.SubLoopAlarmsDic.Add(subLoop.First(), new List<int>() { alarmNums });
+                    spraySystem.SubLoopFireAreasDic.Add(subLoop.First(), new List<int>() { fireAreaNums });
+                }
+
+                if (spraySystem.SubLoopAlarmsDic.ContainsKey(subLoop.Last()))
+                {
+                    spraySystem.SubLoopAlarmsDic[subLoop.Last()].Add(alarmNums);
+                    spraySystem.SubLoopFireAreasDic[subLoop.Last()].Add(fireAreaNums);
+                }
+                else
+                {
+                    spraySystem.SubLoopAlarmsDic.Add(subLoop.Last(), new List<int>() { alarmNums });
+                    spraySystem.SubLoopFireAreasDic.Add(subLoop.Last(), new List<int>() { fireAreaNums });
+                }
+            }
+        }
+
 
         public static void GetThrough(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {

@@ -6,6 +6,7 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -59,6 +60,10 @@ namespace ThMEPElectrical.BlockConvert
                 var srcBlockDataPosition = srcBlockData.GetNewBasePoint(true).TransformBy(srcBlockData.OwnerSpace2WCS);
                 var offset = targetBlockDataPosition.GetVectorTo(srcBlockDataPosition);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
+
+                // Z值归零
+                blockReference.ProjectOntoXYPlane();
+                targetBlockData.Position = blockReference.Position;
             }
         }
 
@@ -70,7 +75,7 @@ namespace ThMEPElectrical.BlockConvert
                 var position = srcBlockData.Position;
                 var rotation = srcBlockData.Rotation;
 
-                srcBlockData.OwnerSpace2WCS.Decompose(out _, out var rotate, out _, out _);
+                srcBlockData.OwnerSpace2WCS.Decompose(out _, out var rotate, out var mirror, out _);
 
                 if (srcBlockData.Normal == new Vector3d(0, 0, -1))
                 {
@@ -78,8 +83,23 @@ namespace ThMEPElectrical.BlockConvert
                 }
                 if (convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT].Equals(false))
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position)
-                        .PreMultiplyBy(rotate));
+                    if (mirror.Equals(Matrix3d.Identity))
+                    {
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position).PreMultiplyBy(rotate));
+                    }
+                    else
+                    {
+                        if (Math.Sign(rotate[0, 0]) == -1)
+                        {
+                            blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position).PreMultiplyBy(rotate));
+                            blockReference.TransformBy(Matrix3d.Rotation(-2* blockReference.Rotation, Vector3d.ZAxis, position));
+                        }
+                        else
+                        {
+                            blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position).PreMultiplyBy(rotate));
+                            blockReference.TransformBy(Matrix3d.Rotation(-2 * blockReference.Rotation, Vector3d.ZAxis, position));
+                        }
+                    }
                     targetBlockData.Position = blockReference.Position;
                 }
                 else
@@ -87,8 +107,7 @@ namespace ThMEPElectrical.BlockConvert
                     // rotation大于90度，小于270度
                     if (rotation > Math.PI / 2 && rotation < Math.PI * 3 / 2)
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position)
-                            .PostMultiplyBy(rotate));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position).PostMultiplyBy(rotate));
                         targetBlockData.Position = blockReference.Position;
                     }
                     else

@@ -338,7 +338,17 @@ namespace ThParkingStall.Core.MPartitionLayout
                     lane=lanes_split[0];
                     tlane_depth = lane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));
                     tlane_rec = PolyFromLines(lane, tlane_depth);
-
+                    var inside_cars= cars.Where(e => tlane_rec.Contains(e.Polyline.Envelope.Centroid)).Where(e => e.CarLayoutMode==((int)CarLayoutMode.PARALLEL)).ToList();
+                    if (inside_cars.Count > 0)
+                    {
+                        var inside_end_ps = new List<Coordinate>();
+                        inside_cars.ForEach(car => inside_end_ps.AddRange(car.Polyline.Coordinates));
+                        inside_end_ps= inside_end_ps.Select( p=> lane.ClosestPoint(p,false)).ToList();
+                        var inside_end_p = inside_end_ps.OrderBy(p => p.Distance(lane.P0)).First();
+                        lane = new LineSegment(lane.P0, inside_end_p);
+                        tlane_depth = lane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));
+                        tlane_rec = PolyFromLines(lane, tlane_depth);
+                    }
                     cars = cars.Where(e => !tlane_rec.Contains(e.Polyline.Envelope.Centroid)).ToList();
                     pillars = pillars.Where(e => !tlane_rec.Contains(e.Envelope.Centroid)).ToList();
                     var partitionpro = new MParkingPartitionPro();

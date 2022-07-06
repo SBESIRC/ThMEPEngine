@@ -42,6 +42,7 @@
     <Compile Include="Command\IndoorFanCheck.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
     <Compile Include="Command\IndoorFanPlace.cs" />
+    <Compile Include="Command\SmokeProofSystemCmd.cs" />
     <Compile Include="Command\ThHvacFanTypeSelectCmd.cs" />
     <Compile Include="Command\ThHvacIndoorFanExportCmd.cs" />
     <Compile Include="Common\PretreatmentPolyline.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="Service\ThAirSpeedCalculator.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
     <Compile Include="Service\ThMEPHAVCDataManager.cs" />
+    <Compile Include="Service\ThMepHAVCUtils.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
@@ -273,7 +275,6 @@
     <Compile Include="TCH\ThDrawTCHReducing.cs" />
     <Compile Include="TCH\ThDrawTCHSubSystemTypes.cs" />
     <Compile Include="TCH\ThDrawTCHTee.cs" />
-    <Compile Include="TCH\ThSQLiteHelper.cs" />
     <Compile Include="TCH\ThTCHCommonTables.cs" />
     <Compile Include="TCH\ThTCHDrawFactory.cs" />
     <Compile Include="TCH\ThTCHService.cs" />
@@ -282,8 +283,19 @@
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
+    <Compile Include="ThMEPHVACStaticService.cs" />
     <Compile Include="ThModelExtractionVisitor.cs" />
+    <Compile Include="ThSmokeProofSystemCmd.cs" />
     <Compile Include="ViewModel\AirPortParameterVM.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\EvacuationFrontViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\EvacuationWalkViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\FireElevatorFrontRoomViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\SeparateOrSharedNaturalViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\SeparateOrSharedWindViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\SmokeCalculateViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\StaircaseNoWindViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\StaircaseWindViewModel.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\ThSmokeProofMappingModel\SmokeCalculateMappingModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -309,6 +321,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPIO\ThMEPIO.csproj">
+      <Project>{81CA0ABB-8E13-4E53-99B6-56BAAF2F7BD9}</Project>
+      <Name>ThMEPIO</Name>
     </ProjectReference>
     <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
       <Project>{6fadc5fa-f54f-4742-bacd-9f1f855e8210}</Project>
@@ -363,22 +379,9 @@
     <PackageReference Include="QuikGraph">
       <Version>2.3.0</Version>
     </PackageReference>
-    <PackageReference Include="sqlite-net-pcl">
-      <Version>1.8.116</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.bundle_green">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.core">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3">
-      <Version>2.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl">
-      <Version>2.0.4</Version>
-    </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SmokeProofSystem\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

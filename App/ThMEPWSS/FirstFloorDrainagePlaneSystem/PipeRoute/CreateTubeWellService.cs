@@ -44,7 +44,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 tubeWellPts.Add(new KeyValuePair<VerticalPipeType, KeyValuePair<Point3d, Vector3d>>(routeLst.First().verticalPipeType, CalTubeWellPt(routeLst)));
             }
             Print(tubeWellPts);
-            usefulRoutes.ForEach(x => x.route = GeometryUtils.ShortenPolyline(x.route, shortedDis));
+            usefulRoutes.ForEach(x => x.route = GeometryUtils.ShortenPolyline(x.route, shortedDis * scale));
             usefulRoutes.AddRange(otherRoutes);
 
             return usefulRoutes;
@@ -74,7 +74,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
             var polyline = routes.First().route;
             var dir = (polyline.GetPoint3dAt(polyline.NumberOfVertices - 2) - polyline.GetPoint3dAt(polyline.NumberOfVertices - 1)).GetNormal();
-            pt = pt - Vector3d.YAxis * shortedDis;
+            pt = pt - Vector3d.YAxis * shortedDis * scale;
             return new KeyValuePair<Point3d, Vector3d>(pt, Vector3d.YAxis);
         }
 

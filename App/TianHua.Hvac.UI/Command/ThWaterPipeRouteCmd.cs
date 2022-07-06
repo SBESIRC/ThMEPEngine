@@ -26,7 +26,7 @@ namespace TianHua.Hvac.UI.Command
                 ImportLayer();
                 CreateLayer();
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.WaterPipeRoute);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+                Active.Document.SendStringToExecute("_Pline ", true, false, true);
             }
         }
 

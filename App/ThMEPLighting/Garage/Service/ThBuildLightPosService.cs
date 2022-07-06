@@ -25,6 +25,19 @@ namespace ThMEPLighting.Garage.Service
             ArrangeParameter = arrangeParameter;
             QueryLightBlockService = queryLightBlockService;
         }
+        public void Build()
+        {
+            Segments.ForEach(o =>
+            {
+                var splitParameter = new ThLineSplitParameter
+                {
+                    Segment = o,
+                    Margin = ArrangeParameter.Margin,
+                    Interval = ArrangeParameter.Interval,
+                };
+                BuildByCalculation(splitParameter);
+            });
+        }
         protected virtual void BuildByCalculation(ThLineSplitParameter splitParameter)
         {
             var installPoints = ThDistributeLightService.Distribute(splitParameter);
@@ -53,26 +66,6 @@ namespace ThMEPLighting.Garage.Service
                     }
                 }
             }
-        }
-        public void Build()
-        {
-            Segments.ForEach(o =>
-            {
-                var splitParameter = new ThLineSplitParameter
-                {
-                    Segment = o,
-                    Margin = ArrangeParameter.Margin,
-                    Interval = ArrangeParameter.Interval,
-                };
-                if (ArrangeParameter.AutoGenerate)
-                {
-                    BuildByCalculation(splitParameter);
-                }
-                else
-                {
-                    BuildByExtractFromCad(splitParameter);
-                }
-            });
         }
     }
 }

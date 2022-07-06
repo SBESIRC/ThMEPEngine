@@ -790,7 +790,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             var adjs = fireHydrantSysIn.PtDic[curPt];
                             if (adjs.Count == 1)
                             {
-                                termPts.Add(curPt);
+                                if(fireHydrantSysIn.TermPointDic.ContainsKey(curPt))
+                                {
+                                    termPts.Add(curPt);
+                                }
                                 continue;
                             }
 

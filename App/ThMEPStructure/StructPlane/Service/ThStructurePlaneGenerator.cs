@@ -61,6 +61,10 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     output = proc.StandardOutput.ReadToEnd();
                 }
+                else
+                {
+                    output = proc.StandardError.ReadToEnd();
+                }
             }
         }
         
@@ -80,13 +84,26 @@ namespace ThMEPStructure.StructPlane.Service
         {
             //svgFiles已经经过合理性检查
             //C: \Users\XXXX\AppData\Local\Temp\0407-1-Floor_1-Floor_2.svg
-            var ifcFileName = Config.IfcFileName.ToUpper();
             return svgFiles.OrderBy(o =>
             {
                 var fileName = Path.GetFileNameWithoutExtension(o);
-                var restStr = fileName.Substring(ifcFileName.Length + 1);
-                var strs = restStr.Split('-');
-                return int.Parse(strs[0].Trim());
+                var strs = fileName.Split('-');
+                if(strs.Length>3)
+                {
+                    var str = strs[strs.Length - 3];
+                    if(IsInteger(str))
+                    {
+                        return int.Parse(str.Trim());
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                else
+                {
+                    return -1;
+                }
             }).ToList();
         }
 
@@ -131,17 +148,12 @@ namespace ThMEPStructure.StructPlane.Service
                 return false;
             }
             // 1-Floor_1-Floor_2
-            var restStr = fileName.Substring(ifcFileName.Length+1);
-            var strs = restStr.Split('-');
-            if(strs.Length<2)
+            var strs = fileName.Split('-');
+            if(strs.Length<=3)
             {
                 return false;
-            }
-            if (!IsInteger(strs[0]))
-            {
-                return false;
-            }            
-            return true;
+            }  
+            return IsInteger(strs[strs.Length - 3]);
         }
         private bool IsInteger(string content)
         {

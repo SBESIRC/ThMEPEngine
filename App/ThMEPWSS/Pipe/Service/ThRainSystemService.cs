@@ -1,24 +1,16 @@
 namespace ThMEPWSS.ReleaseNs.RainSystemNs
 {
-    using TypeDescriptor = System.ComponentModel.TypeDescriptor;
     using System;
     using System.Linq;
     using System.Text;
-    using System.Reflection;
     using System.Collections.Generic;
-    using System.Windows.Forms;
-    using Autodesk.AutoCAD.EditorInput;
     using AcHelper;
     using Autodesk.AutoCAD.Geometry;
     using Linq2Acad;
     using ThMEPWSS.Pipe.Model;
-    using ThMEPWSS.Pipe.Engine;
     using Autodesk.AutoCAD.DatabaseServices;
-    using System.Diagnostics;
-    using Autodesk.AutoCAD.ApplicationServices;
     using Dreambuild.AutoCAD;
     using DotNetARX;
-    using Autodesk.AutoCAD.Internal;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.ExtensionsNs;
@@ -26,26 +18,11 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
     using ThMEPWSS.Pipe.Service;
     using NFox.Cad;
     using Autodesk.AutoCAD.Colors;
-    using System.Runtime.Remoting;
-    using System.IO;
-    using Autodesk.AutoCAD.Runtime;
-    using ThMEPWSS.Pipe;
-    using Newtonsoft.Json;
     using System.Text.RegularExpressions;
     using ThCADExtension;
-    using System.Collections;
-    using ThCADCore.NTS.IO;
-    using Newtonsoft.Json.Linq;
-    using ThMEPEngineCore.Engine;
     using NetTopologySuite.Geometries;
-    using NetTopologySuite.Operation.Linemerge;
-    using Microsoft.CSharp;
-    using System.CodeDom.Compiler;
-    using System.Linq.Expressions;
     using ThMEPEngineCore.Algorithm;
-    using ThMEPWSS.ReleaseNs;
     using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
-    using ThMEPWSS.Diagram.ViewModel;
     using ThMEPWSS.JsonExtensionsNs;
     using static ThMEPWSS.Assistant.DrawUtils;
     using static THRainService;
@@ -606,56 +583,56 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 if (lst.Count > THESAURUSSTAMPEDE) geoData.Groups.Add(lst);
             }
             foreach (var entity in adb.ModelSpace.OfType<Entity>())
+            {
+                if (entity is BlockReference br)
                 {
-                    if (entity is BlockReference br)
+                    if (!br.BlockTableRecord.IsValid) continue;
+                    var btr = adb.Blocks.Element(br.BlockTableRecord);
+                    var _fs = new List<KeyValuePair<Geometry, Action>>();
+                    Action f = null;
+                    try
                     {
-                        if (!br.BlockTableRecord.IsValid) continue;
-                        var btr = adb.Blocks.Element(br.BlockTableRecord);
-                        var _fs = new List<KeyValuePair<Geometry, Action>>();
-                        Action f = null;
-                        try
+                        isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
+                        handleBlockReference(br, Matrix3d.Identity, _fs);
+                    }
+                    finally
+                    {
+                        isInXref = INTRAVASCULARLY;
+                    }
+                    {
+                        var info = br.XClipInfo();
+                        if (info.IsValid)
                         {
-                            isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
-                            handleBlockReference(br, Matrix3d.Identity, _fs);
-                        }
-                        finally
-                        {
-                            isInXref = INTRAVASCULARLY;
-                        }
-                        {
-                            var info = br.XClipInfo();
-                            if (info.IsValid)
+                            info.TransformBy(br.BlockTransform);
+                            var gf = info.PreparedPolygon;
+                            foreach (var kv in _fs)
                             {
-                                info.TransformBy(br.BlockTransform);
-                                var gf = info.PreparedPolygon;
-                                foreach (var kv in _fs)
-                                {
-                                    if (gf.Intersects(kv.Key))
-                                    {
-                                        f += kv.Value;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                foreach (var kv in _fs)
+                                if (gf.Intersects(kv.Key))
                                 {
                                     f += kv.Value;
                                 }
                             }
-                            f?.Invoke();
                         }
-                    }
-                    else
-                    {
-                        var _fs = new List<KeyValuePair<Geometry, Action>>();
-                        handleEntity(entity, Matrix3d.Identity, _fs);
-                        foreach (var kv in _fs)
+                        else
                         {
-                            kv.Value();
+                            foreach (var kv in _fs)
+                            {
+                                f += kv.Value;
+                            }
                         }
+                        f?.Invoke();
                     }
                 }
+                else
+                {
+                    var _fs = new List<KeyValuePair<Geometry, Action>>();
+                    handleEntity(entity, Matrix3d.Identity, _fs);
+                    foreach (var kv in _fs)
+                    {
+                        kv.Value();
+                    }
+                }
+            }
         }
         List<GLineSegment> labelLines => geoData.LabelLines;
         List<GLineSegment> wLines => geoData.WLines;
@@ -1453,9 +1430,9 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             {
                 var dbObj = adb.Element<Entity>(objId);
                 if (dbObj is BlockReference b)
-                    {
-                        handleBlockReference(b, br.BlockTransform.PreMultiplyBy(matrix));
-                    }
+                {
+                    handleBlockReference(b, br.BlockTransform.PreMultiplyBy(matrix));
+                }
                 else
                 {
                     handleEntity(dbObj, br.BlockTransform.PreMultiplyBy(matrix));
@@ -4831,7 +4808,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                         }
                                                         {
                                                             var seg = new List<Vector2d> { new Vector2d(THESAURUSPLEASING, THESAURUSSTAMPEDE), new Vector2d(THESAURUSIMPOSING, THESAURUSSTAMPEDE) }.ToGLineSegments(p).Last();
-                                                            var pt1 = seg.StartPoint.ToPoint3d().OffsetXY(-CRYSTALLOGRAPHER,-COMPANIABLENESS);
+                                                            var pt1 = seg.StartPoint.ToPoint3d().OffsetXY(-CRYSTALLOGRAPHER, -COMPANIABLENESS);
                                                             var pt2 = pt1.OffsetX(THESAURUSSCINTILLATE);
                                                             var dim = new AlignedDimension();
                                                             dim.XLine1Point = pt1;

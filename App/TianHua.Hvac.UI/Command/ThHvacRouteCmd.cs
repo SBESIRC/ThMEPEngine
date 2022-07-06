@@ -26,7 +26,7 @@ namespace TianHua.Hvac.UI.Command
                 ImportLayer(); // 优先使用从模板中导入的图层
                 CreateLayer(); // 没有所需图层，则创建
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.HAVCRoute);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+                Active.Document.SendStringToExecute("_Pline ", true, false, true);
             }
         }
 

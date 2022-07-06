@@ -105,8 +105,11 @@
         public static string OutdoorRainWellBlockName = "重力流雨水井编号";     //室外雨水井块名
         //堵头
         public static string ReservedPlugBlockName = "清扫口系统";     //堵头块名
+        //地漏
+        public static string FloorDrainingBlockName = "地漏平面";           //地漏块名
+        public static string FloorDrainingLayerName = "W-DRAI-EQPM";        //地漏图层名
         //处理冷凝水管
-        public static string DisconnectionLayerName = "W-WSUP-EQPM";
+        public static string DisconnectionLayerName = "W-RAIN-EQPM";
         public static string DisconnectionBlockName = "断线";
         public static string RainwaterInletLayerName = "W-RAIN-EQPM";
         public static string RainwaterInletBlockName = "13#雨水口";

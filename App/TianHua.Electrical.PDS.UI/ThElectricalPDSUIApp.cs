@@ -48,19 +48,6 @@ namespace TianHua.Electrical.PDS.UI
 
             if (_PDSUI != null)
             {
-                // 初始化窗口位置
-                int w = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
-                int h = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
-                _PDSUI.Loaded += (s, e) =>
-                {
-                    _PDSUI.Width = w - 200;
-                    _PDSUI.Height = h - 200;
-                    if (_PDSUI.Width > 1300) _PDSUI.Width = 1300;
-                    if (_PDSUI.Height > 850) _PDSUI.Height = 850;
-                    _PDSUI.Left = (w - _PDSUI.Width) / 2;
-                    _PDSUI.Top = (h - _PDSUI.Height) / 2;
-                };
-
                 // 显示窗口
                 AcadApp.ShowModelessWindow(_PDSUI);
             }

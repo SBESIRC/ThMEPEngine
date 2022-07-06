@@ -16,6 +16,7 @@ using ThMEPStructure.ArchitecturePlane.Print;
 using ThMEPStructure.ArchitecturePlane.Service;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
+using DotNetARX;
 
 namespace ThMEPStructure
 {
@@ -217,6 +218,7 @@ namespace ThMEPStructure
                 if(printer!=null)
                 {
                     printer.Print(Active.Database);
+                    Active.Document.SendCommand("HatchToBack", "\n");
                 } 
             }
         }
@@ -224,7 +226,7 @@ namespace ThMEPStructure
         public void THSMUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ydb文件");
-            pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc";
+            pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc|Ifc files (*.get)|*.get";
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
@@ -257,7 +259,7 @@ namespace ThMEPStructure
         public void THAUTSC()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
-            pofo.Filter = "Ifc files (*.ifc)|*.ifc";
+            pofo.Filter = "Ifc files (*.ifc)|*.ifc|Ifc files (*.get)|*.get";     
             var pfnr = Active.Editor.GetFileNameForOpen(pofo);
             if (pfnr.Status == PromptStatus.OK)
             {
@@ -274,16 +276,24 @@ namespace ThMEPStructure
                 }
 
                 var drawingType = DrawingType.Unknown;
-                switch(result1.StringResult)
+                var eye_dir = new Direction();
+                var up = new Direction();
+                switch (result1.StringResult)
                 {
                     case "平面图":
                         drawingType = DrawingType.Plan;
+                        eye_dir = new Direction(0, 0, -1);
+                        up = new Direction(0, 1, 0);
                         break;
                     case "立面图":
                         drawingType = DrawingType.Elevation;
+                        eye_dir = new Direction(0, -1, 0);
+                        up = new Direction(0, 0, 1);
                         break;
                     case "剖面图":
                         drawingType = DrawingType.Section;
+                        eye_dir = new Direction(-1, 0, 0);
+                        up = new Direction(0, 0, 1);
                         break;
                     default:
                         break;
@@ -296,15 +306,18 @@ namespace ThMEPStructure
                     DrawingScale = "1:100",
                     DrawingType = drawingType,
                 };
+                config.JsonConfig.SvgConfig.image_size = null;
+                config.JsonConfig.GlobalConfig.eye_dir = eye_dir;
+                config.JsonConfig.GlobalConfig.up = up;
 
                 if (drawingType == DrawingType.Section)
                 {
-                    var ppo = new PromptDoubleOptions("\n请输入裁剪位置");
-                    ppo.AllowArbitraryInput = true;
-                    ppo.AllowNegative = true;
-                    ppo.AllowNone = false;
-                    ppo.AllowZero = true;
-                    var pdr = Active.Editor.GetDouble(ppo);
+                    var pio = new PromptIntegerOptions("\n请输入裁剪位置");
+                    pio.AllowArbitraryInput = true;
+                    pio.AllowNegative = true;
+                    pio.AllowNone = false;
+                    pio.AllowZero = true;
+                    var pdr = Active.Editor.GetInteger(pio);
                     if(pdr.Status == PromptStatus.OK)
                     {
                         config.JsonConfig.GlobalConfig.cut_position = pdr.Value;

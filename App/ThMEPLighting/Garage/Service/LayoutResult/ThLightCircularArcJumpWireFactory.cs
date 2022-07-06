@@ -1,13 +1,13 @@
 ﻿using System;
-using DotNetARX;
 using System.Linq;
+using System.Collections.Generic;
+using DotNetARX;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -44,33 +44,58 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Where(l => !DefaultNumbers.Contains(l.First.Number))
                 .Where(l => !l.OnLinkPath && l.Edges.Count > 0 && !l.IsCrossLink)
                 .ForEach(l => DrawCornerJumpWire(l));
+        }
 
-            // 绘制十字路口跳线
+        public void BuildStraitLinks()
+        {
+            // 绘制十字路口直连跳线
             LightNodeLinks
-                .Where(l => l.IsCrossLink)
-                .ForEach(l => DrawCrossJumpWire(l));
+                .ForEach(l => DrawStraitJumpWire(l));
+        }
+
+        public void BuildCrossAdjacentLinks()
+        {
+            // 绘制在同一段上
+            LightNodeLinks
+                .Where(l => l.OnLinkPath)
+                .ForEach(l => DrawAdjacentSamePathJumpWire(l));
         }
 
         private void DrawSamePathJumpWire(ThLightNodeLink lightNodeLink)
         {
-            // 获取跳接线的偏移方向
-            var firstLine = lightNodeLink.Edges.FirstOrDefault();
+            // 获取跳接线的偏移方向            
             var offsetDir = GetJumpWireDirection(lightNodeLink);
             if(!offsetDir.HasValue)
             {
                 return;
             }
+            DrawArc(lightNodeLink, offsetDir.Value);
+        }
+
+        private void DrawAdjacentSamePathJumpWire(ThLightNodeLink lightNodeLink)
+        {
+            // 获取跳接线的偏移方向
+            var offsetDir = GetAdjacentJumpWireDirection(lightNodeLink);
+            if (!offsetDir.HasValue)
+            {
+                return;
+            }
+            DrawArc(lightNodeLink, offsetDir.Value);
+        }
+
+        private void DrawArc(ThLightNodeLink lightNodeLink,Vector3d direction)
+        {
             var startEndPt = CalculateJumpStartEndPt(lightNodeLink);
             var startPt = startEndPt.Item1;
             var endPt = startEndPt.Item2;
-            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, offsetDir.Value);
+            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, direction);
             var radius = CalculateRadius(startPt.DistanceTo(endPt));
             var wire = ThArcDrawTool.DrawArc(startPt, endPt, radius, arcTopVec);
-            if (wire!=null)
+            if (wire != null)
             {
                 lightNodeLink.JumpWires.Add(wire);
             }
-        }        
+        }
 
         private void DrawCornerJumpWire(ThLightNodeLink lightNodeLink)
         {
@@ -174,8 +199,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }
             return results;
-        }
-        
+        }        
         private Vector3d GetOffsetDir(Polyline path,Polyline polygon)
         {
             var firstSegment = path.GetLineSegmentAt(0);
@@ -243,34 +267,58 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return cornerPoints;
         }
 
-        private void DrawCrossJumpWire(ThLightNodeLink lightNodeLink)
+        private void DrawStraitJumpWire(ThLightNodeLink lightNodeLink)
         {
-            var startEndPt = CalculateJumpStartEndPt(lightNodeLink);
-            var startPt = startEndPt.Item1;
-            var endPt = startEndPt.Item2;
-            var initOffsetDir = startPt.GetVectorTo(endPt).GetPerpendicularVector();
-            var shortRes = Shorten(startPt, endPt, LightLinkShortenDis);
-            var detectArc1 = DrawArc(shortRes.Item1, shortRes.Item2, initOffsetDir);
-            var detectArc2 = DrawArc(shortRes.Item1, shortRes.Item2, initOffsetDir.Negate());
-            if (CheckLightLinkConflictedSideLines(detectArc1, 1.0) == false)
+            var startPt = lightNodeLink.First.Position;
+            var endPt = lightNodeLink.Second.Position;
+            var direction = GetArcStraitDirection(lightNodeLink);
+            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, direction);
+            var radius = CalculateRadius(startPt.DistanceTo(endPt));
+            var wire = ThArcDrawTool.DrawArc(startPt, endPt, radius, arcTopVec);
+            if (wire != null)
             {
-                lightNodeLink.JumpWires.Add(DrawArc(startPt, endPt, initOffsetDir));
+                lightNodeLink.JumpWires.Add(wire);
             }
-            else if (CheckLightLinkConflictedSideLines(detectArc2, 1.0) == false)
+        }
+
+        private Vector3d GetArcStraitDirection(ThLightNodeLink link)
+        {
+            if (CenterSideDicts.Count==0)
             {
-                lightNodeLink.JumpWires.Add(DrawArc(startPt, endPt, initOffsetDir.Negate()));
-            }
-            else 
-            {
-                if(lightNodeLink.CrossIntersectionPt.HasValue)
+                if (link.Edges.Count == 2)
                 {
-                    lightNodeLink.JumpWires.AddRange(DrawLinkArcs(startPt, endPt, lightNodeLink.CrossIntersectionPt.Value));
+                    var firstDir = link.Edges[0].LineDirection();
+                    var secondDir = link.Edges[1].LineDirection();
+                    var firstExtent = link.First.Position + firstDir.GetPerpendicularVector().MultiplyBy(100);
+                    var secondExtent = link.Second.Position + secondDir.GetPerpendicularVector().MultiplyBy(100);
+                    var firstLine = new Line(link.First.Position, firstExtent);
+                    var secondLine = new Line(link.Second.Position, secondExtent);
+                    var pts = firstLine.IntersectWithEx(secondLine, Intersect.ExtendBoth);
+                    firstLine.Dispose();
+                    secondLine.Dispose();
+                    if(pts.Count>0)
+                    {
+                        return link.First.Position.GetVectorTo(pts[0]).GetNormal();
+                    }
+                }
+            }
+            else
+            {
+                var firstDir = GetJumpWireDirection(link.First.Position);
+                if (firstDir.HasValue)
+                {
+                    return firstDir.Value.Negate();
                 }
                 else
                 {
-                    lightNodeLink.JumpWires.Add(DrawArc(startPt, endPt, initOffsetDir));
+                    var secondDir = GetJumpWireDirection(link.Second.Position);
+                    if (secondDir.HasValue)
+                    {
+                        return secondDir.Value.Negate();
+                    }
                 }
             }
+            return link.First.Position.GetVectorTo(link.Second.Position).GetPerpendicularVector().GetNormal();
         }
 
         private List<Arc> DrawLinkArcs(Point3d start, Point3d end, Point3d initBrigePt)

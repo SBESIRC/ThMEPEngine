@@ -12,6 +12,7 @@ using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterWellPumpLayout.Command;
 using ThMEPWSS.WaterWellPumpLayout.Model;
 using ThMEPWSS.WaterWellPumpLayout.ViewModel;
+using ThMEPWSS.WaterWellPumpLayout.Service;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 using Autodesk.AutoCAD.Geometry;
 
@@ -71,49 +72,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var selectWellCmd = new ThSelectWaterWellCmd(IdentifyInfo);
             selectWellCmd.Execute();
             var wellList = selectWellCmd.WaterWellList;
-            foreach (var selectWell in wellList)
-            {
-                bool isHave = false;
-                foreach (var listWell in WaterWellList)
-                {
-                    if (selectWell.IsEqual(listWell))
-                    {
-                        isHave = true;
-                        listWell.PumpModel = selectWell.PumpModel;
-                        //listWell.IsHavePump = selectWell.IsHavePump;
-                        break;
-                    }
-                }
-                if (!isHave)
-                {
-                    WaterWellList.Add(selectWell);
-                }
-            }
 
-            var groups = new ObservableCollection<ThWaterWellConfigInfo>();
-            var tmpList = WaterWellList.Select(o => o).ToList();
-            while (tmpList.Count > 0)
-            {
-                var first = tmpList.First();
-                var sameTypes = tmpList.Where(o => o.IsSameType(first)).ToList();
+            UpdateWellList(wellList);
+            UpdateUIWellList();
 
-                ThWaterWellConfigInfo info = new ThWaterWellConfigInfo();
-                info.WellCount = sameTypes.Count;
-                info.WellArea = first.GetAcreage();
-                info.BlockName = first.EffName;
-                info.WellSize = first.GetWellSize();
-                if (first.PumpModel != null)
-                {
-                    info.PumpCount = first.PumpModel.VisibilityValue;
-                    info.PumpNumber = first.PumpModel.AttriValue;
-                }
-                info.WellModelList = sameTypes;
-                //info需要增加 泵数量 编号
-                sameTypes.ForEach(s => tmpList.Remove(s));
-                groups.Add(info);
-            }
-            //处理viewModel里面的数据
-            ViewModel.WellConfigInfo = groups;
         }
         public void HighlightWell()
         {
@@ -194,6 +156,71 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     tm.EraseTransient(w.WellObb, intCol);
                 });
             }
+        }
+
+        private void cbNotMergeDiffExRef_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateUIWellList();
+        }
+
+        private void UpdateWellList(List<ThWaterWellModel> wellList)
+        {
+            foreach (var selectWell in wellList)
+            {
+                bool isHave = false;
+                foreach (var listWell in WaterWellList)
+                {
+                    if (selectWell.IsEqual(listWell))
+                    {
+                        isHave = true;
+                        listWell.PumpModel = selectWell.PumpModel;
+                        listWell.FullName = selectWell.FullName;
+                        //listWell.IsHavePump = selectWell.IsHavePump;
+                        break;
+                    }
+                }
+                if (!isHave)
+                {
+                    WaterWellList.Add(selectWell);
+                }
+            }
+        }
+
+        private void UpdateUIWellList()
+        {
+            var notMergeDiffExRef = (bool)cbNotMergeDiffExRef.IsChecked;
+
+            var groups = new ObservableCollection<ThWaterWellConfigInfo>();
+
+            //var tmpList = WaterWellList.Select(o => o).ToList();
+            //while (tmpList.Count > 0)
+            //{
+            //    var first = tmpList.First();
+            //    var sameTypes = tmpList.Where(o => o.IsSameType(first, notMergeDiffExRef)).ToList();
+
+            //    ThWaterWellConfigInfo info = new ThWaterWellConfigInfo();
+            //    info.WellCount = sameTypes.Count;
+            //    info.WellArea = first.GetAcreage();
+            //    info.BlockName = first.EffName;
+            //    info.FullName = first.FullName;
+            //    info.WellSize = first.GetWellSize();
+            //    if (first.PumpModel != null)
+            //    {
+            //        info.PumpCount = first.PumpModel.VisibilityValue;
+            //        info.PumpNumber = first.PumpModel.AttriValue;
+            //    }
+            //    info.WellModelList = sameTypes;
+            //    //info需要增加 泵数量 编号
+            //    sameTypes.ForEach(s => tmpList.Remove(s));
+            //    groups.Add(info);
+            //}
+
+            var groupList = ThWaterWellPumpUtils.MergeWellList(WaterWellList, notMergeDiffExRef);
+           
+            groupList.ForEach(x => groups.Add(x));
+
+            //处理viewModel里面的数据
+            ViewModel.WellConfigInfo = groups;
         }
     }
 }

@@ -51,6 +51,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         public bool IsEuiqmentPipe = false;
 
         /// <summary>
+        /// 是否是地漏点位
+        /// </summary>
+        public bool IsFloorDrainPipe = false;
+
+        /// <summary>
         /// 立管类型
         /// </summary>
         public VerticalPipeType PipeType { get; set; }

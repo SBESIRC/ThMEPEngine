@@ -26,6 +26,11 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
+                if (pumpCount==0)
+                {
+                    return;
+                }
+
                 //获取插入的边
                 int edgeIndex = model.GetInstalEdge(pumpCount);
                 //获取插入水泵的角度

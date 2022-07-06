@@ -255,7 +255,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, firLine.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
                 }
-                var routeModel = new RouteModel(resConnectLine, type, connectPt, false);
+                var routeModel = new RouteModel(resConnectLine, type, connectPt, false, false);
                 routeModel.IsBranchPipe = true;
                 return routeModel;
             }
@@ -268,7 +268,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                      ? closetLine.StartPoint : closetLine.EndPoint;
                 resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, otherP.ToPoint2D(), 0, 0, 0);
             }
-            var route = new RouteModel(resConnectLine, type, connectPt, false);
+            var route = new RouteModel(resConnectLine, type, connectPt, false, false);
             route.IsBranchPipe = true;
             return route;
         }
@@ -288,7 +288,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var connectLine = new Polyline();
                 connectLine.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
                 connectLine.AddVertexAt(1, pipe.Position.ToPoint2D(), 0, 0, 0);
-                var route = new RouteModel(connectLine, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
+                var route = new RouteModel(connectLine, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe, pipe.IsFloorDrainPipe);
                 route.printCircle = pipe.PipeCircle;
                 route.IsBranchPipe = true;
                 resPolys.Add(route);

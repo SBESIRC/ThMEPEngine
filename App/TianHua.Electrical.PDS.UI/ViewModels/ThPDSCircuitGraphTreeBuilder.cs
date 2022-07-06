@@ -1,6 +1,5 @@
 ﻿using QuikGraph;
 using System.Linq;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.Services;
@@ -10,7 +9,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public class ThPDSCircuitGraphTreeBuilder
     {
-        public ThPDSCircuitGraphTreeModel Build(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
+        public static ThPDSCircuitGraphTreeModel Build(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             var lst = new ObservableCollection<ThPDSCircuitGraphTreeModel>();
             var root = new ThPDSCircuitGraphTreeModel()
@@ -32,16 +31,16 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     Name = rootNode.Value,
                     NodeUID = rootNode.Key.Load.LoadUID,
                     Parent = root,
-                    DataList =new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                    DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                 };
                 root.DataList.Add(m);
                 DFSSearch(m, rootNode.Key);
             }
 
-            void DFSSearch(ThPDSCircuitGraphTreeModel m,ThPDSProjectGraphNode node)
+            void DFSSearch(ThPDSCircuitGraphTreeModel m, ThPDSProjectGraphNode node)
             {
                 var edges = graph.OutEdges(node);
-                foreach (var nextNode in edges.ToDictionary(key=> key.Target,value => value.Target.LoadIdString()).OrderBy(o => o.Value))
+                foreach (var nextNode in edges.ToDictionary(key => key.Target, value => value.Target.LoadIdString()).OrderBy(o => o.Value))
                 {
                     var target = nextNode.Key;
                     if (target.Type == Model.PDSNodeType.DistributionBox)
@@ -56,7 +55,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                         m.DataList.Add(targetModel);
                         DFSSearch(targetModel, target);
                     }
-                    else if(target.Type == Model.PDSNodeType.VirtualLoad)
+                    else if (target.Type == Model.PDSNodeType.VirtualLoad)
                     {
                         var VirtualLoadEdges = graph.OutEdges(target);
                         foreach (var virtualLoadNextNode in VirtualLoadEdges.ToDictionary(key => key.Target, value => value.Target.LoadIdString()).OrderBy(o => o.Value))

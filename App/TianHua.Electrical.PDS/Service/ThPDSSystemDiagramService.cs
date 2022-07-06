@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
 using AcHelper;
 using Linq2Acad;
 using QuikGraph;
-using System.Linq;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module;
@@ -67,8 +69,8 @@ namespace TianHua.Electrical.PDS.Service
         private void Draw()
         {
             using (var docLock = Active.Document.LockDocument())
-            using (var activeDb = AcadDatabase.Active())
             using (var configDb = AcadDatabase.Open(ThCADCommon.PDSDiagramDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (var activeDb = AcadDatabase.Active())
             {
                 if (!ThPDSSelectPointService.TrySelectPoint(out var selectPoint, "\n选择图纸基点"))
                 {
@@ -91,9 +93,9 @@ namespace TianHua.Electrical.PDS.Service
                 var anotherStartPoint = new Point3d(basePoint.X + 36300 * scaleFactor, basePoint.Y, 0);
                 var residue = ThPDSCommon.INNER_TOLERANCE - 1000.0;
 
-                foreach (var thisNode in Graph.Vertices)
+                foreach (var thisNode in Nodes.Distinct())
                 {
-                    if (!Nodes.Contains(thisNode))
+                    if (!Graph.Vertices.Contains(thisNode))
                     {
                         continue;
                     }
@@ -188,8 +190,7 @@ namespace TianHua.Electrical.PDS.Service
                             var circuitData = new ThPDSControlCircuitData();
                             var controlEdges = ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o).GetSortedEdges().ToList();
                             circuitData.CircuitUID = controlEdges[0].Circuit.CircuitUID;
-                            var dataList = circuitDatas
-                                .Where(data => data.CircuitUID.Equals(circuitData.CircuitUID)).ToList();
+                            var dataList = circuitDatas.Where(data => data.CircuitUID.Equals(circuitData.CircuitUID)).ToList();
                             if (dataList.Count > 0)
                             {
                                 circuitData.BelongToCPS = dataList[0].BelongToCPS;
@@ -281,14 +282,14 @@ namespace TianHua.Electrical.PDS.Service
                     // 插入表尾
                     var tableTable = thisNode.Load.Phase == ThPDSPhase.一相
                         ? ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE : ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE;
-                    if (thisNode.Details.IsDualPower && thisNode.Details.LowPower > 0)
+                    if (thisNode.Details.LoadCalculationInfo.IsDualPower && thisNode.Details.LoadCalculationInfo.LowPower > 0)
                     {
                         var tailInLow = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
-                        assignment.TableTailAssign(activeDb, tailInLow, thisNode, tableObjs, thisNode.Details.LowPower);
+                        assignment.TableTailAssign(activeDb, tailInLow, thisNode, tableObjs, thisNode.Details.LoadCalculationInfo.LowPower);
                         basePoint = new Point3d(basePoint.X, basePoint.Y - 936.3333 * scaleFactor, 0);
                     }
                     var tailInHigh = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
-                    assignment.TableTailAssign(activeDb, tailInHigh, thisNode, tableObjs, thisNode.Details.HighPower);
+                    assignment.TableTailAssign(activeDb, tailInHigh, thisNode, tableObjs, thisNode.Details.LoadCalculationInfo.HighPower);
                     basePoint = new Point3d(basePoint.X, basePoint.Y - 936.3333 * scaleFactor, 0);
 
                     // 计算表身终点
@@ -372,7 +373,6 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     }
                 }
-                Active.Editor.Regen();
             }
         }
 
@@ -563,8 +563,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<List<ThPDSProjectGraphEdge>> MotorCircuitSort(List<ThPDSProjectGraphEdge> motorCircuit)
         {
-            var result = new List<List<ThPDSProjectGraphEdge>>();
-            result.Add(new List<ThPDSProjectGraphEdge>());
+            var result = new List<List<ThPDSProjectGraphEdge>>
+            {
+                new List<ThPDSProjectGraphEdge>(),
+            };
             result[0].Add(motorCircuit[0]);
             for (var i = 1; i < motorCircuit.Count; i++)
             {
@@ -598,8 +600,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<List<ThPDSProjectGraphEdge>> PrimarySpareSort(List<ThPDSProjectGraphEdge> motorCircuit)
         {
-            var result = new List<List<ThPDSProjectGraphEdge>>();
-            result.Add(new List<ThPDSProjectGraphEdge>());
+            var result = new List<List<ThPDSProjectGraphEdge>>
+            {
+                new List<ThPDSProjectGraphEdge>(),
+            };
             result[0].Add(motorCircuit[0]);
             for (var i = 1; i < motorCircuit.Count; i++)
             {
@@ -623,8 +627,10 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<List<ThPDSProjectGraphEdge>> DualPowerSort(List<ThPDSProjectGraphEdge> motorCircuit)
         {
-            var result = new List<List<ThPDSProjectGraphEdge>>();
-            result.Add(new List<ThPDSProjectGraphEdge>());
+            var result = new List<List<ThPDSProjectGraphEdge>>
+            {
+                new List<ThPDSProjectGraphEdge>(),
+            };
             result[0].Add(motorCircuit[0]);
             for (var i = 1; i < motorCircuit.Count; i++)
             {

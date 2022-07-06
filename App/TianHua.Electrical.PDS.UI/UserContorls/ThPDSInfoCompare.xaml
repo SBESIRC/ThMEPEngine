@@ -3,27 +3,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
-    xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
-    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-    xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter" mc:Ignorable="d" FontSize="14" Background="White" d:DesignHeight="1000" d:DesignWidth="1000">
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls" mc:Ignorable="d" Background="White" d:DesignHeight="1000" d:DesignWidth="1000">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter"></cvt:RadioUiValueConverter>
-            <cvt:VisibilityHiddenConverter x:Key="VisibilityConverter"></cvt:VisibilityHiddenConverter>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding ValidateCmd}">绘图标准校核</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CompareCmd}">对比平面信息</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CreateCmd}">创建非平面负载</cus:ImageButton>
-            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding UpdateCmd}">更新修改到平面</cus:ImageButton>
+            <Button Margin="3" Command="{Binding RefreshUICmd}">刷新界面</Button>
+            <Button Margin="3" Command="{Binding ValidateCmd}">绘图标准校核</Button>
+            <Button Margin="3" Command="{Binding CompareCmd}">对比平面信息</Button>
+            <Button Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</Button>
+            <Button Margin="3" Command="{Binding CreateCmd}">创建非平面负载</Button>
+            <Button Margin="3" Command="{Binding UpdateCmd}">更新修改到平面</Button>
         </StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -42,9 +39,9 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <cus:ImageButton Height="25" Grid.Row="0" Grid.Column="0" Command="{Binding ReadAndRegenCmd}" Margin="3" Style="{x:Null}">读取并新建项目</cus:ImageButton>
+                <Button Grid.Row="0" Grid.Column="0" Command="{Binding ReadAndRegenCmd}" Margin="3">读取并新建项目</Button>
                 <Border Grid.Row="1" Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                    <ListBox x:Name="lbx" Style="{x:Null}" ItemsSource="{Binding DataList}">
+                    <ListBox x:Name="lbx" ItemsSource="{Binding DataList}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -69,7 +66,7 @@
                         <hc:SearchBar Name="CircuitSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="CircuitDataGrid" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
+                        <DataGrid x:Name="CircuitDataGrid" AutoGenerateColumns="False" Style="{DynamicResource DataGrid.Small}" SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -78,27 +75,27 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="回路编号">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitId}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="回路类型">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitType}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="回路负载">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitLoad}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding CircuitId}" Header="回路编号">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Background" Value="{Binding Background}"></Setter>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding CircuitType}" Header="回路类型">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Background" Value="{Binding Background}"></Setter>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding CircuitLoad}" Header="回路负载">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Background" Value="{Binding Background}"></Setter>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                             <DataGrid.GroupStyle>
                                 <GroupStyle>
@@ -135,7 +132,7 @@
                         <hc:SearchBar Name="LoadSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="LoadDataGrid" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
+                        <DataGrid x:Name="LoadDataGrid" AutoGenerateColumns="False" Style="{DynamicResource DataGrid.Small}" SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -144,27 +141,27 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="负载编号">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadId}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="负载功率">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadPower}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="参照图纸">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Dwg}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding LoadId}" Header="负载编号">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Background" Value="{Binding Background}"></Setter>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn IsReadOnly="True" Width="130" Binding="{Binding LoadPower}" Header="负载功率">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Background" Value="{Binding Background}"></Setter>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Dwg}" Header="参照图纸">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Background" Value="{Binding Background}"></Setter>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                             <DataGrid.GroupStyle>
                                 <GroupStyle>

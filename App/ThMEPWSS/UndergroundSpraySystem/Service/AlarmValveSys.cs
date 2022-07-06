@@ -1,6 +1,5 @@
 ﻿using Linq2Acad;
 using System.Linq;
-using AcHelper;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPWSS.UndergroundSpraySystem.Model;
@@ -8,11 +7,6 @@ using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundSpraySystem.Method;
-using Autodesk.AutoCAD.EditorInput;
-using GeometryExtensions;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
-using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
-using System.Diagnostics;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
@@ -91,8 +85,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             StoreyLine.Get2(sprayOut, spraySystem, sprayIn);
             PipeLine.Split(sprayOut);
         }
-
-
-
     }
 }

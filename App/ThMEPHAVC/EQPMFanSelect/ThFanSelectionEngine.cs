@@ -21,17 +21,19 @@ namespace ThMEPHVAC.EQPMFanSelect
             var pr = Active.Editor.GetPoint("\n请输入插入点");
             if (pr.Status == PromptStatus.OK)
             {
+                var ucsXVector = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis;
+                var angle = Vector3d.XAxis.GetAngleTo(ucsXVector, Vector3d.ZAxis);
                 for (int i = 0; i < dataModel.ListVentQuan.Count; i++)
                 {
                     var number = dataModel.ListVentQuan[i];
                     // 以指定点作为起始点（UCS），沿着X轴方向间隔5000放置图块
                     var insertPt = pr.Value + Vector3d.XAxis * 5000 * i;
                     var position = insertPt.TransformBy(Active.Editor.UCS2WCS());
-                    InsertModel(dataModel, cFanModel, number, position);
+                    InsertModel(dataModel, cFanModel, number, position, angle);
                 }
             }
         }
-        public static ObjectId InsertModel(FanDataModel dataModel,FanDataModel cFanModel, int number, Point3d pt)
+        public static ObjectId InsertModel(FanDataModel dataModel,FanDataModel cFanModel, int number, Point3d pt,double rotation)
         {
             string blockName = BlockLayerName(dataModel, out string layerName);
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -41,7 +43,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 // 设置风机图块位置
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
                 blockRef.TransformBy(Matrix3d.Displacement(pt - objId.GetModelBasePoint()));
-
+                blockRef.Rotate(pt, rotation);
                 // 返回风机图块
                 return objId;
             }

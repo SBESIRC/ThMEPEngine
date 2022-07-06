@@ -1,13 +1,14 @@
 ﻿using System.IO;
 using System.Text;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Interface;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.IO.GeoJSON
 {
-    public class ThGeometryJsonWriter : GeoJsonWriter
+    public class ThGeometryJsonWriter : GeoJsonWriter, IThGeometryWriter
     {
         public string Write(List<ThGeometry> geos)
         {

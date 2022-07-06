@@ -70,7 +70,7 @@ namespace ThMEPStructure.Common
     internal class GlobalConfig
     {
         public string image_type { get; set; }
-        public double? cut_position { get; set; }
+        public int? cut_position { get; set; }
         public Direction eye_dir { get; set; }
         public Direction up { get; set; }
         public int scale_size { get; set; }
@@ -87,6 +87,15 @@ namespace ThMEPStructure.Common
         public int x { get; set; }
         public int y { get; set; }
         public int z { get; set; }
+        public Direction()
+        {
+        }
+        public Direction(int x,int y,int z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 }
 

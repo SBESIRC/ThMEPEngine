@@ -377,7 +377,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 }
                                 else
                                 {
-                                    GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn, pipeLength);
+                                    //GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn, pipeLength);
                                 }
                             }
 
@@ -404,6 +404,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             {
                                 GetBranchType3(pt, ref fireHydrantSysOut, stPt, branchDic[pt], ValveDic, fireHydrantSysIn, pipeLength);
                             }
+                        }
+                        else if(type1Nums==2)
+                        {
+                            GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn, pipeLength);
+                            GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][1], ValveDic, fireHydrantSysIn, pipeLength+1250);
+
                         }
                         else
                         {
@@ -651,7 +657,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt4 = pt1.OffsetX(pipeLength);
             double floorHeight = fireHydrantSysIn.FloorHeight;
             var pt5 = pt4.OffsetY(-floorHeight * 0.58);
-            var pt6 = pt1.OffsetY(-floorHeight * 0.58);
+            var pt6 = pt5.OffsetX(-800);
             var lineList = new List<Line>
             {
                 new Line(pt4, pt5),
@@ -887,9 +893,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 fireHydrantSysOut.LoopLine.Add(line);
             }
-            fireHydrantSysOut.PipeInterrupted.Add(pt5, Math.PI);
+            fireHydrantSysOut.PipeInterrupted.Add(pt5, Math.PI/2);
             var textLine1 = ThTextSet.ThTextLine(pt5, pt6);
-            var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textWidth - 50));
+            var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(-textWidth - 50));
 
             if (pipeNumber1 is not null)
             {

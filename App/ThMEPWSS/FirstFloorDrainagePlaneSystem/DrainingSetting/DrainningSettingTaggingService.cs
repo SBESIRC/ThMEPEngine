@@ -14,7 +14,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 {
     public class DrainningSettingTaggingService : DraningSettingService
     {
-        double moveLength = 1000;
+        double moveLength = 1500;
         public DrainningSettingTaggingService(List<RouteModel> _pipes, ThMEPOriginTransformer _originTransformer)
         {
             pipes = _pipes;

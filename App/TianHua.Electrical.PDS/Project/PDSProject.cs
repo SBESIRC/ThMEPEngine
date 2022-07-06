@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
@@ -27,9 +28,15 @@ namespace TianHua.Electrical.PDS.Project
 
         public ProjectGlobalConfiguration projectGlobalConfiguration;
 
+        public List<THPDSProjectSubstation> substations;
+
+        public THPDSSubstationMap substationMap;
+
         private bool InitializedState;
 
         public Action DataChanged;
+
+        public Action GlobalConfigurationChanged;
 
         /// <summary>
         /// 加载项目
@@ -39,21 +46,33 @@ namespace TianHua.Electrical.PDS.Project
         {
             if (!InitializedState)
             {
+                substations = new List<THPDSProjectSubstation>();
+                substationMap = new THPDSSubstationMap();
                 this.LoadGlobalConfig();
                 InitializedState = true;
             }
             if (string.IsNullOrEmpty(url))
             {
-                //Creat New Project
                 this.graphData = new ProjectGraph().CreatPDSProjectGraph();
                 PDSProjectExtend.CalculateProjectInfo();
-                this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
                 instance.DataChanged?.Invoke();
+                this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
+                instance.GlobalConfigurationChanged?.Invoke();
             }
             else
             {
                 PDSProjectManagement.ImportProject(url);
                 instance.DataChanged?.Invoke();
+                instance.GlobalConfigurationChanged?.Invoke();
+            }
+        }
+
+        public void LoadGlobalConfiguration(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                PDSProjectManagement.ImportGlobalConfiguration(url);
+                instance.GlobalConfigurationChanged?.Invoke();
             }
         }
     }

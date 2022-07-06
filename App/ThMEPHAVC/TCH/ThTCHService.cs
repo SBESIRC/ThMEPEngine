@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
@@ -14,9 +15,8 @@ namespace ThMEPHVAC.TCH
             return new Point3d((sp.X + ep.X) * 0.5, (sp.Y + ep.Y) * 0.5, 0);
         }
 
-        public static void RecordPortInfo(ThSQLiteHelper sqliteHelper, List<TCHInterfaceParam> interfaces)
+        public static void RecordPortInfo(THMEPSQLiteServices sqliteHelper, List<TCHInterfaceParam> interfaces)
         {
-            sqliteHelper.Conn();
             foreach (var p in interfaces)
             {
                 string recordInfo = $"INSERT INTO " + ThTCHCommonTables.interfaceTableName +
@@ -27,7 +27,7 @@ namespace ThMEPHVAC.TCH
                                          "'" + CovertVector(p.normalVector) + "'," +
                                          "'" + CovertVector(p.heighVector) + "'," +
                                          "'" + CovertPoint(p.centerPoint) + "')";
-                sqliteHelper.Query<TCHInterfaceParam>(recordInfo);
+                sqliteHelper.ExecuteNonQuery(recordInfo);
             }
             
         }

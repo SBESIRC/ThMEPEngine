@@ -28,10 +28,17 @@ namespace ThMEPStructure.Reinforcement.Service
         public List<List<EdgeComponentExtractInfo>> Group(List<EdgeComponentExtractInfo> infos)
         {
             var results = new List<List<EdgeComponentExtractInfo>>();
+            //results.AddRange(GroupNonStandards(infos.Where(o => !o.IsStandard).ToList()));
             results.AddRange(GroupStandards(infos.Where(o => o.IsStandard && !o.IsCalculation).ToList()));
             results.AddRange(GroupStandardCals(infos.Where(o => o.IsStandard && o.IsCalculation).ToList()));
             return results;
         }
+
+        private List<List<EdgeComponentExtractInfo>> GroupNonStandards(List<EdgeComponentExtractInfo> infos)
+        {
+            return GroupStandards(infos);
+        }
+
         private List<List<EdgeComponentExtractInfo>> GroupStandards(List<EdgeComponentExtractInfo> infos)
         {
             //分组规则

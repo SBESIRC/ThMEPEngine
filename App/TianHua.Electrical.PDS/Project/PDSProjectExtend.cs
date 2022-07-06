@@ -56,18 +56,21 @@ namespace TianHua.Electrical.PDS.Project
             }
             node.CalculateCircuitFormInType();
             var edges = _projectGraph.OutEdges(node).ToList();
+            if(edges.Count == 1)
+            {
+                edges[0].Target.Details.LoadCalculationInfo.HighDemandFactor = 1.0;
+            }
             edges.ForEach(e =>
             {
                 e.Target.CalculateProjectInfo(node.Type == PDSNodeType.VirtualLoad);
                 e.ComponentSelection();
             });
             edges.BalancedPhaseSequence();
-            node.Details.HighPower =Math.Max(node.Load.InstalledCapacity.HighPower, node.CalculateHighPower());
-            if(node.Details.IsDualPower)
+            node.Details.LoadCalculationInfo.HighPower =Math.Max(node.Load.InstalledCapacity.HighPower, node.CalculateHighPower());
+            if(node.Details.LoadCalculationInfo.IsDualPower)
             {
-                node.Details.LowPower = Math.Max(node.Load.InstalledCapacity.LowPower, node.CalculateLowPower());
+                node.Details.LoadCalculationInfo.LowPower = Math.Max(node.Load.InstalledCapacity.LowPower, node.CalculateLowPower());
             }
-            node.CalculateCurrent();
             node.ComponentSelection(edges, SuperiorNodeIsVirtualLoad);
             edges.CalculateSecondaryCircuit();
             node.Details.IsStatistical = true;
@@ -141,53 +144,6 @@ namespace TianHua.Electrical.PDS.Project
             edge.ComponentGlobalConfigurationCheck();
             //统计回路级联电流
             edge.Details.CascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
-        }
-
-        /// <summary>
-        /// 计算电流
-        /// </summary>
-        public static void CalculateCurrent(this ThPDSProjectGraphNode node)
-        {
-            //if单相/三相，因为还没有这部分的内容，所有默认所有都是三相
-            //单向：I_c=S_c/U_n =P_c/(cos⁡φ×U_n )=(P_n×K_d)/(cos⁡φ×U_n )
-            //三相：I_c=S_c/(√3 U_n )=P_c/(cos⁡φ×√3 U_n )=(P_n×K_d)/(cos⁡φ×√3 U_n )
-            var Phase = node.Load.Phase;
-            if (Phase != ThPDSPhase.一相 && Phase != ThPDSPhase.三相)
-            {
-                node.Load.CalculateCurrent = 0;
-            }
-            else
-            {
-                var DemandFactor = node.Load.DemandFactor;
-                var LastNode = _projectGraph.InEdges(node).FirstOrDefault();
-                if (LastNode.IsNull() || _projectGraph.OutDegree(LastNode.Source) == 1)
-                    DemandFactor = 1.0;
-                var PowerFactor = node.Load.PowerFactor;
-                var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
-                node.Load.CalculateCurrent = Math.Round(node.Details.HighPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
-            }
-        }
-
-        /// <summary>
-        /// 计算电流
-        /// </summary>
-        public static void CalculateCurrent(this MiniBusbar miniBusbar)
-        {
-            //if单相/三相，因为还没有这部分的内容，所有默认所有都是三相
-            //单向：I_c=S_c/U_n =P_c/(cos⁡φ×U_n )=(P_n×K_d)/(cos⁡φ×U_n )
-            //三相：I_c=S_c/(√3 U_n )=P_c/(cos⁡φ×√3 U_n )=(P_n×K_d)/(cos⁡φ×√3 U_n )
-            var Phase = miniBusbar.Phase;
-            if (Phase != ThPDSPhase.一相 && Phase != ThPDSPhase.三相)
-            {
-                miniBusbar.CalculateCurrent = 0;
-            }
-            else
-            {
-                var DemandFactor = miniBusbar.DemandFactor;
-                var PowerFactor = miniBusbar.PowerFactor;
-                var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
-                miniBusbar.CalculateCurrent = Math.Round(miniBusbar.Power * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
-            }
         }
 
         /// <summary>
@@ -520,12 +476,15 @@ namespace TianHua.Electrical.PDS.Project
             }
             else if (edge.Source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
-                edge.Target.Details.PhaseSequence = PhaseSequence.L;
                 //消防应急照明回路
+                edge.Target.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L;
+                if(edge.Target.Details.LoadCalculationInfo.HighPower < 1)
+                    edge.Target.Details.LoadCalculationInfo.HighPower = 1;
                 edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
             else if (edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ElectricalMeterPanel)
             {
+                var LeakageProtection = new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName);
                 switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType)
                 {
                     case MeterBoxCircuitType.上海住宅:
@@ -533,13 +492,18 @@ namespace TianHua.Electrical.PDS.Project
                             edge.Details.CircuitForm = specifyComponentFactory.GetShanghaiMTCircuit();
                             if (edge.Details.CircuitForm.IsNull())
                             {
-                                edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
+                                var circuit = new DistributionMetering_ShanghaiMTCircuit()
                                 {
                                     breaker2 = componentFactory.CreatBreaker(),
                                     meter = componentFactory.CreatMeterTransformer(),
                                     breaker1 = componentFactory.CreatBreaker(),
                                     Conductor = componentFactory.CreatConductor(),
                                 };
+                                if(LeakageProtection)
+                                {
+                                    circuit.breaker2.SetBreakerType(ComponentType.组合式RCD);
+                                }
+                                edge.Details.CircuitForm = circuit;
                             }
                             break;
                         }
@@ -548,33 +512,48 @@ namespace TianHua.Electrical.PDS.Project
                             edge.Details.CircuitForm = specifyComponentFactory.GetMTInFrontCircuit();
                             if (edge.Details.CircuitForm.IsNull())
                             {
-                                edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
+                                var circuit = new DistributionMetering_MTInFrontCircuit()
                                 {
                                     meter = componentFactory.CreatMeterTransformer(),
                                     breaker = componentFactory.CreatBreaker(),
                                     Conductor = componentFactory.CreatConductor(),
                                 };
+                                if (LeakageProtection)
+                                {
+                                    circuit.breaker.SetBreakerType(ComponentType.组合式RCD);
+                                }
+                                edge.Details.CircuitForm = circuit;
                             }
                             break;
                         }
                     case MeterBoxCircuitType.国标_表在断路器前:
                         {
-                            edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
+                            var circuit = new DistributionMetering_CTInFrontCircuit()
                             {
                                 meter = componentFactory.CreatMeterTransformer(),
                                 breaker = componentFactory.CreatBreaker(),
                                 Conductor = componentFactory.CreatConductor(),
                             };
+                            if (LeakageProtection)
+                            {
+                                circuit.breaker.SetBreakerType(ComponentType.组合式RCD);
+                            }
+                            edge.Details.CircuitForm = circuit;
                             break;
                         }
                     case MeterBoxCircuitType.国标_表在断路器后:
                         {
-                            edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
+                            var circuit = new DistributionMetering_CTInBehindCircuit()
                             {
                                 meter = componentFactory.CreatCurrentTransformer(),
                                 breaker = componentFactory.CreatBreaker(),
                                 Conductor = componentFactory.CreatConductor(),
                             };
+                            if (LeakageProtection)
+                            {
+                                circuit.breaker.SetBreakerType(ComponentType.组合式RCD);
+                            }
+                            edge.Details.CircuitForm = circuit;
                             break;
                         }
                     default:
@@ -613,7 +592,7 @@ namespace TianHua.Electrical.PDS.Project
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
                 if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
                 {
-                    if (edge.Target.Details.IsDualPower)
+                    if (edge.Target.Details.LoadCalculationInfo.IsDualPower)
                     {
                         edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
                     }
@@ -622,7 +601,7 @@ namespace TianHua.Electrical.PDS.Project
                         //消防
                         if (edge.Target.Load.FireLoad)
                         {
-                            if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                             {
                                 edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
                             }
@@ -646,7 +625,7 @@ namespace TianHua.Electrical.PDS.Project
                         }
                         else
                         {
-                            if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
                             {
                                 edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
                             }
@@ -672,7 +651,7 @@ namespace TianHua.Electrical.PDS.Project
                 }
                 else
                 {
-                    if (edge.Target.Details.IsDualPower)
+                    if (edge.Target.Details.LoadCalculationInfo.IsDualPower)
                     {
                         edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
                     }
@@ -681,7 +660,7 @@ namespace TianHua.Electrical.PDS.Project
                         //消防
                         if (edge.Target.Load.FireLoad)
                         {
-                            if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                             {
                                 edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
                             }
@@ -704,7 +683,7 @@ namespace TianHua.Electrical.PDS.Project
                         }
                         else
                         {
-                            if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower <PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
                             {
                                 edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
                             }
@@ -1002,42 +981,42 @@ namespace TianHua.Electrical.PDS.Project
             var edges = _projectGraph.OutEdges(source).ToList();
             if (source.Details.CircuitFormType?.CircuitFormType == CircuitFormInType.集中电源)
             {
-                return edges.Sum(o => o.Target.Details.HighPower);
+                return edges.Sum(o => o.Target.Details.LoadCalculationInfo.HighPower);
             }
             else if (source.Load.Phase == ThPDSPhase.一相)
             {
-                return edges.Sum(o => o.Target.Details.HighPower);
+                return edges.Sum(o => o.Target.Details.LoadCalculationInfo.HighPower);
             }
             double power = 0;
             double L1Power = 0, L2Power = 0, L3Power = 0;
             edges.ForEach(edge =>
             {
                 var node = edge.Target;
-                switch (node.Details.PhaseSequence)
+                switch (node.Details.LoadCalculationInfo.PhaseSequence)
                 {
                     case PhaseSequence.L1:
                         {
-                            L1Power += node.Details.HighPower;
+                            L1Power += node.Details.LoadCalculationInfo.HighPower;
                             break;
                         }
                     case PhaseSequence.L2:
                         {
-                            L2Power += node.Details.HighPower;
+                            L2Power += node.Details.LoadCalculationInfo.HighPower;
                             break;
                         }
                     case PhaseSequence.L3:
                         {
-                            L3Power += node.Details.HighPower;
+                            L3Power += node.Details.LoadCalculationInfo.HighPower;
                             break;
                         }
                     case PhaseSequence.L:
                         {
-                            L3Power += node.Details.HighPower;
+                            L3Power += node.Details.LoadCalculationInfo.HighPower;
                             break;
                         }
                     case PhaseSequence.L123:
                         {
-                            power += node.Details.HighPower;
+                            power += node.Details.LoadCalculationInfo.HighPower;
                             break;
                         }
                     default:
@@ -1051,45 +1030,45 @@ namespace TianHua.Electrical.PDS.Project
 
         public static double CalculateLowPower(this ThPDSProjectGraphNode source)
         {
-            if (!source.Details.IsDualPower)
+            if (!source.Details.LoadCalculationInfo.IsDualPower)
             {
                 return 0;
             }
             var edges = _projectGraph.OutEdges(source).ToList();
             if (source.Load.Phase == ThPDSPhase.一相)
             {
-                return edges.Sum(o => o.Target.Details.LowPower);
+                return edges.Sum(o => o.Target.Details.LoadCalculationInfo.LowPower);
             }
             double power = 0;
             double L1Power = 0, L2Power = 0, L3Power = 0;
             edges.ForEach(edge =>
             {
                 var node = edge.Target;
-                switch (node.Details.PhaseSequence)
+                switch (node.Details.LoadCalculationInfo.PhaseSequence)
                 {
                     case PhaseSequence.L1:
                         {
-                            L1Power += node.Details.LowPower;
+                            L1Power += node.Details.LoadCalculationInfo.LowPower;
                             break;
                         }
                     case PhaseSequence.L2:
                         {
-                            L2Power += node.Details.LowPower;
+                            L2Power += node.Details.LoadCalculationInfo.LowPower;
                             break;
                         }
                     case PhaseSequence.L3:
                         {
-                            L3Power += node.Details.LowPower;
+                            L3Power += node.Details.LoadCalculationInfo.LowPower;
                             break;
                         }
                     case PhaseSequence.L:
                         {
-                            L3Power += node.Details.LowPower;
+                            L3Power += node.Details.LoadCalculationInfo.LowPower;
                             break;
                         }
                     case PhaseSequence.L123:
                         {
-                            power += node.Details.LowPower;
+                            power += node.Details.LoadCalculationInfo.LowPower;
                             break;
                         }
                     default:
@@ -1111,11 +1090,11 @@ namespace TianHua.Electrical.PDS.Project
             }
             else
             {
-                if (edge.Target.Load.Phase == ThPDSPhase.一相 && edges.All(o => o.Target.Details.PhaseSequence == edge.Target.Details.PhaseSequence))
+                if (edge.Target.Load.Phase == ThPDSPhase.一相 && edges.All(o => o.Target.Details.LoadCalculationInfo.PhaseSequence == edge.Target.Details.LoadCalculationInfo.PhaseSequence))
                 {
-                    miniBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
+                    miniBusbar.PhaseSequence = edge.Target.Details.LoadCalculationInfo.PhaseSequence;
                     miniBusbar.Phase = ThPDSPhase.一相;
-                    return edges.Sum(o => o.Target.Details.HighPower);
+                    return edges.Sum(o => o.Target.Details.LoadCalculationInfo.HighPower);
                 }
                 else
                 {
@@ -1126,31 +1105,31 @@ namespace TianHua.Electrical.PDS.Project
                     edges.ForEach(e =>
                     {
                         var node = e.Target;
-                        switch (node.Details.PhaseSequence)
+                        switch (node.Details.LoadCalculationInfo.PhaseSequence)
                         {
                             case PhaseSequence.L1:
                                 {
-                                    L1Power += node.Details.HighPower;
+                                    L1Power += node.Details.LoadCalculationInfo.HighPower;
                                     break;
                                 }
                             case PhaseSequence.L2:
                                 {
-                                    L2Power += node.Details.HighPower;
+                                    L2Power += node.Details.LoadCalculationInfo.HighPower;
                                     break;
                                 }
                             case PhaseSequence.L3:
                                 {
-                                    L3Power += node.Details.HighPower;
+                                    L3Power += node.Details.LoadCalculationInfo.HighPower;
                                     break;
                                 }
                             case PhaseSequence.L:
                                 {
-                                    L3Power += node.Details.HighPower;
+                                    L3Power += node.Details.LoadCalculationInfo.HighPower;
                                     break;
                                 }
                             case PhaseSequence.L123:
                                 {
-                                    power += node.Details.HighPower;
+                                    power += node.Details.LoadCalculationInfo.HighPower;
                                     break;
                                 }
                             default:
@@ -1175,21 +1154,21 @@ namespace TianHua.Electrical.PDS.Project
             {
                 if (edge.Target.Load.Phase == ThPDSPhase.三相)
                 {
-                    edge.Target.Details.PhaseSequence = PhaseSequence.L123;
+                    edge.Target.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L123;
                 }
-                else if (edge.Target.Load.Phase == ThPDSPhase.一相 && edge.Target.Details.PhaseSequence != PhaseSequence.L)
+                else if (edge.Target.Load.Phase == ThPDSPhase.一相 && edge.Target.Details.LoadCalculationInfo.PhaseSequence != PhaseSequence.L)
                 {
                     onePhase.Add(edge.Target);
                 }
             }
-            var zeroNodes = onePhase.Where(o => o.Details.HighPower <= 0).ToList();
+            var zeroNodes = onePhase.Where(o => o.Details.LoadCalculationInfo.HighPower <= 0).ToList();
             for (int i = 0; i < zeroNodes.Count; i++)
             {
-                zeroNodes[i].Details.PhaseSequence = PhaseSequence.L1;
+                zeroNodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
                 if (++i < zeroNodes.Count)
-                    zeroNodes[i].Details.PhaseSequence = PhaseSequence.L2;
+                    zeroNodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2;
                 if (++i < zeroNodes.Count)
-                    zeroNodes[i].Details.PhaseSequence = PhaseSequence.L3;
+                    zeroNodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3;
             }
             onePhase = onePhase.Except(zeroNodes).ToList();
             if (onePhase.Count > 0)
@@ -1201,48 +1180,59 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void BalancedPhaseSequence(this List<ThPDSProjectGraphNode> nodes)
         {
-            if (nodes.Count == 1)
+            if(nodes.All(o => o.Details.LoadCalculationInfo.HighPower == nodes[0].Details.LoadCalculationInfo.HighPower))
             {
-                nodes[0].Details.PhaseSequence = PhaseSequence.L1;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    nodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
+                    if (++i < nodes.Count)
+                        nodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2;
+                    if (++i < nodes.Count)
+                        nodes[i].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3;
+                }
+            }
+            else if (nodes.Count == 1)
+            {
+                nodes[0].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
             }
             else if (nodes.Count == 2)
             {
-                nodes[0].Details.PhaseSequence = PhaseSequence.L1;
-                nodes[1].Details.PhaseSequence = PhaseSequence.L2;
+                nodes[0].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
+                nodes[1].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2;
             }
             else if (nodes.Count == 3)
             {
-                nodes[0].Details.PhaseSequence = PhaseSequence.L1;
-                nodes[1].Details.PhaseSequence = PhaseSequence.L2;
-                nodes[2].Details.PhaseSequence = PhaseSequence.L3;
+                nodes[0].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1;
+                nodes[1].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2;
+                nodes[2].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3;
             }
             else
             {
-                var powerSum = nodes.Sum(x => x.Details.HighPower);
+                var powerSum = nodes.Sum(x => x.Details.LoadCalculationInfo.HighPower);
                 var averagePower = powerSum/3;
-                var HighPowerNodes = nodes.Where(o => o.Details.HighPower > averagePower).ToList();
+                var HighPowerNodes = nodes.Where(o => o.Details.LoadCalculationInfo.HighPower > averagePower).ToList();
                 if (HighPowerNodes.Count == 2)
                 {
-                    HighPowerNodes[0].Details.PhaseSequence = PhaseSequence.L2;
-                    HighPowerNodes[1].Details.PhaseSequence = PhaseSequence.L3;
-                    nodes.Except(HighPowerNodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
+                    HighPowerNodes[0].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2;
+                    HighPowerNodes[1].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3;
+                    nodes.Except(HighPowerNodes).ForEach(o => o.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1);
                 }
                 else if (HighPowerNodes.Count == 1)
                 {
-                    HighPowerNodes[0].Details.PhaseSequence = PhaseSequence.L3;
+                    HighPowerNodes[0].Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3;
                     nodes.Remove(HighPowerNodes[0]);
                     var L1Nodes = nodes.ChoisePhaseSequence(averagePower);
-                    L1Nodes.ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
-                    nodes.Except(L1Nodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L2);
+                    L1Nodes.ForEach(o => o.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1);
+                    nodes.Except(L1Nodes).ForEach(o => o.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2);
                 }
                 else
                 {
                     var L1Nodes = nodes.ChoisePhaseSequence(averagePower);
-                    L1Nodes.ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
+                    L1Nodes.ForEach(o => o.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L1);
                     var L23 = nodes.Except(L1Nodes).ToList();
                     var L2Nodes = L23.ChoisePhaseSequence(averagePower);
-                    L2Nodes.ForEach(o => o.Details.PhaseSequence = PhaseSequence.L2);
-                    L23.Except(L2Nodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L3);
+                    L2Nodes.ForEach(o => o.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L2);
+                    L23.Except(L2Nodes).ForEach(o => o.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L3);
                 }
             }
         }
@@ -1263,7 +1253,7 @@ namespace TianHua.Electrical.PDS.Project
             int[] vs = new int[nodes.Count];
             for (int i = 0; i < vs.Length; i++)
             {
-                vs[i] = (int)Math.Ceiling(nodes[i].Details.HighPower/multiple);
+                vs[i] = (int)Math.Ceiling(nodes[i].Details.LoadCalculationInfo.HighPower/multiple);
             }
             var capacity = (int)(target_int/multiple);
             int[,] dp = new int[nodes.Count + 1, capacity + 1];
@@ -1310,10 +1300,9 @@ namespace TianHua.Electrical.PDS.Project
             var edges = _projectGraph.OutEdges(node).ToList();
             if (IsPhaseSequenceChange)
             {
-                node.Details.HighPower = node.CalculateHighPower();
-                node.Details.LowPower =Math.Max(node.Details.LowPower, node.CalculateLowPower());
+                node.Details.LoadCalculationInfo.HighPower = node.CalculateHighPower();
+                node.Details.LoadCalculationInfo.LowPower =Math.Max(node.Details.LoadCalculationInfo.LowPower, node.CalculateLowPower());
             }
-            node.CalculateCurrent();
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
@@ -1337,8 +1326,6 @@ namespace TianHua.Electrical.PDS.Project
             {
                 miniBusbar.Power = node.CalculatePower(miniBusbar);
             }
-            miniBusbar.CalculateCurrent();
-
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             node.ComponentCheck(miniBusbar, CascadeCurrent);
@@ -1355,12 +1342,11 @@ namespace TianHua.Electrical.PDS.Project
         public static void CheckWithNode(this ThPDSProjectGraphNode node)
         {
             var edges = _projectGraph.OutEdges(node).ToList();
-            node.Details.HighPower = Math.Max(node.Details.HighPower, node.CalculateHighPower());
-            if (node.Details.IsDualPower)
+            node.Details.LoadCalculationInfo.HighPower = Math.Max(node.Details.LoadCalculationInfo.HighPower, node.CalculateHighPower());
+            if (node.Details.LoadCalculationInfo.IsDualPower)
             {
-                node.Details.LowPower =Math.Max(node.Details.LowPower, node.CalculateLowPower());
+                node.Details.LoadCalculationInfo.LowPower =Math.Max(node.Details.LoadCalculationInfo.LowPower, node.CalculateLowPower());
             }
-            node.CalculateCurrent();
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
@@ -1386,7 +1372,6 @@ namespace TianHua.Electrical.PDS.Project
         {
             var edges = node.Details.MiniBusbars[miniBusbar];
             miniBusbar.Power = Math.Max(miniBusbar.Power, node.CalculatePower(miniBusbar));
-            miniBusbar.CalculateCurrent();
 
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
@@ -1457,7 +1442,6 @@ namespace TianHua.Electrical.PDS.Project
         {
             var edges = node.Details.MiniBusbars[miniBusbar];
             miniBusbar.Power = Math.Max(miniBusbar.Power, node.CalculatePower(miniBusbar));
-            miniBusbar.CalculateCurrent();
 
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
@@ -2258,7 +2242,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     if(edge.Target.Load.FireLoad)
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                         {
                             edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
                         }
@@ -2269,7 +2253,7 @@ namespace TianHua.Electrical.PDS.Project
                     }
                     else
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
                         {
                             edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
                         }
@@ -2283,7 +2267,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     if (edge.Target.Load.FireLoad)
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                         {
                             edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
                         }
@@ -2294,7 +2278,7 @@ namespace TianHua.Electrical.PDS.Project
                     }
                     else
                     {
-                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        if (edge.Target.Details.LoadCalculationInfo.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
                         {
                             edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
                         }
@@ -2348,21 +2332,33 @@ namespace TianHua.Electrical.PDS.Project
             {
                 var breaker = componentFactory.CreatBreaker();
                 regularCircuit.breaker = regularCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                regularCircuit.Conductor = regularCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is LeakageCircuit leakageCircuit)
             {
                 var breaker = componentFactory.CreatResidualCurrentBreaker();
                 leakageCircuit.breaker = leakageCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                leakageCircuit.Conductor = leakageCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is ContactorControlCircuit contactorControlCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 contactorControlCircuit.breaker = contactorControlCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                contactorControlCircuit.Conductor = contactorControlCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is ThermalRelayProtectionCircuit thermalRelayCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 thermalRelayCircuit.breaker = thermalRelayCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                thermalRelayCircuit.Conductor = thermalRelayCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
             {
@@ -2371,6 +2367,9 @@ namespace TianHua.Electrical.PDS.Project
 
                 var breaker1 = componentFactory.CreatBreaker();
                 shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
+
+                var conductor = componentFactory.CreatConductor();
+                shanghaiCTCircuit.Conductor = shanghaiCTCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
             {
@@ -2379,29 +2378,45 @@ namespace TianHua.Electrical.PDS.Project
 
                 var breaker1 = componentFactory.CreatBreaker();
                 shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
+
+                var conductor = componentFactory.CreatConductor();
+                shanghaiMTCircuit.Conductor = shanghaiMTCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_CTInFrontCircuit CTInFrontCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 CTInFrontCircuit.breaker = CTInFrontCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                CTInFrontCircuit.Conductor = CTInFrontCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_MTInFrontCircuit MTInFrontCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 MTInFrontCircuit.breaker = MTInFrontCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                MTInFrontCircuit.Conductor = MTInFrontCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_CTInBehindCircuit CTInBehindCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 CTInBehindCircuit.breaker = CTInBehindCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                CTInBehindCircuit.Conductor = CTInBehindCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is DistributionMetering_MTInBehindCircuit MTInBehindCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 MTInBehindCircuit.breaker = MTInBehindCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                MTInBehindCircuit.Conductor = MTInBehindCircuit.Conductor.ComponentChange(conductor);
             }
             else if (edge.Details.CircuitForm is FireEmergencyLighting fireEmergencyLighting)
             {
+                edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
             else if (edge.Details.CircuitForm is Motor_DiscreteComponentsCircuit)
             {

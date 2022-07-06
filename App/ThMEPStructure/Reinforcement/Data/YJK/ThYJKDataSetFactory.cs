@@ -12,6 +12,7 @@ using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.Reinforcement.Data.YJK
 {
@@ -57,13 +58,21 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             // 获取数据
             var wallColumns = GetWallColumns(database, collection); // 墙柱
             var walls = GetWalls(database, collection); // 墙
+            var leaderMarks = GetLeaderMarks(database, collection); // 引线标注<MarkLines,MarkTexts>
+
+            // 移动到近似原点            
+            var center = collection.Envelope().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
+            transformer.Transform(wallColumns);
+            transformer.Transform(walls);
+            leaderMarks.Item1.ForEach(o => transformer.Transform(o.Value));
+            leaderMarks.Item2.ForEach(o => transformer.Transform(o.Value));
 
             // 用墙柱对墙线进行裁剪
             var bufferWallColumns = Buffer(wallColumns, ThReinforcementUtils.WallColumnBufferLength);
             var clipWalls = Clip(bufferWallColumns, walls);
             var wallLines = clipWalls.ExplodeLines();
-            var leaderMarks = GetLeaderMarks(database, collection); // 引线标注<MarkLines,MarkTexts>
-
+            
             // 识别墙柱轮廓、规格
             var markFindService = new ThEdgeComponentMarkFindService(leaderMarks.Item1, leaderMarks.Item2);
             foreach(var edgeComponent in wallColumns.OfType<Polyline>())
@@ -92,6 +101,9 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             leaderObjs.DisposeEx();
             var restWallColumns = wallColumns.Difference(Results.Select(o=>o.EdgeComponent).ToCollection());
             restWallColumns.DisposeEx();
+
+            // 还原到近似原点
+            transformer.Reset(wallColumns);
         }
 
         private void GetOutlineSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf,DBObjectCollection walls)

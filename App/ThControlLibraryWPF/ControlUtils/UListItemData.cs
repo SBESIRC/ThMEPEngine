@@ -11,6 +11,7 @@ namespace ThControlLibraryWPF.ControlUtils
         private int _value = 0;
         private object _tag;
         private Type _type;
+        public UListItemData() { }
         public UListItemData(string name, int value)
         {
             _value = value;
@@ -44,9 +45,9 @@ namespace ThControlLibraryWPF.ControlUtils
             //#endif
         }
 
-        public string Name { get { return this._name; } }
-        public int Value { get { return this._value; } }
-        public object Tag { get { return this._tag; } }
-        public Type EnumType { get { return this._type; } }
+        public string Name { get { return this._name; } set { this._name = value; } }
+        public int Value { get { return this._value; } set { this._value = value; } }
+        public object Tag { get { return this._tag; } set { this._tag = value; } }
+        public Type EnumType { get { return this._type; } set { this._type = value; } }
     }
 }

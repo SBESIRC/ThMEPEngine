@@ -16,11 +16,7 @@ namespace ThMEPEngineCore.IO.SVG
     {
         public static ThGeometry CreateThGeometry(this Entity boundary, Dictionary<string, object> properties)
         {
-            return new ThGeometry()
-            {
-                Boundary = boundary,
-                Properties = properties,
-            };
+            return ThGeometry.Create(boundary, properties);
         }
         public static ThFloorInfo ParseFloorInfo(this SvgCustomAttributeCollection svgCustomAttributes)
         {
@@ -29,28 +25,44 @@ namespace ThMEPEngineCore.IO.SVG
                 return null;
             }
             var floorInfo = new ThFloorInfo();
+            bool hasFLOORNAME = false, hasFLOORNO = false, hasSTDFLRNO=false, hasBOTTOMELEVATION=false, hasELEVATION=false;
             foreach (var item in svgCustomAttributes)
             {
                 switch (item.Key.ToUpper())
                 {
                     case "FLOORNAME":
+                        hasFLOORNAME = true;
                         floorInfo.FloorName = item.Value;
                         break;
                     case "FLOORNO":
+                        hasFLOORNO = true;
                         floorInfo.FloorNo = item.Value;
                         break;
                     case "STDFLRNO":
+                        hasSTDFLRNO = true;
                         floorInfo.StdFlrNo = item.Value;
                         break;
                     case "BOTTOM_ELEVATION":
+                        hasBOTTOMELEVATION = true;
                         floorInfo.Bottom_elevation = item.Value;
                         break;
                     case "ELEVATION": // 存放的是楼层高度
+                        hasELEVATION = true;
                         floorInfo.Height = item.Value;
+                        break;
+                    case "DESCRIPTION": // 存放的是楼层高度
+                        floorInfo.Description = item.Value;
                         break;
                 }
             }
-            return floorInfo;
+            if(hasFLOORNAME && hasFLOORNO && hasSTDFLRNO && hasBOTTOMELEVATION && hasELEVATION)
+            {
+                return floorInfo;
+            }
+            else
+            {
+                return null;
+            }
         }
         
         public static ThComponentInfo ParseComponentInfo(this SvgCustomAttributeCollection svgCustomAttributes)

@@ -46,7 +46,34 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return (string)value;
             }
-        }       
+        }
+
+        public static string GetDescription(this Dictionary<string, object> properties)
+        {
+            var value = properties.GetPropertyValue(ThSvgPropertyNameManager.DescriptionPropertyName);
+            if (value == null)
+            {
+                return "";
+            }
+            else
+            {
+                return (string)value;
+            }
+        }
+
+        public static string GetDirection(this Dictionary<string, object> properties)
+        {
+            var value = properties.GetPropertyValue(ThSvgPropertyNameManager.DirPropertyName);
+            if (value == null)
+            {
+                return "";
+            }
+            else
+            {
+                return (string)value;
+            }
+        }
+
         public static double GetFloorHeight(this Dictionary<string, string> properties)
         {
             if (properties.ContainsKey(ThSvgPropertyNameManager.FloorElevationPropertyName))
@@ -203,6 +230,34 @@ namespace ThMEPStructure.StructPlane.Service
                 }
             }
             return result;
+        }
+        public static Vector3d ToVector(this string vecContent)
+        {
+            if (string.IsNullOrEmpty(vecContent))
+            {
+                return new Vector3d();
+            }
+            else
+            {
+                var values = vecContent.Split(',');
+                if (values.Length == 2)
+                {
+                    double value1 = 0.0, value2 = 0.0;
+                    if (double.TryParse(values[0], out value1) &&
+                       double.TryParse(values[1], out value2))
+                    {
+                        return new Vector3d(value1, value2, 0);
+                    }
+                    else
+                    {
+                        return new Vector3d();
+                    }
+                }
+                else
+                {
+                    return new Vector3d();
+                }
+            }
         }
     }
 }

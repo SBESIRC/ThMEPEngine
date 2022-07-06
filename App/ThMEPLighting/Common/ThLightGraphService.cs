@@ -15,7 +15,7 @@ namespace ThMEPLighting.Common
         /// 用传入的线创建的边
         /// 遍历完后某些边可能是未被遍历过的
         /// </summary>
-        private List<ThLightEdge> Edges { get; set; }
+        protected List<ThLightEdge> Edges { get; set; }
         protected ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         public List<ThLinkPath> Links { get; set; }
         /// <summary>
@@ -36,7 +36,7 @@ namespace ThMEPLighting.Common
             }
         }
 
-        protected ThLightGraphService(List<ThLightEdge> edges, Point3d start)
+        public ThLightGraphService(List<ThLightEdge> edges, Point3d start)
         {
             Edges = edges;
             Start = start;

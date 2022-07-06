@@ -386,4 +386,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         [Description("潜水泵电动机")]
         Pump = 17,
     }
+
+    /// <summary>
+    /// 负荷等级
+    /// </summary>
+    public enum LoadCalculationGrade
+    {
+        一级,
+        二级,
+        三级,
+    }
 }

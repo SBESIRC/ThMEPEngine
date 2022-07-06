@@ -51,6 +51,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
     using System.IO;
     using System.Collections;
     using System.Reflection;
+    using GeometryExtensions;
     public class FireHydrantSystem
     {
         public Dictionary<Point3dEx, List<Point3dEx>> BranchDic;
@@ -1325,6 +1326,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
                                             t.Layer = LeaderLayer;
                                             t.WidthFactor = THESAURUSDISPASSIONATE;
+                                            t.TransformBy(Active.Editor.UCS2WCS());
                                             ByLayer(t);
                                             DrawingQueue.Enqueue(adb =>
                                             {
@@ -1333,11 +1335,13 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             {
                                                 var e = DrawLineSegmentLazy(labelline1);
                                                 e.Layer = LeaderLayer;
+                                                e.TransformBy(Active.Editor.UCS2WCS());
                                                 ByLayer(e);
                                             }
                                             {
                                                 var e = DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom));
                                                 e.Layer = LeaderLayer;
+                                                e.TransformBy(Active.Editor.UCS2WCS());
                                                 ByLayer(e);
                                             }
                                             addsankaku(rpl);

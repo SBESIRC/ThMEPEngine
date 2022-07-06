@@ -1,5 +1,4 @@
-﻿using System;
-using TianHua.Electrical.PDS.UI.ViewModels;
+﻿using TianHua.Electrical.PDS.UI.ViewModels;
 
 namespace TianHua.Electrical.PDS.UI.Project
 {
@@ -19,21 +18,10 @@ namespace TianHua.Electrical.PDS.UI.Project
         public static PDSProjectVM Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        public Action ProjectViewModelChanged;
-
-        public void ProjectDataChanged()
-        {
-            ConverterFactory.ConvertToViewModel();//数据转换ViewModel
-            if (!instance.ProjectViewModelChanged.IsNull())
-                instance.ProjectViewModelChanged();//推送VM状态改变
-        }
-
         #region ViewModel 集合
-        public InformationMatchViewModel InformationMatchViewModel { get; set; } //信息匹配视图模型
-        public GlobalParameterViewModel GlobalParameterViewModel { get; set; } //全局参数视图模型
-
-        readonly Lazy<ThPDSUESandboxParameterModel> lazy = new(() => new());
-        public ThPDSUESandboxParameterModel GlobalParameterModel => lazy.Value;
+        public GlobalParameterViewModel GlobalParameterViewModel { get; set; } = new();
+        public InformationMatchViewModel InformationMatchViewModel { get; set; } = new();
+        public LoadCalculationViewModel LoadCalculationViewModel { get; set; } = new();
         #endregion
     }
 }

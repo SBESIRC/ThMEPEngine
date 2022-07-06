@@ -1,23 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using QuikGraph;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
-using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
-using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 
 namespace TianHua.Electrical.PDS.Diagram
 {
@@ -392,7 +392,7 @@ namespace TianHua.Electrical.PDS.Diagram
             });
 
             var texts = objs.OfType<DBText>().ToList();
-            if(reservedComponent is CurrentTransformer ct)
+            if (reservedComponent is CurrentTransformer ct)
             {
                 var ctText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CT)).First();
                 ctText.TextString = ct.Content();
@@ -404,7 +404,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_MT)).First();
                 mtText.TextString = mt.Content();
             }
-            else if(reservedComponent is OUVP ouvp)
+            else if (reservedComponent is OUVP ouvp)
             {
                 var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_OUVP)).First();
                 mtText.TextString = ouvp.Content();
@@ -420,9 +420,12 @@ namespace TianHua.Electrical.PDS.Diagram
             // Pn
             CellAssign(table.Cells[0, 1], power);
             // Kx
-            CellAssign(table.Cells[0, 5], node.Load.DemandFactor);
+            CellAssign(table.Cells[0, 5], node.Details.LoadCalculationInfo.HighDemandFactor);
             // cos(\Phi)
-            CellAssign(table.Cells[0, 12], node.Load.PowerFactor);
+            CellAssign(table.Cells[0, 12], node.Details.LoadCalculationInfo.PowerFactor);
+
+            // 刷新表格中的公式计算值
+            table.GenerateLayout();
         }
 
         private void CellAssign(Cell cell, double value)
@@ -446,20 +449,20 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 相序
             var phaseSequence = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_PHSAE).First();
-            phaseSequence.TextString = edge.Target.Details.PhaseSequence.GetDescription();
+            phaseSequence.TextString = edge.Target.Details.LoadCalculationInfo.PhaseSequence.GetDescription();
 
             // 功率
             var power = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_POWER).ToList();
             if (power.Count == 1)
             {
-                power[0].TextString = edge.Target.Details.HighPower == 0 ? "" : edge.Target.Details.HighPower.ToString();
+                power[0].TextString = edge.Target.Details.LoadCalculationInfo.HighPower == 0 ? "" : edge.Target.Details.LoadCalculationInfo.HighPower.ToString();
             }
             else
             {
                 var lowPower = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_LOW_POWER).First();
-                lowPower.TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
+                lowPower.TextString = edge.Target.Details.LoadCalculationInfo.LowPower == 0 ? "" : edge.Target.Details.LoadCalculationInfo.LowPower.ToString();
                 var highPower = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_HIGH_POWER).First();
-                highPower.TextString = edge.Target.Details.HighPower == 0 ? "" : edge.Target.Details.HighPower.ToString();
+                highPower.TextString = edge.Target.Details.LoadCalculationInfo.HighPower == 0 ? "" : edge.Target.Details.LoadCalculationInfo.HighPower.ToString();
             }
 
             // 负载编号
@@ -787,7 +790,6 @@ namespace TianHua.Electrical.PDS.Diagram
                                 CTText.TextString = ct.Content();
                                 MTText.TextString = ct.ContentMT();
                             }
-                                
                         }
 
                         // 元器件2

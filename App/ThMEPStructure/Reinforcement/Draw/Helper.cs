@@ -419,6 +419,11 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public static int FindPairPoint(List<Point3d> pts, int idx, int type)
         {
+            if (idx == -1)
+            {
+                int a = 0;
+                return -1;
+            }
             //type=1,寻找水平点，type=2,寻找竖直点
             int res = -1;
             if (type == 1)

@@ -19,16 +19,23 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         {
             SpatialIndex= new ThCADCoreNTSSpatialIndex(beams);
         }
-        public override List<Point3d> Layout(List<Line> dxLines)
+        public override List<Tuple<Point3d,Vector3d>> Layout(List<Line> dxLines)
         {
-            var results = new List<Point3d>();
-
+            var results = new List<Tuple<Point3d, Vector3d>>();
             // 计算在梁和不在梁内的线
-            var splitLines = Calculate(dxLines);
+            var newBeams = CalculateOffsetBeams(dxLines);
 
-            // 布置点
-            results.AddRange(LinearDistribute(splitLines.Item1, this.Margin, this.Interval));
-            results.AddRange(LinearDistribute(splitLines.Item2, SpanBeamMargin, this.Interval));
+            // 计算布置的点
+            var newDxLines = ThMergeLightLineService.Merge(dxLines);
+            newDxLines.ForEach(link =>
+            {
+                var unLayoutLines = link.CalculateUnLayoutParts(newBeams);
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,0.0);
+                results.AddRange(DistributeLaytoutPoints(pts, link));
+                path.Dispose();
+                unLayoutLines.ForEach(l => l.Dispose());
+            });
             return results;
         }
 
@@ -45,7 +52,7 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
                 var lrBeams = GetLRBeams(offsetBeams);
 
                 // 找出所有被梁分割的线
-                var layoutLines = l.Calculate(lrBeams);
+                var layoutLines = new List<Line> {l}.CalculateLayoutParts(lrBeams);
 
                 // 找出在梁间隙内的线
                 var beamIntervalLines = FindBeamIntervalLines(layoutLines, offsetBeams);
@@ -56,6 +63,23 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
                 nonBeamIntervalLinesCollector.AddRange(nonBeamIntervalLines);
             });
             return Tuple.Create(nonBeamIntervalLinesCollector, beamIntervalLinesCollector);
+        }
+
+        private DBObjectCollection CalculateOffsetBeams(List<Line> dxLines)
+        {
+            var results = new DBObjectCollection();
+            dxLines.ForEach(l =>
+            {
+                // 把梁沿着其所在线的方向左、右偏移
+                var offsetBeams = Build(l);
+
+                // 收集左右偏移的梁
+                var lrBeams = GetLRBeams(offsetBeams);
+
+                // 添加到结果集
+                results = results.Union(lrBeams);
+            });
+            return results;
         }
 
         private List<Line> FindBeamIntervalLines(List<Line> lines,List<Tuple<Entity,Entity,Entity>> offsetBeams)
@@ -89,29 +113,50 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             return lrBeams;
         }
 
-        public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
+        public override List<Tuple<Point3d, Vector3d>> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
-            var results  = new List<Point3d>(); 
-            // nonBeamIntervalLines,beamIntervalLines
-            var l1SplitLines = Calculate(L1Lines); // L1被梁分割的线
-            var l2SplitLines = Calculate(L2Lines); // L2被梁分割的线
+            var results  = new List<Tuple<Point3d, Vector3d>>();
+            // 计算在梁和不在梁内的线
+            var l1Beams = CalculateOffsetBeams(L1Lines);
+            var l2Beams = CalculateOffsetBeams(L2Lines);
 
-            var nonBeamIntervalRes = CalculatePubExclusiveLines(l1SplitLines.Item1, l2SplitLines.Item1);            
-            var l1PubLayoutPoints = LinearDistribute(nonBeamIntervalRes.L1Pubs, this.Margin, this.Interval);
-            var l2PubLayoutPoints = GetL2LayoutPointByPass(l1PubLayoutPoints, L1Lines, L2Lines);
-            var l1ExclusiveLayoutPoints = LinearDistribute(nonBeamIntervalRes.L1Exclusives, this.Margin, this.Interval);
-            var l2ExclusiveLayoutPoints = LinearDistribute(nonBeamIntervalRes.L2Exclusives, this.Margin, this.Interval);
+            // 计算L1,L2不可布区域
+            var l1UnLayoutLines = L1Lines.CalculateUnLayoutParts(l1Beams);
+            var l2UnLayoutLines = L2Lines.CalculateUnLayoutParts(l2Beams);
 
-            //var beamIntervalRes = CalculatePubExclusiveLines(l1SplitLines.Item2, l2SplitLines.Item2);
-            var l1BeamIntervalLayoutPoints = LinearDistribute(l1SplitLines.Item2, SpanBeamMargin, this.Interval);
-            var l2BeamIntervalLayoutPoints = LinearDistribute(l2SplitLines.Item2, SpanBeamMargin, this.Interval);
+            // 计算L1上布置的点
+            var newL1Lines = ThMergeLightLineService.Merge(L1Lines);
+            // 把L2不可布区域投影到L1上
+            var l1NewUnLayoutLines = GetProjectionLinesByPass(l2UnLayoutLines, L2Lines, L1Lines);
+            var l1UnLayoutQuery = ThQueryLineService.Create(l1UnLayoutLines.Union(l1NewUnLayoutLines).ToList());
+            var l1LayoutPoints = new List<Tuple<Point3d, Vector3d>>();
+            newL1Lines.ForEach(link =>
+            {
+                var unLayoutLines = link.SelectMany(o => l1UnLayoutQuery.QueryCollinearLines(o.StartPoint, o.EndPoint)).ToList();
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,0.0);
+                l1LayoutPoints.AddRange(DistributeLaytoutPoints(pts,link));
+                path.Dispose();
+            });
 
-            results.AddRange(l1PubLayoutPoints);
-            results.AddRange(l2PubLayoutPoints);
-            results.AddRange(l1ExclusiveLayoutPoints);
-            results.AddRange(l2ExclusiveLayoutPoints);
-            results.AddRange(l1BeamIntervalLayoutPoints);
-            results.AddRange(l2BeamIntervalLayoutPoints);
+            // 把L1上布置的点投影到L2上
+            var l2LayoutPoints = GetL2LayoutPointByPass(l1LayoutPoints, L1Lines, L2Lines);
+            var l1LayoutLines = L1Lines.CalculateLayoutParts(l1Beams);
+            var l2LayoutLines = L2Lines.CalculateLayoutParts(l2Beams);
+            var l1l2PubExclusiveInfo = CalculatePubExclusiveLines(l1LayoutLines, l2LayoutLines);
+            var newL2Exclusives = ThMergeLightLineService.Merge(l1l2PubExclusiveInfo.L2Exclusives);
+            var l2UnLayoutQuery = ThQueryLineService.Create(l2UnLayoutLines);
+            newL2Exclusives.ForEach(link =>
+            {
+                var unLayoutLines = link.SelectMany(o => l2UnLayoutQuery.QueryCollinearLines(o.StartPoint, o.EndPoint)).ToList();
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,0.0);
+                l2LayoutPoints.AddRange(DistributeLaytoutPoints(pts,link));
+                path.Dispose();
+            });
+
+            results.AddRange(l1LayoutPoints);
+            results.AddRange(l2LayoutPoints);
             return results;
         }
 

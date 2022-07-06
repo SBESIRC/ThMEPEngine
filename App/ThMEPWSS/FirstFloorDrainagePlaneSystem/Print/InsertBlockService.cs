@@ -91,6 +91,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                     txt.Layer = layerName;
                     txt.ColorIndex = 256;
                     txt.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+                    txt.Scale(txt.Position, scaleNum);
                     acadDatabase.ModelSpace.Add(txt);
                 }
             }

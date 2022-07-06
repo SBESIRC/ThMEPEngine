@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using TianHua.Electrical.PDS.Project.Module;
@@ -346,11 +347,11 @@ namespace TianHua.Electrical.PDS.Model
             InstalledCapacity = new ThInstalledCapacity();
             AttributesCopy = "";
             Phase = ThPDSPhase.三相;
-            DemandFactor = 1.0;
+            DemandFactor = 0.8;
             PowerFactor = 0.85;
             FireLoadWithNull = ThPDSFireLoad.Unknown;
             LocationList = new List<ThPDSLocation>();
-            OnLightingCableTray = false;
+            LightingCableTray = new ThPDSLightingCableTray();
             CableLayingMethod1 = LayingSite.CC;
             CableLayingMethod2 = LayingSite.None;
             PrimaryAvail = 1;
@@ -366,16 +367,6 @@ namespace TianHua.Electrical.PDS.Model
         /// 特征编号
         /// </summary>
         public ThPDSID ID { get; set; }
-
-        /// <summary>
-        /// 额定电压
-        /// </summary>
-        public double KV { get; set; }
-
-        /// <summary>
-        /// 计算电流
-        /// </summary>
-        public double CalculateCurrent { get; set; }
 
         /// <summary>
         /// 一级负载类型
@@ -479,7 +470,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 判断配电箱是否在照明桥架上
         /// </summary>
-        private bool OnLightingCableTray { get; set; }
+        private ThPDSLightingCableTray LightingCableTray { get; set; }
 
         /// <summary>
         /// Cable laying method 1
@@ -510,14 +501,28 @@ namespace TianHua.Electrical.PDS.Model
         }
         #endregion
 
-        public bool GetOnLightingCableTray()
+        public ThPDSLightingCableTray GetOnLightingCableTray()
         {
-            return OnLightingCableTray;
+            return LightingCableTray;
         }
 
-        public void SetOnLightingCableTray(bool onLightingCableTray)
+        public void SetOnLightingCableTray(ThPDSLightingCableTray lightingCableTray)
         {
-            OnLightingCableTray = onLightingCableTray;
+            LightingCableTray = lightingCableTray;
+        }
+
+        public void SetOnLightingCableTray(bool onLlightingCableTray, Curve cableTray)
+        {
+            if (!onLlightingCableTray)
+            {
+                return;
+            }
+
+            LightingCableTray = new ThPDSLightingCableTray
+            {
+                OnLightingCableTray = onLlightingCableTray,
+                CableTray = cableTray,
+            };
         }
 
         public ThPDSFireLoad GetFireLoad()
@@ -572,7 +577,7 @@ namespace TianHua.Electrical.PDS.Model
                 PowerFactor = this.PowerFactor,
                 FireLoadWithNull = this.FireLoadWithNull,
                 LocationList = this.LocationList,
-                OnLightingCableTray = this.OnLightingCableTray,
+                LightingCableTray = this.LightingCableTray,
                 CableLayingMethod1 = this.CableLayingMethod1,
                 CableLayingMethod2 = this.CableLayingMethod2,
                 PrimaryAvail = this.PrimaryAvail,

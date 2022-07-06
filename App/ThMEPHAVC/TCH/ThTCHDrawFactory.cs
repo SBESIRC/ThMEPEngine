@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPIO.DB.SQLite;
 
 namespace ThMEPHVAC.TCH
 {
@@ -161,19 +162,17 @@ namespace ThMEPHVAC.TCH
         public ThDrawTCHMaterials materialsService;
         public ThDrawTCHDimension dimensionService;
         public ThDrawTCHSubSystemTypes subSystemService;
-        public ThSQLiteHelper sqliteHelper;
+        public THMEPSQLiteServices sqliteHelper;
         public ThTCHDrawFactory(string databasePath)
         {
-            sqliteHelper = new ThSQLiteHelper(databasePath);
-            sqliteHelper.Conn();
+            sqliteHelper = new THMEPSQLiteServices(databasePath);
             subSystemService = new ThDrawTCHSubSystemTypes(sqliteHelper);
             materialsService = new ThDrawTCHMaterials(sqliteHelper);
         }
         public ThTCHDrawFactory(string databasePath, string scenario)
         {
             var subSysId = GetSubSystemId(scenario);
-            sqliteHelper = new ThSQLiteHelper(databasePath);
-            sqliteHelper.Conn();
+            sqliteHelper = new THMEPSQLiteServices(databasePath);
             ductService = new ThDrawTCHDuct(sqliteHelper, subSysId);
             elbowService = new ThDrawTCHElbow(sqliteHelper, subSysId);
             teeService = new ThDrawTCHTee(sqliteHelper, subSysId);

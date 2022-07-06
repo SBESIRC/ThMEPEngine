@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ThMEPLighting.Garage.Model
 {
@@ -30,10 +31,6 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public int LoopNumber { get; set; } = 4;
         /// <summary>
-        /// 自动生成灯
-        /// </summary>
-        public bool AutoGenerate { get; set; } = true;
-        /// <summary>
         /// 自动计算回路数量
         /// </summary>
         public bool AutoCalculate { get; set; } = false;
@@ -45,10 +42,6 @@ namespace ThMEPLighting.Garage.Model
         /// 图纸比例
         /// </summary>
         public double PaperRatio { get; set; } = 1.0;
-        /// <summary>
-        /// 最小边的长度
-        /// </summary>
-        public double MinimumEdgeLength { get; set; } = 100.0;
         /// <summary>
         /// 灯编号文字高度
         /// </summary>
@@ -107,12 +100,95 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 跳线连接，相交线的打断长度
         /// </summary>
-        public double LightWireBreakLength { get; set; } = 300.0;
+        public double LightWireBreakLength { get; set; } = 150.0;
         /// <summary>
         /// 建筑车道线图层
         /// </summary>
         public List<string> LaneLineLayers { get; set; } = new List<string>();
-     }
+
+        /// <summary>
+        /// 过滤点的距离
+        /// </summary>
+        public double FilterPointDistance
+        {
+            get
+            {
+                return 0.4 * Interval;
+            }
+        }
+        /// <summary>
+        /// 为了避免T字、十字路口灯比较拥挤，需要将分支布灯的线内缩一点，形成不可布区域
+        /// </summary>
+        public double ShortenDistance { get; set; } = 500.0;
+
+        public int GetLoopNumber(int lightNumber)
+        {
+            if (AutoCalculate)
+            {
+                return IsSingleRow ? 
+                    CalculateSingleRowLoopNumber(lightNumber, LightNumberOfLoop) :
+                    CalculateDoubleRowLoopNumber(lightNumber, LightNumberOfLoop);
+            }
+            else
+            {
+                return IsSingleRow ? 
+                    GetSingleRowUILoopNumber() : 
+                    GetDoubleRowUILoopNumber();
+            }
+        }
+        private int CalculateSingleRowLoopNumber(int lightNumbers, int lightNumberOfLoop)
+        {
+            double number = Math.Ceiling(lightNumbers * 1.0 / lightNumberOfLoop);
+            if (number < 2)
+            {
+                number = 2;
+            }
+            return (int)number;
+        }
+        /// <summary>
+        /// 根据灯的数量和每一个回路包含灯的数量，计算灯回路
+        /// eg. 灯的数量为100,每个回路25盏灯，计算得出4个回路
+        /// </summary>
+        /// <param name="lightNumbers">灯的数量</param>
+        /// <param name="lightNumberOfLoop">每一个回路包含多少盏灯</param>
+        /// <returns></returns>
+        private int CalculateDoubleRowLoopNumber(int lightNumbers, int lightNumberOfLoop)
+        {
+            var value = lightNumbers * 1.0 / lightNumberOfLoop;
+            double number = Math.Ceiling(value);
+            int intNumber = (int)number;
+            if (intNumber < 4)
+            {
+                intNumber = 4;
+            }
+            if (intNumber % 2 == 1)
+            {
+                intNumber += 1;
+            }
+            return intNumber / 2; // 计算单回路数量
+        }
+        private int GetSingleRowUILoopNumber()
+        {
+            return LoopNumber < 2 ? 2 : LoopNumber;
+        }
+        private int GetDoubleRowUILoopNumber()
+        {
+            int result = 0;
+            if (LoopNumber < 4)
+            {
+                result = 4;
+            }
+            else
+            {
+                result = LoopNumber;
+            }
+            if (result % 2 == 1)
+            {
+                result += 1;
+            }
+            return result / 2; // 计算单回路数量
+        }
+    }
     public enum InstallWay
     {
         /// <summary>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{A9EA2D83-98D9-4259-8F64-FD61D92E4EBF}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{2F2F18ED-CEEC-4E58-8FE0-0448F139DEED}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -130,8 +130,8 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THZW"   Global="THZW" />
-                <Command Local="THFDL"  Global="THFDL" />
+                <Command Local="THZW" Global="THZW" />
+                <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
@@ -148,8 +148,8 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THZW"   Global="THZW" />
-                <Command Local="THFDL"  Global="THFDL" />
+                <Command Local="THZW" Global="THZW" />
+                <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
@@ -166,8 +166,8 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THZW"   Global="THZW" />
-                <Command Local="THFDL"  Global="THFDL" />
+                <Command Local="THZW" Global="THZW" />
+                <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
@@ -408,7 +408,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-	<Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
+                <Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -417,7 +417,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-	<Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
+                <Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -426,34 +426,34 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-	<Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
+                <Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPTCH, 2014 version-->
+    <!--Assembly App, ThMEPIFC, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+                <Command Local="THDB2IFC" Global="THDB2IFC" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPTCH, 2016 version-->
+    <!--Assembly App, ThMEPIFC, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+                <Command Local="THDB2IFC" Global="THDB2IFC" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPTCH, 2018 version-->
+    <!--Assembly App, ThMEPIFC, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+                <Command Local="THDB2IFC" Global="THDB2IFC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -500,8 +500,8 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
-                <Command Local="THXFGB"  Global="THXFGB" />
-                <Command Local="THJDPM"  Global="THJDPM" />
+                <Command Local="THXFGB" Global="THXFGB" />
+                <Command Local="THJDPM" Global="THJDPM" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
                 <Command Local="THYDFHJS" Global="THYDFHJS" />
             </Commands>
@@ -517,8 +517,8 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
-                <Command Local="THXFGB"  Global="THXFGB" />
-                <Command Local="THJDPM"  Global="THJDPM" />
+                <Command Local="THXFGB" Global="THXFGB" />
+                <Command Local="THJDPM" Global="THJDPM" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
                 <Command Local="THYDFHJS" Global="THYDFHJS" />
             </Commands>
@@ -534,8 +534,8 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
-                <Command Local="THXFGB"  Global="THXFGB" />
-                <Command Local="THJDPM"  Global="THJDPM" />
+                <Command Local="THXFGB" Global="THXFGB" />
+                <Command Local="THJDPM" Global="THJDPM" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
                 <Command Local="THYDFHJS" Global="THYDFHJS" />
             </Commands>
@@ -578,9 +578,9 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THDXXHS" Global="THDXXHS" />
-                <Command Local="THSJSB"  Global="THSJSB" />
-                <Command Local="THDXCX"  Global="THDXCX" />
-                <Command Local="THLGHZ"  Global="THLGHZ" />
+                <Command Local="THSJSB" Global="THSJSB" />
+                <Command Local="THDXCX" Global="THDXCX" />
+                <Command Local="THLGHZ" Global="THLGHZ" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
@@ -600,7 +600,7 @@
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
                 <Command Local="THHXDYZC" Global="THHXDYZC" />
-				<Command Local="THDXJSXT" Global="THDXJSXT" />
+                <Command Local="THDXJSXT" Global="THDXJSXT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -611,9 +611,9 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THDXXHS" Global="THDXXHS" />
-                <Command Local="THSJSB"  Global="THSJSB" />
-                <Command Local="THDXCX"  Global="THDXCX" />
-                <Command Local="THLGHZ"  Global="THLGHZ" />
+                <Command Local="THSJSB" Global="THSJSB" />
+                <Command Local="THDXCX" Global="THDXCX" />
+                <Command Local="THLGHZ" Global="THLGHZ" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
@@ -633,7 +633,7 @@
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
                 <Command Local="THHXDYZC" Global="THHXDYZC" />
-				<Command Local="THDXJSXT" Global="THDXJSXT" />
+                <Command Local="THDXJSXT" Global="THDXJSXT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -644,9 +644,9 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THDXXHS" Global="THDXXHS" />
-                <Command Local="THSJSB"  Global="THSJSB" />
-                <Command Local="THDXCX"  Global="THDXCX" />
-                <Command Local="THLGHZ"  Global="THLGHZ" />
+                <Command Local="THSJSB" Global="THSJSB" />
+                <Command Local="THDXCX" Global="THDXCX" />
+                <Command Local="THLGHZ" Global="THLGHZ" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
@@ -666,7 +666,7 @@
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
                 <Command Local="THHXDYZC" Global="THHXDYZC" />
-				<Command Local="THDXJSXT" Global="THDXJSXT" />
+                <Command Local="THDXJSXT" Global="THDXJSXT" />
             </Commands>
         </ComponentEntry>
     </Components>

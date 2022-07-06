@@ -43,7 +43,9 @@ namespace ThParkingStall.Core
             var ThreadCnt = Int32.Parse(ProcessInfo[4]);// 使用的线程数量
             if (ThreadCnt > 2) InterParameter.MultiThread = true;
             else InterParameter.MultiThread = false;
-            string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
+            string LogFileName;
+            if (LogAllInfo) LogFileName = Path.Combine(GetPath.GetAppDataPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
+            else LogFileName = Path.Combine(GetPath.GetDebugPath(), "SubProcessDebug" + ProcessIndex.ToString() + "_.txt");
             var Logger = new Serilog.LoggerConfiguration().WriteTo
                                 .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
             MCompute.Logger = Logger;

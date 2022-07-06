@@ -14,5 +14,6 @@
         public readonly static string LPropertyName = "line-type";
         public readonly static string MaterialPropertyName = "material";
         public readonly static string FloorBottomElevationPropertyName = "bottom_elevation";
+        public readonly static string DescriptionPropertyName = "description";
     }
 }
