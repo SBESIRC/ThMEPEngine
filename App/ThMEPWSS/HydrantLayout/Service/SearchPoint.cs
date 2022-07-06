@@ -38,7 +38,10 @@ namespace ThMEPWSS.HydrantLayout.Service
         public List<Polyline> LeanWallList = new List<Polyline>();
 
         //这个给消火栓的柱子用的，判断左 中 右（0，1，2） 逆右 -1 ， 顺左 3
+        // 19: 左横右  20：右横左
         public List<int> BasePointPosition = new List<int>();
+        // 0: 自由  1：车道  2：车位；
+        public List<int> ColumnDirMode =  new List<int>();
 
         public SearchPoint(MPolygon mp, Point3d centerPoint)
         {
@@ -360,9 +363,11 @@ namespace ThMEPWSS.HydrantLayout.Service
         }
 
         //锁方向
-        public void FindColumnPoint12(out List<Point3d> basePointList, out List<Vector3d> dirList)
+        public void FindColumnPointOnly(out List<Point3d> basePointList, out List<Vector3d> dirList)
         {
             LeanWallList.Clear();
+            ColumnDirMode.Clear();
+            BasePointPosition.Clear();
             basePointList = new List<Point3d>();
             dirList = new List<Vector3d>();
 
@@ -388,7 +393,8 @@ namespace ThMEPWSS.HydrantLayout.Service
                 int mainIndex = index.OrderBy(x => dis[x]).ToList().First();
                 int leftIndex = (mainIndex + index.Count - 1) % index.Count;
                 int rightIndex = (mainIndex + 1) % index.Count;
-                   
+                int columnType = GetColumnType(cl,mainIndex);
+
                 for (int i = 0; i < cl.NumberOfVertices; i++)
                 {
                     Point3d start = cl.GetPoint3dAt(i);
@@ -398,8 +404,12 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                     if (i == mainIndex) 
                     {
+                        
                         Point3d mid = start + 0.5 * dir01;
                         //Polyline probe = CreateBoundaryService.CreateBoundary(center, 1500, 190, dirOut);
+
+                        bool longEnough = false;
+                        if (dir01.Length > TMPDATA.TmpVPSideLength + Info.VPSide) longEnough = true;
 
                         Polyline vpMid = CreateBoundaryService.CreateBoundary(mid + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
                         if (FeasibilityCheck.IsBoundaryOK(vpMid, Frame, ProcessedData.ParkingIndex))
@@ -409,7 +419,9 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 basePointList.Add(mid);
                                 dirList.Add(dirOut);
                                 LeanWallList.Add(cl);
+
                                 BasePointPosition.Add(1);
+                                ColumnDirMode.Add(columnType);
                             }
                         }
 
@@ -422,7 +434,11 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 basePointList.Add(left);
                                 dirList.Add(dirOut);
                                 LeanWallList.Add(cl);
-                                BasePointPosition.Add(0);
+
+                                if (longEnough) BasePointPosition.Add(19);
+                                else BasePointPosition.Add(0);
+
+                                ColumnDirMode.Add(columnType);
                             }
                         }
 
@@ -434,8 +450,10 @@ namespace ThMEPWSS.HydrantLayout.Service
                             {
                                 basePointList.Add(right);
                                 dirList.Add(dirOut);
-                                LeanWallList.Add(cl);
-                                BasePointPosition.Add(2);
+                                if (longEnough) BasePointPosition.Add(20);
+                                else BasePointPosition.Add(1);
+
+                                ColumnDirMode.Add(columnType);
                             }
                         }
                     }
@@ -452,6 +470,8 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(dirOut);
                                 LeanWallList.Add(cl);
                                 BasePointPosition.Add(-1);
+
+                                ColumnDirMode.Add(columnType);
                             }
                         }
                     }
@@ -467,6 +487,8 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(dirOut);
                                 LeanWallList.Add(cl);
                                 BasePointPosition.Add(3);
+
+                                ColumnDirMode.Add(columnType);
                             }
                         }
                     }
@@ -658,8 +680,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             Polyline pl = CreateBoundaryService.CreateBoundary(basePoint + Dir * 0.5 * Info.VPSide, Info.VPSide, Info.VPSide, Dir);
             return FeasibilityCheck.IsFireFeasible(pl,shell);
         }
-
-
+        
         //------------------------------------
         //灭火器
 
@@ -937,6 +958,36 @@ namespace ThMEPWSS.HydrantLayout.Service
 
 
             }
+        }
+
+        //
+        public int GetColumnType(Polyline cl, int mainIndex)
+        {
+            int type = -1;
+
+            Point3d start1 = cl.GetPoint3dAt(mainIndex);
+            Point3d end1 = cl.GetPoint3dAt((mainIndex + 1) % cl.NumberOfVertices);
+            Vector3d dir1 = end1 - start1;
+            Vector3d dirOut1 = new Vector3d(-dir1.Y, dir1.X, dir1.Z).GetNormal();
+            Polyline pl1 = CreateBoundaryService.CreateRectangle2(start1 - dirOut1 * 1500, end1 + dirOut1 * 1500, 1500);
+            double score1 = IndexCompute.ComputeOverlapScore(pl1, this.Frame, ProcessedData.ParkingIndex);
+
+            int newIndex = (mainIndex + 2) % cl.NumberOfVertices;
+
+            Point3d start2 = cl.GetPoint3dAt(newIndex);
+            Point3d end2 = cl.GetPoint3dAt((newIndex + 1) % cl.NumberOfVertices);
+            Vector3d dir2 = end2 - start2;
+            Vector3d dirOut2 =  - dirOut1;
+
+            Polyline pl2 = CreateBoundaryService.CreateRectangle2(start2 - dirOut2 * 1500, end2 + dirOut2 * 1500, 1500);
+            double score2 = IndexCompute.ComputeOverlapScore(pl2, this.Frame, ProcessedData.ParkingIndex);
+
+
+            if (score1 > 50 && score2 < 20) type = 2;
+            else if (score1 < 20 && score2 > 50) type = 1;
+            else type = 0;
+
+            return type;
         }
     }
 }

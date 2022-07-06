@@ -61,6 +61,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
             //读取边长
             CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
+            TMPDATA.TmpVPSideLength = LongSide;
         }
 
         public void Pipeline() 
@@ -113,7 +114,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 //只存在柱子
                 if (basePointTest3.Count == 0)
                 {
-                    searchPoint0.FindColumnPoint12(out basePointList, out dirList);
+                    searchPoint0.FindColumnPointOnly(out basePointList, out dirList);
                     SecondPriorityTest(basePointList, dirList);
                 }
                 else 

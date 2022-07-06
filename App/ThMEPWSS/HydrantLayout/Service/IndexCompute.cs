@@ -57,6 +57,14 @@ namespace ThMEPWSS.HydrantLayout.Service
             }
         }
 
+        public static double ComputeOverlapScore(Polyline area, Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
+        {
+            double score = 0;
+            double overlapArea = ComputeOverlapArea(area, shell, forbidden);
+            if (overlapArea == 0) return 100;
+            else return ((area.Area - overlapArea) / area.Area);
+        }
+
         public static double ComputeOverlapArea(Polyline area ,Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
         {
             double overlapArea = 0;

@@ -114,4 +114,10 @@ namespace ThMEPWSS.HydrantLayout.Model
 
 
     }
+
+    class TMPDATA 
+    {
+        public static double TmpVPSideLength = 200;
+        public static double FireHydrantLength = 800;
+    }
 }

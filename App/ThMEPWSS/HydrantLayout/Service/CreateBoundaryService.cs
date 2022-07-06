@@ -137,5 +137,31 @@ namespace ThMEPWSS.HydrantLayout.Service
 
             return boundary;
         }
+
+
+
+        //其他
+        public static Polyline CreateRectangle2(Point3d pt0, Point3d pt1, double length)
+        {
+            Vector3d dir = pt1 - pt0;
+            Vector3d clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
+
+            Point3d pt2 = pt1 + clockwise270 * length;
+            Point3d pt3 = pt0 + clockwise270 * length;
+
+            var boundary = new Polyline();
+            boundary.Closed = true;
+            boundary.AddVertexAt(0, pt0.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(1, pt1.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(2, pt2.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(3, pt3.ToPoint2D(), 0, 0, 0);
+
+            return boundary;
+        }
+
+
+
+
+
     }
 }
