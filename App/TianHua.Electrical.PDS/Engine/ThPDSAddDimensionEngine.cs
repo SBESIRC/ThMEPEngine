@@ -131,6 +131,106 @@ namespace TianHua.Electrical.PDS.Engine
         }
 
         /// <summary>
+        /// 插入负载及标注
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="loadType"></param>
+        public void InsertNewLoad(ThPDSProjectGraphNode node, ImageLoadType loadType)
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var activeDb = AcadDatabase.Active())
+            using (var configDb = AcadDatabase.Open(ThCADCommon.PDSDiagramDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                var referenceDWG = Path.GetFileNameWithoutExtension(activeDb.Database.Filename);
+                if (!ThPDSSelectPointService.TrySelectPoint(out var insertPoint, "请选择负载插入点"))
+                {
+                    return;
+                }
+                if (!ThPDSSelectPointService.TrySelectPoint(out var firstPoint, "请选择标注插入点"))
+                {
+                    return;
+                }
+                if (!ThPDSSelectPointService.TrySelectPoint(out var secondPoint, "请选择标注线端点"))
+                {
+                    return;
+                }
+                if (!ThPDSSelectPointService.TrySelectPoint(out var thirdPoint, "请选择标注线方向"))
+                {
+                    return;
+                }
+                if (!ThPDSSelectPointService.TryInputScale(out var scale, "请输入插入比例"))
+                {
+                    return;
+                }
+
+                // 设备编号或用途
+                var loadIDOrPurpose = node.Load.ID.LoadID;
+                if (string.IsNullOrEmpty(loadIDOrPurpose))
+                {
+                    loadIDOrPurpose = node.Load.ID.Description;
+                    if (string.IsNullOrEmpty(loadIDOrPurpose))
+                    {
+                        if (node.Load.LoadTypeCat_3 != Model.ThPDSLoadTypeCat_3.None)
+                        {
+                            loadIDOrPurpose = node.Load.LoadTypeCat_3.GetDescription();
+                        }
+                        else if (node.Load.LoadTypeCat_2 != Model.ThPDSLoadTypeCat_2.None)
+                        {
+                            loadIDOrPurpose = node.Load.LoadTypeCat_2.GetDescription();
+                        }
+                        else
+                        {
+                            loadIDOrPurpose = node.Load.LoadTypeCat_1.GetDescription();
+                        }
+                    }
+                }
+
+                // 设备功率
+                var loadPower = (node.Details.LoadCalculationInfo.LowPower == 0
+                    ? "" : (node.Details.LoadCalculationInfo.LowPower.ToString() + "/"))
+                    + node.Details.LoadCalculationInfo.HighPower.ToString() + "kW";
+
+                // 主备关系
+                var primaryAndSpareAvail = node.Load.PrimaryAvail == 0
+                    ? "" : (NumberToChinese(node.Load.PrimaryAvail) + "用" +
+                    (node.Load.SpareAvail == 0 ? "" : NumberToChinese(node.Load.PrimaryAvail) + "备"));
+
+                var attributes = new Dictionary<string, string>
+                    {
+                        { ThPDSCommon.LOAD_ID_OR_PURPOSE, loadIDOrPurpose },
+                        { ThPDSCommon.LOAD_POWER, loadPower },
+                        { ThPDSCommon.PRIMARY_AND_SPARE_AVAIL, primaryAndSpareAvail},
+                    };
+
+                var dimensionVector = thirdPoint - secondPoint;
+                var wcsVector = new Vector3d(1, 0, 0);
+                var insertEngine = new ThPDSBlockInsertEngine();
+                var match = ThPDSBlockNameMapService.Match(loadType);
+                if (match.AttNameValues != null)
+                {
+                    var blockId = insertEngine.Insert(activeDb, configDb, match.BlockName, insertPoint, scale, match.AttNameValues);
+                }
+                else
+                {
+                    var blockId = insertEngine.Insert(activeDb, configDb, match.BlockName, insertPoint, scale);
+                }
+
+                if (dimensionVector.DotProduct(wcsVector) >= 0)
+                {
+                    var dimension = insertEngine.InsertCircuitDimension(activeDb, configDb, ThPDSCommon.LOAD_DIMENSION_R,
+                        firstPoint, scale);
+                    CircuitDimensionAssign(dimension, secondPoint, scale, attributes);
+                }
+                else
+                {
+                    var dimension = insertEngine.InsertCircuitDimension(activeDb, configDb, ThPDSCommon.LOAD_DIMENSION_L,
+                        firstPoint, scale);
+                    CircuitDimensionAssign(dimension, secondPoint, scale, attributes);
+                }
+            }
+        }
+
+        /// <summary>
         /// 创建平面负载标注（需抓取一遍当前图纸，并传入）
         /// </summary>
         /// <param name="projectNode"></param>
