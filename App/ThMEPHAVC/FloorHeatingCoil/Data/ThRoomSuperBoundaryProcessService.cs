@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.ApplicationServices;
-
-using NFox.Cad;
+﻿using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
-using Dreambuild.AutoCAD;
-using ThCADCore.NTS;
-using ThMEPEngineCore;
-using ThMEPEngineCore.Command;
-using ThMEPEngineCore.CAD;
 using DotNetARX;
+using System.Linq;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Data
 {
@@ -49,7 +41,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 }
                 else
                 {
+#if ACAD_ABOVE_2014
                     Active.Editor.Command("SBND_ALL");//异步，不用ui会等待选择
+#else
+                    ResultBuffer args = new ResultBuffer(
+                        new TypedValue((int)LispDataType.Text, "_.SBND_ALL"),
+                        new TypedValue((int)LispDataType.Text, " "));
+                    Active.Editor.AcedCmd(args);
+#endif
                 }
                 Active.Database.ObjectAppended -= Database_ObjectAppended;
 
