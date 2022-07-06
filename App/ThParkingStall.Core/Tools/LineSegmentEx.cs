@@ -280,24 +280,31 @@ namespace ThParkingStall.Core.Tools
             }
             return result.Where(l => l.Length > tol).ToList();
         }
-        public static LineSegment Extend(this LineSegment line,double distance)
+        //public static LineSegment Extend(this LineSegment line,double distance)
+        //{
+        //    if (line.IsVertical())
+        //    {
+        //        var X = line.P0.X;
+        //        var minY = Math.Min(line.P0.Y, line.P1.Y);
+        //        var maxY = Math.Max(line.P0.Y, line.P1.Y);
+        //        return new LineSegment(X,minY-distance,X,maxY + distance);
+        //    }
+        //    else
+        //    {
+        //        var Y = line.P0.Y;
+        //        var minX = Math.Min(line.P0.X, line.P1.X);
+        //        var maxX = Math.Max(line.P0.X, line.P1.X);
+        //        return new LineSegment( minX - distance,Y, maxX + distance,Y);
+        //    }
+        //}
+        public static LineSegment Extend(this LineSegment line, double distance)
         {
-            if (line.IsVertical())
-            {
-                var X = line.P0.X;
-                var minY = Math.Min(line.P0.Y, line.P1.Y);
-                var maxY = Math.Max(line.P0.Y, line.P1.Y);
-                return new LineSegment(X,minY-distance,X,maxY + distance);
-            }
-            else
-            {
-                var Y = line.P0.Y;
-                var minX = Math.Min(line.P0.X, line.P1.X);
-                var maxX = Math.Max(line.P0.X, line.P1.X);
-                return new LineSegment( minX - distance,Y, maxX + distance,Y);
-            }
+            var vec0 = new Vector2D(line.P1, line.P0).Normalize();
+            var p0 = vec0.Multiply(distance).Translate(line.P0);
+            var vec1 = new Vector2D(line.P0, line.P1).Normalize();
+            var p1 = vec1.Multiply(distance).Translate(line.P1);
+            return new LineSegment(p0, p1);
         }
-
         public static List<Coordinate> LineIntersection(this LineSegment line,LineString lstr)
         {
             double distance;

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Prepared;
+using NetTopologySuite.Mathematics;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
 namespace ThParkingStall.Core.Tools
@@ -155,6 +157,84 @@ namespace ThParkingStall.Core.Tools
             var list = new List<LineString> { linestring };
             list.AddRange(others);
             return list.GetPolygons();
+        }
+        public static List<Coordinate> ToCoordinates(this LineString linestring, double distance)
+        {
+            var coors = new List<Coordinate>();
+            for (int i = 0; i < linestring.Coordinates.Count() - 1; i++)
+            {
+                var coor_Start = linestring.Coordinates[i];
+                var coor_End = linestring.Coordinates[i + 1];
+                //var disToEnd = coor_Start.Distance(coor_End);
+                var vector = new Vector2D(coor_Start, coor_End).Normalize();
+                while (true)
+                {
+                    coors.Add(coor_Start);
+                    coor_Start = vector.Multiply(distance).Translate(coor_Start);
+                    var vec_new = new Vector2D(coor_Start, coor_End).Normalize();
+                    if (Math.Abs(vec_new.Angle() - vector.Angle()) > 0.1) break;
+                }
+            }
+            return coors;
+        }
+
+        //钝化所有锐角 + simplyfy(移除相连的平行线),该函数尚未完全验证
+        // inner 钝化内部锐角
+        public static LinearRing Obtusify(this LinearRing Linearring,bool inner, double tolerance = 0.1)
+        {
+            bool findCW = Linearring.IsCCW &&inner || !Linearring.IsCCW && !inner;
+            var Coordinates = Linearring.CoordinateSequence.ToCoordinateArray().ToList();
+            Coordinates.RemoveAt(Coordinates.Count - 1);//删除最后一个
+            Coordinate coor_pre;//前一个点
+            Coordinate coor_next;//后一个点
+            var NewCoordinates = new List<Coordinate> ();//新的钝化列表
+            coor_pre = Coordinates[Coordinates.Count - 1];
+            for (int i = 0; i < Coordinates.Count; i++)//遍历所有顶点
+            {
+                if(NewCoordinates.Count !=0) coor_pre = NewCoordinates.Last();
+                if (i == Coordinates.Count - 1)
+                {
+                    if (NewCoordinates.Count == 0) break;
+                    coor_next = NewCoordinates.First();
+                }
+                else coor_next = Coordinates[i + 1];
+                if (coor_pre.Equals(Coordinates[i])) continue;//与前一个点相同 跳过
+                var vecA = new Vector2D(coor_pre, Coordinates[i]);
+                var vecB = new Vector2D(Coordinates[i], coor_next);
+                if (vecA.IsParallel(vecB)) continue;//角的度数为0或pi 当前点可忽略
+                bool OnCWSide = vecB.IsOnClockWiseSideOf(vecA);
+                bool IsTheVecToFind = (findCW && OnCWSide) || (!findCW && !OnCWSide);
+                if (IsTheVecToFind && AngleUtility.IsAcute(coor_pre, Coordinates[i], coor_next) )//锐角 切分锐角至两个钝角
+                {
+                    var dist1 = Coordinates[i].Distance(coor_pre);//当前点与前一个点的距离
+                    var dist2 = Coordinates[i].Distance(coor_next);//当前点与后一个点的距离
+                    var mindist = Math.Min(dist1, dist2);//较近的距离
+                    mindist = Math.Min(mindist,tolerance);//与容差相比最近的距离
+                    if (mindist < dist1)
+                    {
+                        var vec1 = new Vector2D(Coordinates[i], coor_pre).Normalize();
+                        var coor1 = vec1.Multiply(mindist).Translate(Coordinates[i]);//添加节点，当前点向上一个点平移
+                        NewCoordinates.Add(coor1);
+                    }
+                    if(mindist < dist2)
+                    {
+                        var vec2 = new Vector2D(Coordinates[i], coor_next).Normalize();
+                        var coor2 = vec2.Multiply(mindist).Translate(Coordinates[i]);//添加节点，当前点向下一个点平移
+                        NewCoordinates.Add(coor2);
+                    }
+                }
+                else NewCoordinates.Add(Coordinates[i]);//添加当前点
+            }
+            if (NewCoordinates.Count <3) NewCoordinates.Clear();//返回空的linearRing
+            else NewCoordinates.Add(NewCoordinates.First());
+            return new LinearRing(NewCoordinates.ToArray());
+        }
+
+        public static bool IsOnClockWiseSideOf(this Vector2D b, Vector2D a)
+        {
+            var dot = a.X * -b.Y + a.Y * b.X;
+            if (dot > 0) return true;
+            else return false;
         }
     }
 }
