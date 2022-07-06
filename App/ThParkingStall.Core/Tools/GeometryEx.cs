@@ -14,25 +14,29 @@ namespace ThParkingStall.Core.Tools
     public static class GeometryEx
     {
         static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
-        public static Geometry MitreBuffer(this Geometry geo, double distance, bool removeHoles = true,double Obt_tol = 0.1)
+        public static Geometry MitreBuffer(this Geometry geo, double distance,bool obtusify = true,double Obt_tol = 0.1)
         {
+            //obtusify = false;
+            if (!obtusify) return geo.Buffer(distance, MitreParam);
             var inner = distance < 0;
-            var basics = geo.ToBasic(removeHoles);
+            var basics = geo.ToBasic(false);
             var gpolys = new List<Polygon>();
-            foreach(var basic in basics)
+            
+            foreach (var basic in basics)
             {
                 if(basic == null) continue;
                 if (basic is Polygon polygon)
                 {
-                    gpolys.AddRange(polygon.Obtusify(inner,Obt_tol).Buffer(distance, MitreParam).Get<Polygon>(removeHoles));
+                    if(obtusify) gpolys.AddRange(polygon.Obtusify(inner,Obt_tol).Buffer(distance, MitreParam).Get<Polygon>(false));
+                    else gpolys.AddRange(polygon.Buffer(distance, MitreParam).Get<Polygon>(false));
                 }
                     
                 else
                 {
-                    gpolys.AddRange(basic.Buffer(distance, MitreParam).Get<Polygon>(removeHoles));
+                    gpolys.AddRange(basic.Buffer(distance, MitreParam).Get<Polygon>(false));
                 }
             }
-            var result = new MultiPolygon(gpolys.ToArray()).Union().Get<Polygon>(removeHoles);
+            var result = new MultiPolygon(gpolys.ToArray()).Union().Get<Polygon>(false);
             return new MultiPolygon(result.ToArray());
         }
         public static Geometry GetVoronoiDiagram(this Geometry geo,double distance = 1000)

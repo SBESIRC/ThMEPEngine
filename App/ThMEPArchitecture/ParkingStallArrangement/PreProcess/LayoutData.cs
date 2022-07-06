@@ -352,26 +352,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             TightBoundaries = ObstacleBoundsGeo.MitreBuffer(-(ParameterStock.RoadWidth / 2)).Get<Polygon>(true);
             BoundingBoxes = ObstacleBounds.Select(bound => ObstacleSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
                 Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
-            //var wallBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2), bufferParameters);//边界内缩
-            //wallBound = wallBound.Difference(ObstacleBoundsGeo);//取差值
 
+            //#######################获取维诺环##########################################
             var SegBound = WallLine.MitreBuffer(-(ParameterStock.RoadWidth / 2)).Difference(ObstacleBoundsGeo).
                 Get<Polygon>(false).OrderBy(p => p.Area).Last();//边界内缩 + 取差值=任何分割线可画的范围
             //SegBound.ToDbMPolygon().AddToCurrentSpace();
             var ObstacleBound = new Polygon(SegBound.Shell).MitreBuffer(20000).Get<Polygon>(true).OrderBy(p => p.Area).Last()
                                 .MitreBuffer(-20000).Get<Polygon>(true).OrderBy(p => p.Area).Last();//(直角）外扩20000 + 内缩20000
-
             var buildings = ObstacleBound.Difference(SegBound).MitreBuffer(-(ParameterStock.RoadWidth / 2));//过滤后的障碍物（真实）框线
             var vornoiShell = ObstacleBound.MitreBuffer((ParameterStock.RoadWidth / 2)).Get<Polygon>().OrderBy(p => p.Area).Last().Shell;//边界外扩2750（智能边界外包框)
 
             //buildings.Get<Polygon>(true).ForEach(p =>p.ToDbMPolygon().AddToCurrentSpace());
             var vornoiInput = new Polygon(vornoiShell, buildings.Get<Polygon>().Select(p => p.Shell).ToArray());//维诺图输入
-            //vornoiInput.ToDbMPolygon().AddToCurrentSpace();
+            vornoiInput.ToDbMPolygon().AddToCurrentSpace();
             var shells = vornoiInput.GetVoronoiCenter();//维诺环
-            //shells.Get<LineString>().ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
-            var GuideLines = shells.Intersection(ObstacleBound).Union().Get<LineString>();//维诺环和ObstacleBound求交集
-            ObstacleBound.ToDbMPolygon().AddToCurrentSpace();
-            GuideLines.ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
+            shells.Get<LineString>().ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
+            //var GuideLines = shells.Intersection(ObstacleBound).Union().Get<LineString>();//维诺环和ObstacleBound求交集
+            //ObstacleBound.ToDbMPolygon().AddToCurrentSpace();
+            //GuideLines.ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
+            //#######################维诺环获取完成##########################################
 
             var ignorableObstacles = ObstacleSpatialIndex.SelectNOTCrossingGeometry(SegBound).Cast<Polygon>().ToList();
             SegLineBoundary = SegBound as Polygon;
@@ -386,106 +385,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
             BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
         }
-        //private void GetSegLineBoundary()//以半车道宽为基准外扩
-        //{
-        //    BufferParameters bufferParameters = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
-
-        //    var buffered = new MultiPolygon(Obstacles.ToArray()).Buffer((ParameterStock.RoadWidth / 2), bufferParameters);//外扩
-        //    var ObstacleBounds = buffered.Union().Get<Polygon>(true);
-        //    var ObstacleBoundsGeo = new MultiPolygon(ObstacleBounds.ToArray());
-        //    TightBoundaries = ObstacleBoundsGeo.Buffer(-(ParameterStock.RoadWidth / 2), bufferParameters).Get<Polygon>(true);
-        //    BoundingBoxes = ObstacleBounds.Select(bound => ObstacleSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
-        //        Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
-        //    //var wallBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2), bufferParameters);//边界内缩
-        //    //wallBound = wallBound.Difference(ObstacleBoundsGeo);//取差值
-
-        //    var SegBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2), bufferParameters).Difference(ObstacleBoundsGeo).
-        //        Get<Polygon>(false).OrderBy(p => p.Area).Last();//边界内缩 + 取差值=任何分割线可画的范围
-        //    //SegBound.ToDbMPolygon().AddToCurrentSpace();
-        //    var ObstacleBound = new Polygon(SegBound.Shell).Buffer(20000, bufferParameters).Get<Polygon>(true).OrderBy(p => p.Area).Last()
-        //                        .Buffer(-20000, bufferParameters).Get<Polygon>(true).OrderBy(p => p.Area).Last();//(直角）外扩20000 + 内缩20000
-
-        //    var buildings = ObstacleBound.Difference(SegBound).Buffer(-(ParameterStock.RoadWidth / 2),bufferParameters);//过滤后的障碍物（真实）框线
-        //    var vornoiShell = ObstacleBound.Buffer((ParameterStock.RoadWidth / 2), bufferParameters).Get<Polygon>().OrderBy(p => p.Area).Last().Shell;//边界外扩2750（智能边界外包框)
-
-        //    //buildings.Get<Polygon>(true).ForEach(p =>p.ToDbMPolygon().AddToCurrentSpace());
-        //    var vornoiInput = new Polygon(vornoiShell, buildings.Get<Polygon>().Select(p => p.Shell).ToArray());//维诺图输入
-        //    //vornoiInput.ToDbMPolygon().AddToCurrentSpace();
-        //    var shells = vornoiInput.GetVoronoiCenter();//维诺环
-        //    //shells.Get<LineString>().ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
-        //    var GuideLines = shells.Intersection(ObstacleBound).Union().Get<LineString>();//维诺环和ObstacleBound求交集
-        //    ObstacleBound.ToDbMPolygon().AddToCurrentSpace();
-        //    GuideLines.ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
-
-        //    //var GuideLines=shells.Difference(buildings.Buffer((ParameterStock.RoadWidth / 2), bufferParameters)).Get<LineString>();
-        //    //buildings.Buffer((ParameterStock.RoadWidth / 2), bufferParameters).Get<Polygon>().ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
-        //    //GuideLines.ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
-
-        //    //shells.Get<LineString>().ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
-
-        //    //var parkingStall = wallBound.Buffer(ParameterStock.RoadWidth / 2, bufferParameters).Get<Polygon>(false).OrderBy(p =>p.Area).Last();
-        //    ////parkingStall.ToDbMPolygon().AddToCurrentSpace();
-
-        //    //var parkingStallShell = new Polygon(parkingStall.Shell);
-        //    //var Orgnew_wall = new MultiPolygon(parkingStallShell.Buffer(20000, bufferParameters).Get<Polygon>(true).ToArray()).
-        //    //    Buffer(-20000, bufferParameters).Get<Polygon>().OrderBy(p => p.Area).Last();
-        //    //var buildings = Orgnew_wall.Difference(parkingStall).Union().Get<Polygon>(true);
-
-        //    //BufferParameters bufferParameters2 = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Bevel, 5.0);
-        //    //var buildings_new = new MultiPolygon(buildings.ToArray()).Buffer(-2000, bufferParameters2).Buffer(2000, bufferParameters2).Get<Polygon>();
-        //    ////buildings.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
-
-        //    //buildings_new = new MultiPolygon(buildings_new.ToArray()).Buffer(-2000, bufferParameters).Buffer(2000, bufferParameters).Get<Polygon>();
-        //    ////buildings_new.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
-
-
-        //    //var buildGeos = new MultiPolygon(buildings_new.ToArray()).Buffer(-2000, bufferParameters).Buffer(2000, bufferParameters);
-        //    //var new_wall = new Polygon(Orgnew_wall.Shell);
-        //    //buildGeos = new_wall.Intersection(buildGeos);
-        //    //new_wall = new_wall.Buffer(2750, bufferParameters).Get<Polygon>().OrderBy(p => p.Area).Last();
-
-        //    //var vornoiInput = new Polygon(new_wall.Shell, buildGeos.Get<Polygon>().Select(p =>p.Shell).ToArray());
-
-
-        //    //var Shell = new Polygon(parkingStall.Shell);
-        //    //Shell.ToDbMPolygon().AddToCurrentSpace();
-        //    //var shells = vornoiInput.GetVoronoiCenter().Intersection(Shell);
-        //    //shells.Get<LineString>().ForEach(lstr => lstr.ToDbPolyline().AddToCurrentSpace());
-
-        //    //parkingStall.
-        //    //GetAutoVoronoiCenter(parkingStall);
-        //    //var parkingStallShell = new Polygon(parkingStall.Shell);
-        //    //var new_wall = new MultiPolygon(parkingStallShell.Buffer(15000).Get<Polygon>(true).ToArray()).
-        //    //    Buffer(-15000).Get<Polygon>().OrderBy(p =>p.Area).Last();
-        //    //var buildings = new_wall.Difference(parkingStall).Buffer(2750).Union().Get<Polygon>(true);
-
-
-        //    //var vornoiInput = new Polygon(((Polygon)parkingStallShell.Envelope.Buffer(10000)).Shell, buildings.Select(p=>p.Shell).ToArray());
-        //    //vornoiInput.ToDbMPolygon().AddToCurrentSpace();
-        //    //vornoiInput.GetVoronoiCenter().ForEach(l => l.ToDbLine().AddToCurrentSpace());
-        //    //wallBound.GetVoronoiDiagram().Get<Polygon>(false).ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
-        //    //wallBound.GetVoronoiEdge().ForEach(l => l.ToDbLine().AddToCurrentSpace());
-        //    //var Bound = wallBound.Get<Polygon>(false).OrderBy(p => p.Area).Last();
-        //    //Bound.GetVoronoiCenter().ForEach(l => l.ToDbLine().AddToCurrentSpace());
-
-        //    //if (wallBound is Polygon wpoly) wallBound = wpoly.RemoveHoles();
-        //    //else if (wallBound is MultiPolygon mpoly)
-        //    //{
-        //    //    wallBound = mpoly.Geometries.Cast<Polygon>().Select(p => p.RemoveHoles()).OrderBy(p => p.Area).Last();//取最大的
-        //    //}
-        //    var ignorableObstacles = ObstacleSpatialIndex.SelectNOTCrossingGeometry(SegBound).Cast<Polygon>().ToList();
-        //    SegLineBoundary = SegBound as Polygon;
-        //    InnerBuildings = BuildingSpatialIndex.SelectCrossingGeometry(SegBound).Cast<Polygon>().ToList();
-        //    OuterBuildingIdxs = Buildings.Select((v, i) => new { v, i }).Where(x => !SegBound.Intersects(x.v)).Select(x => x.i).ToList();
-
-        //    var outerBounds = RampSpatialIndex.SelectNOTCrossingGeometry(SegBound);//外部坡道
-        //    outerBounds.AddRange(TightBoundaries.Where(b => !SegBound.Contains(b)));//外部障碍物的tight边界
-        //    InnerObs_OutterBoundSPIDX = new MNTSSpatialIndex(InnerBuildings.Concat(outerBounds));
-        //    var BoundaryObjects = new List<Geometry>();
-        //    BoundaryObjects.AddRange(ignorableObstacles);
-        //    BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
-        //    BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
-        //}
         private void GetAutoVoronoiCenter(Polygon parkingStall)
         {
             BufferParameters bufferParameters = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
