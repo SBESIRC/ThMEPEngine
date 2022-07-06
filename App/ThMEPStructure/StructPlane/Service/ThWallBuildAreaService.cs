@@ -1,12 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using NFox.Cad;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NFox.Cad;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
@@ -20,17 +17,9 @@ namespace ThMEPStructure.StructPlane.Service
         }
         public List<ThGeometry> BuildArea(List<ThGeometry> geos)
         {
-            var results = new List<ThGeometry>();
-            var wallGeos = geos
-                .Where(o => o.Properties != null)
-                .Where(o => o.Properties.ContainsKey("type"))
-                .Where(o => o.Properties["type"].ToString() == "IfcWall")
-                .ToList();
-
-            // 
-            geos.Where(o => !wallGeos.Contains(o))
-                .ForEach(o=> results.Add(o));
-
+            var wallGeos = geos.GetWallGeos();
+            var results = geos.Except(wallGeos).ToList();
+            
             var groups = wallGeos.GroupBy(x =>
             x.Properties["LineType"].ToString());            
             foreach (var group in groups)

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NFox.Cad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.SVG;
 
@@ -258,6 +260,83 @@ namespace ThMEPStructure.StructPlane.Service
                     return new Vector3d();
                 }
             }
+        }
+        public static DBObjectCollection Clip(this Entity polygon,
+           DBObjectCollection curves, bool inverted = false)
+        {
+            var results = new DBObjectCollection();
+            if (polygon is Polyline polyline)
+            {
+                results = ThCADCoreNTSGeometryClipper.Clip(polyline, curves, inverted);
+            }
+            else if (polygon is MPolygon mPolygon)
+            {
+                results = ThCADCoreNTSGeometryClipper.Clip(mPolygon, curves, inverted);
+            }
+            return results.OfType<Curve>().ToCollection();
+        }
+        public static List<string> FilterSlabElevations(this List<string> elevations,double flrHeight)
+        {
+            return elevations.Where(o =>
+            {
+                if (string.IsNullOrEmpty(o))
+                {
+                    return false;
+                }
+                else
+                {
+                    double tempV = 0.0;
+                    if (double.TryParse(o, out tempV))
+                    {
+                        return Math.Abs(tempV - flrHeight) <= 1.0 ? false : true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }).ToList();
+        }
+        public static bool IsTenThickSlab(this string content)
+        {
+            var values = content.GetDoubles();
+            if (values.Count == 1)
+            {
+                return Math.Abs(values[0] - 10.0) <= 1e-4;
+            }
+            return false;
+        }
+        public static string GetFloorRange(this List<ThFloorInfo> floorInfos,double flrBottomEle)
+        {
+            var result = "";
+            var stdFloors = floorInfos.Where(o =>
+            {
+                double bottomElevation = 0.0;
+                if (double.TryParse(o.Bottom_elevation, out bottomElevation))
+                {
+                    if (Math.Abs(bottomElevation - flrBottomEle) <= 1e-4)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (stdFloors.Count() == 1)
+            {
+                var stdFlr = stdFloors.First().StdFlrNo;
+                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlr);
+                if (floors.Count() == 1)
+                {
+                    result = floors.First().FloorNo.NumToChinese() + "层结构平面图";
+                }
+                else if (floors.Count() > 1)
+                {
+                    var startRange = floors.First().FloorNo.NumToChinese();
+                    var endRange = floors.Last().FloorNo.NumToChinese();
+                    result = startRange + "~" + endRange + "层结构平面图";
+                }
+            }
+            return result;
         }
     }
 }

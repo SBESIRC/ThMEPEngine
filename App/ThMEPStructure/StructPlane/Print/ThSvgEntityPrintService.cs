@@ -8,13 +8,14 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using acadApp = Autodesk.AutoCAD.ApplicationServices;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
-using ThMEPStructure.StructPlane.Print;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.Model.Printer;
 using ThMEPStructure.Common;
+using ThMEPStructure.StructPlane.Service;
 
-namespace ThMEPStructure.StructPlane.Service
+namespace ThMEPStructure.StructPlane.Print
 {
     internal class ThSvgEntityPrintService
     {
@@ -61,16 +62,12 @@ namespace ThMEPStructure.StructPlane.Service
             SetSysVariables();
 
             // 获取楼板的标高                
-            var elevations = GetSlabElevations(Geos);
-            elevations = FilterSlabElevations(elevations);
+            var elevations = Geos.GetSlabElevations();
+            elevations = elevations.FilterSlabElevations(FlrHeight);
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
 
-            // 给墙造洞
-            var buildAreaSevice =new ThWallBuildAreaService();
-            var newGeos =buildAreaSevice.BuildArea(Geos);
-
             // 打印对象
-            var res = PrintGeos(db, newGeos, slabHatchConfigs); //BeamLines,BeamTexts
+            var res = PrintGeos(db, Geos, slabHatchConfigs); //BeamLines,BeamTexts
 
             // 过滤多余文字
             var beamLines = res.Item1.ToDBObjectCollection(db);
@@ -104,9 +101,9 @@ namespace ThMEPStructure.StructPlane.Service
             PrintHeadText(db);
 
             // 打印柱表
-            var maxX= newGeos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
+            var maxX= Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                 .MaxPoint.X).OrderByDescending(o => o).FirstOrDefault();
-            var minY = newGeos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
+            var minY = Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                  .MinPoint.Y).OrderBy(o => o).FirstOrDefault();
             var elevationTblBasePt = new Point3d(maxX+1000.0, minY,0);
             var elevationInfos = GetElevationInfos();
@@ -130,57 +127,6 @@ namespace ThMEPStructure.StructPlane.Service
             acadApp.Application.SetSystemVariable("MEASUREMENT", Measurement);
         }
 
-        private void PrintHeadText(Database database)
-        {
-            // 打印自然层标识, eg 一层~五层结构平面层
-            var flrRange = GetFloorRange();
-            if (string.IsNullOrEmpty(flrRange))
-            {
-                return;
-            }
-            var extents = ObjIds.ToDBObjectCollection(database).ToExtents2d();
-            var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
-                extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
-            var printService = new ThPrintDrawingHeadService()
-            {
-                Head = flrRange,
-                DrawingSacle = this.DrawingScale,
-                BasePt = textCenter,
-            };
-            Append(printService.Print(database)); // 把结果存到ObjIds中
-        }
-        private string GetFloorRange()
-        {
-            var result = "";
-            var stdFloors = FloorInfos.Where(o =>
-            {
-                double bottomElevation = 0.0;
-                if (double.TryParse(o.Bottom_elevation,out bottomElevation))
-                {
-                    if(Math.Abs(bottomElevation-FlrBottomEle)<=1e-4)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            });
-            if(stdFloors.Count()==1)
-            {
-                var stdFlr = stdFloors.First().StdFlrNo;
-                var floors = FloorInfos.Where(o => o.StdFlrNo == stdFlr);
-                if(floors.Count()==1)
-                {
-                    result = floors.First().FloorNo.NumToChinese()+"层结构平面图";
-                }
-                else if (floors.Count() > 1)
-                {
-                    var startRange = floors.First().FloorNo.NumToChinese();
-                    var endRange = floors.Last().FloorNo.NumToChinese();
-                    result = startRange+"~"+endRange+ "层结构平面图";
-                }
-            }
-            return result;
-        }
         private DBObjectCollection FilterBeamMarks(
             DBObjectCollection beamLines,DBObjectCollection beamTexts)
         {
@@ -281,9 +227,9 @@ namespace ThMEPStructure.StructPlane.Service
                     if(o.Boundary is DBText dbText)
                     {
                         // 文字为注释
-                        if (category == "IfcSlab")
+                        if (category == ThIfcCategoryManager.SlabCategory)
                         {
-                            if(IsTenThickSlab(dbText.TextString))
+                            if(dbText.TextString.IsTenThickSlab())
                             {
                                 // 不要打印到界面上
                                 //tenThckSlabTexts.Add(dbText); // 后面打开
@@ -297,7 +243,7 @@ namespace ThMEPStructure.StructPlane.Service
                                 Append(printer.Print(db, dbText));
                             }
                         }
-                        else if (category == "IfcBeam")
+                        else if (category == ThIfcCategoryManager.BeamCategory)
                         {
                             var decription = o.Properties.GetDescription();
                             if(string.IsNullOrEmpty(decription))
@@ -345,7 +291,7 @@ namespace ThMEPStructure.StructPlane.Service
                     }
                     else
                     {
-                        if (category == "IfcBeam")
+                        if (category == ThIfcCategoryManager.BeamCategory)
                         {
                             var config = GetBeamConfig(o.Properties);
                             var printer = new ThBeamPrinter(config);
@@ -353,28 +299,15 @@ namespace ThMEPStructure.StructPlane.Service
                             Append(beamRes);
                             beamRes.OfType<ObjectId>().ForEach(e => beamLines.Add(e));
                         }
-                        else if (category == "IfcColumn")
+                        else if (category == ThIfcCategoryManager.ColumnCategory)
                         {
-                            var outlineConfig = GetColumnOutlineConfig(o.Properties);
-                            var hatchConfig = GetColumnHatchConfig(o.Properties);
-                            var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
-                            Append(printer.Print(db, o.Boundary as Polyline));
+                            Append(PrintColumn(db,o));
                         }
-                        else if (category == "IfcWall")
+                        else if (category == ThIfcCategoryManager.WallCategory)
                         {
-                            var outlineConfig = GetShearWallConfig(o.Properties);
-                            var hatchConfig = GetShearWallHatchConfig(o.Properties);
-                            var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
-                            if (o.Boundary is Polyline polyline)
-                            {
-                                Append(printer.Print(db, polyline));
-                            }
-                            else if (o.Boundary is MPolygon mPolygon)
-                            {
-                                Append(printer.Print(db, mPolygon));
-                            }                            
+                            Append(PrintShearWall(db,o));
                         }
-                        else if (category == "IfcSlab")
+                        else if (category == ThIfcCategoryManager.SlabCategory)
                         {
                             var outlineConfig = ThSlabPrinter.GetSlabConfig();
                             var bg = o.Properties.GetElevation();                            
@@ -394,10 +327,10 @@ namespace ThMEPStructure.StructPlane.Service
                                 }
                             }                            
                         }
-                        else if (category == "IfcOpeningElement")
+                        else if (category == ThIfcCategoryManager.OpeningElementCategory)
                         {
-                            var outlineConfig = GetOpeningConfig(o.Properties);
-                            var hatchConfig = GetOpeningHatchConfig(o.Properties);
+                            var outlineConfig = ThHolePrinter.GetHoleConfig();
+                            var hatchConfig = ThHolePrinter.GetHoleHatchConfig();
                             var printer = new ThHolePrinter(hatchConfig, outlineConfig);
                             Append(printer.Print(db, o.Boundary as Polyline));
                         }
@@ -419,47 +352,6 @@ namespace ThMEPStructure.StructPlane.Service
             }   
         }      
 
-        private bool IsTenThickSlab(string content)
-        {
-            var values = content.GetDoubles();
-            if(values.Count==1)
-            {
-                return Math.Abs(values[0] - 10.0) <= 1e-4;
-            }
-            return false;
-        }
-
-        private List<string> GetSlabElevations(List<ThGeometry> geos)
-        {
-            var groups = geos
-                .Where(g => g.Properties.GetCategory() == "IfcSlab" && !(g.Boundary is DBText))
-                .Select(g => g.Properties.GetElevation())
-                .Where(g => !string.IsNullOrEmpty(g))
-                .GroupBy(o => o);
-            return groups.OrderByDescending(o => o.Count()).Select(o => o.Key).ToList();
-        }
-        private List<string> FilterSlabElevations(List<string> elevations)
-        {
-            return elevations.Where(o =>
-             {
-                 if (string.IsNullOrEmpty(o))
-                 {
-                     return false;
-                 }
-                 else
-                 {
-                     double tempV = 0.0;
-                     if (double.TryParse(o, out tempV))
-                     {
-                         return Math.Abs(tempV - FlrHeight) <= 1.0 ? false:true ;
-                     }
-                     else
-                     {
-                         return false;
-                     }
-                 }
-             }).ToList();
-        }
         private void Import(Database database)
         {
             using (var acadDb = AcadDatabase.Use(database))
@@ -505,71 +397,8 @@ namespace ThMEPStructure.StructPlane.Service
                 }
                 return config;
             }
-        }
-        private PrintConfig GetColumnOutlineConfig(Dictionary<string, object> properties)
-        {
-            var fillColor = properties.GetFillColor();
-            if(fillColor == "#7f3f3f") // 上层柱
-            {
-                return ThColumnPrinter.GetUpperColumnConfig();
-            }
-            else if(fillColor == "#ff0000" || fillColor == "Red") //下层柱
-            {
-                return ThColumnPrinter.GetBelowColumnConfig();
-            }
-            else
-            {
-                return new PrintConfig();
-            }
-        }
-        private HatchPrintConfig GetColumnHatchConfig(Dictionary<string, object> properties)
-        {
-            var fillColor = properties.GetFillColor();
-            if (fillColor == "#7f3f3f") // 上层柱
-            {
-                return ThColumnPrinter.GetUpperColumnHatchConfig();
-            }
-            else if (fillColor == "#ff0000" || fillColor == "Red") //下层柱
-            {
-                return ThColumnPrinter.GetBelowColumnHatchConfig();
-            }
-            else
-            {
-                return new HatchPrintConfig();                
-            }
-        }
-        private PrintConfig GetShearWallConfig(Dictionary<string, object> properties)
-        {
-            var fillColor = properties.GetFillColor();
-            if (fillColor == "#ff7f00") // 上层墙
-            {
-                return ThShearwallPrinter.GetUpperShearWallConfig();
-            }
-            else if (fillColor == "#ffff00" || fillColor == "Yellow") //下层墙
-            {
-                return ThShearwallPrinter.GetBelowShearWallConfig();
-            }
-            else
-            {
-                return new PrintConfig();
-            }
-        }
-        private HatchPrintConfig GetShearWallHatchConfig(Dictionary<string, object> properties)
-        {
-            var fillColor = properties.GetFillColor();
-            if (fillColor == "#ff7f00") // 上层墙
-            {
-                return ThShearwallPrinter.GetUpperShearWallHatchConfig();
-            }
-            else if (fillColor == "#ffff00" || fillColor == "Yellow") //下层墙
-            {
-                return ThShearwallPrinter.GetBelowShearWallHatchConfig();
-            }
-            else
-            {
-                return new HatchPrintConfig();
-            }
-        }
+        }        
+        
         private Dictionary<string,HatchPrintConfig> GetSlabHatchConfigs(List<string> elevations)
         {
             var results = new Dictionary<string,HatchPrintConfig>();
@@ -587,14 +416,66 @@ namespace ThMEPStructure.StructPlane.Service
             }
             return results;
         }
-        private PrintConfig GetOpeningConfig(Dictionary<string, object> properties)
+        private ObjectIdCollection PrintColumn(Database db, ThGeometry column)
         {
-            return ThHolePrinter.GetHoleConfig();
+            bool isUpper = column.IsUpperFloorColumn();
+            bool isBelow = column.IsBelowFloorColumn();
+            var outlineConfig = new PrintConfig();
+            var hatchConfig = new HatchPrintConfig();
+            if (isUpper || isBelow)
+            {
+                outlineConfig = isUpper ? ThColumnPrinter.GetUpperColumnConfig() : ThColumnPrinter.GetBelowColumnConfig();
+                hatchConfig = isUpper ? ThColumnPrinter.GetUpperColumnHatchConfig() : ThColumnPrinter.GetBelowColumnHatchConfig();
+            }
+            var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
+            return printer.Print(db, column.Boundary as Polyline);            
         }
-        private HatchPrintConfig GetOpeningHatchConfig(Dictionary<string, object> properties)
+        private ObjectIdCollection PrintShearWall(Database db, ThGeometry shearwall)
         {
-            return ThHolePrinter.GetHoleHatchConfig();
+            bool isUpper = shearwall.IsUpperFloorShearWall();
+            bool isBelow = shearwall.IsBelowFloorShearWall();
+            var outlineConfig = new PrintConfig();
+            var hatchConfig = new HatchPrintConfig();
+            if (isUpper || isBelow)
+            {
+                outlineConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallConfig() : ThShearwallPrinter.GetBelowShearWallConfig();
+                hatchConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallHatchConfig() : ThShearwallPrinter.GetBelowShearWallHatchConfig();
+            }
+            var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
+            if (shearwall.Boundary is Polyline polyline)
+            {
+                return printer.Print(db, polyline);
+            }
+            else if (shearwall.Boundary is MPolygon mPolygon)
+            {
+                return printer.Print(db, mPolygon);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
         }
+
+        private void PrintHeadText(Database database)
+        {
+            // 打印自然层标识, eg 一层~五层结构平面层
+            var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
+            if (string.IsNullOrEmpty(flrRange))
+            {
+                return;
+            }
+            var extents = ObjIds.ToDBObjectCollection(database).ToExtents2d();
+            var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
+                extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
+            var printService = new ThPrintDrawingHeadService()
+            {
+                Head = flrRange,
+                DrawingSacle = this.DrawingScale,
+                BasePt = textCenter,
+            };
+            Append(printService.Print(database)); // 把结果存到ObjIds中
+        }
+
         private void Append(ObjectIdCollection objIds)
         {
             foreach(ObjectId objId in objIds)

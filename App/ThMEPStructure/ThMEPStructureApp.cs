@@ -17,6 +17,7 @@ using ThMEPStructure.ArchitecturePlane.Service;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using DotNetARX;
+using ThMEPStructure.StructPlane;
 
 namespace ThMEPStructure
 {
@@ -161,7 +162,7 @@ namespace ThMEPStructure
             if (pfnr.Status == PromptStatus.OK)
             {
                 // 解析
-                var svg = new ThMEPEngineCore.IO.SVG.ThStructureSVGReader();
+                var svg = new ThStructureSVGReader();
                 svg.ReadFromFile(pfnr.StringResult);
 
                 //// 沿着X轴镜像
@@ -169,7 +170,7 @@ namespace ThMEPStructure
                 //geometries.ForEach(o => o.Boundary.TransformBy(mt));
 
                 // Print                    
-                var prinService = new ThSvgEntityPrintService(svg.Geos,
+                var prinService = new StructPlane.Print.ThSvgEntityPrintService(svg.Geos,
                     svg.FloorInfos,svg.DocProperties);
                 prinService.Print(Active.Database);
             }
@@ -186,7 +187,7 @@ namespace ThMEPStructure
             if (pfnr.Status == PromptStatus.OK)
             {
                 // 解析
-                var svg = new ThMEPEngineCore.IO.SVG.ThArchitectureSVGReader();
+                var svg = new ThArchitectureSVGReader();
                 svg.ReadFromFile(pfnr.StringResult);
 
                 // Print

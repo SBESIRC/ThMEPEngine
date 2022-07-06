@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using AcHelper;
 using ThMEPStructure.Common;
+using ThMEPStructure.StructPlane.Service;
 
-namespace ThMEPStructure.StructPlane.Service
+namespace ThMEPStructure.StructPlane
 {
     internal class ThStructurePlaneGenerator
     {
