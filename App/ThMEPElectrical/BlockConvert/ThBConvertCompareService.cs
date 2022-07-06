@@ -56,24 +56,32 @@ namespace ThMEPElectrical.BlockConvert
                         Database = currentDb.Database,
                         SourceID = o.Value.ObjectId,
                     };
-                    CompareModels.Add(result);
-                    searchedIds.Add(o.Value.ObjectId);
 
-                    var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
-                    var filterPoint = targetIndex.SelectCrossingPolygon(searchCircle).OfType<DBPoint>().ToList();
-                    if (filterPoint.Count > 0)
+                    var sourceName = o.Value.ObjectId.GetBlockName();
+                    if (sourceName.KeepChinese().Equals(ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION))
                     {
-                        var sourceName = o.Value.ObjectId.GetBlockName();
-                        var filterEntity = filterPoint.Select(p => targetEntitiesMap[p].ObjectId).Where(id => id.GetBlockName().Equals(sourceName));
-                        foreach (var id in filterEntity)
-                        {
-                            result.TargetID = id;
-                            result.Type = ThBConvertCompareType.Unchanged;
-                            searchedIds.Add(id);
-                            return;
-                        }
+
                     }
-                    result.Type = ThBConvertCompareType.Delete;
+                    else
+                    {
+                        CompareModels.Add(result);
+                        searchedIds.Add(o.Value.ObjectId);
+
+                        var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
+                        var filterPoint = targetIndex.SelectCrossingPolygon(searchCircle).OfType<DBPoint>().ToList();
+                        if (filterPoint.Count > 0)
+                        {
+                            var filterEntity = filterPoint.Select(p => targetEntitiesMap[p].ObjectId).Where(id => id.GetBlockName().Equals(sourceName));
+                            foreach (var id in filterEntity)
+                            {
+                                result.TargetID = id;
+                                result.Type = ThBConvertCompareType.Unchanged;
+                                searchedIds.Add(id);
+                                return;
+                            }
+                        }
+                        result.Type = ThBConvertCompareType.Delete;
+                    }
                 });
                 targetEntitiesMap.ForEach(o =>
                 {
