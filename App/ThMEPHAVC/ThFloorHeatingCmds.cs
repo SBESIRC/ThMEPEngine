@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 
 using Linq2Acad;
 using ThCADCore.NTS;
@@ -19,6 +20,7 @@ using ThMEPHVAC.FloorHeatingCoil.Cmd;
 using ThMEPHVAC.FloorHeatingCoil.Data;
 using ThMEPHVAC.FloorHeatingCoil.Service;
 using ThMEPHVAC.FloorHeatingCoil.Model;
+
 
 namespace ThMEPHVAC
 {
@@ -57,6 +59,7 @@ namespace ThMEPHVAC
 
                 var dataQuery = new ThFloorHeatingDataProcessService()
                 {
+                    WithUI = false,
                     InputExtractors = dataFactory.Extractors,
                     FurnitureObstacleData = dataFactory.SanitaryTerminal,
                     RoomSeparateLine = dataFactory.RoomSeparateLine,
@@ -85,7 +88,7 @@ namespace ThMEPHVAC
                 {
                     { "单盆洗手台",new List<string> {"A-Toilate-1"} },
                 };
-
+                ThFloorHeatingCoilSetting.Instance.WithUI = false;
 
                 using (var cmd = new ThFloorHeatingCmd())
                 {
@@ -95,6 +98,7 @@ namespace ThMEPHVAC
 
             }
         }
+
 
 
     }

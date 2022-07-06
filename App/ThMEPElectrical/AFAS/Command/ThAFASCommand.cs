@@ -52,7 +52,7 @@ namespace ThMEPElectrical.AFAS.Command
                                 ////加\n自动回车 否则用户要敲回车键。
                                 ////CommandHandlerBase.ExecuteFromCommandLine(false, "THFASmoke") 是异步，这里不适用
                                 ////Active.Editor.Command(new Object[] { "THFASmoke" });没有ui模式可以，有ui模式会报错
-                                ////sendCommand同步调用。cmd cammand flag需要是session。
+                                ////sendCommand是异步调用。cmd cammand flag需要是session包一层命令强制同步调用。
                                 document.SendCommand("THFASmoke" + "\n");
                                 break;
                             }

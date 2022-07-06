@@ -10,11 +10,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
     public class ThFloorHeatingRoom
     {
-        public MPolygon RoomBoundary { get; private set; }
+        public Polyline RoomBoundary { get; private set; }
         public List<string> Name { get; private set; }
         public double SuggestDist { get; private set; }
 
-        public ThFloorHeatingRoom(MPolygon room)
+        public ThFloorHeatingRoom(Polyline room)
         {
             RoomBoundary = room;
             Name = new List<string>();
@@ -29,7 +29,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
         public void SetSuggestDist(double d)
         {
-            SuggestDist = d;
+            if (SuggestDist != 0)
+            {
+                SuggestDist = d;
+            }
         }
 
 

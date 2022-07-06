@@ -9,6 +9,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
     public class ThFloorHeatingCoilSetting
     {
         public Dictionary<string, List<string>> BlockNameDict { get; set; }
+        public bool WithUI = false;
         public static ThFloorHeatingCoilSetting Instance = new ThFloorHeatingCoilSetting();
 
         public ThFloorHeatingCoilSetting()

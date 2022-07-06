@@ -27,6 +27,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
     public class ThFloorHeatingCmd : ThMEPBaseCommand, IDisposable
     {
         private Dictionary<string, List<string>> _BlockNameDict;
+        private bool WithUI = false;
 
         public ThFloorHeatingCmd()
         {
@@ -41,6 +42,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
         private void InitialSetting()
         {
             _BlockNameDict = ThFloorHeatingCoilSetting.Instance.BlockNameDict;
+            WithUI = ThFloorHeatingCoilSetting.Instance.WithUI;
         }
         public override void SubExecute()
         {
@@ -73,6 +75,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
                 var dataQuery = new ThFloorHeatingDataProcessService()
                 {
+                    WithUI = this.WithUI,
                     InputExtractors = dataFactory.Extractors,
                     FurnitureObstacleData = dataFactory.SanitaryTerminal,
                     RoomSeparateLine = dataFactory.RoomSeparateLine,
