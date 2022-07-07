@@ -386,7 +386,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         
         public override void DrawCJin()
         {
-
+            try { 
             StrToReinforce RReinStr = new StrToReinforce();
             RReinStr = Helper.StrToRein(thRectangleEdgeComponent.Reinforce);
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
@@ -642,37 +642,43 @@ namespace ThMEPStructure.Reinforcement.Draw
 
             }
 
-            //StrToReinforce TReinStr = new StrToReinforce();
-            //TReinStr = Helper.StrToRein(thRectangleEdgeComponent.Reinforce);
-            //List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
-            //R_FindCJin(points, TReinStr, ZongjinPoints);
-            //for (int i = 0; i < ZongjinPoints.Count; i++)
-            //{
-            //    if (ZongjinPoints[i].hasUse == true)
-            //    {
-            //        Point3d pos = ZongjinPoints[i].position;
-            //        var pts = new Point3dCollection {
+                //StrToReinforce TReinStr = new StrToReinforce();
+                //TReinStr = Helper.StrToRein(thRectangleEdgeComponent.Reinforce);
+                //List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
+                //R_FindCJin(points, TReinStr, ZongjinPoints);
+                //for (int i = 0; i < ZongjinPoints.Count; i++)
+                //{
+                //    if (ZongjinPoints[i].hasUse == true)
+                //    {
+                //        Point3d pos = ZongjinPoints[i].position;
+                //        var pts = new Point3dCollection {
 
-            //            pos+new Vector3d(-150,150,0),
-            //            pos+new Vector3d(150,150,0),
-            //            pos+new Vector3d(150,-150,0),
-            //            pos+new Vector3d(-150,-150,0)
-            //        };
-            //        Polyline rect = new Polyline();
-            //        rect = pts.CreatePolyline();
-            //        LabelAndRect.Add(rect);
-            //        Polyline label = new Polyline();
-            //        label.AddVertexAt(0, new Point2d((pts[0].X + pts[1].X) / 2, (pts[0].Y + pts[1].Y) / 2), 0, 0, 0);
-            //        label.AddVertexAt(1, new Point2d((pts[0].X + pts[1].X) / 2, (pts[0].Y + pts[1].Y) / 2 + 100), 0, 0, 0);
-            //        label.AddVertexAt(2, new Point2d((pts[0].X + pts[1].X) / 2 - 500, (pts[0].Y + pts[1].Y) / 2 + 100), 0, 0, 0);
-            //        LabelAndRect.Add(label);
-            //        DBText txt = new DBText();
-            //        txt.TextString = "1C" + ZongjinPoints[i].size;
-            //        txt.Height = 150;
-            //        txt.Position = label.GetPoint3dAt(2) + new Vector3d(0, 50, 0);
-            //        CJintText.Add(txt);
-            //    }
-            //}
+                //            pos+new Vector3d(-150,150,0),
+                //            pos+new Vector3d(150,150,0),
+                //            pos+new Vector3d(150,-150,0),
+                //            pos+new Vector3d(-150,-150,0)
+                //        };
+                //        Polyline rect = new Polyline();
+                //        rect = pts.CreatePolyline();
+                //        LabelAndRect.Add(rect);
+                //        Polyline label = new Polyline();
+                //        label.AddVertexAt(0, new Point2d((pts[0].X + pts[1].X) / 2, (pts[0].Y + pts[1].Y) / 2), 0, 0, 0);
+                //        label.AddVertexAt(1, new Point2d((pts[0].X + pts[1].X) / 2, (pts[0].Y + pts[1].Y) / 2 + 100), 0, 0, 0);
+                //        label.AddVertexAt(2, new Point2d((pts[0].X + pts[1].X) / 2 - 500, (pts[0].Y + pts[1].Y) / 2 + 100), 0, 0, 0);
+                //        LabelAndRect.Add(label);
+                //        DBText txt = new DBText();
+                //        txt.TextString = "1C" + ZongjinPoints[i].size;
+                //        txt.Height = 150;
+                //        txt.Position = label.GetPoint3dAt(2) + new Vector3d(0, 50, 0);
+                //        CJintText.Add(txt);
+                //    }
+                //}
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+                return;
+            }
         }
         protected override void CalLinkPosition()
         {

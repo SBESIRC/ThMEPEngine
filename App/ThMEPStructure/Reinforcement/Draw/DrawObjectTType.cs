@@ -1799,6 +1799,7 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public override void DrawCJin()
         {
+            try {
             StrToReinforce TReinStr = new StrToReinforce();
             TReinStr = Helper.StrToRein(thTTypeEdgeComponent.Reinforce);
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
@@ -3620,6 +3621,12 @@ namespace ThMEPStructure.Reinforcement.Draw
 
                     }
                 }
+            }
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+                return;
             }
 
         }
