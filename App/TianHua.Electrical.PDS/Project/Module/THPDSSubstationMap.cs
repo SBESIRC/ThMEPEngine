@@ -7,6 +7,7 @@ using TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
+    [Serializable]
     public class THPDSSubstationMap
     {
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using QuikGraph;
 using System.ComponentModel;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -33,14 +34,30 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSCircuitGraphNode()
         {
             Loads = new List<ThPDSLoad>();
+            LightingCableTray = new ThPDSLightingCableTray();
         }
 
         public PDSNodeType NodeType { get; set; }
         public List<ThPDSLoad> Loads { get; set; }
+        public ThPDSLightingCableTray LightingCableTray { get; set; }
 
         public bool Equals(ThPDSCircuitGraphNode other)
         {
             return this.NodeType == other.NodeType && this.Loads.SequenceEqual(other.Loads);
+        }
+
+        public void SetOnLightingCableTray(bool onLlightingCableTray, Curve cableTray)
+        {
+            if (!onLlightingCableTray)
+            {
+                return;
+            }
+
+            LightingCableTray = new ThPDSLightingCableTray
+            {
+                OnLightingCableTray = onLlightingCableTray,
+                CableTray = cableTray,
+            };
         }
     }
 

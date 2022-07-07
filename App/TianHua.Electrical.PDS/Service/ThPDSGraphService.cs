@@ -156,12 +156,12 @@ namespace TianHua.Electrical.PDS.Service
                 var load = service.LoadMarkAnalysis(textFilter, distBoxKey, LoadBlocks[entity], ref attributesCopy);
                 load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
                 load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
-                load.SetOnLightingCableTray(true, cableTray);
                 loads.Add(load);
             }
 
             node.Loads = loads;
             node.NodeType = PDSNodeType.Load;
+            node.SetOnLightingCableTray(true, cableTray);
             return node;
         }
 

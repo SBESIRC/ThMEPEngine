@@ -344,7 +344,7 @@ namespace TianHua.Electrical.PDS.Engine
                             thisMark.Texts.AddRange(thisCircuitMark.Texts);
                             thisMark.ObjectIds.AddRange(thisCircuitMark.ObjectIds);
                             var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey, buffer);
-                            newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray, cableTray);
+                            newNode.SetOnLightingCableTray(onLightingCableTray, cableTray);
                             cacheNodes.Add(newNode);
                             cacheDistBoxes.Add(distBox);
                             if (!CacheDistBoxes.ContainsKey(distBox))
@@ -620,7 +620,7 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         var objectIds = new List<ObjectId>();
                         var newNode = ThPDSGraphService.CreateNode(distBox, Database, MarkService, DistBoxKey, objectIds);
-                        newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray, curve);
+                        newNode.SetOnLightingCableTray(onLightingCableTray, curve);
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
                         NodeMap.Add(newNode, objectIds);
@@ -831,7 +831,7 @@ namespace TianHua.Electrical.PDS.Engine
                 objectIds, ref attributesCopy);
             if (onLightingCableTray)
             {
-                newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray, cableTray);
+                newNode.SetOnLightingCableTray(onLightingCableTray, cableTray);
             }
             PDSGraph.Graph.AddVertex(newNode);
             NodeMap.Add(newNode, objectIds);
@@ -1640,10 +1640,10 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var distBoxesInAreas = PDSGraph.Graph.Vertices
                 .Where(v => v.NodeType == PDSNodeType.DistributionBox)
-                .Where(v => v.Loads[0].GetOnLightingCableTray().OnLightingCableTray).ToList();
+                .Where(v => v.LightingCableTray.OnLightingCableTray).ToList();
             var loadsInAreas = PDSGraph.Graph.Vertices
                 .Where(v => v.NodeType == PDSNodeType.Load)
-                .Where(v => v.Loads[0].GetOnLightingCableTray().OnLightingCableTray).ToList();
+                .Where(v => v.LightingCableTray.OnLightingCableTray).ToList();
             if (loadsInAreas.Count == 0)
             {
                 return;
@@ -1654,8 +1654,8 @@ namespace TianHua.Electrical.PDS.Engine
 
             cableTrayFrames.ForEach(frame =>
             {
-                var loads = loadsInAreas.Where(node => frame.Contains(node.Loads[0].GetOnLightingCableTray().CableTray)).ToList();
-                var distBoxes = distBoxesInAreas.Where(node => frame.Contains(node.Loads[0].GetOnLightingCableTray().CableTray)).ToList();
+                var loads = loadsInAreas.Where(node => frame.Contains(node.LightingCableTray.CableTray)).ToList();
+                var distBoxes = distBoxesInAreas.Where(node => frame.Contains(node.LightingCableTray.CableTray)).ToList();
                 if (loads.Count == 0 || distBoxes.Count == 0)
                 {
                     return;
