@@ -35,6 +35,7 @@ namespace ThMEPWSS.HydrantLayout.Command
         private int _layoutMode = 2;
         private int _layoutObject = 2;
         private bool _avoidParking = true;
+        private bool _layoutInMiddle = false;
         public Dictionary<string, List<string>> _BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
         public ThHydrantLayoutCmd()
         {
@@ -54,6 +55,7 @@ namespace ThMEPWSS.HydrantLayout.Command
             _layoutMode = HydrantLayoutSetting.Instance.LayoutMode;
             _avoidParking = HydrantLayoutSetting.Instance.AvoidParking;
             _BlockNameDict = HydrantLayoutSetting.Instance.BlockNameDict;
+            _layoutInMiddle = HydrantLayoutSetting.Instance.LayoutInMiddle;
         }
 
         public override void SubExecute()

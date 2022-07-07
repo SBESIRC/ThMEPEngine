@@ -8,14 +8,14 @@
         xmlns:viewmodels="clr-namespace:ThMEPWSS.HydrantLayout.Model;assembly=ThMEPWSS"
         mc:Ignorable="d" 
         SizeToContent="Height" 
-        Width="160" 
+        Width="260" 
         Title="消火栓灭火器调整">
     <Window.Resources>
         <ResourceDictionary>
             <local:LayoutConverter x:Key="LayoutConverter"/>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="5 10 10 10">
+    <Grid Margin="10 10 10 10">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
@@ -34,8 +34,8 @@
         </StackPanel>
         <Grid Grid.Row="1" Margin="0 0 0 0" >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="6*"></ColumnDefinition>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" Grid.Column="0">
                 <CheckBox Content="消火栓" IsChecked="{Binding CheckHydrant,Mode=TwoWay,NotifyOnSourceUpdated=True}" />
@@ -64,8 +64,17 @@
             <Label Content="靠柱布置时立管形式："/>
         </Grid>
         <Grid Grid.Row="5" >
-            <RadioButton  GroupName="rbMode" Content="立管在消火栓侧面"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="6*"></ColumnDefinition>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel  Grid.Column="0">
+                <RadioButton  GroupName="rbMode" Content="立管在消火栓侧面"
                           IsChecked="{Binding LayoutMode,Converter={StaticResource LayoutConverter},ConverterParameter=0}" Height="14" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <StackPanel  Grid.Column="1">
+                <CheckBox  Content="柱子中间布置" IsChecked="{Binding LayoutInMiddle,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+            </StackPanel>
         </Grid>
         <Grid Grid.Row="6" >
             <RadioButton  GroupName="rbMode" Content="立管在消火栓背面"

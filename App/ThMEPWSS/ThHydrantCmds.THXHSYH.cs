@@ -55,11 +55,13 @@ namespace ThMEPWSS
 
 
             var avoidParking = ThMEPWSSUtils.SettingBoolean("\n车位是否阻挡开门", 1);
+            var layoutInMid = ThMEPWSSUtils.SettingBoolean("\n一字布置在中间", 0);
 
             HydrantLayoutSetting.Instance.LayoutObject = Convert.ToInt32(layoutObject);
             HydrantLayoutSetting.Instance.SearchRadius = radius;
             HydrantLayoutSetting.Instance.LayoutMode = Convert.ToInt32(layoutMode);
             HydrantLayoutSetting.Instance.AvoidParking = avoidParking;
+            HydrantLayoutSetting.Instance.LayoutInMiddle = layoutInMid;
             HydrantLayoutSetting.Instance.BlockNameDict = new Dictionary<string, List<string>>()
                                 {
                                     { "集水井", new List<string>() { "A-Well-1" }},

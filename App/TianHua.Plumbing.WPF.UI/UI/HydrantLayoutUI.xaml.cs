@@ -70,6 +70,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             HydrantLayoutSetting.Instance.LayoutMode = (int)VM.LayoutMode;//一字（0） L字（1） 两者都考虑（2）
             HydrantLayoutSetting.Instance.SearchRadius = VM.SearchRadius;
             HydrantLayoutSetting.Instance.AvoidParking = VM.AvoidParking;
+            HydrantLayoutSetting.Instance.LayoutInMiddle = VM.LayoutInMiddle;
             HydrantLayoutSetting.Instance.BlockNameDict = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
 
         }
@@ -82,6 +83,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             Active.Document.Window.Focus();
 #endif
         }
+
     }
 
     public class LayoutConverter : IValueConverter
