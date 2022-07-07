@@ -18,6 +18,7 @@ using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using DotNetARX;
 using ThMEPStructure.StructPlane;
+using ThMEPStructure.StructPlane.Print;
 
 namespace ThMEPStructure
 {
@@ -169,9 +170,19 @@ namespace ThMEPStructure
                 //var mt = Matrix3d.Rotation(System.Math.PI, Vector3d.XAxis, Point3d.Origin);
                 //geometries.ForEach(o => o.Boundary.TransformBy(mt));
 
-                // Print                    
-                var prinService = new StructPlane.Print.ThSvgEntityPrintService(svg.Geos,
-                    svg.FloorInfos,svg.DocProperties);
+                // Print
+                var svgInput = new ThSvgInput()
+                {
+                    Geos = svg.Geos,
+                    FloorInfos = svg.FloorInfos,
+                    DocProperties = svg.DocProperties,
+                };
+                var printPara = new ThPlanePrintParameter()
+                {
+                    DrawingScale = "1:100",
+                };
+                Active.Database.ImportStruPlaneTemplate();
+                var prinService = new ThStruPlanDrawingPrinter(svgInput, printPara);
                 prinService.Print(Active.Database);
             }
         }
@@ -191,7 +202,7 @@ namespace ThMEPStructure
                 svg.ReadFromFile(pfnr.StringResult);
 
                 // Print
-                var svgInput = new ThArchSvgInput()
+                var svgInput = new ThSvgInput()
                 {
                     Geos = svg.Geos,
                     FloorInfos = svg.FloorInfos,
@@ -218,6 +229,11 @@ namespace ThMEPStructure
                 }
                 if(printer!=null)
                 {
+                    // 从模板导入要打印的图层
+                    if (!ThImportDatabaseService.ImportArchDwgTemplate(Active.Database))
+                    {
+                        return;
+                    }
                     printer.Print(Active.Database);
                     Active.Document.SendCommand("HatchToBack", "\n");
                 } 
@@ -244,13 +260,32 @@ namespace ThMEPStructure
                 
                 if(!string.IsNullOrEmpty(ifcFilePath))
                 {
+                    var options = new PromptKeywordOptions("\n选择出图方式");
+                    options.Keywords.Add("结构平面图", "P", "结构平面图(P)");
+                    options.Keywords.Add("墙柱施工图", "D", "墙柱施工图(D)");
+                    options.Keywords.Default = "结构平面图";
+                    options.AllowArbitraryInput = true;
+                    var result1 = Active.Editor.GetKeywords(options);
+                    if (result1.Status != PromptStatus.OK)
+                    {
+                        return;
+                    }
+                    var printParameter = new ThPlanePrintParameter()
+                    {
+                        DrawingScale = "1:100",
+                    };
                     var config = new ThPlaneConfig()
                     {
                         IfcFilePath = ifcFilePath,
                         SvgSavePath = "",
                         DrawingType = DrawingType.Structure,
                     };
-                    var generator = new ThStructurePlaneGenerator(config);
+                    config.JsonConfig.GlobalConfig.eye_dir = new Direction(0, 0, -1);
+                    config.JsonConfig.GlobalConfig.up = new Direction(0, 1, 0);
+                    var generator = new ThStructurePlaneGenerator(config, printParameter)
+                    {
+                        DrawingType = result1.StringResult,
+                    };
                     generator.Generate();
                 }               
             }
@@ -300,11 +335,15 @@ namespace ThMEPStructure
                         break;
                 }
 
+                var printParameter = new ThPlanePrintParameter()
+                {
+                    DrawingScale ="1:100",
+                };
+
                 var config = new ThPlaneConfig()
                 {
                     IfcFilePath = pfnr.StringResult,
                     SvgSavePath = "",
-                    DrawingScale = "1:100",
                     DrawingType = drawingType,
                 };
                 config.JsonConfig.SvgConfig.image_size = null;
@@ -328,7 +367,7 @@ namespace ThMEPStructure
                         return;
                     }
                 }
-                var generator = new ThArchitectureGenerator(config);
+                var generator = new ThArchitectureGenerator(config, printParameter);
                 generator.Generate();
             }
         }

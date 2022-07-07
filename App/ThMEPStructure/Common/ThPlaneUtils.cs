@@ -6,6 +6,7 @@ using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO.SVG;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPStructure.Common
 {
@@ -186,6 +187,82 @@ namespace ThMEPStructure.Common
                     .Where(o => !o.IsErased)
                     .Select(o => acadDb.Element<Entity>(o)).ToCollection();
             }
+        }
+        public static void SetLayerOrder(this List<ObjectIdCollection> floorObjIds,List<string> layerPriority)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                // build dict
+                var dict = new Dictionary<string, ObjectIdCollection>();
+                floorObjIds.ForEach(o =>
+                {
+                    o.OfType<ObjectId>().ForEach(e =>
+                    {
+                        var entity = acadDb.Element<Entity>(e, true);
+
+                        if (dict.ContainsKey(entity.Layer))
+                        {
+                            dict[entity.Layer].Add(e);
+                        }
+                        else
+                        {
+                            var objIds = new ObjectIdCollection() { e };
+                            dict.Add(entity.Layer, objIds);
+                        }
+                    });
+                });
+
+                var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId);
+                var btrModelSpace = acadDb.Element<BlockTableRecord>(bt[BlockTableRecord.ModelSpace]);
+                var dot = acadDb.Element<DrawOrderTable>(btrModelSpace.DrawOrderTableId, true);
+
+                layerPriority.ForEach(layer =>
+                {
+                    if (dict.ContainsKey(layer))
+                    {
+                        dot.MoveToBottom(dict[layer]);
+                    }
+                });
+            }
+        }
+        public static void Layout(this List<ObjectIdCollection> floorObjIds,double floorSpacing)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                for (int i = 0; i < floorObjIds.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        continue;
+                    }
+                    var dir = new Vector3d(0, i * floorSpacing, 0);
+                    var mt = Matrix3d.Displacement(dir);
+                    floorObjIds[i].OfType<ObjectId>().ForEach(o =>
+                    {
+                        var entity = acadDb.Element<Entity>(o, true);
+                        entity.TransformBy(mt);
+                    });
+                }
+            }
+        }
+        public static bool IsIncludeHatch(this List<ObjectIdCollection> floorObjIds)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                for (int i = 0; i < floorObjIds.Count; i++)
+                {
+                    if (floorObjIds[i].OfType<ObjectId>().Where(id => acadDb.Element<Entity>(id) is Hatch).Any())
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        public static bool IsInteger(this string content)
+        {
+            string pattern = @"^\s*\d+\s*$";
+            return System.Text.RegularExpressions.Regex.IsMatch(content, pattern);
         }
     }
 }

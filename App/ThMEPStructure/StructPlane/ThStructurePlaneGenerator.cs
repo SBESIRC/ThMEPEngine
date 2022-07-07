@@ -3,17 +3,33 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using AcHelper;
+using NFox.Cad;
+using Linq2Acad;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using acadApp = Autodesk.AutoCAD.ApplicationServices;
+using ThMEPEngineCore.Model;
 using ThMEPStructure.Common;
+using ThMEPEngineCore.IO.SVG;
+using ThMEPStructure.StructPlane.Print;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane
 {
     internal class ThStructurePlaneGenerator
     {
+        /// <summary>
+        /// 结构出图类型
+        /// </summary>
+        public string DrawingType { get; set; }
         private ThPlaneConfig Config { get; set; }
-        public ThStructurePlaneGenerator(ThPlaneConfig config)
+        private ThPlanePrintParameter PrintParameter { get; set; }
+        public ThStructurePlaneGenerator(ThPlaneConfig config, ThPlanePrintParameter printParameter)
         {
             Config = config;
+            PrintParameter = printParameter;
         }
         public void Generate()
         {
@@ -71,8 +87,144 @@ namespace ThMEPStructure.StructPlane
         
         private void Print(List<string> svgFiles)
         {            
-            var printer = new ThMultiSvgPrintService(Active.Database,svgFiles);
-            printer.Print();
+            if(svgFiles.Count==0)
+            {
+                return;
+            }
+            Active.Database.ImportStruPlaneTemplate();
+            SetSysVariables();
+            var printers = new List<ThStruDrawingPrinter>();
+            if (DrawingType == "结构平面图")
+            {
+                printers = PrintStructurePlan(svgFiles);
+            }
+            else if (DrawingType == "墙柱施工图")
+            {
+                printers = PrintWallColumnDrawing(svgFiles);
+            }
+            var floorObjIds = printers.Select(o => o.ObjIds).ToList();
+            floorObjIds.Layout(PrintParameter.FloorSpacing);
+            InsertBasePoint();
+
+            // 设置DrawOrder
+            SetLayerOrder(floorObjIds);
+            if (floorObjIds.IsIncludeHatch())
+            {
+                Active.Document.SendCommand("HatchToBack" + "\n");
+            }
+        }
+
+        private void SetLayerOrder(List<ObjectIdCollection> floorObjIds)
+        {
+            // 按照图层设置DrawOrder
+            var layerPriority1 = new List<string> { ThPrintLayerManager.ColumnHatchLayerName, ThPrintLayerManager.BelowColumnHatchLayerName};
+            var layerPriority2 = new List<string> { ThPrintLayerManager.ShearWallHatchLayerName, ThPrintLayerManager.BelowShearWallHatchLayerName };
+            floorObjIds.SetLayerOrder(layerPriority1);
+            floorObjIds.SetLayerOrder(layerPriority2);
+        }
+
+        private List<ThStruDrawingPrinter> PrintWallColumnDrawing(List<string> svgFiles)
+        {
+            var results = new List<ThStruDrawingPrinter>();
+            svgFiles.ForEach(svgFile =>
+            {
+                var svg = new ThStructureSVGReader();
+                svg.ReadFromFile(svgFile);
+
+                // 对剪力墙造洞
+                var buildAreaSevice = new ThWallBuildAreaService();
+                var passGeos = buildAreaSevice.BuildArea(svg.Geos);
+
+                var svgInput = new ThSvgInput()
+                {
+                    Geos = passGeos,
+                    FloorInfos = svg.FloorInfos,
+                    DocProperties = svg.DocProperties,
+                };
+
+                var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
+                printer.Print(Active.Database);
+                results.Add(printer);
+            });
+            return results;
+        }
+
+        private List<ThStruDrawingPrinter> PrintStructurePlan(List<string> svgFiles)
+        {
+            var results = new List<ThStruDrawingPrinter>();
+            svgFiles.ForEach(svgFile =>
+            {
+                var svg = new ThStructureSVGReader();
+                svg.ReadFromFile(svgFile);
+
+                // 处理
+                // 对剪力墙造洞
+                var buildAreaSevice = new ThWallBuildAreaService();
+                var newGeos = buildAreaSevice.BuildArea(svg.Geos);
+
+                // 对梁线要合并
+                var beamGeos = newGeos.GetBeamGeos();
+                var passGeos = newGeos.Except(beamGeos).ToList();
+                var belowObjs = GetBelowObjs(passGeos);
+                var newBeamGeos = Handle(beamGeos, belowObjs);
+                passGeos.AddRange(newBeamGeos);
+
+                var svgInput = new ThSvgInput()
+                {
+                    Geos = passGeos,
+                    FloorInfos = svg.FloorInfos,
+                    DocProperties = svg.DocProperties,
+                };
+
+                var printer = new ThStruPlanDrawingPrinter(svgInput, PrintParameter);
+                printer.Print(Active.Database);
+                results.Add(printer);
+            });
+            return results;
+        }
+
+        private List<ThGeometry> Handle(List<ThGeometry> beams, DBObjectCollection polygons)
+        {
+            using (var hander = new ThBeamLineHandler(polygons))
+            {
+                var results = new List<ThGeometry>();
+                var beamGroups = GroupBeam(beams);
+                beamGroups.ForEach(g =>
+                {
+                    var beamLines = g.Select(o => o.Boundary).ToCollection();
+                    // 后面如果有弧梁，则不要传入进去
+                    var newBeamLines = hander.Handle(beamLines);
+                    newBeamLines.OfType<Line>().ForEach(l => results.Add(ThGeometry.Create(l, g.First().Properties)));
+                });
+                return results;
+            }
+        }
+
+        private List<List<ThGeometry>> GroupBeam(List<ThGeometry> beamGeos)
+        {
+            var results = new List<List<ThGeometry>>();
+            var groups = beamGeos.GroupBy(o => o.Properties.GetCategory() + o.Properties.GetLineType());
+            foreach (var group in groups)
+            {
+                results.Add(group.ToList());
+            }
+            return results;
+        }
+
+        private DBObjectCollection GetBelowObjs(List<ThGeometry> geos)
+        {
+            var polygons = new DBObjectCollection();
+            var belowColumns = geos.GetBelowColumnGeos();
+            var belowShearWalls = geos.GetBelowShearwallGeos();
+            belowColumns.ForEach(o => polygons.Add(o.Boundary));
+            belowShearWalls.ForEach(o => polygons.Add(o.Boundary));
+            return polygons;
+        }
+
+        private void SetSysVariables()
+        {
+            acadApp.Application.SetSystemVariable("LTSCALE", PrintParameter.LtScale);
+            acadApp.Application.SetSystemVariable("MEASUREMENT", PrintParameter.Measurement);
         }
 
         private void Clear()
@@ -92,7 +244,7 @@ namespace ThMEPStructure.StructPlane
                 if(strs.Length>3)
                 {
                     var str = strs[strs.Length - 3];
-                    if(IsInteger(str))
+                    if(str.IsInteger())
                     {
                         return int.Parse(str.Trim());
                     }
@@ -154,12 +306,25 @@ namespace ThMEPStructure.StructPlane
             {
                 return false;
             }  
-            return IsInteger(strs[strs.Length - 3]);
+            return strs[strs.Length - 3].IsInteger();
         }
-        private bool IsInteger(string content)
+        
+        private void InsertBasePoint()
         {
-            string pattern = @"^\s*\d+\s*$";
-            return System.Text.RegularExpressions.Regex.IsMatch(content, pattern);
+            using (var acadDb = AcadDatabase.Active())
+            {
+                if (acadDb.Blocks.Contains(ThPrintBlockManager.BasePointBlkName) &&
+                    acadDb.Layers.Contains(ThPrintLayerManager.DefpointsLayerName))
+                {
+                    DbHelper.EnsureLayerOn(ThPrintLayerManager.DefpointsLayerName);
+                    acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                                       ThPrintLayerManager.DefpointsLayerName,
+                                       ThPrintBlockManager.BasePointBlkName,
+                                       Point3d.Origin,
+                                       new Scale3d(1.0),
+                                       0.0);
+                }
+            }
         }
     }
 }

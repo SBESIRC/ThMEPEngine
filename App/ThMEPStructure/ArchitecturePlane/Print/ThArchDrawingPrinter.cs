@@ -24,7 +24,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
         /// </summary>
         public ObjectIdCollection ObjIds { get; protected set; }
         protected ThPlanePrintParameter PrintParameter { get; set; }
-        public ThArchDrawingPrinter(ThArchSvgInput input, ThPlanePrintParameter printParameter)
+        public ThArchDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
         {
             Geos = input.Geos;
             FloorInfos = input.FloorInfos;

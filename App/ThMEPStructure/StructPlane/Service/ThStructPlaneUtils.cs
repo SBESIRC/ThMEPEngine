@@ -8,6 +8,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.SVG;
+using Linq2Acad;
+using ThCADExtension;
 
 namespace ThMEPStructure.StructPlane.Service
 {
@@ -337,6 +339,30 @@ namespace ThMEPStructure.StructPlane.Service
                 }
             }
             return result;
+        }
+        public static void ImportStruPlaneTemplate(this Database database)
+        {
+            using (var acadDb = AcadDatabase.Use(database))
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.StructPlanePath(), DwgOpenMode.ReadOnly, false))
+            {
+                // 导入图层
+                ThPrintLayerManager.AllLayers.ForEach(layer =>
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), true);
+                });
+
+                // 导入样式
+                ThPrintStyleManager.AllTextStyles.ForEach(style =>
+                {
+                    acadDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(style), false);
+                });
+
+                // 导入块
+                ThPrintBlockManager.AllBlockNames.ForEach(b =>
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(b), true);
+                });
+            }
         }
     }
 }

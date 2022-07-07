@@ -18,18 +18,12 @@ namespace ThMEPStructure.ArchitecturePlane.Print
     /// </summary>
     internal class ThArchSectionDrawingPrinter : ThArchDrawingPrinter
     {
-        public ThArchSectionDrawingPrinter(ThArchSvgInput input, ThPlanePrintParameter printParameter)
+        public ThArchSectionDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
             : base(input, printParameter)
         {
         }
         public override void Print(Database db)
         {
-            // 从模板导入要打印的图层
-            if (!ThImportDatabaseService.ImportArchDwgTemplate(db))
-            {
-                return;
-            }
-
             // 打印对象,结果存于ObjIds中
             PrintGeos(db, Geos);
 

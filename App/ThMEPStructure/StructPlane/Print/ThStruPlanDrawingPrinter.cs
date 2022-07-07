@@ -7,7 +7,6 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.SVG;
@@ -17,50 +16,14 @@ using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print
 {
-    internal class ThSvgEntityPrintService
+    internal class ThStruPlanDrawingPrinter:ThStruDrawingPrinter
     {
-        private double LtScale = 500;
-        private int Measurement = 0;
-        // 标题文字距离图纸底部的距离
-        private double HeadTextDisToPaperBottom = 3500.0;
-        /// <summary>
-        /// 楼层底部标高
-        /// </summary>
-        public double FlrBottomEle { get; private set; }
-        /// <summary>
-        /// 楼层高度
-        /// </summary>
-        public double FlrHeight { get; private set; }
-        private string DrawingScale { set; get; }
-        public List<ThFloorInfo> FloorInfos { get; set; }
-        /// <summary>
-        /// 收集所有当前图纸打印的物体
-        /// </summary>
-        public ObjectIdCollection ObjIds { get; private set; }
-        private List<ThGeometry> Geos { get; set; } = new List<ThGeometry>();
-        private Dictionary<string, string> DocProperties {get;set;} = new Dictionary<string, string>(); 
-        public ThSvgEntityPrintService(
-            List<ThGeometry> geos,
-            List<ThFloorInfo> floorInfos,
-            Dictionary<string,string> docProperties,
-            string drawingSacle="")
-        {
-            Geos = geos;
-            FloorInfos = floorInfos;
-            DocProperties = docProperties;
-            ObjIds = new ObjectIdCollection();
-            FlrHeight = DocProperties.GetFloorHeight();
-            DrawingScale = drawingSacle;
-            FlrBottomEle = DocProperties.GetFloorBottomElevation();            
+        public ThStruPlanDrawingPrinter(ThSvgInput input,ThPlanePrintParameter printParameter) 
+            :base(input, printParameter)
+        {                     
         }
-        public void Print(Database db)
+        public override void Print(Database db)
         {
-            // 从模板导入要打印的图层
-            Import(db);
-
-            // 设置系统变量
-            SetSysVariables();
-
             // 获取楼板的标高                
             var elevations = Geos.GetSlabElevations();
             elevations = elevations.FilterSlabElevations(FlrHeight);
@@ -121,12 +84,6 @@ namespace ThMEPStructure.StructPlane.Print
             ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
         }
 
-        private void SetSysVariables()
-        {
-            acadApp.Application.SetSystemVariable("LTSCALE", LtScale);
-            acadApp.Application.SetSystemVariable("MEASUREMENT", Measurement);
-        }
-
         private DBObjectCollection FilterBeamMarks(
             DBObjectCollection beamLines,DBObjectCollection beamTexts)
         {
@@ -177,33 +134,6 @@ namespace ThMEPStructure.StructPlane.Print
             var mt = Matrix3d.Displacement(basePt-Point3d.Origin);
             objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt));
             Append(objs.Print(db));
-        }
-
-        private List<ElevationInfo> GetElevationInfos()
-        {
-            var results =new List<ElevationInfo>();
-            FloorInfos.ForEach(o =>
-            {
-                double flrBottomElevation = 0.0;
-                if (double.TryParse(o.Bottom_elevation, out flrBottomElevation))
-                {
-                    flrBottomElevation /= 1000.0;
-                }
-                double flrHeight = 0.0;
-                if (double.TryParse(o.Height, out flrHeight))
-                {
-                    flrHeight /= 1000.0;
-                }
-                results.Add(new ElevationInfo()
-                {
-                    FloorNo = o.FloorNo,
-                    BottomElevation = flrBottomElevation.ToString("0.000"),
-                    FloorHeight = flrHeight.ToString("0.000"),
-                    WallColumnGrade = "",
-                    BeamBoardGrade = "",
-                });
-            });
-            return results;
         }
 
         private Tuple<ObjectIdCollection, Dictionary<ObjectId, Vector3d>> PrintGeos(
@@ -352,30 +282,6 @@ namespace ThMEPStructure.StructPlane.Print
             }   
         }      
 
-        private void Import(Database database)
-        {
-            using (var acadDb = AcadDatabase.Use(database))
-            using (var blockDb = AcadDatabase.Open(ThCADCommon.StructPlanePath(), DwgOpenMode.ReadOnly, false))
-            {
-                // 导入图层
-                ThPrintLayerManager.AllLayers.ForEach(layer =>
-                {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), true);
-                });
-
-                // 导入样式
-                ThPrintStyleManager.AllTextStyles.ForEach(style =>
-                {
-                    acadDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(style), false);
-                });
-
-                // 导入块
-                ThPrintBlockManager.AllBlockNames.ForEach(b =>
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(b), true);
-                });
-            }
-        }
         private PrintConfig GetBeamConfig(Dictionary<string,object> properties)
         {
             var config =ThBeamPrinter.GetBeamConfig();
@@ -415,73 +321,6 @@ namespace ThMEPStructure.StructPlane.Print
                 }
             }
             return results;
-        }
-        private ObjectIdCollection PrintColumn(Database db, ThGeometry column)
-        {
-            bool isUpper = column.IsUpperFloorColumn();
-            bool isBelow = column.IsBelowFloorColumn();
-            var outlineConfig = new PrintConfig();
-            var hatchConfig = new HatchPrintConfig();
-            if (isUpper || isBelow)
-            {
-                outlineConfig = isUpper ? ThColumnPrinter.GetUpperColumnConfig() : ThColumnPrinter.GetBelowColumnConfig();
-                hatchConfig = isUpper ? ThColumnPrinter.GetUpperColumnHatchConfig() : ThColumnPrinter.GetBelowColumnHatchConfig();
-            }
-            var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
-            return printer.Print(db, column.Boundary as Polyline);            
-        }
-        private ObjectIdCollection PrintShearWall(Database db, ThGeometry shearwall)
-        {
-            bool isUpper = shearwall.IsUpperFloorShearWall();
-            bool isBelow = shearwall.IsBelowFloorShearWall();
-            var outlineConfig = new PrintConfig();
-            var hatchConfig = new HatchPrintConfig();
-            if (isUpper || isBelow)
-            {
-                outlineConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallConfig() : ThShearwallPrinter.GetBelowShearWallConfig();
-                hatchConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallHatchConfig() : ThShearwallPrinter.GetBelowShearWallHatchConfig();
-            }
-            var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
-            if (shearwall.Boundary is Polyline polyline)
-            {
-                return printer.Print(db, polyline);
-            }
-            else if (shearwall.Boundary is MPolygon mPolygon)
-            {
-                return printer.Print(db, mPolygon);
-            }
-            else
-            {
-                return new ObjectIdCollection();
-            }
-        }
-
-        private void PrintHeadText(Database database)
-        {
-            // 打印自然层标识, eg 一层~五层结构平面层
-            var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
-            if (string.IsNullOrEmpty(flrRange))
-            {
-                return;
-            }
-            var extents = ObjIds.ToDBObjectCollection(database).ToExtents2d();
-            var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
-                extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
-            var printService = new ThPrintDrawingHeadService()
-            {
-                Head = flrRange,
-                DrawingSacle = this.DrawingScale,
-                BasePt = textCenter,
-            };
-            Append(printService.Print(database)); // 把结果存到ObjIds中
-        }
-
-        private void Append(ObjectIdCollection objIds)
-        {
-            foreach(ObjectId objId in objIds)
-            {
-                ObjIds.Add(objId);
-            }
         }
     }
 }

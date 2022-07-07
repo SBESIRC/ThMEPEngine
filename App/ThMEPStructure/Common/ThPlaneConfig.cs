@@ -11,15 +11,6 @@ namespace ThMEPStructure.Common
     {
         public PlaneJsonConfig JsonConfig { get; set; }
         /// <summary>
-        /// 图纸比例
-        /// </summary>
-        public string DrawingScale { get; set; } = "";
-        /// <summary>
-        /// 楼层间距
-        /// </summary>
-        public double FloorSpacing { get; set; } = 100000;
-
-        /// <summary>
         /// 传入的IFC文件
         /// 对应config.json的path
         /// </summary>

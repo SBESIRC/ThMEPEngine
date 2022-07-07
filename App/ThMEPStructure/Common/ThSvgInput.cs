@@ -2,15 +2,15 @@
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.SVG;
 
-namespace ThMEPStructure.ArchitecturePlane.Print
+namespace ThMEPStructure.Common
 {
-    internal class ThArchSvgInput
+    internal class ThSvgInput
     {
         public List<ThGeometry> Geos { get; set; }
         public List<ThFloorInfo> FloorInfos { get; set; }
         public List<ThComponentInfo> ComponentInfos { get; set; }
         public Dictionary<string, string> DocProperties { get; set; }
-        public ThArchSvgInput()
+        public ThSvgInput()
         {
             Geos = new List<ThGeometry>();
             FloorInfos = new List<ThFloorInfo>();
