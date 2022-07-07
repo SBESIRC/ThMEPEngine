@@ -86,7 +86,7 @@ namespace ThMEPElectrical.BlockConvert
             {
                 foreach (var block in list)
                 {
-                    var br = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    var br = (block.Data as ThBlockReferenceData).ObjId.GetObject(OpenMode.ForRead) as BlockReference;
                     //如果不是动态块，则返回
                     if (br == null || !br.IsDynamicBlock)
                     {
@@ -100,7 +100,7 @@ namespace ThMEPElectrical.BlockConvert
                         var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                                     "0",
                                     "水泵标注",
-                                    srcBlockData.Position,
+                                    srcBlockData.Position.TransformBy(srcBlockData.OwnerSpace2WCS),
                                     scale,
                                     0.0,
                                     new Dictionary<string, string>(srcBlockData.Attributes));
