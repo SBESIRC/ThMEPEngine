@@ -1790,7 +1790,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                 if (idx != -1)
                                 {
-                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                 }
                                 else
                                 {
@@ -1800,7 +1800,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                 RightNum = RightNum - 1;
                             }
                         }
@@ -2041,7 +2041,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                     if (idx != -1)
                                     {
-                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     }
                                     else
                                     {
@@ -2051,7 +2051,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 }
                                 else
                                 {
-                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                     RightNum = RightNum -1;
                                 }
                             }
@@ -2559,7 +2559,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                 if (idx != -1)
                                 {
-                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                 }
                                 else
                                 {
@@ -2569,7 +2569,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                 RightNum = RightNum - 1;
                             }
                         }
@@ -3006,11 +3006,11 @@ namespace ThMEPStructure.Reinforcement.Draw
                             int idx = Helper.FindClosePoint(points, 5, 6, 6);
                             if (idx != -1)
                             {
-                                Helper.CreateRectAndLabel(points[idx], points[4], Helper.NumOfTwoPoint(points, 5, 6) * 2 + 3, ZongjinPoints[idx].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
+                                Helper.CreateRectAndLabel(points[idx], points[4], Helper.NumOfTwoPoint(points, 5, 6) * 2 + 5, ZongjinPoints[idx].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[5], points[4], 2, ZongjinPoints[5].size, LabelAndRect, CJintText, 400, 800, 2, 200);
+                                Helper.CreateRectAndLabel(points[5], points[4], 3, ZongjinPoints[5].size, LabelAndRect, CJintText, 400, 800, 2, 200);
                             }
 
                         }
@@ -3039,7 +3039,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                     if (idx != -1)
                                     {
-                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     }
                                     else
                                     {
@@ -3049,7 +3049,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 }
                                 else
                                 {
-                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                     RightNum = RightNum - 1;
                                 }
                             }
