@@ -1500,8 +1500,16 @@ namespace ThMEPStructure.Reinforcement.Draw
         }
         public override void DrawCJin()
         {
+            try
+            {
+
+           
             StrToReinforce LReinStr = new StrToReinforce();
             LReinStr = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
+            if (LReinStr.Rein_Detail_list.Count == 0)
+            {
+                return;
+            }
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
             L_FindCJin(points, LReinStr, ZongjinPoints); 
             if (thLTypeEdgeComponent.Bf < 300 && thLTypeEdgeComponent.Bw < 300)
@@ -2072,6 +2080,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             else
             {
+
+                
                 int Cnum = LReinStr.Rein_Detail_list[0].TypeNum;
                 int Csize = LReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
@@ -3066,6 +3076,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     }
                 }
 
+            }
+            }
+            catch (Exception ex)
+            {
+                string message= ex.Message;
+                return;
             }
 
         }
