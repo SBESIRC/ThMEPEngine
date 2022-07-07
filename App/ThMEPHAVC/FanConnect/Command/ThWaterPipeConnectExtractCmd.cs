@@ -171,7 +171,8 @@ namespace ThMEPHVAC.FanConnect.Command
                         AllFan = tmpFcus,
                         AllLine = allLines
                     };
-                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+                    var tempLine = handlePipeService.CleanPipe(mt);
+                    var tmpTree = handlePipeService.HandleFanPipe(mt, tempLine);
                     if (tmpTree == null)
                     {
                         return;

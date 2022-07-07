@@ -59,7 +59,8 @@ namespace ThMEPHVAC.FanConnect.Command
                         AllFan = fcus,
                         AllLine = pipes
                     };
-                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+                    var tempLine = handlePipeService.CleanPipe(mt);
+                    var tmpTree = handlePipeService.HandleFanPipe(mt, tempLine);
                     if (tmpTree == null)
                     {
                         return;
