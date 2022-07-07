@@ -169,8 +169,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         private void GroupPipeLineUnitByGroupedHorizontalPipe(List<Horizontal> horizontalLines, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps, int layer)
         {
             List<List<Horizontal>> groupedlines = new ();
-            List<Horizontal> lines = new ();
-            horizontalLines.ForEach(o => lines.Add(o));
+            List<Horizontal> lines = new();
+            horizontalLines./*Where(e => e.Line.Length > 1).*/ForEach(o => lines.Add(o));
             while (lines.Count > 0)
             {
                 List<Horizontal> linesOri = new ();
