@@ -20,11 +20,12 @@ namespace TianHua.Mep.UI.ViewModel
 {
     public class ThExtractRoomOutlineVM : NotifyPropertyChangedBase
     {
+        private const string AIWallLayer = "AI-墙线";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
         private bool ynExtractShearWall;
         public bool YnExtractShearWall
         {
-            get =>  ynExtractShearWall;
+            get => ynExtractShearWall;
             set
             {
                 if (value != ynExtractShearWall)
@@ -33,9 +34,9 @@ namespace TianHua.Mep.UI.ViewModel
                     OnPropertyChanged(nameof(YnExtractShearWall));
                 }
             }
-        }        
+        }
         public ThExtractRoomOutlineVM()
-        {            
+        {
             LayerInfos = new ObservableCollection<ThLayerInfo>(LoadLayers());
             ynExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
         }
@@ -45,17 +46,17 @@ namespace TianHua.Mep.UI.ViewModel
             using (var cmd = new ThExtractRoomDataCmd(GetLayers()))
             {
                 cmd.YnExtractShearWall = YnExtractShearWall;
-                SetFocusToDwgView();                
+                SetFocusToDwgView();
                 cmd.Execute();
                 if (cmd.RangePts.Count>=3)
                 {
-                    if(cmd.Walls.Count > 0)
+                    if (cmd.Walls.Count > 0)
                     {
-                        Active.Database.CreateAIWallLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.WALL);
-                        PrintEntities(cmd.Walls, ThMEPEngineCoreLayerUtils.WALL);
+                        Active.Database.CreateAILayer(AIWallLayer,7);
+                        EraseEntities(cmd.RangePts, AIWallLayer);
+                        PrintEntities(cmd.Walls, AIWallLayer);
                     }
-                    if(cmd.Columns.Count>0)
+                    if (cmd.Columns.Count>0)
                     {
                         Active.Database.CreateAIColumnLayer();
                         EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
@@ -68,7 +69,7 @@ namespace TianHua.Mep.UI.ViewModel
                         PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
                     }
                     SetCurrentLayer(ThMEPEngineCoreLayerUtils.WALL);
-                }               
+                }
             }
         }
         public void BuildRoomOutline()
@@ -76,11 +77,22 @@ namespace TianHua.Mep.UI.ViewModel
             var roomDatas = GetRoomDataFromMS();
             SuperBoundary(roomDatas);
         }
-
+        public void BuildDoors()
+        {
+            using (var lockDoc = Active.Document.LockDocument())
+            using (var cmd = new ThBuildDoorsCmd(AIWallLayer, ThMEPEngineCoreLayerUtils.DOOR, ThMEPEngineCoreLayerUtils.COLUMN))
+            {
+                SetFocusToDwgView();
+                cmd.Execute();
+                Active.Database.CreateAIDoorLayer();
+                PrintEntities(cmd.doors, ThMEPEngineCoreLayerUtils.DOOR);
+                //Active.Editor.Regen();
+            }
+        }
         private DBObjectCollection GetRoomDataFromMS()
         {
             var roomDatas = new DBObjectCollection();
-            var walls = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.WALL);
+            var walls = GetEntitiesFromMS(AIWallLayer);
             var doors = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.DOOR);
             var columns = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.COLUMN);
             roomDatas = roomDatas.Union(walls);
@@ -91,7 +103,7 @@ namespace TianHua.Mep.UI.ViewModel
 
         private void SuperBoundary(DBObjectCollection roomDatas)
         {
-            if(roomDatas.Count==0)
+            if (roomDatas.Count==0)
             {
                 return;
             }
@@ -109,16 +121,16 @@ namespace TianHua.Mep.UI.ViewModel
         public void Confirm()
         {
             SaveLayers();
-            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = ynExtractShearWall;            
+            ThExtratRoomOutlineConfig.Instance.YnExtractShearWall = ynExtractShearWall;
         }
         public void SelectLayer()
         {
             var layer = PickUp();
-            if(string.IsNullOrEmpty(layer))
+            if (string.IsNullOrEmpty(layer))
             {
                 return;
             }
-            if(!IsExisted(layer))
+            if (!IsExisted(layer))
             {
                 AddLayer(layer);
             }
@@ -187,7 +199,7 @@ namespace TianHua.Mep.UI.ViewModel
                 return "";
             }
         }
-        private void PrintEntities(DBObjectCollection walls,string layer)
+        private void PrintEntities(DBObjectCollection walls, string layer)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -202,7 +214,7 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
-        private void EraseEntities(Point3dCollection pts,string layer)
+        private void EraseEntities(Point3dCollection pts, string layer)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -238,14 +250,14 @@ namespace TianHua.Mep.UI.ViewModel
         }
 
         private List<ThLayerInfo> LoadLayers()
-        {            
+        {
             // 优先获取以A_WALL结尾的梁
             var aWallLayers = GetAWallLayers().Select(o => new ThLayerInfo()
             {
                 Layer = o,
                 IsSelected = true,
             }).ToList();
-            
+
             // 存在于DB中的
             var storeInfos = FilterLayers(ThExtratRoomOutlineConfig.Instance.LayerInfos);
             storeInfos = storeInfos.Where(o => !aWallLayers.Select(s => s.Layer).Contains(o.Layer)).ToList();

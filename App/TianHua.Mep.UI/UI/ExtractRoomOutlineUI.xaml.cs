@@ -27,6 +27,11 @@ namespace TianHua.Mep.UI.UI
             RoomOutlineVM.ExtractRoomDatas();
         }
 
+        private void btnBuildDoors_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            RoomOutlineVM.BuildDoors();
+        }
+
         private void btnBuildRoomOutline_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             RoomOutlineVM.BuildRoomOutline();
