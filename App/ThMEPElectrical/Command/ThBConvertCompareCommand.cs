@@ -13,8 +13,6 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPElectrical.BlockConvert;
-using ThMEPEngineCore.Engine;
-using System.Linq;
 
 namespace ThMEPElectrical.Command
 {

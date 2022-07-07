@@ -280,7 +280,7 @@ namespace ThMEPElectrical.BlockConvert
                                 break;
                             case ThBConvertCompareType.ParameterChange:
                                 Print(acadDatabase, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(acadDatabase, model.TargetId, 3, "CONTINUOUS");
+                                Print(acadDatabase, model.TargetId, 3, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
                                 break;
                             case ThBConvertCompareType.RepetitiveID:
                                 Print(acadDatabase, model.SourceId, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
@@ -325,7 +325,7 @@ namespace ThMEPElectrical.BlockConvert
             {
                 CompareModels.ForEach(model =>
                 {
-                    switch(model.Type)
+                    switch (model.Type)
                     {
                         case ThBConvertCompareType.Unchanged:
                             break;
@@ -355,7 +355,7 @@ namespace ThMEPElectrical.BlockConvert
                             break;
                     }
                 });
-                
+
                 var ltr = currentDb.Layers.ElementOrDefault(ThBConvertCommon.HIDING_LAYER, true);
                 if (ltr == null)
                 {
