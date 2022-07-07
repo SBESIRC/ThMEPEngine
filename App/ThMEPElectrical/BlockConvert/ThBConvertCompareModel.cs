@@ -1,4 +1,6 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -12,12 +14,17 @@ namespace ThMEPElectrical.BlockConvert
         /// <summary>
         /// 源图纸图元ID
         /// </summary>
-        public ObjectId SourceID { get; set; }
+        public ObjectId SourceId { get; set; }
 
         /// <summary>
         /// 当前转换图元ID
         /// </summary>
-        public ObjectId TargetID { get; set; }
+        public ObjectId TargetId { get; set; }
+
+        /// <summary>
+        /// 当前转换图元ID
+        /// </summary>
+        public List<ObjectId> TargetIdList { get; set; }
 
         /// <summary>
         /// 比对结果
@@ -26,8 +33,9 @@ namespace ThMEPElectrical.BlockConvert
 
         public ThBConvertCompareModel()
         {
-            SourceID = ObjectId.Null;
-            TargetID = ObjectId.Null;
+            SourceId = ObjectId.Null;
+            TargetId = ObjectId.Null;
+            TargetIdList = new List<ObjectId>();
             Type = ThBConvertCompareType.Unchanged;
         }
     }
