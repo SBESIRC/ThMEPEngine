@@ -141,7 +141,7 @@ namespace ThMEPHVAC.FanLayout.Service
                 }
             }
         }
-        public void InsertFanHole(AcadDatabase acadDatabase,ThFanHoleModel hole)
+        public ObjectId InsertFanHole(AcadDatabase acadDatabase,ThFanHoleModel hole)
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("标高", hole.FanHoleMark);
@@ -166,6 +166,7 @@ namespace ThMEPHVAC.FanLayout.Service
                     }
                 }
             }
+            return blkId;
         }
         public void InsertWAFFan(AcadDatabase acadDatabase,ThFanWAFModel waf, ThFanConfigInfo info)
         {

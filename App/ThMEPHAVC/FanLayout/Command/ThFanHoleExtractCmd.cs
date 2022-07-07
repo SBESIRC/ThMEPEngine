@@ -1,22 +1,17 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using ThMEPEngineCore.Command;
-using ThMEPHVAC.FanLayout.Engine;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.FanLayout.Model;
+using ThMEPHVAC.FanLayout.Engine;
 using ThMEPHVAC.FanLayout.Service;
-using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.FanLayout.Command
 {
@@ -35,8 +30,8 @@ namespace ThMEPHVAC.FanLayout.Command
         }
         public void ImportBlockFile()
         {
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 if (blockDb.Blocks.Contains("AI-洞口"))
                 {
@@ -47,7 +42,7 @@ namespace ThMEPHVAC.FanLayout.Command
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-HOLE"));
                 }
             }
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Active())
             {
                 DbHelper.EnsureLayerOn("H-HOLE");
             }
@@ -55,11 +50,11 @@ namespace ThMEPHVAC.FanLayout.Command
         public bool GetTuplePoints(out Tuple<Point3d, Point3d> pts, string tips1, string tips2)
         {
             var ppo = new PromptPointOptions(tips1);
-            ppo.Keywords.Add("S","S", "设置(S)");
+            ppo.Keywords.Add("S", "S", "设置(S)");
             ppo.AppendKeywordsToMessage = true;
 
             var point1 = Active.Editor.GetPoint(ppo);
-            if(point1.Status == PromptStatus.Keyword)
+            if (point1.Status == PromptStatus.Keyword)
             {
                 if (point1.StringResult == "S")
                 {
@@ -79,7 +74,7 @@ namespace ThMEPHVAC.FanLayout.Command
                 point1 = Active.Editor.GetPoint(tips1);
 
             }
-            if(point1.Status!= PromptStatus.OK)
+            if (point1.Status != PromptStatus.OK)
             {
                 pts = Tuple.Create(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
                 return false;
@@ -96,52 +91,68 @@ namespace ThMEPHVAC.FanLayout.Command
                 return false;
             }
 
-            pts = Tuple.Create(point1.Value.TransformBy(Active.Editor.UCS2WCS()), point2.Value.TransformBy(Active.Editor.UCS2WCS()));
+            pts = Tuple.Create(point1.Value, point2.Value);
             return true;
         }
+
+        private bool GetDuct(Tuple<Point3d, Point3d> tuplePts, out ThDuctInfo info)
+        {
+            var line = new Line(tuplePts.Item1, tuplePts.Item2);
+            var area = line.Buffer(10);
+            area.TransformBy(Active.Editor.UCS2WCS());
+            var engine = new ThFanDuctRecognitionEngine();
+            return engine.GetDuctInfo(area.Vertices(), out info);
+        }
+
+        private double GetHoleAngle(Vector3d dir)
+        {
+            return Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis) + Math.PI / 2.0;
+        }
+
+        private void OverrideFontHeight(ThDuctInfo info)
+        {
+            info.fontHeight = ThFanLayoutDealService.GetFontHeight(0, StrMapScale);
+        }
+
         public override void SubExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var doclock = Active.Document.LockDocument())
             using (var database = AcadDatabase.Active())
             {
                 ImportBlockFile();
                 Tuple<Point3d, Point3d> tuplePts1;
-                if (!GetTuplePoints(out tuplePts1, "\n请选择洞口插入的基点位置", "\n请选择洞口插入的第二点（方向）："))
+                if (!GetTuplePoints(out tuplePts1, "请选择洞口插入的基点位置\n", "请选择洞口插入的第二点（方向）\n"))
                 {
                     return;
                 }
-
-                double fontHeight = ThFanLayoutDealService.GetFontHeight(0, StrMapScale);
-                var point1 = tuplePts1.Item1;
-                var point2 = tuplePts1.Item2;
-
-                Vector3d basVector = new Vector3d(1, 0, 0);
-                Vector3d refVector = new Vector3d(0, 0, 1);
-                Vector3d vector = point2.GetVectorTo(point1).GetNormal();
-                double holeAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
-                //通过，point1和point2构造一条直线，然后进行buffer，得到一个很小的范围，再在这个范围没，提取风管
-                var tmpLine = new Line(point1, point2);
-                if(tmpLine.Length < 1.0)
+                var dir = tuplePts1.Item2 - tuplePts1.Item1;
+                if (dir.Length < 1.0)
                 {
                     Active.Editor.WriteMessage("请选择风管中心线上位置不同的两个点\n");
                     return;
                 }
-                var tmpAre = tmpLine.Buffer(10);
-                //提取到风管，然后进行数据提取
-                ThDuctInfo info;
-                var ductEngine = new ThFanDuctRecognitionEngine();
-                if (ductEngine.GetDuctInfo(tmpAre.Vertices(),out info))
+
+                if (GetDuct(tuplePts1, out ThDuctInfo info))
                 {
-                    info.fontHeight = fontHeight;
-                    //插入风管
+                    OverrideFontHeight(info);
+
+                    // 插入洞口到指定位置（UCS)
+                    var location = tuplePts1.Item1;
                     string strSize = ThFanLayoutDealService.GetFanHoleSize(info.width, info.height, 100);
                     string strMark = ThFanLayoutDealService.GetFanHoleMark(1, info.markHeight - 0.05);
-                    InsertFanHole(database, point1, holeAngle, info.fontHeight, info.width + 100, strSize, strMark);
+                    var holeObjId = InsertFanHole(database, location, GetHoleAngle(dir), info.fontHeight, info.width + 100, strSize, strMark);
+
+                    // 转换到WCS
+                    var hole = database.ElementOrDefault<BlockReference>(holeObjId, true);
+                    if (hole != null)
+                    {
+                        hole.TransformBy(Active.Editor.UCS2WCS());
+                    }
                 }
             }
         }
 
-        private void InsertFanHole(AcadDatabase acadDatabase, Point3d pt, double angle, double fontHeight, double width, string strSize, string mark)
+        private ObjectId InsertFanHole(AcadDatabase acadDatabase, Point3d pt, double angle, double fontHeight, double width, string strSize, string mark)
         {
             var fanHole = new ThFanHoleModel();
             fanHole.FanHolePosition = pt;
@@ -151,7 +162,7 @@ namespace ThMEPHVAC.FanLayout.Command
             fanHole.FanHoleSize = strSize;
             fanHole.FanHoleMark = mark;
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
-            toDbServiece.InsertFanHole(acadDatabase, fanHole);
+            return toDbServiece.InsertFanHole(acadDatabase, fanHole);
         }
     }
 }
