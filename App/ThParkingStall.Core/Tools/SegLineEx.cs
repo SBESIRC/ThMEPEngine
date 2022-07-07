@@ -43,8 +43,8 @@ namespace ThParkingStall.Core.Tools
                     var linei = segLines[i];
                     var linej = segLines[j];
                     ExtendBoth(ref linei, ref linej);
-                    segLines[i] = linei;
-                    segLines[j] = linej;
+                    segLines[i] = linei.Extend(0.1);
+                    segLines[j] = linej.Extend(0.1);
                 }
             }
         }

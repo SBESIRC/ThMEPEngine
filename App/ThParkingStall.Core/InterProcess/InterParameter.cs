@@ -152,7 +152,7 @@ namespace ThParkingStall.Core.InterProcess
             newSegLines.ExtendToBound(TotalArea, seglineToBoundNew, InnerObjectSpatialIndex);
             newSegLines.ExtendAndIntSect(seglineIndexListNew);//延展
             newSegLines.SeglinePrecut(TotalArea);//预切割
-            newSegLines.Clean();//过滤孤立的线
+            //newSegLines.Clean();//过滤孤立的线
             newSegLines = newSegLines.GroupSegLines().OrderBy(g => g.Count).Last();//用最大的全连接组
             var vaildLanes = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
             if (!vaildLanes.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return (null, null);//判断是否满足车道宽
