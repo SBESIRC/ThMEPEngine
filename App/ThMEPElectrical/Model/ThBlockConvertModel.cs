@@ -14,11 +14,13 @@ namespace ThMEPElectrical.Model
             manualActuatorOps = false;
             havcOps = true;
             wssOps = true;
+            BlockConvertInfos = new ObservableCollection<BlockConvertInfo>();
             BlkScales = new ObservableCollection<string>(new List<string> { "1:100", "1:150" });
             BlkFrames = new ObservableCollection<string>(new List<string> { "标注带边框", "标注无边框" });
         }
         public ObservableCollection<string> BlkScales { get; set; }
         public ObservableCollection<string> BlkFrames { get; set; }
+        public ObservableCollection<BlockConvertInfo> BlockConvertInfos { get; set; }
 
         private bool havcOps;
         public bool HavcOps
@@ -89,6 +91,19 @@ namespace ThMEPElectrical.Model
                 RaisePropertyChanged("BlkScale");
             }
         }
+        private double compareTolerance;
+        public double CompareTolerance
+        {
+            get
+            {
+                return compareTolerance;
+            }
+            set
+            {
+                compareTolerance = value;
+                RaisePropertyChanged("CompareTolerance");
+            }
+        }
         public double BlkScaleValue
         {
             get
@@ -134,5 +149,20 @@ namespace ThMEPElectrical.Model
         Strong,
         Weak,
         All,
+    }
+    public class BlockConvertInfo
+    {
+        /// <summary>
+        /// 来源专业
+        /// </summary>
+        public string Major { get; set; } = "";
+        /// <summary>
+        /// 设备类型
+        /// </summary>
+        public string EquipmentType { get; set; } = "";
+        /// <summary>
+        /// 对比结果
+        /// </summary>
+        public string CompareResult { get; set; } = "";
     }
 }

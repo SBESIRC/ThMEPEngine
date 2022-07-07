@@ -41,5 +41,15 @@ namespace TianHua.Electrical.UI.BlockConvert
         {
             convertManualActuator.IsEnabled = true;
         }
+
+        private void btnSinglePointUpdate_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnBlockUpdate_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }
