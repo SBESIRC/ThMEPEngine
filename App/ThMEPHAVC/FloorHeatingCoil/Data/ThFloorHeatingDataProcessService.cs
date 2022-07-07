@@ -491,6 +491,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 if (roomset.WaterSeparator != null)
                 {
                     roomset.WaterSeparator.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l1waterSeparator", 1, r: 30));
+                    DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirLine, "l1waterDir", 1, l: 50);
+                    DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirStartPt, "l1waterDir", 1, l: 50);
+
                 }
                 roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l1obstacle", 1));
                 roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l1room", 30));
@@ -503,6 +506,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 if (roomset.WaterSeparator != null)
                 {
                     roomset.WaterSeparator.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l1wwaterSeparator", 1, r: 30));
+                    DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirLine, "l1wwaterDir", 1, l: 50);
+                    DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirStartPt, "l1wwaterDir", 1, l: 50);
                 }
                 roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l1wobstacle", 1));
                 roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l1wroom", 30));

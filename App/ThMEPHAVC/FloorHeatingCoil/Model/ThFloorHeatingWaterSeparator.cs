@@ -18,7 +18,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         public BlockReference Blk { get; private set; }
         public Polyline OBB { get; private set; }
         public List<Point3d> StartPts { get; private set; }
-        public Vector3d Dir { get; private set; }
+        public Vector3d DirLine { get; private set; }
+        public Vector3d DirStartPt { get; private set; }
 
         private double StartPtDist = 50;
 
@@ -26,8 +27,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         {
             Blk = blk;
             OBB = ThGeomUtil.GetVisibleOBB(blk);
+            SetDir();
             SetStartPts();
 
+        }
+
+        private void SetDir()
+        {
+            var dir = new Vector3d(0, -1, 0);
+            DirLine = dir.TransformBy(Blk.BlockTransform).GetNormal();
         }
         private void SetStartPts()
         {
@@ -35,11 +43,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
             var i = GetStartPtCount();
             var dir = new Vector3d(1, 0, 0);
-            Dir = dir.TransformBy(Blk.BlockTransform).GetNormal();
-           
+            DirStartPt = dir.TransformBy(Blk.BlockTransform).GetNormal();
+
             for (int j = 0; j < i; j++)
             {
-                var pt = Blk.Position + j * StartPtDist * Dir;
+                var pt = Blk.Position + j * StartPtDist * DirStartPt;
                 StartPts.Add(pt);
             }
         }
