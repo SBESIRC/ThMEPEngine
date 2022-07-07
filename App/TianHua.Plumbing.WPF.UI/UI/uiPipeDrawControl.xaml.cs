@@ -94,6 +94,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
             pipDrawCmd.Execute();
             SetBtnEnabled(true);
         }
+        private void btnSewageWaterPipe_Click(object sender, RoutedEventArgs e)
+        {
+            ThPipeDrawCmd pipDrawCmd = new ThPipeDrawCmd();
+            pipDrawCmd.BlockName = "污水立管-AI";
+            SetBtnEnabled(false);
+            pipDrawCmd.Execute();
+            SetBtnEnabled(true);
+        }
         private void btnVentilatePipe_Click(object sender, RoutedEventArgs e)
         {
             ThPipeDrawCmd pipDrawCmd = new ThPipeDrawCmd();
@@ -162,6 +170,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             ThPipeDrawCmd pipDrawCmd = new ThPipeDrawCmd();
             pipDrawCmd.BlockName = "废水+通气+污废合流-AI";
+            SetBtnEnabled(false);
+            pipDrawCmd.Execute();
+            SetBtnEnabled(true);
+        }
+        private void btnWasteVentilateSewage_Click(object sender, RoutedEventArgs e)
+        {
+            ThPipeDrawCmd pipDrawCmd = new ThPipeDrawCmd();
+            pipDrawCmd.BlockName = "废水+通气+污水-AI";
             SetBtnEnabled(false);
             pipDrawCmd.Execute();
             SetBtnEnabled(true);

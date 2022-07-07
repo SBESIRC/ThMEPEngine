@@ -7,10 +7,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     WindowStartupLocation="CenterOwner"
-                    Title="立管绘制"
+                    Title="立管图块"
                     SizeToContent="Height"
                     Width="150"
-                    Height="480"
+                    Height="520"
              mc:Ignorable="d" >
     <Grid Margin="5,5,5,5">
         <Grid.RowDefinitions>
@@ -28,6 +28,7 @@
                 <Button x:Name="btnFloorDrain" Content="地漏" Click="btnFloorDrain_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnSewageWastePipe" Content="污废合流立管" Click="btnSewageWastePipe_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnWasteWaterPipe" Content="废水立管" Click="btnWasteWaterPipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnSewageWaterPipe" Content="污水立管" Click="btnSewageWaterPipe_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnVentilatePipe" Content="通气立管" Click="btnVentilatePipe_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnCaissonPipe" Content="沉箱立管" Click="btnCaissonPipe_Click" Margin="0,0,0,0"/>
             </StackPanel>
@@ -48,6 +49,7 @@
                 <Button x:Name="btnBalconyFloorDrain" Content="阳台+地漏" Click="btnBalconyFloorDrain_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnSewageWasteFloorDrain" Content="污废+通气" Click="btnSewageWasteFloorDrain_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnWasteVentilateSewageWaste" Content="废水+通气+污废" Click="btnWasteVentilateSewageWaste_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnWasteVentilateSewage" Content="废水+通气+污水" Click="btnWasteVentilateSewage_Click" Margin="0,0,0,5"/>
             </StackPanel>
         </StackPanel>
     </Grid>

@@ -37,6 +37,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //废水立管
                         dn = SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString();
                         tag = "FL";
+                        if (item.enumRoomType.Equals(EnumRoomType.Balcony))
+                            tag = "FyL";
+                        else if(item.enumRoomType.Equals(EnumRoomType.Kitchen))
+                            tag = "FcL";
+                        layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
+                        break;
+                    case EnumEquipmentType.sewageWaterRiser:
+                        //污水立管
+                        dn = SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString();
+                        tag = "WL";
                         layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                         break;
                     case EnumEquipmentType.sewageWasteRiser:

@@ -14,12 +14,14 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         static double _balconyWMachineFloorDrainDistance = 1000;//阳台洗衣机找地漏范围
         public static string FloorDrainBlockDynName = "普通地漏";
         public static string FloorDrainWMachineBlockDynName = "带洗衣机插口地漏";
-        public static List<CreateBlockInfo> FloorDrainConvertToBlock(string floorId,List<EquipmentBlockSpace> floorDrainBlcoks,List<EquipmentBlockSpace> balconyWMachine) 
+        public static List<CreateBlockInfo> FloorDrainConvertToBlock(string floorId,List<EquipmentBlockSpace> floorDrainBlcoks,List<EquipmentBlockSpace> balconyWMachine, List<EquipmentBlockSpace> wastewaterRisers, List<EquipmentBlockSpace> rainRisers) 
         {
             var createBlocks = new List<CreateBlockInfo>();
             if (floorDrainBlcoks == null || floorDrainBlcoks.Count < 1)
                 return createBlocks;
             var balconyDrain = new List<EquipmentBlockSpace>();
+            var balconyWastewaterRisers = wastewaterRisers.Where(e => e.enumRoomType.Equals(EnumRoomType.Balcony)).ToList();
+            var balconyRainRisers = rainRisers.Where(e => e.enumRoomType.Equals(EnumRoomType.Balcony)).ToList();
             foreach (var item in floorDrainBlcoks) 
             {
                 if (item.enumEquipmentType != EnumEquipmentType.floorDrain)
@@ -81,6 +83,35 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     }
                 }
             }
+            //20220706Added:
+            //Case1: 1个废水立管+1个地漏
+            //Case2: 1个雨水立管 + 1个废水立管 + 两个地漏
+            //杨工说暂时不上
+            //var roomIds = balconyDrain.Select(e => e.roomSpaceId).Distinct();
+            //foreach (var id in roomIds)
+            //{
+            //    var _wasteRisers = wastewaterRisers.Where(e => e.roomSpaceId.Equals(id));
+            //    var _balconyRisers = balconyRainRisers.Where(e => e.roomSpaceId.Equals(id));
+            //    var _floorDrains = balconyDrain.Where(e => !hisIds.Contains(e.uid)).Where(e => e.roomSpaceId.Equals(id));
+            //    if (_wasteRisers.Count() == 1 && _floorDrains.Count() == 1 && _balconyRisers.Count() == 0)
+            //    {
+            //        var item = _floorDrains.First();
+            //        var block = new CreateBlockInfo(floorId, ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockWastLayerName, item.blockPosition, item.enumEquipmentType, item.uid);
+            //        block.dymBlockAttr.Add("可见性", FloorDrainBlockDynName);
+            //        block.spaceId = item.roomSpaceId;
+            //        createBlocks.Add(block);
+            //        hisIds.Add(item.uid);
+            //    }
+            //    else if (_wasteRisers.Count() == 1 && _floorDrains.Count() == 2 && _balconyRisers.Count() == 1)
+            //    {
+            //        var first = _floorDrains.OrderBy(e => e.blockPosition.DistanceTo(_wasteRisers.First().blockPosition)).First();
+            //        var block = new CreateBlockInfo(floorId, ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockWastLayerName, first.blockPosition, first.enumEquipmentType, first.uid);
+            //        block.dymBlockAttr.Add("可见性", FloorDrainWMachineBlockDynName);
+            //        block.spaceId = first.roomSpaceId;
+            //        createBlocks.Add(block);
+            //        hisIds.Add(first.uid);
+            //    }
+            //}
             foreach (var item in balconyDrain)
             {
                 if (hisIds.Any(c => c.Equals(item.uid)))

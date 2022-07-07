@@ -167,14 +167,17 @@ namespace ThMEPWSS.Command
                 var kitchenRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Kitchen).ToList();
                 var toiletRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Toilet).ToList();
                 //标准层、非标层的房间布置逻辑 地漏转换
+                var wastewaterRisers = _classifyResult.Where(e => e.enumEquipmentType == EnumEquipmentType.wastewaterRiser).ToList();
+                var rainRisers = _classifyResult.Where(e => e.enumEquipmentType == EnumEquipmentType.balconyRiser).ToList();
                 var blocks = FloorDrainConvert.FloorDrainConvertToBlock(livingHighestFloor.floorUid,
                     _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.floorDrain).ToList(),
-                    _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.washingMachine).ToList());
+                    _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.washingMachine).ToList(), wastewaterRisers, rainRisers);
                 if (null != blocks && blocks.Count > 0)
                     createBlockInfos.AddRange(blocks);
                 var converterTypes = new List<EnumEquipmentType>
                 {
                     EnumEquipmentType.sewageWasteRiser,
+                    EnumEquipmentType.sewageWaterRiser,
                     EnumEquipmentType.ventRiser,
                     EnumEquipmentType.wastewaterRiser,
                     EnumEquipmentType.caissonRiser,
@@ -250,7 +253,7 @@ namespace ThMEPWSS.Command
                 if (balconyCorridorEqu.createDBTextElements != null && balconyCorridorEqu.createDBTextElements.Count > 0)
                     createTextElems.AddRange(balconyCorridorEqu.createDBTextElements);
                 //卫生间PL添加清扫口
-                List<string> pipeTags = new List<string> { "PL", "FL", "TL", "DL" };
+                List<string> pipeTags = new List<string> { "PL", "FL","FyL","FcL", "TL", "DL","WL" };
                 var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();
                 ToiletRoomCleanout roomCleanout = new ToiletRoomCleanout(livingHighestFloor.floorUid, toiletRooms, pipes);
                 var addClean = roomCleanout.GetCreateCleanout(_classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.toilet).ToList());
@@ -271,6 +274,7 @@ namespace ThMEPWSS.Command
                 createBlockInfos.Clear();
                 pipeTags.Add("Y2L");
                 pipeTags.Add("Y1L");
+                pipeTags.Add("YyL");
                 pipeTags.Add("NL");
                 foreach (var item in tempElems)
                 {
@@ -303,6 +307,14 @@ namespace ThMEPWSS.Command
                         case "DL":
                         case "FL":
                         case "Y2L":
+                            pipeSystem = "雨水";
+                            pipeMaterial = "排水铸铁管";
+                            break;
+                        case "FyL":
+                            pipeSystem = "废水";
+                            pipeMaterial = "排水铸铁管";
+                            break;
+                        case "FcL":
                             pipeSystem = "废水";
                             pipeMaterial = "排水铸铁管";
                             break;
@@ -317,6 +329,10 @@ namespace ThMEPWSS.Command
                         case "Y1L":
                         case "NL":
                             pipeSystem = "雨水";
+                            pipeMaterial = "排水铸铁管";
+                            break;
+                        case "WL":
+                            pipeSystem = "污水";
                             pipeMaterial = "排水铸铁管";
                             break;
                     }
@@ -398,7 +414,7 @@ namespace ThMEPWSS.Command
                         tchPipe.FloorType = 4;
                         tchPipe.TextHeight = 3.5;
                         tchPipe.DimRadius = 4.0;
-                        tchPipe.Spacing = 4.0;
+                        tchPipe.Spacing = 1.0;
                         tchPipe.DimTypeText = item.tag;
                         tchPipe.PipeNum = intNum.ToString();
                     }

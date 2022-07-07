@@ -57,23 +57,36 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     }
                     thDistributionMS.Extract(acdb.Database);
 
-                    var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
+                    var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();   
                     foreach (var block in blocks)
                     {
                         if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
                             continue;
-                        foreach (var visitor in equipmentBlcokVisitorsModelSpace) 
+                        bool isEx = MatchBlockToEquipmentVistor(block, Matrix3d.Identity);
+                        if (!isEx)
+                            continue;
+                        var mcs2wcs = block.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        var blockTableRecord = acdb.Blocks.Element(block.BlockTableRecord);
+                        var objs = new ObjectIdCollection();
+                        foreach (var objId in blockTableRecord)
                         {
-                            var elems = new List<ThRawIfcDistributionElementData>();
-                            if (visitor.equipmentDataVisitor.IsBuildElementBlockReference(block))
+                            var dbObj = acdb.Element<Entity>(objId);
+                            if (dbObj.Visible)
                             {
-                                if (visitor.equipmentDataVisitor.CheckLayerValid(block) && visitor.equipmentDataVisitor.IsDistributionElement(block))
-                                {
-                                    visitor.equipmentDataVisitor.DoExtract(elems, block,Matrix3d.Identity);
-                                }
+                                objs.Add(objId);
                             }
-                            if(null != elems && elems.Count>0)
-                                visitor.equipmentDataVisitor.Results.AddRange(elems);
+                        }
+                        foreach (ObjectId objId in objs)
+                        {
+                            var dbObj = acdb.Element<Entity>(objId);
+                            if (dbObj is BlockReference blockObj)
+                            {
+                                if (blockObj.BlockTableRecord.IsNull)
+                                {
+                                    continue;
+                                }
+                                MatchBlockToEquipmentVistor(blockObj, mcs2wcs);
+                            }
                         }
                     }
                 }
@@ -87,7 +100,27 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     thDistribution.Extract(acdb.Database);
                 }
             }
-
+        }
+        private bool MatchBlockToEquipmentVistor(BlockReference block,Matrix3d matrix)
+        {
+            var isEx = true;
+            foreach (var visitor in equipmentBlcokVisitorsModelSpace)
+            {
+                var elems = new List<ThRawIfcDistributionElementData>();
+                if (visitor.equipmentDataVisitor.IsBuildElementBlockReference(block))
+                {
+                    if (visitor.equipmentDataVisitor.CheckLayerValid(block) && visitor.equipmentDataVisitor.IsDistributionElement(block))
+                    {
+                        visitor.equipmentDataVisitor.DoExtract(elems, block, matrix);
+                    }
+                }
+                if (null != elems && elems.Count > 0)
+                {
+                    visitor.equipmentDataVisitor.Results.AddRange(elems);
+                    isEx = false;
+                }
+            }
+            return isEx;
         }
         /// 获取框线内的设备块
         /// </summary>
@@ -236,6 +269,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             gravityRainBucketNames.Add(ThWSSCommon.GravityFlowRainBucketBlockName, 2);
             gravityRainBucketNames.Add("ffdsf", 2);
             gravityRainBucketNames.Add("W-drain-51", 2);
+            gravityRainBucketNames.Add("W-drain-4", 2);
             GetVisitorDictionary(EnumEquipmentType.gravityRainBucket, ref gravityRainBucketNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.gravityRainBucket, gravityRainBucketNames));
 
@@ -331,6 +365,11 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             var fRaiseNames = new Dictionary<string, int>();
             fRaiseNames.Add("废水立管-AI",2);
             this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.wastewaterRiser,fRaiseNames, false, true));
+
+            //污水立管
+            var sewageRaiseNames = new Dictionary<string, int>();
+            sewageRaiseNames.Add("污水立管-AI", 2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.sewageWaterRiser, sewageRaiseNames, false, true));
 
             //拖把池 - 块名称过滤
             var mopPoolNames = new Dictionary<string, int>();

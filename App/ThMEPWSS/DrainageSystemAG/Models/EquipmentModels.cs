@@ -219,6 +219,11 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         [Description("双盆洗手台")]
         doubleBasinWashingTable = 16,
         /// <summary>
+        /// 污水立管
+        /// </summary>
+        [Description("污水立管")]
+        sewageWaterRiser = 17,
+        /// <summary>
         /// 水管井
         /// </summary>
         [Description("水管井")]

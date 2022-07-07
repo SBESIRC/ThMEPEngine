@@ -63,7 +63,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 _cretateFloorRooms.AddRange(thisFloorRooms);
             var pipeTags = new List<string>
             {
-                "Y1L","Y2L", "NL","FL","PL","TL","DL"
+                "Y1L","Y2L","FyL","FcL", "NL","FL","PL","TL","DL","WL"
             };
             foreach (var cBlock in thisFloorBlocks)
             {
