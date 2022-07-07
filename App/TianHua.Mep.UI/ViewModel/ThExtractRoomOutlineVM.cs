@@ -14,12 +14,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Mep.UI.Command;
 using ThMEPEngineCore.Model.Common;
 using ThControlLibraryWPF.ControlUtils;
+using ThCADExtension;
 
 namespace TianHua.Mep.UI.ViewModel
 {
     public class ThExtractRoomOutlineVM : NotifyPropertyChangedBase
     {
-        private readonly string AIWallLayer = "AI-墙线";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
         private bool ynExtractShearWall;
         public bool YnExtractShearWall
@@ -39,40 +39,70 @@ namespace TianHua.Mep.UI.ViewModel
             LayerInfos = new ObservableCollection<ThLayerInfo>(LoadLayers());
             ynExtractShearWall = ThExtratRoomOutlineConfig.Instance.YnExtractShearWall;
         }
-        public void ExtractWalls()
+        public void ExtractRoomDatas()
         {
             using (var lockDoc = Active.Document.LockDocument())
-            using (var cmd = new ThExtractWallLinesCmd(GetLayers()))
+            using (var cmd = new ThExtractRoomDataCmd(GetLayers()))
             {
                 cmd.YnExtractShearWall = YnExtractShearWall;
                 SetFocusToDwgView();                
                 cmd.Execute();
-                CreateAILayer(AIWallLayer, 7);
-                if (cmd.RangePts.Count>=3 && cmd.Walls.Count>0)
+                if (cmd.RangePts.Count>=3)
                 {
-                    EraseWallLines(cmd.RangePts, AIWallLayer);
+                    if(cmd.Walls.Count > 0)
+                    {
+                        Active.Database.CreateAIWallLayer();
+                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.WALL);
+                        PrintEntities(cmd.Walls, ThMEPEngineCoreLayerUtils.WALL);
+                    }
+                    if(cmd.Columns.Count>0)
+                    {
+                        Active.Database.CreateAIColumnLayer();
+                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
+                        PrintEntities(cmd.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
+                    }
+                    if (cmd.Doors.Count > 0)
+                    {
+                        Active.Database.CreateAIDoorLayer();
+                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
+                        PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
+                    }
+                    SetCurrentLayer(ThMEPEngineCoreLayerUtils.WALL);
                 }               
-                PrintWallLines(cmd.Walls, AIWallLayer);
-                SetCurrentLayer(AIWallLayer);
-                Active.Editor.Regen();
             }
         }
         public void BuildRoomOutline()
         {
-            var wallLines = GetWallLines(); // get entities in modeslspace
-            SetFocusToDwgView();
-            if(wallLines.Count>0)
-            {
-                SuperBoundary(wallLines);
-            }
+            var roomDatas = GetRoomDataFromMS();
+            SuperBoundary(roomDatas);
         }
 
-        private void SuperBoundary(DBObjectCollection wallLines)
+        private DBObjectCollection GetRoomDataFromMS()
         {
-            using (var docLock = Active.Document.LockDocument())
-            using (var cmd = new ThSuperBoundaryCmd(wallLines))
+            var roomDatas = new DBObjectCollection();
+            var walls = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.WALL);
+            var doors = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.DOOR);
+            var columns = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.COLUMN);
+            roomDatas = roomDatas.Union(walls);
+            roomDatas = roomDatas.Union(doors);
+            roomDatas = roomDatas.Union(columns);
+            return roomDatas;
+        }
+
+        private void SuperBoundary(DBObjectCollection roomDatas)
+        {
+            if(roomDatas.Count==0)
             {
-                cmd.Execute();
+                return;
+            }
+            else
+            {
+                using (var docLock = Active.Document.LockDocument())
+                using (var cmd = new ThSuperBoundaryCmd(roomDatas))
+                {
+                    SetFocusToDwgView();
+                    cmd.Execute();
+                }
             }
         }
 
@@ -157,14 +187,14 @@ namespace TianHua.Mep.UI.ViewModel
                 return "";
             }
         }
-        private void PrintWallLines(DBObjectCollection walls,string layer)
+        private void PrintEntities(DBObjectCollection walls,string layer)
         {
             using (var acadDb = AcadDatabase.Active())
             {
                 walls.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
-                    e.Layer = AIWallLayer;
+                    e.Layer = layer;
                     e.ColorIndex = (int)ColorIndex.BYLAYER;
                     e.LineWeight = LineWeight.ByLayer;
                     e.Linetype = "ByLayer";
@@ -172,7 +202,7 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
-        private void EraseWallLines(Point3dCollection pts,string layer)
+        private void EraseEntities(Point3dCollection pts,string layer)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -195,14 +225,14 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
-        private DBObjectCollection GetWallLines()
+        private DBObjectCollection GetEntitiesFromMS(string layer)
         {
             using (var acadDb = AcadDatabase.Active())
             {
                 return acadDb.ModelSpace
                     .OfType<Entity>()
                     .Where(e => e is Curve || e is MPolygon)
-                    .Where(e => e.Layer == AIWallLayer)
+                    .Where(e => e.Layer == layer)
                     .ToCollection();
             }
         }
@@ -240,14 +270,6 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 return layerInfos.Where(o => acdb.Layers.Contains(o.Layer)).ToList();
-            }
-        }
-        private void CreateAILayer(string layer, short colorIndex)
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                acadDb.Database.CreateAILayer(layer, colorIndex);
-                acadDb.Database.OpenAILayer(layer);
             }
         }
         private void SetCurrentLayer(string layerName)

@@ -30,6 +30,17 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection _cornice = new DBObjectCollection(); //仅支持Polyline
         private DBObjectCollection _roomSplitline = new DBObjectCollection();
         private DBObjectCollection _curtainWall = new DBObjectCollection();
+
+        public DBObjectCollection ArchitectureWalls => _architectureWall;
+        public DBObjectCollection ShearWalls => _shearWall;
+        public DBObjectCollection Columns => _column;
+        public DBObjectCollection Doors => _door;
+        public DBObjectCollection Windows => _window;
+        public DBObjectCollection Slabs => _slab;
+        public DBObjectCollection Cornices => _cornice;
+        public DBObjectCollection RoomSplitlines => _roomSplitline;
+        public DBObjectCollection CurtainWalls => _curtainWall;
+
         public ThMEPOriginTransformer Transformer { get; private set; }
         private Action<Database, Point3dCollection> GetData;
 

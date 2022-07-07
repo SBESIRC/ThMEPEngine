@@ -24,7 +24,7 @@ namespace TianHua.Mep.UI.UI
 
         private void btnExtractWall_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            RoomOutlineVM.ExtractWalls();
+            RoomOutlineVM.ExtractRoomDatas();
         }
 
         private void btnBuildRoomOutline_Click(object sender, System.Windows.RoutedEventArgs e)

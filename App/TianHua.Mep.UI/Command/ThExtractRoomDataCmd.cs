@@ -15,24 +15,31 @@ using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Mep.UI.Command
 {
-    public class ThExtractWallLinesCmd : ThMEPBaseCommand, IDisposable
+    public class ThExtractRoomDataCmd : ThMEPBaseCommand, IDisposable
     {
         /// <summary>
         /// 配置的墙体图层
         /// </summary>
         private List<string> WallLayers { get; set; } = new List<string>();
         /// <summary>
-        /// 返回提取的墙线
+        /// 返回提取的墙
         /// </summary>
         public DBObjectCollection Walls { get; private set; }
+        // <summary>
+        /// 返回提取的柱
+        /// </summary>
+        public DBObjectCollection Columns { get; private set; }
+        public DBObjectCollection Doors { get; private set; }
         public Point3dCollection RangePts { get; private set; }
         public bool YnExtractShearWall { get; set; }
-        public ThExtractWallLinesCmd(List<string> wallLayers)
+        public ThExtractRoomDataCmd(List<string> wallLayers)
         {
-            ActionName = "提取墙线";
-            CommandName = "XXXX";
+            ActionName = "提取房间框线";
+            CommandName = "THEROC";
             WallLayers = wallLayers;
+            Doors = new DBObjectCollection();
             Walls = new DBObjectCollection();
+            Columns = new DBObjectCollection();
             RangePts = new Point3dCollection();
         }
 
@@ -51,10 +58,21 @@ namespace TianHua.Mep.UI.Command
                     return;
                 }
                 Walls = new DBObjectCollection();
-                var originObjs = GetRoomDatas(acadDb.Database, RangePts);
+                // 把图层配置提取的墙线，合并到Walls中
                 var wallObjs = GetConfigWalls(acadDb.Database, RangePts);
-                Walls = Walls.Union(originObjs);
                 Walls = Walls.Union(wallObjs);
+
+                var roomData = GetRoomData(acadDb.Database, RangePts);                
+                Walls = Walls.Union(roomData.Slabs);
+                Walls = Walls.Union(roomData.Windows);
+                Walls = Walls.Union(roomData.Cornices);
+                Walls = Walls.Union(roomData.ShearWalls);
+                Walls = Walls.Union(roomData.CurtainWalls);
+                Walls = Walls.Union(roomData.RoomSplitlines);
+                Walls = Walls.Union(roomData.ArchitectureWalls);
+
+                Doors = Doors.Union(roomData.Doors); 
+                Columns = Columns.Union(roomData.Columns);
             }
         }
 
@@ -97,15 +115,14 @@ namespace TianHua.Mep.UI.Command
                 return objs;
             }            
         }
-        private DBObjectCollection GetRoomDatas(Database database,Point3dCollection frame)
+        private ThRoomdata GetRoomData(Database database,Point3dCollection frame)
         {
             var data = new ThRoomdata(false)
             { 
                 YnExtractShearWall=this.YnExtractShearWall,
             };
-
             data.Build(database, frame);
-            return data.MergeData();
+            return data;
         }
         private Point3dCollection GetRange()
         {
