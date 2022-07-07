@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
@@ -6,6 +8,8 @@ using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Command;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -41,16 +45,17 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     //提取水管路由
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
-
                     if (pipes.Count == 0)
                     {
                         return;
                     }
-                    if (pipes.ToCollection().Polygonize().Count > 0)
-                    {
-                        Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
-                        return;
-                    }
+
+                    //if (pipes.ToCollection().Polygonize().Count > 0)
+                    //{
+                    //    Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
+                    //    return;
+                    //}
+
                     //提取水管连接点
                     var fcus = ThEquipElementExtractService.GetFCUModels(ConfigInfo.WaterSystemConfigInfo.SystemType);
                     if (fcus.Count == 0)
@@ -65,13 +70,22 @@ namespace ThMEPHVAC.FanConnect.Command
                         AllFan = fcus,
                         AllLine = pipes
                     };
-                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+
+                    var tempLine = handlePipeService.CleanPipe(mt);
+                    if (tempLine.ToCollection().Polygonize().Count > 0)
+                    {
+                        Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
+                        return;
+                    }
+
+                    var tmpTree = handlePipeService.HandleFanPipe(mt, tempLine);
                     if (tmpTree == null)
                     {
                         return;
                     }
                     var badLines = handlePipeService.GetBadLine(tmpTree, mt);
                     var rightLines = handlePipeService.GetRightLine(tmpTree, mt);//已经处理好的线
+
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                     {
