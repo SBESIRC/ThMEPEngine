@@ -550,6 +550,19 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             return res;
         }
+        public static double ClosestPointInLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
+        {
+            var ls = lines;
+            if (!returninfinity)
+                if (ls.Count() == 0) return -1;
+            var res = double.PositiveInfinity;
+            foreach (var l in ls)
+            {
+                var dis = l.ClosestPoint(pt).Distance(pt);
+                if (res > dis) res = dis;
+            }
+            return res;
+        }
         public static bool IsInAnyPolys(Coordinate pt, List<Polygon> pls, bool allowOnEdge = false, bool accurate = false)
         {
             if (pls.Count == 0) return false;
