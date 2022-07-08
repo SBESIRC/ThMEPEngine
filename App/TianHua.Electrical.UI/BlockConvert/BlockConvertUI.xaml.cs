@@ -1,5 +1,10 @@
 ﻿using ThMEPElectrical.Model;
 using ThControlLibraryWPF.CustomControl;
+using System.Windows.Controls;
+using System.Windows;
+using System.Windows.Media;
+using System.Data;
+using System.Linq;
 
 namespace TianHua.Electrical.UI.BlockConvert
 {
@@ -42,14 +47,44 @@ namespace TianHua.Electrical.UI.BlockConvert
             convertManualActuator.IsEnabled = true;
         }
 
-        private void btnSinglePointUpdate_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void btnBlockUpdate_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
         }
 
-        private void btnBlockUpdate_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ignoreChange_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var ids = table1.SelectedItems.OfType<BlockConvertInfo>().Select(o=>o.Id).ToList();
+            if(ids.Count>0)
+            {
+                Parameter.IgnoreBlockConvertInfos(ids);
+                table1.ItemsSource = null;
+                table1.ItemsSource = Parameter.BlockConvertInfos;
+            }
+        }
+
+        private void localUpdate_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
+        }
+
+        private void table1_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            //DataGrid datagrid = sender as DataGrid;
+            //Point aP = e.GetPosition(datagrid);
+            //IInputElement obj = datagrid.InputHitTest(aP);
+            //var target = obj as DependencyObject;
+            //while(target!=null)
+            //{
+            //    if (target is DataGridRow)
+            //    {
+            //        DataGridRow dgr = target as DataGridRow;
+            //        DataRowView theDRV = dgr.Item as DataRowView;
+            //        table1.SelectedItem = theDRV;
+            //        break;
+            //    }
+            //    target = VisualTreeHelper.GetParent(target);
+            //}
         }
     }
 }
