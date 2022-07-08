@@ -38,7 +38,7 @@ namespace ThMEPWSS.HydrantLayout.Service
         public List<Polyline> LeanWallList = new List<Polyline>();
 
         //这个给消火栓的柱子用的，判断左 中 右（0，1，2） 逆右 -1 ， 顺左 3
-        // 19: 左横右  20：右横左
+        // 19: 左横右  20：右横左  21:靠左右横左 22：靠右左横右
         public List<int> BasePointPosition = new List<int>();
         // 0: 自由  1：车道  2：车位；
         public List<int> ColumnDirMode =  new List<int>();
@@ -450,10 +450,45 @@ namespace ThMEPWSS.HydrantLayout.Service
                             {
                                 basePointList.Add(right);
                                 dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+
                                 if (longEnough) BasePointPosition.Add(20);
-                                else BasePointPosition.Add(1);
+                                else BasePointPosition.Add(2);
 
                                 ColumnDirMode.Add(columnType);
+                            }
+                        }
+
+
+                        if (longEnough) 
+                        {
+                            Point3d rightNew = end - (Info.VPSide / 2  + TMPDATA.TmpVPSideLength) * dir01.GetNormal();
+                            Polyline vpRightNew = CreateBoundaryService.CreateBoundary(rightNew + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                            if (FeasibilityCheck.IsBoundaryOK(vpRightNew, Frame, ProcessedData.ForbiddenIndex))
+                            {
+                                if (IsVPBlocked(rightNew, dirOut, Frame))
+                                {
+                                    basePointList.Add(rightNew);
+                                    dirList.Add(dirOut);
+                                    LeanWallList.Add(cl);
+
+                                    BasePointPosition.Add(22);
+                                    ColumnDirMode.Add(columnType);
+                                }
+                            }
+
+                            Point3d leftNew = start + (Info.VPSide / 2 + TMPDATA.TmpVPSideLength) * dir01.GetNormal();
+                            Polyline vpLeftNew = CreateBoundaryService.CreateBoundary(leftNew + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                            if (FeasibilityCheck.IsBoundaryOK(vpLeftNew, Frame, ProcessedData.ForbiddenIndex))
+                            {
+                                if (IsVPBlocked(leftNew, dirOut, Frame))
+                                {
+                                    basePointList.Add(leftNew);
+                                    dirList.Add(dirOut);
+                                    LeanWallList.Add(cl);
+                                    BasePointPosition.Add(21);
+                                    ColumnDirMode.Add(columnType);
+                                }
                             }
                         }
                     }
@@ -475,6 +510,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             }
                         }
                     }
+                    
                     if (i == rightIndex)
                     {
                         Point3d left = start + Info.VPSide / 2 * dir01.GetNormal();
@@ -964,12 +1000,13 @@ namespace ThMEPWSS.HydrantLayout.Service
         public int GetColumnType(Polyline cl, int mainIndex)
         {
             int type = -1;
+            double rangeLength = 3000;
 
             Point3d start1 = cl.GetPoint3dAt(mainIndex);
             Point3d end1 = cl.GetPoint3dAt((mainIndex + 1) % cl.NumberOfVertices);
             Vector3d dir1 = end1 - start1;
             Vector3d dirOut1 = new Vector3d(-dir1.Y, dir1.X, dir1.Z).GetNormal();
-            Polyline pl1 = CreateBoundaryService.CreateRectangle2(start1 - dirOut1 * 1500, end1 + dirOut1 * 1500, 1500);
+            Polyline pl1 = CreateBoundaryService.CreateRectangle2(start1 - dirOut1 * rangeLength, end1 + dirOut1 * rangeLength, rangeLength);
             double score1 = IndexCompute.ComputeOverlapScore(pl1, this.Frame, ProcessedData.ParkingIndex);
 
             int newIndex = (mainIndex + 2) % cl.NumberOfVertices;
@@ -979,7 +1016,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             Vector3d dir2 = end2 - start2;
             Vector3d dirOut2 =  - dirOut1;
 
-            Polyline pl2 = CreateBoundaryService.CreateRectangle2(start2 - dirOut2 * 1500, end2 + dirOut2 * 1500, 1500);
+            Polyline pl2 = CreateBoundaryService.CreateRectangle2(start2 - dirOut2 * rangeLength, end2 + dirOut2 * rangeLength, rangeLength);
             double score2 = IndexCompute.ComputeOverlapScore(pl2, this.Frame, ProcessedData.ParkingIndex);
 
 

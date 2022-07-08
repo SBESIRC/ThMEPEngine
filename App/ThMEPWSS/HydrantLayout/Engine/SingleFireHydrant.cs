@@ -94,15 +94,12 @@ namespace ThMEPWSS.HydrantLayout.Engine
             List<Point3d> basePointList;
             List<Vector3d> dirList;
 
-            
-
+           
             //寻找第一优先级定位点并测试摆放
             searchPoint0.FindTurningPoint(out basePointList, out dirList);
             FirstPriorityTest(basePointList, dirList);
 
            
-
-
             //寻找第二优先级定位点并测试摆放
             if (Done == false)
             {
@@ -115,7 +112,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 if (basePointTest3.Count == 0)
                 {
                     searchPoint0.FindColumnPointOnly(out basePointList, out dirList);
-                    SecondPriorityTest(basePointList, dirList);
+                    SecondPriorityTestOnlyColumn(basePointList, dirList);
                 }
                 else 
                 {
@@ -363,16 +360,21 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
                     ////大量逻辑
                     //如果在柱子两侧，则不能外开;
-                    if (searchPoint0.BasePointPosition[i] == 0 && j == 8) continue;
-                    if (searchPoint0.BasePointPosition[i] == 2 && j == 9) continue;
+                    if (searchPoint0.BasePointPosition[i] == 0 && (j == 8 || j == 1)) continue;
+                    if (searchPoint0.BasePointPosition[i] == 2 && (j == 9 || j == 4)) continue;
 
-                    //部分情况只能放0，5
+                    if (searchPoint0.BasePointPosition[i] == 19 && (j == 8 || j == 1)) continue;
+                    if (searchPoint0.BasePointPosition[i] == 20 && (j == 9 || j == 4)) continue;
+
+                    //部分情况只能放固定形状
                     if (searchPoint0.BasePointPosition[i] == -1 && j !=  5) continue;
                     if (searchPoint0.BasePointPosition[i] == 3 && j !=  0) continue;
+                    if (searchPoint0.BasePointPosition[i] == 21 && j != 6) continue;
+                    if (searchPoint0.BasePointPosition[i] == 22 && j != 7) continue;
 
                     //6，7只有部分情况能放
-                    if (searchPoint0.BasePointPosition[i] != 19 && j == 7) continue;
-                    if (searchPoint0.BasePointPosition[i] != 20 && j == 6) continue;
+                    if (j == 7 && (searchPoint0.BasePointPosition[i] != 19 && searchPoint0.BasePointPosition[i] != 22)) continue;
+                    if (j == 6 && (searchPoint0.BasePointPosition[i] != 20 && searchPoint0.BasePointPosition[i] != 21)) continue;
 
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {
@@ -437,6 +439,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLengthB, j, doorGood);
                                 fireCompareModeltmp.PositionScore = positionScore;
                                 fireCompareModeltmp.DoorScore = doorScore;
+                                fireCompareModeltmp.BasePointPosition = searchPoint0.BasePointPosition[i];
 
                                 //overlappedAreaDoor.Add(fireCompareModeltmp, overlappedArea);
                                 fireCompareModels0.Add(fireCompareModeltmp);
@@ -448,11 +451,13 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
             //寻找最优
             //fireCompareModels0.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance);
-            fireCompareModels0 = fireCompareModels0.OrderByDescending(x => x.PositionScore).ThenBy(x => x.DoorScore).ThenBy(x => x.againstWallLength).ToList();
+            fireCompareModels0 = fireCompareModels0.OrderByDescending(x => x.PositionScore).ThenByDescending(x => x.DoorScore).ThenByDescending(x => x.againstWallLength).ThenBy(x=>x.distance).ToList();
             if (fireCompareModels0.Count > 0)
             {
                 Done = true;
                 FireCompareModel fireCompareModelbest = fireCompareModels0[0];
+                BestLayOut = fireCompareModelbest;
+
                 Polyline drawFire = CreateBoundaryService.CreateBoundary(fireCompareModelbest.fireCenterPoint, ShortSide, LongSide, fireCompareModelbest.fireDir);
                 DrawUtils.ShowGeometry(drawFire, "l1fire", 2, lineWeightNum: 30);
                 fireCompareModelbest.Draw(ShortSide, LongSide);
@@ -558,8 +563,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     FireCompareModel fireCompareModelsa = fireCompareModelsMix1[0];
                     FireCompareModel fireCompareModelsb = fireCompareModelsMix1[1];
                     if (fireCompareModelsa.fireCenterPoint.DistanceTo(fireCompareModelsb.fireCenterPoint) < 300
-                        && fireCompareModelsa.doorOpenDir + fireCompareModelsb.doorOpenDir == 1
-                        ) 
+                        && fireCompareModelsa.doorOpenDir + fireCompareModelsb.doorOpenDir == 1) 
                     {
                         if (overlappedAreaDoor[fireCompareModelsa] > overlappedAreaDoor[fireCompareModelsb]) 
                         {
