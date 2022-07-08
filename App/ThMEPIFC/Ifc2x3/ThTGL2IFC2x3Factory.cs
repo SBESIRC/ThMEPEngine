@@ -174,9 +174,11 @@ namespace ThMEPIFC.Ifc2x3
 
                 //model as a swept area solid
                 IfcProfileDef profile = null;
+                var moveVector = floor_origin.GetAsVector();
                 if (wall.Outline is Polyline pline)
                 {
                     profile = model.ToIfcArbitraryClosedProfileDef(pline);
+                    moveVector = moveVector + wall.ExtrudedDirection.MultiplyBy(pline.Elevation);
                 }
                 else
                 {
@@ -203,7 +205,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
                     p.RefDirection = model.ToIfcDirection(wall.XVector);
-                    p.Location = model.ToIfcCartesianPoint(wall.Origin + floor_origin.GetAsVector());
+                    p.Location = model.ToIfcCartesianPoint(wall.Origin + moveVector);
                 });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;

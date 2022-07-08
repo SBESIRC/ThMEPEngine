@@ -55,6 +55,7 @@ namespace ThMEPTCH.Model
         public ThTCHWall(Polyline outPline, double height) 
         {
             Init();
+            XVector = Vector3d.XAxis;
             Outline = outPline;
             Height = height;
         }

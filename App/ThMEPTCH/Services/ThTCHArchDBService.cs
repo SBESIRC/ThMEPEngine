@@ -34,7 +34,7 @@ namespace ThMEPTCH.Services
             var dbWalls = archDBData.GetDBWallDatas();
             var dbDoors = archDBData.GetDBDoorDatas();
             var dbWindows = archDBData.GetDBWindowDatas();
-            var walls = entityConvert.WallDoorWindowRelation(dbWalls, dbDoors, dbWindows);
+            var walls = entityConvert.WallDoorWindowRelation(dbWalls, dbDoors, dbWindows,new Vector3d(0,0,0));
             buildingStorey.Walls.AddRange(walls);
             thBuilding.Storeys.Add(buildingStorey);
             thSite.Building = thBuilding;

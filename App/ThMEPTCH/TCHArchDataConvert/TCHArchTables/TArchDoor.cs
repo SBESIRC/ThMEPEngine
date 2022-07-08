@@ -1,6 +1,6 @@
 ﻿namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
-    class TArchDoor
+    class TArchDoor : TArchEntity
     {
         /*
         CREATE TABLE TArchDoor(
@@ -23,7 +23,6 @@
     TextLayer CHAR,
     StyleID CHAR
 );*/
-        public ulong Id { get; set; }
         public double TextPointZ { get; set; }
         public double TextPointX { get; set; }
         public double TextPointY { get; set; }
@@ -35,9 +34,8 @@
         public double Height { get; set; }
         public double Width { get; set; }
         public double Thickness { get; set; }
-        public string LineType { get; set; }
         public int Kind { get; set; }
         public string SubKind { get; set; }
-        public string StyleID { get; set; }
+        public double Rotation { get; set; }
     }
 }

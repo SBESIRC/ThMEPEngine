@@ -24,7 +24,8 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
+                var planeOrigin = floor_origin + railing.ExtrudedDirection.MultiplyBy(centerline.Elevation);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(planeOrigin);
 
                 txn.Commit();
                 return ret;

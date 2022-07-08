@@ -39,7 +39,8 @@ namespace ThMEPIFC
                         }
                         else
                         {
-                            var holeSolid = CreateExtrudedSolid(data.Outline, -(slab.Thickness + 1), 0.0);
+                            var outLine = data.Outline.GetTransformedCopy(Matrix3d.Displacement(slab.ExtrudedDirection.MultiplyBy(1))) as Polyline;
+                            var holeSolid = CreateExtrudedSolid(outLine, -(slab.Thickness + 2), 0.0);
                             slabSolid.BooleanOperation(BooleanOperationType.BoolSubtract, holeSolid);
                         }
                     }

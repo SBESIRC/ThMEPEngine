@@ -52,8 +52,8 @@ namespace ThMEPIFC.Ifc2x3
                     // in ~500 faces for a sphere (during my testing,
                     // anyway). Other control settings are available
                     // TODO：这里需要根据具体情况设置
-                    mc.MaxSubdivisions = 10000;
-                    mc.MaxNodeSpacing = Length(solid) / 100;
+                    mc.MaxSubdivisions = 100;
+                    mc.MaxNodeSpacing = Length(solid) / 2;
 
                     // Create a mesh filter object
                     using (Mesh2dFilter mf = new Mesh2dFilter())
