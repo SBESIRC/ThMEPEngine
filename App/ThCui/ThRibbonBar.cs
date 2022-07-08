@@ -641,16 +641,6 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THXHSJH_SMALL",
                     "IDI_THCAD_THXHSJH_LARGE",
                     RibbonButtonStyle.SmallWithText);
-
-                // 距离校核
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("距离校核",
-                    "天华距离校核",
-                    "MEASUREPATH",
-                    "天华距离校核",
-                    "IDI_THCAD_MEASUREPATH_SMALL",
-                    "IDI_THCAD_MEASUREPATH_LARGE",
-                    RibbonButtonStyle.SmallWithText);
             }
         }
 
@@ -677,18 +667,8 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 连管标注
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("连管标注",
-                    "天华喷头连管标注",
-                    "THPTLGBZ",
-                    "天华喷头连管标注",
-                    "IDI_THCAD_THPTLGBZ_SMALL",
-                    "IDI_THCAD_THPTLGBZ_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-
                 // 喷淋系统
-                subRow = subPanel.AddNewRibbonRow();
+                var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("喷淋系统",
                     "天华地下喷淋系统图",
                     "THDXPLXTT",
