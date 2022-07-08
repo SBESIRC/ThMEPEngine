@@ -40,7 +40,7 @@ namespace TianHua.Electrical.PDS.UI.UI
         /// <exception cref="NotImplementedException"></exception>
         public void LoadProject()
         {
-            ThPDSProjectGraphService.ImportProject("");
+            ThPDSProjectGraphService.CreateNewProject();
         }
 
         #region 初始化信息
@@ -64,7 +64,7 @@ namespace TianHua.Electrical.PDS.UI.UI
         #region 界面顶部按钮响应事件
         private void btnNewProject_Click(object sender, RoutedEventArgs e)
         {
-            ThPDSProjectGraphService.ImportProject("");
+            ThPDSProjectGraphService.CreateNewProject();
         }
         private void btnOpenProject_Click(object sender, RoutedEventArgs e)
         {
