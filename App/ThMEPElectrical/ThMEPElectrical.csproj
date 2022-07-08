@@ -59,6 +59,7 @@
     <Compile Include="BlockConvert\ThBConvertExcelExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertInsertMode.cs" />
     <Compile Include="BlockConvert\ThBConvertManager.cs" />
+    <Compile Include="BlockConvert\ThBConvertObbService.cs" />
     <Compile Include="BlockConvert\ThBConvertParameter.cs" />
     <Compile Include="BlockConvert\ThBConvertRule.cs" />
     <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="BlockConvert\ThBConvertBlockExtractionEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertWipeOut.cs" />
+    <Compile Include="BlockConvert\ThBConvertZoomService.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
     <Compile Include="Broadcast\Model\ThBroadcastParameter.cs" />

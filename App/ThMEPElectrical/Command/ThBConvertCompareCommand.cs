@@ -13,8 +13,6 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPElectrical.BlockConvert;
-using ThMEPEngineCore.Engine;
-using System.Linq;
 
 namespace ThMEPElectrical.Command
 {
@@ -88,14 +86,17 @@ namespace ThMEPElectrical.Command
 
                 var compareService = new ThBConvertCompareService(currentDb.Database, targetBlocks, service.ObjectIds);
                 compareService.Compare();
-                compareService.Print();
-                compareService.Update();
 
-                UpdateLayerSettings(ThBConvertCommon.HIDING_LAYER);
+                //var zoomService = new ThBConvertZoomService();
+                //zoomService.Zoom(compareService.CompareModels[0]);
+
+                DeleteLayer(ThBConvertCommon.HIDING_LAYER);
+
+                compareService.Update();
             }
         }
 
-        private void UpdateLayerSettings(string name)
+        private void DeleteLayer(string name)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

@@ -256,11 +256,11 @@ namespace ThMEPElectrical.BlockConvert
             return result;
         }
 
-        public void Print()
+        public void Update()
         {
-            using (var acadDatabase = AcadDatabase.Use(Database))
+            using (var currentDb = AcadDatabase.Use(Database))
             {
-                if (CompareModels.Count > 0 && acadDatabase.Database.Equals(CompareModels[0].Database))
+                if (CompareModels.Count > 0 && currentDb.Database.Equals(CompareModels[0].Database))
                 {
                     CompareModels.ForEach(model =>
                     {
@@ -269,93 +269,45 @@ namespace ThMEPElectrical.BlockConvert
                             case ThBConvertCompareType.Unchanged:
                                 break;
                             case ThBConvertCompareType.Delete:
-                                Print(acadDatabase, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN);
+                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
+
+                                Print(currentDb, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN);
                                 break;
                             case ThBConvertCompareType.Add:
-                                Print(acadDatabase, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
+                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
+
+                                Print(currentDb, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
                                 break;
                             case ThBConvertCompareType.Displacement:
-                                Print(acadDatabase, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(acadDatabase, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
+                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
+                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
+
+                                Print(currentDb, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN);
+                                Print(currentDb, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
                                 break;
                             case ThBConvertCompareType.ParameterChange:
-                                Print(acadDatabase, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(acadDatabase, model.TargetId, 3, "CONTINUOUS");
+                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
+                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
+                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
+
+                                Print(currentDb, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN);
+                                Print(currentDb, model.TargetId, 3, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
                                 break;
                             case ThBConvertCompareType.RepetitiveID:
-                                Print(acadDatabase, model.SourceId, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
-                                Print(acadDatabase, model.TargetId, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                model.TargetIdList.ForEach(o =>
+                                {
+                                    ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[o]);
+                                    currentDb.Element<BlockReference>(o, true).Layer = ObjectIds[o];
+
+                                    Print(currentDb, o, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                });
                                 break;
                         }
                     });
                 }
-            }
-        }
 
-        private void Print(AcadDatabase acadDatabase, ObjectId objectId, short colorIndex, string lineType)
-        {
-            if (!objectId.Equals(ObjectId.Null))
-            {
-                var block = acadDatabase.Element<BlockReference>(objectId, true);
-                var name = objectId.GetBlockName();
-                if (name.KeepChinese().Equals(ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION))
-                {
-                    var objs = new DBObjectCollection();
-                    block.Explode(objs);
-                    var motor = objs.OfType<BlockReference>().First();
-                    var obb = motor.ToOBB();
-                    ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
-                }
-                else if (name.KeepChinese().Equals(ThBConvertCommon.BLOCK_LOAD_DIMENSION))
-                {
-                    var obb = block.Position.CreateSquare(100.0);
-                    ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
-                }
-                else
-                {
-                    var obb = block.ToOBB();
-                    ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
-                }
-            }
-        }
-
-        public void Update()
-        {
-            using (var currentDb = AcadDatabase.Use(Database))
-            {
-                CompareModels.ForEach(model =>
-                {
-                    switch(model.Type)
-                    {
-                        case ThBConvertCompareType.Unchanged:
-                            break;
-                        case ThBConvertCompareType.Delete:
-                            currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                            break;
-                        case ThBConvertCompareType.Add:
-                            ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                            currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-                            break;
-                        case ThBConvertCompareType.Displacement:
-                            currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                            ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                            currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-                            break;
-                        case ThBConvertCompareType.ParameterChange:
-                            currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                            ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                            currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-                            break;
-                        case ThBConvertCompareType.RepetitiveID:
-                            model.TargetIdList.ForEach(o =>
-                            {
-                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[o]);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[o];
-                            });
-                            break;
-                    }
-                });
-                
                 var ltr = currentDb.Layers.ElementOrDefault(ThBConvertCommon.HIDING_LAYER, true);
                 if (ltr == null)
                 {
@@ -372,6 +324,12 @@ namespace ThMEPElectrical.BlockConvert
                     ltr.Erase();
                 }
             }
+        }
+
+        private void Print(AcadDatabase acadDatabase, ObjectId objectId, short colorIndex, string lineType)
+        {
+            var obb = ThBConvertObbService.BlockObb(acadDatabase, objectId);
+            ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
         }
     }
 }
