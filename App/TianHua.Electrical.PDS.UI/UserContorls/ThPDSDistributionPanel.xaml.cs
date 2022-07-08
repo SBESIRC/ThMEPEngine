@@ -26,7 +26,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
                 Service.Init(this, Graph);
                 Service.UpdateTreeView(this.tv, Graph);
             });
-            PDSProject.Instance.DataChanged += () =>
+            PDSProject.Instance.ProjectDataChanged += (sender , e) =>
             {
                 Service.Init(this, Graph);
                 Service.UpdateTreeView(this.tv, Graph);

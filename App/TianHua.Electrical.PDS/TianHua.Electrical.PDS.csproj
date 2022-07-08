@@ -40,6 +40,7 @@
     <Compile Include="Project\Module\THPDSProjectSubstation.cs" />
     <Compile Include="Project\Module\THPDSSubstationMap.cs" />
     <Compile Include="Project\PDSProjectManagement.cs" />
+    <Compile Include="Project\PDSProjectEventArgs.cs" />
     <Compile Include="Service\ThPDSBlockNameMap.cs" />
     <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
     <Compile Include="Service\ThPDSLoadIDMatchService.cs" />

@@ -1320,11 +1320,26 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 创建空项目
+        /// </summary>
+        public static void CreateNewProject()
+        {
+            PDSProject.Instance.SetDefaults();
+        }
+
+        /// <summary>
         /// 导入项目
         /// </summary>
         public static void ImportProject(string filePath)
         {
-            PDSProject.Instance.Load(filePath);
+            if(string.IsNullOrWhiteSpace(filePath))
+            {
+                PDSProject.Instance.SetDefaults();
+            }
+            else
+            {
+                PDSProject.Instance.LoadFromFile(filePath);
+            }
         }
 
         /// <summary>

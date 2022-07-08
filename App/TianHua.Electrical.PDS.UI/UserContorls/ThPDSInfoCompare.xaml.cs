@@ -14,7 +14,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         {
             InitializeComponent();
             Service.Init(this);
-            PDSProject.Instance.DataChanged += () =>
+            PDSProject.Instance.ProjectDataChanged += (sender , e) =>
             {
                 Service.UpdateView(this);
             };
