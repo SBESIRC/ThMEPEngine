@@ -704,11 +704,7 @@ namespace TianHua.Electrical.PDS.Engine
                             newLoads.Add(item.Key);
                             CacheLoads.Add(item.Key);
                             var nextLoops = new List<Entity>();
-                            if (item.Key is Curve curve)
-                            {
-                                nextLoops = FindNext(curve, ThPDSBufferService.Buffer(curve, Database));
-                            }
-                            else if (item.Key is BlockReference block)
+                            if (item.Key is BlockReference block)
                             {
                                 if (GeometryMap.ContainsKey(block))
                                 {
@@ -741,6 +737,12 @@ namespace TianHua.Electrical.PDS.Engine
                                 }
                             }
                         }
+                    }
+                    else if(item.Key is Curve curve)
+                    {
+                        // 未知负载
+                        newLoads.Add(curve);
+                        entityList.Add(Tuple.Create(sourceEntity, item.Key, logos, newLoads));
                     }
                 }
             }
