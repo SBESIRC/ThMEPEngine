@@ -202,6 +202,11 @@ namespace TianHua.Hvac.UI.UI
             var btn = sender as Button;
             var model = (FanDataViewModel)btn.DataContext;
             RefreshFanModelParameter(model);
+            if (model.fanDataModel.ListVentQuan == null || model.fanDataModel.ListVentQuan.Count < 1) 
+            {
+                MessageBox.Show("当前行数据没有风机编号，无法进行插入操作,请输入风机编号后再进行插入操作", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (model.IsRepetitions || string.IsNullOrEmpty(model.FanModelCCCF) || model.FanModelCCCF.Contains("无") || model.FanModelCCCF.Contains("未知"))
             {
                 MessageBox.Show("当前行，名称重复或者没有风机型号，无法进行插入图块，请修改数据后再进行操作","天华-提醒",MessageBoxButton.OK,MessageBoxImage.Warning);
@@ -744,6 +749,7 @@ namespace TianHua.Hvac.UI.UI
                 pViewModel = fanDataView;
                 cViewModel = GetChildFanViewModel(fanDataView.fanDataModel.ID);
             }
+            pViewModel.VentNum = pViewModel.VentNum;
             if (null != cViewModel)
             {
                 pViewModel.fanDataModel.AirVolumeDescribe = string.Format("{0}/{1}", pViewModel.fanDataModel.AirVolume, cViewModel.fanDataModel.AirVolume);
