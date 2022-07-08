@@ -791,6 +791,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
             }
             PDSProject.Instance.graphData.Graph.AddVertex(node);
+            node.ComponentSelection(new List<ThPDSProjectGraphEdge>(), false);
             return node;
         }
 

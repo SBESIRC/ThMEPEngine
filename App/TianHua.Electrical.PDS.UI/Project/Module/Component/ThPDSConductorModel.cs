@@ -5,6 +5,7 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
+using ThCADExtension;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -32,7 +33,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("材料特征及结构")]
         public string OuterSheathMaterial
         {
-            get => _conductor.OuterSheathMaterial;
+            get => _conductor.OuterSheathMaterial.GetDescription();
         }
 
         [Browsable(true)]
