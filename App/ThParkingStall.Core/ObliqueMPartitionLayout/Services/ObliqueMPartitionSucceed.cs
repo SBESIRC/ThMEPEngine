@@ -44,21 +44,23 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
         }
         private bool IsConnectedToLane(LineSegment line)
         {
-            if (ClosestPointInVertLines(line.P0, line, IniLanes.Select(e => e.Line)) < 10
-                || ClosestPointInVertLines(line.P1, line, IniLanes.Select(e => e.Line)) < 10)
+            var nonParallelLanes = IniLanes.Where(e => !IsParallelLine(e.Line, line)).Select(e => e.Line);
+            if (ClosestPointInLines(line.P0, line, nonParallelLanes) < 10
+                || ClosestPointInLines(line.P1, line, nonParallelLanes) < 10)
                 return true;
             else return false;
         }
         private bool IsConnectedToLane(LineSegment line, bool Startpoint)
         {
+            var nonParallelLanes = IniLanes.Where(e => !IsParallelLine(e.Line, line)).Select(e => e.Line);
             if (Startpoint)
             {
-                if (ClosestPointInVertLines(line.P0, line, IniLanes.Select(e => e.Line)) < 10) return true;
+                if (ClosestPointInLines(line.P0, line, nonParallelLanes) < 10) return true;
                 else return false;
             }
             else
             {
-                if (ClosestPointInVertLines(line.P1, line, IniLanes.Select(e => e.Line)) < 10) return true;
+                if (ClosestPointInLines(line.P1, line, nonParallelLanes) < 10) return true;
                 else return false;
             }
         }
@@ -66,12 +68,12 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
         {
             if (Startpoint)
             {
-                if (ClosestPointInVertLines(line.P0, line, lanes) < 10) return true;
+                if (ClosestPointInLines(line.P0, line, lanes) < 10) return true;
                 else return false;
             }
             else
             {
-                if (ClosestPointInVertLines(line.P1, line, lanes.Select(e => e)) < 10) return true;
+                if (ClosestPointInLines(line.P1, line, lanes.Select(e => e)) < 10) return true;
                 else return false;
             }
         }
