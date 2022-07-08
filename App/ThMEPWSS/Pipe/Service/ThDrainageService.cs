@@ -10848,6 +10848,7 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSINAUDIBLE = 1506;
         public const string UNCEREMONIOUSNESS = "NOTE";
         public const string THESAURUSFLABBY = "DIMS";
+        public const string THESAURUSPOTENTIAL = @"(?:^F0L\-)|(?:^FL.*\-0$)|(?:^FL\-0$)";
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -10911,6 +10912,7 @@ cb: tolReturnValueRangeTo =>
     public static bool IsFL0(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
+      if (Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSPOTENTIAL, RegexOptions.IgnoreCase)) return THESAURUSOBSTINACY;
       return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(AUTOLITHOGRAPHIC);
     }
     public static bool IsPL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
@@ -11636,9 +11638,22 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                     }
                     if (IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
                     {
+                      var fdsc = THESAURUSSTAMPEDE;
                       foreach (var fd in Commonradius(fdwlGeo))
                       {
+                        ++fdsc;
                         max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                      }
+                      if (fdsc == THESAURUSSTAMPEDE)
+                      {
+                        if (IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                        {
+                          foreach (var fd in Commonradius(toilet_wells_interval.GetCenter().ToGCircle(QUOTATIONWITTIG).ToCirclePolygon(SUPERLATIVENESS)))
+                          {
+                            ++fdsc;
+                            max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                          }
+                        }
                       }
                       foreach (var cp in MaxBalconybasinToBalcony(cpwlGeo))
                       {
