@@ -29,7 +29,7 @@ namespace ThMEPElectrical.BlockConvert
             _bufferService = new ThNTSBufferService();
         }
 
-        public void Zoom(ThBConvertCompareModel model)
+        public void Zoom(ThBConvertCompareModel model,  double scale)
         {
             using (var docLock = Active.Document.LockDocument())
             using (var activeDb = AcadDatabase.Active())
@@ -38,32 +38,32 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     if (model.SourceId != ObjectId.Null && model.TargetId != ObjectId.Null)
                     {
-                        Highlight(activeDb, model.SourceId, true);
-                        Highlight(activeDb, model.TargetId);
+                        Highlight(activeDb, model.SourceId, scale, true);
+                        Highlight(activeDb, model.TargetId, scale);
                     }
                     else if (model.SourceId != ObjectId.Null && model.TargetId == ObjectId.Null)
                     {
-                        Highlight(activeDb, model.SourceId, true);
+                        Highlight(activeDb, model.SourceId, scale, true);
                     }
                     else if (model.SourceId == ObjectId.Null && model.TargetId != ObjectId.Null)
                     {
-                        Highlight(activeDb, model.TargetId, true);
+                        Highlight(activeDb, model.TargetId, scale, true);
                     }
                     else if (model.TargetIdList.Count > 0)
                     {
-                        Highlight(activeDb, model.TargetIdList[0], true);
+                        Highlight(activeDb, model.TargetIdList[0], scale, true);
                         for (var i = 1; i < model.TargetIdList.Count; i++)
                         {
-                            Highlight(activeDb, model.TargetIdList[i]);
+                            Highlight(activeDb, model.TargetIdList[i], scale);
                         }
                     }
                 }
             }
         }
 
-        private void Highlight(AcadDatabase activeDb, ObjectId objectId, bool zoom = false)
+        private void Highlight(AcadDatabase activeDb, ObjectId objectId,double scale, bool zoom = false)
         {
-            var obb = ThBConvertObbService.BlockObb(activeDb, objectId);
+            var obb = ThBConvertObbService.BlockObb(activeDb, objectId, scale);
             var buffer = obb.Buffer(100.0).OfType<DbPolyline>().First().GeometricExtents;
 
             // 高亮

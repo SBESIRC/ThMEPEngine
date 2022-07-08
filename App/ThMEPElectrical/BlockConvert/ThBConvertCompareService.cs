@@ -11,7 +11,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -176,6 +175,16 @@ namespace ThMEPElectrical.BlockConvert
                                 CompareModels.Add(result);
                                 localSearchIds.AddRange(result.TargetIdList);
                             }
+                            else
+                            {
+                                var result = new ThBConvertCompareModel
+                                {
+                                    Database = currentDb.Database,
+                                    TargetId = o.Value.ObjectId,
+                                    Type = ThBConvertCompareType.Add,
+                                };
+                                CompareModels.Add(result);
+                            }
                         });
                     }
                     else
@@ -256,7 +265,7 @@ namespace ThMEPElectrical.BlockConvert
             return result;
         }
 
-        public void Update()
+        public void Update(double scale)
         {
             using (var currentDb = AcadDatabase.Use(Database))
             {
@@ -271,29 +280,29 @@ namespace ThMEPElectrical.BlockConvert
                             case ThBConvertCompareType.Delete:
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
 
-                                Print(currentDb, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN);
+                                Print(currentDb, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN, scale);
                                 break;
                             case ThBConvertCompareType.Add:
                                 ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
                                 currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
 
-                                Print(currentDb, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                Print(currentDb, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 break;
                             case ThBConvertCompareType.Displacement:
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
                                 currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
 
-                                Print(currentDb, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(currentDb, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                Print(currentDb, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN, scale);
+                                Print(currentDb, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 break;
                             case ThBConvertCompareType.ParameterChange:
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
                                 currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
 
-                                Print(currentDb, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(currentDb, model.TargetId, 3, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                Print(currentDb, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN, scale);
+                                Print(currentDb, model.TargetId, 3, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 break;
                             case ThBConvertCompareType.RepetitiveID:
                                 model.TargetIdList.ForEach(o =>
@@ -301,7 +310,7 @@ namespace ThMEPElectrical.BlockConvert
                                     ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[o]);
                                     currentDb.Element<BlockReference>(o, true).Layer = ObjectIds[o];
 
-                                    Print(currentDb, o, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
+                                    Print(currentDb, o, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 });
                                 break;
                         }
@@ -326,10 +335,10 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        private void Print(AcadDatabase acadDatabase, ObjectId objectId, short colorIndex, string lineType)
+        private void Print(AcadDatabase acadDatabase, ObjectId objectId, short colorIndex, string lineType, double scale)
         {
-            var obb = ThBConvertObbService.BlockObb(acadDatabase, objectId);
-            ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
+            var obb = ThBConvertObbService.BlockObb(acadDatabase, objectId, scale);
+            ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType, scale);
         }
     }
 }

@@ -1,36 +1,27 @@
-﻿using System.Linq;
-
-using DotNetARX;
+﻿using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 
-using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertObbService
     {
-        public static Polyline BlockObb(AcadDatabase acadDatabase, ObjectId objectId)
+        public static Polyline BlockObb(AcadDatabase acadDatabase, ObjectId objectId, double scale)
         {
             if (!objectId.Equals(ObjectId.Null))
             {
                 var block = acadDatabase.Element<BlockReference>(objectId, true);
                 var name = objectId.GetBlockName();
-                if (name.KeepChinese().Equals(ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION))
+                if (ThBConvertLabelBlockList.BlockList.Contains(name))
                 {
-                    var objs = new DBObjectCollection();
-                    block.Explode(objs);
-                    var motor = objs.OfType<BlockReference>().First();
-                    return motor.ToOBB();
-                }
-                else if (name.KeepChinese().Equals(ThBConvertCommon.BLOCK_LOAD_DIMENSION))
-                {
-                    return block.Position.CreateSquare(100.0);
+                    return block.Position.CreateSquare(250.0 * scale);
                 }
                 else
                 {
-                    return block.ToOBB();
+                    return block.ToOBB(block.BlockTransform);
                 }
             }
             return new Polyline();

@@ -90,13 +90,14 @@ namespace ThMEPElectrical.Command
                 //var zoomService = new ThBConvertZoomService();
                 //zoomService.Zoom(compareService.CompareModels[0]);
 
-                DeleteLayer(ThBConvertCommon.HIDING_LAYER);
+                HiddenLayer(ThBConvertCommon.HIDING_LAYER);
 
-                compareService.Update();
+                compareService.Update(Scale / 100.0);
+                Active.Editor.Regen();
             }
         }
 
-        private void DeleteLayer(string name)
+        private void HiddenLayer(string name)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

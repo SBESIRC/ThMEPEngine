@@ -143,7 +143,7 @@ namespace ThMEPElectrical.BlockConvert
                             if (quantity != sum.ToString())
                             {
                                 var obb = pumpLabel.GetBlockOBB();
-                                ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, 1, "ByLayer");
+                                ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, 1, "ByLayer", scale.X / 100);
                             }
                         }
                         break;

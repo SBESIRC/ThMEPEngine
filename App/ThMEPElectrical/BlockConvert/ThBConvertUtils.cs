@@ -245,14 +245,14 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public static void InsertRevcloud(Database database, Polyline obb, short colorIndex, string linetype)
+        public static void InsertRevcloud(Database database, Polyline obb, short colorIndex, string linetype, double scale)
         {
             using (var db = AcadDatabase.Use(database))
             {
                 // 创建云线
                 var layerId = db.Database.CreateAILayer("AI-圈注", colorIndex);
                 ObjectId revcloud = ObjectId.Null;
-                var buffer = obb.Buffer(300);
+                var buffer = obb.Buffer(300.0 * scale);
                 var objId = db.ModelSpace.Add(buffer[0] as Entity);
                 void handler(object s, ObjectEventArgs e)
                 {
