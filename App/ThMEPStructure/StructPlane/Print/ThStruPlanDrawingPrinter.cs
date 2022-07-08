@@ -46,7 +46,7 @@ namespace ThMEPStructure.StructPlane.Print
             adjustService.DoubleRowTexts.ForEach(x => removedTexts.Add(x.Item1));
 
             // 将生成的文字打印出来
-            var config = ThAnnotationPrinter.GetAnnotationConfig();
+            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
             var printer = new ThAnnotationPrinter(config);
             adjustService.DoubleRowTexts.ForEach(x =>
             {
@@ -206,7 +206,7 @@ namespace ThMEPStructure.StructPlane.Print
                                 textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector();
                             }
                             ThAdjustDbTextRotationService.Adjust(dbText, textMoveDir.GetPerpendicularVector());
-                            var config = ThAnnotationPrinter.GetAnnotationConfig();
+                            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
                             var printer = new ThAnnotationPrinter(config);
                             var beamAnnotions = printer.Print(db, dbText);
                             Append(beamAnnotions);
@@ -214,7 +214,7 @@ namespace ThMEPStructure.StructPlane.Print
                         }
                         else
                         {
-                            var config = ThAnnotationPrinter.GetAnnotationConfig();
+                            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
                             var printer = new ThAnnotationPrinter(config);
                             Append(printer.Print(db, dbText));
                         }
@@ -272,7 +272,7 @@ namespace ThMEPStructure.StructPlane.Print
                 var slabCorners = builder.Build(tenThckSlabTexts,slabs);
                 if(slabCorners.Count>0)
                 {
-                    var textConfig = ThStairLineMarkPrinter.GetTextConfig();
+                    var textConfig = ThStairLineMarkPrinter.GetTextConfig(PrintParameter.DrawingScale);
                     var lineConfig = ThStairLineMarkPrinter.GetLineConfig();
                     var stairLinePrinter = new ThStairLineMarkPrinter(lineConfig, textConfig);
                     slabCorners.OfType<Line>().ForEach(l => Append(stairLinePrinter.Print(db, l)));

@@ -88,7 +88,7 @@ namespace ThMEPStructure.StructPlane.Service
                     TextString = Head,
                     Height = 100,
                 };
-                var printer = new ThAnnotationPrinter(ThAnnotationPrinter.GetHeadTextConfig());
+                var printer = new ThAnnotationPrinter(ThAnnotationPrinter.GetHeadTextConfig(DrawingSacle));
                 return printer.Print(database, headText);
             }     
         }
@@ -106,7 +106,7 @@ namespace ThMEPStructure.StructPlane.Service
                     TextString = DrawingSacle,
                     Height = 100,
                 };
-                var printer = new ThAnnotationPrinter(ThAnnotationPrinter.GetHeadTextScaleConfig());
+                var printer = new ThAnnotationPrinter(ThAnnotationPrinter.GetHeadTextScaleConfig(DrawingSacle));
                 return printer.Print(database, scaleText);
             }            
         }

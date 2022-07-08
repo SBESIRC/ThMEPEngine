@@ -19,32 +19,53 @@ namespace ThMEPStructure.StructPlane.Print
             results.Add(textId);
             return results;
         }
-        public static AnnotationPrintConfig GetAnnotationConfig()
+        public static AnnotationPrintConfig GetAnnotationConfig(string drawingScale)
         {
+            var config = GetAnnotationConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
+        }
+        private static AnnotationPrintConfig GetAnnotationConfig()
+        {
+            // 1:1
             return new AnnotationPrintConfig
             {
                 LayerName = ThPrintLayerManager.BeamTextLayName,
-                Height = 250,
+                Height = 2.5,
                 WidthFactor = 0.7,
                 TextStyleName = ThPrintStyleManager.THSTYLE3,
             };
         }
-        public static AnnotationPrintConfig GetHeadTextConfig()
+        public static AnnotationPrintConfig GetHeadTextConfig(string drawingScale)
+        {
+            var config = GetHeadTextConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
+        }
+        private static AnnotationPrintConfig GetHeadTextConfig()
         {
             return new AnnotationPrintConfig
             {
                 LayerName = ThPrintLayerManager.HeadTextLayerName,
-                Height = 800,
+                Height = 8,
                 WidthFactor = 0.8,
                 TextStyleName = "TH-STYLE2",
             };
         }
-        public static AnnotationPrintConfig GetHeadTextScaleConfig()
+
+        public static AnnotationPrintConfig GetHeadTextScaleConfig(string drawingScale)
+        {
+            var config = GetHeadTextScaleConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
+        }
+
+        private static AnnotationPrintConfig GetHeadTextScaleConfig()
         {
             return new AnnotationPrintConfig
             {
                 LayerName = ThPrintLayerManager.HeadTextLayerName,
-                Height = 600,
+                Height = 6,
                 WidthFactor = 0.8,
                 TextStyleName = "TH-STYLE2",
             };

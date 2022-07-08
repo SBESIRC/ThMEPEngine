@@ -264,5 +264,36 @@ namespace ThMEPStructure.Common
             string pattern = @"^\s*\d+\s*$";
             return System.Text.RegularExpressions.Regex.IsMatch(content, pattern);
         }
+        public static double GetScaleTextHeight(this double textHeight,double x,double y)
+        {
+            return textHeight * y / x;
+        }
+        public static Tuple<double,double> GetDrawScaleValue(this string drawScale)
+        {
+            // drawScale格式 1:100,1:50 1:1
+            if (string.IsNullOrEmpty(drawScale))
+            {
+                return Tuple.Create(1.0, 1.0);
+            }
+            else
+            {
+                var strs = drawScale.Split(':');
+                if(strs.Length==0)
+                {
+                    strs = drawScale.Split('：');
+                }
+                if(strs.Length == 2)
+                {
+                    double x = double.Parse(strs[0]);
+                    double y = double.Parse(strs[1]);
+                    return Tuple.Create(x, y);
+                }
+                else
+                {
+                    return Tuple.Create(1.0, 1.0);
+                }
+            }
+            
+        }
     }
 }

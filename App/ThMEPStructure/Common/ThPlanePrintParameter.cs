@@ -1,4 +1,6 @@
-﻿namespace ThMEPStructure.Common
+﻿using System;
+
+namespace ThMEPStructure.Common
 {
     /// <summary>
     /// 通用的打印参数
