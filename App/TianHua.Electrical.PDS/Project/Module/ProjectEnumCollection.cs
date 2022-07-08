@@ -191,29 +191,29 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum MaterialStructure
     {
         [Description("YJY")]
-        YJY,
+        YJY = 1,
         [Description("YJV")]
-        YJV,
+        YJV = 2,
         [Description("BYJ")]
-        BYJ,
+        BYJ = 3,
         [Description("KYJY")]
-        KYJY,
+        KYJY = 4,
         [Description("RYJ")]
-        RYJ,
+        RYJ = 5,
         [Description("BTTZ")]
-        BTTZ,
+        BTTZ = 6,
         [Description("BTTRZ")]
-        BTTRZ,
+        BTTRZ = 7,
         [Description("RTTZ")]
-        RTTZ,
+        RTTZ = 8,
         [Description("NG-A(BTLY)")]
-        NG_A_BTLY,
+        NG_A_BTLY = 9,
         [Description("BV")]
-        BV,
+        BV = 10,
         [Description("KYJV")]
-        KYJV,
+        KYJV = 11,
         [Description("RVV")]
-        RVV,
+        RVV = 12,
     }
 
     public enum ConductorLevel
@@ -235,15 +235,24 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum ConductorType
     {
-        非消防配电电线,
-        非消防配电电缆,
-        消防配电电线,
-        消防配电干线,
-        消防配电分支线路,
-        消防配电控制电缆,
-        非消防配电控制电缆,
-        消防控制信号软线,
-        非消防控制信号软线,
+        [Description("非消防配电电线")]
+        非消防配电电线 = 1,
+        [Description("非消防配电电缆")]
+        非消防配电电缆 = 2,
+        [Description("消防配电电线")]
+        消防配电电线 = 3,
+        [Description("消防配电干线")]
+        消防配电干线 = 4,
+        [Description("消防配电分支线路")]
+        消防配电分支线路 = 5,
+        [Description("消防配电控制电缆")]
+        消防配电控制电缆 = 6,
+        [Description("非消防配电控制电缆")]
+        非消防配电控制电缆 = 7,
+        [Description("消防控制信号软线")]
+        消防控制信号软线 = 8,
+        [Description("非消防控制信号软线")]
+        非消防控制信号软线 = 9,
     }
 
     /// <summary>

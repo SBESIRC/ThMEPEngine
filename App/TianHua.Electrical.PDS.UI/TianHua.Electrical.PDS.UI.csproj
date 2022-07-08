@@ -47,6 +47,7 @@
     <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorLayingPathPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorLayingSitePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorTypePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSSecondaryCircuitDescriptionEditPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
