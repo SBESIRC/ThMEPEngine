@@ -10,6 +10,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThCADExtension;
 
 namespace ThMEPWSS.Command
 {
