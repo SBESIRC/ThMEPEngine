@@ -86,15 +86,19 @@ namespace ThCADCore.NTS
             // 处理弧线（椭圆）
             objs = objs.Tessellate();
 
-            // 对每个Polygon进行修复
+            // 暂时只支持多段线
+            // 对每个多段线进行修复
             var filters = new DBObjectCollection();
             objs.OfType<Polyline>().ForEach(o =>
             {
-                o.Fix().OfType<Polyline>().ForEach(e => filters.Add(e));
+                foreach(Entity e in o.Fix())
+                {
+                    filters.Add(e);
+                }
             });
-            if (filters.Count == 0)
+            if (filters.Count == 0 || filters.Count == 1)
             {
-                return new DBObjectCollection();
+                return filters;
             }
 
             // 获取面域
@@ -154,7 +158,7 @@ namespace ThCADCore.NTS
             {
                 DissolveSharedEdges = false
             };
-            return builder.Build(objs.ToMultiLineString());
+            return builder.Build(objs.ToGeometryCollection());
         }
 
         public static Geometry OuterOutline(this DBObjectCollection objs)

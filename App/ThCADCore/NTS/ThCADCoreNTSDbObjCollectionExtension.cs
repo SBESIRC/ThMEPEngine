@@ -26,6 +26,12 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 
+        public static GeometryCollection ToGeometryCollection(this DBObjectCollection objs)
+        {
+            var geometries = objs.OfType<Entity>().Select(e => e.ToNTSGeometry());
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection(geometries.ToArray());
+        }
+
         public static Geometry ToNTSNodedLineStrings(this MultiLineString linestrings)
         {
             // UnaryUnionOp.Union()有Robust issue
