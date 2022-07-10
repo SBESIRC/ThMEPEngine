@@ -1279,6 +1279,8 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                         var t2 = GeoFac.CreateIntersectsTester(rdls);
                         var t3 = GeoFac.CreateIntersectsTester(rdls.OfType<Geometry>().Concat(textpls).ToList());
                         var (t4, addsankaku) = GeoFac.CreateIntersectsTesterEngine<Geometry>();
+                        var w2u = Active.Editor.WCS2UCS();
+                        var u2w = Active.Editor.UCS2WCS();
                         foreach (var tg in targets)
                         {
                             var text = toDrawf(tg.ToGRect(HYPERDISYLLABLE).ToPolygon()).FirstOrDefault()?.UserData as string;
@@ -1297,19 +1299,19 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             const double text_gap = THESAURUSENTREPRENEUR;
                                             const double bd_gap = THESAURUSENTREPRENEUR;
                                             var angle = step * k + PROCRASTINATION.AngleFromDegree();
-                                            var pt1 = tg.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle));
+                                            var pt1 = tg.TransformBy(w2u).OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle));
                                             var pt2 = pt1.OffsetXY(w + THESAURUSPERMUTATION * text_gap, h + THESAURUSPERMUTATION * text_gap);
-                                            var labelline1 = new GLineSegment(pt1, tg);
+                                            var labelline1 = new GLineSegment(pt1.TransformBy(u2w), tg);
                                             if (state < THESAURUSPERMUTATION)
                                             {
                                                 if (t2(labelline1.ToLineString())) continue;
                                             }
                                             var r = new GRect(pt1, pt2);
-                                            if ((pt1 - tg).X < THESAURUSSTAMPEDE)
+                                            if ((pt1.TransformBy(u2w) - tg).TransformBy(w2u).X < THESAURUSSTAMPEDE)
                                             {
                                                 r = r.OffsetXY(-(w + THESAURUSPERMUTATION * text_gap), THESAURUSSTAMPEDE);
                                             }
-                                            var rpl = r.Expand(bd_gap).ToPolygon();
+                                            var rpl = r.Expand(bd_gap).ToPolygon().TransformBy(u2w);
                                             if (state < THESAURUSPERMUTATION)
                                             {
                                                 if (t4(rpl)) continue;
@@ -1324,9 +1326,9 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             }
                                             var _r = r.Expand(-text_gap);
                                             var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
-                                            t.Layer = LeaderLayer;
+                                                t.Layer = LeaderLayer;
                                             t.WidthFactor = THESAURUSDISPASSIONATE;
-                                            t.TransformBy(Active.Editor.UCS2WCS());
+                                            t.TransformBy(u2w);
                                             ByLayer(t);
                                             DrawingQueue.Enqueue(adb =>
                                             {
@@ -1334,14 +1336,13 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             });
                                             {
                                                 var e = DrawLineSegmentLazy(labelline1);
-                                                e.Layer = LeaderLayer;
-                                                e.TransformBy(Active.Editor.UCS2WCS());
+                                                    e.Layer = LeaderLayer;
                                                 ByLayer(e);
                                             }
                                             {
                                                 var e = DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom));
-                                                e.Layer = LeaderLayer;
-                                                e.TransformBy(Active.Editor.UCS2WCS());
+                                                    e.Layer = LeaderLayer;
+                                                e.TransformBy(u2w);
                                                 ByLayer(e);
                                             }
                                             addsankaku(rpl);
