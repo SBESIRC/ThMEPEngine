@@ -4,6 +4,7 @@ using System.Linq;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm.Hull;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Linemerge;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -155,20 +156,15 @@ namespace ThCADCore.NTS
             };
             return builder.Build(objs.ToMultiLineString());
         }
-    }
-    public enum ThBufferEndCapStyle
-    {
-        //
-        // 摘要:
-        //     Map NTS EndCapStyle's Round style.
-        Round = 1,
-        //
-        // 摘要:
-        //     Map NTS EndCapStyle's Flat style.
-        Flat = 2,
-        //
-        // 摘要:
-        //     Map NTS EndCapStyle's Square style.
-        Square = 3
+
+        public static Geometry OuterOutline(this DBObjectCollection objs)
+        {
+            var plines = objs.Fix().OfType<Polyline>().ToCollection();
+            if (plines.ToNTSMultiPolygon() is MultiPolygon polygons)
+            {
+                return ConcaveHullOfPolygons.ConcaveHullByLengthRatio(polygons, 0.05, true, false);
+            }
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+        }
     }
 }
