@@ -174,6 +174,7 @@
     <Compile Include="ViewModels\ThPDSCircuitGraphWpfRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
+    <Compile Include="ViewModels\ThPDSCreateLoadVM.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
     <Compile Include="ViewModels\THPDSLoadCalculationVM.cs" />
     <Compile Include="ViewModels\ThPDSProjectGraphNodeTreeViewVM.cs" />
