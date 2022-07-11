@@ -36,6 +36,7 @@
     <Compile Include="Project\Module\LowVoltageCabinet\FeederCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PDSBaseLowVoltageCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PowerReceivingCabinet.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeData.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeExtension.cs" />
     <Compile Include="Project\Module\THPDSProjectSubstation.cs" />
     <Compile Include="Project\Module\THPDSSubstationMap.cs" />
