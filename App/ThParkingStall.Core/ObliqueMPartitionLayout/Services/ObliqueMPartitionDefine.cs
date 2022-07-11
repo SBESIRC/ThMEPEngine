@@ -170,7 +170,89 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
             GenerateCarsOnRestLanes();
             PostProcess();
         }
+        public void GenerateLanes()
+        {
+            int count = 0;
+            while (true)
+            {
+                count++;
+                if (count > 20) break;
 
+                SortLaneByDirection(IniLanes, LayoutMode);
+                GenerateLaneParas paras_integral_modules = new GenerateLaneParas();
+                GenerateLaneParas paras_adj_lanes = new GenerateLaneParas();
+                GenerateLaneParas paras_between_two_builds = new GenerateLaneParas();
+                GenerateLaneParas paras_single_vert_modules = new GenerateLaneParas();
+
+                var length_integral_modules = ((int)GenerateIntegralModuleLanesOptimizedByRealLength(ref paras_integral_modules, true));
+                var length_adj_lanes = ((int)GenerateAdjacentLanesOptimizedByRealLength(ref paras_adj_lanes));
+                var length_between_two_builds = ((int)GenerateLaneBetweenTwoBuilds(ref paras_between_two_builds));
+                var length_single_vert_modules = (int)GenerateLaneForLayoutingSingleVertModule(ref paras_single_vert_modules);
+                var max = Math.Max(Math.Max(length_integral_modules, length_adj_lanes), Math.Max(length_adj_lanes, length_between_two_builds));
+                max = Math.Max(max, length_single_vert_modules);
+                if (max > 0)
+                {
+                    if (max == length_integral_modules)
+                    {
+                        RealizeGenerateLaneParas(paras_integral_modules);
+                    }
+                    else if (max == length_adj_lanes)
+                    {
+                        RealizeGenerateLaneParas(paras_adj_lanes);
+                    }
+                    else if (max == length_between_two_builds)
+                    {
+                        RealizeGenerateLaneParas(paras_between_two_builds);
+                    }
+                    else
+                    {
+                        RealizeGenerateLaneParas(paras_single_vert_modules);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        public void GenerateCarsOnRestLanes()
+        {
+            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            var vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
+            SortLaneByDirection(vertlanes, LayoutMode);
+            var align_backback_for_align_rest = false;
+            for (int i = 0; i < vertlanes.Count; i++)
+            {
+                var k = vertlanes[i];
+                var vl = k.Line;
+                UnifyLaneDirection(ref vl, IniLanes);
+                var line = new LineSegment(vl);
+                line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                var line_align_backback_rest = new LineSegment();
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
+                    , ref line_align_backback_rest, true, false, false, false, true, true, true, align_backback_for_align_rest, false, true, false, true, false, true);
+                align_backback_for_align_rest = false;
+                if (line_align_backback_rest.Length > 0)
+                {
+                    vertlanes.Insert(i + 1, new Lane(line_align_backback_rest, k.Vec));
+                    align_backback_for_align_rest = true;
+                }
+            }
+
+            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
+            SortLaneByDirection(vertlanes, LayoutMode);
+            foreach (var k in vertlanes)
+            {
+                var vl = k.Line;
+                UnifyLaneDirection(ref vl, IniLanes);
+                var line = new LineSegment(vl);
+                line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                var line_align_backback_rest = new LineSegment();
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
+                    , ref line_align_backback_rest, true, false, false, false, true, true, false);
+            }
+        }
         private void InitialzeDatas(List<LineSegment> iniLanes)
         {
             //如果柱子完成面宽度对车道间距没有影响，则在一开始便将柱子缩小为净尺寸
