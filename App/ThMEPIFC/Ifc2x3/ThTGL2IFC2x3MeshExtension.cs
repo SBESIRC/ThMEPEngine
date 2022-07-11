@@ -38,14 +38,37 @@ namespace ThMEPIFC.Ifc2x3
 
         public static IfcFaceBasedSurfaceModel ToIfcFaceBasedSurface(this IfcStore model, Solid3d solid)
         {
+            using (var m = solid.ToMesh2d())
+            {
+                var connectedFaceSet = model.Instances.New<IfcConnectedFaceSet>();
+                var faceBasedSurface = model.Instances.New<IfcFaceBasedSurfaceModel>();
+                // Extract individual faces from the mesh data
+                foreach (Element2d e in m.Element2ds)
+                {
+                    Point3dCollection pts = new Point3dCollection();
+                    foreach (Node n in e.Nodes)
+                    {
+                        pts.Add(n.Point);
+                        n.Dispose();
+                    }
+                    e.Dispose();
+
+                    connectedFaceSet.CfsFaces.Add(ToIfcFace(model, pts));
+                }
+                faceBasedSurface.FbsmFaces.Add(connectedFaceSet);
+                return faceBasedSurface;
+            }
+        }
+
+        public static Mesh2d ToMesh2d(this Solid3d solid)
+        {
             // Reference：
-            //  https://through-the-interface.typepad.com/through_the_interface/2011/03/generating-a-mesh-for-a-3d-solid-using-autocads-brep-api-from-net.html
+            //  https://www.keanw.com/2011/03/generating-a-mesh-for-a-3d-solid-using-autocads-brep-api-from-net.html
 
             // Build the BRep topology object to traverse
             using (var brep = new Brep(solid))
             {
                 // Create and set our mesh control object
-                var faceBasedSurface = model.Instances.New<IfcFaceBasedSurfaceModel>();
                 using (Mesh2dControl mc = new Mesh2dControl())
                 {
                     // These settings seem extreme, but only result
@@ -62,27 +85,9 @@ namespace ThMEPIFC.Ifc2x3
                         mf.Insert(brep, mc);
 
                         // Generate a mesh using the filter
-                        using (Mesh2d m = new Mesh2d(mf))
-                        {
-                            // Extract individual faces from the mesh data
-                            var connectedFaceSet = model.Instances.New<IfcConnectedFaceSet>();
-                            foreach (Element2d e in m.Element2ds)
-                            {
-                                Point3dCollection pts = new Point3dCollection();
-                                foreach (Node n in e.Nodes)
-                                {
-                                    pts.Add(n.Point);
-                                    n.Dispose();
-                                }
-                                e.Dispose();
-
-                                connectedFaceSet.CfsFaces.Add(ToIfcFace(model, pts));
-                            }
-                            faceBasedSurface.FbsmFaces.Add(connectedFaceSet);
-                        }
+                        return new Mesh2d(mf);
                     }
                 }
-                return faceBasedSurface;
             }
         }
 

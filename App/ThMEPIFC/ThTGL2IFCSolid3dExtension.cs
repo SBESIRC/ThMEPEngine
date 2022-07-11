@@ -1,16 +1,25 @@
 ﻿using System;
-using ThMEPTCH.Model;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
-using ThCADCore.NTS;
 using System.Linq;
+using ThCADCore.NTS;
+using ThMEPTCH.Model;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPIFC
 {
     public static class ThTGL2IFCSolid3dExtension
     {
         public static Solid3d CreateSolid3d(this ThTCHWall wall)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Solid3d CreateSolid3d(this ThTCHDoor door)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Solid3d CreateSolid3d(this ThTCHWindow window)
         {
             throw new NotImplementedException();
         }
