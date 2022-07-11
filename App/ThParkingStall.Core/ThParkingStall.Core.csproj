@@ -86,6 +86,7 @@
     <Compile Include="MPartitionLayout\Utilities\MGeoUtilities.cs" />
     <Compile Include="MPartitionLayout\Utilities\MNTSExtensions.cs" />
     <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionDefine.cs" />
+    <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionCal.cs" />
     <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionMain.cs" />
     <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionSucceed.cs" />
     <Compile Include="Program.cs" />

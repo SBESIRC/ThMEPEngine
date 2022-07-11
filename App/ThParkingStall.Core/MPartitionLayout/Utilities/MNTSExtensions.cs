@@ -195,6 +195,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             else if (g is MultiPoint)
                 return ((MultiPoint)g).Coordinates;
             //出现了两曲线为相交但判为相交的bug，用where筛除一下
+            else if (g is GeometryCollection)
+            {
+                return g.Coordinates.Where(t => line.ClosestPoint(t).Distance(t) < 0.001
+                    && shell.ClosestPoint(t).Distance(t) < 0.001).ToArray();
+            }
             return ((LineString)g).Coordinates
                 .Where(t => line.ClosestPoint(t).Distance(t)<0.001
                 && shell.ClosestPoint(t).Distance(t) < 0.001).ToArray();
