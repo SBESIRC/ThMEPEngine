@@ -82,7 +82,7 @@ namespace ThMEPElectrical.Command
                 var targetNames = new List<string>();
                 var manager = service.ReadFile(srcNames, targetNames);
                 var targetBlocks = service.TargetBlockExtract(targetNames);
-                service.Convert(manager, srcNames, targetNames, targetBlocks, true);
+                service.Convert(manager, srcNames, targetBlocks, true);
             }
         }
     }

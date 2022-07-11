@@ -59,7 +59,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         public bool ConvertManualActuator { get; set; }
 
-        public Dictionary<ObjectId, string> ObjectIds { get; set; }
+        public List<ThBConvertEntityInfos> EntityInfos { get; set; }
 
         public ThBConvertService(AcadDatabase currentDb, Polyline frame, ConvertMode mode, ConvertCategory category, double scale,
             string frameStyle, bool convertManualActuator)
@@ -71,7 +71,7 @@ namespace ThMEPElectrical.BlockConvert
             Scale = scale;
             FrameStyle = frameStyle;
             ConvertManualActuator = convertManualActuator;
-            ObjectIds = new Dictionary<ObjectId, string>();
+            EntityInfos = new List<ThBConvertEntityInfos>();
         }
 
         public ThBConvertManager ReadFile(List<string> srcNames, List<string> targetNames)
@@ -130,7 +130,7 @@ namespace ThMEPElectrical.BlockConvert
                 ? SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
         }
 
-        public void Convert(ThBConvertManager manager, List<string> srcNames, List<string> targetNames, List<ThBlockReferenceData> targetBlocks, bool setLayer)
+        public void Convert(ThBConvertManager manager, List<string> srcNames, List<ThBlockReferenceData> targetBlocks, bool setLayer)
         {
             using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
             {
@@ -375,7 +375,11 @@ namespace ThMEPElectrical.BlockConvert
                                     if (!id.IsErased)
                                     {
                                         engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayerSetting);
-                                        ObjectIds.Add(id, targetBlockLayer);
+                                        EntityInfos.Add(new ThBConvertEntityInfos(
+                                            id, 
+                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
+                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT), 
+                                            targetBlockLayer)); 
                                     }
                                 });
                             }

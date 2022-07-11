@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Text.RegularExpressions;
+
 using AcHelper;
 using Linq2Acad;
-using DotNetARX;
+using Autodesk.AutoCAD.DatabaseServices;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Autodesk.AutoCAD.Runtime;
-using System.Text.RegularExpressions;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 

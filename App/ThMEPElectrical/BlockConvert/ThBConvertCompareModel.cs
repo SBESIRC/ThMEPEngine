@@ -27,6 +27,16 @@ namespace ThMEPElectrical.BlockConvert
         public List<ObjectId> TargetIdList { get; set; }
 
         /// <summary>
+        /// 来源专业
+        /// </summary>
+        public EquimentCategory Category { get; set; }
+
+        /// <summary>
+        /// 设备类型
+        /// </summary>
+        public string EquimentType { get; set; }
+
+        /// <summary>
         /// 比对结果
         /// </summary>
         public ThBConvertCompareType Type { get; set; }
@@ -36,6 +46,8 @@ namespace ThMEPElectrical.BlockConvert
             SourceId = ObjectId.Null;
             TargetId = ObjectId.Null;
             TargetIdList = new List<ObjectId>();
+            Category = EquimentCategory.暖通;
+            EquimentType = "";
             Type = ThBConvertCompareType.Unchanged;
         }
     }

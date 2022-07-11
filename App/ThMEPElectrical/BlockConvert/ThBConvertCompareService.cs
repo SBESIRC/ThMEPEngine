@@ -20,17 +20,17 @@ namespace ThMEPElectrical.BlockConvert
 
         public Database Database { get; set; }
 
-        public List<ThBlockReferenceData> TargetBlocks { get; set; }
+        public List<ThBConvertEntityInfos> SrcEntityInfos { get; set; }
 
-        public Dictionary<ObjectId, string> ObjectIds { get; set; }
+        public List<ThBConvertEntityInfos> TarEntityInfos { get; set; }
 
         public List<ThBConvertCompareModel> CompareModels { get; set; }
 
-        public ThBConvertCompareService(Database database, List<ThBlockReferenceData> targetBlocks, Dictionary<ObjectId, string> objectIds)
+        public ThBConvertCompareService(Database database, List<ThBConvertEntityInfos> srcEntityInfos, List<ThBConvertEntityInfos> tarEntityInfos)
         {
             Database = database;
-            TargetBlocks = targetBlocks;
-            ObjectIds = objectIds;
+            SrcEntityInfos = srcEntityInfos;
+            TarEntityInfos = tarEntityInfos;
             CompareModels = new List<ThBConvertCompareModel>();
         }
 
@@ -39,8 +39,8 @@ namespace ThMEPElectrical.BlockConvert
             using (var currentDb = AcadDatabase.Use(Database))
             {
                 var searchedIds = new List<ObjectId>();
-                var sourceEntites = TargetBlocks.Select(o => currentDb.Element<BlockReference>(o.ObjId, true)).ToList();
-                var targetEntites = ObjectIds.Select(o => currentDb.Element<BlockReference>(o.Key, true)).ToList();
+                var sourceEntites = SrcEntityInfos.Select(o => currentDb.Element<BlockReference>(o.ObjectId, true)).ToList();
+                var targetEntites = TarEntityInfos.Select(o => currentDb.Element<BlockReference>(o.ObjectId, true)).ToList();
 
                 var sourceEntitiesMap = EntitiesMap(sourceEntites);
                 var targetEntitiesMap = EntitiesMap(targetEntites);
@@ -56,6 +56,8 @@ namespace ThMEPElectrical.BlockConvert
                         {
                             Database = currentDb.Database,
                             SourceId = o.Value.ObjectId,
+                            Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                            EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
                         };
                         CompareModels.Add(result);
                         searchedIds.Add(o.Value.ObjectId);
@@ -101,6 +103,8 @@ namespace ThMEPElectrical.BlockConvert
                                             Database = currentDb.Database,
                                             SourceId = o.Value.ObjectId,
                                             TargetId = targetLoadList[0].Value.ObjectId,
+                                            Category = GetCategory(TarEntityInfos, targetLoadList[0].Value.ObjectId),
+                                            EquimentType = GetEquimentType(TarEntityInfos, targetLoadList[0].Value.ObjectId),
                                             Type = ThBConvertCompareType.ParameterChange,
                                         };
                                         CompareModels.Add(model);
@@ -170,6 +174,8 @@ namespace ThMEPElectrical.BlockConvert
                                 {
                                     Database = currentDb.Database,
                                     TargetIdList = targetLoadList.Select(e => e.Value.ObjectId).ToList(),
+                                    Category = GetCategory(TarEntityInfos, targetLoadList.First().Value.ObjectId),
+                                    EquimentType = GetEquimentType(TarEntityInfos, targetLoadList.First().Value.ObjectId),
                                     Type = ThBConvertCompareType.RepetitiveID,
                                 };
                                 CompareModels.Add(result);
@@ -181,6 +187,8 @@ namespace ThMEPElectrical.BlockConvert
                                 {
                                     Database = currentDb.Database,
                                     TargetId = o.Value.ObjectId,
+                                    Category = GetCategory(TarEntityInfos, o.Value.ObjectId),
+                                    EquimentType = GetEquimentType(TarEntityInfos, o.Value.ObjectId),
                                     Type = ThBConvertCompareType.Add,
                                 };
                                 CompareModels.Add(result);
@@ -200,6 +208,8 @@ namespace ThMEPElectrical.BlockConvert
                             {
                                 Database = currentDb.Database,
                                 TargetId = o.Value.ObjectId,
+                                Category = GetCategory(TarEntityInfos, o.Value.ObjectId),
+                                EquimentType = GetEquimentType(TarEntityInfos, o.Value.ObjectId),
                                 Type = ThBConvertCompareType.Add,
                             };
                             CompareModels.Add(result);
@@ -273,43 +283,40 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     CompareModels.ForEach(model =>
                     {
+                        var layer = GetLayer(TarEntityInfos, model.TargetId);
                         switch (model.Type)
                         {
                             case ThBConvertCompareType.Unchanged:
                                 break;
                             case ThBConvertCompareType.Delete:
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-
                                 Print(currentDb, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN, scale);
                                 break;
                             case ThBConvertCompareType.Add:
-                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-
+                                ThBConvertDbUtils.UpdateLayerSettings(layer);
+                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
                                 Print(currentDb, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 break;
                             case ThBConvertCompareType.Displacement:
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-
+                                ThBConvertDbUtils.UpdateLayerSettings(layer);
+                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
                                 Print(currentDb, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN, scale);
                                 Print(currentDb, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 break;
                             case ThBConvertCompareType.ParameterChange:
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-
+                                ThBConvertDbUtils.UpdateLayerSettings(layer);
+                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
                                 Print(currentDb, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN, scale);
                                 Print(currentDb, model.TargetId, 3, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 break;
                             case ThBConvertCompareType.RepetitiveID:
                                 model.TargetIdList.ForEach(o =>
                                 {
-                                    ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[o]);
-                                    currentDb.Element<BlockReference>(o, true).Layer = ObjectIds[o];
-
+                                    var oLayer = GetLayer(TarEntityInfos, model.TargetId);
+                                    ThBConvertDbUtils.UpdateLayerSettings(oLayer);
+                                    currentDb.Element<BlockReference>(o, true).Layer = oLayer;
                                     Print(currentDb, o, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale);
                                 });
                                 break;
@@ -339,6 +346,33 @@ namespace ThMEPElectrical.BlockConvert
         {
             var obb = ThBConvertObbService.BlockObb(acadDatabase, objectId, scale);
             ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType, scale);
+        }
+
+        private string GetLayer(List<ThBConvertEntityInfos> infos, ObjectId objectId)
+        {
+            if (objectId == ObjectId.Null)
+            {
+                return "";
+            }
+            return infos.Where(info => info.ObjectId.Equals(objectId)).First().Layer;
+        }
+
+        private EquimentCategory GetCategory(List<ThBConvertEntityInfos> infos, ObjectId objectId)
+        {
+            if (objectId == ObjectId.Null)
+            {
+                return EquimentCategory.暖通;
+            }
+            return infos.Where(info => info.ObjectId.Equals(objectId)).First().Category;
+        }
+
+        private string GetEquimentType(List<ThBConvertEntityInfos> infos, ObjectId objectId)
+        {
+            if (objectId == ObjectId.Null)
+            {
+                return "";
+            }
+            return infos.Where(info => info.ObjectId.Equals(objectId)).First().EquimentType;
         }
     }
 }
