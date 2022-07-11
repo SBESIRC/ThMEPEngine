@@ -32,6 +32,8 @@
     <Compile Include="Command\ThBuildDoorsCmd.cs" />
     <Compile Include="Command\ThExtractRoomDataCmd.cs" />
     <Compile Include="Converter\BeamEngineOpsBooleanConverter.cs" />
+    <Compile Include="Data\ThOtherShearWallExtractionVisitor.cs" />
+    <Compile Include="Data\ThOtherShearWallRecognitionEngine.cs" />
     <Compile Include="FrameCompare\FrameCompareUI.xaml.cs">
       <DependentUpon>FrameCompareUI.xaml</DependentUpon>
     </Compile>

@@ -10,17 +10,13 @@ namespace ThMEPEngineCore.Engine
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            if (dbObj is Polyline polyline)
+            if (dbObj is Polyline || dbObj is Arc || dbObj is Line)
             {
-                elements.AddRange(HandleCurve(polyline, matrix));
+                elements.AddRange(HandleCurve(dbObj as Curve, matrix));
             }
-            else if(dbObj is Line line)
+            else if (dbObj is Mline mLine)
             {
-                elements.AddRange(HandleCurve(line, matrix));
-            }
-            else if (dbObj is Arc arc)
-            {
-                elements.AddRange(HandleCurve(arc, matrix));
+                elements.AddRange(HandleMLine(mLine, matrix));
             }
         }
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -32,15 +28,15 @@ namespace ThMEPEngineCore.Engine
                 elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
             }
         }  
-        private List<ThRawIfcBuildingElementData> HandleCurve(Polyline polyline, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleCurve(Curve curve, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (IsBuildElement(polyline) && CheckLayerValid(polyline))
+            if (IsBuildElement(curve) && CheckLayerValid(curve))
             {
                 try
                 {
-                    var clone = polyline.WashClone();
-                    if (clone != null && clone is Polyline || clone is Line)
+                    var clone = curve.WashClone();
+                    if (clone != null)
                     {
                         clone.TransformBy(matrix);
                         results.Add(new ThRawIfcBuildingElementData()
@@ -57,21 +53,26 @@ namespace ThMEPEngineCore.Engine
             }
             return results;
         }
-        private List<ThRawIfcBuildingElementData> HandleCurve(Line line, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleMLine(Mline mline, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (IsBuildElement(line) && CheckLayerValid(line))
+            if (IsBuildElement(mline) && CheckLayerValid(mline))
             {
                 try
                 {
-                    var clone = line.WashClone();
-                    if (clone != null && clone is Line)
+                    var curves = new DBObjectCollection();
+                    mline.Explode(curves);
+                    foreach(Curve curve in curves)
                     {
-                        clone.TransformBy(matrix);
-                        results.Add(new ThRawIfcBuildingElementData()
+                        var clone = curve.WashClone();
+                        if (clone != null)
                         {
-                            Geometry = clone,
-                        });
+                            clone.TransformBy(matrix);
+                            results.Add(new ThRawIfcBuildingElementData()
+                            {
+                                Geometry = clone,
+                            });
+                        }
                     }
                 }
                 catch
@@ -79,32 +80,7 @@ namespace ThMEPEngineCore.Engine
                     // 由于传入的矩阵是NonUniform Scale,导致Transform失败
                     // 暂时这样跳过去
                 }
-            }            
-            return results;
-        }
-        private List<ThRawIfcBuildingElementData> HandleCurve(Arc arc, Matrix3d matrix)
-        {
-            var results = new List<ThRawIfcBuildingElementData>();
-            if (IsBuildElement(arc) && CheckLayerValid(arc))
-            {
-                try
-                {
-                    var clone = arc.WashClone();
-                    if (clone != null && clone is Arc)
-                    {
-                        clone.TransformBy(matrix);
-                        results.Add(new ThRawIfcBuildingElementData()
-                        {
-                            Geometry = clone,
-                        });
-                    }
-                }
-                catch
-                {
-                    // 由于传入的矩阵是NonUniform Scale,导致Transform失败
-                    // 暂时这样跳过去
-                }
-            }                     
+            }
             return results;
         }
     }
