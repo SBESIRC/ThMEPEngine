@@ -144,6 +144,19 @@ namespace TianHua.Electrical.PDS.UI.Project
                 }
             }
         }
+        public double FireproofShutterPower
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireproofShutterPower;
+            set
+            {
+                if (value != FireproofShutterPower)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireproofShutterPower = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+
         public double CurrentOfTrunkDistribution
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.TreeTrunkDistributionCurrent;
