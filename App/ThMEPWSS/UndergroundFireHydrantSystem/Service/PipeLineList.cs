@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public static class PipeLineList
     {
-        public static void PipeLineAutoConnect(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
+        public static void PipeLineAutoConnect(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
@@ -29,7 +29,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
                 GLineSegList.Add(GLineSeg);
             }
+
             var GLineConnectList = GeoFac.AutoConn(GLineSegList, 880, 1);//打断部分 自动连接
+
             var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 30);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
@@ -121,9 +123,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             foreach (var line in lineList.ToArray())//删除两个点都是端点的线段
             {
-                if (PtInPtList.PtIsTermLine(line, hydrantPosition))
+                if(line.Length>200)
                 {
-                    lineList.Remove(line);
+                    if (PtInPtList.PtIsTermLine(line, hydrantPosition))
+                    {
+                        lineList.Remove(line);
+                    }
                 }
             }
         }
