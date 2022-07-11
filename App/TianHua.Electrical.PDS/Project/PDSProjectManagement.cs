@@ -177,6 +177,10 @@ namespace TianHua.Electrical.PDS.Project
                 newNode.Details.LoadCalculationInfo.HighPower = load.InstalledCapacity.HighPower;
                 newNode.Details.LoadCalculationInfo.IsDualPower = load.InstalledCapacity.IsDualPower;
             }
+            if(load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter && newNode.Details.LoadCalculationInfo.HighPower == 0)
+            {
+                newNode.Details.LoadCalculationInfo.HighPower = _project.projectGlobalConfiguration.FireproofShutterPower;
+            }
             newNode.Details.LoadCalculationInfo.LowDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.HighDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.PowerFactor = load.PowerFactor;
