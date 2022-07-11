@@ -13,6 +13,52 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
 {
     public partial class ObliqueMPartition
     {
+        public LineSegment TranslateReservedConnection(LineSegment line, Vector2D vector)
+        {
+            var res=line.Translation(vector);
+            var nonparallellines = IniLanes.Where(e => !IsParallelLine(line, e.Line)).Select(e => e.Line);
+            //start
+            nonparallellines = nonparallellines.OrderBy(e => e.ClosestPoint(line.P0).Distance(line.P0));
+            if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P0).Distance(line.P0) < 10)
+            {
+                var start_connected_line = nonparallellines.First();
+                res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
+                var intersects = res.IntersectPoint(start_connected_line);
+                if (intersects.Count() > 0)
+                    res.P0 = intersects.First();
+            }
+            else
+            {
+                if (Boundary.ClosestPoint(line.P0).Distance(line.P0) < 10)
+                {
+                    res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
+                    var intersects = res.IntersectPoint(Boundary);
+                    if (intersects.Count() > 0)
+                        res.P0 = intersects.First();
+                }
+            }
+            //end
+            nonparallellines = nonparallellines.OrderBy(e => e.ClosestPoint(line.P1).Distance(line.P1));
+            if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P1).Distance(line.P1) < 10)
+            {
+                var end_connected_line = nonparallellines.First();
+                res.P1 = res.P1.Translation(Vector(res).Normalize() * MaxLength);
+                var intersects = res.IntersectPoint(end_connected_line);
+                if (intersects.Count() > 0)
+                    res.P1 = intersects.First();
+            }
+            else
+            {
+                if (Boundary.ClosestPoint(line.P1).Distance(line.P1) < 10)
+                {
+                    res.P1 = res.P1.Translation(Vector(res).Normalize() * MaxLength);
+                    var intersects = res.IntersectPoint(Boundary);
+                    if (intersects.Count() > 0)
+                        res.P1 = intersects.First();
+                }
+            }
+            return res;
+        }
         public static void SortLaneByDirection(List<Lane> lanes, int mode)
         {
             var comparer = new LaneComparer(mode, DisCarAndHalfLaneBackBack);
