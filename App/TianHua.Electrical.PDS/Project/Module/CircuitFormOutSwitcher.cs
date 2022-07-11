@@ -9,9 +9,11 @@ namespace TianHua.Electrical.PDS.Project.Module
     public class CircuitFormOutSwitcher
     {
         private readonly ThPDSProjectGraphEdge _edge;
+        private readonly bool _isCentralizedPowerCircuit;
         public CircuitFormOutSwitcher(ThPDSProjectGraphEdge edge)
         {
             _edge = edge;
+            _isCentralizedPowerCircuit = edge.Source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源;
         }
 
         /// <summary>
@@ -21,6 +23,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotSupportedException"></exception>
         public List<string> AvailableTypes()
         {
+            if(_isCentralizedPowerCircuit)
+            {
+                return new List<string>() { "消防应急照明回路（WFEL）" };
+            }
             return ThPDSProjectGraphService.AvailableTypes(_edge);
         }
 

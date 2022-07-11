@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 
 namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 {
@@ -107,9 +108,24 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatBreaker()
         {
-            var breaker = new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
-            var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
-            breaker.SetRatedCurrent(ratedCurrent);
+            Breaker breaker;
+            try
+            {
+                breaker = new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
+            }
+            catch (NotFoundComponentException)
+            {
+                breaker = new Breaker(_calculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
+            }
+            catch
+            {
+                throw;
+            }
+            if (breaker.GetCascadeRatedCurrent() < _calculateCurrentMagnification)
+            {
+                var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+                breaker.SetRatedCurrent(ratedCurrent);
+            }
             _maxCalculateCurrent =  Math.Max(_maxCalculateCurrent, breaker.GetCascadeRatedCurrent());
             return breaker;
         }
@@ -133,7 +149,20 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             if(_IsEmptyLoad)
                 return null;
-            return new Conductor(_maxCalculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber,_edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2,_edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+            try
+            {
+                var conductor = new Conductor(_maxCalculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+                return conductor;
+            }
+            catch (NotFoundComponentException)
+            {
+                var conductor = new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+                return conductor;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public Conductor GetSecondaryCircuitConductor(SecondaryCircuitInfo secondaryCircuitInfo)

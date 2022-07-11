@@ -1037,6 +1037,24 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 设置回路锁状态
+        /// </summary>
+        public static void SetLockState(ThPDSProjectGraphEdge edge, bool state)
+        {
+            edge.Details.CircuitLock = state;
+        }
+
+        /// <summary>
+        /// 获取回路锁定状态
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public static bool LockState(ThPDSProjectGraphEdge edge)
+        {
+            return edge.Details.CircuitLock;
+        }
+
+        /// <summary>
         /// 指定回路至控制回路
         /// </summary>
         public static void AssignCircuit2ControlCircuit(ThPDSProjectGraphNode node, SecondaryCircuit secondaryCircuit, ThPDSProjectGraphEdge edge)

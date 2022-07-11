@@ -150,7 +150,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
             set
             {
-                _conductor.BridgeLaying = value;
+                _conductor.SetBridgeLaying(value);
                 OnPropertyChanged(nameof(BridgeLaying));
                 OnPropertyChanged(nameof(Content));
             }

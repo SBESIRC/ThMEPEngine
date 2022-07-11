@@ -982,6 +982,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.LayingSite2 = layingSite;
         }
 
+        public void SetBridgeLaying(BridgeLaying bridgeLaying)
+        {
+            this.BridgeLaying = bridgeLaying;
+            if (this.BridgeLaying == BridgeLaying.None)
+            {
+                SetConductorLayingPath(ConductorLayingPath.ViaConduit);
+            }
+        }
+
         public void SetBAControl()
         {
             this.IsBAControl = true;
@@ -1012,7 +1021,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 var ViaConduitStr = !IsBAControl && ConductorType == ConductorType.消防配电干线 ? layingSiteStr : PipeMaterial.ToString() + PipeDiameter + "-" + layingSiteStr;
                 if (ConductorLayingPath == ConductorLayingPath.ViaCableTrayAndViaConduit)
                 {
-                    return $"{this.BridgeLaying.ToString()}/ {ViaConduitStr }";
+                    if(this.BridgeLaying == BridgeLaying.None)
+                    {
+                        return ViaConduitStr;
+                    }
+                    else
+                    {
+                        return $"{this.BridgeLaying}/ {ViaConduitStr}";
+                    }
                 }
                 else if (ConductorLayingPath == ConductorLayingPath.ViaCableTray)
                 {
