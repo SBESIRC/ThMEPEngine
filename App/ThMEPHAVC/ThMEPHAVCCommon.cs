@@ -50,7 +50,7 @@ namespace ThMEPHVAC
                 .ToList();
         }
 
-        //正压送风平面
+        //正压送风平面（机械送风/自然送风图块）
         public const string SMOKE_PROOF_BLOCK_NAME = "AI-防烟计算";
         public const string SMOKE_PROOF_LAYER_NAME = "AI-房间功能";
 

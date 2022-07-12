@@ -268,6 +268,13 @@
     <Compile Include="Service\ThQueryRoomAirVolumeService.cs" />
     <Compile Include="Service\ThRoomSelector.cs" />
     <Compile Include="Model\ThDrawDimension.cs" />
+    <Compile Include="SmokeProofSystem\Data\CalStructrueService.cs" />
+    <Compile Include="SmokeProofSystem\LayoutService\GetLayoutRoomInfo.cs" />
+    <Compile Include="SmokeProofSystem\LayoutService\LayoutAirShaftService.cs" />
+    <Compile Include="SmokeProofSystem\Model\SmkBlockModel.cs" />
+    <Compile Include="SmokeProofSystem\Model\SmkProofLayoutModel.cs" />
+    <Compile Include="SmokeProofSystem\Service\CheckService.cs" />
+    <Compile Include="SmokeProofSystem\Utils\StructUtils.cs" />
     <Compile Include="TCH\ThDrawTCHCross.cs" />
     <Compile Include="TCH\ThDrawTCHDimension.cs" />
     <Compile Include="TCH\ThDrawTCHDuct.cs" />
@@ -383,7 +390,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="SmokeProofSystem\" />
+    <Folder Include="SmokeProofSystem\MarkEngine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
