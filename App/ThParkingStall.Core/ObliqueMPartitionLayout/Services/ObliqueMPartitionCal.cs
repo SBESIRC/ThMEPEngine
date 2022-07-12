@@ -81,7 +81,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             {
                                 var p = crosscars[i].Coordinates.OrderBy(t => t.Distance(line.P0)).First();
                                 var ponline_ex = line.ClosestPoint(p, true);
-                                if (line.ClosestPoint(ponline_ex, false).Distance(ponline_ex) > 0) continue;
+                                if (line.ClosestPoint(ponline_ex, false).Distance(ponline_ex) > 1) continue;
                                 var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
                                 line_align_backback_rest = new LineSegment(line.P0, line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)));
                                 line_align_backback_rest = line_align_backback_rest.Translation(-vec.Normalize() * DisLaneWidth / 2);
@@ -141,7 +141,13 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                 var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
                                 if (g is Polygon && g.Area > 0)
                                 {
-                                    var segs_g_short = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e, seg)).First();
+                                    var segs_g_shorts = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e, seg));
+                                    if (!segs_g_shorts.Any())
+                                    {
+                                        cond = false;
+                                        break;
+                                    }
+                                    var segs_g_short = segs_g_shorts.First();
                                     if (Math.Round(segs_g_short.Length) > (DisVertCarLength - DisVertCarLengthBackBack) * 2)
                                     {
                                         cond = false;
@@ -156,7 +162,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                         cond = false;
                                         break;
                                     }
-                                    if (Cars[exist_index].CarLayoutMode == 0 && cond_area)
+                                    if (Cars[exist_index].CarLayoutMode != 1 && cond_area)
                                     {
                                         found_backback = true;
                                         var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
