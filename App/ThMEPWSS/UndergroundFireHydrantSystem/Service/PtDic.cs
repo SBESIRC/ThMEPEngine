@@ -607,7 +607,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     var line = labelLineDic[lk][i];
 
                     var text = GetText(spatialIndex, line);
-                    ptTextDic.Add(new Point3dEx(labelPtDic[lk][i]), text);
+
+                    var ptex = new Point3dEx(labelPtDic[lk][i]);
+                    if(!ptTextDic.ContainsKey(ptex))
+                    {
+                        ptTextDic.Add(ptex, text);
+                    }
                 }
             }
             return ptTextDic;
