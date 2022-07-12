@@ -166,7 +166,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
             GenerateLanes();
             GeneratePerpModules();
             GenerateCarsInModules();
-            ProcessLanes(ref IniLanes);
+            //ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
             PostProcess();
         }
@@ -217,6 +217,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
         }
         public void GenerateCarsOnRestLanes()
         {
+            CarSpatialIndex = new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
             SortLaneByDirection(vertlanes, LayoutMode);
@@ -227,7 +228,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                 var vl = k.Line;
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = new LineSegment(vl);
-                line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                line = TranslateReservedConnection(line,k.Vec.Normalize() * DisLaneWidth / 2,false);
                 var line_align_backback_rest = new LineSegment();
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
                     , ref line_align_backback_rest, true, false, false, false, true, true, true, align_backback_for_align_rest, false, true, false, true, false, true);
@@ -247,7 +248,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                 var vl = k.Line;
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = new LineSegment(vl);
-                line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                line = TranslateReservedConnection(line,k.Vec.Normalize() * DisLaneWidth / 2,false);
                 var line_align_backback_rest = new LineSegment();
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
                     , ref line_align_backback_rest, true, false, false, false, true, true, false);

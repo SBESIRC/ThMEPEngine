@@ -98,59 +98,90 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
         public void GenerateCarsInModules()
         {
 
-                //UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-                //var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
-                //SortLaneByDirection(vertlanes, LayoutMode);
+            //UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            //var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
+            //SortLaneByDirection(vertlanes, LayoutMode);
 
-                var lanes = new List<Lane>();
-                CarModules.Where(e => !e.IsInVertUnsureModule).ToList().ForEach(e => lanes.Add(new Lane(e.Line, e.Vec)));
-                //lanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true, lanes);
-                List<double> lengths = new List<double>();
-                lanes.ForEach(e => lengths.Add(e.Line.Length));
-                ProcessLanes(ref lanes);
-                var align_backback_for_align_rest = false;
-                for (int i = 0; i < lanes.Count; i++)
+            var lanes = new List<Lane>();
+            CarModules.Where(e => !e.IsInVertUnsureModule).ToList().ForEach(e => lanes.Add(new Lane(e.Line, e.Vec)));
+            //lanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true, lanes);
+            List<double> lengths = new List<double>();
+            lanes.ForEach(e => lengths.Add(e.Line.Length));
+            ProcessLanes(ref lanes);
+            var align_backback_for_align_rest = false;
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                var vl = lanes[i].Line;
+                var generate_middle_pillar = CarModules[i].IsInBackBackModule;
+                var isin_backback = CarModules[i].IsInBackBackModule;
+                if (!GenerateMiddlePillars) generate_middle_pillar = false;
+                UnifyLaneDirection(ref vl, IniLanes);
+                var line = new LineSegment(vl);
+
+                //var start_onlane = new Coordinate();
+                //double start_angle = Math.PI / 2;
+                //foreach (var ln in IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line)))
+                //{
+                //    if (ln.ClosestPoint(line.P0).Distance(line.P0) < 10)
+                //    {
+                //        start_onlane = ln.ClosestPoint(line.P0);
+                //        var move_onlane = start_onlane.Translation(lanes[i].Vec.Normalize()*100);
+                //        var near_onlane = start_onlane.Translation(Vector(ln).Normalize());
+                //        if(move_onlane.Distance(start_onlane)<move_onlane.Distance(near_onlane))
+                //            near_onlane= start_onlane.Translation(-Vector(ln).Normalize());
+                //        start_angle = new Vector2D(start_onlane, near_onlane).AngleTo(Vector(vl));
+                //        start_angle = Math.Min(start_angle, Math.PI - start_angle);
+                //        break;
+                //    }
+                //}
+
+                line = SplitLine(line, IniLaneBoxes).OrderBy(e => e.MidPoint.Distance(line.MidPoint)).First();
+
+                if (ClosestPointInLines(line.P0, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line))) < 10)
+                    line.P0 = line.P0.Translation(Vector(line).Normalize() * DisLaneWidth / 2);
+                if (ClosestPointInLines(line.P1, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line))) < 10)
+                    line.P1 = line.P1.Translation(-Vector(line).Normalize() * (DisLaneWidth / 2 + DisPillarLength));
+
+
+
+                //if (line.Intersect(Boundary, Intersect.OnBothOperands).Count > 0)
+                //{
+                //    var lines = SplitLine(line, Boundary).Where(e => e.Length > 1)
+                //        .Where(e => Boundary.Contains(e.GetCenter()) || ClosestPointInCurves(line.GetCenter(), OriginalLanes) == 0);
+                //    if (lines.Count() > 0) line = lines.First();
+                //    else continue;
+                //}
+                line = TranslateReservedConnection(line, lanes[i].Vec.Normalize() * DisLaneWidth / 2, false);
+                var dis_start = ClosestPointInLines(line.P0, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line)));
+                if (dis_start < DisLaneWidth / 2)
+                    line.P0 = line.P0.Translation(Vector(line).Normalize() * (DisLaneWidth / 2 - dis_start));
+                var dis_end = ClosestPointInLines(line.P1, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line)));
+                if (dis_end < DisLaneWidth / 2 + DisPillarLength)
+                    line.P1 = line.P1.Translation(-Vector(line).Normalize() * (DisLaneWidth / 2 + DisPillarLength - dis_end));
+
+                var lnbox = PolyFromLines(line, TranslateReservedConnection(line, lanes[i].Vec.Normalize() * DisVertCarLength, false));
+                var intersects_lanbox = new List<Coordinate>();
+                foreach (var box in IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line)).Select(e => BufferReservedConnection(e, DisLaneWidth / 2)))
                 {
-                    var vl = lanes[i].Line;
-                    var generate_middle_pillar = CarModules[i].IsInBackBackModule;
-                    var isin_backback = CarModules[i].IsInBackBackModule;
-                    if (!GenerateMiddlePillars) generate_middle_pillar = false;
-                    UnifyLaneDirection(ref vl, IniLanes);
-                    var line = new LineSegment(vl);
-                    line = SplitLine(line, IniLaneBoxes).OrderBy(e => e.MidPoint.Distance(line.MidPoint)).First();
-                    if (ClosestPointInLines(line.P0, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e,line))) < 10)
-                        line.P0 = line.P0.Translation(Vector(line).Normalize() * DisLaneWidth / 2);
-                    if (ClosestPointInLines(line.P1, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line))) < 10)
-                        line.P1 = line.P1.Translation(-Vector(line).Normalize() * (DisLaneWidth / 2 + DisPillarLength));
-                    //if (line.Intersect(Boundary, Intersect.OnBothOperands).Count > 0)
-                    //{
-                    //    var lines = SplitLine(line, Boundary).Where(e => e.Length > 1)
-                    //        .Where(e => Boundary.Contains(e.GetCenter()) || ClosestPointInCurves(line.GetCenter(), OriginalLanes) == 0);
-                    //    if (lines.Count() > 0) line = lines.First();
-                    //    else continue;
-                    //}
-                    line = TranslateReservedConnection(line,lanes[i].Vec.Normalize() * DisLaneWidth / 2);
-                    var dis_start = ClosestPointInLines(line.P0, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line)));
-                    if (dis_start < DisLaneWidth / 2)
-                        line.P0 = line.P0.Translation(Vector(line).Normalize() * (DisLaneWidth / 2 - dis_start));
-                    var dis_end = ClosestPointInLines(line.P1, line, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, line)));
-                    if (dis_end < DisLaneWidth / 2 + DisPillarLength)
-                        line.P1 = line.P1.Translation(-Vector(line).Normalize() * (DisLaneWidth / 2 + DisPillarLength - dis_end));
-                    var judge_in_obstacles = false;
-                    if (lengths[i] != lanes[i].Line.Length) judge_in_obstacles = true;
-                    var line_align_backback_rest = new LineSegment();
-                    GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, ref line_align_backback_rest, false, false, false, false, true, false, true, false, judge_in_obstacles, true, true, generate_middle_pillar, isin_backback, true);
-                    align_backback_for_align_rest = false;
-                    if (line_align_backback_rest.Length > 0)
-                    {
-                        lanes.Insert(i + 1, new Lane(line_align_backback_rest, lanes[i].Vec));
-                        var mod = new CarModule(PolyFromLines(line_align_backback_rest, line_align_backback_rest.Translation(lanes[i].Vec.Normalize() * DisVertCarLength)), line_align_backback_rest, lanes[i].Vec.Normalize());
-                        mod.IsInBackBackModule = CarModules[i].IsInBackBackModule;
-                        CarModules.Insert(i + 1, mod);
-                        lengths.Insert(i + 1, line_align_backback_rest.Length);
-                        align_backback_for_align_rest = true;
-                    }
+                    intersects_lanbox.AddRange(box.IntersectPoint(lnbox));
+                }
+                intersects_lanbox = intersects_lanbox.Select(e => line.ClosestPoint(e)).ToList();
+                line = SplitLine(line, intersects_lanbox).OrderByDescending(e => e.Length).First();
 
+                var judge_in_obstacles = false;
+                if (lengths[i] != lanes[i].Line.Length) judge_in_obstacles = true;
+                var line_align_backback_rest = new LineSegment();
+                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, ref line_align_backback_rest, false, false, false, false, true, false, true, false, judge_in_obstacles, true, true, generate_middle_pillar, isin_backback, true);
+                align_backback_for_align_rest = false;
+                if (line_align_backback_rest.Length > 0)
+                {
+                    lanes.Insert(i + 1, new Lane(line_align_backback_rest, lanes[i].Vec));
+                    var mod = new CarModule(PolyFromLines(line_align_backback_rest, line_align_backback_rest.Translation(lanes[i].Vec.Normalize() * DisVertCarLength)), line_align_backback_rest, lanes[i].Vec.Normalize());
+                    mod.IsInBackBackModule = CarModules[i].IsInBackBackModule;
+                    CarModules.Insert(i + 1, mod);
+                    lengths.Insert(i + 1, line_align_backback_rest.Length);
+                    align_backback_for_align_rest = true;
+                }
             }
         }
         public void ProcessLanes(ref List<Lane> Lanes, bool preprocess = false)
@@ -159,7 +190,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
         }
         public void PostProcess()
         {
-
+            RemoveDuplicateCars();
+            RemoveCarsIntersectedWithBoundary();
+            RemoveInvalidPillars();
+            ReDefinePillarDimensions();
+            InsuredForTheCaseOfoncaveBoundary();
         }
         private void RealizeGenerateLaneParas(GenerateLaneParas paras)
         {
@@ -693,6 +728,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                 ps = pt.Translation(-Vector(lane.Line).Normalize() * (DisCarAndHalfLane + CollisionD - CollisionTOP));
             }
             //拿邻近wall的方向
+            var _nearwall_seg = new LineSegment();
             var vec = lane.Vec;
             foreach (var wall in Walls)
             {
@@ -704,6 +740,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                         var wl = new LineSegment(wall.Coordinates[i], wall.Coordinates[i + 1]);
                         if (wl.ClosestPoint(pt).Distance(pt) < 10)
                         {
+                            _nearwall_seg = wl;
                             if (wl.Length < LengthCanGAdjLaneConnectSingle * 0.8) continue;
                             var angle = Math.Abs(Vector(wl).AngleTo(new Vector2D(pt, ps)) / Math.PI * 180);
                             angle = Math.Min(angle, 180 - angle);       
@@ -736,6 +773,19 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                     }
                     if (found) break;
                 }
+            }
+            var pt_closest_onwall = _nearwall_seg.ClosestPoint(ps, true);
+            var angle_pspt_pswall = new Vector2D(ps, pt).AngleTo(new Vector2D(ps, pt_closest_onwall));
+            var length= (DisCarAndHalfLane + CollisionD - CollisionTOP)/ Math.Cos(angle_pspt_pswall);
+            if (isStart)
+            {
+                pt = lane.Line.P0;
+                ps = pt.Translation(Vector(lane.Line).Normalize() * length);
+            }
+            else
+            {
+                pt = lane.Line.P1;
+                ps = pt.Translation(-Vector(lane.Line).Normalize() * length);
             }
 
             var line = LineSegmentSDL(ps, vec, MaxLength);
