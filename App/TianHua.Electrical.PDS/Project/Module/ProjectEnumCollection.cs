@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -191,28 +192,76 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum MaterialStructure
     {
         [Description("YJY")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
         YJY = 1,
         [Description("YJV")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
         YJV = 2,
         [Description("BYJ")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FlexibleCable)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
         BYJ = 3,
         [Description("KYJY")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
         KYJY = 4,
         [Description("RYJ")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.Cord)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
         RYJ = 5,
         [Description("BTTZ")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
         BTTZ = 6,
         [Description("BTTRZ")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
         BTTRZ = 7,
         [Description("RTTZ")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
         RTTZ = 8,
         [Description("NG-A(BTLY)")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
         NG_A_BTLY = 9,
         [Description("BV")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FlexibleCable)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
         BV = 10,
         [Description("KYJV")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
         KYJV = 11,
         [Description("RVV")]
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.Cord)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
         RVV = 12,
     }
 

@@ -6,6 +6,7 @@ using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.Project.PDSProjectException;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -672,8 +673,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativeConductorType = new List<ConductorType>();
             }
+            ChooseOuterSheathMaterialType();
         }
 
+        private void ChooseOuterSheathMaterialType()
+        {
+            if (IsBAControl)
+                AlternativeOuterSheathMaterialType = new List<MaterialStructure>();
+            else
+                AlternativeOuterSheathMaterialType = OuterSheathMaterial.GetScopeOfApplicationType().GetSameMaterialStructureGroup();
+        }
         /// <summary>
         /// 计算敷设部位选型
         /// </summary>
@@ -938,6 +947,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
         }
 
+        public List<MaterialStructure> GetMaterialStructures()
+        {
+            return AlternativeOuterSheathMaterialType;
+        }
+
         /// <summary>
         /// 修改材料特征及结构
         /// </summary>
@@ -1098,6 +1112,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 备选相导用途
         /// </summary>
         private List<ConductorType> AlternativeConductorType { get; set; }
+
+        private List<MaterialStructure> AlternativeOuterSheathMaterialType { get; set; }
 
         /// <summary>
         /// 备选敷设路径选择

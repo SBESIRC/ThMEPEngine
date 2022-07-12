@@ -31,6 +31,11 @@
     <Compile Include="Model\ThPDSLightingCableTray.cs" />
     <Compile Include="Model\ThPDSLowVoltageCabinetEdge.cs" />
     <Compile Include="Model\THPDSSubstation.cs" />
+    <Compile Include="Project\Module\Component\Extension\CableTypeAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\InsulationAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\MaterialAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\MaterialStructureExtension.cs" />
+    <Compile Include="Project\Module\Component\Extension\ScopeOfApplicationAttribute.cs" />
     <Compile Include="Project\Module\Configure\DistributionMeteringConfiguration.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\CompensationCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\FeederCabinet.cs" />

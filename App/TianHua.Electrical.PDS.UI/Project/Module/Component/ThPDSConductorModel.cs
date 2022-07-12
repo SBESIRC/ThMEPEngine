@@ -152,6 +152,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.SetBridgeLaying(value);
                 OnPropertyChanged(nameof(BridgeLaying));
+                OnPropertyChanged(nameof(LayingPath));
                 OnPropertyChanged(nameof(Content));
             }
         }
