@@ -2,17 +2,19 @@
 using System.Linq;
 using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service.Hvac;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -77,10 +79,26 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData,
+            List<ThRawIfcDistributionElementData> list, Scale3d scale, List<ThBlockReferenceData> targetBlocks)
         {
             // 先做泵的常规处理
             Displacement(targetBlockData, srcBlockData);
+
+            // 若该位置已存在“水泵标注”则忽略后续转换
+            var continueToDo = true;
+            targetBlocks.Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName).Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
+                .ForEach(t =>
+                {
+                    if (continueToDo && t.Position.DistanceTo(targetBlockData.Position) < 10.0)
+                    {
+                        continueToDo = false;
+                    }
+                });
+            if (!continueToDo)
+            {
+                return;
+            }
 
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
@@ -100,7 +118,7 @@ namespace ThMEPElectrical.BlockConvert
                         var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                                     "0",
                                     "水泵标注",
-                                    srcBlockData.Position.TransformBy(srcBlockData.OwnerSpace2WCS),
+                                    targetBlockData.Position,
                                     scale,
                                     0.0,
                                     new Dictionary<string, string>(srcBlockData.Attributes));

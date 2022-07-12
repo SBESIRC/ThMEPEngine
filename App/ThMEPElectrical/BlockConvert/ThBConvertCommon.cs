@@ -8,7 +8,6 @@
         public const double default_fire_valve_length = 320.0;
 
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_NAME = "块名";
-        public const string BLOCK_MAP_ATTRIBUTES_BLOCK_POSITION = "位置";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER = "目标图层";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_ID = "负载编号";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
@@ -61,6 +60,7 @@
         public const string BLOCK_MOTOR_AND_LOAD_DIMENSION = "电动机及负载标注";
         public const string BLOCK_PUMP_LABEL = "水泵标注";
         public const string BLOCK_PUMP_LABEL_LAYER = "E-UNIV-NOTE";
+        public const string BLOCK_LOAD_DIMENSION_LAYER = "E-UNIV-DIAG";
         public const string BLOCK_SUBMERSIBLE_PUMP = "潜水泵";
         public const string BLOCK_AI_SUBMERSIBLE_PUMP = "潜水泵-AI";
 

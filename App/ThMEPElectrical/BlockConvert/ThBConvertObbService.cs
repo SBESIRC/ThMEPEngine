@@ -1,5 +1,9 @@
-﻿using DotNetARX;
+﻿using System.Linq;
+
+using NFox.Cad;
+using DotNetARX;
 using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
@@ -23,6 +27,21 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     return block.ToOBB(block.BlockTransform);
                 }
+            }
+            return new Polyline();
+        }
+
+        public static Polyline BlockLabelObb(AcadDatabase acadDatabase, ObjectId objectId, double scale)
+        {
+            if (!objectId.Equals(ObjectId.Null))
+            {
+                var block = acadDatabase.Element<BlockReference>(objectId, true);
+                var objs = new DBObjectCollection();
+                block.Explode(objs);
+                var labels = objs.OfType<Line>().Where(o => o.Layer.Equals(ThBConvertCommon.BLOCK_LOAD_DIMENSION_LAYER)).ToList();
+                labels.ForEach(o => o.TransformBy(block.BlockTransform.Inverse()));
+                var rectangle = labels.Where(o => o.DistanceTo(Point3d.Origin, false) > 5.0).ToCollection().GeometricExtents().ToRectangle();
+                return rectangle.GetTransformedRectangle(block.BlockTransform).FlattenRectangle();
             }
             return new Polyline();
         }

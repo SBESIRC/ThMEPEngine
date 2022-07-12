@@ -24,7 +24,8 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         public abstract void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData);
 
-        public abstract void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale);
+        public abstract void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData,
+            List<ThRawIfcDistributionElementData> list, Scale3d scale, List<ThBlockReferenceData> targetBlocks);
 
         /// <summary>
         /// 旋转角度

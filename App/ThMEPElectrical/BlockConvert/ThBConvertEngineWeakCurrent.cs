@@ -185,7 +185,8 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, 
+            List<ThRawIfcDistributionElementData> list, Scale3d scale, List<ThBlockReferenceData> targetBlocks)
         {
             //
         }

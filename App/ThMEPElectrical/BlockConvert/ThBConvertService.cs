@@ -125,6 +125,7 @@ namespace ThMEPElectrical.BlockConvert
             {
                 NameFilter = targetNames.Distinct().ToList(),
             };
+            targetEngine.NameFilter.Add(ThBConvertCommon.BLOCK_PUMP_LABEL);
             targetEngine.ExtractFromMS(CurrentDb.Database);
             return targetEngine.Results.Count > 0
                 ? SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
@@ -295,7 +296,7 @@ namespace ThMEPElectrical.BlockConvert
                             {
                                 CurrentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThBConvertCommon.BLOCK_PUMP_LABEL), false);
                                 CurrentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThBConvertCommon.BLOCK_PUMP_LABEL_LAYER), false);
-                                engine.Displacement(targetBlockData, o, collectingWellEngine.Results, scale);
+                                engine.Displacement(targetBlockData, o, collectingWellEngine.Results, scale, targetBlocks);
                                 engine.SpecialTreatment(targetBlockData, o);
                             }
                             else
