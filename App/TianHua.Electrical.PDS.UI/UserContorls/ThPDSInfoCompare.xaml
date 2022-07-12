@@ -19,7 +19,7 @@
             <Button Margin="3" Command="{Binding ValidateCmd}">绘图标准校核</Button>
             <Button Margin="3" Command="{Binding CompareCmd}">对比平面信息</Button>
             <Button Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</Button>
-            <Button Margin="3" Command="{Binding CreateCmd}">创建非平面负载</Button>
+            <Button Margin="3" Command="{Binding CreateCmd}">新建负载</Button>
             <Button Margin="3" Command="{Binding UpdateCmd}">更新修改到平面</Button>
         </StackPanel>
         <Grid>
