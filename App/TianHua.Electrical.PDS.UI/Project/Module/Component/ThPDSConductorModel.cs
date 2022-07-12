@@ -33,7 +33,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [Category("电线电缆参数")]
         [DisplayName("材料特征及结构")]
-        [Editor(typeof(ThPDSEnumPropertyEditor<MaterialStructure>), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSConductorMaterialStructurePropertyEditor), typeof(PropertyEditorBase))]
         public MaterialStructure OuterSheathMaterial
         {
             get => _conductor.OuterSheathMaterial;
@@ -262,6 +262,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<ConductorType> AlternativeConductorTypes
         {
             get => _conductor.GetConductorTypes();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<MaterialStructure> AlternativeOuterSheathMaterialTypes
+        {
+            get => _conductor.GetMaterialStructures();
         }
 
         [ReadOnly(true)]
