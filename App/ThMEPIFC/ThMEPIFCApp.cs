@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using AcHelper;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using ThMEPTCH.Services;
@@ -65,7 +67,7 @@ namespace ThMEPIFC
             {
                 return;
             }
-
+            var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
             var project = service.DWGToProject();
@@ -73,12 +75,41 @@ namespace ThMEPIFC
             {
                 return;
             }
-
+            var dwgDBDate = DateTime.Now;
+            Active.Editor.WriteMessage(string.Format("DWG&DB To ThIfcModel End,Time:{0}\\n", dwgDBDate - startDate));
             // 转换并保存IFC数据
             ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
             Tgl2IfcService.GenerateIfcModelAndSave(project, Path.ChangeExtension(filePath, "ifc"));
+            var endDate = DateTime.Now;
+            Active.Editor.WriteMessage(string.Format("ThIfcModel To IfcFile End,Time:{0}\\n", endDate - dwgDBDate));
+            Active.Editor.WriteMessage(string.Format("DWG&DB To IfcFile End,Total:{0}\\n", endDate - startDate));
         }
-
+        [CommandMethod("TIANHUACAD", "THDB2File", CommandFlags.Modal)]
+        public void THDBL2MidFile()
+        {
+            // 拾取TGL DB文件
+            var filePath = OpenDBFile();
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+            var startDate = System.DateTime.Now;
+            // 读入并解析TGL XML文件
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProject();
+            if (project == null)
+            {
+                return;
+            }
+            var dwgDBDate = DateTime.Now;
+            Active.Editor.WriteMessage(string.Format("DWG&DB To ThIfcModel End,Time:{0}\\n", dwgDBDate - startDate));
+            // 转换并保存为渲染引擎识别的中间文件
+            var Tgl2IfcService = new ThTGL2GeoFileService();
+            Tgl2IfcService.GenerateIfcModelAndSave(project, Path.ChangeExtension(filePath, "midfile"));
+            var endDate = DateTime.Now;
+            Active.Editor.WriteMessage(string.Format("ThIfcModel To MidFile End,Time:{0}\\n", endDate - dwgDBDate));
+            Active.Editor.WriteMessage(string.Format("DWG&DB To MidFile End,Total:{0}\\n", endDate - startDate));
+        }
         [CommandMethod("TIANHUACAD", "THTGL2DWG", CommandFlags.Modal)]
         public void THTGL2DWG()
         {
@@ -108,7 +139,7 @@ namespace ThMEPIFC
                 {
                     foreach (var slab in storey.Slabs)
                     {
-                        acadDatabase.ModelSpace.Add(slab.CreateSlabSolid());
+                        acadDatabase.ModelSpace.Add(slab.CreateSlabSolid(Point3d.Origin));
                     }
 
                 }
