@@ -14,7 +14,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
 {
     public partial class ObliqueMPartition
     {
-        public LineSegment TranslateReservedConnection(LineSegment line, Vector2D vector)
+        public LineSegment TranslateReservedConnection(LineSegment line, Vector2D vector,bool allow_extend_bound=true)
         {
             var res = line.Translation(vector);
             var nonparallellines = IniLanes.Where(e => !IsParallelLine(line, e.Line)).Select(e => e.Line);
@@ -24,9 +24,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
             {
                 var start = res.P0;
                 var start_connected_line = nonparallellines.First();
+                var case_out2750 = false;
                 //偏移直线超出了边界2750的case
                 if (!Boundary.Contains(res.MidPoint))
                 {
+                    case_out2750 = true;
                     start_connected_line = new LineSegment(start_connected_line);
                     start_connected_line=start_connected_line.Scale(20);
                     res = res.Translation(-vector.Normalize() * DisLaneWidth / 2);
@@ -40,20 +42,32 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                 else
                     res.P0 = start;
                 //偏移直线超出了边界2750的case
-                if (!Boundary.Contains(res.MidPoint))
+                if (case_out2750)
                 {
                     res = res.Translation(vector.Normalize() * DisLaneWidth / 2);
                 }
             }
-            else
+            else if(allow_extend_bound)
             {
-                if (Boundary.ClosestPoint(line.P0).Distance(line.P0) < 10)
+                var near_wall = false;
+                foreach (var wall in Walls)
+                    if (wall.ClosestPoint(line.P0).Distance(line.P0) < 10) near_wall = true;
+                if (near_wall)
                 {
                     var start = res.P0;
                     res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
                     var intersects = res.IntersectPoint(Boundary);
                     if (intersects.Count() > 0)
-                        res.P0 = intersects.OrderBy( P=> P.Distance(start)).First();
+                    {
+                        var p_bound= intersects.OrderBy(P => P.Distance(start)).First();
+                        res.P0 = p_bound;
+                        //var extend_seg = new LineSegment(start, p_bound);
+                        //extend_seg = extend_seg.Translation(-vector);
+                        //if (Boundary.ClosestPoint(extend_seg.MidPoint).Distance(extend_seg.MidPoint) < 1 )
+                        //    res.P0 = p_bound;
+                        //else
+                        //    res.P0 = start;
+                    }
                     else
                         res.P0 = start;
                 }
@@ -64,9 +78,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
             {
                 var end = res.P1;
                 var end_connected_line = nonparallellines.First();
+                var case_out2750 = false;
                 //偏移直线超出了边界2750的case
                 if (!Boundary.Contains(res.MidPoint))
                 {
+                    case_out2750 = true;
                     end_connected_line = new LineSegment(end_connected_line);
                     end_connected_line = end_connected_line.Scale(20);
                     res = res.Translation(-vector.Normalize() * DisLaneWidth / 2);
@@ -79,20 +95,32 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                 else
                     res.P1=end;
                 //偏移直线超出了边界2750的case
-                if (!Boundary.Contains(res.MidPoint))
+                if (case_out2750)
                 {
                     res = res.Translation(vector.Normalize() * DisLaneWidth / 2);
                 }
             }
-            else
+            else if(allow_extend_bound)
             {
-                if (Boundary.ClosestPoint(line.P1).Distance(line.P1) < 10)
+                var near_wall = false;
+                foreach (var wall in Walls)
+                    if (wall.ClosestPoint(line.P1).Distance(line.P1) < 10) near_wall = true;
+                if (near_wall)
                 {
                     var end= res.P1;
                     res.P1 = res.P1.Translation(Vector(res).Normalize() * MaxLength);
                     var intersects = res.IntersectPoint(Boundary);
                     if (intersects.Count() > 0)
-                        res.P1 = intersects.OrderBy(p=> p.Distance(end)).First();
+                    {
+                        var p_bound = intersects.OrderBy(P => P.Distance(end)).First();
+                        res.P1 = p_bound;
+                        //var extend_seg = new LineSegment(end, p_bound);
+                        //extend_seg = extend_seg.Translation(-vector);
+                        //if (Boundary.ClosestPoint(extend_seg.MidPoint).Distance(extend_seg.MidPoint) < 1 )
+                        //    res.P1 = p_bound;
+                        //else
+                        //    res.P1 = end;
+                    }
                     else
                         res.P1 = end;
                 }
@@ -323,7 +351,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
             {
                 var line = new LineSegment(lane.Line);
                 var linetest = new LineSegment(line);
-                linetest = TranslateReservedConnection(linetest,lane.Vec.Normalize() * mindistance);
+                linetest = TranslateReservedConnection(linetest,lane.Vec.Normalize() * mindistance,false);
                 var bdpl = PolyFromLines(line, linetest);
                 bdpl = bdpl.Scale(ScareFactorForCollisionCheck);
                 var bdpoints = Boundary.Coordinates.ToList();
@@ -343,9 +371,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                 foreach (var bsplit in bdsplits)
                 {
                     var bdsplit = bsplit;
-                    bdsplit = TranslateReservedConnection(bdsplit ,- lane.Vec.Normalize() * mindistance);
+                    bdsplit = TranslateReservedConnection(bdsplit ,- lane.Vec.Normalize() * mindistance,false);
                     var bdsplittest = new LineSegment(bdsplit);
-                    bdsplittest = TranslateReservedConnection(bdsplittest,lane.Vec.Normalize() * mindistance);
+                    bdsplittest = TranslateReservedConnection(bdsplittest,lane.Vec.Normalize() * mindistance,false);
                     var obpl = PolyFromLines(bdsplit, bdsplittest);
                     obpl = obpl.Scale(ScareFactorForCollisionCheck);
                     var obcrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(obpl).Cast<Polygon>().ToList();
@@ -375,9 +403,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                     foreach (var bxsplit in boxsplits)
                     {
                         var boxsplit = bxsplit;
-                        boxsplit = TranslateReservedConnection(boxsplit ,- lane.Vec.Normalize() * mindistance);
+                        boxsplit = TranslateReservedConnection(boxsplit ,- lane.Vec.Normalize() * mindistance,false);
                         var boxsplittest = new LineSegment(boxsplit);
-                        boxsplittest = TranslateReservedConnection(boxsplittest,lane.Vec.Normalize() * mindistance);
+                        boxsplittest = TranslateReservedConnection(boxsplittest,lane.Vec.Normalize() * mindistance,false);
                         var boxpl = PolyFromLines(boxsplit, boxsplittest);
                         boxpl = boxpl.Scale(ScareFactorForCollisionCheck);
                         var boxcrossed = new List<Polygon>();
@@ -423,7 +451,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                         //boxpl.Scale(boxpl.GetRecCentroid(), ScareFactorForCollisionCheck);
                         boxcrossed.AddRange(LaneSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>());
                         //boxcrossed.AddRange(LaneBufferSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>());
-                        foreach (var bx in LaneBufferSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>())
+                        var lnbox = LaneBufferSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>();
+                        foreach (var bx in lnbox)
                         {
                             var pts = bx.Coordinates.ToList();
                             var pta = AveragePoint(pts[0], pts[3]);
@@ -431,7 +460,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                             var lin = new LineSegment(pta, ptb);
                             boxcrossed.Add(BufferReservedConnection(lin,DisLaneWidth / 2));
                         }
-                        boxsplittest = TranslateReservedConnection(boxsplittest,lane.Vec.Normalize() * DisLaneWidth / 2);
+                        boxsplittest = TranslateReservedConnection(boxsplittest,lane.Vec.Normalize() * DisLaneWidth / 2,false);
                         var boxpoints = new List<Coordinate>();
                         foreach (var cross in boxcrossed)
                         {
@@ -444,7 +473,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                             .Where(e =>
                             {
                                 var k = new LineSegment(e);
-                                k = TranslateReservedConnection(k,-lane.Vec.Normalize() * DisLaneWidth / 2/*(minlength < DisLaneWidth / 2? minlength : DisLaneWidth / 2)*/);
+                                k = TranslateReservedConnection(k,-lane.Vec.Normalize() * DisLaneWidth / 2/*(minlength < DisLaneWidth / 2? minlength : DisLaneWidth / 2)*/,false);
+                                var k_pl = PolyFromLines(k, TranslateReservedConnection(k, -lane.Vec.Normalize() *(mindistance-DisLaneWidth/2)));
+                                k_pl = k_pl.Scale(ScareFactorForCollisionCheck);
+                                //20220712
+                                foreach (var lbox in lnbox)
+                                {
+                                    if (lbox.IntersectPoint(k_pl).Count() > 0) return false;
+                                }
+                                return true;
+                                //20220712
                                 var con = !IsInAnyBoxes(k.MidPoint, LaneBoxes, true);
                                 if (con) return true;
                                 else return false;
@@ -466,8 +504,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                         foreach (var slit in splits)
                         {
                             var split = slit;
-                            split = TranslateReservedConnection(split ,- lane.Vec.Normalize() * DisLaneWidth / 2);
-                            split =TranslateReservedConnection(split ,- lane.Vec.Normalize() * mindistance);
+                            split = TranslateReservedConnection(split ,- lane.Vec.Normalize() * DisLaneWidth / 2,false);
+                            split =TranslateReservedConnection(split ,- lane.Vec.Normalize() * mindistance,false);
                             if (transform_start_edge_for_perp_module && split.Length > DisLaneWidth / 2 + DisVertCarLength)
                             {
                                 if (ClosestPointInLines(split.P0, split, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e,split))) < 10)
@@ -479,7 +517,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                                 split.P1 = split.P1.Translation(-Vector(split).Normalize() * DisLaneWidth / 2);
                             //
                             var splitnw = new LineSegment(split);
-                            splitnw = TranslateReservedConnection(splitnw,lane.Vec.Normalize() * DisLaneWidth / 2);
+                            splitnw = TranslateReservedConnection(splitnw,lane.Vec.Normalize() * DisLaneWidth / 2,false);
                             if (check_adj_collision)
                             {
                                 var pls = ConvertSpecialCollisionCheckRegionForLane(splitnw, lane.Vec.Normalize());
@@ -561,7 +599,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
                                 }
                             }
                             if (splitnw.Length < minlength) continue;
-                            splitnw = TranslateReservedConnection(splitnw ,- lane.Vec.Normalize() * DisLaneWidth / 2);
+                            splitnw = TranslateReservedConnection(splitnw ,- lane.Vec.Normalize() * DisLaneWidth / 2,false);
                             Lane ln = new Lane(splitnw, lane.Vec);
                             lanes.Add(ln);
                         }
@@ -628,6 +666,169 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
             var pl = PolyFromPoints(points.ToList());
             CollisionD = collisionD;
             return pl;
+        }
+        private class LocCar
+        {
+            public LocCar(Polygon car, Coordinate point)
+            {
+                Car = car;
+                Point = point;
+            }
+            public Polygon Car;
+            public Coordinate Point;
+        }
+        private class LocCarComparer : IEqualityComparer<LocCar>
+        {
+            public bool Equals(LocCar a, LocCar b)
+            {
+                if (a.Point.Distance(b.Point) < 1000) return true;
+                return false;
+            }
+            public int GetHashCode(LocCar car)
+            {
+                return ((int)car.Point.X).GetHashCode();
+            }
+        }
+        private void RemoveDuplicateCars()
+        {
+            var locCars = CarSpots.Select(e => new LocCar(e, e.Envelope.Coordinate));
+            var compare = new LocCarComparer();
+            locCars = locCars.Distinct(compare);
+            CarSpots = locCars.Select(e => e.Car).ToList();
+        }
+        private void RemoveCarsIntersectedWithBoundary()
+        {
+            var obspls = Obstacles.Where(e => e.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
+            var tmps = new List<Polygon>();
+            foreach (var e in CarSpots)
+            {
+                var k = e.Clone();
+                k = k.Scale(ScareFactorForCollisionCheck);
+                var conda = Boundary.Contains(k.Envelope.Centroid.Coordinate);
+                //var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
+                var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(k.Envelope.Centroid).Cast<Polygon>().ToList();
+                _tmpobs = _tmpobs.Where(t => t.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
+                var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, _tmpobs);
+                //var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
+                //if (conda && condb && condc) tmps.Add(e);
+                if (conda && condb)
+                {
+                    if (Boundary.ClosestPoint(k.Envelope.Centroid.Coordinate).Distance(k.Envelope.Centroid.Coordinate) > DisVertCarLength)
+                        tmps.Add(e);
+                    else if (Boundary.IntersectPoint(k).Count() == 0)
+                        tmps.Add(e);
+                }
+            }
+            CarSpots = tmps;
+            var tps = new List<InfoCar>();
+            foreach (var e in Cars)
+            {
+                var k = e.Polyline.Clone();
+                k = k.Scale(ScareFactorForCollisionCheck);
+                var conda = Boundary.Contains(k.Envelope.Centroid);
+                //var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
+                var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(k.Envelope.Centroid).Cast<Polygon>().ToList();
+                _tmpobs = _tmpobs.Where(t => t.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
+                var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, _tmpobs);
+                //var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
+                //if (conda && condb && condc) tmps.Add(e);
+                if (conda && condb)
+                {
+                    if (Boundary.ClosestPoint(k.Envelope.Centroid.Coordinate).Distance(k.Envelope.Centroid.Coordinate) > DisVertCarLength)
+                        tps.Add(e);
+                    else if (Boundary.IntersectPoint(k).Count() == 0)
+                        tps.Add(e);
+                }
+            }
+            Cars = tps;
+        }
+        private void RemoveInvalidPillars()
+        {
+            List<Polygon> tmps = new List<Polygon>();
+            foreach (var t in Pillars)
+            {
+                var clone = t.Clone();
+                clone = clone.Scale(0.5);
+                if (ClosestPointInCurveInAllowDistance(clone.Envelope.Centroid.Coordinate, CarSpots, DisPillarLength + DisHalfCarToPillar))
+                {
+                    tmps.Add(t);
+                }
+            }
+            Pillars = tmps;
+        }
+        public void ReDefinePillarDimensions()
+        {
+            IniPillar.AddRange(Pillars.Select(e => e.Clone()));
+            if (HasImpactOnDepthForPillarConstruct)
+            {
+                Pillars = Pillars.Select(e =>
+                {
+                    var segobjs = e.GetEdges();
+                    if (DisPillarLength < DisPillarDepth)
+                    {
+                        double t = DisPillarDepth;
+                        DisPillarDepth = DisPillarLength;
+                        DisPillarLength = t;
+                        t = PillarNetLength;
+                        PillarNetLength = PillarNetDepth;
+                        PillarNetDepth = t;
+                    }
+                    var segs = segobjs.OrderByDescending(t => t.Length).ToList();
+                    if (DisPillarLength < DisPillarDepth)
+                        segs = segobjs.OrderBy(t => t.Length).ToList();
+                    LineSegment a = new LineSegment();
+                    LineSegment b = new LineSegment();
+                    if (DisPillarLength != DisPillarDepth)
+                    {
+                        a = segs[0];
+                        b = segs[1];
+                    }
+                    else
+                    {
+                        a = segs[0];
+                        segs.RemoveAt(0);
+                        b = segs.Where(t => IsParallelLine(t, a)).First();
+                    }
+                    b = new LineSegment(b.P1, b.P0);
+                    a = a.Scale(PillarNetLength / a.Length);
+                    b = b.Scale(PillarNetLength / b.Length);
+                    a = a.Translation(new Vector2D(a.MidPoint, b.MidPoint).Normalize() * ThicknessOfPillarConstruct);
+                    b = b.Translation(-new Vector2D(a.MidPoint, b.MidPoint).Normalize() * ThicknessOfPillarConstruct);
+                    var pl = PolyFromLines(a, b);
+                    return pl;
+                }).ToList();
+            }
+        }
+        private void InsuredForTheCaseOfoncaveBoundary()
+        {
+            var lanebox = IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2 - 1).Scale(ScareFactorForCollisionCheck));
+            var carspacialindex = new MNTSSpatialIndex(CarSpots);
+            var pillarspacialindex = new MNTSSpatialIndex(Pillars);
+            var cars_to_remove = new List<Polygon>();
+            var pillars_to_remove = new List<Polygon>();
+            foreach (var lane in lanebox)
+            {
+                var cars = carspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                var pillars = pillarspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                cars_to_remove.AddRange(cars);
+                pillars_to_remove.AddRange(pillars);
+            }
+            cars_to_remove = cars_to_remove.Distinct().ToList();
+            pillars_to_remove = pillars_to_remove.Distinct().ToList();
+            CarSpots = CarSpots.Except(cars_to_remove).ToList();
+            for (int i = 0; i < Cars.Count; i++)
+            {
+                foreach (var remove in cars_to_remove)
+                {
+                    if (Cars[i].Polyline.Centroid.Coordinate.Distance(remove.Centroid.Coordinate) < 1)
+                    {
+                        Cars.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+            Pillars = Pillars.Except(pillars_to_remove).ToList();
         }
     }
 }
