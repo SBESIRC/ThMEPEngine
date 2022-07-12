@@ -52,7 +52,11 @@ namespace ThCADExtension
                         var circle = ToCircle(hatchLoop.Curves);
                         if (circle.Area <= 1e-6)
                         {
-                            curves.Add(ToPolyline(hatchLoop.Curves, plane, tolerance));
+                            var poly = ToPolyline(hatchLoop.Curves, plane, tolerance);
+                            if(poly!=null)
+                            {
+                                curves.Add(poly);
+                            }
                         }
                         else
                         {
@@ -61,7 +65,12 @@ namespace ThCADExtension
                     }
                     else
                     {
-                        curves.Add(ToPolyline(hatchLoop.Curves, plane, tolerance));
+                        var poly = ToPolyline(hatchLoop.Curves, plane, tolerance);
+                        if(poly!=null)
+                        {
+                            curves.Add(poly);
+                        }
+                        
                     }
                 }
             }
@@ -114,13 +123,10 @@ namespace ThCADExtension
                 }
                 else
                 {
-                    throw new NotSupportedException();
-                }
-                //else if (ellipse2d != null)
-                //{
-                //    var eclipse = ellipse2d.ToCurve();
-                //    segments.AddRange(new PolylineSegmentCollection(eclipse));
-                //}
+                    // 暂时不支持由椭圆弧和样条曲线围合的面域
+                    segments = new PolylineSegmentCollection();
+                    break;
+                }               
                 //else if (spline2d != null)
                 //{
                 //    var poly = spline2d.ToCurve().ToPolyline() as Polyline;
@@ -134,14 +140,21 @@ namespace ThCADExtension
             // TODO:
             //  存在一种“特殊”的Loop，为了用一个Loop来表达一个带洞的区域，
             //  在带洞区域的外轮廓线和内轮廓线之间拉一根线，使其能被“一笔画”
-            //  需要将这种情况处理成正常的带洞区域
-            segments.Join();
-            var newPoly = segments.ToPolyline();
-            if (newPoly.StartPoint.IsEqualTo(newPoly.EndPoint, new Tolerance(tolerance, tolerance)))
+            //  需要将这种情况处理成正常的带洞区域            
+            if(segments.Count>0)
             {
-                newPoly.Closed = true;
+                segments.Join();
+                var newPoly = segments.ToPolyline();
+                if (newPoly.StartPoint.IsEqualTo(newPoly.EndPoint, new Tolerance(tolerance, tolerance)))
+                {
+                    newPoly.Closed = true;
+                }
+                return newPoly;
             }
-            return newPoly;
+            else
+            {
+                return null;
+            }            
         }
     }
 }
