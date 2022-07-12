@@ -93,7 +93,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
         }
         public void GeneratePerpModules()
         {
-
+            double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
+            var lanes = GeneratePerpModuleLanes(mindistance, DisBackBackModulus, true, null, true, null, true);
+            GeneratePerpModuleBoxes(lanes);
         }
         public void GenerateCarsInModules()
         {
