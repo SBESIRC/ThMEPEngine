@@ -9,6 +9,8 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
 
 namespace ThMEPElectrical.BlockConvert
 {
