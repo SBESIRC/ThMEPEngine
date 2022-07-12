@@ -11540,7 +11540,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                       foreach (var ToiletWellsInterval in MaxRainpipeToWashmachine(ToiletBufferDistance))
                       {
                         var SidewaterbucketYIndent = ToiletWellsInterval.UserData as string;
-                        if (IsDrainageLabel(SidewaterbucketYIndent))
+                        if (IsDrainageLabel(SidewaterbucketYIndent) && !IsTL(SidewaterbucketYIndent))
                         {
                           toilet_wells_interval.UserData = SidewaterbucketYIndent;
                           if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
