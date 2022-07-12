@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPHVAC.SmokeProofSystem.Model;
 using ThMEPHVAC.SmokeProofSystem.Service;
+using ThMEPHVAC.SmokeProofSystem.Utils;
 
 namespace ThMEPHVAC.SmokeProofSystem.LayoutService
 {
@@ -15,6 +16,7 @@ namespace ThMEPHVAC.SmokeProofSystem.LayoutService
         Dictionary<Polyline, List<string>> roomInfo;
         List<SmkBlockModel> blocks;
         List<Polyline> doors;
+        double doorDis = 500;
         public LayoutAirShaftService(Dictionary<Polyline, List<string>> _roomInfo, List<SmkBlockModel> _blocks, List<Polyline> _doors)
         {
             roomInfo = _roomInfo;
@@ -109,8 +111,15 @@ namespace ThMEPHVAC.SmokeProofSystem.LayoutService
 
         private void LayoutBlock(Polyline AirShaftRoom, Polyline layoutRoom, List<SmkBlockModel> smkBlockModels)
         {
-            
-          
+            var parallelDic = AirShaftRoom.GetTangentEdge(layoutRoom, 410);
+            if (parallelDic.Count > 0)
+            {
+                if (parallelDic.Count > 1)
+                {
+
+                }
+            }
+
         }
     }
 }

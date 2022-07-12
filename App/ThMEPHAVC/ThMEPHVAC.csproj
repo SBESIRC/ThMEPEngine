@@ -274,6 +274,7 @@
     <Compile Include="SmokeProofSystem\Model\SmkBlockModel.cs" />
     <Compile Include="SmokeProofSystem\Model\SmkProofLayoutModel.cs" />
     <Compile Include="SmokeProofSystem\Service\CheckService.cs" />
+    <Compile Include="SmokeProofSystem\Service\GeoUtils.cs" />
     <Compile Include="SmokeProofSystem\Utils\StructUtils.cs" />
     <Compile Include="TCH\ThDrawTCHCross.cs" />
     <Compile Include="TCH\ThDrawTCHDimension.cs" />
