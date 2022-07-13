@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,9 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Diagnostics;
+using ThMEPEngineCore.Service;
 using ThMEPHVAC.FanConnect.Command;
+using ThMEPHVAC.FanConnect.Service;
 
 namespace ThMEPHVAC.FanConnect.Model
 {
@@ -54,6 +57,25 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
             }
             return -1;
+        }
+
+        public List<ThFanTreeNode<T>> GetDecendent()
+        {
+            var descendant = new List<ThFanTreeNode<T>>();
+
+            var nextChild = Children;
+
+            if (nextChild.Count != 0)
+            {
+                descendant.AddRange(nextChild);
+
+                foreach (var c in nextChild)
+                {
+                    descendant.AddRange(c.GetDecendent());
+                }
+            }
+
+            return descendant;
         }
     }
     public class ThFanTreeModel
@@ -319,8 +341,7 @@ namespace ThMEPHVAC.FanConnect.Model
                         node.Item.CoolFlow = f.CoolFlow;
                         node.Item.HotFlow = f.HotFlow;
 
-                        DrawUtils.ShowGeometry(node.Item.CntPoint,String.Format ("cool:{0}, hot:{1},capa:{2}", node.Item.CoolFlow, node.Item.HotFlow, node.Item.CoolCapa), "l0node",hight:200);
-
+                        DrawUtils.ShowGeometry(node.Item.CntPoint, String.Format("cool:{0}, hot:{1},capa:{2}", node.Item.CoolFlow, node.Item.HotFlow, node.Item.CoolCapa), "l0node", hight: 200);
 
                         break;
                     }
@@ -381,17 +402,17 @@ namespace ThMEPHVAC.FanConnect.Model
             }
             return null;
         }
-        public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node)
-        {
-            node.Item.Level = PIPELEVEL.LEVEL2;
-            if (node.Parent != null)
-            {
-                if (node.Parent.Children.Count == 1)
-                {
-                    FindFcuNode(node.Parent);
-                }
-            }
-        }
+        //public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node)
+        //{
+        //    node.Item.Level = PIPELEVEL.LEVEL2;
+        //    if (node.Parent != null)
+        //    {
+        //        if (node.Parent.Children.Count == 1)
+        //        {
+        //            FindFcuNode(node.Parent);
+        //        }
+        //    }
+        //}
         public void FindEndNode(ThFanTreeNode<ThFanPointModel> node)
         {
             foreach (var item in node.Children)
@@ -528,4 +549,385 @@ namespace ThMEPHVAC.FanConnect.Model
             return retText;
         }
     }
+
+
+    public class ThPointTreeModelService
+    {
+        public static List<Line> BreakLine(List<Line> lines, Matrix3d mt)
+        {
+            foreach (var l in lines)
+            {
+                l.TransformBy(mt);
+            }
+
+            ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+            var allLineColles = cleanServiec.CleanNoding(lines.ToCollection());
+            var breaklLines = allLineColles.OfType<Line>().ToList();
+
+            foreach (var l in breaklLines)
+            {
+                l.TransformBy(mt.Inverse());
+            }
+
+            foreach (var l in lines)
+            {
+                l.TransformBy(mt.Inverse());
+            }
+
+            return breaklLines;
+        }
+
+        public static ThFanTreeNode<ThFanPointModelNew> BuildTree(List<Line> lines, Point3d startPt)
+        {
+            var ptDict = GetPtDict(lines);
+            var startPtInDict = IsInDict(startPt, ptDict);
+
+            if (startPtInDict == Point3d.Origin)
+                return null;
+            var root = BuildTree(startPtInDict, ptDict);
+
+            return root;
+        }
+
+        //private static Point3d GetStartPt(Point3d startPt, Dictionary<Point3d, List<Line>> ptDict)
+        //{
+        //    var pt = new Point3d();
+        //    var key = ptDict.Where(x => x.Value.Contains(rootLine)).ToList();
+        //    if (key.Count() == 2)
+        //    {
+        //        if (key[0].Value.Count == 1)
+        //        {
+        //            pt = key[0].Key;
+        //        }
+        //        else if (key[1].Value.Count == 1)
+        //        {
+        //            pt = key[1].Key;
+        //        }
+        //    }
+        //    return pt;
+        //}
+
+        public static Dictionary<Point3d, List<Line>> GetPtDict(List<Line> lines)
+        {
+            var ptDict = new Dictionary<Point3d, List<Line>>();
+            foreach (var line in lines)
+            {
+                var pt = line.StartPoint;
+
+                var key = IsInDict(pt, ptDict);
+                if (key == Point3d.Origin)
+                {
+                    ptDict.Add(pt, new List<Line> { line });
+                }
+                else
+                {
+                    ptDict[key].Add(line);
+                }
+
+                pt = line.EndPoint;
+
+                key = IsInDict(pt, ptDict);
+                if (key == Point3d.Origin)
+                {
+                    ptDict.Add(pt, new List<Line> { line });
+                }
+                else
+                {
+                    ptDict[key].Add(line);
+                }
+            }
+
+            return ptDict;
+        }
+
+        public static ThFanTreeNode<ThFanPointModelNew> BuildTree(Point3d startPt, Dictionary<Point3d, List<Line>> ptDict)
+        {
+            var traversed = ptDict.SelectMany(x => x.Value).Distinct().ToDictionary(x => x, x => 0);
+
+            var rootNodeModel = new ThFanPointModelNew(startPt);
+            var rootNode = new ThFanTreeNode<ThFanPointModelNew>(rootNodeModel);
+            FindNextLeaf(rootNode, ptDict, traversed);
+
+            return rootNode;
+        }
+
+        private static void FindNextLeaf(ThFanTreeNode<ThFanPointModelNew> thisNode, Dictionary<Point3d, List<Line>> ptDict, Dictionary<Line, int> traversed)
+        {
+            var tol = new Tolerance(1, 1);
+            var thisNodePt = thisNode.Item.BasePt;
+
+            var toLine = ptDict[thisNodePt].Where(x => traversed[x] == 0).ToList();
+            foreach (var l in toLine)
+            {
+                traversed[l] = 1;
+                var theOtherEnd = l.EndPoint;
+                if (theOtherEnd.IsEqualTo(thisNodePt, tol))
+                {
+                    theOtherEnd = l.StartPoint;
+                }
+                var otherKey = IsInDict(theOtherEnd, ptDict);
+                if (otherKey != Point3d.Origin)
+                {
+                    var childModel = new ThFanPointModelNew(otherKey);
+                    var child = new ThFanTreeNode<ThFanPointModelNew>(childModel);
+                    thisNode.Children.Add(child);
+                    child.Parent = thisNode;
+                    FindNextLeaf(child, ptDict, traversed);
+                }
+            }
+        }
+        private static Point3d IsInDict(Point3d pt, Dictionary<Point3d, List<Line>> ptDict)
+        {
+            var key = new Point3d();
+            var tol = new Tolerance(ThFanConnectCommon.Tol_SamePoint, ThFanConnectCommon.Tol_SamePoint);
+            var dict = ptDict.Where(x => x.Key.IsEqualTo(pt, tol));
+            if (dict.Count() > 0)
+            {
+                key = dict.First().Key;
+            }
+            return key;
+        }
+
+        public static void CalNodeFlowValue(ThFanTreeNode<ThFanPointModelNew> node, List<ThFanCUModel> fans)
+        {
+            //优先计算子结点的值
+            foreach (var child in node.Children)
+            {
+                CalNodeFlowValue(child, fans);
+            }
+
+            if (node.Children.Count == 0)
+            {
+                foreach (var f in fans)
+                {
+                    var closetPt = f.FanObb.GetClosestPointTo(node.Item.BasePt, false);
+                    //DrawUtils.ShowGeometry(f.FanObb, "l0fanobb");
+
+                    if (closetPt.DistanceTo(node.Item.BasePt) < ThFanConnectCommon.Tol_LineToFan)
+                    {
+                        node.Item.CoolCapa = f.CoolCapa;
+                        node.Item.CoolFlow = f.CoolFlow;
+                        node.Item.HotFlow = f.HotFlow;
+
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var child in node.Children)
+                {
+                    node.Item.CoolCapa += child.Item.CoolCapa;
+                    node.Item.CoolFlow += child.Item.CoolFlow;
+                    node.Item.HotFlow += child.Item.HotFlow;
+                }
+            }
+        }
+
+        public static void CalNodeDimValue(ThFanTreeNode<ThFanPointModelNew> node, string coeff)
+        {
+            //优先计算子结点的值
+            foreach (var child in node.Children)
+            {
+                CalNodeDimValue(child, coeff);
+            }
+
+            node.Item.CoolCapaDim = ThQueryDNService.QueryCondPipeDNInt(node.Item.CoolCapa);
+            node.Item.CoolDim = ThQueryDNService.QuerySupplyPipeDNInt(coeff, node.Item.CoolFlow);
+            node.Item.HotDim = ThQueryDNService.QuerySupplyPipeDNInt(coeff, node.Item.HotFlow);
+        }
+
+        /// <summary>
+        /// 计算每个节点的level
+        /// </summary>
+        /// <param name="node"></param>
+        public static void CalNodeLevel(ThFanTreeNode<ThFanPointModelNew> node)
+        {
+            foreach (var c in node.Children)
+            {
+                CalNodeLevel(c);
+            }
+
+            //孩子node最大level数>1，本node.level+1
+            //孩子node最大level《=1，本node.level == child最大level
+            var maxChildLevel = 0;
+            var maxChildLevelCount = 0;
+            foreach (var c in node.Children)
+            {
+                if (c.Item.Level > maxChildLevel)
+                {
+                    maxChildLevel = c.Item.Level;
+                }
+            }
+            maxChildLevelCount = node.Children.Where(x => x.Item.Level == maxChildLevel).Count();
+            if (maxChildLevelCount > 1)
+            {
+                node.Item.Level = maxChildLevel + 1;
+            }
+            else
+            {
+                node.Item.Level = maxChildLevel;
+            }
+
+        }
+
+        /// <summary>
+        /// 计算node是否是每段level第一段或最后一段，是否需要标记
+        /// </summary>
+        /// <param name="node"></param>
+        public static void CheckMarkForLevel(ThFanTreeNode<ThFanPointModelNew> node)
+        {
+            foreach (var c in node.Children)
+            {
+                CheckMarkForLevel(c);
+            }
+
+            if (((node.Parent != null && node.Item.Level != node.Parent.Item.Level) || (node.Parent == null)) && node.Item.Level != 0)
+            {
+                //第一段
+                var markNode = FindLongPartMarkNode(node);
+                markNode.Item.IsLevelChangeMark = true;
+            }
+
+            if (node.Children.Count != 0)
+            {
+                var maxChildLevel = node.Children.Max(x => x.Item.Level);
+                if (node.Item.Level == maxChildLevel + 1)
+                {
+                    //最后一段
+                    var markNode = FindLongPartMarkNode(node);
+                    markNode.Item.IsLevelChangeMark = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 检查流量变化标注位
+        /// </summary>
+        /// <param name="node"></param>
+        public static void CheckDimChange(ThFanTreeNode<ThFanPointModelNew> node)
+        {
+            foreach (var child in node.Children)
+            {
+                CheckDimChange(child);
+            }
+
+            if (node.Parent != null)
+            {
+                //四管制冷热
+                if ((node.Item.Level == node.Parent.Item.Level) && (node.Item.CoolDim != node.Parent.Item.CoolDim || node.Item.HotDim != node.Parent.Item.HotDim))
+                {
+                    var nodeThisMark = FindLongPartMarkNode(node);
+                    nodeThisMark.Item.IsCoolHotChangeMark = true;
+                    var nodeMark = FindLongPartMarkNode(node.Parent);
+                    nodeMark.Item.IsCoolHotChangeMark = true;
+                }
+
+                //两管制冷热
+                var maxCHCurr = node.Item.CoolDim >= node.Item.HotDim ? node.Item.CoolDim : node.Item.HotDim;
+                var maxChP = node.Parent.Item.CoolDim >= node.Parent.Item.HotDim ? node.Parent.Item.CoolDim : node.Parent.Item.HotDim;
+                if ((node.Item.Level == node.Parent.Item.Level) && (maxCHCurr != maxChP))
+                {
+                    var nodeThisMark = FindLongPartMarkNode(node);
+                    nodeThisMark.Item.IsCoolHotMaxChangeMark = true;
+                    var nodeMark = FindLongPartMarkNode(node.Parent);
+                    nodeMark.Item.IsCoolHotMaxChangeMark = true;
+                }
+
+                //冷凝
+                if ((node.Item.Level == node.Parent.Item.Level) && (node.Item.CoolCapaDim != node.Parent.Item.CoolCapaDim))
+                {
+                    var nodeThisMark = FindLongPartMarkNode(node);
+                    nodeThisMark.Item.IsCapaChangeMarked = true;
+                    var nodeMark = FindLongPartMarkNode(node.Parent);
+                    nodeMark.Item.IsCapaChangeMarked = true;
+                }
+            }
+        }
+
+        private static ThFanTreeNode<ThFanPointModelNew> FindLongPartMarkNode(ThFanTreeNode<ThFanPointModelNew> node)
+        {
+            var toParentEnd = false;
+            var toChildEnd = false;
+            var markNode = node;
+            var maxLength = 0.0;
+
+            //往不分叉父节点找最长线
+            var tempNode = node;
+            while (toParentEnd == false)
+            {
+                if (tempNode.Parent != null)
+                {
+                    var dist = tempNode.Item.BasePt.DistanceTo(tempNode.Parent.Item.BasePt);
+                    if (dist >= maxLength)
+                    {
+                        maxLength = dist;
+                        markNode = tempNode;
+                    }
+                    if (tempNode.Parent.Children.Count == 1)
+                    {
+
+                        tempNode = tempNode.Parent;
+                    }
+                    else
+                    {
+                        toParentEnd = true;
+                    }
+                }
+                else
+                {
+                    toParentEnd = true;
+                }
+            }
+
+            //往不分叉子节点找最长线
+            tempNode = node;
+            while (toChildEnd == false)
+            {
+                if (tempNode.Children.Count == 0)
+                {
+                    //理论上不会进入这里
+                    toChildEnd = true;
+                }
+                else if (tempNode.Children.Count == 1)
+                {
+                    var dist = tempNode.Item.BasePt.DistanceTo(tempNode.Children[0].Item.BasePt);
+                    if (dist >= maxLength)
+                    {
+                        maxLength = dist;
+                        markNode = tempNode.Children[0];
+                    }
+                    tempNode = tempNode.Children[0];
+                }
+                else
+                {
+                    toChildEnd = true;
+                }
+            }
+
+            return markNode;
+        }
+
+        public static void PrintTree(ThFanTreeNode<ThFanPointModelNew> node, string layer)
+        {
+            var h = 50;
+            var templ = layer;
+            if (node.Item.IsLevelChangeMark || node.Item.IsCoolHotChangeMark || node.Item.IsCapaChangeMarked || node.Item.IsCoolHotMaxChangeMark)
+            {
+                h = 50;
+                templ = templ + "True";
+            }
+            DrawUtils.ShowGeometry(node.Item.BasePt, String.Format("cool flow:{0},hot flow:{1},capa flow:{2},level:{3},isMark:{4}\ncool dim:{5},hot dim:{6},capa dim:{7}",
+                                    node.Item.CoolFlow, node.Item.HotFlow, node.Item.CoolCapa, node.Item.Level, node.Item.IsLevelChangeMark,
+                                   node.Item.CoolDim, node.Item.HotDim, node.Item.CoolCapaDim), templ,
+                                    colorIndex: node.Item.Level % 7, hight: h);
+
+
+            node.Children.ForEach(x => PrintTree(x, layer));
+        }
+
+    }
+
+
+
 }

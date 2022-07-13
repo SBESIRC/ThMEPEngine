@@ -70,6 +70,7 @@
     <Compile Include="FanConnect\Service\ThAddValveService.cs" />
     <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
     <Compile Include="FanConnect\Service\ThHandleFanPipeService.cs" />
+    <Compile Include="FanConnect\ThFanConnectCommon.cs" />
     <Compile Include="FanPipeAlgorithm\ArrangePipe.cs" />
     <Compile Include="FanPipeAlgorithm\data_process.cs" />
     <Compile Include="FanPipeAlgorithm\edge.cs" />

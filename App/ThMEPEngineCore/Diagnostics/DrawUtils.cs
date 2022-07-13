@@ -178,11 +178,12 @@ namespace ThMEPEngineCore.Diagnostics
                 return;
             }
 
-            DBText text = new DBText();
-            text.Position = pt;
-            text.TextString = s;
+            var text = new MText();
+            text.Location = pt;
+            text.Contents = s;
             text.Rotation = 0;
             text.Height = hight;
+            text.TextHeight = hight;
             //text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
 
             DrawUtils.ShowGeometry(text, LayerName, colorIndex, lineWeightNum);
