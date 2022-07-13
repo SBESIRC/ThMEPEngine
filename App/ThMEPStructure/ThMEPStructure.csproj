@@ -189,10 +189,12 @@
     <Compile Include="StructPlane\Service\ThBuildStairSlabLineService.cs" />
     <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
     <Compile Include="StructPlane\Service\ThGeometryQuerier.cs" />
+    <Compile Include="StructPlane\Service\ThInsertBeamHandler.cs" />
     <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
     <Compile Include="StructPlane\Service\ThPrintDrawingHeadService.cs" />
     <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
     <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
+    <Compile Include="StructPlane\ThStructurePlaneCommon.cs" />
     <Compile Include="StructPlane\ThStructurePlaneGenerator.cs" />
     <Compile Include="StructPlane\Print\ThStruPlanDrawingPrinter.cs" />
     <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
