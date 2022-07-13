@@ -96,7 +96,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 List<List<string>> names = new List<List<string>>();
                 names.Add(names_a.ToList());
                 names.Add(names_b.ToList());
-                for (int i = 0; i < 2; i++)
+                names.Add(names_c.ToList());
+                for (int i = 0; i < 3; i++)
                 {
                     foreach (var name in names[i])
                     {

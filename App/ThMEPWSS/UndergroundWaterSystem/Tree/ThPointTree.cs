@@ -82,7 +82,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                     {
                         var rec = valve.Valve.GeometricExtents.ToRectangle();
                         var seg = rec.GetEdges().OrderByDescending(e => e.Length).First();
-                        if (!IsParallelLine(line, seg)) continue;
+                        var angle = CreateVector(line).GetAngleTo(CreateVector(seg));
+                        angle = Math.Min(angle, Math.PI - angle);
+                        angle = angle / Math.PI * 180;
+                        if (angle>30) continue;
                         if (box.IsIntersects(rec))
                         {
                             node.Item.Valves.Add(valve);
@@ -147,24 +150,25 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         }
         private List<Line> FindConnectLine(Point3d pt, ref List<Line> lines)
         {
+            double tol = 20;
             var remLines = new List<Line>();
             var retLines = new List<Line>();
             foreach (var l in lines)
             {
-                if (l.StartPoint.DistanceTo(pt) < 10)
+                if (l.StartPoint.DistanceTo(pt) < tol)
                 {
                     l.StartPoint = pt;
                     remLines.Add(l);
                     retLines.Add(l);
                 }
-                else if (l.EndPoint.DistanceTo(pt) < 10)
+                else if (l.EndPoint.DistanceTo(pt) < tol)
                 {
                     l.EndPoint = l.StartPoint;
                     l.StartPoint = pt;
                     retLines.Add(l);
                     remLines.Add(l);
                 }
-                else if (l.GetDistToPoint(pt) < 10)
+                else if (l.GetDistToPoint(pt) < tol)
                 {
                     //将l在pt处打断
                     var line1 = new Line(pt, l.StartPoint);
