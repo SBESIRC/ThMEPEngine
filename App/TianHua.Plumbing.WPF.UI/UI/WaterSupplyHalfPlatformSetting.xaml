@@ -50,6 +50,7 @@
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
             </StackPanel>
+            
             <Label Content="入户点位置："></Label>
             <ItemsControl x:Name="testList5" ItemsSource="{Binding EntryLocationDynamicRadios}">
                 <ItemsControl.ItemTemplate>
@@ -63,6 +64,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
+            
             <Label Content="供水支管是否穿水井地板："></Label>
             <ItemsControl x:Name="testList6" ItemsSource="{Binding PipeThroughWellDynamicRadios}">
                 <ItemsControl.ItemTemplate>

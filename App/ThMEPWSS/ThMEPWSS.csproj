@@ -446,8 +446,13 @@
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithMainLoopAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Test\DisplayTool.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Command\ThWaterSuplySystemDiagramCmd.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyCmd.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyTankCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\SysIn.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Data\SysOut.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\SysProcess.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Data\SysTank.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case1.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseAll.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseChoose.cs" />
@@ -467,10 +472,12 @@
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case8.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case9.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfFloor.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Method\PtTools.cs" />
     <Compile Include="WaterSupplyPipeSystem\Method\Tool.cs" />
     <Compile Include="WaterSupplyPipeSystem\tool\BranchPipeDeal.cs" />
     <Compile Include="WaterSupplyPipeSystem\tool\BranchPts.cs" />
     <Compile Include="WaterSupplyPipeSystem\ViewModel\HalfPlatformSetVM.cs" />
+    <Compile Include="WaterSupplyPipeSystem\ViewModel\RoofTankVM.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWithdrawalFormCmd.cs" />
     <Compile Include="Command\ThDrainSystemAboveGroundCmd.cs" />
@@ -876,7 +883,6 @@
     <Compile Include="WaterWellPumpLayout\ViewModel\ThWaterWellConfigViewModel.cs" />
     <Compile Include="WaterWellPumpLayout\ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractionEngine.cs" />
-    <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractVisitor.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\CleaningToolsSystem.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\Details.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\Elevation.cs" />
@@ -887,7 +893,6 @@
     <Compile Include="WaterSupplyPipeSystem\model\ThWSSDPipeUnit.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\ThWSSDStorey.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\ThWSuplySystemDiagram.cs" />
-    <Compile Include="WaterSupplyPipeSystem\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\tool\PipeCompute.cs" />
     <Compile Include="WaterSupplyPipeSystem\ViewModel\WaterSupplySetVM.cs" />
     <Compile Include="WaterSupplyPipeSystem\ViewModel\WaterSupplyVM.cs" />

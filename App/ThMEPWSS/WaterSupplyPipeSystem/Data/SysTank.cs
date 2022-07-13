@@ -5,7 +5,7 @@ using ThMEPWSS.WaterSupplyPipeSystem.model;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.Data
 {
-    public class SysProcess
+    public class SysTank
     {
         public List<int[]> Households { get; set; }//厨房数
         public int MaxHouseholds { get; set; }//最大厨房数
@@ -18,10 +18,10 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
         public List<double[]> U0LIST { get; set; }
 
 
-        public SysProcess()
+        public SysTank()
         {
-             NGLIST = new List<double[]>();
-             U0LIST = new List<double[]>();
+            NGLIST = new List<double[]>();
+            U0LIST = new List<double[]>();
             BranchPipeX = new List<double>();
         }
 
@@ -37,29 +37,21 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
             GetBranchPipeX();
         }
 
-        public void SetTank(SysIn sysIn)
-        {
-            Households = ThWCompute.CountKitchenNums(sysIn);
-            MaxHouseholds = ThWCompute.GetMaxHouseholds(Households, sysIn.FlushFaucet);
-            FloorCleanToolList = ThWCompute.CountCleanToolNums(sysIn, Households);
-            MaxHouseholdNums = Tool.GetMaxHouseholdNums(sysIn, FloorCleanToolList);
-        }
-
 
         private void GetBranchPipeX()
         {
             double lastPipeOffsetX = PipeOffsetX[0];
-            for (int i =0; i < PipeOffsetX.Length;i++)
+            for (int i = 0; i < PipeOffsetX.Length; i++)
             {
-                if(i==0)
+                if (i == 0)
                 {
                     BranchPipeX.Add(400);
                 }
                 else
                 {
-                    if(PipeOffsetX[i]!=lastPipeOffsetX)
+                    if (PipeOffsetX[i] != lastPipeOffsetX)
                     {
-                        BranchPipeX.Add(BranchPipeX.Last()+600);
+                        BranchPipeX.Add(BranchPipeX.Last() + 600);
                     }
                     else
                     {

@@ -49,14 +49,20 @@
             <StackPanel Orientation="Horizontal">
                 <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding MeterType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">同层</RadioButton>
                 <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding MeterType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">半平台</RadioButton>
+                <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding MeterType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">屋顶水箱</RadioButton>
             </StackPanel>
+            
             <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,5,0,5" IsEnabled="{Binding MeterType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <Button x:Name="HalfSet" Click="HalfPlatformSet" Width="80" Margin="0,0,0,0">半平台设置</Button>
                 </StackPanel>
             </StackPanel>
 
-
+            <StackPanel Orientation="Vertical" Grid.Row="3" Margin="0,5,0,5" IsEnabled="{Binding MeterType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <Button x:Name="TankSet" Click="RoofTankSet" Width="80" Margin="0,0,0,0">屋顶水箱设置</Button>
+                </StackPanel>
+            </StackPanel>
 
         </StackPanel>
         <!--半平台设置结束-->

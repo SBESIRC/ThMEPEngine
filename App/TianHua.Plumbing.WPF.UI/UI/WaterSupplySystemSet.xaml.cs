@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Diagram.ViewModel;
@@ -16,14 +15,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         public WaterSupplySetVM setViewModel;
         //private DrainageSetViewModel orgViewModel;
-        public WaterSupplySystemSet(WaterSupplySetVM viewModel = null)
+        public WaterSupplySystemSet(WaterSupplySetVM viewModel = null, int maxfloor=1)
         {
             InitializeComponent();
             this.Title = "参数设置";
             setViewModel = viewModel;
             //orgViewModel = viewModel;
             if (null == viewModel)
-                setViewModel = new WaterSupplySetVM();
+                setViewModel = new WaterSupplySetVM(maxfloor);
             this.DataContext = setViewModel;
         }
 
@@ -45,11 +44,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.Close();
         }
 
-        /// <summary>
-        /// 楼层线间距
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void TextBox_TextChanged_FloorGap(object sender, TextChangedEventArgs e)
         {
             var str = ((TextBox)e.Source).Text.ToString();
@@ -303,8 +297,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     newStr += item;
                 }
+                
             }
             ((TextBox)e.Source).Text = newStr;
+
         }
 
         private void LostFocus_NumberOfHouseholds(object sender, RoutedEventArgs e)
@@ -386,9 +382,21 @@ namespace TianHua.Plumbing.WPF.UI.UI
             FloorHeightSettingWindow.ShowModelSingletonWindow();
 
         }
+
+        //屋顶水箱设置
+        private void RoofTankSet(object sender, RoutedEventArgs e)
+        {
+            var oldViewModel = setViewModel.tankViewModel?.Clone(setViewModel.MaxFloor);
+
+            WaterSupplyRoofTank systemSet = new WaterSupplyRoofTank(setViewModel.tankViewModel);
+            systemSet.Owner = this;
+            var ret = systemSet.ShowDialog();
+            if (ret == false)
+            {
+                //用户取消了操作
+                setViewModel.tankViewModel = oldViewModel;
+                return;
+            }
+        }
     }
-
-
-   
-
 }
