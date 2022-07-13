@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.ViewModels;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
@@ -14,33 +13,19 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnInsert(object sender, RoutedEventArgs e)
         {
-            var vm = this.DataContext as ThPDSCreateLoadVM;
-            ThPDSProjectGraphService.CreatNewLoad(CreateData(vm));
+            DialogResult = true;
             Close();
         }
         private void btnSave(object sender, RoutedEventArgs e)
         {
-            var vm = this.DataContext as ThPDSCreateLoadVM;
-            ThPDSProjectGraphService.CreatNewLoad(CreateData(vm));
+            DialogResult = true;
             Close();
         }
 
         private void btnCancel(object sender, RoutedEventArgs e)
         {
+            DialogResult = false;
             Close();
-        }
-
-        private ThPDSProjectGraphNodeData CreateData(ThPDSCreateLoadVM vm)
-        {
-            var data = ThPDSProjectGraphNodeData.Create();
-            data.Power = vm.Power;
-            data.Storey = vm.Storey;
-            data.Number = vm.Number;
-            data.Type = vm.Type.Type;
-            data.FireLoad = vm.FireLoad;
-            data.Description = vm.Description;
-            data.Sync();
-            return data;
         }
     }
 }
