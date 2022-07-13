@@ -21,6 +21,7 @@ namespace TianHua.Mep.UI.ViewModel
     public class ThExtractRoomOutlineVM : NotifyPropertyChangedBase
     {
         private const string AIWallLayer = "AI-墙线";
+        private const string AIShearWallLayer = "AI-剪力墙";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
         private bool ynExtractShearWall;
         public bool YnExtractShearWall
@@ -86,7 +87,7 @@ namespace TianHua.Mep.UI.ViewModel
         public void BuildDoors()
         {
             using (var lockDoc = Active.Document.LockDocument())
-            using (var cmd = new ThBuildDoorsCmd(AIWallLayer, ThMEPEngineCoreLayerUtils.DOOR, ThMEPEngineCoreLayerUtils.COLUMN))
+            using (var cmd = new ThBuildDoorsCmd(AIWallLayer, AIShearWallLayer, ThMEPEngineCoreLayerUtils.DOOR, ThMEPEngineCoreLayerUtils.COLUMN))
             {
                 SetFocusToDwgView();
                 cmd.Execute();
