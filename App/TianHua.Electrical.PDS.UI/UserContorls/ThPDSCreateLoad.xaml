@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d" Title="新建负载"
-             d:DesignHeight="215" d:DesignWidth="265" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+             d:DesignHeight="241" d:DesignWidth="307.666" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -21,6 +21,7 @@
         <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button Margin="3" Click="btnInsert">保存并插入平面</Button>
             <Button Margin="3" Click="btnSave">保存</Button>
+            <Button Margin="3" Click="btnCancel">取消</Button>
         </StackPanel>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
@@ -34,19 +35,28 @@
                     </ComboBox>
                     <Label Content="{Binding SelectedItem.Name, ElementName=TypeComboBox}"/>
                 </StackPanel>
-                <StackPanel Orientation="Vertical">
-                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Number}" hc:InfoElement.Placeholder="设备编号" hc:InfoElement.Necessary="True" hc:InfoElement.Title=" " hc:InfoElement.TitlePlacement="Left" ></TextBox>
-                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Power}" hc:InfoElement.Placeholder="设备功率" hc:InfoElement.Necessary="True" hc:InfoElement.Title=" " hc:InfoElement.TitlePlacement="Left" ></TextBox>
-                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Description}" hc:InfoElement.Placeholder="描述信息"></TextBox>
-                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Storey}" hc:InfoElement.Placeholder="所在楼层"></TextBox>
+                <StackPanel Orientation="Vertical" Margin="5,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Number}" hc:InfoElement.Placeholder="设备编号"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Power}" hc:InfoElement.Placeholder="设备功率"></TextBox>
+                        <Label Content="kW"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Description}" hc:InfoElement.Placeholder="描述信息"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Style="{StaticResource TextBoxExtend}" Width="150" Text="{Binding Storey}" hc:InfoElement.Placeholder="所在楼层"></TextBox>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="设备额定电压："/>
                 <ComboBox ItemsSource="{Binding RatedVoltages, Mode=OneWay}" SelectedItem="{Binding RatedVoltage}"/>
                 <Label Content="kV"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                 <CheckBox IsChecked="{Binding FireLoad}">消防设备</CheckBox>
             </StackPanel>
         </StackPanel>

@@ -25,6 +25,11 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             Close();
         }
 
+        private void btnCancel(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
         private ThPDSProjectGraphNodeData CreateData(ThPDSCreateLoadVM vm)
         {
             var data = ThPDSProjectGraphNodeData.Create();
