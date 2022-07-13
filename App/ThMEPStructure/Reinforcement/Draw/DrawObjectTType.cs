@@ -597,6 +597,19 @@ namespace ThMEPStructure.Reinforcement.Draw
 
                             }
 
+                            //反转hasUse属性，始终保证C筋为true的正确
+                            for(int i = 0; i < ZongjinPoint_list.Count; i++)
+                            {
+                                if (ZongjinPoint_list[i].hasUse == true)
+                                {
+                                    ZongjinPoint_list[i].hasUse = false;
+                                }
+                                else
+                                {
+                                    ZongjinPoint_list[i].hasUse = true;
+                                }
+                            }
+
                         }
                     }
                     else if (thTTypeEdgeComponent.Type == "B")
@@ -820,7 +833,17 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 }
 
                             }
-
+                            for (int i = 0; i < ZongjinPoint_list.Count; i++)
+                            {
+                                if (ZongjinPoint_list[i].hasUse == true)
+                                {
+                                    ZongjinPoint_list[i].hasUse = false;
+                                }
+                                else
+                                {
+                                    ZongjinPoint_list[i].hasUse = true;
+                                }
+                            }
                         }
 
                     }
@@ -1158,6 +1181,17 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     }
                                 }
 
+                            }
+                            for (int i = 0; i < ZongjinPoint_list.Count; i++)
+                            {
+                                if (ZongjinPoint_list[i].hasUse == true)
+                                {
+                                    ZongjinPoint_list[i].hasUse = false;
+                                }
+                                else
+                                {
+                                    ZongjinPoint_list[i].hasUse = true;
+                                }
                             }
 
                         }
@@ -1502,6 +1536,17 @@ namespace ThMEPStructure.Reinforcement.Draw
 
 
                             }
+                            for (int i = 0; i < ZongjinPoint_list.Count; i++)
+                            {
+                                if (ZongjinPoint_list[i].hasUse == true)
+                                {
+                                    ZongjinPoint_list[i].hasUse = false;
+                                }
+                                else
+                                {
+                                    ZongjinPoint_list[i].hasUse = true;
+                                }
+                            }
 
                         }
 
@@ -1801,11 +1846,6 @@ namespace ThMEPStructure.Reinforcement.Draw
         public override void DrawCJin()
         {
             try {
-                if (thTTypeEdgeComponent.Number.Contains("GBZ67"))
-                {
-                    int a = 0;
-                }
-
             StrToReinforce TReinStr = new StrToReinforce();
             TReinStr = Helper.StrToRein(thTTypeEdgeComponent.Reinforce);
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
@@ -3242,7 +3282,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 Helper.CreateRectAndLabel(points[0], points[9], 3, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[4], points[5], 3, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                Helper.CreateRectAndLabel(points[4], points[5], 3, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
 
                             }
 

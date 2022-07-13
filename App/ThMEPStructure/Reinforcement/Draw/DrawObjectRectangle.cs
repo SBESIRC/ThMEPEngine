@@ -386,7 +386,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         
         public override void DrawCJin()
         {
-            try { 
+            try {
             StrToReinforce RReinStr = new StrToReinforce();
             RReinStr = Helper.StrToRein(thRectangleEdgeComponent.Reinforce);
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
@@ -442,7 +442,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 }//修改
 
                 //Rect型不分A B型
-                if (Cnum == 2)
+                    if (Cnum == 2)
                     {
                        
                        Helper.CreateRectAndLabel(points[0], points[1], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
@@ -462,6 +462,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                         else
                         {
                             Helper.CreateRectAndLabel(points[0], points[1], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                            Helper.CreateRectAndLabel(points[3], points[2], 2, ZongjinPoints[3].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
                         }
                     }
                     else
@@ -558,6 +559,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     {
                         Helper.CreateRectAndLabel(points[0], points[0], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                         Helper.CreateRectAndLabel(points[1], points[1], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
+                        
                     }
                     else if (Step == 6)
                     {
