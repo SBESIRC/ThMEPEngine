@@ -72,6 +72,7 @@
     <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
+    <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
     <Compile Include="Model\ThTCHSlabDescendingData.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />
     <Compile Include="Model\ThTCHBuildingStorey.cs" />
@@ -102,7 +103,9 @@
     <Compile Include="TCHArchDataConvert\THArchEntity\WindowEntity.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawVerticalPipeService.cs" />
+    <Compile Include="TCHTables\TCHTgSymbMultiLeader.cs" />
     <Compile Include="TCHTables\TCHTwtBlock.cs" />
     <Compile Include="TCHTables\TCHTwtEquipment.cs" />
     <Compile Include="TCHTables\TCHTwtPoint.cs" />

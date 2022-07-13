@@ -429,6 +429,13 @@ namespace ThMEPWSS.Command
             }
             tchPipeService.InitPipe(verPipes);
             tchPipeService.DrawExecute(false);
+            TCHDrawSymbMultiLeaderService tCHDrawSymbMultiLeaderService = new TCHDrawSymbMultiLeaderService();
+            List<ThTCHSymbMultiLeader> thTCHSymbMultis = new List<ThTCHSymbMultiLeader>();
+            ThTCHSymbMultiLeader thTCHSymbMulti = new ThTCHSymbMultiLeader();
+            thTCHSymbMulti.Point = new Point3d(0, 0, 0);
+            thTCHSymbMulti.DownText = "测试";
+            tCHDrawSymbMultiLeaderService.InitDimensions(thTCHSymbMultis);
+            tCHDrawSymbMultiLeaderService.DrawExecute(false);
         }
         void InitData(Database database) 
         {
