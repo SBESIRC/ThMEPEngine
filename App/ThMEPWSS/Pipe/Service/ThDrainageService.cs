@@ -11962,24 +11962,8 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
             {
               if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
               {
-                MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].WPSCount = THESAURUSHOUSING;
-                {
-                  var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs.TryGet(THESAURUSPERMUTATION);
-                  if (DEFAULT_FIRE_VALVE_WIDTH is not null)
-                  {
-                    if (DEFAULT_FIRE_VALVE_WIDTH.FDSCount > THESAURUSSTAMPEDE)
-                    {
-                      if (MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].FDSCount < DEFAULT_FIRE_VALVE_WIDTH.FDSCount)
-                      {
-                        MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].FDSCount = DEFAULT_FIRE_VALVE_WIDTH.FDSCount;
-                        if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
-                        {
-                          MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].FDSCount = THESAURUSHOUSING;
-                        }
-                      }
-                    }
-                  }
-                }
+                var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+                if (DEFAULT_FIRE_VALVE_WIDTH.FDSCount > THESAURUSHOUSING) DEFAULT_FIRE_VALVE_WIDTH.FDSCount = THESAURUSHOUSING;
               }
             }
             if (MaxBalconyToBalconyDistance.PipeType is PipeType.PL)
