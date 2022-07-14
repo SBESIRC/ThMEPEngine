@@ -87,7 +87,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 var layerStatusDict = InsertBlkService.RecordLayerStatus(recordLayerStatus);
 
                 //var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
-                var blkList = new List<string> { ThHydrantCommon.BlkName_Vertical };
+                var blkList = new List<string> { ThHydrantCommon.BlkName_Vertical, ThHydrantCommon.BlkName_Vertical150 };
                 var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
                 InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
@@ -118,7 +118,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 dataQuery.Print();
 
                 //Engine start
-                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutMode, _avoidParking,_layoutInMiddle);
+                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutMode, _avoidParking, _layoutInMiddle);
                 Run run0 = new Run(dataQuery, dataPass0);
                 run0.Pipeline();
                 List<OutPutModel> outPutModels = run0.outPutModels;
