@@ -62,7 +62,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             double score = 0;
             double overlapArea = ComputeOverlapArea(area, shell, forbidden);
             if (overlapArea == 0) return 100;
-            else return ((area.Area - overlapArea) / area.Area);
+            else return ((area.Area - overlapArea) / area.Area) * 100;
         }
 
         public static double ComputeOverlapArea(Polyline area ,Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
@@ -72,6 +72,8 @@ namespace ThMEPWSS.HydrantLayout.Service
             var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
             //List<Polyline> pakings = ProcessedData.ParkingIndex.SelectCrossingPolygon(shell).OfType<Polyline>().ToList();
             DBObjectCollection pakings = ProcessedData.ParkingIndex.SelectCrossingPolygon(shell);
+            List<Polyline> pakingList = pakings.OfType<Polyline>().ToList();
+            DrawUtils.ShowGeometry(pakingList, "l2paking", 4);
 
             if (pakings.Count > 0)
             {

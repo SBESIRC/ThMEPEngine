@@ -1000,28 +1000,31 @@ namespace ThMEPWSS.HydrantLayout.Service
         public int GetColumnType(Polyline cl, int mainIndex)
         {
             int type = -1;
-            double rangeLength = 3000;
+            double rangeLength = Info.RangeLength;
 
             Point3d start1 = cl.GetPoint3dAt(mainIndex);
             Point3d end1 = cl.GetPoint3dAt((mainIndex + 1) % cl.NumberOfVertices);
-            Vector3d dir1 = end1 - start1;
+            Vector3d dir1 = (end1 - start1).GetNormal();
             Vector3d dirOut1 = new Vector3d(-dir1.Y, dir1.X, dir1.Z).GetNormal();
-            Polyline pl1 = CreateBoundaryService.CreateRectangle2(start1 - dirOut1 * rangeLength, end1 + dirOut1 * rangeLength, rangeLength);
+            Polyline pl1 = CreateBoundaryService.CreateRectangle2(start1 - dir1 * rangeLength, end1 + dir1 * rangeLength, rangeLength);
+            DrawUtils.ShowGeometry(pl1, "l2Rec", 2, lineWeightNum: 30);
             double score1 = IndexCompute.ComputeOverlapScore(pl1, this.Frame, ProcessedData.ParkingIndex);
 
             int newIndex = (mainIndex + 2) % cl.NumberOfVertices;
 
             Point3d start2 = cl.GetPoint3dAt(newIndex);
             Point3d end2 = cl.GetPoint3dAt((newIndex + 1) % cl.NumberOfVertices);
-            Vector3d dir2 = end2 - start2;
+            Vector3d dir2 = (end2 - start2).GetNormal();
             Vector3d dirOut2 =  - dirOut1;
 
-            Polyline pl2 = CreateBoundaryService.CreateRectangle2(start2 - dirOut2 * rangeLength, end2 + dirOut2 * rangeLength, rangeLength);
+            Polyline pl2 = CreateBoundaryService.CreateRectangle2(start2 - dir2 * rangeLength, end2 + dir2 * rangeLength, rangeLength);
+            DrawUtils.ShowGeometry(pl2, "l2Rec" ,3 , lineWeightNum: 30);
             double score2 = IndexCompute.ComputeOverlapScore(pl2, this.Frame, ProcessedData.ParkingIndex);
 
 
-            if (score1 > 50 && score2 < 20) type = 2;
-            else if (score1 < 20 && score2 > 50) type = 1;
+
+            if (score1 < Info.SmallScore && score2 > Info.BigScore) type = 2;
+            else if (score1 > Info.BigScore && score2 < Info.SmallScore ) type = 1;
             else type = 0;
 
             return type;

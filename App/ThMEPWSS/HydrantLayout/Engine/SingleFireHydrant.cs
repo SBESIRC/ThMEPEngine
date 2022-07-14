@@ -338,6 +338,9 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 //判断能否放中心
                 if (searchPoint0.BasePointPosition[i] == 1 && !Info.ColumnCenterOK) continue;
 
+                Polyline showPl = CreateBoundaryService.CreateBoundary(basePointList[i] + dirList[i].GetNormal() * Info.VPSide/2, Info.VPSide, Info.VPSide, dirList[i]);
+                DrawUtils.ShowGeometry(showPl, "l1VP", 70, lineWeightNum: 30);
+
                 var fireHydrant0 = new FireHydrant(basePointList[i], dirList[i], ShortSide, LongSide, Info.Mode);
                 Polyline vpPl = fireHydrant0.GetRiserObb();
                 List<Polyline> fireObbList = fireHydrant0.GetFireObbList();
@@ -383,7 +386,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
                         //确定位置优先级的逻辑
                         double positionScore = -1;
-                        if (j == 6 || j == 7) positionScore = 3;
+                        if (j == 6 || j == 7) positionScore = 4;
                         if (j == 1 || j == 4) 
                         {
                             if (searchPoint0.ColumnDirMode[i] == 1) { positionScore = 0; }
@@ -391,6 +394,9 @@ namespace ThMEPWSS.HydrantLayout.Engine
                         }
                         if (j == 0 || j == 5) positionScore = 1;
                         if (j == 8 || j == 9) positionScore = 0;
+
+                        if (searchPoint0.BasePointPosition[i] == 1 && (j == 8 || j == 9)) positionScore = 3;
+
 
                         double distance = fireHydrant0.TFireCenterPointList[j].DistanceTo(CenterPoint);
                         double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, searchPoint0.LeanWallList[i]);
