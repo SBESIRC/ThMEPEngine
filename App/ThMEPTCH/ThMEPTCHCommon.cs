@@ -10,5 +10,7 @@
         public const string TCHTableName_TwtVerticalPipeDim = "TwtVerticalPipeDim";//水系统中立管标注信息
         public const string TCHTableName_TwtSprinkler = "TwtSprinkler";//水系统中喷淋信息表
         public const string TCHTableName_TgSymbMultiLeader = "TgSymbMultiLeader";//水系统中引出标注表
+        public const string TCHTableName_TgPublicList = "TgPublicList";//水系统中引出标注表公共链表
+        public const string TCHTableName_TgPoint = "TgPoint";//水系统中引出标注点
     }
 }

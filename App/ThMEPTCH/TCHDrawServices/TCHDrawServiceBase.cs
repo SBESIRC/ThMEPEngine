@@ -23,20 +23,24 @@ namespace ThMEPTCH.TCHDrawServices
             TCHTemplateDBPath = ThCADCommon.TCHWSSDBPath();
             ClearDataTables = new List<string>();
         }
-        protected virtual void InitTCHDatabase()
+        protected virtual void InitTCHDatabase(bool isDelHisDB)
         {
             if (string.IsNullOrEmpty(TCHDBPath) || string.IsNullOrEmpty(TCHTemplateDBPath))
                 return;
             if (!File.Exists(TCHTemplateDBPath))
                 return;
-            if (File.Exists(TCHDBPath))
-                File.Delete(TCHDBPath);
-            File.Copy(TCHTemplateDBPath, TCHDBPath);
+            if (File.Exists(TCHDBPath)) 
+            {
+                if (isDelHisDB)
+                    File.Delete(TCHDBPath);
+            }
+            if (!File.Exists(TCHDBPath))
+                File.Copy(TCHTemplateDBPath, TCHDBPath);
             DBHelper = new THMEPSQLiteServices(TCHDBPath);
         }
-        public virtual void DrawExecute(bool sendImpTCHCmd =true)
+        public virtual void DrawExecute(bool sendImpTCHCmd =true,bool delHisDB =true)
         {
-            InitTCHDatabase();
+            InitTCHDatabase(delHisDB);
             ClearDBTableHistoricalData();
             WriteModelToTCHDatabase();
             CloseDBConnect();

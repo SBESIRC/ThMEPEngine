@@ -105,6 +105,8 @@
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawVerticalPipeService.cs" />
+    <Compile Include="TCHTables\TCHTgPoint.cs" />
+    <Compile Include="TCHTables\TCHTgPublicList.cs" />
     <Compile Include="TCHTables\TCHTgSymbMultiLeader.cs" />
     <Compile Include="TCHTables\TCHTwtBlock.cs" />
     <Compile Include="TCHTables\TCHTwtEquipment.cs" />

@@ -51,6 +51,27 @@ namespace ThMEPTCH.Data
             };
             return twtPoint;
         }
+        public static TCHTgPoint PointToTCHTgPoint(ulong Id, Point3d point)
+        {
+            TCHTgPoint tCHTgPoint = new TCHTgPoint
+            {
+                ID = ((int)Id),
+                X = Math.Round(point.X, 6).ToString(),
+                Y = Math.Round(point.Y, 6).ToString(),
+                Z = Math.Round(point.Z, 6).ToString(),
+            };
+            return tCHTgPoint;
+        }
+        public static TCHTgPublicList ConvertToTCHTgPublicList(ulong Id, int pointID, int nextID)
+        {
+            TCHTgPublicList tCHTgPublicList = new TCHTgPublicList
+            {
+                ID = ((int)Id),
+                PointID = pointID,
+                NextID = nextID,
+            };
+            return tCHTgPublicList;
+        }
         public static TCHTwtVector VectorToTwtVectorModel(ulong Id, Vector3d vector)
         {
             TCHTwtVector tvwVector = new TCHTwtVector
