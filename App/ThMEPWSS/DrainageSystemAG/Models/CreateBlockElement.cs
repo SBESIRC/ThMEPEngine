@@ -51,6 +51,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public string belongBlockId { get; }
         public string connectBlockId { get; set; }
         public string curveTag { get; }
+        public bool ConvertToTCHElement = false;
         public CreateBasicElement(string floorId,Curve curve,string layerName,string belongId,string tag,Color lineColor =null) 
         {
             this.uid = Guid.NewGuid().ToString();
@@ -73,6 +74,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public string belongBlockId { get; }
         public DBText dbText { get; }
         public string copyId { get; }
+        public bool ConvertToTCHElement = false;
         public CreateDBTextElement(string floorId, Point3d textPoint,DBText dBText,string belongId,string layerName,string textStyle,string copyId="")
         {
             this.uid = Guid.NewGuid().ToString();
