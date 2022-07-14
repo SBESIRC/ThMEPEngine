@@ -10850,6 +10850,8 @@ cb: tolReturnValueRangeTo =>
         public const string THESAURUSFLABBY = "DIMS";
         public const string THESAURUSPOTENTIAL = @"(?:^F0L\-)|(?:^FL.*\-0$)|(?:^FL\-0$)";
         public const string PHONOCARDIOGRAPH = "污废水管+通气管";
+        public const string DEINSTITUTIONALIZATION = "天井";
+        public const string QUOTATIONLORENTZ = "散排至天井";
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -11003,6 +11005,7 @@ cb: tolReturnValueRangeTo =>
         var gwtfs = new List<Geometry>();
         var MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = new List<Geometry>();
         var MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE = new List<Geometry>();
+        var gSkyWells = new List<Geometry>();
         var MAX_BALCONY_TO_BALCONY_DISTANCE = new HashSet<CText>(CreateEqualityComparer<CText>((TolLightRangeSingleSideMax, y) => TolLightRangeSingleSideMax.Text == y.Text && TolLightRangeSingleSideMax.Boundary.EqualsTo(y.Boundary, THESAURUSACRIMONIOUS)));
         var MAX_KITCHEN_TO_BALCONY_DISTANCE = new List<Geometry>();
         var MIN_DEVICEPLATFORM_AREA = new List<Geometry>();
@@ -11252,6 +11255,10 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                 MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE.Add(GeoFac.CreateGeometryEx(GeoFac.GetPoints(sidewaterbucket_y_indent).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
               }
             }
+            if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSCATEGORICAL) && MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(DEINSTITUTIONALIZATION))
+            {
+              gSkyWells.Add(GeoFac.CreateGeometryEx(GeoFac.GetPoints(sidewaterbucket_y_indent).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPoint2d().ToGRect(THESAURUSENTREPRENEUR).ToPolygon()).ToList()));
+            }
             if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSLECHER))
             {
               string toilet_buffer_distance = null, MAX_CONDENSEPIPE_TO_WASHMACHINE = null;
@@ -11400,6 +11407,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
             var MinBalconybasinToBalcony = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BASECIRCLE_AREA)(MaxBalconywashingmachineToBalconybasinline));
             var MaxTagYposition = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
             var MaxTagXposition = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE)(MaxBalconywashingmachineToBalconybasinline));
+            var skyWellsf = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(gSkyWells)(MaxBalconywashingmachineToBalconybasinline));
             var MaxTagLength = GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(MIN_DEVICEPLATFORM_AREA.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Buffer(THESAURUSDERELICTION)).ToList())(MaxBalconywashingmachineToBalconybasinline));
             var wlineGeos = GeoFac.GroupLinesByConnPoints(GeoFac.CreateIntersectsSelector(GeoFac.CreateContainsSelector(GeoFac.GetManyLines(MAX_TOILET_TO_CONDENSEPIPE_DISTANCE).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSCOMMUNICATION).ToLineString()).ToList())(MaxBalconywashingmachineToBalconybasinline))(MaxBalconywashingmachineToBalconybasinline), THESAURUSACRIMONIOUS).ToList();
             var TextIndent = GeoFac.CreateIntersectsSelector(wlineGeos);
@@ -11660,12 +11668,13 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                       var fdsc = THESAURUSSTAMPEDE;
                       foreach (var fd in Commonradius(fdwlGeo))
                       {
+                        if (fd.GetCenter().GetDistanceTo(toilet_wells_interval.GetCenter()) > THESAURUSINHERIT) continue;
                         ++fdsc;
                         max_basecircle_area.Add(fd.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
                       }
                       if (fdsc == THESAURUSSTAMPEDE)
                       {
-                        if (IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                        if (IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
                         {
                           foreach (var fd in Commonradius(toilet_wells_interval.GetCenter().ToGCircle(QUOTATIONWITTIG).ToCirclePolygon(SUPERLATIVENESS)))
                           {
@@ -11689,6 +11698,10 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                       else if (MaxTagLength(WellToWallOffset).Any())
                       {
                         MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = THESAURUSINTENTIONAL;
+                      }
+                      else if (skyWellsf(WellToWallOffset).Any())
+                      {
+                        MaxBalconywashingfloordrainToRainpipe[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = DEINSTITUTIONALIZATION;
                       }
                     }
                     else if (IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
@@ -11963,7 +11976,10 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               if (MAX_ANGEL_TOLLERANCE == THESAURUSSTAMPEDE)
               {
                 var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-                if (DEFAULT_FIRE_VALVE_WIDTH.FDSCount > THESAURUSHOUSING) DEFAULT_FIRE_VALVE_WIDTH.FDSCount = THESAURUSHOUSING;
+                if (DEFAULT_FIRE_VALVE_WIDTH.FDSCount > THESAURUSHOUSING)
+                {
+                  DEFAULT_FIRE_VALVE_WIDTH.FDSCount = THESAURUSHOUSING;
+                }
               }
             }
             if (MaxBalconyToBalconyDistance.PipeType is PipeType.PL)
@@ -12755,6 +12771,14 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                               MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
                               MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
                               MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSUPPOSITION, -QUOTATION1ASHANKS), CHRISTADELPHIAN, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                            }
+                            break;
+                          case DEINSTITUTIONALIZATION:
+                            {
+                              COMMONRADIUS.Add(new(THESAURUSEMPHASIS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW)));
+                              MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSBELLOW), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                              MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSINHERIT, -THESAURUSPROSPEROUS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSUNGRATEFUL, -THESAURUSPROSPEROUS)), CIRCUMCONVOLUTION));
+                              MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSUPPOSITION, -QUOTATION1ASHANKS), QUOTATIONLORENTZ, CIRCUMCONVOLUTION, CONTROVERSIALLY));
                             }
                             break;
                           case VICISSITUDINOUS:
@@ -13776,6 +13800,12 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                   _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_TOILET_TO_FLOORDRAIN_DISTANCE1);
                 }
               }
+              return;
+            }
+            if (toilet_buffer_distance == PARATHYROIDECTOMY)
+            {
+              var maxKitchenToBalconyDistance = tolReturnValueRangeTo.Bounds.ToGRect().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
+              if (maxKitchenToBalconyDistance.IsValid) _tol_lane_protect(maxToiletToFloordrainDistance, maxKitchenToBalconyDistance, MAX_KITCHEN_TO_BALCONY_DISTANCE);
               return;
             }
             if (toilet_buffer_distance.Contains(THESAURUSINDULGENT))
