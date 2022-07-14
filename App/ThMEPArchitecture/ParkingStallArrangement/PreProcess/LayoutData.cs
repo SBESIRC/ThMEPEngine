@@ -26,6 +26,7 @@ using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 using ThMEPEngineCore.Algorithm;
 using ThMEPArchitecture.MultiProcess;
+using ThCADExtension;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
@@ -259,7 +260,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void UpdateSegLines()
         {
-            SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).Select(l => l.ToNTSLineSegment()).ToList();
+            SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLine(1)).Select(l => l.ToNTSLineSegment()).ToList();
             //RemoveSortSegLine();
         }
         private void RemoveSortSegLine()
