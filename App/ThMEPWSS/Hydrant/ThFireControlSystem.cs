@@ -183,6 +183,45 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 allStoreys.Add("RF");
                 var iRF = allStoreys.IndexOf("RF");
                 Point3d getStoreyBsPt(int i) => basePoint.OffsetY(HEIGHT * i);
+                void drawSimpleSpray(Func<int,int,Point3d> getGeneralBsPt)
+                {
+                    for (int i = 0; i < allStoreys.Count; i++)
+                    {
+                        if (i != iRF)
+                        {
+                            for (int j = 0; j < generalCount; j++)
+                            {
+                                var count = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items[j].SimpleSprayCount;
+                                if (count == 0) continue;
+                                var px = getGeneralBsPt(i, j);
+                                if (j == 0)
+                                {
+                                    brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-326, 1300)) { ScaleEx = new Scale3d(-1, 1, 1) });
+                                    brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(-626, 1297)) { Rotate = Math.PI, DynaDict = new() { { "可见性", "平面" }, }, });
+                                    if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-926, 1297), px.OffsetXY(-1325 + SPRAY_STEP - count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
+                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
+                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-1040, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                }
+                                else
+                                {
+                                    brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(326, 1300)));
+                                    brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(626, 1297)) { Rotate = Math.PI, ScaleEx = new Scale3d(-1, 1, 1), DynaDict = new() { { "可见性", "平面" }, }, });
+                                    if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(926, 1297), px.OffsetXY(1325 - SPRAY_STEP + count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
+                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
+                                    textInfos.Add(new DBTextInfo(px.OffsetXY(200, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                }
+                            }
+                        }
+                    }
+                }
                 if (vm.IsDoublePipe)
                 {
                     if (vm.IsTopRing)
@@ -3571,42 +3610,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                             }
-                            for (int i = 0; i < allStoreys.Count; i++)
-                            {
-                                if (i != iRF)
-                                {
-                                    for (int j = 0; j < generalCount; j++)
-                                    {
-                                        var count = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items[j].SimpleSprayCount;
-                                        if (count == 0) continue;
-                                        var px = getGeneralBsPt(i, j);
-                                        if (j == 0)
-                                        {
-                                            brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-326, 1300)) { ScaleEx = new Scale3d(-1, 1, 1) });
-                                            brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(-626, 1297)) { Rotate = Math.PI, DynaDict = new() { { "可见性", "平面" }, }, });
-                                            if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-926, 1297), px.OffsetXY(-1325 + SPRAY_STEP - count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
-                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
-                                            textInfos.Add(new DBTextInfo(px.OffsetXY(-1040, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                        }
-                                        else
-                                        {
-                                            brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(326, 1300)));
-                                            brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(626, 1297)) { Rotate = Math.PI, ScaleEx = new Scale3d(-1, 1, 1), DynaDict = new() { { "可见性", "平面" }, }, });
-                                            if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
-                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(926, 1297), px.OffsetXY(1325 - SPRAY_STEP + count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
-                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
-                                            textInfos.Add(new DBTextInfo(px.OffsetXY(200, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                        }
-                                    }
-                                }
-                            }
+                            drawSimpleSpray(getGeneralBsPt);
                             for (int i = 0; i < allStoreys.Count; i++)
                             {
                                 var storey = allStoreys[i];

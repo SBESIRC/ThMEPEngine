@@ -582,8 +582,6 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const string ADMINISTRATIONS = "hatch";
         public const string QUOTATIONCHROMIC = "TCH";
         public const string QUOTATIONPURKINJE = "DIMENSION";
-        public const double THESAURUSTROUPE = 1e6;
-        public const double THESAURUSBACKER = 180.0;
         public static void Generate(FireHydrantSystemUIViewModel vm)
         {
             int @case = THESAURUSSTAMPEDE;
