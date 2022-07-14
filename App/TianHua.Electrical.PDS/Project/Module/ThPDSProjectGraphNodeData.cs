@@ -32,9 +32,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             return new ThPDSProjectGraphNodeData()
             {
-                Storey = "",
                 Number = "",
-                Power = 0.0,
+                Power = 0.38,
+                Storey = "1F",
                 FireLoad = false,
                 Description = "备用",
                 Type = ImageLoadType.None,
