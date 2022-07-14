@@ -11941,22 +11941,6 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               }
               else
               {
-                MaxBalconyToBalconyDistance.Outlet = THESAURUSINTENTIONAL;
-              }
-            }
-            for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE--)
-            {
-              var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-              if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
-              {
-                --MAX_ANGEL_TOLLERANCE;
-                while (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE)
-                {
-                  DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                  --MAX_ANGEL_TOLLERANCE;
-                }
-                break;
               }
             }
             {
@@ -11969,40 +11953,6 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                   {
                     var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
                     DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
-                  }
-                }
-              }
-            }
-            {
-              if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) <= THESAURUSHOUSING)
-              {
-                foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
-                {
-                  if (IsDraiType(MaxBalconyToBalconyDistance.PipeType))
-                  {
-                    if (GetStoreyScore((DEFAULT_FIRE_VALVE_WIDTH.Storey)) <= GetStoreyScore(THESAURUSARGUMENTATIVE))
-                    {
-                      DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    }
-                  }
-                  else
-                  {
-                    DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
-                    {
-                      DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
-                    }
-                  }
-                }
-              }
-              if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) <= THESAURUSHOUSING)
-              {
-                foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
-                {
-                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                  if (IsRainType(MaxBalconyToBalconyDistance.PipeType))
-                  {
                     DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
                   }
                 }
@@ -12029,19 +11979,6 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                       }
                     }
                   }
-                }
-              }
-            }
-            for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; --MAX_ANGEL_TOLLERANCE)
-            {
-              var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-              if (DEFAULT_FIRE_VALVE_WIDTH.WaterBucket is not null)
-              {
-                --MAX_ANGEL_TOLLERANCE;
-                while (MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE)
-                {
-                  MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].Exists = THESAURUSOBSTINACY;
-                  --MAX_ANGEL_TOLLERANCE;
                 }
               }
             }
