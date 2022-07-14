@@ -34,10 +34,10 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                 };
                 root.DataList.Add(m);
-                DFSSearch(m, rootNode.Key);
+                DFSearch(m, rootNode.Key);
             }
 
-            void DFSSearch(ThPDSCircuitGraphTreeModel m, ThPDSProjectGraphNode node)
+            void DFSearch(ThPDSCircuitGraphTreeModel m, ThPDSProjectGraphNode node)
             {
                 var edges = graph.OutEdges(node);
                 foreach (var nextNode in edges.ToDictionary(key => key.Target, value => value.Target.LoadIdString()).OrderBy(o => o.Value))
@@ -53,7 +53,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                             DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                         };
                         m.DataList.Add(targetModel);
-                        DFSSearch(targetModel, target);
+                        DFSearch(targetModel, target);
                     }
                     else if (target.Type == Model.PDSNodeType.VirtualLoad)
                     {
@@ -71,7 +71,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                                     DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                                 };
                                 m.DataList.Add(targetModel);
-                                DFSSearch(targetModel, virtualLoadTarget);
+                                DFSearch(targetModel, virtualLoadTarget);
                             }
                         }
                     }

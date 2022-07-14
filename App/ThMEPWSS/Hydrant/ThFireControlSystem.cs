@@ -97,7 +97,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var floorDatas = InputDataConvert.FloorDataModels(floorGroupData);
                 var HEIGHT = vm.FaucetFloor;
                 var fireOffsetY = (HEIGHT > 3000 ? HEIGHT / 3 : HEIGHT / 2) - 500;
-                const double fireHeight = 700.0;
+                const double FIRE_HEIGHT = 700.0;
+                const double SPRAY_STEP = 440.0;
                 var SPAN_X = 2000.0;
                 if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.Any(x => x.IsHalfPlatform))
                 {
@@ -144,6 +145,21 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var OFFSET_X1 = 5000.0;
                 var OFFSET_X2 = 2000.0;
                 const double width_HandPumpConnection = 2500.0;
+                var fixSprayX = new double[vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.Count];
+                var hasSimpleSrpay = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.Any(x => x.SimpleSprayCount > 0);
+                if (hasSimpleSrpay)
+                {
+                    if (SPAN_X < 3400) SPAN_X = 3400;
+                }
+                double getAgora()
+                {
+                    if (hasSimpleSrpay) return 700;
+                    return 300;
+                }
+                double getLabelOffsetY()
+                {
+                    return -1000;
+                }
                 bool canHaveHandPumpConnection(string storey)
                 {
                     return vm.HaveHandPumpConnection && GetStoreyScore(storey) >= 30 && refugeFloors.Contains(storey);
@@ -195,6 +211,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         dx += dc * SPAN_X;
                                     }
                                 }
+                                dx += fixSprayX[j];
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                             }
                             Point3d getRefugeBsPt(int i, int j)
@@ -202,6 +219,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 var dx = (ringsCount + generalCount / 2) * SPAN_X;
                                 dx += width_HaveHandPumpConnection;
                                 dx += getRangeOffsetX();
+                                dx += fixSprayX[j];
                                 return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                             }
                             {
@@ -541,7 +559,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                         var beLeft = !isLeft;
                                                                         if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                        var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                        var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                         textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                         foreach (var seg in segs)
                                                                         {
@@ -918,7 +936,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                         hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                         drawDomePipe(seg);
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -927,7 +945,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -1439,8 +1457,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var p1 = bsPt.OffsetY(fireOffsetY);
                                                                 var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                                 var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                                var st = bsPt.OffsetY(HEIGHT - 300);
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                                var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                                 if (refugeFloors.Contains(storey))
                                                                 {
                                                                     st = bsPt.OffsetY(HEIGHT - 800);
@@ -1989,12 +2007,15 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     dx += dc * SPAN_X;
                                 }
                             }
+                            dx += fixSprayX[j];
+                            Console.WriteLine(fixSprayX.ToCadJson());
                             return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                         }
                         Point3d getRefugeBsPt(int i, int j)
                         {
                             var dx = (ringsCount + generalCount / 2) * SPAN_X;
                             dx += width_HaveHandPumpConnection;
+                            dx += fixSprayX[j];
                             return basePoint.OffsetXY(j * SPAN_X + OFFSET_X1 + dx, HEIGHT * i);
                         }
                         {
@@ -2318,7 +2339,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                 var beLeft = !isLeft;
                                                                 if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                 textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                 foreach (var seg in segs)
                                                                 {
@@ -2689,7 +2710,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                     hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                     drawDomePipe(seg);
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -2698,7 +2719,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                     var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                     vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                     {
@@ -3215,8 +3236,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var p1 = bsPt.OffsetY(fireOffsetY);
                                                                 var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                                 var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                                var st = bsPt.OffsetY(HEIGHT - 300);
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                                var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                                 if (refugeFloors.Contains(storey))
                                                                 {
                                                                     st = bsPt.OffsetY(HEIGHT - 800);
@@ -3547,6 +3568,42 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var dn = "DN65";
                                         var (w, h) = GetDBTextSize(dn, TEXT_HEIGHT, .7, "TH-STLYE3");
                                         textInfos.Add(new DBTextInfo(p7.OffsetXY(-w - 100, -h - 100), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                    }
+                                }
+                            }
+                            for (int i = 0; i < allStoreys.Count; i++)
+                            {
+                                if (i != iRF)
+                                {
+                                    for (int j = 0; j < generalCount; j++)
+                                    {
+                                        var count = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items[j].SimpleSprayCount;
+                                        if (count == 0) continue;
+                                        var px = getGeneralBsPt(i, j);
+                                        if (j == 0)
+                                        {
+                                            brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-326, 1300)) { ScaleEx = new Scale3d(-1, 1, 1) });
+                                            brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(-626, 1297)) { Rotate = Math.PI, DynaDict = new() { { "可见性", "平面" }, }, });
+                                            if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-926, 1297), px.OffsetXY(-1325 + SPRAY_STEP - count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
+                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
+                                            textInfos.Add(new DBTextInfo(px.OffsetXY(-1040, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                        }
+                                        else
+                                        {
+                                            brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(326, 1300)));
+                                            brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(626, 1297)) { Rotate = Math.PI, ScaleEx = new Scale3d(-1, 1, 1), DynaDict = new() { { "可见性", "平面" }, }, });
+                                            if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
+                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(926, 1297), px.OffsetXY(1325 - SPRAY_STEP + count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
+                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
+                                            textInfos.Add(new DBTextInfo(px.OffsetXY(200, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                        }
                                     }
                                 }
                             }
@@ -4186,7 +4243,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                     var beLeft = !isLeft;
                                                                     if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                    var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                    var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                     textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                     foreach (var seg in segs)
                                                                     {
@@ -4559,7 +4616,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                         hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                         drawDomePipe(seg);
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -4568,7 +4625,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -5076,8 +5133,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     var p1 = bsPt.OffsetY(fireOffsetY);
                                                                     var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                                     var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                                    var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                                    var st = bsPt.OffsetY(HEIGHT - 300);
+                                                                    var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                                    var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                                     if (refugeFloors.Contains(storey))
                                                                     {
                                                                         st = bsPt.OffsetY(HEIGHT - 800);
@@ -6241,7 +6298,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                     var beLeft = !isLeft;
                                                                     if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                    var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                    var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                     textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                     foreach (var seg in segs)
                                                                     {
@@ -6614,7 +6671,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                         hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                         drawDomePipe(seg);
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -6623,7 +6680,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -7131,8 +7188,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     var p1 = bsPt.OffsetY(fireOffsetY);
                                                                     var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                                     var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                                    var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                                    var st = bsPt.OffsetY(HEIGHT - 300);
+                                                                    var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                                    var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                                     if (refugeFloors.Contains(storey))
                                                                     {
                                                                         st = bsPt.OffsetY(HEIGHT - 800);
@@ -8318,7 +8375,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                         var beLeft = !isLeft;
                                                                         if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                        var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                        var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                         textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                         foreach (var seg in segs)
                                                                         {
@@ -8694,7 +8751,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                         hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                         drawDomePipe(seg);
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -8703,7 +8760,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -9225,8 +9282,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var p1 = bsPt.OffsetY(fireOffsetY);
                                                                 var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                                 var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                                var st = bsPt.OffsetY(HEIGHT - 300);
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                                var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                                 if (refugeFloors.Contains(storey) && (refugeFloors.Count > 6))
                                                                 {
                                                                     st = bsPt.OffsetY(HEIGHT - 800);
@@ -10157,7 +10214,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                         var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                         var beLeft = !isLeft;
                                                                         if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                        var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                        var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                         textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                         foreach (var seg in segs)
                                                                         {
@@ -10533,7 +10590,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                         hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                         drawDomePipe(seg);
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -10542,7 +10599,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                         drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                        drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                         var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                         vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                         {
@@ -11064,8 +11121,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 var p1 = bsPt.OffsetY(fireOffsetY);
                                                                 var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                                 var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                                var st = bsPt.OffsetY(HEIGHT - 300);
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                                var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                                 if (refugeFloors.Contains(storey) && (refugeFloors.Count > 6))
                                                                 {
                                                                     st = bsPt.OffsetY(HEIGHT - 800);
@@ -11997,7 +12054,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     var vecs = new List<Vector2d> { new Vector2d(0, -600), new Vector2d(150, 150), new Vector2d(w, 0) };
                                                                     var beLeft = !isLeft;
                                                                     if (beLeft) vecs = vecs.GetYAxisMirror();
-                                                                    var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0))).Skip(1).ToList();
+                                                                    var segs = vecs.ToGLineSegments(bsPt.OffsetY(HEIGHT + (hasFullHalfPlatformLine ? HEIGHT / 2 : 0)).OffsetY(getLabelOffsetY())).Skip(1).ToList();
                                                                     textInfos.Add(new DBTextInfo((beLeft ? segs[1].EndPoint : segs[1].StartPoint).OffsetY(50).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                                                     foreach (var seg in segs)
                                                                     {
@@ -12372,7 +12429,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                                     hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                                     drawDomePipe(seg);
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1350 , -250), px.OffsetXY(-1150, -250)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -12381,7 +12438,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-1270, -1125 + fixY), px.OffsetXY(-1220, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-920, -1125 + fixY), px.OffsetXY(-845, -1125 + fixY)));
                                                     drawDomePipe(new GLineSegment(px.OffsetXY(-845, -1125 + fixY), px.OffsetXY(-770, -1125 + fixY)));
-                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470 , -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
+                                                    drawDomePipe(new GLineSegment(px.OffsetXY(-470, -1125 + fixY), px.OffsetXY(-365, -1125 + fixY)));
                                                     var ed = seg.StartPoint.ReplaceY(p2.Y);
                                                     vlines.Add(new GLineSegment(seg.StartPoint, ed).ToLineString());
                                                     {
@@ -12903,8 +12960,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             var p1 = bsPt.OffsetY(fireOffsetY);
                                                             var p8 = p1.OffsetX(isLeft ? -600 : 600);
                                                             var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                            var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                            var st = bsPt.OffsetY(HEIGHT - 300);
+                                                            var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - getAgora())), new Vector2d(300, 0) };
+                                                            var st = bsPt.OffsetY(HEIGHT - getAgora());
                                                             if (refugeFloors.Contains(storey))
                                                             {
                                                                 st = bsPt.OffsetY(HEIGHT - 800);
@@ -13521,6 +13578,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                     DrawBlockReference(info.BlockName, info.BasePoint.Offset(baseOffset), layer: info.LayerName, cb: br =>
                     {
                         ByLayer(br);
+                        if (info.ScaleEx.HasValue) br.ScaleFactors = info.ScaleEx.Value;
                         {
                             if (info.DynaDict != null && br.IsDynamicBlock) br.DynamicBlockReferencePropertyCollection.Cast<DynamicBlockReferenceProperty>().Where(x => !x.ReadOnly).Join(info.DynaDict, x => x.PropertyName, y => y.Key, (x, y) => x.Value = y.Value).Count();
                         }
@@ -13640,6 +13698,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
         public Point3d BasePoint;
         public double Rotate;
         public double Scale;
+        public Scale3d? ScaleEx;
         public Dictionary<string, string> PropDict;
         public Dictionary<string, object> DynaDict;
         public BlockInfo(string blockName, string layerName, Point3d basePoint)
