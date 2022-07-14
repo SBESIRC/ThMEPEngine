@@ -137,7 +137,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             canvas.Width = 2000;
             canvas.Height = 2000;
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
-            var glyphsUnicodeStrinConverter = new GlyphsUnicodeStringConverter();
+            var glyphsUnicodeStringConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
             IEnumerable<MenuItem> GetCommonMenuItems()
             {
@@ -466,7 +466,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -479,7 +479,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -708,7 +708,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var m = leftTemplates.FirstOrDefault(x => x.Tag as string == "过欠电压保护器");
                                         if (m != null)
                                         {
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         }
                                     }
@@ -734,7 +734,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.UnicodeString is "ATSE");
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -756,7 +756,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 var m = leftTemplates.FirstOrDefault(x => x.UnicodeString is "ATSE");
                                                 if (m != null)
                                                 {
-                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                 }
                                             }
@@ -790,7 +790,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MTSE");
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -845,7 +845,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MT" or "CT");
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -858,7 +858,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.Tag as string is "MT");
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -866,7 +866,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = leftTemplates.FirstOrDefault(x => x.Tag as string is "CT");
                                             if (m != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -1079,7 +1079,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null && vm != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -1426,7 +1426,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "QAC");
                                                                 if (m != null)
                                                                 {
-                                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                 }
                                                             }
@@ -1442,7 +1442,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                     var m = glyphs.FirstOrDefault(x => x.Tag as string == "QAC" + (idx + 1));
                                                                     if (m != null)
                                                                     {
-                                                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                        var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                         m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                     }
                                                                 }
@@ -1466,7 +1466,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                                             if (m != null && vm != null)
                                                             {
-                                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                             }
                                                             cb += () => { UpdatePropertyGrid(pg, vm); };
@@ -1662,7 +1662,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                                             if (m != null && vm != null)
                                                             {
-                                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                             }
                                                             cb += () => { UpdatePropertyGrid(pg, vm); };
@@ -1778,7 +1778,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                     var m = glyphs.FirstOrDefault(x => x.Tag as string is "MT" or "CT");
                                                                     if (m != null)
                                                                     {
-                                                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                        var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                         m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                     }
                                                                 }
@@ -1792,15 +1792,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                     var m2 = glyphs.FirstOrDefault(x => x.Tag as string is "MT");
                                                                     if (m1 is not null && m2 is not null)
                                                                     {
-                                                                        m1.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                                                        m2.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                                                        m1.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                                                        m2.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                                                     }
                                                                     else
                                                                     {
                                                                         var m = glyphs.FirstOrDefault(x => x.Tag as string is "MT" or "CT");
                                                                         if (m != null)
                                                                         {
-                                                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                         }
                                                                     }
@@ -1992,7 +1992,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         if (conductor != null)
                                         {
                                             var vm = new ThPDSConductorModel(conductor);
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
@@ -2010,7 +2010,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         if (conductor1 != null)
                                         {
                                             var vm = new ThPDSConductorModel(conductor1);
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
@@ -2028,7 +2028,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         if (conductor2 != null)
                                         {
                                             var vm = new ThPDSConductorModel(conductor2);
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
@@ -2044,7 +2044,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
                                 if (m != null)
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -2052,7 +2052,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                     m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
@@ -2060,7 +2060,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(低)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                     m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
@@ -2068,28 +2068,28 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(高)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                     m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
                             {
                                 foreach (var m in glyphs.Where(x => x.Tag as string == "相序"))
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
                             {
                                 foreach (var m in glyphs.Where(x => x.Tag as string == "负载编号"))
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
                             {
                                 foreach (var m in glyphs.Where(x => x.Tag as string == "功能用途"))
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -2390,7 +2390,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null && vm != null)
                                             {
-                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             }
                                         }
@@ -2637,7 +2637,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                                 if (m != null && vm != null)
                                                 {
-                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                 }
                                             }
@@ -2908,7 +2908,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         if (conductor != null)
                                         {
                                             var vm = new ThPDSConductorModel(conductor);
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
@@ -2926,7 +2926,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         if (conductor1 != null)
                                         {
                                             var vm = new ThPDSConductorModel(conductor1);
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
@@ -2944,7 +2944,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         if (conductor2 != null)
                                         {
                                             var vm = new ThPDSConductorModel(conductor2);
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
@@ -2960,7 +2960,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
                                 if (m != null)
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -2968,7 +2968,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                     m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
@@ -2976,7 +2976,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "相序");
                                 if (m != null)
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -2984,7 +2984,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "负载编号");
                                 if (m != null)
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -2992,7 +2992,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功能用途");
                                 if (m != null)
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -3000,7 +3000,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(低)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                     m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
@@ -3008,7 +3008,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(高)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStringConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                     m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
@@ -3349,7 +3349,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     if (conductor != null)
                                                     {
                                                         var vm = scVm.ConductorModel;
-                                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                         m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                         var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                                         reg(r, vm);
@@ -3364,7 +3364,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
                                                 if (m != null)
                                                 {
-                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                 }
                                             }
@@ -3372,7 +3372,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "控制回路");
                                                 if (m != null)
                                                 {
-                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    var bd = new Binding() { Converter = glyphsUnicodeStringConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                 }
                                             }
@@ -3577,7 +3577,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 fe.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = config.Current, Path = new PropertyPath(nameof(config.Current.SurgeProtection)), Converter = new EqualsThenNotVisibeConverter(PDS.Project.Module.SurgeProtectionDeviceType.None), });
                                 if (fe is Glyphs g)
                                 {
-                                    g.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Source = config.Current, Converter = glyphsUnicodeStrinConverter, Path = new PropertyPath(nameof(config.Current.SurgeProtection)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+                                    g.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Source = config.Current, Converter = glyphsUnicodeStringConverter, Path = new PropertyPath(nameof(config.Current.SurgeProtection)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
                                 }
                                 canvas.Children.Add(fe);
                             }
