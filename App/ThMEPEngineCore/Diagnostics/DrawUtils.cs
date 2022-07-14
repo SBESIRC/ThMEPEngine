@@ -163,7 +163,8 @@ namespace ThMEPEngineCore.Diagnostics
         }
 
         /// <summary>
-        /// 打印一行字。hight：文字大小
+        /// 打印文字。hight：文字大小
+        /// 支持多行文字。字符串中用\n换行
         /// </summary>
         /// <param name="pt"></param>
         /// <param name="s"></param>
