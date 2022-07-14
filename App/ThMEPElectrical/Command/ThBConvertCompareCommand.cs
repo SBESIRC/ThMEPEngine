@@ -45,6 +45,11 @@ namespace ThMEPElectrical.Command
         public bool ConvertManualActuator { get; set; }
 
         /// <summary>
+        /// 操作命令
+        /// </summary>
+        public BConvertCommand Command { get; set; }
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="mode"></param>

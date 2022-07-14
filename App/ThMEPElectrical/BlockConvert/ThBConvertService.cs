@@ -106,6 +106,13 @@ namespace ThMEPElectrical.BlockConvert
             manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
             {
                 var targetBlock = o.Transformation.Item2;
+                if ((Category.Equals(ConvertCategory.WSS) 
+                    && !targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Equals(ConvertCategory.WSS.GetDescription()))
+                    || (Category.Equals(ConvertCategory.HVAC)
+                    && !targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Equals(ConvertCategory.HVAC.GetDescription())))
+                {
+                    return;
+                }
                 targetNames.Add(targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
 
                 // 获取内含图块块名
@@ -127,12 +134,12 @@ namespace ThMEPElectrical.BlockConvert
             };
             targetEngine.NameFilter.Add(ThBConvertCommon.BLOCK_PUMP_LABEL);
             targetEngine.ExtractFromMS(CurrentDb.Database);
-            return targetEngine.Results.Count > 0
-                ? SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
+            return targetEngine.Results.Count > 0 ? SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
         }
 
         public void Convert(ThBConvertManager manager, List<string> srcNames, List<ThBlockReferenceData> targetBlocks, bool setLayer)
         {
+            using (var docLock = Active.Document.LockDocument())
             using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 CurrentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(ThBConvertCommon.LINE_TYPE_HIDDEN, false));
@@ -142,6 +149,7 @@ namespace ThMEPElectrical.BlockConvert
                 var rEngine = new ThBConvertElementExtractionEngine()
                 {
                     NameFilter = srcNames.Distinct().ToList(),
+                    Category = Category,
                 };
                 rEngine.Extract(CurrentDb.Database);
                 if (rEngine.Results.Count == 0)
@@ -157,7 +165,8 @@ namespace ThMEPElectrical.BlockConvert
                 // 从图纸中提取集水井提资表表身
                 var collectingWellEngine = new ThBConvertElementExtractionEngine()
                 {
-                    NameFilter = new List<string> { ThBConvertCommon.COLLECTING_WELL }
+                    NameFilter = new List<string> { ThBConvertCommon.COLLECTING_WELL },
+                    Category = ConvertCategory.ALL,
                 };
                 collectingWellEngine.Extract(CurrentDb.Database);
 
@@ -172,30 +181,11 @@ namespace ThMEPElectrical.BlockConvert
                     var block = rule.Transformation.Item1;
                     var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                     var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
-                    srcBlocks.Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName).Where(o =>
-                    {
-                        // 仅转换指定外参上的图块
-                        var name = "";
-                        ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
-                        var r = new Regex(@"([a-zA-Z])");
-                        var m = r.Match(name);
-                        if (!m.Success)
-                        {
-                            return false;
-                        }
-                        switch (Category)
-                        {
-                            case ConvertCategory.WSS:
-                                return m.Value.ToUpper() == "W";
-                            case ConvertCategory.HVAC:
-                                return m.Value.ToUpper() == "H";
-                            default:
-                                return true;
-                        }
-                    }).ForEach(o =>
+                    srcBlocks.Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName).ForEach(o =>
                     {
                         // 获取转换后的块信息
                         ThBlockConvertBlock transformedBlock = null;
+                        var currentVisibility = o.CurrentVisibilityStateValue();
                         switch (mode)
                         {
                             case ConvertMode.STRONGCURRENT:
@@ -205,12 +195,10 @@ namespace ThMEPElectrical.BlockConvert
                                         // 当配置表中可见性为空时，则按图块名转换
                                         transformedBlock = manager.TransformRule(srcName);
                                     }
-                                    else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
+                                    else if (ThStringTools.CompareWithChinesePunctuation(currentVisibility, visibility))
                                     {
                                         // 当配置表中可见性有字符时，则按块名和可见性的组合一对一转换
-                                        transformedBlock = manager.TransformRule(
-                                        srcName,
-                                        o.CurrentVisibilityStateValue());
+                                        transformedBlock = manager.TransformRule(srcName, currentVisibility);
                                     }
                                 }
                                 break;
@@ -220,9 +208,9 @@ namespace ThMEPElectrical.BlockConvert
                                     {
                                         transformedBlock = manager.TransformRule(srcName);
                                     }
-                                    else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
+                                    else if (ThStringTools.CompareWithChinesePunctuation(currentVisibility, visibility))
                                     {
-                                        transformedBlock = manager.TransformRule(srcName, o.CurrentVisibilityStateValue());
+                                        transformedBlock = manager.TransformRule(srcName, currentVisibility);
                                     }
                                 }
                                 break;
@@ -377,10 +365,10 @@ namespace ThMEPElectrical.BlockConvert
                                     {
                                         engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayerSetting);
                                         EntityInfos.Add(new ThBConvertEntityInfos(
-                                            id, 
+                                            id,
                                             transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
-                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT), 
-                                            targetBlockLayer)); 
+                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT),
+                                            targetBlockLayer));
                                     }
                                 });
                             }

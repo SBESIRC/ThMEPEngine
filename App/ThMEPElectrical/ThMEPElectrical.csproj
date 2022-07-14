@@ -49,6 +49,7 @@
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
     <Compile Include="BlockConvert\ThBConvertCompareModel.cs" />
     <Compile Include="BlockConvert\ThBConvertCompareService.cs" />
+    <Compile Include="BlockConvert\ThBConvertCompareUpdateService.cs" />
     <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertWipeOut.cs" />
     <Compile Include="BlockConvert\ThBConvertZoomService.cs" />
+    <Compile Include="BlockConvert\ThRevcloudParameter.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
     <Compile Include="Broadcast\Model\ThBroadcastParameter.cs" />
@@ -116,7 +118,6 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
-    <Compile Include="Command\ThBConvertCompareCommand.cs" />
     <Compile Include="Command\ThElectricalLoadCalculationCommand.cs" />
     <Compile Include="Command\ThInsertRoomFunctionCmd.cs" />
     <Compile Include="Command\TxtStrucInfoCommand.cs" />
@@ -413,6 +414,7 @@
     <Compile Include="ThEarthingGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
+    <Compile Include="ThInsertRevcloudCmd.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -426,6 +428,7 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
     <Compile Include="SecurityPlaneSystem\StructureHandleService\GetLayoutStructureService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
+    <Compile Include="ViewModel\ThBlockConvertVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

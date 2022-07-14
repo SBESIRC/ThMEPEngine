@@ -6,73 +6,135 @@
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
                     xmlns:converters="clr-namespace:TianHua.Electrical.UI.BlockConvert"
                     SizeToContent="WidthAndHeight" mc:Ignorable="d" ResizeMode="NoResize" Title="天华提资转换"
-                    Width="192" Height="260" HorizontalContentAlignment="Left" 
-                    MinWidth="192" MinHeight="260" MaxHeight="300" MaxWidth="200" >
+                    Width="520" Height="390" HorizontalContentAlignment="Left" 
+                    MinWidth="520" MinHeight="390" MaxHeight="400" MaxWidth="600" >
     <Window.Resources>
         <ResourceDictionary>
             <converters:CapitalOpsBooleanConverter x:Key="CapitalOpsConverter"/>
             <Style x:Key="TextStyle" TargetType="CheckBox">
                 <Setter Property="FontSize" Value="20"></Setter>
             </Style>
+            <Style x:Key="buttnStyle1" TargetType="Button">
+                <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                <Setter Property="Background" Value="#169BD5"></Setter>
+                <Setter Property="Foreground" Value="White"></Setter>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Height" Value="20"></Setter>
+            </Style>
+            <Style x:Key="buttnStyle2" TargetType="Button">
+                <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                <Setter Property="Background" Value="White"></Setter>
+                <Setter Property="Foreground" Value="#169BD5"></Setter>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Height" Value="20"></Setter>
+            </Style>
+            <ContextMenu x:Key="ContextMenu" >
+                <MenuItem Name="ignoreChange" Header="忽略变化" Click="ignoreChange_Click">
+                    <!--<MenuItem.Icon/>-->
+                </MenuItem>
+                <MenuItem Name="localUpdate" Header="局部更新" Click="localUpdate_Click">
+                    <!--<MenuItem.Icon/>-->
+                </MenuItem>                
+            </ContextMenu>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="5"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="0.9*"/>
-        </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
-            <StackPanel >
-                <CheckBox x:Name="chkHavcEquipBlockConvert" Margin="3,5" Content="暖通设备提资转换" IsThreeState="False"
-                      IsChecked="{Binding HavcOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                <CheckBox x:Name="chkWssEquipBlockConvert" Margin="3,5" Content="给排水设备提资转换" IsThreeState="False"
-                      IsChecked="{Binding WssOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="1" Margin="0,3" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3" >
-            <StackPanel >
-                <RadioButton x:Name="wssConvertStrongEquip" Content="转换所有强电设备" GroupName="Wss" Margin="3,5" IsThreeState="False"
-                         IsChecked="{Binding EquipOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
-                Converter={StaticResource CapitalOpsConverter},ConverterParameter=0}" Checked="wssConvertStrongEquip_Checked"></RadioButton>
-                <RadioButton x:Name="wssConvertWeakEquip" Content="转换所有弱电设备" GroupName="Wss" Margin="3,5" IsThreeState="False"
-                         IsChecked="{Binding EquipOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
-                Converter={StaticResource CapitalOpsConverter},ConverterParameter=1}" Checked="wssConvertWeakEquip_Checked"></RadioButton>
-                <RadioButton x:Name="wssConvertAllEquip" Content="转换所有设备" GroupName="Wss" Margin="3,5" IsThreeState="False"
-                         IsChecked="{Binding EquipOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
-                Converter={StaticResource CapitalOpsConverter},ConverterParameter=2}" Checked="wssConvertAllEquip_Checked"></RadioButton>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="2" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
-            <StackPanel >
-                <CheckBox x:Name="convertManualActuator" Margin="3,5" Content="转换排烟阀手动执行机构" IsThreeState="False"
-                      IsChecked="{Binding ManualActuatorOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="3" Margin="0,3" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="负载标注样式" Height="24"></Label>
-                <ComboBox Margin="5,0" Name="cbBlkFrame" Width="92" Height="20" HorizontalAlignment = "Right"
-                      ItemsSource="{Binding BlkFrames,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                      Text="{Binding BlkFrame,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="4" Margin="0,3" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="图块比例    " Height="24"></Label>
-                <ComboBox Margin="5,0" Name="cbBlkScale" Width="92" Height="20" HorizontalAlignment = "Right"
-                      ItemsSource="{Binding BlkScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                      Text="{Binding BlkScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-            </StackPanel>
-        </Border>
-        <StackPanel Grid.Row="5" Margin="0,3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="btnUpdateCompare" Content="更新比对" Width="60" Height="20" Margin="0,0" 
-                    Visibility="Hidden" IsEnabled="False" Click="btnUpdateCompare_Click"></Button>
-            <Button x:Name="btnBlockConvert" Content="提资转换" Width="60" Height="20" Margin="5,0" 
-                    Click="btnBlockConvert_Click"></Button>
+    <StackPanel Margin="3" Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal">
+            <DataGrid Name="table1" AutoGenerateColumns="False" VerticalAlignment="Stretch" HeadersVisibility="All"
+                      VerticalScrollBarVisibility="Visible" HorizontalAlignment="Left" AllowDrop="False" 
+                      CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False"
+                      SelectionMode="Extended"  SelectionUnit="FullRow" MouseDoubleClick="table1_MouseDoubleClick"
+                  BorderThickness="1,1,1,1" ContextMenu="{StaticResource ContextMenu}"
+                  ItemsSource="{Binding BlockConvertInfos,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                        <Setter Property="Background" Value="White"></Setter>
+                        <Setter Property="Foreground" Value="Black"></Setter>
+                        <Setter Property="BorderThickness" Value="0,0,1,1" />
+                        <Setter Property="FontWeight" Value="Normal"/>
+                        <Setter Property="BorderBrush" Value="#808080" />
+                        <Setter Property="TextOptions.TextFormattingMode" Value="Display"></Setter>
+                        <Setter Property="Height" Value="20"></Setter>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="来源专业" Width="100" CanUserSort="False" CanUserResize="false">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding Category,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="设备类型" Width="100" CanUserSort="False" CanUserResize="false">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding EquipmentType,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="对比结果" Width="100" CanUserSort="False" CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding CompareResult,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </StackPanel>
-    </Grid>
+        <StackPanel Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnBlockConvert}">            
+            <Border Margin="5,0,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+                <StackPanel >
+                    <CheckBox x:Name="chkHavcEquipBlockConvert" Margin="3,5" Content="暖通设备提资转换" IsThreeState="False"
+                      IsChecked="{Binding Parameter.HavcOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox x:Name="chkWssEquipBlockConvert" Margin="3,5" Content="给排水设备提资转换" IsThreeState="False"
+                      IsChecked="{Binding Parameter.WssOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                </StackPanel>
+            </Border>
+            <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3" >
+                <StackPanel >
+                    <RadioButton x:Name="wssConvertStrongEquip" Content="转换所有强电设备" GroupName="Wss" Margin="3,5" IsThreeState="False"
+                         IsChecked="{Binding Parameter.EquipOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                Converter={StaticResource CapitalOpsConverter},ConverterParameter=0}" Checked="wssConvertStrongEquip_Checked"></RadioButton>
+                    <RadioButton x:Name="wssConvertWeakEquip" Content="转换所有弱电设备" GroupName="Wss" Margin="3,5" IsThreeState="False"
+                         IsChecked="{Binding Parameter.EquipOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                Converter={StaticResource CapitalOpsConverter},ConverterParameter=1}" Checked="wssConvertWeakEquip_Checked"></RadioButton>
+                    <RadioButton x:Name="wssConvertAllEquip" Content="转换所有设备" GroupName="Wss" Margin="3,5" IsThreeState="False"
+                         IsChecked="{Binding Parameter.EquipOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                Converter={StaticResource CapitalOpsConverter},ConverterParameter=2}" Checked="wssConvertAllEquip_Checked"></RadioButton>
+                </StackPanel>
+            </Border>
+            <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+                <StackPanel >
+                    <CheckBox x:Name="convertManualActuator" Margin="3,5" Content="转换排烟阀手动执行机构" IsThreeState="False"
+                      IsChecked="{Binding Parameter.ManualActuatorOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                </StackPanel>
+            </Border>
+            <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="负载标注样式" Height="24"></Label>
+                    <ComboBox Margin="5,0" Name="cbBlkFrame" Width="90" Height="20" HorizontalAlignment = "Right"
+                      ItemsSource="{Binding Parameter.BlkFrames,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      Text="{Binding Parameter.BlkFrame,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                </StackPanel>
+            </Border>
+            <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="图块比例    " Height="24"></Label>
+                    <ComboBox Margin="5,0" Name="cbBlkScale" Width="90" Height="20" HorizontalAlignment = "Right"
+                      ItemsSource="{Binding Parameter.BlkScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      Text="{Binding Parameter.BlkScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                </StackPanel>
+            </Border>
+           
+            <Button Margin="5,65,5,0" x:Name="btnBlockConvert" Content="提资转换" Height="24"
+                    Style="{StaticResource buttnStyle1}" Click="btnBlockConvert_Click"></Button>
+            <Button Margin="5,5,5,0" x:Name="btnUpdateCompare" Content="更新比对" Height="24" 
+                    Style="{StaticResource buttnStyle1}" Click="btnUpdateCompare_Click"></Button>
+            <Button Margin="5,5,5,0" x:Name="btnBlockUpdate" Content="提资更新" Height="24"
+                    Style="{StaticResource buttnStyle2}" Click="btnBlockUpdate_Click"></Button>
+        </StackPanel>
+    </StackPanel>
+    
 </cus:ThCustomWindow>

@@ -3,15 +3,15 @@ using System.Linq;
 using System.Collections.Generic;
 
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPElectrical.BlockConvert
@@ -62,7 +62,7 @@ namespace ThMEPElectrical.BlockConvert
                     var entities = new DBObjectCollection();
                     var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
                     blkref.ExplodeWithVisible(entities);
-                    var obbLayer = convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string;
+                    var obbLayer = (convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string).ToUpper();
                     if (string.IsNullOrEmpty(obbLayer))
                     {
                         entities = entities.OfType<Entity>()
@@ -71,9 +71,10 @@ namespace ThMEPElectrical.BlockConvert
                     }
                     else
                     {
+                        // 在大写状态下比较图层
                         entities = entities.OfType<Entity>()
                             .Where(e => !(e is DBText))
-                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
+                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).ToUpper().Equals(obbLayer))
                             .ToCollection();
                     }
                     if (entities.Count > 0)
@@ -158,15 +159,16 @@ namespace ThMEPElectrical.BlockConvert
                     var entities = new DBObjectCollection();
                     var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
                     blkref.Explode(entities);
-                    var obbLayer = convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string;
+                    var obbLayer = (convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string).ToUpper();
                     if (string.IsNullOrEmpty(obbLayer))
                     {
                         entities = entities.OfType<DBText>().ToCollection();
                     }
                     else
                     {
+                        // 在大写状态下比较图层
                         entities = entities.OfType<DBText>()
-                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).Equals(obbLayer))
+                            .Where(e => ThMEPXRefService.OriginalFromXref(e.Layer).ToUpper().Equals(obbLayer))
                             .ToCollection();
                     }
                     if (entities.Count > 0)

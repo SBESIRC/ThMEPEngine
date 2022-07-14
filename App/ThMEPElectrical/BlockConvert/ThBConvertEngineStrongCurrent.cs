@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
+using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -161,7 +162,8 @@ namespace ThMEPElectrical.BlockConvert
                             if (quantity != sum.ToString())
                             {
                                 var obb = pumpLabel.GetBlockOBB();
-                                ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, 1, "ByLayer", scale.X / 100);
+                                ThInsertRevcloud.Set(acadDatabase.Database, obb, 1, "ByLayer", scale.X / 100);
+                                CommandHandlerBase.ExecuteFromCommandLine(false, "THREVClOUD");
                             }
                         }
                         break;
