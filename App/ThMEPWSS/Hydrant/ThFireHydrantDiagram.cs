@@ -229,7 +229,8 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                     try
                     {
                         isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
-                        handleBlockReference(br, Matrix3d.Identity, _fs);
+                        if (!isInXref)
+                            handleBlockReference(br, Matrix3d.Identity, _fs);
                     }
                     finally
                     {
@@ -334,57 +335,6 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                     {
                         var gc = new GCircle(circle.Center.TransformBy(matrix).ToPoint2d(), get_ratio(matrix) * circle.Radius);
                         reg(fs, gc, () => { segs.AddRange(GeoFac.GetLines(gc.ToCirclePolygon(SUPERLATIVENESS).Shell)); });
-                    }
-                    else if (ent is Arc arc)
-                    {
-                        static IEnumerable<GLineSegment> ConvertToGLineSegments(GArc arc, double tolAngle)
-                        {
-                            if (tolAngle <= Math.PI / THESAURUSTROUPE) throw new ArgumentOutOfRangeException();
-                            int n = THESAURUSHOUSING;
-                            double step;
-                            arc.StartAngle = GeoFac.FixAngle(arc.StartAngle);
-                            arc.EndAngle = GeoFac.FixAngle(arc.EndAngle);
-                            var delta = arc.EndAngle - arc.StartAngle;
-                            if (arc.IsClockWise)
-                            {
-                                if (arc.StartAngle < arc.EndAngle)
-                                {
-                                    delta -= Math.PI * THESAURUSPERMUTATION;
-                                }
-                            }
-                            else
-                            {
-                                if (arc.StartAngle > arc.EndAngle)
-                                {
-                                    delta += Math.PI * THESAURUSPERMUTATION;
-                                }
-                            }
-                            do
-                            {
-                                step = delta / ++n;
-                                if (Math.Abs(step) <= tolAngle) break;
-                            } while (THESAURUSOBSTINACY);
-                            IEnumerable<Point2d> yieldPts()
-                            {
-                                var st = arc.StartAngle;
-                                for (int i = THESAURUSSTAMPEDE; i <= n; i++)
-                                {
-                                    var angle = st + step * i;
-                                    yield return new Point2d(arc.Center.X + arc.Radius * Math.Cos(angle), arc.Center.Y + arc.Radius * Math.Sin(angle));
-                                }
-                            }
-                            return GeoFac.YieldGLineSegments(yieldPts());
-                        }
-                        segs.AddRange(ConvertToGLineSegments(arc.ToGArc(), Math.PI / THESAURUSBACKER * PROCRASTINATION).Select(seg => seg.TransformBy(matrix)).Where(seg => seg.IsValid));
-                    }
-                    else if (ent is Curve curve)
-                    {
-                        var chordHeight = THESAURUSACRIMONIOUS;
-                        try
-                        {
-                            segs.AddRange(GeoFac.YieldGLineSegments(curve.GetGeCurve()?.GetNewSamplePoints(curve.StartParam, curve.EndParam, chordHeight).Select(o => o.Point).Distinct()));
-                        }
-                        catch { }
                     }
                 }
             }
@@ -723,7 +673,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
             if (ctx == null) return;
             {
                 var TEXTHEIGHT = vm.CurrentDwgRatio is SEMITRANSPARENT ? THESAURUSSOMBRE : THESAURUSCOMPULSIVE;
-{ ThRainSystemService.ImportElementsFromStdDwg(); }
+                { ThRainSystemService.ImportElementsFromStdDwg(); }
                 using (DocLock)
                 using (var adb = AcadDatabase.Active())
                 using (var tr = new _DrawingTransaction(adb))
@@ -1219,36 +1169,36 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                         }
                         var targetsf = GeoFac.CreateIntersectsSelector(adb.ModelSpace.OfType<Entity>().SelectMany(getTargets).ToList());
                         IEnumerable<Point2d> getShooters()
+                        {
+                            foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => kv.Value.Type is THESAURUSHOUSING))
                             {
-                                foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => kv.Value.Type is THESAURUSHOUSING))
+                                var pt = kv.Value;
+                                if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
                                 {
-                                    var pt = kv.Value;
-                                    if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
+                                    if (!shootHints.Contains(kv.Key))
                                     {
-                                        if (!shootHints.Contains(kv.Key))
-                                        {
-                                            continue;
-                                        }
+                                        continue;
                                     }
-                                    if (pt.StartLine is not null)
+                                }
+                                if (pt.StartLine is not null)
+                                {
+                                    var seg = pt.StartLine.ToGLineSegment();
+                                    if (seg.IsValid)
                                     {
-                                        var seg = pt.StartLine.ToGLineSegment();
-                                        if (seg.IsValid)
-                                        {
-                                            yield return seg.Center;
-                                        }
+                                        yield return seg.Center;
                                     }
-                                    if (pt.TextLine is not null)
+                                }
+                                if (pt.TextLine is not null)
+                                {
+                                    var seg = pt.TextLine.ToGLineSegment();
+                                    if (seg.IsValid)
                                     {
-                                        var seg = pt.TextLine.ToGLineSegment();
-                                        if (seg.IsValid)
-                                        {
-                                            yield return seg.Center;
-                                            yield return seg.Center.OffsetY(THESAURUSHYPNOTIC);
-                                        }
+                                        yield return seg.Center;
+                                        yield return seg.Center.OffsetY(THESAURUSHYPNOTIC);
                                     }
                                 }
                             }
+                        }
                         var tokills = targetsf(getShooters().Select(x => x.ToNTSPoint()).ToGeometry()).Select(x => x.UserData).Cast<Entity>().Distinct().ToList();
                         foreach (var ent in tokills)
                         {
@@ -1326,7 +1276,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             }
                                             var _r = r.Expand(-text_gap);
                                             var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
-                                                t.Layer = LeaderLayer;
+                                            t.Layer = LeaderLayer;
                                             t.WidthFactor = THESAURUSDISPASSIONATE;
                                             t.TransformBy(u2w);
                                             ByLayer(t);
@@ -1336,12 +1286,12 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             });
                                             {
                                                 var e = DrawLineSegmentLazy(labelline1);
-                                                    e.Layer = LeaderLayer;
+                                                e.Layer = LeaderLayer;
                                                 ByLayer(e);
                                             }
                                             {
                                                 var e = DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom));
-                                                    e.Layer = LeaderLayer;
+                                                e.Layer = LeaderLayer;
                                                 e.TransformBy(u2w);
                                                 ByLayer(e);
                                             }
