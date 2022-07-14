@@ -15,8 +15,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.ObliqueMPartitionLayout.Services;
+using ThMEPArchitecture.MultiProcess;
+using Converter = ThMEPArchitecture.MultiProcess.Converter;
+using ThMEPArchitecture.ViewModel;
+using ThParkingStall.Core.OInterProcess;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -30,10 +36,19 @@ namespace ThMEPArchitecture.PartitionLayout
         [CommandMethod("TIANHUACAD", "ThOParkPartitionTest", CommandFlags.Modal)]
         public void ThOParkPartitionTest()
         {
-            ObliqueExecute();
+            try
+            {
+                ParameterViewModel = new ParkingStallArrangementViewModel();
+                ParameterStock.Set(ParameterViewModel);
+                ObliqueExecute();
+            }
+            catch (System.Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
         }
-
-        private void ObliqueExecute()
+        public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
+        private void _ObliqueExecute()
         {
             var walls = new List<Polyline>();
             var iniLanes = new List<Line>();
@@ -84,6 +99,37 @@ namespace ThMEPArchitecture.PartitionLayout
             mParkingPartitionPro.Process();
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
             mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+        }
+        private void ObliqueExecute()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var block = InputData.SelectBlock(acdb);//提取地库对象
+                var layoutData = new LayoutData();
+                layoutData.TryInit(block,true);
+                var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel, false);
+                OInterParameter.Init(dataWraper);
+                var oSubAreas = OInterParameter.GetSubAreas();
+
+                foreach(var oSubArea in oSubAreas)
+                {
+                    try
+                    {
+                        ObliqueMPartition mParkingPartitionPro = new ObliqueMPartition(oSubArea.Walls, oSubArea.VaildLanes, oSubArea.Buildings, oSubArea.Area);
+                        mParkingPartitionPro.OutputLanes = new List<LineSegment>();
+                        mParkingPartitionPro.OutBoundary = oSubArea.Area;
+                        mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
+                        mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
+                        mParkingPartitionPro.Process();
+                        MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
+                        mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Active.Editor.WriteMessage(ex.Message);
+                    }
+                }
+            }
         }
         private void Execute()
         {

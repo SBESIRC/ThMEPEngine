@@ -90,6 +90,8 @@
     <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionCal.cs" />
     <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionMain.cs" />
     <Compile Include="ObliqueMPartitionLayout\Services\ObliqueMPartitionSucceed.cs" />
+    <Compile Include="OInterProcess\OInterParameter.cs" />
+    <Compile Include="OInterProcess\OSubArea.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\ListEx.cs" />
