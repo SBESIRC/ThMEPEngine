@@ -38,7 +38,54 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static List<Line> ConnectVerticalLine(this List<Line> pipeLines, SprayIn sprayIn)
+        public static List<Line> PipeLineAutoConnect(List<Line> lineList, Dictionary<Point3dEx, List<Point3dEx>> ptDic)
+        {
+            var GLineSegList = new List<GLineSegment>();
+            foreach (var l in lineList)
+            {
+                var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
+                GLineSegList.Add(GLineSeg);
+            }
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1001, 2);
+
+            foreach (var gl in GLineConnectList)
+            {
+                var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+
+                if (pt1.DistanceToEx(pt2) < 1) continue;
+
+                if (ptDic.ContainsKey(pt1) && ptDic.ContainsKey(pt2))
+                {
+                    if (ptDic[pt1].Count >= 2 || ptDic[pt2].Count >= 2)
+                    {
+                        continue;
+                    }
+                }
+                var line = new Line(pt1._pt, pt2._pt);
+
+                lineList.Add(line);
+            }
+
+            //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+            if (GLineConnectList.Count() > 0)
+            {
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
+                var cleanLines = LineMerge.CleanLaneLines(tmpLines);
+                return cleanLines;
+            }
+
+            return lineList;//merge
+        }
+
+
+        public static List<Line> ConnectVerticalLine(List<Line> pipeLines, SprayIn sprayIn)
         {
             //基于竖管连接管线
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(pipeLines.ToCollection());
@@ -49,11 +96,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 var rect = ver._pt.GetRect(100);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
-                var flag = sprayIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
+                var flag = sprayIn.AddNewPtDic(dbObjs, ver, ref lines);
 
                 if (dbObjs.Count >= 2)
                 {
                     connectVreticals.Add(ver);
+                    var closedPt1 = (dbObjs[0] as Line).GetClosedPt(ver);//获取最近点1
+                    var closedPt2 = (dbObjs[1] as Line).GetClosedPt(ver);//获取最近点2
                 }
                 else if(dbObjs.Count == 1)
                 {
@@ -63,28 +112,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     if(cl.Length > 1.0 && cl.Length < 120)
                     {
                         pipeLines.Add(cl);
-#if DEBUG
-                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        {
-                            var layerNames = "立管和支管的单链接线";
-                            if (!acadDatabase.Layers.Contains(layerNames))
-                            {
-                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                            }
-                            cl.LayerId = DbHelper.GetLayerId(layerNames);
-                            cl.ColorIndex = (int)ColorIndex.Red;
-                            acadDatabase.CurrentSpace.Add(cl);
-
-                        }
-#endif
                     }
-
                 }
             }
             var leadLines = sprayIn.LeadLines.ToCollection();
             var leadLineSpatialIndex = new ThCADCoreNTSSpatialIndex(leadLines);
-
-
 
             foreach (var cv in connectVreticals)
             {
@@ -101,6 +133,49 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
             return pipeLines;
         }
+
+        public static List<Line> PipeLineSplit(List<Line> pipeLines)
+        {
+            var pts = GetPts(pipeLines);
+            foreach (var pt in pts)
+            {
+                var rect = pt.GetRect(5);
+                var linesSaptialIndex = new ThCADCoreNTSSpatialIndex(pipeLines.ToCollection());
+                var rst = linesSaptialIndex.SelectCrossingPolygon(rect);
+                foreach(var obj in rst)
+                {
+                    var line = obj as Line;
+                    var spt = line.StartPoint;
+                    var ept = line.EndPoint;
+                    if(pt.DistanceTo(spt) > 1 && pt.DistanceTo(ept) > 1)
+                    {
+                        var closedPt = line.GetClosestPointTo(pt,false);
+                        pipeLines.Remove(line);
+                        if(closedPt.DistanceTo(pt) > 1)
+                        {
+                            pipeLines.Add(new Line(closedPt, pt));
+                        }
+                        pipeLines.Add(new Line(closedPt, spt));
+                        pipeLines.Add(new Line(closedPt, ept));
+                    }
+                }
+            }
+
+            return pipeLines;
+        }
+
+        private static List<Point3d> GetPts(List<Line> pipeLines)
+        {
+            var pts = new List<Point3d>();
+            foreach(var line in pipeLines)
+            {
+                pts.Add(line.StartPoint);
+                pts.Add(line.EndPoint);
+            }
+            return pts;
+        }
+
+
 
         public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, ThCADCoreNTSSpatialIndex verticalSpatialIndex = null)
         {
@@ -192,6 +267,37 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
 
             return lineList;//merge
+        }
+
+        public static List<Line> ConnectWithAlarmValve(List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)
+        {
+            foreach (var apt in alarmPts)
+            {
+                var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+                var rect = apt.GetRect(210);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                var pts = new List<Point3d>();
+                foreach(var obj in rst)
+                {
+                    var l = obj as Line;
+                    lineList.Remove(l);
+                    pts.Add(l.StartPoint);
+                    pts.Add(l.EndPoint);
+                }
+                var orderPts = pts.OrderByDescending(p=>p.DistanceTo(apt)).ToList();
+                if(orderPts.Count>3)
+                {
+                    lineList.Add(new Line(apt, orderPts[0]));
+                    lineList.Add(new Line(apt, orderPts[1]));
+                    lineList.Add(new Line(apt, orderPts[2]));
+                }
+                else
+                {
+                    ;
+                }
+            }
+
+            return lineList;
         }
 
         public static void PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)

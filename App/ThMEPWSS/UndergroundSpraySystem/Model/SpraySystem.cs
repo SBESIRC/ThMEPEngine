@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<Point3dEx, List<Point3dEx>> BranchDic { get; set; }//支路
         public Dictionary<Point3dEx, List<Point3dEx>> BranchThroughDic { get; set; }//穿越点支路
         public HashSet<Point3dEx> ValveDic { get; set; }//端点存在阀门
-        public HashSet<Point3dEx> FlowDIc { get; set; }//端点存在水流指示器
+        public Dictionary<Point3dEx,string> FlowDIc { get; set; }//端点存在水流指示器
         public Dictionary<Point3dEx, List<int>> SubLoopAlarmsDic { get; set; }//支路的报警阀数目
         public Dictionary<Point3dEx, List<int>> SubLoopFireAreasDic { get; set; }//支路的防火分区数目
         public Dictionary<Point3dEx, int> SubLoopBranchDic { get; set; }//次环支路数目
@@ -50,7 +50,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             BranchDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             BranchThroughDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             ValveDic = new HashSet<Point3dEx>();
-            FlowDIc = new HashSet<Point3dEx>();
+            FlowDIc = new Dictionary<Point3dEx, string>();
             SubLoopAlarmsDic = new Dictionary<Point3dEx, List<int>>();
             SubLoopFireAreasDic = new Dictionary<Point3dEx, List<int>>();
             SubLoopBranchDic = new Dictionary<Point3dEx, int>();

@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
@@ -78,7 +79,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
         }
 
-        public List<Point3dEx> CreatePts()
+        public List<Point3dEx> CreatePts(SprayIn sprayIn)
         {
             var pts = new List<Point3dEx>();
             foreach (var db in DBObjs)
@@ -90,6 +91,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         (bounds.Value.MaxPoint.Y + bounds.Value.MinPoint.Y) / 2);
                     var newpt = pt.ToPoint3d();
                     pts.Add(new Point3dEx(newpt));
+                    sprayIn.FlowTypeDic.Add(new Point3dEx(newpt), br.ObjectId.GetDynBlockValue("可见性"));
+
                 }
             }
             return pts;

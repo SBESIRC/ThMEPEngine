@@ -67,7 +67,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
                 }
                 sprayIn.Verticals = GetVerticals();
-                Draw.Verticals(sprayIn.Verticals);
+                //Draw.Verticals(sprayIn.Verticals);
             }
         }
 
