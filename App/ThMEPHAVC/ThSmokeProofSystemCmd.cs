@@ -16,6 +16,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.JSON;
 using ThMEPHVAC.Command;
 using ThMEPHVAC.Service;
+using ThMEPHVAC.SmokeProofSystem.ExportExcelService;
 using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels.ThSmokeProofMappingModel;
 
@@ -31,6 +32,13 @@ namespace ThMEPHVAC
         //        cmd.Execute();
         //    }
         //}
+
+        [CommandMethod("TIANHUACAD", "THSPEXPORT", CommandFlags.Modal)]
+        public void ThSomkeProofExport()
+        {
+            ExportExcel exportExcel = new ExportExcel();
+            exportExcel.Export();
+        }
 
         [CommandMethod("TIANHUACAD", "THLXSPS", CommandFlags.Modal)]
         public void ThLXUcsCompass()

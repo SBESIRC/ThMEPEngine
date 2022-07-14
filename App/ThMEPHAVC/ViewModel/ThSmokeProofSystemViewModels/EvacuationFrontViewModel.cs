@@ -8,7 +8,7 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    public class EvacuationFrontViewModel : NotifyPropertyChangedBase
+    public class EvacuationFrontViewModel : BaseSmokeProofViewModel
     {
         /// <summary>
         /// 这是AK的值
