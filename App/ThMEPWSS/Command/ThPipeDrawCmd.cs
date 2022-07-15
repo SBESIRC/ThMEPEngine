@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using ThCADExtension;
@@ -135,6 +136,7 @@ namespace ThMEPWSS.Command
                             var pt = insertPtRst.Value;
                             var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(layerName, BlockName, pt, new Scale3d(1, 1, 1), 0);
                             var blk = acadDb.Element<BlockReference>(blkId);
+                            blk.TransformBy(Active.Editor.UCS2WCS());
                             if (blk.IsDynamicBlock)
                             {
                                 foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)

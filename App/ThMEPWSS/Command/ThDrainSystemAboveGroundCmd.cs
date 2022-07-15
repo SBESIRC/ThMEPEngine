@@ -1,7 +1,9 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,8 @@ using ThMEPWSS.DrainageSystemAG.Services;
 using ThMEPWSS.Engine;
 using ThMEPWSS.Model;
 using ThMEPWSS.ViewModel;
+using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentPipeConvertion;
+using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentSymbMultiLeaderConvertion;
 
 namespace ThMEPWSS.Command
 {
@@ -130,8 +134,11 @@ namespace ThMEPWSS.Command
             if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
                 return;
             Active.Document.LockDocument();
+
             var verPipes = new List<ThTCHVerticalPipe>();
             var tchPipeService = new TCHDrawVerticalPipeService();
+            var symbMultiLeaders = new List<ThTCHSymbMultiLeader>();
+            var tchsymbMultiLeaderService = new TCHDrawSymbMultiLeaderService();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 //所有的楼层框 必须有顶层，没有时不进行后续的生成
@@ -139,7 +146,7 @@ namespace ThMEPWSS.Command
                 var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
                 if (!CheckData(floorFrameds))
                 {
-                    if (!string.IsNullOrEmpty(errorMsg)) 
+                    if (!string.IsNullOrEmpty(errorMsg))
                         Active.Database.GetEditor().WriteMessage(errorMsg);
                     return;
                 }
@@ -187,11 +194,11 @@ namespace ThMEPWSS.Command
                     EnumEquipmentType.roofRainRiser,
                 };
                 var pipeConverter = RaisePipeConvert.ConvetPipeToBlock(livingHighestFloor.floorUid, _classifyResult.Where(c => converterTypes.Any(x => x == c.enumEquipmentType)).ToList());
-                if (null != pipeConverter && pipeConverter.Count > 0) 
+                if (null != pipeConverter && pipeConverter.Count > 0)
                     createBlockInfos.AddRange(pipeConverter);
                 //PL和TL增加连线
-                var pipeConnectPipe =new PipeConnectPipe(pipeConverter.Where(c=>!string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("PL")).ToList(),
-                    pipeConverter.Where(c=> !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("TL")).ToList());
+                var pipeConnectPipe = new PipeConnectPipe(pipeConverter.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("PL")).ToList(),
+                    pipeConverter.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("TL")).ToList());
                 var connectLines = pipeConnectPipe.GetConnectLines();
                 if (connectLines.Count > 0)
                     createBasicElems.AddRange(connectLines);
@@ -211,7 +218,7 @@ namespace ThMEPWSS.Command
                     EnumRoomType.Balcony,
                     EnumRoomType.EquipmentPlatform
                 };
-                var equpBlocks = _classifyResult.Where(c => equpBlockRoomTypes.Any(x=>x == c.enumRoomType)).ToList();
+                var equpBlocks = _classifyResult.Where(c => equpBlockRoomTypes.Any(x => x == c.enumRoomType)).ToList();
                 var otherRooms = new List<RoomModel>();
                 foreach (var room in rooms)
                 {
@@ -224,14 +231,14 @@ namespace ThMEPWSS.Command
                 parameters.Columns.AddRange(_allColumns);
                 parameters.Beams.AddRange(_allBeams);
                 var balconyCorridorEqu = new BalconyCorridorEquPlatform(livingHighestFloor.floorUid, balconyRooms, corridorRooms, otherRooms, equpBlocks, parameters);
-                balconyCorridorEqu.LayoutConnect(createBlockInfos,out List<string> changeY1ToFLIds,out List<string> changeDrainToFDrainIds);
-                if ((null != changeY1ToFLIds && changeY1ToFLIds.Count > 0) || (null != changeDrainToFDrainIds && changeDrainToFDrainIds.Count > 0)) 
+                balconyCorridorEqu.LayoutConnect(createBlockInfos, out List<string> changeY1ToFLIds, out List<string> changeDrainToFDrainIds);
+                if ((null != changeY1ToFLIds && changeY1ToFLIds.Count > 0) || (null != changeDrainToFDrainIds && changeDrainToFDrainIds.Count > 0))
                 {
                     foreach (var item in createBlockInfos)
                     {
                         if (item.equipmentType != EnumEquipmentType.balconyRiser && item.equipmentType != EnumEquipmentType.floorDrain)
                             continue;
-                        if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId)) 
+                        if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId))
                         {
                             item.tag = "FL";
                             item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
@@ -242,18 +249,18 @@ namespace ThMEPWSS.Command
                 if (balconyCorridorEqu.createBasicElements != null && balconyCorridorEqu.createBasicElements.Count > 0)
                 {
                     createBasicElems.AddRange(balconyCorridorEqu.createBasicElements);
-                    foreach (var item in balconyCorridorEqu.createBasicElements) 
+                    foreach (var item in balconyCorridorEqu.createBasicElements)
                     {
                         if (item.baseCurce is Line)
                             _pipeDrainConnectLines.Add(item);
                     }
-                } 
+                }
                 if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
                     createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
                 if (balconyCorridorEqu.createDBTextElements != null && balconyCorridorEqu.createDBTextElements.Count > 0)
                     createTextElems.AddRange(balconyCorridorEqu.createDBTextElements);
                 //卫生间PL添加清扫口
-                List<string> pipeTags = new List<string> { "PL", "FL","FyL","FcL", "TL", "DL","WL" };
+                List<string> pipeTags = new List<string> { "PL", "FL", "FyL", "FcL", "TL", "DL", "WL" };
                 var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();
                 ToiletRoomCleanout roomCleanout = new ToiletRoomCleanout(livingHighestFloor.floorUid, toiletRooms, pipes);
                 var addClean = roomCleanout.GetCreateCleanout(_classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.toilet).ToList());
@@ -261,7 +268,7 @@ namespace ThMEPWSS.Command
                     createBlockInfos.AddRange(addClean);
                 var midY = LivingFloorMidY(rooms, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList());
                 RoofPipeLabelLayout();
-                LivingFloorLabelLayout(midY,rooms);
+                LivingFloorLabelLayout(midY, rooms);
                 CopyToOtherFloor(midY);
                 BreakPipeConnectByY1Lines(_pipeDrainConnectLines, _roofY1ConvertLines);
                 //屋面立管碰撞检查
@@ -293,144 +300,20 @@ namespace ThMEPWSS.Command
                 }
                 var notCreateLineIds = new List<string>();
                 var notCreateTextIds = new List<string>();
-                foreach (var item in pipeElems)
-                {
-                    var tchPipe = new ThTCHVerticalPipe();
-                    tchPipe.PipeBottomPoint = item.createPoint;
-                    tchPipe.PipeTopPoint = item.createPoint + Vector3d.ZAxis.MultiplyBy(3000);
-                    tchPipe.PipeDN = Convert.ToDouble(item.dymBlockAttr.First().Value.ToString().Replace("DN", ""));
-                    string pipeSystem = "废水";
-                    string pipeMaterial = "排水铸铁管";
-                    string pipeDNType = "DN";
-                    switch (item.tag) 
-                    {
-                        case "DL":
-                        case "FL":
-                        case "Y2L":
-                            pipeSystem = "雨水";
-                            pipeMaterial = "排水铸铁管";
-                            break;
-                        case "FyL":
-                            pipeSystem = "废水";
-                            pipeMaterial = "排水铸铁管";
-                            break;
-                        case "FcL":
-                            pipeSystem = "废水";
-                            pipeMaterial = "排水铸铁管";
-                            break;
-                        case "TL":
-                            pipeSystem = "通气";
-                            pipeMaterial = "排水铸铁管";
-                            break;
-                        case "PL":
-                            pipeSystem = "排水";
-                            pipeMaterial = "镀锌钢管";
-                            break;
-                        case "Y1L":
-                        case "NL":
-                            pipeSystem = "雨水";
-                            pipeMaterial = "排水铸铁管";
-                            break;
-                        case "WL":
-                            pipeSystem = "污水";
-                            pipeMaterial = "排水铸铁管";
-                            break;
-                    }
-                    tchPipe.PipeSystem = pipeSystem;
-                    tchPipe.PipeMaterial = pipeMaterial;
-                    tchPipe.DnType = pipeDNType;
-                    switch (SetServicesModel.Instance.drawingScale) 
-                    {
-                        case EnumDrawingScale.DrawingScale1_100:
-                            tchPipe.DocScale = 100.0;
-                            break;
-                        case EnumDrawingScale.DrawingScale1_150:
-                            tchPipe.DocScale = 150.0;
-                            break;
-                        case EnumDrawingScale.DrawingScale1_50:
-                            tchPipe.DocScale = 50;
-                            break;
-                    }
-                    var bId = string.IsNullOrEmpty(item.copyId) ? item.uid : item.copyId;
-                    var lines = createBasicElems.Where(c => (c.belongBlockId.Contains(bId)|| c.belongBlockId.Contains(item.uid)) && c.floorId == item.floorId).ToList();
-                    var texts = createTextElems.Where(c => c.belongBlockId.Contains(bId) && c.floorUid == item.floorId).ToList();
-                    if ((null != lines && lines.Count > 0) && (texts != null && texts.Count > 0))
-                    {
-                        //计算标注
-                        var pipeCenter = item.createPoint;
-                        Line nearLine = null;
-                        double nearDis = double.MaxValue;
-                        foreach (var line in lines)
-                        {
-                            var thisLine = line.baseCurce as Line;
-                            var lineSp = thisLine.StartPoint;
-                            var lineEp = thisLine.EndPoint;
-                            var spDis = lineSp.DistanceTo(pipeCenter);
-                            var epDis = lineEp.DistanceTo(pipeCenter);
-                            var thisDis = Math.Min(spDis, epDis);
-                            if (thisDis < nearDis)
-                            {
-                                nearLine = thisLine;
-                            }
-                        }
-                        Line otherLine = null;
-                        var dir = nearLine.LineDirection();
-                        var allPoints = new List<Point3d>();
-                        foreach (var line in lines)
-                        {
-                            var thisLine = line.baseCurce as Line;
-                            var thisDir = thisLine.LineDirection();
-                            if (Math.Abs(thisDir.DotProduct(dir)) < 0.9)
-                            {
-                                otherLine = thisLine;
-                                break;
-                            }
-                        }
-                        if (otherLine == null)
-                            continue;
-                        notCreateLineIds.AddRange(lines.Select(c => c.uid).ToList());
-                        notCreateTextIds.AddRange(texts.Select(c => c.uid).ToList());
-                        var pt1 = otherLine.StartPoint;
-                        var pt2 = otherLine.EndPoint;
-                        if (pt1.DistanceTo(pipeCenter) < pt2.DistanceTo(pipeCenter))
-                        {
-                            tchPipe.TurnPoint = pt1;
-                            tchPipe.TextDirection = otherLine.LineDirection();
-                        }
-                        else
-                        {
-                            tchPipe.TurnPoint = pt2;
-                            tchPipe.TextDirection = otherLine.LineDirection().Negate();
-                        }
-                        var textFirst = texts.First();
-                        var spliteStr = textFirst.dbText.TextString.Split('-').ToList();
-                        var numStr = spliteStr.Last();
-                        var floorNum = spliteStr.First();
-                        floorNum = floorNum.Replace(item.tag, "");
-                        int.TryParse(numStr, out int intNum);
-                        tchPipe.FloorNum = floorNum;
-                        tchPipe.TextStyle = "_TWT_SERIAL";
-                        tchPipe.DimType = 0;
-                        tchPipe.FloorType = 4;
-                        tchPipe.TextHeight = 3.5;
-                        tchPipe.DimRadius = 4.0;
-                        tchPipe.Spacing = 1.0;
-                        tchPipe.DimTypeText = item.tag;
-                        tchPipe.PipeNum = intNum.ToString();
-                    }
-                    verPipes.Add(tchPipe);
-                }
-                createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid)).ToList();
-                createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid)).ToList();
+                ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
+                ConvertToTCHSymbMultiLeader(ref createBasicElems,ref createTextElems, ref symbMultiLeaders);
+                createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                 var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                 var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
                 var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
-                
             }
             tchPipeService.InitPipe(verPipes);
             tchPipeService.DrawExecute(false);
+            tchsymbMultiLeaderService.Init(symbMultiLeaders);
+            tchsymbMultiLeaderService.DrawExecute(false,false);
         }
-        void InitData(Database database) 
+        void InitData(Database database)
         {
             _pipeDrainConnectLines.Clear();
             _roofBlockPointInfos.Clear();

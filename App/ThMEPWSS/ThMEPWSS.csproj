@@ -58,6 +58,8 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\TangentPipeConvertion.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\TangentSymbMultiLeaderConvertion.cs" />
     <Compile Include="DrainageSystemAG\Models\StruParameters.cs" />
     <Compile Include="Engine\ThTCHWaterIndicatorExtractionVisitor.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\HandleStructService.cs" />
