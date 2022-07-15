@@ -61,7 +61,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (elements.Count() == 1)
                     {
                         var firstelement = elements.First();
-                        createBasicElems.Remove(createBasicElems.First());
+                        createBasicElems.Remove(horizontalBasicElems.First());
                         createBasicElems.Remove(elements.First());
                         var basepoint = firstelement.baseCurce.StartPoint;
                         var locpoint = firstelement.baseCurce.EndPoint;
