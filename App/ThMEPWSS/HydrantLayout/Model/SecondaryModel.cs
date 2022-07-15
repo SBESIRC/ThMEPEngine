@@ -44,6 +44,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         public int doorGood = 0;
 
         //单柱子新晋指标
+        //3最高，横着摆  ； 2大部分优先情况 ；0没啥优先级的情况
         public double PositionScore = 0;
         public double DoorScore = 0;
         public int BasePointPosition = -2;

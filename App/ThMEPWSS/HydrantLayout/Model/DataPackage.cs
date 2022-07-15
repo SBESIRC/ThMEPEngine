@@ -112,6 +112,11 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static double PakingBuffer = 30;
         public static double CollisionTolerance = 0.25;
 
+        
+        //确定车位旁边的立柱的地理环境
+        public static double RangeLength = 3000;
+        public static double BigScore = 80;
+        public static double SmallScore = 50;
 
     }
 
