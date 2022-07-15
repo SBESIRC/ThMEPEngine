@@ -71,6 +71,7 @@ namespace ThMEPStructure.Common
     {
         public string image_type { get; set; }
         public int? cut_position { get; set; }
+        public int? relative_cut_position { get; set; }
         public Direction eye_dir { get; set; }
         public Direction up { get; set; }
         public int scale_size { get; set; }

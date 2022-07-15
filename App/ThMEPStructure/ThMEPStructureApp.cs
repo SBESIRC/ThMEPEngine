@@ -314,12 +314,15 @@ namespace ThMEPStructure
                 var drawingType = DrawingType.Unknown;
                 var eye_dir = new Direction();
                 var up = new Direction();
+                int? cut_position = null;
+                int? ralative_cut_position = null;
                 switch (result1.StringResult)
                 {
                     case "平面图":
                         drawingType = DrawingType.Plan;
                         eye_dir = new Direction(0, 0, -1);
                         up = new Direction(0, 1, 0);
+                        ralative_cut_position = 1200;
                         break;
                     case "立面图":
                         drawingType = DrawingType.Elevation;
@@ -330,6 +333,7 @@ namespace ThMEPStructure
                         drawingType = DrawingType.Section;
                         eye_dir = new Direction(-1, 0, 0);
                         up = new Direction(0, 0, 1);
+                        ralative_cut_position = 500;
                         break;
                     default:
                         break;
@@ -349,6 +353,8 @@ namespace ThMEPStructure
                 config.JsonConfig.SvgConfig.image_size = null;
                 config.JsonConfig.GlobalConfig.eye_dir = eye_dir;
                 config.JsonConfig.GlobalConfig.up = up;
+                config.JsonConfig.GlobalConfig.cut_position = cut_position;
+                config.JsonConfig.GlobalConfig.relative_cut_position = ralative_cut_position;
 
                 if (drawingType == DrawingType.Section)
                 {

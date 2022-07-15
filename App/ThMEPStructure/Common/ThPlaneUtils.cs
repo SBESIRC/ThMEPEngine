@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO.SVG;
 using Autodesk.AutoCAD.Geometry;
+using System.Text.RegularExpressions;
 
 namespace ThMEPStructure.Common
 {
@@ -292,8 +293,17 @@ namespace ThMEPStructure.Common
                 {
                     return Tuple.Create(1.0, 1.0);
                 }
+            }            
+        }
+        public static List<int> GetIntegers(this string content)
+        {
+            var datas = new List<int>();
+            string pattern = @"\d+";
+            foreach (Match item in Regex.Matches(content, pattern))
+            {
+                datas.Add(int.Parse(item.Value));
             }
-            
+            return datas;
         }
     }
 }
