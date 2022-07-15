@@ -364,11 +364,22 @@ namespace ThMEPElectrical.BlockConvert
                                     if (!id.IsErased)
                                     {
                                         engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayerSetting);
-                                        EntityInfos.Add(new ThBConvertEntityInfos(
+                                        if (id.GetBlockName().Equals(ThBConvertCommon.BLOCK_NAME_LEVEL_CONTROLLER))
+                                        {
+                                            EntityInfos.Add(new ThBConvertEntityInfos(
+                                            id,
+                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
+                                            ThBConvertCommon.BLOCK_LEVEL_CONTROLLER,
+                                            targetBlockLayer));
+                                        }
+                                        else
+                                        {
+                                            EntityInfos.Add(new ThBConvertEntityInfos(
                                             id,
                                             transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
                                             transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT),
                                             targetBlockLayer));
+                                        }
                                     }
                                 });
                             }

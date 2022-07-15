@@ -62,6 +62,8 @@
         public const string BLOCK_PUMP_LABEL_LAYER = "E-UNIV-NOTE";
         public const string BLOCK_LOAD_DIMENSION_LAYER = "E-UNIV-DIAG";
         public const string BLOCK_SUBMERSIBLE_PUMP = "潜水泵";
+        public const string BLOCK_LEVEL_CONTROLLER = "液位控制器";
+        public const string BLOCK_NAME_LEVEL_CONTROLLER = "E-BFAS23-3";
         public const string BLOCK_AI_SUBMERSIBLE_PUMP = "潜水泵-AI";
 
         public const string SINGLE_SUBMERSIBLE_PUMP = "单台潜水泵";

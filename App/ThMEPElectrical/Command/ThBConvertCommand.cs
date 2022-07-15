@@ -150,13 +150,26 @@ namespace ThMEPElectrical.Command
             {
                 var result = new ThBConvertEntityInfos();
                 result.ObjectId = t.ObjId;
-                foreach (var rule in manager.Rules)
+                if (t.EffectiveName.Equals("E-BDB054"))
                 {
-                    if (rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME).Equals(t.EffectiveName))
+                    result.Category = EquimentCategory.给排水;
+                    result.EquimentType = ThBConvertCommon.BLOCK_SUBMERSIBLE_PUMP;
+                }
+                else if(t.EffectiveName.Equals("E-BFAS23-3"))
+                {
+                    result.Category = EquimentCategory.给排水;
+                    result.EquimentType = ThBConvertCommon.BLOCK_LEVEL_CONTROLLER;
+                }
+                else
+                {
+                    foreach (var rule in manager.Rules)
                     {
-                        result.Category = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert();
-                        result.EquimentType = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT);
-                        break;
+                        if (rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME).Equals(t.EffectiveName))
+                        {
+                            result.Category = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert();
+                            result.EquimentType = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT);
+                            break;
+                        }
                     }
                 }
                 results.Add(result);
