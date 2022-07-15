@@ -36,6 +36,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <StackPanel  Grid.Row="0">
@@ -178,9 +179,15 @@
             </WrapPanel>
             <cus:ImageButton Content="->" Tag="空调内机--柜机" ImageTextLocation="TextOnly"  PreviewMouseLeftButtonDown="btnSet_MouseDown" Click="btnSet_Click"  Margin="90,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
             <cus:ImageButton Content="⊕" Tag="空调内机--柜机" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
-        </Grid>
-        
+        </Grid>       
         <Grid   Grid.Row="24">
+            <WrapPanel Orientation="Vertical">
+                <Label Content="门"></Label>
+            </WrapPanel>
+            <cus:ImageButton Content="->" Tag="门块" ImageTextLocation="TextOnly"  PreviewMouseLeftButtonDown="btnSet_MouseDown" Click="btnSet_Click"  Margin="90,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+            <cus:ImageButton Content="⊕" Tag="门块" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+        </Grid>
+        <Grid   Grid.Row="25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="66*"/>
@@ -191,6 +198,5 @@
                 <cus:ImageButton ImageTextLocation="TextOnly" Content="保存" Width="50" Height="24" Margin="30,0,0,0" Name="Cancle" Click="Save_Click"></cus:ImageButton>
             </StackPanel>
         </Grid>
-
     </Grid>
 </cus:ThCustomWindow>
