@@ -134,14 +134,12 @@ namespace ThMEPStructure.StructPlane
                 // 对剪力墙造洞
                 var buildAreaSevice = new ThWallBuildAreaService();
                 var passGeos = buildAreaSevice.BuildArea(svg.Geos);
-
                 var svgInput = new ThSvgInput()
                 {
                     Geos = passGeos,
                     FloorInfos = svg.FloorInfos,
                     DocProperties = svg.DocProperties,
                 };
-
                 var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
                 printer.Print(Active.Database);
                 results.Add(printer);
@@ -162,12 +160,16 @@ namespace ThMEPStructure.StructPlane
                 var buildAreaSevice = new ThWallBuildAreaService();
                 var newGeos = buildAreaSevice.BuildArea(svg.Geos);
 
-                // 对梁线要合并
+                #region ---------- 梁处理 ----------
+                // 用下层墙、柱对梁线进行Trim+合并梁线
                 var beamGeos = newGeos.GetBeamGeos();
+                var beamMarkGeos = newGeos.GetBeamMarks();
                 var passGeos = newGeos.Except(beamGeos).ToList();
                 var belowObjs = GetBelowObjs(passGeos);
-                var newBeamGeos = Handle(beamGeos, belowObjs);
+                var newBeamGeos = ThBeamLineCleaner.Clean(beamGeos, belowObjs,
+                    beamMarkGeos.Select(o=>o.Boundary).ToCollection());
                 passGeos.AddRange(newBeamGeos);
+                #endregion
 
                 var svgInput = new ThSvgInput()
                 {
@@ -175,42 +177,12 @@ namespace ThMEPStructure.StructPlane
                     FloorInfos = svg.FloorInfos,
                     DocProperties = svg.DocProperties,
                 };
-
                 var printer = new ThStruPlanDrawingPrinter(svgInput, PrintParameter);
                 printer.Print(Active.Database);
                 results.Add(printer);
             });
             return results;
         }
-
-        private List<ThGeometry> Handle(List<ThGeometry> beams, DBObjectCollection polygons)
-        {
-            using (var hander = new ThBeamLineHandler(polygons))
-            {
-                var results = new List<ThGeometry>();
-                var beamGroups = GroupBeam(beams);
-                beamGroups.ForEach(g =>
-                {
-                    var beamLines = g.Select(o => o.Boundary).ToCollection();
-                    // 后面如果有弧梁，则不要传入进去
-                    var newBeamLines = hander.Handle(beamLines);
-                    newBeamLines.OfType<Line>().ForEach(l => results.Add(ThGeometry.Create(l, g.First().Properties)));
-                });
-                return results;
-            }
-        }
-
-        private List<List<ThGeometry>> GroupBeam(List<ThGeometry> beamGeos)
-        {
-            var results = new List<List<ThGeometry>>();
-            var groups = beamGeos.GroupBy(o => o.Properties.GetCategory() + o.Properties.GetLineType());
-            foreach (var group in groups)
-            {
-                results.Add(group.ToList());
-            }
-            return results;
-        }
-
         private DBObjectCollection GetBelowObjs(List<ThGeometry> geos)
         {
             var polygons = new DBObjectCollection();
@@ -220,19 +192,16 @@ namespace ThMEPStructure.StructPlane
             belowShearWalls.ForEach(o => polygons.Add(o.Boundary));
             return polygons;
         }
-
         private void SetSysVariables()
         {
             acadApp.Application.SetSystemVariable("LTSCALE", PrintParameter.LtScale);
             acadApp.Application.SetSystemVariable("MEASUREMENT", PrintParameter.Measurement);
         }
-
         private void Clear()
         {
             var svgFiles = GetGeneratedSvgFiles();
             Erase(svgFiles);
         }
-
         private List<string> Sort(List<string> svgFiles)
         {
             //svgFiles已经经过合理性检查
@@ -259,7 +228,6 @@ namespace ThMEPStructure.StructPlane
                 }
             }).ToList();
         }
-
         private void Erase(List<string> svgFiles)
         {
             svgFiles.ForEach(svgFile =>
@@ -271,7 +239,6 @@ namespace ThMEPStructure.StructPlane
                 }
             });
         }
-
         private List<string> GetGeneratedSvgFiles()
         {
             var results = new List<string>();
@@ -308,7 +275,6 @@ namespace ThMEPStructure.StructPlane
             }  
             return strs[strs.Length - 3].IsInteger();
         }
-        
         private void InsertBasePoint()
         {
             using (var acadDb = AcadDatabase.Active())

@@ -11,24 +11,16 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.StructPlane.Service
 {
-    internal class ThColliearLineMerger
+    internal class ThColliearLineGrouper
     {
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private DBObjectCollection Lines { get; set; }
         private double ColliearTolerance = 1.0;
         private double ExtendTolerance = 1.0;
-        public ThColliearLineMerger(DBObjectCollection lines)
+        public ThColliearLineGrouper(DBObjectCollection lines)
         {
             Lines= lines;
             SpatialIndex = new ThCADCoreNTSSpatialIndex(lines);
-        }
-
-        public DBObjectCollection Merge()
-        {
-            var groups = Group();
-            return groups
-                .Select(o => CreateLine(o))
-                .ToCollection();
         }
 
         public List<DBObjectCollection> Group()
@@ -173,11 +165,6 @@ namespace ThMEPStructure.StructPlane.Service
             var maxX = pts.OfType<Point3d>().OrderByDescending(p => p.X).FirstOrDefault().X;
             var maxY = pts.OfType<Point3d>().OrderByDescending(p => p.Y).FirstOrDefault().Y;
             return new Extents2d(minX, minY, maxX, maxY);
-        }
-        private Line CreateLine(DBObjectCollection lines)
-        {
-            var ptPair = ThGeometryTool.GetCollinearMaxPts(lines.OfType<Line>().ToList());
-            return new Line(ptPair.Item1, ptPair.Item2);
         }
     }
 }

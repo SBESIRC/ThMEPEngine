@@ -10,7 +10,7 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.StructPlane.Service
 {
-    internal class ThBeamLineHandler:IDisposable
+    internal class ThBeamLineClipper:IDisposable
     {
         private double BufferTolerance = 1.0;
         private DBObjectCollection Polygons { get; set; }
@@ -18,7 +18,7 @@ namespace ThMEPStructure.StructPlane.Service
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private double SnapTolerance=0.0;
 
-        public ThBeamLineHandler(DBObjectCollection polygons)
+        public ThBeamLineClipper(DBObjectCollection polygons)
         {
             Polygons = polygons;
             // 若对polygons进行了扩大，再对梁线裁剪会造成间隙
@@ -49,11 +49,6 @@ namespace ThMEPStructure.StructPlane.Service
             garbages = garbages.Union(newBeamLines);
             newBeamLines = FitlerSmallLength(newBeamLines);
 
-            // merge
-            newBeamLines = DoMerge(newBeamLines);
-            garbages = garbages.Union(newBeamLines);
-            newBeamLines = FitlerSmallLength(newBeamLines);
-
             var results = new DBObjectCollection();
             results = results.Union(newBeamLines);
 
@@ -63,12 +58,6 @@ namespace ThMEPStructure.StructPlane.Service
             garbages.MDispose();
 
             return results;
-        }
-
-        private DBObjectCollection DoMerge(DBObjectCollection beamLines)
-        {
-            var merger = new ThColliearLineMerger(beamLines);
-            return merger.Merge();
         }
 
         private DBObjectCollection DoSnap(DBObjectCollection beamLines)

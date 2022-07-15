@@ -39,6 +39,16 @@ namespace ThMEPStructure.StructPlane.Service
                 return (string)value;
             }
         }
+
+        public static void UpdateLineType(this Dictionary<string, object> properties,string lineType)
+        {
+            string lineTypeKWord = ThSvgPropertyNameManager.LineTypePropertyName;
+            if(properties.ContainsKey(lineTypeKWord))
+            {
+                properties[lineTypeKWord] = lineType;
+            }
+        }
+
         public static string GetCategory(this Dictionary<string, object> properties)
         {
             var value = properties.GetPropertyValue(ThSvgPropertyNameManager.CategoryPropertyName);
@@ -277,6 +287,21 @@ namespace ThMEPStructure.StructPlane.Service
             }
             return results.OfType<Curve>().ToCollection();
         }
+
+        public static DBObjectCollection CollinearMerge(this DBObjectCollection lines)
+        {
+            var grouper = new ThColliearLineGrouper(lines);
+            var groups = grouper.Group();
+            // 再对组内的线按连接关系分组
+            return groups.Select(g => Create(g)).ToCollection();
+        }
+
+        private static Line Create(DBObjectCollection colliearLines)
+        {
+            var ptPair = ThGeometryTool.GetCollinearMaxPts(colliearLines.OfType<Line>().ToList());
+            return new Line(ptPair.Item1, ptPair.Item2);
+        }
+
         public static List<string> FilterSlabElevations(this List<string> elevations,double flrHeight)
         {
             return elevations.Where(o =>
