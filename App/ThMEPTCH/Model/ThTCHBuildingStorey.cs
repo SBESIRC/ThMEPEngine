@@ -6,6 +6,8 @@ namespace ThMEPTCH.Model
 {
     public class ThTCHBuildingStorey : ThIfcBuildingStorey
     {
+        public string MemoryStoreyId { get; set; }
+        public Matrix3d MemoryMatrix3d { get; set; }
         /// <summary>
         /// 编号
         /// </summary>
@@ -29,6 +31,7 @@ namespace ThMEPTCH.Model
             Slabs = new List<ThTCHSlab>();
             Windows = new List<ThTCHWindow>();
             Railings = new List<ThTCHRailing>();
+            MemoryStoreyId = null;
         }
         public List<ThTCHWall> Walls { get; set; }
         public List<ThTCHWindow> Windows { get; set; }

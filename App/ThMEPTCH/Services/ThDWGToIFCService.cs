@@ -4,12 +4,14 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Common;
 using ThMEPTCH.Model;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
@@ -30,91 +32,114 @@ namespace ThMEPTCH.Services
         double slabThickness = 100;
         public ThDWGToIFCService(string dbPath)
         {
-            archDBData = new TCHArchDBData(dbPath);
+            if(!string.IsNullOrEmpty(dbPath) && File.Exists(dbPath))
+                archDBData = new TCHArchDBData(dbPath);
         }
-        public ThTCHProject DWGToProject()
+        public ThTCHProject DWGToProject(bool isMemoryStory)
         {
+            if (null == archDBData)
+                return null;
             var thPrj = new ThTCHProject();
             thPrj.ProjectName = "测试项目";
             var thSite = new ThTCHSite();
             var thBuilding = new ThTCHBuilding();
-            using (AcadDatabase acdb = AcadDatabase.Active())
+            var floorOrigin = FloorOrigin();
+            var allEntitys = archDBData.AllTArchEntitys();
+            InitFloorDBEntity(allEntitys);
+            var entityConvert = new TCHDBEntityConvert();
+            foreach (var floor in floorOrigin)
             {
-                var floorOrigin = FloorOrigin(acdb);
-                var allEntitys = archDBData.AllTArchEntitys();
-                InitFloorDBEntity(allEntitys);
-                var entityConvert = new TCHDBEntityConvert();
-                foreach (var floor in floorOrigin)
+                var floorEntitys = FloorEntitys(floor.FloorOutLine, out List<FloorCurveEntity> curveEntities);
+                var moveVector = Point3d.Origin - floor.FloorOrigin;
+                Matrix3d matrix = Matrix3d.Displacement(moveVector);
+                var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntiy).Cast<TArchWall>().ToList();
+                var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntiy).Cast<TArchDoor>().ToList();
+                var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntiy).Cast<TArchWindow>().ToList();
+                var walls = entityConvert.WallDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
+                floor.FloorEntitys.AddRange(walls);
+                var allSlabs = new List<ThTCHSlab>();
+                var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailing>();
+                var railingColls = new DBObjectCollection();
+                foreach (var item in curveEntities)
                 {
-                    var floorEntitys = FloorEntitys(floor.FloorOutLine, out List<FloorCurveEntity> curveEntities);
-                    var moveVector = Point3d.Origin - floor.FloorOrigin;
-                    Matrix3d matrix = Matrix3d.Displacement(moveVector);
-                    var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntiy).Cast<TArchWall>().ToList();
-                    var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntiy).Cast<TArchDoor>().ToList();
-                    var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntiy).Cast<TArchWindow>().ToList();
-                    var walls = entityConvert.WallDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
-                    floor.FloorEntitys.AddRange(walls);
-                    var allSlabs = new List<ThTCHSlab>();
-                    var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailing>();
-                    var railingColls = new DBObjectCollection();
-                    foreach (var item in curveEntities)
+                    if (item.EntitySystem.Contains("楼板"))
                     {
-                        if (item.EntitySystem.Contains("楼板"))
+                        if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
                         {
-                            if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
-                            {
-                                var slab = CreateSlab(slab1, matrix);
-                                allSlabs.Add(slab);
-                            }
-                        }
-                        else if (item.EntitySystem.Contains("栏杆"))
-                        {
-                            if (item.EntityCurve is Polyline polyline)
-                            {
-                                var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
-                                railingColls.Add(pLine);
-                                var railing = CreateRailing(pLine);
-                                railing.Depth = ralingHeight;
-                                thisRailingEntitys.Add(pLine, railing);
-                            }
+                            var slab = CreateSlab(slab1, matrix);
+                            allSlabs.Add(slab);
                         }
                     }
-                    //用墙的索引找栏杆没有找到
-                    var railingSpatialIndex = new ThCADCoreNTSSpatialIndex(railingColls);
-                    List<Polyline> hisPLines = new List<Polyline>();
-                    foreach (var wall in walls)
+                    else if (item.EntitySystem.Contains("栏杆"))
                     {
-                        if (wall.Height < 10 || wall.Height > 2000)
-                            continue;
-                        if (hisPLines.Count == thisRailingEntitys.Count)
-                            break;
-                        var crossRailings = railingSpatialIndex.SelectCrossingPolygon(wall.Outline).OfType<Polyline>().ToList();
-                        if (crossRailings.Count < 1)
-                            continue;
-                        foreach (var polyline in crossRailings)
+                        if (item.EntityCurve is Polyline polyline)
                         {
-                            if (hisPLines.Any(c => c == polyline))
-                                continue;
-                            var railing = thisRailingEntitys[polyline];
-                            (railing.Outline as Polyline).Elevation = (wall.Outline as Polyline).Elevation + wall.Height;
-                            railing.Depth = 800;
+                            var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
+                            railingColls.Add(pLine);
+                            var railing = CreateRailing(pLine);
+                            railing.Depth = ralingHeight;
+                            thisRailingEntitys.Add(pLine, railing);
                         }
                     }
-                    floor.FloorEntitys.AddRange(allSlabs);
-                    floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
                 }
-
-                var floorData = GetTestElevtion();
-                foreach (var floor in floorData)
+                //用墙的索引找栏杆没有找到
+                var railingSpatialIndex = new ThCADCoreNTSSpatialIndex(railingColls);
+                List<Polyline> hisPLines = new List<Polyline>();
+                foreach (var wall in walls)
                 {
-                    var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
-                    if (levelEntitys == null)
+                    if (wall.Height < 10 || wall.Height > 2000)
                         continue;
-                    var buildingStorey = new ThTCHBuildingStorey();
-                    buildingStorey.Number = floor.Num.ToString();
-                    buildingStorey.Height = floor.LevelHeight;
-                    buildingStorey.Elevation = floor.Elevtion;
-                    buildingStorey.Origin = new Point3d(0, 0, floor.Elevtion);
+                    if (hisPLines.Count == thisRailingEntitys.Count)
+                        break;
+                    var crossRailings = railingSpatialIndex.SelectCrossingPolygon(wall.Outline).OfType<Polyline>().ToList();
+                    if (crossRailings.Count < 1)
+                        continue;
+                    foreach (var polyline in crossRailings)
+                    {
+                        if (hisPLines.Any(c => c == polyline))
+                            continue;
+                        var railing = thisRailingEntitys[polyline];
+                        (railing.Outline as Polyline).Elevation = (wall.Outline as Polyline).Elevation + wall.Height;
+                        railing.Depth = 800;
+                    }
+                }
+                floor.FloorEntitys.AddRange(allSlabs);
+                floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
+            }
+
+            var floorData = GetBlockElevtionValue(floorOrigin);
+            foreach (var floor in floorData)
+            {
+                var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
+                if (levelEntitys == null)
+                    continue;
+                var buildingStorey = new ThTCHBuildingStorey();
+                buildingStorey.Number = floor.Num.ToString();
+                buildingStorey.Height = floor.LevelHeight;
+                buildingStorey.Elevation = floor.Elevtion;
+                buildingStorey.Useage = floor.FloorName;
+                buildingStorey.Origin = new Point3d(0, 0, floor.Elevtion);
+
+                ThTCHBuildingStorey memoryStory = null;
+                if (isMemoryStory)
+                {
+                    foreach (var item in thBuilding.Storeys)
+                    {
+                        if (!string.IsNullOrEmpty(item.MemoryStoreyId) || item.Useage != floor.FloorName)
+                            continue;
+                        if (Math.Abs(item.Height - floor.LevelHeight) < 1)
+                        {
+                            memoryStory = item;
+                        }
+                    }
+                }
+                if (null != memoryStory)
+                {
+                    buildingStorey.MemoryStoreyId = memoryStory.Uuid;
+                    buildingStorey.MemoryMatrix3d = Matrix3d.Displacement(buildingStorey.Origin - memoryStory.Origin);
+                }
+                else
+                {
                     var walls = new List<ThTCHWall>();
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHWall>().ToList())
                     {
@@ -133,28 +158,32 @@ namespace ThMEPTCH.Services
                     var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailing>().ToList();
                     buildingStorey.Railings.AddRange(railings);
                     buildingStorey.Walls.AddRange(walls);
-                    thBuilding.Storeys.Add(buildingStorey);
                 }
-                spatialIndex = null;
-                entitySpatialIndex = null;
-                entityBases = null;
-                entityDic = null;
-                cadCurveEntitys = null;
-                cadEntityDic = null;
-                archDBData = null;
+                thBuilding.Storeys.Add(buildingStorey);
             }
+            //spatialIndex = null;
+            //entitySpatialIndex = null;
+            //entityBases = null;
+            //entityDic = null;
+            //cadCurveEntitys = null;
+            //cadEntityDic = null;
+            //archDBData = null;
             thSite.Building = thBuilding;
             thPrj.Site = thSite;
             return thPrj;
         }
-        private List<FloorBlock> FloorOrigin(AcadDatabase acdb)
+        private List<FloorBlock> FloorOrigin()
         {
-            var slabTexts = new List<DBText>();
-            var slabMTexts = new List<MText>();
-            var slabPLines = new List<Polyline>();
-            var floorOrigins =  GetFloorBlockPolylines(acdb,out slabPLines,out slabTexts,out slabMTexts);
-            slabPLines = slabPLines.Distinct().ToList();
-            CalcFloorSlab(slabPLines, slabTexts, slabMTexts);
+            var floorOrigins = new List<FloorBlock>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var slabTexts = new List<DBText>();
+                var slabMTexts = new List<MText>();
+                var slabPLines = new List<Polyline>();
+                floorOrigins = GetFloorBlockPolylines(acdb, out slabPLines, out slabTexts, out slabMTexts);
+                slabPLines = slabPLines.Distinct().ToList();
+                CalcFloorSlab(slabPLines, slabTexts, slabMTexts);
+            }
             return floorOrigins;
         }
         private void CalcFloorSlab(List<Polyline> slabPolylines,List<DBText> slabTexts,List<MText> slabMTexts) 
@@ -296,8 +325,10 @@ namespace ThMEPTCH.Services
                 else if (entity is BlockReference block)
                 {
                     var name = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
-                    if (name == "THAPE_A2L1_inner")
+                    if (name.ToLower().StartsWith("thape") && name.EndsWith("inner")) 
+                    {
                         floorBlocks.Add(block);
+                    }
                     else if (name == "BASEPOINT")
                         originBlocks.Add(block);
                 }
@@ -348,36 +379,102 @@ namespace ThMEPTCH.Services
         List<LevelElevtion> GetTestElevtion() 
         {
             var res = new List<LevelElevtion>();
-            res.Add(new LevelElevtion { Num = 1, Elevtion = 0.0, LevelHeight =5630, FloorName = "BZ1"});
-            res.Add(new LevelElevtion { Num = 2, Elevtion = 5630, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 3, Elevtion = 8530, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 4, Elevtion = 11430, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 5, Elevtion = 14330, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 6, Elevtion = 17230, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 7, Elevtion = 20130, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 8, Elevtion = 23030, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 9, Elevtion = 25930, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 10, Elevtion = 28830, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 11, Elevtion = 31730, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 12, Elevtion = 34630, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 13, Elevtion = 37530, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 14, Elevtion = 40430, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 15, Elevtion = 43330, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 16, Elevtion = 46230, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 17, Elevtion = 49130, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 18, Elevtion = 52030, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 19, Elevtion = 54930, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 20, Elevtion = 57830, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 21, Elevtion = 60730, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 22, Elevtion = 63630, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 23, Elevtion = 66530, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 24, Elevtion = 69430, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 25, Elevtion = 72330, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 26, Elevtion = 75230, LevelHeight = 2900, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 27, Elevtion = 78130, LevelHeight = 2900, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 1, Elevtion = 0, LevelHeight = 5300, FloorName = "BZ1" });
+            res.Add(new LevelElevtion { Num = 2, Elevtion = 5300, LevelHeight = 3150, FloorName = "BZ2" });
+            res.Add(new LevelElevtion { Num = 3, Elevtion = 8450, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 4, Elevtion = 11600, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 5, Elevtion = 14750, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 6, Elevtion = 17900, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 7, Elevtion = 21050, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 8, Elevtion = 24200, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 9, Elevtion = 27350, LevelHeight = 3150, FloorName = "BZ3" });
+            res.Add(new LevelElevtion { Num = 10, Elevtion = 30500, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 11, Elevtion = 33650, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 12, Elevtion = 36800, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 13, Elevtion = 39950, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 14, Elevtion = 43100, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 15, Elevtion = 46250, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 16, Elevtion = 49400, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 17, Elevtion = 52550, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 18, Elevtion = 55700, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 19, Elevtion = 58850, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 20, Elevtion = 62000, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 21, Elevtion = 65150, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 22, Elevtion = 68300, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 23, Elevtion = 71450, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 24, Elevtion = 74600, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 25, Elevtion = 77750, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 26, Elevtion = 80900, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 27, Elevtion = 84050, LevelHeight = 3150, FloorName = "BZ4" });
+
             return res;
         }
+        List<LevelElevtion> GetBlockElevtionValue(List<FloorBlock> floorBlocks)
+        {
+            var res = new List<LevelElevtion>();
+            double firstFloorHeight = 5300;
+            double levelHeight = 3150;
+            double startElevtion = 0.0;
+            foreach (var floor in floorBlocks)
+            {
+                var name = floor.FloorName;
+                var floorCalculator = new FloorCalculator(name);
+                var floorStrs = floorCalculator.Floors;
+                foreach (var str in floorStrs)
+                {
+                    int floorNum = 0;
+                    string result = System.Text.RegularExpressions.Regex.Replace(str, @"[^0-9]+", "");
+                    if (int.TryParse(result, out floorNum))
+                    {
+                        res.Add(new LevelElevtion { Num = floorNum, Elevtion = 0, LevelHeight = levelHeight, FloorName = name });
+                    }
+                }
+            }
+            if (res.Count < 1)
+                return res;
 
+            res = res.OrderBy(c => c.Num).ToList();
+            res.First().Elevtion = startElevtion;
+            res.First().LevelHeight = firstFloorHeight;
+            var elevtion = startElevtion + firstFloorHeight;
+            for (int i = 1; i < res.Count; i++) 
+            {
+                var level = res[i];
+                level.Elevtion = elevtion;
+                level.LevelHeight = levelHeight;
+                elevtion += levelHeight;
+            }
+
+            //res.Add(new LevelElevtion { Num = 1, Elevtion = 0, LevelHeight = 5300, FloorName = "BZ1" });
+            //res.Add(new LevelElevtion { Num = 2, Elevtion = 5300, LevelHeight = 3150, FloorName = "BZ2" });
+            //res.Add(new LevelElevtion { Num = 3, Elevtion = 8450, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 4, Elevtion = 11600, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 5, Elevtion = 14750, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 6, Elevtion = 17900, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 7, Elevtion = 21050, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 8, Elevtion = 24200, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 9, Elevtion = 27350, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 10, Elevtion = 30500, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 11, Elevtion = 33650, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 12, Elevtion = 36800, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 13, Elevtion = 39950, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 14, Elevtion = 43100, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 15, Elevtion = 46250, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 16, Elevtion = 49400, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 17, Elevtion = 52550, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 18, Elevtion = 55700, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 19, Elevtion = 58850, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 20, Elevtion = 62000, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 21, Elevtion = 65150, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 22, Elevtion = 68300, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 23, Elevtion = 71450, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 24, Elevtion = 74600, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 25, Elevtion = 77750, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 26, Elevtion = 80900, LevelHeight = 3150, FloorName = "BZ3" });
+            //res.Add(new LevelElevtion { Num = 27, Elevtion = 84050, LevelHeight = 3150, FloorName = "BZ4" });
+
+            return res;
+        }
         void InitFloorDBEntity(List<TArchEntity> allDBEntitys) 
         {
             var addDBColl = new DBObjectCollection();

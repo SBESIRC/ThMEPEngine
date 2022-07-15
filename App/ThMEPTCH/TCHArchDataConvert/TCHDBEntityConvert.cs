@@ -56,12 +56,14 @@ namespace ThMEPTCH.TCHArchDataConvert
                 {
                     var dbWall = walls.Find(c => c.Id == entity.DBId);
                     var tempEntity = DBToTHEntityCommon.TArchWallToEntityWall(dbWall, spLeftOffSet, epLeftOffSet, spRightOffSet, epRightOffSet, moveOffSet);
-                    wallDic.Add(entity.OutLine, WallEntityToTCHWall(tempEntity));
-
+                    if (tempEntity.OutLine != null && tempEntity.OutLine.Area>100)
+                        wallDic.Add(entity.OutLine, WallEntityToTCHWall(tempEntity));
                 }
                 else 
                 {
-                    wallDic.Add(entity.OutLine, WallEntityToTCHWall(entity));
+                    if (entity.OutLine != null && entity.OutLine.Area > 100)
+                        wallDic.Add(entity.OutLine, WallEntityToTCHWall(entity));
+
                 }
             }
 
@@ -107,7 +109,17 @@ namespace ThMEPTCH.TCHArchDataConvert
                     wall.Openings.Add(WallWindowOpening(wallEntityDic[outLine], windowEntity));
                 }
             }
-            return wallDic.Select(c=>c.Value).ToList();
+            var resList = new List<ThTCHWall>();
+            foreach (var keyValue in wallDic) 
+            {
+                if (keyValue.Value.Outline is Polyline polyline) 
+                {
+                    if (polyline.Area < 100)
+                        continue;
+                    resList.Add(keyValue.Value);
+                }
+            }
+            return resList;
         }
 
         double GetWallPointOffSet(Line wallLine, List<Curve> otherWallCurves, out double epLeftOffSet, out double spRightOffSet, out double epRightOffSet) 

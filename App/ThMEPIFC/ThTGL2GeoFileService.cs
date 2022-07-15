@@ -6,6 +6,7 @@ using ThMEPIFC.Ifc2x3;
 using ThMEPTCH.Model;
 using Xbim.Common;
 using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene;
 
 namespace ThMEPIFC
@@ -14,9 +15,6 @@ namespace ThMEPIFC
     {
 		protected int gIndex = 0;
 		protected int pIndex = 1;
-		List<IfcMeshModel> allModelMeshs = new List<IfcMeshModel>();
-		List<PointNormal> allModelPointNormals = new List<PointNormal>();
-
 		private double _deflectionOverride = double.NaN;
 		private double _angularDeflectionOverride = double.NaN;
 		public IfcStore Model { get; private set; }
@@ -42,8 +40,39 @@ namespace ThMEPIFC
 					{
 					}
 				}
+				//var ifcProject = Model.Instances.OfType<IIfcProject>().FirstOrDefault();
+				//var allElems = Model.Instances.OfType<IIfcElement>().ToList();
+				//var allElemIds = allElems.Select(c => c.EntityLabel).ToList();
+				//var ifcStorys = ifcProject.Buildings.SelectMany(c => c.BuildingStoreys).ToList();
 				var ifcGeo = new IfcStoreToEngineFile();
 				var allModelMeshs = ifcGeo.ReadGeomtry(Model, out List<PointNormal> allModelPointNormals);
+				//var notElems = allModelMeshs.Where(c => !allElemIds.Any(x => x == c.IfcIndex)).ToList();
+				//foreach (var item in project.Site.Building.Storeys) 
+				//{
+				//	if (string.IsNullOrEmpty(item.MemoryStoreyId))
+				//		continue;
+				//	var memoryStory = project.Site.Building.Storeys.Where(c => c.Uuid == item.MemoryStoreyId).FirstOrDefault();
+				//	if (null == memoryStory)
+				//		continue;
+				//	IIfcBuildingStorey buildingStorey = null;
+				//	foreach (var story in ifcStorys) 
+				//	{
+				//		var name = story.Name.Value.ToString();
+				//		if (name == memoryStory.Number)
+				//		{
+				//			buildingStorey = story;
+				//			break;
+				//		}
+				//	}
+				//	if (buildingStorey == null)
+				//		continue;
+    //                foreach (var ifcType in buildingStorey.ContainsElements)
+    //                {
+    //                    //foreach (var ifcEntity in ifcType.)
+
+    //                }
+
+    //            }
 				WriteMidFile(allModelMeshs, allModelPointNormals, file);
 				Model.Dispose();
 			}
@@ -67,7 +96,7 @@ namespace ThMEPIFC
 				return;
 			if (!string.IsNullOrEmpty(midFilePath) && File.Exists(midFilePath))
 				File.Delete(midFilePath);
-			var create = new FileStream(midFilePath, FileMode.Create);
+			var create = new FileStream(midFilePath, FileMode.Create, FileAccess.Write);
 			BinaryWriter writer = new BinaryWriter(create);
 			ulong ptCount = (ulong)meshPoints.Count();
 			//vertices
@@ -130,7 +159,11 @@ namespace ThMEPIFC
 					writer.Write(item.TriangleMaterial.NS);
 				}
 			}
-			writer.Close();
+			//writer.Close();
+			writer.Dispose();
+			writer = null;
+			create.Dispose();
+			create = null;
 		}
 	}
 	class PointNormal
