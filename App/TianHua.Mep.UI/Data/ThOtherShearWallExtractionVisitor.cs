@@ -26,10 +26,10 @@ namespace TianHua.Mep.UI.Data
             {
                 elements.AddRange(HandleHatch(hatch, matrix));
             }
-            //else if (dbObj is Solid solid)
-            //{
-            //    elements.AddRange(HandleSolid(solid, matrix));
-            //}
+            else if (dbObj is Solid solid)
+            {
+                elements.AddRange(HandleSolid(solid, matrix));
+            }
         }
 
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
