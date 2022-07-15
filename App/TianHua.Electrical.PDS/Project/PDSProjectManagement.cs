@@ -16,6 +16,7 @@ using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using DwgGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode, TianHua.Electrical.PDS.Model.ThPDSCircuitGraphEdge<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode>>;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 using TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet;
+using System.IO.Compression;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -198,10 +199,11 @@ namespace TianHua.Electrical.PDS.Project
                 var GlobalConfigurationFile = ExportGlobalConfiguration(filePath);
                 ConfigFiles[0] = GraphFile;
                 ConfigFiles[1] = GlobalConfigurationFile;
-                using (ZipOutputStream outStream = new ZipOutputStream(File.Create(path)))
-                {
-                    Zip(ConfigFiles, outStream, "PDSProjectKey");
-                }
+                //using (ZipOutputStream outStream = new ZipOutputStream(File.Create(path)))
+                //{
+                //    Zip(ConfigFiles, outStream, "PDSProjectKey");
+                //}
+                Zip(ConfigFiles, path, "PDSProjectKey");
             }
             catch (Exception ex)
             {
@@ -304,6 +306,23 @@ namespace TianHua.Electrical.PDS.Project
             catch (Exception ex)
             {
                 throw;
+            }
+        }
+
+        public static void Zip(string[] files, string path, string pwd)
+        {
+            using (FileStream zipFileToOpen = new FileStream(path, FileMode.Create))
+            using (ZipArchive archive = new ZipArchive(zipFileToOpen, ZipArchiveMode.Create))
+            {
+                foreach (string file in files)
+                {
+                    ZipArchiveEntry entry = archive.CreateEntry(file);
+                    using (Stream stream = entry.Open())
+                    {
+                        byte[] bytes = File.ReadAllBytes(file);
+                        stream.Write(bytes, 0, bytes.Length);
+                    }
+                }
             }
         }
 
