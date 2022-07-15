@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-using AcHelper;
-
 using ThCADExtension;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Command;
@@ -33,10 +31,14 @@ namespace ThMEPElectrical.ViewModel
         public ThBlockConvertVM()
         {
             Parameter = new ThBlockConvertModel();
-            BlockConvertInfos = new ObservableCollection<BlockConvertInfo>();
+            CreateBlockConvertInfos();
             CompareModels = new List<ThBConvertCompareModel>();
             TarEntityInfos = new List<ThBConvertEntityInfos>();
+        }
 
+        private void CreateBlockConvertInfos()
+        {
+            BlockConvertInfos = new ObservableCollection<BlockConvertInfo>();
             // blank
             for (var i = 0; i <= 15; i++)
             {
@@ -62,9 +64,9 @@ namespace ThMEPElectrical.ViewModel
         {
             // 执行命令
             var cmd = CreateBConvertCommand();
-            FocusToCAD();
             cmd.Command = BConvertCommand.BlockCompare;
             cmd.Execute();
+            CreateBlockConvertInfos();
             CompareModels = cmd.CompareModels.OrderBy(o => o.Category).ThenBy(o => o.EquimentType).ThenBy(o => o.Type).ToList();
             TarEntityInfos = cmd.TarEntityInfos;
 
@@ -90,6 +92,7 @@ namespace ThMEPElectrical.ViewModel
                         CompareModels[j].EquimentType, CompareModels[j].Type.GetDescription()));
                 }
             }
+            FillBlank();
         }
 
         /// <summary>
@@ -144,6 +147,10 @@ namespace ThMEPElectrical.ViewModel
         /// </summary>
         public void Zoom(BlockConvertInfo info)
         {
+            if (string.IsNullOrEmpty(info.Guid) || CompareModels.Count == 0)
+            {
+                return;
+            }
             var zoomService = new ThBConvertZoomService();
             zoomService.Zoom(CompareModels.Where(o => o.Guid.Equals(info.Guid)).First(), Parameter.BlkScaleValue / 100.0);
         }
@@ -197,14 +204,6 @@ namespace ThMEPElectrical.ViewModel
             return cmd;
         }
 
-        private static void FocusToCAD()
-        {
-            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
-#if ACAD2012
-            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
-#else
-            Active.Document.Window.Focus();
-#endif
-        }
+
     }
 }

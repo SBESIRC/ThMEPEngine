@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using AcHelper;
+using System.Linq;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.ViewModel;
@@ -51,6 +52,7 @@ namespace TianHua.Electrical.UI.BlockConvert
         private void btnUpdateCompare_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             this.Hide();
+            FocusToCAD();
             BlockConvertVM.UpdateCompare();
             Refresh();
             this.Show();
@@ -99,6 +101,7 @@ namespace TianHua.Electrical.UI.BlockConvert
 
         private void table1_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            FocusToCAD();
             BlockConvertVM.Zoom(table1.SelectedItem as BlockConvertInfo);
         }
 
@@ -106,6 +109,16 @@ namespace TianHua.Electrical.UI.BlockConvert
         {
             table1.ItemsSource = null;
             table1.ItemsSource = BlockConvertVM.BlockConvertInfos;
+        }
+
+        private static void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
     }
 }
