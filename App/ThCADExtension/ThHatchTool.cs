@@ -121,11 +121,21 @@ namespace ThCADExtension
                 {
                     segments.Add(new PolylineSegment(arc2d));
                 }
+                else if (ellipse2d != null)
+                {
+                    var ellipse = ThEllipseTool.ToEllipse(plane, ellipse2d);
+                    if (ellipse != null)
+                    {
+                        segments.AddRange(new PolylineSegmentCollection(ellipse));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
                 else
                 {
-                    // 暂时不支持由椭圆弧和样条曲线围合的面域
-                    segments = new PolylineSegmentCollection();
-                    break;
+                    throw new NotSupportedException();
                 }               
                 //else if (spline2d != null)
                 //{
