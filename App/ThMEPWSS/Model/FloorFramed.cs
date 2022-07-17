@@ -27,11 +27,11 @@ namespace ThMEPWSS.Model
         /// 楼层框线的Block，
         /// 注意：这里的BlockReference可能只是是复制出来的数据，不能直接通过该块的ID去找块的信息
         /// </summary>
-        public BlockReference floorBlock { get; }
+        public BlockReference floorBlock { get; set; }
         /// <summary>
         /// 楼层框的外轮廓
         /// </summary>
-        public Polyline outPolyline { get; }
+        public Polyline outPolyline { get; set; }
         /// <summary>
         /// 楼层框的开始楼层编号(屋面或没有找到时 -999)
         /// </summary>
@@ -49,7 +49,7 @@ namespace ThMEPWSS.Model
         /// <summary>
         /// 楼层框的基准Id
         /// </summary>
-        public Point3d datumPoint { get; }
+        public Point3d datumPoint { get; set; }
         /// <summary>
         /// 显示的楼层名称
         /// </summary>
@@ -65,7 +65,7 @@ namespace ThMEPWSS.Model
         /// <summary>
         /// 楼层的框线角点
         /// </summary>
-        public Point3dCollection blockOutPointCollection { get; }
+        public Point3dCollection blockOutPointCollection { get; set; }
         public FloorFramed(BlockReference floorBlock,ObjectId blockId)
         {
             this.floorUid = Guid.NewGuid().ToString();

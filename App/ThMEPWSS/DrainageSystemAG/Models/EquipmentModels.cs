@@ -66,7 +66,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     public class EquipmentBlcokModel
     {
         public EnumEquipmentType enumEquipmentType { get; }
-        public List<BlockReference> blockReferences { get; }
+        public List<BlockReference> blockReferences { get; set; }
         public EquipmentBlcokModel(EnumEquipmentType type, List<BlockReference> blockReferences = null)
         {
             this.enumEquipmentType = type;
