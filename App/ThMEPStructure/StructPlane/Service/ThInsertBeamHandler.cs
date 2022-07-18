@@ -14,11 +14,13 @@ namespace ThMEPStructure.StructPlane.Service
 {
     internal class ThInsertBeamHandler
     {
+        private double PointTolerance = 1.0;
         private List<ThGeometry> BeamGeos { get; set; }
         private ThCADCoreNTSSpatialIndex BeamMarkSpatialIndex { get; set; }
         public ThInsertBeamHandler(List<ThGeometry> beamGeos,DBObjectCollection beamMarks)
         {
             BeamGeos = beamGeos;
+            PointTolerance = ThStructurePlaneCommon.PointTolerance;
             BeamMarkSpatialIndex = new ThCADCoreNTSSpatialIndex(beamMarks);
         }
         public void Handle()
@@ -69,7 +71,7 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return;
             }            
-            if (info.Branch1.StartPoint.IsPointOnLine(info.Main))
+            if (info.Branch1.StartPoint.IsPointOnLine(info.Main,PointTolerance))
             {
                 info.Branch1.StartPoint = info.IntersPt1;
             }
@@ -77,7 +79,7 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 info.Branch1.EndPoint = info.IntersPt1;
             }
-            if (info.Branch2.StartPoint.IsPointOnLine(info.Main))
+            if (info.Branch2.StartPoint.IsPointOnLine(info.Main, PointTolerance))
             {
                 info.Branch2.StartPoint = info.IntersPt2;
             }
@@ -86,7 +88,7 @@ namespace ThMEPStructure.StructPlane.Service
                 info.Branch2.EndPoint = info.IntersPt2;
             }
             var midPt = info.IntersPt1.GetMidPt(info.IntersPt2);
-            if (info.Branch1Side.StartPoint.IsPointOnLine(info.Branch1))
+            if (info.Branch1Side.StartPoint.IsPointOnLine(info.Branch1, PointTolerance))
             {
                 info.Branch1Side.StartPoint = midPt;
             }
@@ -94,7 +96,7 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 info.Branch1Side.EndPoint = midPt;
             }
-            if (info.Branch2Side.StartPoint.IsPointOnLine(info.Branch2))
+            if (info.Branch2Side.StartPoint.IsPointOnLine(info.Branch2, PointTolerance))
             {
                 info.Branch2Side.StartPoint = midPt;
             }

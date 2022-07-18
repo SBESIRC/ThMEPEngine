@@ -167,7 +167,7 @@ namespace ThMEPStructure.StructPlane
                 var passGeos = newGeos.Except(beamGeos).ToList();
                 var belowObjs = GetBelowObjs(passGeos);
                 var newBeamGeos = ThBeamLineCleaner.Clean(beamGeos, belowObjs,
-                    beamMarkGeos.Select(o=>o.Boundary).ToCollection());
+                    beamMarkGeos.Select(o => o.Boundary).ToCollection());
                 passGeos.AddRange(newBeamGeos);
                 #endregion
 

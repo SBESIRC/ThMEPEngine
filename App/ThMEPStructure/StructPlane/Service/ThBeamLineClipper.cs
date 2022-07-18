@@ -105,7 +105,7 @@ namespace ThMEPStructure.StructPlane.Service
                         }
                     }
                     if(Math.Abs(newSp.DistanceTo(newEp) - l.Length)<=1e-6 || 
-                    (newSp.DistanceTo(newEp) - l.Length)> totalSnapLength)
+                    Math.Abs(newSp.DistanceTo(newEp) - l.Length)> totalSnapLength)
                     {
                         // 如果长度没变,或调整的长度过长，则不做调整
                         results.Add(l);
@@ -145,7 +145,7 @@ namespace ThMEPStructure.StructPlane.Service
                     }
                     else if (polygon is MPolygon mPolygon)
                     {
-                        results = results.Union(mPolygon.Buffer(length));
+                        results = results.Union(mPolygon.Buffer(length,true));
                     }
                 });
                 var validPolygons = results.FilterSmallArea(1.0);
