@@ -230,6 +230,7 @@
     <Compile Include="SprinklerDim\Data\ThSprinklerDimDataProcessService.cs" />
     <Compile Include="SprinklerDim\Engine\ThSprinklerDimEngine.cs" />
     <Compile Include="SprinklerDim\Service\ThCreateGroupService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerDimNetworkService.cs" />
     <Compile Include="SprinklerDim\ThSprinklerDimCommon.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorEngine.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />

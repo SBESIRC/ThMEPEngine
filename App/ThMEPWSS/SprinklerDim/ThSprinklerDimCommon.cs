@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPWSS.SprinklerDim
+namespace ThMEPWSS.ThSprinklerDim
 {
     public class ThSprinklerDimCommon
     {
