@@ -91,6 +91,7 @@ namespace TianHua.Electrical.PDS.Service
         public void ClearTransientGraphics()
         {
             _objs.OfType<DbPolyline>().ForEach(e => Manager.EraseTransient(e, new IntegerCollection()));
+            _objs.Clear();
         }
     }
 }

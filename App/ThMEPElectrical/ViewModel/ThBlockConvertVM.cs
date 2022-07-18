@@ -28,6 +28,8 @@ namespace ThMEPElectrical.ViewModel
 
         public List<ThBConvertEntityInfos> TarEntityInfos { get; set; }
 
+        private readonly ThBConvertZoomService ZoomService = new ThBConvertZoomService();
+
         public ThBlockConvertVM()
         {
             Parameter = new ThBlockConvertModel();
@@ -151,8 +153,7 @@ namespace ThMEPElectrical.ViewModel
             {
                 return;
             }
-            var zoomService = new ThBConvertZoomService();
-            zoomService.Zoom(CompareModels.Where(o => o.Guid.Equals(info.Guid)).First(), Parameter.BlkScaleValue / 100.0);
+            ZoomService.Zoom(CompareModels.Where(o => o.Guid.Equals(info.Guid)).First(), Parameter.BlkScaleValue / 100.0);
         }
 
         private void FillBlank()
