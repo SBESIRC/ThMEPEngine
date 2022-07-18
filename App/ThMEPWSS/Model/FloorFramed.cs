@@ -10,19 +10,19 @@ namespace ThMEPWSS.Model
 {
     public class FloorFramed
     {
-        public string floorUid { get; }
+        public string floorUid { get; set; }
         /// <summary>
         /// 楼层名称（参数数据）（当楼层为屋面时，数据为空字符串）
         /// </summary>
-        public string floorName { get; }
+        public string floorName { get; set; }
         /// <summary>
         /// 楼层类型（参数数据）（大屋面、小屋面、标准层、非标层）
         /// </summary>
-        public string floorType { get; }
+        public string floorType { get; set; }
         /// <summary>
         /// 楼层框定块的Id
         /// </summary>
-        public ObjectId blockId { get; }
+        public ObjectId blockId { get; set; }
         /// <summary>
         /// 楼层框线的Block，
         /// 注意：这里的BlockReference可能只是是复制出来的数据，不能直接通过该块的ID去找块的信息
@@ -35,17 +35,17 @@ namespace ThMEPWSS.Model
         /// <summary>
         /// 楼层框的开始楼层编号(屋面或没有找到时 -999)
         /// </summary>
-        public int startFloorOrder { get; }
+        public int startFloorOrder { get; set; }
         /// <summary>
         /// 楼层框的结束楼层编号(屋面或没有找到时 -999)
         /// （可能和开始楼层编号一样）
         /// </summary>
-        public int endFloorOrder { get; }
+        public int endFloorOrder { get; set; }
         /// <summary>
         /// 楼层框的楼层（最大、最小）
         /// （3-10）->（3,10）   (3-10,9,8)->(3,8,9,10)
         /// </summary>
-        public List<int> allFloorOrder { get; }
+        public List<int> allFloorOrder { get; set; }
         /// <summary>
         /// 楼层框的基准Id
         /// </summary>
@@ -53,19 +53,44 @@ namespace ThMEPWSS.Model
         /// <summary>
         /// 显示的楼层名称
         /// </summary>
-        public string floorShowName { get; }
+        public string floorShowName { get; set; }
         /// <summary>
         /// 宽度(X轴方向)
         /// </summary>
-        public double width { get; }
+        public double width { get; set; }
         /// <summary>
         /// 高度(Y轴方向)
         /// </summary>
-        public double height { get; }
+        public double height { get; set; }
         /// <summary>
         /// 楼层的框线角点
         /// </summary>
         public Point3dCollection blockOutPointCollection { get; set; }
+        public FloorFramed Clone()
+        {
+            var newFloor = new FloorFramed();
+            newFloor.floorUid = floorUid;
+            newFloor.floorName = floorName;
+            newFloor.floorType = floorType;
+            newFloor.blockId = blockId;
+            newFloor.floorBlock = floorBlock.Clone() as BlockReference;
+            newFloor.outPolyline = outPolyline.Clone() as Polyline;
+            newFloor.startFloorOrder = startFloorOrder;
+            newFloor.endFloorOrder = endFloorOrder;
+            newFloor.allFloorOrder = new List<int>();
+            newFloor.allFloorOrder = allFloorOrder;
+            newFloor.datumPoint = new Point3d(datumPoint.X, datumPoint.Y, datumPoint.Z);
+            newFloor.floorShowName = floorShowName;
+            newFloor.width = width;
+            newFloor.height = height;
+            newFloor.blockOutPointCollection = new Point3dCollection();
+            newFloor.blockOutPointCollection = blockOutPointCollection;
+            return newFloor;
+        }
+        FloorFramed()
+        {
+
+        }
         public FloorFramed(BlockReference floorBlock,ObjectId blockId)
         {
             this.floorUid = Guid.NewGuid().ToString();

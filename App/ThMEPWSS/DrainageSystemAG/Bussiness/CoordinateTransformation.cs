@@ -35,8 +35,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     public static class CoordinateTransformation
     {
         public static void ConvertCoordinateToUCS(ref List<FloorFramed> floorFrameds,
-            ref List<FloorFramed> roofFloors,
-            ref FloorFramed livingHighestFloor,
             ref List<Polyline> _allWalls,
             ref List<Polyline> _allColumns,
             ref List<Polyline> _allRailings,
@@ -51,11 +49,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     floorFrameds[i] = ConvertFloorFramedToUSC(floorFrameds[i], matrix);
                 }
-                for (int i = 0; i < roofFloors.Count; i++)
-                {
-                    roofFloors[i] = ConvertFloorFramedToUSC(roofFloors[i], matrix);
-                }
-                livingHighestFloor = ConvertFloorFramedToUSC(livingHighestFloor, matrix);
                 for (int i = 0; i < _allWalls.Count; i++)
                 {
                     _allWalls[i].TransformBy(matrix);
@@ -76,12 +69,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     _floorBlockEqums[i] = ConvertEquipmentBlcokModelToUSC(_floorBlockEqums[i], matrix);
                 }
-            }
-               
-
-
+            }             
         }
-        private static FloorFramed ConvertFloorFramedToUSC(FloorFramed floorFramed,Matrix3d matrix)
+        public static FloorFramed ConvertFloorFramedToUSC(FloorFramed floorFramed,Matrix3d matrix)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -97,8 +87,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 floorFramed.datumPoint = floorFramed.datumPoint.TransformBy(matrix);
                 return floorFramed;
             }
-
-
         }
         private static EquipmentBlcokModel ConvertEquipmentBlcokModelToUSC(EquipmentBlcokModel equipmentBlcokModel,Matrix3d matrix)
         {
@@ -112,7 +100,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
                 return equipmentBlcokModel;
             }
-
         }
         public static void ConvertCoordinateToWCS(ref List<CreateBlockInfo> createBlocks, ref List<CreateBasicElement> createElems,
             ref List<CreateDBTextElement> createTexts,Matrix3d matrix)
@@ -163,6 +150,5 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 leaders[i] = leader;
             }
         }
-
     }
 }
