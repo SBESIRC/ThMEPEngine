@@ -6,10 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
 using ThMEPTCH.Model;
@@ -143,18 +140,13 @@ namespace ThMEPTCH.Services
                     var walls = new List<ThTCHWall>();
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHWall>().ToList())
                     {
-                        var copyItem = item.Copy();
+                        var copyItem = item.Clone() as ThTCHWall;
                         if (Math.Abs(copyItem.Height) < 10)
                             copyItem.Height = floor.LevelHeight;
                         walls.Add(copyItem);
                     }
                     var slabs = levelEntitys.FloorEntitys.OfType<ThTCHSlab>().ToList();
                     buildingStorey.Slabs.AddRange(slabs);
-                    foreach (var item in walls)
-                    {
-                        if (Math.Abs(item.Height) < 10)
-                            item.Height = floor.LevelHeight;
-                    }
                     var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailing>().ToList();
                     buildingStorey.Railings.AddRange(railings);
                     buildingStorey.Walls.AddRange(walls);
@@ -369,39 +361,6 @@ namespace ThMEPTCH.Services
             outPLine.AddVertexAt(3, pt4.ToPoint2D(), 0, 0, 0);
             outPLine.Closed = true;
             return outPLine;
-        }
-        List<LevelElevtion> GetTestElevtion() 
-        {
-            var res = new List<LevelElevtion>();
-            res.Add(new LevelElevtion { Num = 1, Elevtion = 0, LevelHeight = 5300, FloorName = "BZ1" });
-            res.Add(new LevelElevtion { Num = 2, Elevtion = 5300, LevelHeight = 3150, FloorName = "BZ2" });
-            res.Add(new LevelElevtion { Num = 3, Elevtion = 8450, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 4, Elevtion = 11600, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 5, Elevtion = 14750, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 6, Elevtion = 17900, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 7, Elevtion = 21050, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 8, Elevtion = 24200, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 9, Elevtion = 27350, LevelHeight = 3150, FloorName = "BZ3" });
-            res.Add(new LevelElevtion { Num = 10, Elevtion = 30500, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 11, Elevtion = 33650, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 12, Elevtion = 36800, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 13, Elevtion = 39950, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 14, Elevtion = 43100, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 15, Elevtion = 46250, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 16, Elevtion = 49400, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 17, Elevtion = 52550, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 18, Elevtion = 55700, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 19, Elevtion = 58850, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 20, Elevtion = 62000, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 21, Elevtion = 65150, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 22, Elevtion = 68300, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 23, Elevtion = 71450, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 24, Elevtion = 74600, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 25, Elevtion = 77750, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 26, Elevtion = 80900, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 27, Elevtion = 84050, LevelHeight = 3150, FloorName = "BZ4" });
-
-            return res;
         }
         List<LevelElevtion> GetBlockElevtionValue(List<FloorBlock> floorBlocks)
         {

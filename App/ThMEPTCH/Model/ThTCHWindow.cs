@@ -1,11 +1,13 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
+using System;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHWindow : ThIfcWindow
+    public class ThTCHWindow : ThIfcWindow, ICloneable
     {
         [ProtoMember(1)]
         public Point3d CenterPoint { get; set; }
@@ -20,7 +22,7 @@ namespace ThMEPTCH.Model
         public Vector3d ExtrudedDirection { get; }
         [ProtoMember(6)]
         public string OpenDirection { get; set; }
-
+        private double Angle { get; }
         private ThTCHWindow()
         {
 
@@ -34,6 +36,19 @@ namespace ThMEPTCH.Model
             Width = width;
             Height = height;
             Thickness = thickness;
+            Angle = angle;
+        }
+        public object Clone()
+        {
+            if (this == null)
+                return null;
+            var window = new ThTCHWindow(this.CenterPoint, this.Width, this.Height, this.Thickness, this.Angle);
+            window.XVector = this.XVector;
+            if (this.Outline != null)
+            {
+                window.Outline = this.Outline.Clone() as Entity;
+            }
+            return window;
         }
     }
 }
