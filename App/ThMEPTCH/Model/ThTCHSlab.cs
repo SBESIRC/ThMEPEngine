@@ -1,21 +1,30 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ProtoBuf;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {
-    public class ThTCHSlab: ThIfcSlab
+    [ProtoContract]
+    public class ThTCHSlab : ThIfcSlab
     {
         /// <summary>
         /// 降板信息
         /// </summary>
+        [ProtoMember(1)]
         public List<ThTCHSlabDescendingData> Descendings { get; set; }
 
         /// <summary>
         /// 拉伸方向
         /// </summary>
+        [ProtoMember(2)]
         public Vector3d ExtrudedDirection { get; private set; }
+
+        private ThTCHSlab()
+        {
+
+        }
 
         /// <summary>
         /// 构造函数

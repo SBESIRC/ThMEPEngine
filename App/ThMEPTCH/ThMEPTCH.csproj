@@ -71,6 +71,11 @@
   <ItemGroup>
     <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
+    <Compile Include="Model\SurrogateModel\Matrix3DSurrogate.cs" />
+    <Compile Include="Model\SurrogateModel\Point3DCollectionSurrogate.cs" />
+    <Compile Include="Model\SurrogateModel\Point3DSurrogate.cs" />
+    <Compile Include="Model\SurrogateModel\PolylineSurrogate.cs" />
+    <Compile Include="Model\SurrogateModel\Vector3DSurrogate.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
     <Compile Include="Model\ThTCHSlabDescendingData.cs" />
@@ -175,6 +180,11 @@
       <Project>{81CA0ABB-8E13-4E53-99B6-56BAAF2F7BD9}</Project>
       <Name>ThMEPIO</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="protobuf-net">
+      <Version>3.1.17</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

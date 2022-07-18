@@ -1,14 +1,18 @@
 ﻿using System;
-using System.IO;
-using System.Threading;
-using System.Windows.Forms;
 using AcHelper;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Linq2Acad;
+using System.IO;
+using System.IO.Pipes;
 using ThMEPTCH.Services;
+using System.Diagnostics;
+using System.Windows.Forms;
+using System.Security.Principal;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using ProtoBuf;
+using ThMEPTCH.Model.SurrogateModel;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPIFC
 {
@@ -165,6 +169,69 @@ namespace ThMEPIFC
                     }
 
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THDB2Push", CommandFlags.Modal)]
+        public void THDB2Push()
+        {
+            Active.Database.GetEditor().WriteMessage($"Start");
+
+            // 拾取TGL DB文件
+            var filePath = OpenDBFile();
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+            Active.Database.GetEditor().WriteMessage($"开始读入并解析TGL XML文件");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            // 读入并解析TGL XML文件
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProject(false);
+            if (project == null)
+            {
+                return;
+            }
+            sw.Stop();
+            Active.Database.GetEditor().WriteMessage($"读入并解析TGL XML文件完成，共用时{sw.ElapsedMilliseconds}s");
+            sw.Reset();
+            Active.Database.GetEditor().WriteMessage($"开始序列化project.");
+            sw.Start();
+
+            // 管道
+            //"THDB2Push_TestPipe" 作为管道名称，两端管道名称需一致
+            var pipeClient =
+                    new NamedPipeClientStream(".", "THDB2Push_TestPipe",
+                        PipeDirection.Out, PipeOptions.None,
+                        TokenImpersonationLevel.Impersonation);
+            try
+            {
+                pipeClient.Connect(5000);
+                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Point3d)))
+                {
+                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Point3d), false).SetSurrogate(typeof(Point3DSurrogate));
+                }
+                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Vector3d)))
+                {
+                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Vector3d), false).SetSurrogate(typeof(Vector3DSurrogate));
+                }
+                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Matrix3d)))
+                {
+                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Matrix3d), false).SetSurrogate(typeof(Matrix3DSurrogate));
+                }
+                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Polyline)))
+                {
+                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Polyline), false).SetSurrogate(typeof(PolylineSurrogate));
+                }
+                Serializer.Serialize(pipeClient, project);
+                pipeClient.Close();
+                Active.Database.GetEditor().WriteMessage("已发送至Viewer\r\n");
+            }
+            catch
+            {
+                pipeClient.Dispose();
+                Active.Database.GetEditor().WriteMessage("未连接到Viewer\r\n");
             }
         }
 
