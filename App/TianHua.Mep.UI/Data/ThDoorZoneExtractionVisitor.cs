@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Mep.UI.Data
@@ -58,12 +58,12 @@ namespace TianHua.Mep.UI.Data
         {
             if(br.Bounds.HasValue)
             {
-                var obb = ToOBB(br);
-                if(obb!=null)
+                var obb = br.ToOBB(br.BlockTransform.PreMultiplyBy(matrix));
+                //var obb = br.ToOBB(matrix);
+                if (obb!=null)
                 {
                     if(obb.Area>1.0)
                     {
-                        obb.TransformBy(matrix);
                         elements.Add(new ThRawIfcSpatialElementData()
                         {
                             Geometry = obb,
@@ -86,16 +86,6 @@ namespace TianHua.Mep.UI.Data
         private bool CheckBlockNameIsValid(Entity e)
         {
             return false;
-        }
-
-        private Polyline ToOBB(BlockReference br)
-        {
-            var worker = new ThBlockReferenceObbService()
-            {
-                ChordHeight = 20.0,
-                ArcTesslateLength = 50.0,                
-            };
-            return worker.ToObb(br);
         }
     }
 }

@@ -27,13 +27,25 @@ namespace TianHua.Mep.UI.Data
         private static List<string> GetDoorZoneBlkNames()
         {
             var results = new List<string>();   
-            var blkNameDict = BlockConfigService.GetBlockNameListDict();
+            var blkNameDict = GetBlockNameList();
             if(blkNameDict.ContainsKey("门块"))
             {
                 results.AddRange(blkNameDict["门块"]);
             }
             return results.Distinct().ToList();
         }
+
+        private static Dictionary<string, List<string>> GetBlockNameList()
+        {
+            var dic = new Dictionary<string, List<string>>();
+            var sourceDict = BlockConfigService.Instance.BlockNameList;
+            foreach (var item in sourceDict)
+            {
+                dic.Add(item.Key, item.Value.OfType<BlockNameConfigViewModel>().Select(o => o.layerName).ToList());
+            }
+            return dic;
+        }
+
         private static Func<Entity, bool> CreateCheckBlkNameMethod(List<string> blkNames)
         {
             var upperBlkNames = blkNames.Select(o => o.ToUpper()).ToList();
