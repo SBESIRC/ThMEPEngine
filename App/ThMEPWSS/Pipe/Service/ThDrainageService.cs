@@ -11999,6 +11999,21 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               }
               else
               {
+                MaxBalconyToBalconyDistance.Outlet = THESAURUSINTENTIONAL;
+              }
+            }
+            if (MaxBalconyToBalconyDistance.PipeType is PipeType.NL)
+            {
+              for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE--)
+              {
+                var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+                if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
+                {
+                  if (MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE)
+                  {
+                    if (DEFAULT_FIRE_VALVE_WIDTH.CPSCount == THESAURUSSTAMPEDE) DEFAULT_FIRE_VALVE_WIDTH.CPSCount = THESAURUSHOUSING;
+                  }
+                }
               }
             }
             {

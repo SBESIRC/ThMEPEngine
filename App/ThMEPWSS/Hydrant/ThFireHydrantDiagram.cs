@@ -671,7 +671,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
             if (ctx == null) return;
             {
                 var TEXTHEIGHT = vm.CurrentDwgRatio is SEMITRANSPARENT ? THESAURUSSOMBRE : THESAURUSCOMPULSIVE;
-                { ThRainSystemService.ImportElementsFromStdDwg(); }
+{ ThRainSystemService.ImportElementsFromStdDwg(); }
                 using (DocLock)
                 using (var adb = AcadDatabase.Active())
                 using (var tr = new _DrawingTransaction(adb))
@@ -1167,36 +1167,36 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                         }
                         var targetsf = GeoFac.CreateIntersectsSelector(adb.ModelSpace.OfType<Entity>().SelectMany(getTargets).ToList());
                         IEnumerable<Point2d> getShooters()
-                        {
-                            foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => kv.Value.Type is THESAURUSHOUSING))
                             {
-                                var pt = kv.Value;
-                                if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
+                                foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => kv.Value.Type is THESAURUSHOUSING))
                                 {
-                                    if (!shootHints.Contains(kv.Key))
+                                    var pt = kv.Value;
+                                    if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
                                     {
-                                        continue;
+                                        if (!shootHints.Contains(kv.Key))
+                                        {
+                                            continue;
+                                        }
                                     }
-                                }
-                                if (pt.StartLine is not null)
-                                {
-                                    var seg = pt.StartLine.ToGLineSegment();
-                                    if (seg.IsValid)
+                                    if (pt.StartLine is not null)
                                     {
-                                        yield return seg.Center;
+                                        var seg = pt.StartLine.ToGLineSegment();
+                                        if (seg.IsValid)
+                                        {
+                                            yield return seg.Center;
+                                        }
                                     }
-                                }
-                                if (pt.TextLine is not null)
-                                {
-                                    var seg = pt.TextLine.ToGLineSegment();
-                                    if (seg.IsValid)
+                                    if (pt.TextLine is not null)
                                     {
-                                        yield return seg.Center;
-                                        yield return seg.Center.OffsetY(THESAURUSHYPNOTIC);
+                                        var seg = pt.TextLine.ToGLineSegment();
+                                        if (seg.IsValid)
+                                        {
+                                            yield return seg.Center;
+                                            yield return seg.Center.OffsetY(THESAURUSHYPNOTIC);
+                                        }
                                     }
                                 }
                             }
-                        }
                         var tokills = targetsf(getShooters().Select(x => x.ToNTSPoint()).ToGeometry()).Select(x => x.UserData).Cast<Entity>().Distinct().ToList();
                         foreach (var ent in tokills)
                         {
@@ -1274,7 +1274,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             }
                                             var _r = r.Expand(-text_gap);
                                             var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
-                                            t.Layer = LeaderLayer;
+                                                t.Layer = LeaderLayer;
                                             t.WidthFactor = THESAURUSDISPASSIONATE;
                                             t.TransformBy(u2w);
                                             ByLayer(t);
@@ -1284,12 +1284,12 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             });
                                             {
                                                 var e = DrawLineSegmentLazy(labelline1);
-                                                e.Layer = LeaderLayer;
+                                                    e.Layer = LeaderLayer;
                                                 ByLayer(e);
                                             }
                                             {
                                                 var e = DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom));
-                                                e.Layer = LeaderLayer;
+                                                    e.Layer = LeaderLayer;
                                                 e.TransformBy(u2w);
                                                 ByLayer(e);
                                             }
