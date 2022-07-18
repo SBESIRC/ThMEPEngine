@@ -8,11 +8,11 @@ using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Mep.UI.Data
 {
-    internal class ThDoorBlkExtractionVisitor: ThSpatialElementExtractionVisitor
+    internal class ThDoorZoneExtractionVisitor : ThSpatialElementExtractionVisitor
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
-        public ThDoorBlkExtractionVisitor()
+        public ThDoorZoneExtractionVisitor()
         {
             CheckQualifiedLayer = CheckLayerIsValid;
             CheckQualifiedBlockName = CheckBlockNameIsValid;
