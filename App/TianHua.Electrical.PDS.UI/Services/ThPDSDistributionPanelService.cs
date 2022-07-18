@@ -2142,7 +2142,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "分配负载";
                                     m.Command = new RelayCommand(() =>
                                     {
-                                        var w = new System.Windows.Window() { Title = "分类负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
+                                        var w = new System.Windows.Window() { Title = "分配负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                         var ctrl = new UserContorls.ThPDSLoadDistribution();
                                         var tree = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
                                         void Update(bool filt)
