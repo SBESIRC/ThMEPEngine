@@ -9,7 +9,7 @@ namespace ThMEPElectrical
 {
     public class ThInsertRevcloud
     {
-        private static List<ThRevcloudParameter> ParameterList { get; set; }
+        private static List<ThRevcloudParameter> ParameterList = new List<ThRevcloudParameter>();
 
         public static void Set(List<ThRevcloudParameter> parameterList)
         {
@@ -18,7 +18,6 @@ namespace ThMEPElectrical
 
         public static void Set(Database database, Polyline obb, short colorIndex, string lineType, double scale)
         {
-            ParameterList = new List<ThRevcloudParameter>();
             ParameterList.Add(new ThRevcloudParameter(database, obb, colorIndex, lineType, scale));
         }
 
