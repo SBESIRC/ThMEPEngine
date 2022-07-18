@@ -1,11 +1,23 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using System.IO.Pipes;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Principal;
+using System.Threading;
 using System.Windows.Forms;
 using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Linq2Acad;
+using Newtonsoft.Json;
+using ProtoBuf;
+using ThMEPTCH.Model;
+using ThMEPTCH.Model.SurrogateModel;
 using ThMEPTCH.Services;
 
 namespace ThMEPIFC
@@ -158,6 +170,115 @@ namespace ThMEPIFC
 
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THDB2Push", CommandFlags.Modal)]
+        public void THDB2Push()
+        {
+            Active.Database.GetEditor().WriteMessage($"Start");
+
+            // 拾取TGL DB文件
+            var filePath = OpenDBFile();
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+            Active.Database.GetEditor().WriteMessage($"开始读入并解析TGL XML文件");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            // 读入并解析TGL XML文件
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProject();
+            if (project == null)
+            {
+                return;
+            }
+            sw.Stop();
+            Active.Database.GetEditor().WriteMessage($"读入并解析TGL XML文件完成，共用时{sw.ElapsedMilliseconds}s");
+            sw.Reset();
+            Active.Database.GetEditor().WriteMessage($"开始序列化project.");
+            sw.Start();
+
+
+            // Step 1 共享内存
+            {
+                //var nbytes = 64 * 1024 * 1024;
+                //using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("THDB2Push", 10))
+                //{
+                //    Active.Database.GetEditor().WriteMessage("创建临时管道\r\n");
+                //    bool mutexCreated;
+                //    //同步基元 又名互斥体
+                //    Mutex mutex = new Mutex(true, "THDB2PushMutex", out mutexCreated);
+                //    if (!mutexCreated)
+                //    {
+
+                //    }
+                //    //test
+                //    byte[] bytes = new byte[10];
+                //    bytes[0] = 1;
+                //    bytes[9] = 1;
+                //    using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                //    {
+                //        BinaryWriter writer = new BinaryWriter(stream);
+                //        writer.Write(bytes);
+                //    }
+                //    mutex.ReleaseMutex();
+
+                //    Active.Database.GetEditor().WriteMessage("已上传数据\r\n");
+                //    Thread.Sleep(5000);
+                //    Mutex mutexRe;
+                //    if (Mutex.TryOpenExisting("THDB2PushMutexRe", out mutexRe))
+                //    {
+                //        Active.Database.GetEditor().WriteMessage("收到回复，Push成功\r\n");
+                //    }
+                //    else
+                //    {
+                //        Active.Database.GetEditor().WriteMessage("未收到回复\r\n");
+                //    }
+                //}
+                //Active.Database.GetEditor().WriteMessage("销毁管道\r\n");
+            }
+
+            //Step 2 管道
+            {
+                var pipeClient =
+                        new NamedPipeClientStream(".", "testpipe",
+                            PipeDirection.Out, PipeOptions.None,
+                            TokenImpersonationLevel.Impersonation);
+                try
+                {
+                    pipeClient.Connect(5000);
+                    //if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Point3d)))
+                    //{
+                    //    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Point3d), false).SetSurrogate(typeof(Point3DSurrogate));
+                    //}
+                    //if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Vector3d)))
+                    //{
+                    //    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Vector3d), false).SetSurrogate(typeof(Vector3DSurrogate));
+                    //}
+                    //if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Polyline)))
+                    //{
+                    //    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Polyline), false).SetSurrogate(typeof(PolylineSurrogate));
+                    //}
+                    //Serializer.Serialize(pipeClient, project);
+                    //pipeClient.Dispose();
+                    var stream = new BinaryWriter(pipeClient);
+                    //test
+                    byte[] bytes = new byte[10];
+                    bytes[0] = 1;
+                    bytes[9] = 1;
+                    stream.Write(bytes);
+                    stream.Dispose();
+                    pipeClient.Dispose();
+                    Active.Database.GetEditor().WriteMessage("已发送至Viewer\r\n");
+                }
+                catch
+                {
+                    pipeClient.Dispose();
+                    Active.Database.GetEditor().WriteMessage("未连接到Viewer\r\n");
+                }
+            }
+
         }
 
         private string OpenTGLXMLFile()
