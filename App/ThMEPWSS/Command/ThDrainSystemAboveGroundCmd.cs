@@ -27,6 +27,8 @@ using ThMEPWSS.Model;
 using ThMEPWSS.ViewModel;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentPipeConvertion;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentSymbMultiLeaderConvertion;
+using static ThMEPWSS.DrainageSystemAG.Bussiness.CoordinateTransformation;
+using GeometryExtensions;
 
 namespace ThMEPWSS.Command
 {
@@ -66,6 +68,7 @@ namespace ThMEPWSS.Command
         double _obstacleAxisAngle = 5;
         double _roofY1ConvertAddLineDistance = 1500;
         double _roofY1BreakMoveLength = 25;
+        Matrix3d _wcs2UCS;
         List<EnumEquipmentType> _obstacleBlockTypes = new List<EnumEquipmentType>
         {
             EnumEquipmentType.equipment,
@@ -80,7 +83,7 @@ namespace ThMEPWSS.Command
             ActionName = "布置立管";
             _configLayerNames.Clear();
             if (null != selectFloors && selectFloors.Count > 0)
-                selectFloors.ForEach(c => { if (c != null) floorFrameds.Add(c); });
+                selectFloors.ForEach(c => { if (c != null) floorFrameds.Add(c.Clone()); });
             if (null != viewmodel) 
             {
                 SetServicesModel.Instance.drawingScale = (EnumDrawingScale)viewmodel.ScaleSelectItem.Value;
@@ -134,7 +137,6 @@ namespace ThMEPWSS.Command
             if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
                 return;
             Active.Document.LockDocument();
-
             var verPipes = new List<ThTCHVerticalPipe>();
             var tchPipeService = new TCHDrawVerticalPipeService();
             var symbMultiLeaders = new List<ThTCHSymbMultiLeader>();
@@ -142,6 +144,7 @@ namespace ThMEPWSS.Command
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 //所有的楼层框 必须有顶层，没有时不进行后续的生成
+                _wcs2UCS = Active.Editor.WCS2UCS();
                 _roomEngine = new ThRoomDataEngine();
                 var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
                 if (!CheckData(floorFrameds))
@@ -152,7 +155,12 @@ namespace ThMEPWSS.Command
                 }
                 ThMEPEngineCoreLayerUtils.CreateAILayer(acdb.Database, "W-辅助", 253);
                 InitData(acdb.Database);
-                var allRooms = _roomEngine.GetAllRooms(livingHighestFloor.blockOutPointCollection);
+                ConvertCoordinateToUCS(ref floorFrameds, ref _allWalls,
+                    ref _allColumns, ref _allRailings, ref _allBeams, ref _floorBlockEqums, _wcs2UCS);
+                var ptest = livingHighestFloor.blockOutPointCollection.Cast<Point3d>().First();
+                ptest = ptest.TransformBy(_wcs2UCS);
+                ptest = ptest.TransformBy(_wcs2UCS.Inverse());
+                var allRooms = GetRooms(livingHighestFloor.blockOutPointCollection, Active.Editor.UCS2WCS());
                 var tubeBlocks = new List<BlockReference>();
                 var flueBlocks = new List<BlockReference>();
                 foreach (var item in _floorBlockEqums)
@@ -304,10 +312,13 @@ namespace ThMEPWSS.Command
                 ConvertToTCHSymbMultiLeader(ref createBasicElems,ref createTextElems, ref symbMultiLeaders);
                 createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                 createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
                 var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                 var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
                 var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
             }
+            ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
+            ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
             tchPipeService.InitPipe(verPipes);
             tchPipeService.DrawExecute(false);
             tchsymbMultiLeaderService.Init(symbMultiLeaders);
@@ -497,6 +508,27 @@ namespace ThMEPWSS.Command
                     createTextElems.AddRange(copyTexts);
             }
         }
+        List<ThIfcRoom> GetRooms(Point3dCollection collection,Matrix3d wcs2UCS) 
+        {
+            var allRooms = _roomEngine.GetAllRooms(CollectionTransform(collection, wcs2UCS));
+            allRooms = RoomTransform(allRooms, wcs2UCS.Inverse());
+            return allRooms;
+        }
+        Point3dCollection CollectionTransform(Point3dCollection targetCollection,Matrix3d matrix)
+        {
+            var tempColl = new Point3dCollection();
+            foreach (Point3d item in targetCollection)
+            {
+                var copyPt = new Point3d(item.X,item.Y,item.Z);
+                copyPt = copyPt.TransformBy(matrix);
+                tempColl.Add(copyPt);
+            }
+            return tempColl;
+        }
+        List<ThIfcRoom> RoomTransform(List<ThIfcRoom> ifcRooms,Matrix3d matrix) 
+        {
+            return ifcRooms.Select(e => ThIfcRoom.CreateWithTags(e.Boundary.Clone() as Entity, e.Tags)).ToList();
+        }
         List<EquipmentBlcokModel> InitFloorData(FloorFramed floor, double disToDist=30) 
         {
             var tempBlocks = _blockReferenceData.GetPolylineEquipmentBlocks(floor.outPolyline, disToDist);
@@ -641,7 +673,7 @@ namespace ThMEPWSS.Command
             {
                 if (!item.floorName.Contains("大屋面"))
                     continue;
-                var rooms = _roomEngine.GetAllRooms(item.blockOutPointCollection);
+                var rooms = GetRooms(item.blockOutPointCollection, _wcs2UCS);
                 if (null == rooms || rooms.Count < 1)
                     continue;
                 retDic.Add(item.floorUid,rooms);
@@ -738,6 +770,7 @@ namespace ThMEPWSS.Command
             {
                 if (floor == null || floor.floorType.Contains("屋面"))
                     continue;
+                //var allRooms = GetRooms(floor.blockOutPointCollection,_wcs2UCS);
                 var allRooms = _roomEngine.GetAllRooms(floor.blockOutPointCollection);
                 var rooms = _roomEngine.GetRoomModelRooms(allRooms, null);
                 if (rooms.Any(c => c.roomTypeName == EnumRoomType.Kitchen))
