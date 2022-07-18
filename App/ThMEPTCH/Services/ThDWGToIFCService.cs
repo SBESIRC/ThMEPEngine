@@ -43,7 +43,7 @@ namespace ThMEPTCH.Services
             thPrj.ProjectName = "测试项目";
             var thSite = new ThTCHSite();
             var thBuilding = new ThTCHBuilding();
-            var floorOrigin = FloorOrigin();
+            var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = archDBData.AllTArchEntitys();
             InitFloorDBEntity(allEntitys);
             var entityConvert = new TCHDBEntityConvert();
@@ -172,20 +172,6 @@ namespace ThMEPTCH.Services
             thPrj.Site = thSite;
             return thPrj;
         }
-        private List<FloorBlock> FloorOrigin()
-        {
-            var floorOrigins = new List<FloorBlock>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var slabTexts = new List<DBText>();
-                var slabMTexts = new List<MText>();
-                var slabPLines = new List<Polyline>();
-                floorOrigins = GetFloorBlockPolylines(acdb, out slabPLines, out slabTexts, out slabMTexts);
-                slabPLines = slabPLines.Distinct().ToList();
-                CalcFloorSlab(slabPLines, slabTexts, slabMTexts);
-            }
-            return floorOrigins;
-        }
         private void CalcFloorSlab(List<Polyline> slabPolylines,List<DBText> slabTexts,List<MText> slabMTexts) 
         {
             slabPolylines = slabPolylines.OrderBy(c => c.Area).ToList();
@@ -283,81 +269,89 @@ namespace ThMEPTCH.Services
                 cadCurveEntitys.Add(floorCurveEntity);
             }
         }
-        private List<FloorBlock> GetFloorBlockPolylines(AcadDatabase acdb,out List<Polyline> slabPLines,out List<DBText> slabTexts, out List<MText> slabMTexts) 
+        private List<FloorBlock> GetFloorBlockPolylines() 
         {
-            var floorOrigins = new List<FloorBlock>();
-            slabPLines = new List<Polyline>();
-            slabTexts = new List<DBText>();
-            slabMTexts = new List<MText>();
-            var floorBlocks = new List<BlockReference>();
-            var originBlocks = new List<BlockReference>();
-            foreach (var entity in acdb.ModelSpace.OfType<Entity>())
+            using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                if (entity is Polyline p)
+                var slabTexts = new List<DBText>();
+                var slabMTexts = new List<MText>();
+                var slabPLines = new List<Polyline>();
+                var floorBlocks = new List<BlockReference>();
+                var originBlocks = new List<BlockReference>();
+                foreach (var entity in acdb.ModelSpace.OfType<Entity>())
                 {
-                    if (p.Layer == "栏杆")
+                    if (entity is Polyline p)
                     {
-                        cadCurveEntitys.Add(new FloorCurveEntity(p, "栏杆"));
+                        if (p.Layer == "栏杆")
+                        {
+                            cadCurveEntitys.Add(new FloorCurveEntity(p, "栏杆"));
+                        }
+                        else if (p.Layer == "楼板")
+                        {
+                            slabPLines.Add(p);
+                        }
+                        else if (p.Layer == "降板")
+                        {
+                            slabPLines.Add(p);
+                        }
                     }
-                    else if (p.Layer == "楼板")
+                    else if (entity is DBText dBText)
                     {
-                        slabPLines.Add(p);
+                        if (dBText.Layer == "降板")
+                        {
+                            slabTexts.Add(dBText);
+                        }
                     }
-                    else if (p.Layer == "降板")
+                    else if (entity is MText mText)
                     {
-                        slabPLines.Add(p);
+                        if (mText.Layer == "降板")
+                        {
+                            slabMTexts.Add(mText);
+                        }
+                    }
+                    else if (entity is BlockReference block)
+                    {
+                        var name = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
+                        if (name.ToLower().StartsWith("thape") && name.EndsWith("inner"))
+                        {
+                            floorBlocks.Add(block);
+                        }
+                        else if (name == "BASEPOINT")
+                        {
+                            originBlocks.Add(block);
+                        }
                     }
                 }
-                else if (entity is DBText t)
+
+                var floorOrigins = new List<FloorBlock>();
+                foreach (var floor in floorBlocks)
                 {
-                    if (t.Layer == "降板")
+                    string floorName = "";
+                    var visAttrs = BlockTools.GetAttributesInBlockReference(floor.Id, true);
+                    foreach (var attr in visAttrs)
                     {
-                        slabTexts.Add(t);
+                        if (attr.Key.Equals("内框名称"))
+                        {
+                            floorName = attr.Value;
+                            break;
+                        }
+                    }
+                    var floorOutLine = GetFloorBlockOutLine(floor);
+                    foreach (var basePoint in originBlocks)
+                    {
+                        var point = basePoint.Position;
+                        point = new Point3d(point.X, point.Y, 0);
+                        if (floorOutLine.Contains(point))
+                        {
+                            floorOrigins.Add(new FloorBlock(floorName, floorOutLine, point));
+                            break;
+                        }
                     }
                 }
-                else if (entity is MText mText)
-                {
-                    if (mText.Layer == "降板")
-                    {
-                        slabMTexts.Add(mText);
-                    }
-                }
-                else if (entity is BlockReference block)
-                {
-                    var name = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
-                    if (name.ToLower().StartsWith("thape") && name.EndsWith("inner")) 
-                    {
-                        floorBlocks.Add(block);
-                    }
-                    else if (name == "BASEPOINT")
-                        originBlocks.Add(block);
-                }
+                CalcFloorSlab(slabPLines, slabTexts, slabMTexts);
+
+                return floorOrigins;
             }
-            foreach (var floor in floorBlocks)
-            {
-                string floorName = "";
-                var visAttrs = BlockTools.GetAttributesInBlockReference(floor.Id, true);
-                foreach (var attr in visAttrs)
-                {
-                    if (attr.Key.Equals("内框名称"))
-                    {
-                        floorName = attr.Value;
-                        break;
-                    }
-                }
-                var floorOutLine = GetFloorBlockOutLine(floor);
-                foreach (var basePoint in originBlocks)
-                {
-                    var point = basePoint.Position;
-                    point = new Point3d(point.X, point.Y, 0);
-                    if (floorOutLine.Contains(point))
-                    {
-                        floorOrigins.Add(new FloorBlock(floorName, floorOutLine, point));
-                        break;
-                    }
-                }
-            }
-            return floorOrigins;
         }
         Polyline GetFloorBlockOutLine(BlockReference floor)
         {
