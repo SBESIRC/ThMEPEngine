@@ -1,11 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {
-    public class ThTCHWall : ThIfcWall
+    public class ThTCHWall : ThIfcWall, ICloneable
     {
         /// <summary>
         /// 宽度
@@ -65,6 +66,43 @@ namespace ThMEPTCH.Model
             Windows = new List<ThTCHWindow>();
             Openings = new List<ThTCHOpening>();
             ExtrudedDirection = Vector3d.ZAxis;
+        }
+
+        public object Clone()
+        {
+            if (this == null)
+                return null;
+            ThTCHWall cloneWall = null;
+            if (Outline != null)
+            {
+                if (this.Outline is Polyline polyline) 
+                {
+                    var cloneLine = polyline.Clone() as Polyline;
+                    cloneWall = new ThTCHWall(cloneLine, this.Height);
+                }
+            }
+            else 
+            {
+                var sp = this.Origin - this.XVector.MultiplyBy(Length / 2);
+                var ep = this.Origin + this.XVector.MultiplyBy(Length/2);
+                cloneWall = new ThTCHWall(sp, ep,this.Width,this.Height);
+            }
+            if (cloneWall != null) 
+            {
+                foreach (var item in this.Openings) 
+                {
+                    cloneWall.Openings.Add(item.Clone() as ThTCHOpening);
+                }
+                foreach (var item in this.Doors)
+                {
+                    cloneWall.Doors.Add(item.Clone() as ThTCHDoor);
+                }
+                foreach (var item in this.Windows)
+                {
+                    cloneWall.Windows.Add(item.Clone() as ThTCHWindow);
+                }
+            }
+            return cloneWall;
         }
     }
 }
