@@ -28,6 +28,8 @@ namespace ThMEPElectrical.ViewModel
 
         public List<ThBConvertEntityInfos> TarEntityInfos { get; set; }
 
+        private readonly ThBConvertTransientService TransientService = new ThBConvertTransientService();
+
         public ThBlockConvertVM()
         {
             Parameter = new ThBlockConvertModel();
@@ -151,8 +153,13 @@ namespace ThMEPElectrical.ViewModel
             {
                 return;
             }
-            var zoomService = new ThBConvertZoomService();
-            zoomService.Zoom(CompareModels.Where(o => o.Guid.Equals(info.Guid)).First(), Parameter.BlkScaleValue / 100.0);
+            var model = CompareModels.Where(o => o.Guid.Equals(info.Guid)).FirstOrDefault();
+            if (model != null)
+            {
+                TransientService.AddTransient(model, Parameter.BlkScaleValue / 100.0);
+                var zoomService = new ThBConvertZoomService();
+                zoomService.Zoom(model);
+            }
         }
 
         private void FillBlank()

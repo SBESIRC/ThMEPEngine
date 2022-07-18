@@ -70,6 +70,7 @@
     <Compile Include="BlockConvert\ThBConvertService.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockExtractionEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertTransientService.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertWipeOut.cs" />
     <Compile Include="BlockConvert\ThBConvertZoomService.cs" />
