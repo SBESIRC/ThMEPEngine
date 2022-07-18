@@ -11356,6 +11356,48 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                     }
                   }
                 }
+                {
+                  static bool IsWantedLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+                  {
+                    if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE is null) return INTRAVASCULARLY;
+                    return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSLECHER);
+                  }
+                  var max_tag_xposition = min_balconybasin_to_balcony(new GLineSegment(_raiseDistanceToStartDefault, _raiseDistanceToStartDefault.OffsetY(THESAURUSSURPRISED)).ToLineString()).Where(TolLightRangeSingleSideMax => IsWantedLabel(TolLightRangeSingleSideMax.UserData as string)).ToList();
+                  if (max_tag_xposition.Count == THESAURUSHOUSING)
+                  {
+                    foreach (var maxToiletToFloordrainDistance1 in max_tag_xposition)
+                    {
+                      var MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = maxToiletToFloordrainDistance1.UserData as string;
+                      foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in _tol_avg_column_dist)
+                      {
+                        MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.UserData = maxToiletToFloordrainDistance1.UserData;
+                        if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSLECHER))
+                        {
+                          string toilet_buffer_distance = null, MAX_CONDENSEPIPE_TO_WASHMACHINE = null;
+                          if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSPLUMMET) || MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(ALSOHEAVENWARDS))
+                          {
+                            toilet_buffer_distance = THESAURUSTOPICAL;
+                          }
+                          else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSPROLONG))
+                          {
+                            toilet_buffer_distance = THESAURUSBANDAGE;
+                          }
+                          else if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(QUOTATIONSPENSERIAN))
+                          {
+                            toilet_buffer_distance = THESAURUSCONSERVATION;
+                          }
+                          var tolReturnValueMinRange = Regex.Match(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, UREDINIOMYCETES);
+                          if (tolReturnValueMinRange.Success) MAX_CONDENSEPIPE_TO_WASHMACHINE = tolReturnValueMinRange.Groups[THESAURUSSTAMPEDE].Value;
+                          if (toilet_buffer_distance is not null)
+                          {
+                            MAX_CONDENSEPIPE_TO_WASHMACHINE ??= THESAURUSIMPETUOUS;
+                            MAX_TOILET_TO_FLOORDRAIN_DISTANCE2.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.Tag(toilet_buffer_distance + INTELLECTUALNESS + MAX_CONDENSEPIPE_TO_WASHMACHINE));
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
