@@ -70,7 +70,7 @@ namespace ThMEPElectrical.BlockConvert
                         }
                     });
                     ThInsertRevcloud.Set(printParameterList);
-                    CommandHandlerBase.ExecuteFromCommandLine(false, "THREVClOUD");
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THCOMPAREREVCLOUD");
                 }
 
                 var ltr = currentDb.Layers.ElementOrDefault(ThBConvertCommon.HIDING_LAYER, true);

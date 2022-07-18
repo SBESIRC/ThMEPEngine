@@ -8,6 +8,7 @@ using NFox.Cad;
 using AcHelper;
 using DotNetARX;
 using Linq2Acad;
+using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -386,6 +387,7 @@ namespace ThMEPElectrical.BlockConvert
                         }
                     });
                 }
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THPUMPREVCLOUD");
             }
         }
 

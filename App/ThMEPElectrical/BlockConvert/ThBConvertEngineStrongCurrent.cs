@@ -163,7 +163,6 @@ namespace ThMEPElectrical.BlockConvert
                             {
                                 var obb = pumpLabel.GetBlockOBB();
                                 ThInsertRevcloud.Set(acadDatabase.Database, obb, 1, "ByLayer", scale.X / 100);
-                                CommandHandlerBase.ExecuteFromCommandLine(false, "THREVClOUD");
                             }
                         }
                         break;
