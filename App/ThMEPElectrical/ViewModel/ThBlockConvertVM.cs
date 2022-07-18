@@ -203,7 +203,5 @@ namespace ThMEPElectrical.ViewModel
             }
             return cmd;
         }
-
-
     }
 }

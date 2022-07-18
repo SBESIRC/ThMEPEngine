@@ -46,5 +46,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThEarthingGridCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThInsertRevcloud))]
-
-
+[assembly: CommandClass(typeof(ThMEPElectrical.ThBConvertZoom))]

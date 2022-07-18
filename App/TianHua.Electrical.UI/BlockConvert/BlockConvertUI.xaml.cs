@@ -1,8 +1,12 @@
-﻿using AcHelper;
 using System.Linq;
-using ThControlLibraryWPF.CustomControl;
+
+using AcHelper;
+using AcHelper.Commands;
+
+using ThMEPElectrical;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.ViewModel;
+using ThControlLibraryWPF.CustomControl;
 
 namespace TianHua.Electrical.UI.BlockConvert
 {
@@ -102,7 +106,8 @@ namespace TianHua.Electrical.UI.BlockConvert
         private void table1_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             FocusToCAD();
-            BlockConvertVM.Zoom(table1.SelectedItem as BlockConvertInfo);
+            ThBConvertZoom.Set(table1.SelectedItem as BlockConvertInfo, BlockConvertVM);
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THBCONVERTZOOM");
         }
 
         private void Refresh()

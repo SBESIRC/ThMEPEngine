@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 
 using ThMEPElectrical.BlockConvert;
+using ThMEPElectrical.Model;
+using ThMEPElectrical.ViewModel;
 
 namespace ThMEPElectrical
 {
@@ -27,6 +29,24 @@ namespace ThMEPElectrical
         public void THREVClOUD()
         {
             ThBConvertUtils.InsertRevcloud(ParameterList);
+        }
+    }
+
+    public class ThBConvertZoom
+    {
+        public static BlockConvertInfo Info { get; set; }
+        public static ThBlockConvertVM blockConvertVM { get; set; }
+
+        public static void Set(BlockConvertInfo info, ThBlockConvertVM _blockConvertVM)
+        {
+            Info = info;
+            blockConvertVM = _blockConvertVM;
+        }
+
+        [CommandMethod("TIANHUACAD", "THBCONVERTZOOM", CommandFlags.Modal)]
+        public void THBCONVERTZOOM()
+        {
+            blockConvertVM.Zoom(Info);
         }
     }
 }
