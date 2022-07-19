@@ -41,15 +41,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var circuitLst = graph.Edges.Select(x => x.Circuit).ToList();
             var details = graph.Edges.Select(x => x.Details).ToList();
             var tv = panel.tv;
+            var canvas = panel.canvas;
             var pg = panel.propertyGrid;
-            ctxMenu ??= panel.canvas.ContextMenu;
+            ctxMenu ??= canvas.ContextMenu;
             menuItems ??= new List<MenuItem>();
             foreach (MenuItem m in ctxMenu.Items)
             {
                 menuItems.Add(m);
             }
             var config = new ThPDSDistributionPanelConfig();
-            panel.canvas.DataContext = config;
+            canvas.DataContext = config;
             static string FixString(string text)
             {
                 if (string.IsNullOrEmpty(text)) return " ";
@@ -112,6 +113,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     drawEngine.Draw(graph, nodes);
                 }
             });
+            Action redrawCanvas = null;
+            var redrawCanvasCmd = new RelayCommand(() =>
+            {
+                redrawCanvas?.Invoke();
+            });
             Action autoNumbering = null;
             var autoNumberingCmd = new RelayCommand(() =>
             {
@@ -132,10 +138,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 ItemsSource = GetCommonMenuItems(),
             };
             tv.ContextMenu = treeCmenu;
-            var canvas = panel.canvas;
-            canvas.Background = Brushes.Transparent;
-            canvas.Width = 2000;
-            canvas.Height = 2000;
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var glyphsUnicodeStringConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
@@ -192,6 +194,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 UpdateCanvas();
             };
+            redrawCanvas = () =>
+            {
+                UpdateCanvas();
+            };
             balancedPhaseSequence = () =>
             {
                 var vertice = GetCurrentNode(panel.tv, graph);
@@ -245,6 +251,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 config.Current = new(vertice);
                 {
                     var cmenu = new ContextMenu();
+                    cmenu.Items.Add(new MenuItem()
+                    {
+                        Header = "刷新",
+                        Command = redrawCanvasCmd,
+                    });
                     cmenu.Items.Add(new MenuItem()
                     {
                         Header = "平衡相序",
