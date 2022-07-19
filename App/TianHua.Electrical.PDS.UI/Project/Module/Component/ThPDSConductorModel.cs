@@ -19,20 +19,44 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             _conductor = conductor;
         }
 
-        [ReadOnly(true)]
         [Category("电线电缆参数")]
         [DisplayName("燃料特性代号")]
         public string ConductorMaterial
         {
             get => _conductor.ConductorMaterial;
+            set
+            {
+                _conductor.SetConductorMaterial(value);
+                OnPropertyChanged(nameof(ConductorMaterial));
+            }
         }
 
-        [ReadOnly(true)]
         [Category("电线电缆参数")]
         [DisplayName("材料特征及结构")]
-        public string OuterSheathMaterial
+        [Editor(typeof(ThPDSConductorMaterialStructurePropertyEditor), typeof(PropertyEditorBase))]
+        public MaterialStructure OuterSheathMaterial
         {
             get => _conductor.OuterSheathMaterial;
+            set
+            {
+                _conductor.SetMaterialStructure(value);
+                OnPropertyChanged(nameof(OuterSheathMaterial));
+            }
+        }
+
+        [Category("电线电缆参数")]
+        [DisplayName("导体用途")]
+        [Editor(typeof(ThPDSConductorTypePropertyEditor), typeof(PropertyEditorBase))]
+        public ConductorType Type
+        {
+            get => _conductor.ConductorType;
+            set
+            {
+                _conductor.SetConductorType(value);
+                OnPropertyChanged(nameof(Type));
+                OnPropertyChanged(nameof(ConductorMaterial));
+                OnPropertyChanged(nameof(OuterSheathMaterial));
+            }
         }
 
         [Browsable(true)]
@@ -41,7 +65,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
         public int NumberOfPhaseWire
         {
-            get => _conductor.NumberOfPhaseWire; 
+            get => _conductor.NumberOfPhaseWire;
             set
             {
                 _conductor.SetNumberOfPhaseWire(value);
@@ -126,8 +150,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
             set
             {
-                _conductor.BridgeLaying = value;
+                _conductor.SetBridgeLaying(value);
                 OnPropertyChanged(nameof(BridgeLaying));
+                OnPropertyChanged(nameof(LayingPath));
                 OnPropertyChanged(nameof(Content));
             }
         }
@@ -230,6 +255,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<LayingSite> AlternativeLayingSites2
         {
             get => _conductor.GetLayingSites2();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<ConductorType> AlternativeConductorTypes
+        {
+            get => _conductor.GetConductorTypes();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<MaterialStructure> AlternativeOuterSheathMaterialTypes
+        {
+            get => _conductor.GetMaterialStructures();
         }
 
         [ReadOnly(true)]

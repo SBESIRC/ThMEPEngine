@@ -1502,8 +1502,6 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             try
             {
-
-           
             StrToReinforce LReinStr = new StrToReinforce();
             LReinStr = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
             if (LReinStr.Rein_Detail_list.Count == 0)
@@ -1828,7 +1826,20 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (LReinStr.Rein_Detail_list[0].TypeNum <= LReinStr.num / 2)
                     {
-                        if (Cnum == 4)
+
+                        if (Cnum == 2)
+                        {
+                                if (Step == 5)
+                                {
+                                    Helper.CreateRectAndLabel(points[0], points[7], 4, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                }
+                                else
+                                {
+                                    Helper.CreateRectAndLabel(points[0], points[7], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                }
+
+                        }
+                        else if (Cnum == 4)
                         {
                             if (Step == 5)
                             {
@@ -3006,7 +3017,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             int idx = Helper.FindClosePoint(points, 5, 6, 6);
                             if (idx != -1)
                             {
-                                Helper.CreateRectAndLabel(points[idx], points[4], Helper.NumOfTwoPoint(points, 5, 6) * 2 + 5, ZongjinPoints[idx].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
+                                Helper.CreateRectAndLabel(points[idx], points[4], Helper.NumOfTwoPoint(points, 5, 6) * 2 + 3, ZongjinPoints[idx].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
                             }
                             else
                             {

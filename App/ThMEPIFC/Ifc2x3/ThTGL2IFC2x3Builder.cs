@@ -46,7 +46,8 @@ namespace ThMEPIFC.Ifc2x3
                     foreach (var thtchslab in thtchstorey.Slabs)
                     {
                         var slab = ThTGL2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin);
-                        slabs.Add(slab);
+                        if(null !=slab)
+                            slabs.Add(slab);
                     }
                     foreach (var thtchrailing in thtchstorey.Railings)
                     {

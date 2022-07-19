@@ -57,7 +57,7 @@ namespace TianHua.Electrical.PDS.Project
                 }
                 _project.substations.Add(projectSubstation);
             }
-            _project.DataChanged?.Invoke();
+            _project.BroadcastProjectDataChanged("PushGraphData", "推送Data数据");
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace TianHua.Electrical.PDS.Project
                 });
                 ThPDSGraphCompareService compareService = new ThPDSGraphCompareService();
                 compareService.Diff(_project.graphData.Graph, projectGraph);
-                _project.DataChanged?.Invoke();
+                _project.BroadcastProjectDataChanged("SecondaryPushGraphData", "二次推送Data数据");
             }
             else
             {
@@ -177,6 +177,10 @@ namespace TianHua.Electrical.PDS.Project
                 newNode.Details.LoadCalculationInfo.HighPower = load.InstalledCapacity.HighPower;
                 newNode.Details.LoadCalculationInfo.IsDualPower = load.InstalledCapacity.IsDualPower;
             }
+            if(load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter && newNode.Details.LoadCalculationInfo.HighPower == 0)
+            {
+                newNode.Details.LoadCalculationInfo.HighPower = _project.projectGlobalConfiguration.FireproofShutterPower;
+            }
             newNode.Details.LoadCalculationInfo.LowDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.HighDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.PowerFactor = load.PowerFactor;
@@ -207,27 +211,21 @@ namespace TianHua.Electrical.PDS.Project
 
         public static void ImportProject(string filePath)
         {
-            try
-            {
-                var files = UnZip(filePath, "PDSProjectKey");
-                var GraphFileBuffer = files.First(o => o.Key.Equals("Graph.Config")).Value;
-                var GlobalConfigurationFileBuffer = files.First(o => o.Key.Equals("GlobalConfiguration.Config")).Value;
-                GraphFileBuffer.Seek(0, SeekOrigin.Begin);
-                //1.直接序列化会报<无法找到程序集的错误，本质原因是"提示找不到程序集，原因是序列化时把序列化类的命名空间等信息保存了，但应用程序和类库的命名空间可能是不一样的,所以提示找不到程序集">
-                //graphData.Graph = GraphFileBuffer.DeserializeFromBinary<ThPDSProjectGraphNode, ThPDSProjectGraphEdge, ProjectGraph>();
+            var files = UnZip(filePath, "PDSProjectKey");
+            var GraphFileBuffer = files.First(o => o.Key.Equals("Graph.Config")).Value;
+            var GlobalConfigurationFileBuffer = files.First(o => o.Key.Equals("GlobalConfiguration.Config")).Value;
+            GraphFileBuffer.Seek(0, SeekOrigin.Begin);
+            //1.直接序列化会报<无法找到程序集的错误，本质原因是"提示找不到程序集，原因是序列化时把序列化类的命名空间等信息保存了，但应用程序和类库的命名空间可能是不一样的,所以提示找不到程序集">
+            //graphData.Graph = GraphFileBuffer.DeserializeFromBinary<ThPDSProjectGraphNode, ThPDSProjectGraphEdge, ProjectGraph>();
 
-                //2.重写SerializationBinder，可以解决上述问题，但是会有另外一个问题无法解决，就是反序列化时GetType无法找到对应的Type
-                var uBinder = new PDSProjectUBinder();
-                _project.graphData = new ThPDSProjectGraph(GraphFileBuffer.DeserializeFromBinary<ThPDSProjectGraphNode, ThPDSProjectGraphEdge, ProjectGraph>(uBinder));
+            //2.重写SerializationBinder，可以解决上述问题，但是会有另外一个问题无法解决，就是反序列化时GetType无法找到对应的Type
+            var uBinder = new PDSProjectUBinder();
+            _project.graphData = new ThPDSProjectGraph(GraphFileBuffer.DeserializeFromBinary<ThPDSProjectGraphNode, ThPDSProjectGraphEdge, ProjectGraph>(uBinder));
 
-                GlobalConfigurationFileBuffer.Seek(0, SeekOrigin.Begin);
-                BinaryFormatter bf = new BinaryFormatter();
-                string data = bf.Deserialize(GlobalConfigurationFileBuffer).ToString();
-                _project.projectGlobalConfiguration = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
-            }
-            catch (Exception ex)
-            {
-            }
+            GlobalConfigurationFileBuffer.Seek(0, SeekOrigin.Begin);
+            BinaryFormatter bf = new BinaryFormatter();
+            string data = bf.Deserialize(GlobalConfigurationFileBuffer).ToString();
+            _project.projectGlobalConfiguration = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
         }
 
         public static void ImportGlobalConfiguration(string filePath)
@@ -266,8 +264,6 @@ namespace TianHua.Electrical.PDS.Project
         {
             var path = Path.Combine(filePath, fileName);
             var data = JsonConvert.SerializeObject(_project.projectGlobalConfiguration, Formatting.Indented);
-            //var dataModel = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
-            //File.WriteAllText(path, data);
             FileInfo fileInfo = new FileInfo(path);
             if (!Directory.Exists(fileInfo.DirectoryName))
             {

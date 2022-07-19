@@ -9,7 +9,7 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    public class FireElevatorFrontRoomViewModel : NotifyPropertyChangedBase
+    public class FireElevatorFrontRoomViewModel : BaseSmokeProofViewModel
     {
         [JsonIgnore]
         public CheckValue checkValue;

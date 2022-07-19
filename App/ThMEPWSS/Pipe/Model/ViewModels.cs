@@ -178,6 +178,22 @@ namespace ThMEPWSS.Pipe.Model
                     }
                 }
             }
+
+            int _SimpleSprayCount;
+            public int SimpleSprayCount
+            {
+                get => _SimpleSprayCount;
+                set
+                {
+                    if (value != _SimpleSprayCount)
+                    {
+                        _SimpleSprayCount = value;
+                        if (_SimpleSprayCount < 0) _SimpleSprayCount = 0;
+                        if (_SimpleSprayCount > 4) _SimpleSprayCount = 4;
+                        OnPropertyChanged(nameof(SimpleSprayCount));
+                    }
+                }
+            }
         }
 
         public enum AdditionalFireHydrantEnum

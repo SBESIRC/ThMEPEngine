@@ -10,7 +10,7 @@ using ThControlLibraryWPF.ControlUtils;
 namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
     public delegate void CheckValue(double minvalue, double maxvalue);
-    public class StaircaseWindViewModel : NotifyPropertyChangedBase
+    public class StaircaseWindViewModel : BaseSmokeProofViewModel
     {
         [JsonIgnore]
         public CheckValue checkValue;

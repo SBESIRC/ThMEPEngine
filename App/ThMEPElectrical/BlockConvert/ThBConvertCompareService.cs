@@ -11,7 +11,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -21,27 +20,28 @@ namespace ThMEPElectrical.BlockConvert
 
         public Database Database { get; set; }
 
-        public List<ThBlockReferenceData> TargetBlocks { get; set; }
+        public List<ThBConvertEntityInfos> SrcEntityInfos { get; set; }
 
-        public Dictionary<ObjectId, string> ObjectIds { get; set; }
+        public List<ThBConvertEntityInfos> TarEntityInfos { get; set; }
 
         public List<ThBConvertCompareModel> CompareModels { get; set; }
 
-        public ThBConvertCompareService(Database database, List<ThBlockReferenceData> targetBlocks, Dictionary<ObjectId, string> objectIds)
+        public ThBConvertCompareService(Database database, List<ThBConvertEntityInfos> srcEntityInfos, List<ThBConvertEntityInfos> tarEntityInfos)
         {
             Database = database;
-            TargetBlocks = targetBlocks;
-            ObjectIds = objectIds;
+            SrcEntityInfos = srcEntityInfos;
+            TarEntityInfos = tarEntityInfos;
             CompareModels = new List<ThBConvertCompareModel>();
         }
 
         public void Compare()
         {
+            using (var docLock = Database.GetDocument().LockDocument())
             using (var currentDb = AcadDatabase.Use(Database))
             {
                 var searchedIds = new List<ObjectId>();
-                var sourceEntites = TargetBlocks.Select(o => currentDb.Element<BlockReference>(o.ObjId, true)).ToList();
-                var targetEntites = ObjectIds.Select(o => currentDb.Element<BlockReference>(o.Key, true)).ToList();
+                var sourceEntites = SrcEntityInfos.Select(o => currentDb.Element<BlockReference>(o.ObjectId, true)).ToList();
+                var targetEntites = TarEntityInfos.Select(o => currentDb.Element<BlockReference>(o.ObjectId, true)).ToList();
 
                 var sourceEntitiesMap = EntitiesMap(sourceEntites);
                 var targetEntitiesMap = EntitiesMap(targetEntites);
@@ -53,15 +53,9 @@ namespace ThMEPElectrical.BlockConvert
 
                     sourceEntitiesMap[i].ForEach(o =>
                     {
-                        var result = new ThBConvertCompareModel
-                        {
-                            Database = currentDb.Database,
-                            SourceId = o.Value.ObjectId,
-                        };
-                        CompareModels.Add(result);
                         searchedIds.Add(o.Value.ObjectId);
-
                         var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
+                        // 电动机及负载标注、负载标注
                         if (i == 0 || i == 1)
                         {
                             var sourceAttributes = o.Value.ObjectId.GetAttributesInBlockReference();
@@ -73,26 +67,56 @@ namespace ThMEPElectrical.BlockConvert
                                 var targetAttributes = targetLoadList[0].Value.ObjectId.GetAttributesInBlockReference();
                                 if (searchCircle.Contains(targetLoadList[0].Key.Position))
                                 {
+                                    var result = new ThBConvertCompareModel
+                                    {
+                                        Database = currentDb.Database,
+                                        SourceId = o.Value.ObjectId,
+                                        TargetId = targetLoadList[0].Value.ObjectId,
+                                        Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                        EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                        Type = ThBConvertCompareType.Unchanged,
+                                    };
+                                    CompareModels.Add(result);
+                                    searchedIds.Add(targetLoadList[0].Value.ObjectId);
+
                                     if (ParameterChange(sourceAttributes, targetAttributes))
                                     {
-                                        result.Type = ThBConvertCompareType.ParameterChange;
+                                        var parameterResult = new ThBConvertCompareModel
+                                        {
+                                            Database = currentDb.Database,
+                                            SourceId = o.Value.ObjectId,
+                                            TargetId = targetLoadList[0].Value.ObjectId,
+                                            Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                            EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                            Type = ThBConvertCompareType.ParameterChange,
+                                        };
+                                        CompareModels.Add(parameterResult);
                                     }
-                                    else
-                                    {
-                                        result.Type = ThBConvertCompareType.Unchanged;
-                                    }
-
-                                    result.TargetId = targetLoadList[0].Value.ObjectId;
-                                    searchedIds.Add(targetLoadList[0].Value.ObjectId);
                                 }
                                 else if (string.IsNullOrEmpty(loadId))
                                 {
-                                    result.Type = ThBConvertCompareType.Delete;
+                                    var result = new ThBConvertCompareModel
+                                    {
+                                        Database = currentDb.Database,
+                                        SourceId = o.Value.ObjectId,
+                                        Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                        EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                        Type = ThBConvertCompareType.Delete,
+                                    };
+                                    CompareModels.Add(result);
                                 }
                                 else
                                 {
-                                    result.TargetId = targetLoadList[0].Value.ObjectId;
-                                    result.Type = ThBConvertCompareType.Displacement;
+                                    var result = new ThBConvertCompareModel
+                                    {
+                                        Database = currentDb.Database,
+                                        SourceId = o.Value.ObjectId,
+                                        TargetId = targetLoadList[0].Value.ObjectId,
+                                        Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                        EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                        Type = ThBConvertCompareType.Displacement,
+                                    };
+                                    CompareModels.Add(result);
                                     searchedIds.Add(targetLoadList[0].Value.ObjectId);
 
                                     if (ParameterChange(sourceAttributes, targetAttributes))
@@ -102,6 +126,8 @@ namespace ThMEPElectrical.BlockConvert
                                             Database = currentDb.Database,
                                             SourceId = o.Value.ObjectId,
                                             TargetId = targetLoadList[0].Value.ObjectId,
+                                            Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                            EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
                                             Type = ThBConvertCompareType.ParameterChange,
                                         };
                                         CompareModels.Add(model);
@@ -110,7 +136,14 @@ namespace ThMEPElectrical.BlockConvert
                             }
                             else
                             {
-                                result.Type = ThBConvertCompareType.Delete;
+                                var result = new ThBConvertCompareModel
+                                {
+                                    Database = currentDb.Database,
+                                    SourceId = o.Value.ObjectId,
+                                    Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                    EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                    Type = ThBConvertCompareType.Delete,
+                                };
                             }
                         }
                         else if (i == 2)
@@ -122,33 +155,77 @@ namespace ThMEPElectrical.BlockConvert
                                 var filterEntityId = filterPoint.OrderBy(p => p.Position.DistanceTo(o.Value.Position))
                                     .Select(p => targetEntitiesMap[i][p].ObjectId).First();
                                 var targetAttributes = filterEntityId.GetAttributesInBlockReference();
+                                var model = new ThBConvertCompareModel
+                                {
+                                    Database = currentDb.Database,
+                                    SourceId = o.Value.ObjectId,
+                                    TargetId = filterEntityId,
+                                    Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                    EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                    Type = ThBConvertCompareType.Unchanged,
+                                };
+                                CompareModels.Add(model);
+
                                 if (ParameterChange(sourceAttributes, targetAttributes))
                                 {
-                                    result.TargetId = filterEntityId;
-                                    result.Type = ThBConvertCompareType.ParameterChange;
+                                    var result = new ThBConvertCompareModel
+                                    {
+                                        Database = currentDb.Database,
+                                        SourceId = o.Value.ObjectId,
+                                        TargetId = filterEntityId,
+                                        Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                        EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                        Type = ThBConvertCompareType.ParameterChange,
+                                    };
+                                    CompareModels.Add(result);
                                 }
                             }
                             else
                             {
-                                result.Type = ThBConvertCompareType.Delete;
+                                var result = new ThBConvertCompareModel
+                                {
+                                    Database = currentDb.Database,
+                                    SourceId = o.Value.ObjectId,
+                                    Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                    EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
+                                    Type = ThBConvertCompareType.Delete,
+                                };
+                                CompareModels.Add(result);
                             }
                         }
                         else
                         {
-                            var sourceName = o.Value.ObjectId.GetBlockName();
+                            var srcEquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId);
                             var filterPoint = targetIndex.SelectCrossingPolygon(searchCircle).OfType<DBPoint>().ToList();
-                            if (filterPoint.Count > 0)
+                            // 匹配设备类型相同的块
+                            var filterEntity = filterPoint.Select(p => targetEntitiesMap[i][p].ObjectId)
+                                .Where(id => GetEquimentType(TarEntityInfos, id).Equals(srcEquimentType)).FirstOrDefault();
+                            if (filterEntity != ObjectId.Null)
                             {
-                                var filterEntity = filterPoint.Select(p => targetEntitiesMap[i][p].ObjectId).Where(id => id.GetBlockName().Equals(sourceName));
-                                foreach (var id in filterEntity)
+                                var result = new ThBConvertCompareModel
                                 {
-                                    result.TargetId = id;
-                                    result.Type = ThBConvertCompareType.Unchanged;
-                                    searchedIds.Add(id);
-                                    return;
-                                }
+                                    Database = currentDb.Database,
+                                    SourceId = o.Value.ObjectId,
+                                    TargetId = filterEntity,
+                                    Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                    EquimentType = srcEquimentType,
+                                    Type = ThBConvertCompareType.Unchanged,
+                                };
+                                CompareModels.Add(result);
+                                searchedIds.Add(filterEntity);
                             }
-                            result.Type = ThBConvertCompareType.Delete;
+                            else
+                            {
+                                var result = new ThBConvertCompareModel
+                                {
+                                    Database = currentDb.Database,
+                                    SourceId = o.Value.ObjectId,
+                                    Category = GetCategory(SrcEntityInfos, o.Value.ObjectId),
+                                    EquimentType = srcEquimentType,
+                                    Type = ThBConvertCompareType.Delete,
+                                };
+                                CompareModels.Add(result);
+                            }
                         }
                     });
 
@@ -171,11 +248,28 @@ namespace ThMEPElectrical.BlockConvert
                                 {
                                     Database = currentDb.Database,
                                     TargetIdList = targetLoadList.Select(e => e.Value.ObjectId).ToList(),
+                                    Category = GetCategory(TarEntityInfos, targetLoadList.First().Value.ObjectId),
+                                    EquimentType = GetEquimentType(TarEntityInfos, targetLoadList.First().Value.ObjectId),
                                     Type = ThBConvertCompareType.RepetitiveID,
                                 };
                                 CompareModels.Add(result);
-                                localSearchIds.AddRange(result.TargetIdList);
                             }
+                            targetLoadList.ForEach(pair =>
+                            {
+                                if (!searchedIds.Contains(pair.Value.ObjectId))
+                                {
+                                    var result = new ThBConvertCompareModel
+                                    {
+                                        Database = currentDb.Database,
+                                        TargetId = pair.Value.ObjectId,
+                                        Category = GetCategory(TarEntityInfos, pair.Value.ObjectId),
+                                        EquimentType = GetEquimentType(TarEntityInfos, pair.Value.ObjectId),
+                                        Type = ThBConvertCompareType.Add,
+                                    };
+                                    CompareModels.Add(result);
+                                    localSearchIds.Add(pair.Value.ObjectId);
+                                }
+                            });
                         });
                     }
                     else
@@ -191,6 +285,8 @@ namespace ThMEPElectrical.BlockConvert
                             {
                                 Database = currentDb.Database,
                                 TargetId = o.Value.ObjectId,
+                                Category = GetCategory(TarEntityInfos, o.Value.ObjectId),
+                                EquimentType = GetEquimentType(TarEntityInfos, o.Value.ObjectId),
                                 Type = ThBConvertCompareType.Add,
                             };
                             CompareModels.Add(result);
@@ -256,122 +352,22 @@ namespace ThMEPElectrical.BlockConvert
             return result;
         }
 
-        public void Print()
+        private EquimentCategory GetCategory(List<ThBConvertEntityInfos> infos, ObjectId objectId)
         {
-            using (var acadDatabase = AcadDatabase.Use(Database))
+            if (objectId == ObjectId.Null)
             {
-                if (CompareModels.Count > 0 && acadDatabase.Database.Equals(CompareModels[0].Database))
-                {
-                    CompareModels.ForEach(model =>
-                    {
-                        switch (model.Type)
-                        {
-                            case ThBConvertCompareType.Unchanged:
-                                break;
-                            case ThBConvertCompareType.Delete:
-                                Print(acadDatabase, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                break;
-                            case ThBConvertCompareType.Add:
-                                Print(acadDatabase, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
-                                break;
-                            case ThBConvertCompareType.Displacement:
-                                Print(acadDatabase, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(acadDatabase, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
-                                break;
-                            case ThBConvertCompareType.ParameterChange:
-                                Print(acadDatabase, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN);
-                                Print(acadDatabase, model.TargetId, 3, "CONTINUOUS");
-                                break;
-                            case ThBConvertCompareType.RepetitiveID:
-                                Print(acadDatabase, model.SourceId, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
-                                Print(acadDatabase, model.TargetId, 5, ThBConvertCommon.LINE_TYPE_CONTINUOUS);
-                                break;
-                        }
-                    });
-                }
+                return EquimentCategory.暖通;
             }
+            return infos.Where(info => info.ObjectId.Equals(objectId)).First().Category;
         }
 
-        private void Print(AcadDatabase acadDatabase, ObjectId objectId, short colorIndex, string lineType)
+        private string GetEquimentType(List<ThBConvertEntityInfos> infos, ObjectId objectId)
         {
-            if (!objectId.Equals(ObjectId.Null))
+            if (objectId == ObjectId.Null)
             {
-                var block = acadDatabase.Element<BlockReference>(objectId, true);
-                var name = objectId.GetBlockName();
-                if (name.KeepChinese().Equals(ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION))
-                {
-                    var objs = new DBObjectCollection();
-                    block.Explode(objs);
-                    var motor = objs.OfType<BlockReference>().First();
-                    var obb = motor.ToOBB();
-                    ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
-                }
-                else if (name.KeepChinese().Equals(ThBConvertCommon.BLOCK_LOAD_DIMENSION))
-                {
-                    var obb = block.Position.CreateSquare(100.0);
-                    ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
-                }
-                else
-                {
-                    var obb = block.ToOBB();
-                    ThBConvertUtils.InsertRevcloud(acadDatabase.Database, obb, colorIndex, lineType);
-                }
+                return "";
             }
-        }
-
-        public void Update()
-        {
-            using (var currentDb = AcadDatabase.Use(Database))
-            {
-                CompareModels.ForEach(model =>
-                {
-                    switch(model.Type)
-                    {
-                        case ThBConvertCompareType.Unchanged:
-                            break;
-                        case ThBConvertCompareType.Delete:
-                            currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                            break;
-                        case ThBConvertCompareType.Add:
-                            ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                            currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-                            break;
-                        case ThBConvertCompareType.Displacement:
-                            currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                            ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                            currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-                            break;
-                        case ThBConvertCompareType.ParameterChange:
-                            currentDb.Element<BlockReference>(model.SourceId, true).Erase();
-                            ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[model.TargetId]);
-                            currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[model.TargetId];
-                            break;
-                        case ThBConvertCompareType.RepetitiveID:
-                            model.TargetIdList.ForEach(o =>
-                            {
-                                ThBConvertDbUtils.UpdateLayerSettings(ObjectIds[o]);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = ObjectIds[o];
-                            });
-                            break;
-                    }
-                });
-                
-                var ltr = currentDb.Layers.ElementOrDefault(ThBConvertCommon.HIDING_LAYER, true);
-                if (ltr == null)
-                {
-                    return;
-                }
-
-                var idCollection = new ObjectIdCollection
-                {
-                    ltr.Id,
-                };
-                currentDb.Database.Purge(idCollection);
-                if (idCollection.Count > 0)
-                {
-                    ltr.Erase();
-                }
-            }
+            return infos.Where(info => info.ObjectId.Equals(objectId)).First().EquimentType;
         }
     }
 }

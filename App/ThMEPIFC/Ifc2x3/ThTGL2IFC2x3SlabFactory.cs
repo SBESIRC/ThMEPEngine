@@ -27,7 +27,7 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Name = "TH Slab";
 
                 //create representation
-                var solid = slab.CreateSlabSolid();
+                var solid = slab.CreateSlabSolid(Point3d.Origin);
                 var brep = model.ToIfcFacetedBrep(solid);
                 var shape = CreateBrepBody(model, brep);
                 ret.Representation = CreateProductDefinitionShape(model, shape);
@@ -48,7 +48,9 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Name = "TH Slab";
 
                 //create representation
-                var solid = slab.CreateSlabSolid();
+                var solid = slab.CreateSlabSolid(Point3d.Origin);
+                if (solid.Area < 1)
+                    return null;
                 var mesh = model.ToIfcFaceBasedSurface(solid);
                 var shape = CreateFaceBasedSurfaceBody(model, mesh);
                 ret.Representation = CreateProductDefinitionShape(model, shape);

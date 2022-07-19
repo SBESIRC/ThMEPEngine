@@ -37,8 +37,11 @@ namespace ThMEPWSS.HydrantLayout.Service
         //这个是给消火栓找柱子用的
         public List<Polyline> LeanWallList = new List<Polyline>();
 
-        //这个给消火栓的柱子用的，判断左 中 右（0，1，2）
+        //这个给消火栓的柱子用的，判断左 中 右（0，1，2） 逆右 -1 ， 顺左 3
+        // 19: 左横右  20：右横左  21:靠左右横左 22：靠右左横右
         public List<int> BasePointPosition = new List<int>();
+        // 0: 自由  1：车道  2：车位；
+        public List<int> ColumnDirMode =  new List<int>();
 
         public SearchPoint(MPolygon mp, Point3d centerPoint)
         {
@@ -359,6 +362,176 @@ namespace ThMEPWSS.HydrantLayout.Service
             }
         }
 
+        //锁方向
+        public void FindColumnPointOnly(out List<Point3d> basePointList, out List<Vector3d> dirList)
+        {
+            LeanWallList.Clear();
+            ColumnDirMode.Clear();
+            BasePointPosition.Clear();
+            basePointList = new List<Point3d>();
+            dirList = new List<Vector3d>();
+
+            foreach (var cl in Columns)
+            {
+                //Point3d center = cl.GetCentroidPoint();
+
+                List<int> index = new List<int>();
+                Dictionary<int, double> dis = new Dictionary<int, double>();
+                
+                for (int i = 0; i < cl.NumberOfVertices; i++)
+                {
+                    Point3d start = cl.GetPoint3dAt(i);
+                    Point3d end = cl.GetPoint3dAt((i + 1) % cl.NumberOfVertices);
+                    Vector3d dir01 = end - start;
+
+                    if (dir01.Length < 10) continue;
+                    Point3d mid = start + 0.5 * dir01;
+                    index.Add(i);
+                    dis.Add(i,mid.DistanceTo(CenterPoint));
+                }
+
+                int mainIndex = index.OrderBy(x => dis[x]).ToList().First();
+                int leftIndex = (mainIndex + index.Count - 1) % index.Count;
+                int rightIndex = (mainIndex + 1) % index.Count;
+                int columnType = GetColumnType(cl,mainIndex);
+
+                for (int i = 0; i < cl.NumberOfVertices; i++)
+                {
+                    Point3d start = cl.GetPoint3dAt(i);
+                    Point3d end = cl.GetPoint3dAt((i + 1) % cl.NumberOfVertices);
+                    Vector3d dir01 = end - start;
+                    Vector3d dirOut = new Vector3d(-dir01.Y, dir01.X, dir01.Z).GetNormal();
+
+                    if (i == mainIndex) 
+                    {
+                        
+                        Point3d mid = start + 0.5 * dir01;
+                        //Polyline probe = CreateBoundaryService.CreateBoundary(center, 1500, 190, dirOut);
+
+                        bool longEnough = false;
+                        if (dir01.Length > TMPDATA.TmpVPSideLength + Info.VPSide) longEnough = true;
+
+                        Polyline vpMid = CreateBoundaryService.CreateBoundary(mid + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpMid, Frame, ProcessedData.ParkingIndex))
+                        {
+                            if (IsVPBlocked(mid, dirOut, Frame))
+                            {
+                                basePointList.Add(mid);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+
+                                BasePointPosition.Add(1);
+                                ColumnDirMode.Add(columnType);
+                            }
+                        }
+
+                        Point3d left = start + Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpLeft = CreateBoundaryService.CreateBoundary(left + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpLeft, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(left, dirOut, Frame))
+                            {
+                                basePointList.Add(left);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+
+                                if (longEnough) BasePointPosition.Add(19);
+                                else BasePointPosition.Add(0);
+
+                                ColumnDirMode.Add(columnType);
+                            }
+                        }
+
+                        Point3d right = end - Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpRight = CreateBoundaryService.CreateBoundary(right + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpRight, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(right, dirOut, Frame))
+                            {
+                                basePointList.Add(right);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+
+                                if (longEnough) BasePointPosition.Add(20);
+                                else BasePointPosition.Add(2);
+
+                                ColumnDirMode.Add(columnType);
+                            }
+                        }
+
+
+                        if (longEnough) 
+                        {
+                            Point3d rightNew = end - (Info.VPSide / 2  + TMPDATA.TmpVPSideLength) * dir01.GetNormal();
+                            Polyline vpRightNew = CreateBoundaryService.CreateBoundary(rightNew + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                            if (FeasibilityCheck.IsBoundaryOK(vpRightNew, Frame, ProcessedData.ForbiddenIndex))
+                            {
+                                if (IsVPBlocked(rightNew, dirOut, Frame))
+                                {
+                                    basePointList.Add(rightNew);
+                                    dirList.Add(dirOut);
+                                    LeanWallList.Add(cl);
+
+                                    BasePointPosition.Add(22);
+                                    ColumnDirMode.Add(columnType);
+                                }
+                            }
+
+                            Point3d leftNew = start + (Info.VPSide / 2 + TMPDATA.TmpVPSideLength) * dir01.GetNormal();
+                            Polyline vpLeftNew = CreateBoundaryService.CreateBoundary(leftNew + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                            if (FeasibilityCheck.IsBoundaryOK(vpLeftNew, Frame, ProcessedData.ForbiddenIndex))
+                            {
+                                if (IsVPBlocked(leftNew, dirOut, Frame))
+                                {
+                                    basePointList.Add(leftNew);
+                                    dirList.Add(dirOut);
+                                    LeanWallList.Add(cl);
+                                    BasePointPosition.Add(21);
+                                    ColumnDirMode.Add(columnType);
+                                }
+                            }
+                        }
+                    }
+
+                    if (i == leftIndex) 
+                    {
+                        Point3d right = end - Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpRight = CreateBoundaryService.CreateBoundary(right + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpRight, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(right, dirOut, Frame))
+                            {
+                                basePointList.Add(right);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(-1);
+
+                                ColumnDirMode.Add(columnType);
+                            }
+                        }
+                    }
+                    
+                    if (i == rightIndex)
+                    {
+                        Point3d left = start + Info.VPSide / 2 * dir01.GetNormal();
+                        Polyline vpLeft = CreateBoundaryService.CreateBoundary(left + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
+                        if (FeasibilityCheck.IsBoundaryOK(vpLeft, Frame, ProcessedData.ForbiddenIndex))
+                        {
+                            if (IsVPBlocked(left, dirOut, Frame))
+                            {
+                                basePointList.Add(left);
+                                dirList.Add(dirOut);
+                                LeanWallList.Add(cl);
+                                BasePointPosition.Add(3);
+
+                                ColumnDirMode.Add(columnType);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         //如果都没找到,寻找第三优先级定位点
         public void FindOtherPoint(out List<Point3d> basePointList, out List<Vector3d> dirList)
         {
@@ -543,8 +716,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             Polyline pl = CreateBoundaryService.CreateBoundary(basePoint + Dir * 0.5 * Info.VPSide, Info.VPSide, Info.VPSide, Dir);
             return FeasibilityCheck.IsFireFeasible(pl,shell);
         }
-
-
+        
         //------------------------------------
         //灭火器
 
@@ -822,6 +994,40 @@ namespace ThMEPWSS.HydrantLayout.Service
 
 
             }
+        }
+
+        //
+        public int GetColumnType(Polyline cl, int mainIndex)
+        {
+            int type = -1;
+            double rangeLength = Info.RangeLength;
+
+            Point3d start1 = cl.GetPoint3dAt(mainIndex);
+            Point3d end1 = cl.GetPoint3dAt((mainIndex + 1) % cl.NumberOfVertices);
+            Vector3d dir1 = (end1 - start1).GetNormal();
+            Vector3d dirOut1 = new Vector3d(-dir1.Y, dir1.X, dir1.Z).GetNormal();
+            Polyline pl1 = CreateBoundaryService.CreateRectangle2(start1 - dir1 * rangeLength, end1 + dir1 * rangeLength, rangeLength);
+            DrawUtils.ShowGeometry(pl1, "l2Rec", 2, lineWeightNum: 30);
+            double score1 = IndexCompute.ComputeOverlapScore(pl1, this.Frame, ProcessedData.ParkingIndex);
+
+            int newIndex = (mainIndex + 2) % cl.NumberOfVertices;
+
+            Point3d start2 = cl.GetPoint3dAt(newIndex);
+            Point3d end2 = cl.GetPoint3dAt((newIndex + 1) % cl.NumberOfVertices);
+            Vector3d dir2 = (end2 - start2).GetNormal();
+            Vector3d dirOut2 =  - dirOut1;
+
+            Polyline pl2 = CreateBoundaryService.CreateRectangle2(start2 - dir2 * rangeLength, end2 + dir2 * rangeLength, rangeLength);
+            DrawUtils.ShowGeometry(pl2, "l2Rec" ,3 , lineWeightNum: 30);
+            double score2 = IndexCompute.ComputeOverlapScore(pl2, this.Frame, ProcessedData.ParkingIndex);
+
+
+
+            if (score1 < Info.SmallScore && score2 > Info.BigScore) type = 2;
+            else if (score1 > Info.BigScore && score2 < Info.SmallScore ) type = 1;
+            else type = 0;
+
+            return type;
         }
     }
 }

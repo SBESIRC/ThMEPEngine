@@ -28,11 +28,36 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             var vertical = new VerticalPipeNew();
             vertical.Extract(database, selectArea, sprayIn);//提取竖管
-            ;
+            
             var leadLine = new LeadLineNew();//提取引线
             leadLine.Extract(database, selectArea);//3,283ms
             sprayIn.LeadLines = leadLine.GetLines();
-            PipeLineTool.PipeLineDeal(sprayIn, vertical, ref pipeLines);//管线自动连接，节点打断以及短线删除等操作
+            var alarmValve = new AlarmValveTCH();
+            var alarmPts = alarmValve.Extract(database, selectArea);
+            pipeLines = LineTools.PipeLineAutoConnect(pipeLines, sprayIn.PtDic);//1. 对齐的线自动连接
+
+            pipeLines = LineTools.ConnectVerticalLine(pipeLines, sprayIn);//2. 依靠立管的线连接
+
+            pipeLines = LineTools.ConnectWithAlarmValve(pipeLines, sprayIn, alarmPts);//3. 连接报警阀连接的线
+
+            pipeLines = LineTools.PipeLineSplit(pipeLines);
+            pipeLines.CreatePtDic(sprayIn);//创建初始字典对
+            DicTools.CreatePtTypeDic(sprayIn.PtDic.Keys.ToList(), "MainLoop", sprayIn);
+            foreach (var line in pipeLines.ToList())
+            {
+                var spt = new Point3dEx(line.StartPoint);
+                var ept = new Point3dEx(line.EndPoint);
+                if (sprayIn.PtDic[spt].Count == 1 || sprayIn.PtDic[ept].Count == 1)
+                {
+                    var l = line.Length;
+                    if (l < 10)
+                    {
+                        pipeLines.Remove(line);
+                    }
+                }
+            }
+            //pipeLines = PipeLineTool.PipeLineDeal(sprayIn, vertical, pipeLines, alarmPts);//管线自动连接，节点打断以及短线删除等操作
+
 
             var valve = new Valve();
             valve.Extract(database, sprayIn);//提取阀门
@@ -41,7 +66,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             var flowIndicator = new FlowIndicator();
             flowIndicator.Extract(database, selectArea);
-            var flowPts = flowIndicator.CreatePts();
+            var flowPts = flowIndicator.CreatePts(sprayIn);
             var objs = flowIndicator.CreatBlocks();
             pipeLines.PipeLineSplit(flowPts);
 
@@ -74,8 +99,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             sprayIn.CreateTermPt(textSpatialIndex, true);//针对存在缺省立管的标注
             TermPtDeal.CreateTermPtWithBlock(flowPts, sprayIn, textSpatialIndex);//针对标注标在水流指示器上的case
-            var alarmValve = new AlarmValveTCH();
-            var alarmPts = alarmValve.Extract(database, selectArea);
+
 
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
@@ -92,7 +116,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
 
             DicTools.CreatePtDic(sprayIn);//针对跨层
-             
+            ThMEPWSS.UndergroundSpraySystem.Test.Draw.DrawLine(pipeLines, "处理后的管线2");
             return true;
         }
 

@@ -168,6 +168,6 @@
         </GroupBox>
         <Button x:Name="btnConnectPipe" Content="生成水管路由" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,275,0,0" Height="25" Click="btnConnectPipe_Click"/>
         <Button x:Name="btnGeneraSPM" Content="生成水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,305,0,0" Height="25" Click="btnGeneraSPM_Click"/>
-        <Button x:Name="btnUpdateSPM" Content="更新水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,335,0,0" Height="25" Click="btnUpdateSPM_Click"/>
+        <Button x:Name="btnUpdateSPM" Content="更新水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,335,0,0" Height="25" Click="btnUpdateSPM_Click" IsEnabled="False"/>
     </Grid>
 </cus:ThCustomWindow>

@@ -33,7 +33,7 @@ namespace ThMEPElectrical.BlockConvert
                     .Where(e => !e.BlockTableRecord.IsNull)
                     .ForEach(e =>
                     {
-                        if (NameFilter.Contains(e.GetEffectiveName()))
+                        if (!e.IsErased && NameFilter.Contains(e.GetEffectiveName()))
                         {
                             var elementData = new ThRawIfcDistributionElementData
                             {

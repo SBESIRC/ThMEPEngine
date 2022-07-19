@@ -13,7 +13,7 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection Fix(this AcPolygon polygon)
         {
-            return GeometryFixer.Fix(polygon.ToNTSPolygon()).ToDbCollection();
+            return GeometryFixer.Fix(polygon.ToNTSPolygon()).ToDbCollection(true);
         }
     }
 }

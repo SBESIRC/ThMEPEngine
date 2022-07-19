@@ -83,7 +83,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
                     TextString = Head,
                     Height = 100,
                 };
-                var config = GetHeadTextConfig();
+                var config = GetHeadTextConfig(DrawingSacle);
                 var textId = headText.Print(database, config);
                 results.Add(textId);
             }
@@ -100,28 +100,40 @@ namespace ThMEPStructure.ArchitecturePlane.Print
                     TextString = DrawingSacle,
                     Height = 100,
                 };
-                var config = GetHeadTextScaleConfig();
+                var config = GetHeadTextScaleConfig(DrawingSacle);
                 var textId = scaleText.Print(database, config);
                 results.Add(textId);
             }
             return results;
+        }
+        private AnnotationPrintConfig GetHeadTextConfig(string drawingScale)
+        {
+            var config = GetHeadTextConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
         }
         private AnnotationPrintConfig GetHeadTextConfig()
         {
             return new AnnotationPrintConfig
             {
                 LayerName = ThArchPrintLayerManager.CommonLayer,
-                Height = 800,
+                Height = 8,
                 WidthFactor = 0.8,
                 TextStyleName = ThArchPrintStyleManager.THSTYLE3,
             };
+        }
+        private AnnotationPrintConfig GetHeadTextScaleConfig(string drawingScale)
+        {
+            var config = GetHeadTextScaleConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
         }
         private AnnotationPrintConfig GetHeadTextScaleConfig()
         {
             return new AnnotationPrintConfig
             {
                 LayerName = ThArchPrintLayerManager.CommonLayer,
-                Height = 600,
+                Height = 6,
                 WidthFactor = 0.8,
                 TextStyleName = ThArchPrintStyleManager.THSTYLE3,
             };

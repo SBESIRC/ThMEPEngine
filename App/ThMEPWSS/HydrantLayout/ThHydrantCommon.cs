@@ -19,6 +19,7 @@ namespace ThMEPWSS.HydrantLayout
         public static string BlkName_Vertical150 = "带定位立管150";
         public const string BlkName_Hydrant = "室内消火栓平面";
         public const string BlkName_Hydrant_Extinguisher = "手提式灭火器";
+        public const string BlkName_Hydrant2 = "室内消火栓平面带留洞";
 
         public const string BlkVisibility_Att = "可见性";
         public const string BlkVisibility_Att_1 = "可见性1";

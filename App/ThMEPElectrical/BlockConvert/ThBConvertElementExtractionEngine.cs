@@ -10,11 +10,17 @@ namespace ThMEPElectrical.BlockConvert
     {
         public List<string> NameFilter { get; set; }
 
+        /// <summary>
+        /// 专业
+        /// </summary>
+        public ConvertCategory Category { get; set; }
+
         public override void Extract(Database database)
         {
             var visitor = new ThBConvertElementExtractionVisitor()
             {
                 NameFilter = NameFilter,
+                Category = Category,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);

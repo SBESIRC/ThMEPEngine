@@ -13,14 +13,18 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3ShearWallExtractionVisitor()
-            {
-                LayerFilter = ThDbLayerManager.Layers(database),
-            };
+            var visitor = Create(database);
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
             Results = visitor.Results;
+        }
+        public static ThDB3ShearWallExtractionVisitor Create(Database database)
+        {
+            return new ThDB3ShearWallExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
         }
     }
 

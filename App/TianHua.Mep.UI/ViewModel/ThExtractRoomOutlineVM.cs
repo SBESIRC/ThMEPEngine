@@ -21,6 +21,7 @@ namespace TianHua.Mep.UI.ViewModel
     public class ThExtractRoomOutlineVM : NotifyPropertyChangedBase
     {
         private const string AIWallLayer = "AI-墙线";
+        private const string AIShearWallLayer = "AI-剪力墙";
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
         private bool ynExtractShearWall;
         public bool YnExtractShearWall
@@ -68,6 +69,12 @@ namespace TianHua.Mep.UI.ViewModel
                         EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
                         PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
                     }
+                    if(cmd.ShearWalls.Count>0)
+                    {
+                        Active.Database.CreateAIShearWallLayer();
+                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                        PrintEntities(cmd.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                    }
                     SetCurrentLayer(ThMEPEngineCoreLayerUtils.WALL);
                 }
             }
@@ -80,7 +87,7 @@ namespace TianHua.Mep.UI.ViewModel
         public void BuildDoors()
         {
             using (var lockDoc = Active.Document.LockDocument())
-            using (var cmd = new ThBuildDoorsCmd(AIWallLayer, ThMEPEngineCoreLayerUtils.DOOR, ThMEPEngineCoreLayerUtils.COLUMN))
+            using (var cmd = new ThBuildDoorsCmd(AIWallLayer, AIShearWallLayer, ThMEPEngineCoreLayerUtils.DOOR, ThMEPEngineCoreLayerUtils.COLUMN))
             {
                 SetFocusToDwgView();
                 cmd.Execute();
@@ -95,9 +102,11 @@ namespace TianHua.Mep.UI.ViewModel
             var walls = GetEntitiesFromMS(AIWallLayer);
             var doors = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.DOOR);
             var columns = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.COLUMN);
+            var shearWalls = GetEntitiesFromMS(ThMEPEngineCoreLayerUtils.SHEARWALL);
             roomDatas = roomDatas.Union(walls);
             roomDatas = roomDatas.Union(doors);
             roomDatas = roomDatas.Union(columns);
+            roomDatas = roomDatas.Union(shearWalls);
             return roomDatas;
         }
 

@@ -29,7 +29,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.LeadLines = leadLine.GetLines();
             Dics.CreateLeadLineDic(ref sprayIn);//3,559ms
 
-            pipeLines = pipeLines.ConnectVerticalLine(sprayIn);
+            pipeLines = LineTools.ConnectVerticalLine(pipeLines, sprayIn);
             pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
 
             pipeLines.CreatePtDic(sprayIn);
@@ -52,7 +52,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             var flowIndicator = new FlowIndicator();
             flowIndicator.Extract(database, selectArea);
-            var flowPts = flowIndicator.CreatePts();
+            var flowPts = flowIndicator.CreatePts( sprayIn);
             var objs = flowIndicator.CreatBlocks();
             pipeLines.PipeLineSplit(flowPts);
 

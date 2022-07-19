@@ -9,7 +9,7 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    public class SeparateOrSharedWindViewModel : NotifyPropertyChangedBase
+    public class SeparateOrSharedWindViewModel : BaseSmokeProofViewModel
     {
         [JsonIgnore]
         public CheckValue checkValue;

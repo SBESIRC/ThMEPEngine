@@ -18,11 +18,17 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             results.Add(beamId);
             return results;
         }
-        public static AnnotationPrintConfig GetConfig()
+        public static AnnotationPrintConfig GetConfig(string drawingScale)
+        {
+            var config = GetConfig();
+            config.ScaleHeight(drawingScale);           
+            return config;
+        }
+        private static AnnotationPrintConfig GetConfig()
         {
             return new AnnotationPrintConfig
             {
-                Height = 150,
+                Height = 1.5,
                 WidthFactor = 0.7,
                 LayerName = ThArchPrintLayerManager.DEFPOINTS,
                 TextStyleName = ThArchPrintStyleManager.THSTYLE3,

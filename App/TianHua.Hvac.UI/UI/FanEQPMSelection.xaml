@@ -265,7 +265,7 @@
                                            Content="{Binding VentNum,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
                                            BorderThickness="0,0,0,1"
                                            BorderBrush="Black"
-                                           ToolTip="楼层"
+                                           ToolTip="序号"
                                            HorizontalContentAlignment="Center"
                                            Width="40"
                                            Height="22"

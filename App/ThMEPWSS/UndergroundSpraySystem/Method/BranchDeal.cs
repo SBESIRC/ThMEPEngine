@@ -217,14 +217,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var stopwatch = new Stopwatch();
                         stopwatch.Start();
                         bool flag = false;
-                        BranchDeal2.DfsBranch(spt, spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag);
+                        string flowType = "";
+                        BranchDeal2.DfsBranch(spt, spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag, ref flowType);
                         if (hasValve)
                         {
                             spraySystem.ValveDic.Add(ept);
                         }
                         if (hasFlow)
                         {
-                            spraySystem.FlowDIc.Add(ept);
+                            if(flowType.Equals(""))
+                            {
+                                spraySystem.FlowDIc.Add(ept,flowType);
+                            }
                         }
                     }
                 }

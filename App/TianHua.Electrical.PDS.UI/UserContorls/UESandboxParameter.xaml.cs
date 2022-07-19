@@ -15,7 +15,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         {
             InitializeComponent();
             DataContext = new ThPDSUESandboxParameterModel();
-            PDSProject.Instance.GlobalConfigurationChanged += () =>
+            PDSProject.Instance.ProjectGlobalConfigurationChanged += (sender , e) =>
             {
                 DataContext = new ThPDSUESandboxParameterModel();
             };

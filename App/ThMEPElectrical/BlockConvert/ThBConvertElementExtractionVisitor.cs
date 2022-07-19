@@ -4,12 +4,18 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertElementExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> NameFilter { get; set; }
+
+        /// <summary>
+        /// 专业
+        /// </summary>
+        public ConvertCategory Category { get; set; }
 
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -74,12 +80,49 @@ namespace ThMEPElectrical.BlockConvert
 
         public override bool CheckLayerValid(Entity curve)
         {
-            var layer = curve.LayerId.GetObject(OpenMode.ForRead) as LayerTableRecord;
-            return !layer.IsFrozen && !layer.IsOff && !layer.IsHidden;
+            if (curve.LayerId.IsValid)
+            {
+                var layer = curve.LayerId.GetObject(OpenMode.ForRead) as LayerTableRecord;
+                return !layer.IsFrozen && !layer.IsOff && !layer.IsHidden;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
+            if (blockTableRecord.IsFromExternalReference || blockTableRecord.IsFromOverlayReference)
+            {
+                using (var CurrentDb = Linq2Acad.AcadDatabase.Active())
+                {
+                    var xrg = CurrentDb.Database.GetHostDwgXrefGraph(false);
+                    var name = blockTableRecord.Name;
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        var c = name.ToUpper()[0];
+                        var flag = false;
+                        switch (Category)
+                        {
+                            case ConvertCategory.WSS:
+                                flag = c.Equals('W');
+                                break;
+                            case ConvertCategory.HVAC:
+                                flag = c.Equals('H');
+                                break;
+                            case ConvertCategory.ALL:
+                                flag = c.Equals('W') || c.Equals('H');
+                                break;
+                        }
+                        if (!flag)
+                        {
+                            return flag;
+                        }
+                    }
+                }
+            }
+
             // 不支持图纸空间
             if (blockTableRecord.IsLayout)
             {

@@ -84,6 +84,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static int Type = 2;
         public static int Mode = 2;
         public static bool AllowDoorInPaking = true;
+        public static bool ColumnCenterOK = true;
 
         //搜索范围
         public static double OriginRadius = 3000;
@@ -111,6 +112,17 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static double PakingBuffer = 30;
         public static double CollisionTolerance = 0.25;
 
+        
+        //确定车位旁边的立柱的地理环境
+        public static double RangeLength = 3000;
+        public static double BigScore = 80;
+        public static double SmallScore = 50;
 
+    }
+
+    class TMPDATA 
+    {
+        public static double TmpVPSideLength = 200;
+        public static double FireHydrantLength = 800;
     }
 }

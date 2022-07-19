@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Geometries.Utilities;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
 namespace ThCADCore.NTS
@@ -16,6 +17,21 @@ namespace ThCADCore.NTS
         private const double OFFSET_DISTANCE = 20.0;
         private const double DISTANCE_TOLERANCE = 1.0;
 
+        /// <summary>
+        /// 填充的轮廓（支持洞）
+        /// </summary>
+        /// <param name="hatch"></param>
+        /// <returns></returns>
+        public static DBObjectCollection BoundariesEx(this Hatch hatch)
+        {
+            // 存在一种特殊的填充，即带洞的填充，
+            // 它的Shell和Holes是用一个多段线描述
+            // 即在多段线中，Shell和Holes是连接的
+            var objs = hatch.Boundaries().ToCollection();
+            return GeometryFixer.Fix(objs.ToNTSMultiPolygon()).ToDbCollection(true);
+        }
+
+        [Obsolete("该方法已被弃用，请使用BoundariesEx代替")]
         public static List<Polygon> ToPolygons(this Hatch hatch)
         {
             var objs = new List<Polygon>();

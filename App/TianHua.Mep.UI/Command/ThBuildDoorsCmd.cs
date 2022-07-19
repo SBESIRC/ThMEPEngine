@@ -22,6 +22,7 @@ namespace TianHua.Mep.UI.Command
         public DBObjectCollection doors { get; set; }
 
         private string _wallLayer { get; set; }
+        private string _shearwallLayer { get; set; }
         private string _doorLayer { get; set; }
         private string _columnLayer { get; set; }
 
@@ -40,14 +41,15 @@ namespace TianHua.Mep.UI.Command
         /// </summary>
         private HashSet<int> _OtherwallSpacing { get; set; }
 
-        public ThBuildDoorsCmd(string wallLayer,string doorLayer, string columnLayer)
+        public ThBuildDoorsCmd(string wallLayer, string shearwallLayer, string doorLayer, string columnLayer)
         {
             ActionName = "根据AI-墙线找门";
             CommandName = "XXXX";
             _wallLayer = wallLayer;
+            _shearwallLayer = shearwallLayer;
             _doorLayer = doorLayer;
             _columnLayer = columnLayer;
-            _wallThickness = new HashSet<int> { 100, 200, 250, 300, 350, 400, 500, 600 };
+            _wallThickness = new HashSet<int> { 250, 300, 350, 400, 500, 600 };
             _shearwallSpacing = new HashSet<int> { 5500, 5600, 6000, 7000 };
             _OtherwallSpacing = new HashSet<int> { 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1800, 2000, 2100 };
         }
@@ -63,8 +65,9 @@ namespace TianHua.Mep.UI.Command
                 var Transformer = new ThMEPOriginTransformer(RangePts[0]);
                 var newRangePts = Transformer.Transform(RangePts);
                 var walls = GetWalls(acdb.Database, new List<string>() { _wallLayer, _doorLayer }, newRangePts, Transformer);
+                var shearwalls = GetWalls(acdb.Database, new List<string>() { _shearwallLayer }, newRangePts, Transformer);
                 var columns = GetColunms(acdb.Database, _columnLayer, newRangePts, Transformer);
-                var wallSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
+                var wallSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.Union(shearwalls).ToCollection());
                 foreach (Polyline column in columns)
                 {
                     var space = column.BufferPL(10)[0] as Polyline;
@@ -75,7 +78,8 @@ namespace TianHua.Mep.UI.Command
                     }
                 }
                 var wallObjs = new DBObjectCollection();
-                walls.OfType<Curve>().ForEach(c =>
+                
+                walls.Union(shearwalls).OfType<Curve>().ForEach(c =>
                 {
                     if (c is Polyline poly)
                     {
@@ -104,12 +108,13 @@ namespace TianHua.Mep.UI.Command
 
                 //Find ShearWall door stack
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(mergedLines);
+                var shearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(shearwalls.ToCollection());
                 doors = new DBObjectCollection();
                 Dictionary<Line, Vector3d> ReasonableWalls = new Dictionary<Line, Vector3d>();
                 foreach (Line line in mergedLines)
                 {
                     //过滤
-                    if (_wallThickness.Any(o => Math.Abs(line.Length - o) <= 10))
+                    if (line.Length < 210 || _wallThickness.Any(o => Math.Abs(line.Length - o) <= 10))
                     {
                         var pl = line.ExtendLine(10).Buffer(10);
                         var intersectingLines = spatialIndex.SelectFence(pl).OfType<Line>().ToList();
@@ -153,9 +158,7 @@ namespace TianHua.Mep.UI.Command
                         if (ReasonableWalls.ContainsKey(line) && line.IsParallelToEx(reasonableWall.Key) && ReasonableWalls[line].IsCodirectionalTo(reasonableWall.Value.Negate(), new Tolerance(1, 1)))
                         {
                             var dis = line.Distance(reasonableWall.Key);
-                            //2022/07/07
-                            //杨工新逻辑：已强厚度为判断条件，>200为剪力墙，否则为建筑墙
-                            if(line.Length > 210 && reasonableWall.Key.Length > 210)
+                            if (shearwallSpatialIndex.SelectCrossingPolygon(line.ExtendLine(10).Buffer(10)).Count > 0 && shearwallSpatialIndex.SelectCrossingPolygon(reasonableWall.Key.ExtendLine(10).Buffer(10)).Count > 0)
                             {
                                 if (_shearwallSpacing.Any(o => Math.Abs(dis - o) <= 15))
                                 {

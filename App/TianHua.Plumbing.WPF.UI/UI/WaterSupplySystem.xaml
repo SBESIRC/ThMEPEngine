@@ -27,7 +27,7 @@
         <StackPanel Grid.Row="1" Orientation="Vertical">
             <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
             <Label Content="楼层表：" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
-            <ListBox Height="320" ItemsSource="{Binding FloorListDatas}" SelectionChanged="ListBox_SelectionChanged">
+            <ListBox Height="320" ItemsSource="{Binding FloorListDatas}">
                 
             </ListBox>
         </StackPanel>

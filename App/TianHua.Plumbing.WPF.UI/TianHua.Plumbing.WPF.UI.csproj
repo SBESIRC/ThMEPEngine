@@ -150,6 +150,9 @@
     <Compile Include="UI\DrainageADPrivateUI.xaml.cs">
       <DependentUpon>DrainageADPrivateUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\WaterSupplyRoofTank.xaml.cs">
+      <DependentUpon>WaterSupplyRoofTank.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\WaterSupplySystem.xaml.cs">
       <DependentUpon>WaterSupplySystem.xaml</DependentUpon>
     </Compile>
@@ -327,6 +330,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\DrainageADPrivateUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\WaterSupplyRoofTank.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

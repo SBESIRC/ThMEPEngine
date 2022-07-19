@@ -14,6 +14,7 @@ namespace ThMEPIFC
             {
                 ThTGL2IFC2x3Builder.BuildIfcModel(Model, project);
                 ThTGL2IFC2x3Builder.SaveIfcModel(Model, file);
+                Model.Dispose();
             }
         }
     }

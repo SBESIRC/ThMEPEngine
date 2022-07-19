@@ -101,5 +101,7 @@ namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
         MianVm,
 
         UserControlVm,
+
+        Volume,
     }
 }

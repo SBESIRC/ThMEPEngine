@@ -139,9 +139,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var output_blocks = new DBObjectCollection();
             foreach (BlockReference block in input_blocks)
             {
-                var blocks = _ExplodeToLines(block, out DBObjectCollection walls);
-                foreach (BlockReference b in blocks) output_blocks.Add(b);
-                foreach (Line l in walls) outwalls.Add(l);
+                try
+                {
+                    var blocks = _ExplodeToLines(block, out DBObjectCollection walls);
+                    foreach (BlockReference b in blocks) output_blocks.Add(b);
+                    foreach (Line l in walls) outwalls.Add(l);
+                }
+                catch (Exception ex)
+                {
+                    Active.Editor.WriteMessage("\n块名为" + block.Name + "的块,,炸块失败，结果可能有误");
+                }
             }
             return output_blocks;
         }

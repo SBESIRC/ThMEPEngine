@@ -45,12 +45,13 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     {
         public string uid { get; }
         public string floorId { get; }
-        public Curve baseCurce { get; }
+        public Curve baseCurce { get; set; }
         public Color lineColor { get; }
         public string layerName { get; set; }
         public string belongBlockId { get; }
         public string connectBlockId { get; set; }
         public string curveTag { get; }
+        public bool ConvertToTCHElement = false;
         public CreateBasicElement(string floorId,Curve curve,string layerName,string belongId,string tag,Color lineColor =null) 
         {
             this.uid = Guid.NewGuid().ToString();
@@ -69,10 +70,11 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public string floorUid { get; }
         public string layerName { get; }
         public string textStyle { get; }
-        public Point3d textPoint { get; }
+        public Point3d textPoint { get; set; }
         public string belongBlockId { get; }
-        public DBText dbText { get; }
+        public DBText dbText { get; set; }
         public string copyId { get; }
+        public bool ConvertToTCHElement = false;
         public CreateDBTextElement(string floorId, Point3d textPoint,DBText dBText,string belongId,string layerName,string textStyle,string copyId="")
         {
             this.uid = Guid.NewGuid().ToString();
@@ -91,7 +93,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public string floorUid { get; }
         public string tag { get; }
         public string belongBlockId { get; }
-        public Point3d createPoint { get; }
+        public Point3d createPoint { get; set; }
         public EnumEquipmentType equipmentType { get; }
         public CreateResult(ObjectId id, Point3d point, EnumEquipmentType equipment, string floorUid,string tag)
         {

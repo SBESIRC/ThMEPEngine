@@ -14,14 +14,18 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThShearWallExtractionVisitor()
-            {
-                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
-            };
+            var visitor = Create(database);
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
             Results = visitor.Results;
+        }
+        public static ThShearWallExtractionVisitor Create(Database database)
+        {
+            return new ThShearWallExtractionVisitor()
+            {
+                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
+            };
         }
     }
 

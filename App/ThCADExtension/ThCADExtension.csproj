@@ -41,6 +41,7 @@
     <Compile Include="ThBlockReferenceTool.cs" />
     <Compile Include="ThBlockTools.cs" />
     <Compile Include="ThCADCommon.cs" />
+    <Compile Include="ThHatchTool.cs" />
     <Compile Include="ThCircleExtension.cs" />
     <Compile Include="ThCUITools.cs" />
     <Compile Include="ThCurveExtension.cs" />

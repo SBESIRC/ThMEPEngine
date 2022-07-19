@@ -70,6 +70,13 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI
             CommandHandlerBase.ExecuteFromCommandLine(false, "THLXSPS");
         }
 
+        private void btnExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 发送命令
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THSPEXPORT");
+        }
+
         /// <summary>
         /// 聚焦到CAD
         /// </summary>

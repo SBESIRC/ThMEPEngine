@@ -30,6 +30,13 @@
         <Border Grid.Row="4" Grid.Column ="1" BorderThickness="0">
             <ContentPresenter  Content="{Binding SelectTableItem.ShowUserControl}"/>
         </Border>
-        <cus:ImageButton Grid.Row="5" ImageTextLocation="TextOnly" Content="放置图块" Margin="5,0,5,5" TextMargin="5,0,5,0" Height="25" Width="80" Click="btnLayoutBlock_Click" VerticalAlignment="Bottom" />
+        <Grid Grid.Row="5" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="放置图块" Margin="5,0,5,5" TextMargin="5,0,5,0" Height="25" Width="80" Click="btnLayoutBlock_Click" VerticalAlignment="Bottom" />
+            <cus:ImageButton Grid.Column="1" ImageTextLocation="TextOnly" Content="导出计算书" Margin="5,0,5,5" TextMargin="5,0,5,0" Height="25" Width="80" Click="btnExportButton_Click"  VerticalAlignment="Bottom" />
+        </Grid>
     </Grid>
 </cus:ThCustomWindow>

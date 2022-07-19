@@ -11,7 +11,7 @@ namespace ThMEPHVAC.FanConnect.ViewModel
     {
         public int SystemType { set; get; }//系统选择
         public int HorizontalType { set; get; }//水平同异程
-        public int PipeSystemType { set; get; }//水系统管制
+        public int PipeSystemType { set; get; }//水系统管制 0:两管制 1:四管制
         public bool IsCodeAndHotPipe { set; get; }//空调冷热水管
         public bool IsCWPipe { set; get; }//冷凝水管
         public bool IsCoolPipe { set; get; }//空调冷却水管

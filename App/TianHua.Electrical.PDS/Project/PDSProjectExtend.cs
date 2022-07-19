@@ -1387,11 +1387,10 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="edge"></param>
         public static void CheckWithEdge(this ThPDSProjectGraphEdge edge)
         {
-            if (edge.Details.CircuitLock)
+            if (!edge.Details.CircuitLock)
             {
-                return;
+                edge.ComponentCheck();
             }
-            edge.ComponentCheck();
             //统计回路级联电流
             var cascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
             if (edge.Details.CascadeCurrent > cascadeCurrent)

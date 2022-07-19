@@ -13,8 +13,6 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPElectrical.BlockConvert;
-using ThMEPEngineCore.Engine;
-using System.Linq;
 
 namespace ThMEPElectrical.Command
 {
@@ -45,6 +43,11 @@ namespace ThMEPElectrical.Command
         /// 标注样式
         /// </summary>
         public bool ConvertManualActuator { get; set; }
+
+        /// <summary>
+        /// 操作命令
+        /// </summary>
+        public BConvertCommand Command { get; set; }
 
         /// <summary>
         /// 构造函数
@@ -84,18 +87,44 @@ namespace ThMEPElectrical.Command
                 var targetNames = new List<string>();
                 var manager = service.ReadFile(srcNames, targetNames);
                 var targetBlocks = service.TargetBlockExtract(targetNames);
-                service.Convert(manager, srcNames, targetNames, new List<ThBlockReferenceData>(), false);
+                service.Convert(manager, srcNames, new List<ThBlockReferenceData>(), false);
 
-                var compareService = new ThBConvertCompareService(currentDb.Database, targetBlocks, service.ObjectIds);
+                var compareService = new ThBConvertCompareService(currentDb.Database, GetEntityInfos(targetBlocks, manager), service.EntityInfos);
                 compareService.Compare();
-                compareService.Print();
-                compareService.Update();
 
-                UpdateLayerSettings(ThBConvertCommon.HIDING_LAYER);
+                //var zoomService = new ThBConvertZoomService();
+                //zoomService.Zoom(compareService.CompareModels[0]);
+
+                HiddenLayer(ThBConvertCommon.HIDING_LAYER);
+
+                compareService.Update(Scale / 100.0);
+                Active.Editor.Regen();
             }
         }
 
-        private void UpdateLayerSettings(string name)
+        private List<ThBConvertEntityInfos> GetEntityInfos(List<ThBlockReferenceData> targetBlocks , ThBConvertManager manager)
+        {
+            var results = new List<ThBConvertEntityInfos>();
+            targetBlocks.ForEach(t =>
+            {
+                var result = new ThBConvertEntityInfos();
+                result.ObjectId = t.ObjId;
+                foreach(var rule in manager.Rules)
+                {
+                    if (rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME).Equals(t.EffectiveName))
+                    {
+                        result.Category = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert();
+                        result.EquimentType = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT);
+                        break;
+                    }
+                }
+                results.Add(result);
+            });
+
+            return results;
+        }
+
+        private void HiddenLayer(string name)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

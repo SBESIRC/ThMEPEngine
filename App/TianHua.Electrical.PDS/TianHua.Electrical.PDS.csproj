@@ -31,15 +31,22 @@
     <Compile Include="Model\ThPDSLightingCableTray.cs" />
     <Compile Include="Model\ThPDSLowVoltageCabinetEdge.cs" />
     <Compile Include="Model\THPDSSubstation.cs" />
+    <Compile Include="Project\Module\Component\Extension\CableTypeAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\InsulationAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\MaterialAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\MaterialStructureExtension.cs" />
+    <Compile Include="Project\Module\Component\Extension\ScopeOfApplicationAttribute.cs" />
     <Compile Include="Project\Module\Configure\DistributionMeteringConfiguration.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\CompensationCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\FeederCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PDSBaseLowVoltageCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PowerReceivingCabinet.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeData.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeExtension.cs" />
     <Compile Include="Project\Module\THPDSProjectSubstation.cs" />
     <Compile Include="Project\Module\THPDSSubstationMap.cs" />
     <Compile Include="Project\PDSProjectManagement.cs" />
+    <Compile Include="Project\PDSProjectEventArgs.cs" />
     <Compile Include="Service\ThPDSBlockNameMap.cs" />
     <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
     <Compile Include="Service\ThPDSLoadIDMatchService.cs" />
@@ -216,10 +223,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="QuikGraph">
-      <Version>2.3.0</Version>
+      <Version>2.5.0</Version>
     </PackageReference>
     <PackageReference Include="QuikGraph.Serialization">
-      <Version>2.3.0</Version>
+      <Version>2.5.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

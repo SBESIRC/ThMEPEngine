@@ -26,6 +26,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         public Point3dCollection SelectedArea;//框定区域
         public List<List<Point3dCollection>> FloorAreaList;//楼层区域
         public List<List<int>> FloorNumList;//楼层列表
+        public int MaxFloor=1;//最大楼层号
 
         public WaterSupplyVM()
         {
@@ -80,7 +81,9 @@ namespace ThMEPWSS.Diagram.ViewModel
                         MessageBox.Show("框选区域没有标准楼层");
                     return;
                 }
-                FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
+                int maxFloor = 1;
+                FloorNumList = ThWCompute.CreateFloorNumList(FloorNum,ref maxFloor);
+                MaxFloor = maxFloor;
                 FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
 
                 var AreaNums = 0;
@@ -106,6 +109,8 @@ namespace ThMEPWSS.Diagram.ViewModel
                     DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true });
                 }
                 DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "整层", GroupName = "group", IsChecked = true });
+
+                SetViewModel = new WaterSupplySetVM(maxFloor);
             }
         }
 
@@ -141,7 +146,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        public WaterSupplySetVM SetViewModel { get; set; } = new WaterSupplySetVM();
+        public WaterSupplySetVM SetViewModel { get; set; } 
     }
 
     public class DynamicRadioButton

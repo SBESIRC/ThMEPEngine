@@ -9,11 +9,38 @@ using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.WaterSupplyPipeSystem.Data;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
 using ThMEPWSS.WaterSupplyPipeSystem.tool;
+using ThMEPWSS.WaterSupplyPipeSystem.ViewModel;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.Method
 {
     public static class Tool
     {
+        public static int GetPrValveGroupFloor(int i, WaterSupplyVM uiConfigs, List<int[]> households)
+        {
+            var prValveStyle = uiConfigs.SetViewModel.PRValveStyleDynamicRadios[1].IsChecked;//true表示一户一阀
+            var lowestFloor = uiConfigs.SetViewModel.tankViewModel.LowestFloor;
+            for(int j =0; j < households.Count;j++)
+            {
+                if (households[j][i]>0)
+                {
+                    lowestFloor += j;
+                    break;
+                }
+            }
+            double tankElevation = uiConfigs.SetViewModel.tankViewModel.Elevation;
+            double floorHeight = uiConfigs.SetViewModel.FloorLineSpace/1000;
+            int floorNum = (int)Math.Floor((tankElevation - 42) / floorHeight) + 1;
+            if(prValveStyle)
+            {
+                return Math.Max(floorNum, 3 + lowestFloor);
+            }
+            else
+            {
+                return Math.Max(floorNum, 4 + lowestFloor);
+            }
+            
+        }
+
         public static int GetAreaIndex(WaterSupplyVM uiConfigs)
         {
             var areaIndex = 0;
@@ -23,6 +50,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             }
             return areaIndex;
         }
+
 
         public static bool GetFloorExist(List<int> highestStorey, List<int> lowestStorey, List<string> pipeNumber,
             out List<int> floorExist, out List<int> pipeFloorList)
@@ -51,6 +79,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             }
             return true;
         }
+
 
         public static List<int> GetNotExistFloor(int floorNumbers, List<List<int>> floorNumList)
         {
@@ -114,6 +143,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             return FlushFaucet;
         }
 
+
         public static List<int> GetNoPRValve(WaterSupplySetVM setViewModel, out bool rstNoPRValve)
         {
             rstNoPRValve = true;
@@ -131,6 +161,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             return NoPRValve;
         }
 
+
         public static int GetFloorNumbers(List<List<int>> floorNumList)
         {
             var floorNumbers = 1;//楼层数统计
@@ -143,6 +174,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             }
             return floorNumbers;
         }
+
 
         public static bool GetLowHighStorey(WaterSupplySetVM setViewModel, int floorNumbers, out List<string> pipeNumber,
             out List<int> lowestStorey, out List<int> highestStorey)
@@ -191,6 +223,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             return maxHouseholdNums;
         }
 
+
         public static int GetHouseholdNum(int i, SysIn sysIn, SysProcess sysProcess)
         {
             var floorCleanToolList = sysProcess.FloorCleanToolList;
@@ -202,6 +235,19 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             }
             return HouseholdNum;
         }
+
+        public static int GetHouseholdNum(int i, int areaIndex, SysIn sysIn, SysProcess sysProcess)
+        {
+            var floorCleanToolList = sysProcess.FloorCleanToolList;
+            var HouseholdNum = floorCleanToolList[i][areaIndex].GetHouseholdNums();
+            //if (HouseholdNum == 0)
+            //{
+            //    HouseholdNum = sysProcess.MaxHouseholdNums;
+            //}
+            return HouseholdNum;
+        }
+
+
         public static double ComputeU0i(this double Ngi, SysIn sysIn)
         {
             double U0i = 0;
@@ -212,17 +258,40 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
             return U0i;
         }
 
+
+        public static string GetDN(double U0i, double Ngi, int HouseholdNum, out double qg)
+        {
+            var pipeCompute = new PipeCompute(U0i, Ngi);
+            var DN = "";
+            qg = 0;
+            if (Math.Abs(Ngi) > 1e-6)
+            {
+                DN = pipeCompute.PipeDiameterCompute(out double qg1);
+                qg = qg1;
+            }
+            return DN;
+        }
+
+        public static string GetDN(double U0i, double Ngi)
+        {
+            var pipeCompute = new PipeCompute(U0i, Ngi);
+            var DN = "";
+            if (Math.Abs(Ngi) > 1e-6)
+            {
+                DN = pipeCompute.PipeDiameterCompute(out double qg1);
+            }
+            return DN;
+        }
+
         public static string GetDN(double U0i, double Ngi, int HouseholdNum)
         {
-            var pipeCompute = new PipeCompute(U0i, Ngi * HouseholdNum);
+            var pipeCompute = new PipeCompute(U0i, Ngi);
             var DN = "";
             if (Math.Abs(Ngi) > 1e-6)
             {
                 DN = pipeCompute.PipeDiameterCompute();
             }
-
             return DN;
         }
-
     }
 }

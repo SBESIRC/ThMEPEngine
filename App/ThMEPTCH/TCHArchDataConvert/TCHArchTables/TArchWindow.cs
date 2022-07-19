@@ -1,6 +1,6 @@
 ﻿namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
-    class TArchWindow
+    class TArchWindow:TArchEntity
     {
         /*
         CREATE TABLE TArchWindow(
@@ -22,7 +22,6 @@
     TextPointY DOUBLE,
     TextPointZ DOUBLE
 );*/
-        public ulong Id { get; set; }
         public string Number { get; set; }
         public double TextPointZ { get; set; }
         public double TextPointX { get; set; }
@@ -35,9 +34,8 @@
         public double SillHeight { get; set; }
         public double Width { get; set; }
         public double Thickness { get; set; }
-        public string LineType { get; set; }
         public int Kind { get; set; }
         public string SubKind { get; set; }
-        public string StyleID { get; set; }
+        public double Rotation { get; set; }
     }
 }

@@ -28,17 +28,18 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             ThWSSCommon.Layout_PipeRainTextLayerName,
             ThWSSCommon.Layout_PipeCasingLayerName,
             ThWSSCommon.Layout_PipeCasingTextLayerName,
+            ThWSSCommon.Layout_FloorDrainBlockWastLayerName,
         };
         static List<string> textStyleNames = new List<string>
         {
             ThWSSCommon.Layout_TextStyle
         };
-        public static void ClearHisFloorBlock(this Database database,List<Polyline> selectFloors) 
+        public static void ClearHisFloorBlock(this Database database, List<Polyline> selectFloors)
         {
             if (null == selectFloors || selectFloors.Count < 1)
                 return;
             //这里是删除该框线的块，直接删除块定义
-            
+
             //获取生成的可能是要删除的块
             var blockReferences = new List<BlockReference>();
             using (AcadDatabase acdb = AcadDatabase.Use(database))
@@ -84,9 +85,9 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                     blockRecord.Erase();
                 }
             }
-            
+
         }
-        public static void LoadBlockLayerToDocument(this Database database) 
+        public static void LoadBlockLayerToDocument(this Database database)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
@@ -109,7 +110,7 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                         continue;
                     currentDb.Layers.Import(layer, true);
                 }
-                foreach (var item in textStyleNames) 
+                foreach (var item in textStyleNames)
                 {
                     if (string.IsNullOrEmpty(item))
                         continue;

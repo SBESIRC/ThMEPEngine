@@ -113,8 +113,6 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
-          - text: "连管标注"
-            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷淋系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷头校核"

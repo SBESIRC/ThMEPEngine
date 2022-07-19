@@ -94,6 +94,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             Info.Mode = dataPass0.LayoutMode;
             Info.OriginRadius = dataPass0.SearchRadius;
             Info.AllowDoorInPaking = !dataPass0.AvoidParking;
+            Info.ColumnCenterOK = dataPass0.LayoutInMiddle;
 
             //根据全局参数修改数据
             Info.Radius = Info.OriginRadius + 500;
@@ -108,12 +109,15 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public int SearchRadius = 3500;
         public int LayoutMode = 2; //一字（0） L字（1） 两者都考虑（2）
         public bool AvoidParking = false;  //开门是否避让车位 T:避让 F:不用避让
-        public DataPass(int radius, int layoutObj, int layoutMode, bool avoidPaking)
+        public bool LayoutInMiddle = false;
+
+        public DataPass(int radius, int layoutObj, int layoutMode, bool avoidPaking, bool layoutInMiddle)
         {
             this.SearchRadius = radius;
             this.LayoutObject = layoutObj;
             this.LayoutMode = layoutMode;
             this.AvoidParking = avoidPaking;
+            this.LayoutInMiddle = layoutInMiddle;
         }
     }
 

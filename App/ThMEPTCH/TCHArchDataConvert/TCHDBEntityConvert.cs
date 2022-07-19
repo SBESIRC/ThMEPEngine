@@ -9,6 +9,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPTCH.Model;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
+using ThMEPTCH.TCHArchDataConvert.THArchEntity;
 
 namespace ThMEPTCH.TCHArchDataConvert
 {
@@ -21,9 +22,8 @@ namespace ThMEPTCH.TCHArchDataConvert
         Dictionary<Curve, WallEntity> wallCurveDic = new Dictionary<Curve, WallEntity>();
         public TCHDBEntityConvert() 
         {
-        
         }
-        public List<ThTCHWall> WallDoorWindowRelation(List<TArchWall> walls, List<TArchDoor> doors,List<TArchWindow> windows) 
+        public List<ThTCHWall> WallDoorWindowRelation(List<TArchWall> walls, List<TArchDoor> doors,List<TArchWindow> windows,Vector3d moveOffSet) 
         {
             wallDic = new Dictionary<MPolygon, ThTCHWall>();
             wallEntityDic = new Dictionary<MPolygon, WallEntity>();
@@ -31,7 +31,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var addDBColl = new DBObjectCollection();
             foreach (var item in walls)
             {
-                var entity = TArchWallToEntityWall(item,0,0,0,0);
+                var entity = DBToTHEntityCommon.TArchWallToEntityWall(item,0,0,0,0, moveOffSet);
                 wallEntityDic.Add(entity.OutLine, entity);
                 if (entity.WallCenterCurve != null &&(entity.WallCenterCurve is Line || entity.WallCenterCurve is Arc))
                     wallCurveDic.Add(entity.WallCenterCurve,entity);
@@ -45,7 +45,6 @@ namespace ThMEPTCH.TCHArchDataConvert
                 double epLeftOffSet = 0.0;
                 double spRightOffSet = 0.0;
                 double epRightOffSet = 0.0;
-                
                 if (null != entity.WallCenterCurve) 
                 {
                     if (entity.WallCenterCurve is Line line)
@@ -56,12 +55,15 @@ namespace ThMEPTCH.TCHArchDataConvert
                 if (Math.Abs(spLeftOffSet)>0.001 || Math.Abs(epLeftOffSet)>0.001 || Math.Abs(spRightOffSet)>0.001 || Math.Abs(epRightOffSet)>0.001)
                 {
                     var dbWall = walls.Find(c => c.Id == entity.DBId);
-                    var tempEntity = TArchWallToEntityWall(dbWall, spLeftOffSet, epLeftOffSet, spRightOffSet, epRightOffSet);
-                    wallDic.Add(entity.OutLine, WallEntityToTCHWall(tempEntity));
+                    var tempEntity = DBToTHEntityCommon.TArchWallToEntityWall(dbWall, spLeftOffSet, epLeftOffSet, spRightOffSet, epRightOffSet, moveOffSet);
+                    if (tempEntity.OutLine != null && tempEntity.OutLine.Area>100)
+                        wallDic.Add(entity.OutLine, WallEntityToTCHWall(tempEntity));
                 }
                 else 
                 {
-                    wallDic.Add(entity.OutLine, WallEntityToTCHWall(entity));
+                    if (entity.OutLine != null && entity.OutLine.Area > 100)
+                        wallDic.Add(entity.OutLine, WallEntityToTCHWall(entity));
+
                 }
             }
 
@@ -71,7 +73,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var doorEntityDic = new Dictionary<MPolygon, DoorEntity>();
             foreach (var item in doors)
             {
-                var entity = TArchDoorToEntityDoor(item);
+                var entity = DBToTHEntityCommon.TArchDoorToEntityDoor(item, moveOffSet);
                 doorDic.Add(entity.OutLine, DoorEntityToTCHDoor(entity));
                 doorEntityDic.Add(entity.OutLine, entity);
             }
@@ -80,7 +82,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var windowEntityDic = new Dictionary<MPolygon, WindowEntity>();
             foreach (var item in windows)
             {
-                var entity = TArchWindowToEntityWindow(item);
+                var entity = DBToTHEntityCommon.TArchWindowToEntityWindow(item, moveOffSet);
                 windowDic.Add(entity.OutLine, WindowEntityToTCHWindow(entity));
                 windowEntityDic.Add(entity.OutLine, entity);
             }
@@ -107,7 +109,17 @@ namespace ThMEPTCH.TCHArchDataConvert
                     wall.Openings.Add(WallWindowOpening(wallEntityDic[outLine], windowEntity));
                 }
             }
-            return wallDic.Select(c=>c.Value).ToList();
+            var resList = new List<ThTCHWall>();
+            foreach (var keyValue in wallDic) 
+            {
+                if (keyValue.Value.Outline is Polyline polyline) 
+                {
+                    if (polyline.Area < 100)
+                        continue;
+                    resList.Add(keyValue.Value);
+                }
+            }
+            return resList;
         }
 
         double GetWallPointOffSet(Line wallLine, List<Curve> otherWallCurves, out double epLeftOffSet, out double spRightOffSet, out double epRightOffSet) 
@@ -288,297 +300,43 @@ namespace ThMEPTCH.TCHArchDataConvert
             var resCurves = new Dictionary<Curve,Point3d>();
             foreach (var curve in otherCurves) 
             {
+                var curveSp = curve.StartPoint;
+                if (Math.Abs(curveSp.Z - point.Z) > 1)
+                    continue;
                 var nearPoint = curve.GetClosestPointTo(point, false);
-                if (nearPoint.DistanceTo(point) < tolerance)
+                if (nearPoint.DistanceTo(point) > tolerance)
+                    continue;
                     resCurves.Add(curve,nearPoint);
             }
             return resCurves;
         }
         ThTCHWall WallEntityToTCHWall(WallEntity entity) 
         {
-            var newWall = new ThTCHWall(entity.OutLine.Shell(),entity.WallHeight);
+            var pl = entity.OutLine.Shell();
+            pl.Closed = false;
+            pl.Elevation = entity.OutLine.Elevation;
+            var newWall = new ThTCHWall(pl, entity.WallHeight);
+            //var newWall = new ThTCHWall(entity.StartPoint,entity.EndPoint,entity.RightWidth+entity.LeftWidth, entity.WallHeight);
             return newWall;
         }
         ThTCHDoor DoorEntityToTCHDoor(DoorEntity entity)
         {
-            var newDoor = new ThTCHDoor(entity.MidPoint, entity.Width,entity.Height,entity.Thickness,entity.Angle);
+            var newDoor = new ThTCHDoor(entity.MidPoint, entity.Width,entity.Height,entity.Thickness,entity.Rotation);
             return newDoor;
         }
         ThTCHWindow WindowEntityToTCHWindow(WindowEntity entity)
         {
-            var newWindow = new ThTCHWindow(entity.MidPoint, entity.Width, entity.Height, entity.Thickness, entity.Angle);
+            var newWindow = new ThTCHWindow(entity.MidPoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
             return newWindow;
         }
-        WallEntity TArchWallToEntityWall(TArchWall arch,double leftSpOffSet,double leftEpOffSet,double rightSpOffSet,double rightEpOffSet) 
-        {
-            WallEntity wallEntity = new WallEntity(arch.Id);
-            wallEntity.StartPoint = new Point3d(arch.StartPointX, arch.StartPointY, arch.StartPointZ);
-            wallEntity.EndPoint = new Point3d(arch.EndPointX, arch.EndPointY, arch.EndPointZ);
-            wallEntity.LeftWidth = arch.LeftWidth;
-            wallEntity.RightWidth = arch.RightWidth;
-            wallEntity.WallHeight = arch.Height;
-            wallEntity.Elevtion = arch.Elevtion;
-            if (arch.IsArc)
-            {
-                var sp = wallEntity.StartPoint;
-                var ep = wallEntity.EndPoint;
-                var leftWidth = arch.LeftWidth;
-                var rightWidth = arch.RightWidth;
-                var angle = arch.Bulge;
-                var xAxis = (ep - sp).GetNormal();
-                var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
-                var length = sp.DistanceTo(ep);
-                var centerPt = sp + xAxis.MultiplyBy(length / 2);
-                var radius = length / (2 * Math.Sin(angle / 2));
-                var moveDis = (length / 2) / Math.Tan(angle / 2);
-                var arcCenter = centerPt + yAxis.MultiplyBy(moveDis);
-                var sDir = (sp - arcCenter).GetNormal();
-                var eDir = (ep - arcCenter).GetNormal();
-                var innerArcSp = arcCenter + sDir.MultiplyBy(radius - leftWidth);
-                var innerArcEp = arcCenter + eDir.MultiplyBy(radius - leftWidth);
-                var outArcSp = arcCenter + sDir.MultiplyBy(radius + rightWidth);
-                var outArcEp = arcCenter + eDir.MultiplyBy(radius + rightWidth);
-                var sAngle = Vector3d.XAxis.GetAngleTo(sDir, Vector3d.ZAxis);
-                var innerRadius = radius - leftWidth;
-                var outRadius = radius + rightWidth;
-                var innerSpOffSet = leftSpOffSet / innerRadius;
-                var innerEpOffSet = leftEpOffSet / innerRadius;
-                var outSpOffSet = rightSpOffSet / outRadius;
-                var outEpOffSet = rightEpOffSet / outRadius;
-                var eAngle = sAngle + angle;
-                var innerArc = new Arc(arcCenter, Vector3d.ZAxis, innerRadius, sAngle - innerSpOffSet, eAngle + innerEpOffSet);
-                var outArc = new Arc(arcCenter, Vector3d.ZAxis, outRadius, sAngle - outSpOffSet, eAngle + outEpOffSet);
-                wallEntity.WallCenterCurve = new Arc(arcCenter, Vector3d.ZAxis, radius, sAngle, eAngle);
-                wallEntity.WallLeftCurve = innerArc;
-                wallEntity.WallRightCurve = outArc;
-                innerArcSp = innerArc.StartPoint;
-                innerArcEp = innerArc.EndPoint;
-                outArcSp = outArc.StartPoint;
-                outArcEp = outArc.EndPoint;
-                var segments = new PolylineSegmentCollection();
-                segments.Add(new PolylineSegment(outArcSp.ToPoint2D(), innerArcSp.ToPoint2D()));
-                if (innerArcSp.DistanceTo(innerArc.StartPoint) < 1)
-                {
-                    segments.Add(new PolylineSegment(innerArc.StartPoint.ToPoint2D(), innerArc.EndPoint.ToPoint2D(), innerArc.BulgeFromCurve(innerArc.IsClockWise())));
-                }
-                else
-                {
-                    segments.Add(new PolylineSegment(innerArc.EndPoint.ToPoint2D(), innerArc.StartPoint.ToPoint2D(), -innerArc.BulgeFromCurve(innerArc.IsClockWise())));
-                }
-                segments.Add(new PolylineSegment(innerArcEp.ToPoint2D(), outArcEp.ToPoint2D()));
-                if (outArcEp.DistanceTo(outArc.EndPoint) < 1)
-                {
-                    segments.Add(new PolylineSegment(outArc.EndPoint.ToPoint2D(), outArc.StartPoint.ToPoint2D(), -outArc.BulgeFromCurve(outArc.IsClockWise())));
-                }
-                else
-                {
-                    segments.Add(new PolylineSegment(outArc.StartPoint.ToPoint2D(), outArc.EndPoint.ToPoint2D(), outArc.BulgeFromCurve(outArc.IsClockWise())));
-                }
-                var temp = segments.Join(new Tolerance(2, 2));
-                var newPLine = temp.First().ToPolyline();
-                wallEntity.OutLine = ThMPolygonTool.CreateMPolygon(newPLine, new List<Curve> { });
-            }
-            else 
-            {
-                wallEntity.WallCenterCurve = new Line(wallEntity.StartPoint, wallEntity.EndPoint);
-                var wallDir = (wallEntity.EndPoint - wallEntity.StartPoint).GetNormal();
-                var normal = Vector3d.ZAxis;
-                var sp = wallEntity.StartPoint ;
-                var ep = wallEntity.EndPoint;
-                var leftDir = normal.CrossProduct(wallDir);
-                var spLeft = sp + leftDir.MultiplyBy(arch.LeftWidth) - wallDir.MultiplyBy(leftSpOffSet);
-                var spRight = sp - leftDir.MultiplyBy(arch.RightWidth) - wallDir.MultiplyBy(rightSpOffSet);
-                var epLeft = ep + leftDir.MultiplyBy(arch.LeftWidth) + wallDir.MultiplyBy(leftEpOffSet);
-                var epRight = ep - leftDir.MultiplyBy(arch.RightWidth) + wallDir.MultiplyBy(rightEpOffSet);
-                wallEntity.WallLeftCurve = new Line(spLeft, epLeft);
-                wallEntity.WallRightCurve = new Line(spRight, epRight);
-                Polyline outPLine = new Polyline();
-                outPLine.Elevation = wallEntity.StartPoint.Z;
-                outPLine.AddVertexAt(0, spLeft.ToPoint2D(), 0, 0, 0);
-                outPLine.AddVertexAt(1, spRight.ToPoint2D(), 0, 0, 0);
-                outPLine.AddVertexAt(2, epRight.ToPoint2D(), 0, 0, 0);
-                outPLine.AddVertexAt(3, epLeft.ToPoint2D(), 0, 0, 0);
-                outPLine.Closed = true;
-                wallEntity.OutLine = ThMPolygonTool.CreateMPolygon(outPLine, new List<Curve> { });
-            }
-            return wallEntity;
-        }
-        DoorEntity TArchDoorToEntityDoor(TArchDoor arch)
-        {
-            DoorEntity entity = new DoorEntity();
-            entity.MidPoint = new Point3d(arch.BasePointX, arch.BasePointY, arch.BasePointZ);
-            entity.TextPoint = new Point3d(arch.TextPointX, arch.TextPointY, arch.TextPointZ);
-            var normal = Vector3d.ZAxis;
-            var leftDir = (entity.TextPoint-entity.MidPoint).GetNormal();
-            var dir = normal.CrossProduct(leftDir);
-            entity.Angle = Vector3d.XAxis.GetAngleTo(dir, normal);
-            var sp = entity.MidPoint - dir.MultiplyBy(arch.Width / 2);
-            var ep = entity.MidPoint + dir.MultiplyBy(arch.Width / 2);
-            var spLeft = sp + leftDir.MultiplyBy(arch.Thickness/2);
-            var spRight = sp - leftDir.MultiplyBy(arch.Thickness / 2);
-            var epLeft = ep + leftDir.MultiplyBy(arch.Thickness/2);
-            var epRight = ep - leftDir.MultiplyBy(arch.Thickness / 2);
-            Polyline outPLine = new Polyline();
-            outPLine.AddVertexAt(0, spLeft.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(1, spRight.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(2, epRight.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(3, epLeft.ToPoint2D(), 0, 0, 0);
-            outPLine.Closed = true;
-            entity.OutLine = ThMPolygonTool.CreateMPolygon(outPLine, new List<Curve> { });
-            entity.Width = arch.Width;
-            entity.Height = arch.Height;
-            entity.Thickness = arch.Thickness;
-            return entity;
-        }
-        WindowEntity TArchWindowToEntityWindow(TArchWindow arch)
-        {
-            var entity = new WindowEntity();
-            entity.MidPoint = new Point3d(arch.BasePointX, arch.BasePointY, arch.BasePointZ);
-            entity.TextPoint = new Point3d(arch.TextPointX, arch.TextPointY, arch.TextPointZ);
-            var normal = Vector3d.ZAxis;
-            var leftDir = (entity.TextPoint - entity.MidPoint);
-            leftDir = new Vector3d(leftDir.X, leftDir.Y, 0);
-            leftDir = leftDir.GetNormal();
-            var dir = normal.CrossProduct(leftDir);
-            entity.Angle = Vector3d.XAxis.GetAngleTo(dir, normal);
-            var sp = entity.MidPoint - dir.MultiplyBy(arch.Width / 2);
-            var ep = entity.MidPoint + dir.MultiplyBy(arch.Width / 2);
-            var spLeft = sp + leftDir.MultiplyBy(arch.Thickness / 2);
-            var spRight = sp - leftDir.MultiplyBy(arch.Thickness / 2);
-            var epLeft = ep + leftDir.MultiplyBy(arch.Thickness / 2);
-            var epRight = ep - leftDir.MultiplyBy(arch.Thickness / 2);
-            Polyline outPLine = new Polyline();
-            outPLine.AddVertexAt(0, spLeft.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(1, spRight.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(2, epRight.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(3, epLeft.ToPoint2D(), 0, 0, 0);
-            outPLine.Closed = true;
-            entity.OutLine = ThMPolygonTool.CreateMPolygon(outPLine, new List<Curve> { });
-            entity.Width = arch.Width;
-            entity.Height = arch.Height;
-            entity.Thickness = arch.Thickness;
-            return entity;
-        }
+        
         ThTCHOpening WallDoorOpening(WallEntity wallEntity, DoorEntity doorEntity) 
         {
-            return  new ThTCHOpening(doorEntity.MidPoint, doorEntity.Width, doorEntity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, doorEntity.Angle); 
+            return  new ThTCHOpening(doorEntity.MidPoint, doorEntity.Width, doorEntity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, doorEntity.Rotation); 
         }
         ThTCHOpening WallWindowOpening(WallEntity wallEntity, WindowEntity entity)
         {
-            return new ThTCHOpening(entity.MidPoint, entity.Width, entity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, entity.Angle);
-        }
-    }
-    class WallEntity 
-    {
-        public string Id { get; }
-        public ulong DBId { get; }
-        public Point3d StartPoint { get; set; }
-        public Point3d EndPoint { get; set; }
-        /// <summary>
-        /// 墙中心线，非异形墙有数据（Line,Arc），后续用来计算交点处的延长问题
-        /// 非线或弧线的异形墙不计算延长计算轮廓
-        /// </summary>
-        public Curve WallCenterCurve { get; set; }
-        public Curve WallLeftCurve { get; set; }
-        public Curve WallRightCurve { get; set; }
-        public double Elevtion { get; set; }
-        public MPolygon OutLine { get; set; }
-        public double LeftWidth { get; set; }
-        public double RightWidth { get; set; }
-        public double WallHeight { get; set; }
-        public double WallMinZ 
-        {
-            get 
-            {
-                if (null == WallCenterCurve && null == OutLine)
-                    return 0.0;
-                if (null != WallCenterCurve) 
-                {
-                    var pt = WallCenterCurve.StartPoint;
-                    return pt.Z;
-                }
-                return 0.0;
-            }
-        }
-        public double WallMaxZ 
-        {
-            get 
-            {
-                if (null == WallCenterCurve && null == OutLine)
-                    return 0.0;
-                if (null != WallCenterCurve)
-                {
-                    var pt = WallCenterCurve.StartPoint;
-                    return pt.Z + WallHeight;
-                }
-                return 0.0;
-            } 
-        }
-        public WallEntity(ulong dbWallId)
-        {
-            Id = Guid.NewGuid().ToString();
-            DBId = dbWallId;
-        }
-    }
-
-    class DoorEntity
-    {
-        public string Id { get; }
-        public Point3d MidPoint { get; set; }
-        public Point3d TextPoint { get; set; }
-        public Vector3d XVector { get; set; }
-        public double Angle { get; set; }
-        public MPolygon OutLine { get; set; }
-        public double Thickness { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double MinZ
-        {
-            get
-            {
-                return MidPoint.Z;
-            }
-        }
-        public double MaxZ
-        {
-            get
-            {
-                return MidPoint.Z+ Height;
-            }
-        }
-        public DoorEntity()
-        {
-            Id = Guid.NewGuid().ToString();
-        }
-    }
-    class WindowEntity
-    {
-        public string Id { get; }
-        public Point3d MidPoint { get; set; }
-        public Point3d TextPoint { get; set; }
-        public Vector3d XVector { get; set; }
-        public double Angle { get; set; }
-        public MPolygon OutLine { get; set; }
-        public double Thickness { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double MinZ
-        {
-            get
-            {
-                return MidPoint.Z;
-            }
-        }
-        public double WallMaxZ
-        {
-            get
-            {
-                return MidPoint.Z + Height;
-            }
-        }
-        public WindowEntity()
-        {
-            Id = Guid.NewGuid().ToString();
+            return new ThTCHOpening(entity.MidPoint, entity.Width, entity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, entity.Rotation);
         }
     }
 }

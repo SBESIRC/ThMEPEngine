@@ -78,9 +78,10 @@ namespace ThMEPEngineCore.CAD
         {
             Vector3d firstVec = startPt.GetVectorTo(endPt);
             Vector3d secondVec = startPt.GetVectorTo(outerPt);
-            double angle = firstVec.GetAngleTo(secondVec);
-            double distance = Math.Cos(angle) * secondVec.Length;
-            return startPt + firstVec.GetNormal().MultiplyBy(distance);
+            // secondVec在firstVec上的投影距离
+            Vector3d firstUnitVec = firstVec.GetNormal();
+            double distance = firstUnitVec.DotProduct(secondVec);
+            return startPt + firstUnitVec.MultiplyBy(distance);
         }
         public static bool IsIntersects(this Entity firstEnt, Entity secondEnt)
         {

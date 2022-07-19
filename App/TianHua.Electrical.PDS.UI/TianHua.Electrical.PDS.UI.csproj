@@ -47,6 +47,8 @@
     <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorLayingPathPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorLayingSitePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorMaterialStructurePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorTypePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSSecondaryCircuitDescriptionEditPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
@@ -173,8 +175,10 @@
     <Compile Include="ViewModels\ThPDSCircuitGraphWpfRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
+    <Compile Include="ViewModels\ThPDSCreateLoadVM.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
     <Compile Include="ViewModels\THPDSLoadCalculationVM.cs" />
+    <Compile Include="ViewModels\ThPDSLoadItemTypeVM.cs" />
     <Compile Include="ViewModels\ThPDSProjectGraphNodeTreeViewVM.cs" />
   </ItemGroup>
   <ItemGroup>

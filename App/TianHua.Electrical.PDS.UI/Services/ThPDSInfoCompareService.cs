@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.UserContorls;
 using Microsoft.Toolkit.Mvvm.Input;
 using PDSGraph = QuikGraph.BidirectionalGraph<
@@ -173,8 +174,12 @@ namespace TianHua.Electrical.PDS.UI.Services
                 CreateCmd = new RelayCommand(() =>
                 {
                     var w = new ThPDSCreateLoad();
-                    w.ShowDialog();
-                    UpdateView(panel);
+                    if (w.ShowDialog() == true)
+                    {
+                        var vm = w.DataContext as ThPDSCreateLoadVM;
+                        ThPDSProjectGraphService.CreatNewLoad(CreateData(vm));
+                        UpdateView(panel);
+                    }
                 }),
                 UpdateCmd = new RelayCommand(() =>
                 {
@@ -203,6 +208,19 @@ namespace TianHua.Electrical.PDS.UI.Services
                     UpdateView(panel);
                 }),
             };
+        }
+
+        private ThPDSProjectGraphNodeData CreateData(ThPDSCreateLoadVM vm)
+        {
+            var data = ThPDSProjectGraphNodeData.Create();
+            data.Power = vm.Power;
+            data.Storey = vm.Storey;
+            data.Number = vm.Number;
+            data.Type = vm.Type.Type;
+            data.FireLoad = vm.FireLoad;
+            data.Description = vm.Description;
+            data.Sync();
+            return data;
         }
 
         private ContextMenu GetContextMenu(DataGrid dataGrid)

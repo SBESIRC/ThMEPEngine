@@ -104,7 +104,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             
             if(sprayType == 0)
             {
-                var rstGetInput = SpraySys.GetInput(curDb, sprayIn, selectArea, startPt);//提取输入参数
+                //var rstGetInput = SpraySys.GetInput(curDb, sprayIn, selectArea, startPt);//提取输入参数
+                var rstGetInput = SpraySysWithAcrossFloor.GetInput2(curDb, sprayIn, selectArea, startPt);//提取输入参数
                 if (!rstGetInput) return;
                 CmdWithoutAcrossLayers(curDb, sprayIn, spraySystem, sprayOut);
             }

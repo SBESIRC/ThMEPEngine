@@ -16,6 +16,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.JSON;
 using ThMEPHVAC.Command;
 using ThMEPHVAC.Service;
+using ThMEPHVAC.SmokeProofSystem.ExportExcelService;
 using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels;
 using ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels.ThSmokeProofMappingModel;
 
@@ -31,6 +32,13 @@ namespace ThMEPHVAC
         //        cmd.Execute();
         //    }
         //}
+
+        [CommandMethod("TIANHUACAD", "THSPEXPORT", CommandFlags.Modal)]
+        public void ThSomkeProofExport()
+        {
+            ExportExcel exportExcel = new ExportExcel();
+            exportExcel.Export();
+        }
 
         [CommandMethod("TIANHUACAD", "THLXSPS", CommandFlags.Modal)]
         public void ThLXUcsCompass()
@@ -49,7 +57,8 @@ namespace ThMEPHVAC
                         ThMEPHAVCCommon.SMOKE_PROOF_LAYER_NAME);
                     if (sltBlockType == "自然送风")
                     {
-                        attri = new Dictionary<string, string>() { { "系统风量", "自然" } };
+                        attriVal = "自然";
+                        attri = new Dictionary<string, string>() { { "系统风量", attriVal } };
                     }
                     else
                     {
@@ -59,7 +68,7 @@ namespace ThMEPHVAC
                         ThMEPHAVCCommon.SMOKE_PROOF_BLOCK_NAME,
                         ThMEPHAVCCommon.SMOKE_PROOF_LAYER_NAME,
                         attri);
-                    SetModelData(objId, smViewModel, model);
+                    SetModelData(objId, smViewModel, model, attriVal);
                     var ucs2Wcs = Active.Editor.UCS2WCS();
                     var compass = acadDatabase.Element<BlockReference>(objId, true);
                     compass.TransformBy(ucs2Wcs);
@@ -143,11 +152,12 @@ namespace ThMEPHVAC
         /// <param name="objId"></param>
         /// <param name="smViewModel"></param>
         /// <param name="scenario"></param>
-        private void SetModelData(ObjectId objId, string smViewModel, string scenario)
+        private void SetModelData(ObjectId objId, string smViewModel, string scenario, string volume)
         {
             var flexData = FlexDataStoreExtensions.FlexDataStore(objId);
             flexData.SetValue(FlexDataKeyType.MianVm.ToString(), smViewModel);
             flexData.SetValue(FlexDataKeyType.UserControlVm.ToString(), scenario);
+            flexData.SetValue(FlexDataKeyType.Volume.ToString(), volume);
         }
     }
 }

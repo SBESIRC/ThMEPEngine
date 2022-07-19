@@ -42,7 +42,6 @@
     <Compile Include="NTS\ThCADCoreNTSGeometryFixer.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometrySmoother.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
-    <Compile Include="NTS\ThCADCoreNTSHatchTool.cs" />
     <Compile Include="NTS\ThCADCoreNTSInscribedCircle.cs" />
     <Compile Include="NTS\ThCADCoreNTSKdTree.cs" />
     <Compile Include="NTS\ThCADCoreNTSLineExtension.cs" />

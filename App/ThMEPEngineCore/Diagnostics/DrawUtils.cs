@@ -163,7 +163,8 @@ namespace ThMEPEngineCore.Diagnostics
         }
 
         /// <summary>
-        /// 打印一行字。hight：文字大小
+        /// 打印文字。hight：文字大小
+        /// 支持多行文字。字符串中用\n换行
         /// </summary>
         /// <param name="pt"></param>
         /// <param name="s"></param>
@@ -178,11 +179,12 @@ namespace ThMEPEngineCore.Diagnostics
                 return;
             }
 
-            DBText text = new DBText();
-            text.Position = pt;
-            text.TextString = s;
+            var text = new MText();
+            text.Location = pt;
+            text.Contents = s;
             text.Rotation = 0;
             text.Height = hight;
+            text.TextHeight = hight;
             //text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
 
             DrawUtils.ShowGeometry(text, LayerName, colorIndex, lineWeightNum);

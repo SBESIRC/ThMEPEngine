@@ -288,13 +288,18 @@
                                 <ComboBox ItemsSource="{Binding CircuitSystem,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding CircuitSystem}"></ComboBox>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label>交流充电桩除标注外单枪的额定功率均为</Label>
+                                <Label>交流充电桩除标注外单枪的额定功率均为：</Label>
                                 <hc:NumericUpDown Value="{Binding ACChargerPower}"></hc:NumericUpDown>
                                 <Label>kW</Label>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label>直流非车载充电机除标注外额定功率均为</Label>
+                                <Label>直流非车载充电机除标注外额定功率均为：</Label>
                                 <hc:NumericUpDown Value="{Binding DCChargerPower}"></hc:NumericUpDown>
+                                <Label>kW</Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>防火卷帘控制盒除标注外额定功率均为：</Label>
+                                <hc:NumericUpDown Value="{Binding FireproofShutterPower}"/>
                                 <Label>kW</Label>
                             </StackPanel>
                         </StackPanel>

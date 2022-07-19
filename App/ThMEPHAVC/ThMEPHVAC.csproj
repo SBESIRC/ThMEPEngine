@@ -70,6 +70,7 @@
     <Compile Include="FanConnect\Service\ThAddValveService.cs" />
     <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
     <Compile Include="FanConnect\Service\ThHandleFanPipeService.cs" />
+    <Compile Include="FanConnect\ThFanConnectCommon.cs" />
     <Compile Include="FanPipeAlgorithm\ArrangePipe.cs" />
     <Compile Include="FanPipeAlgorithm\data_process.cs" />
     <Compile Include="FanPipeAlgorithm\edge.cs" />
@@ -268,6 +269,28 @@
     <Compile Include="Service\ThQueryRoomAirVolumeService.cs" />
     <Compile Include="Service\ThRoomSelector.cs" />
     <Compile Include="Model\ThDrawDimension.cs" />
+    <Compile Include="SmokeProofSystem\Data\CalStructrueService.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\BaseExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExcelExportEngine.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExcelExtension.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExcelRangeCopyOperator.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportExcel.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\EvacuationFrontExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\EvacuationWalkExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\FireFrontExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\SeparateOrSharedNaturalExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\SeparateOrSharedWindExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\StaircaseNoWindExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ExportWorkers\StaircaseWindExportWorker.cs" />
+    <Compile Include="SmokeProofSystem\ExportExcelService\ThExportExcelUtils.cs" />
+    <Compile Include="SmokeProofSystem\LayoutService\GetLayoutRoomInfo.cs" />
+    <Compile Include="SmokeProofSystem\LayoutService\LayoutAirShaftService.cs" />
+    <Compile Include="SmokeProofSystem\Model\SmkBlockModel.cs" />
+    <Compile Include="SmokeProofSystem\Model\SmkProofLayoutModel.cs" />
+    <Compile Include="SmokeProofSystem\Model\VolumeExportModel.cs" />
+    <Compile Include="SmokeProofSystem\Service\CheckService.cs" />
+    <Compile Include="SmokeProofSystem\Service\GeoUtils.cs" />
+    <Compile Include="SmokeProofSystem\Utils\StructUtils.cs" />
     <Compile Include="TCH\ThDrawTCHCross.cs" />
     <Compile Include="TCH\ThDrawTCHDimension.cs" />
     <Compile Include="TCH\ThDrawTCHDuct.cs" />
@@ -289,6 +312,7 @@
     <Compile Include="ThModelExtractionVisitor.cs" />
     <Compile Include="ThSmokeProofSystemCmd.cs" />
     <Compile Include="ViewModel\AirPortParameterVM.cs" />
+    <Compile Include="ViewModel\ThSmokeProofSystemViewModels\BaseSmokeProofViewModel.cs" />
     <Compile Include="ViewModel\ThSmokeProofSystemViewModels\EvacuationFrontViewModel.cs" />
     <Compile Include="ViewModel\ThSmokeProofSystemViewModels\EvacuationWalkViewModel.cs" />
     <Compile Include="ViewModel\ThSmokeProofSystemViewModels\FireElevatorFrontRoomViewModel.cs" />
@@ -379,11 +403,11 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="QuikGraph">
-      <Version>2.3.0</Version>
+      <Version>2.5.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="SmokeProofSystem\" />
+    <Folder Include="SmokeProofSystem\MarkEngine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

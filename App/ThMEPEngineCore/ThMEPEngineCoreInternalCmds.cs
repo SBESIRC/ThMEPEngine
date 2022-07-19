@@ -270,27 +270,40 @@ namespace ThMEPEngineCore
                 {
                     objs.Add(acadDatabase.Element<Polyline>(obj));
                 }
-                objs = objs.BuildArea();
 
-                var geos = objs
-                    .OfType<Entity>()
-                    .Select(o => new ThGeometry() { Boundary = o })
-                    .ToList();
+                var geos = new List<ThGeometry>();
+                foreach(Entity e in objs.BuildArea())
+                {
+                    geos.Add(new ThGeometry() { Boundary = e });
+                }
+
                 ThGeoOutput.Output(geos, Active.DocumentDirectory, Active.DocumentName);
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THSELGROUP", CommandFlags.Modal)]
-        public void ThSelGroup()
+        [CommandMethod("TIANHUACAD", "THOUTEROUTLINE", CommandFlags.Modal)]
+        public void THOUTEROUTLINE()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var objs = new List<ObjectId>();
-                acadDatabase.Groups.ForEachDbObject(g =>
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
                 {
-                    objs.AddRange(g.GetAllEntityIds());
-                });
-                Active.Editor.PickFirstObjects(objs.ToArray());
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+
+                var geometry = objs.OuterOutline();
+                foreach (Entity obj in geometry.ToDbCollection())
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                    obj.SetDatabaseDefaults();
+                }
             }
         }
     }

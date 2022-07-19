@@ -7,7 +7,7 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
 {
-    public class EvacuationWalkViewModel : NotifyPropertyChangedBase
+    public class EvacuationWalkViewModel : BaseSmokeProofViewModel
     {
         /// <summary>
         /// 风量

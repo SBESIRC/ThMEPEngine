@@ -22,6 +22,17 @@ namespace ThMEPTCH.TCHArchDataConvert
                 return;
             dbHelper = new THMEPSQLiteServices(tchDBPath);
         }
+        public List<TArchEntity> AllTArchEntitys() 
+        {
+            var resList = new List<TArchEntity>();
+            var allWalls = GetDBWallDatas();
+            resList.AddRange(allWalls);
+            var allWindows = GetDBWindowDatas();
+            resList.AddRange(allWindows);
+            var allDoors = GetDBDoorDatas();
+            resList.AddRange(allDoors);
+            return resList;
+        }
         public List<TArchWall> GetDBWallDatas() 
         {
             var walls = new List<TArchWall>();

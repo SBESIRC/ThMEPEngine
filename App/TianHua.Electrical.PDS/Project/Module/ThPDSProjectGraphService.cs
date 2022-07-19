@@ -623,24 +623,21 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建负载
         /// </summary>
-        /// <param name="defaultPhase">项数</param>
-        /// <param name="defaultPhaseSequence">相序</param>
-        /// <param name="defaultLoadID">设备编号</param>
-        /// <param name="defaultPower">设备功率</param>
-        /// <param name="defaultDescription">描述信息</param>
-        /// <param name="defaultFireLoad">是否消防</param>
-        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "备用", bool defaultFireLoad = false, ImageLoadType imageLoadType = ImageLoadType.None ,string floorNumber = "1F")
+        /// <param name="data"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSProjectGraphNodeData data)
         {
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
-            node.Load.Phase = defaultPhase;
-            node.Details.LoadCalculationInfo.PhaseSequence = defaultPhaseSequence;
-            node.Load.ID.LoadID = defaultLoadID;
-            node.Details.LoadCalculationInfo.HighPower = defaultPower;
-            node.Load.ID.Description = defaultDescription;
-            node.Load.SetFireLoad(defaultFireLoad);
-            node.Load.SetLocation(new ThPDSLocation() { FloorNumber = floorNumber });
-            switch (imageLoadType)
+            node.Load.Phase = data.Phase;
+            node.Details.LoadCalculationInfo.PhaseSequence = data.PhaseSequence;
+            node.Load.ID.LoadID = data.Number;
+            node.Details.LoadCalculationInfo.HighPower = data.Power;
+            node.Load.ID.Description = data.Description;
+            node.Load.SetFireLoad(data.FireLoad);
+            node.Load.SetLocation(new ThPDSLocation() { FloorNumber = data.Storey });
+            switch (data.Type)
             {
                 case ImageLoadType.None:
                     {
@@ -733,7 +730,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     {
                         node.Type = PDSNodeType.DistributionBox;
                         node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
-                        node.Load.LoadTypeCat_2 = defaultPhase == ThPDSPhase.一相? ThPDSLoadTypeCat_2.OnePhaseSocket: ThPDSLoadTypeCat_2.ThreePhaseSocket;
+                        node.Load.LoadTypeCat_2 = data.Phase == ThPDSPhase.一相 ? ThPDSLoadTypeCat_2.OnePhaseSocket : ThPDSLoadTypeCat_2.ThreePhaseSocket;
                         node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
                         break;
                     }
@@ -791,6 +788,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
             }
             PDSProject.Instance.graphData.Graph.AddVertex(node);
+            node.ComponentSelection(new List<ThPDSProjectGraphEdge>(), false);
             return node;
         }
 
@@ -824,7 +822,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.LoadCalculationInfo.PhaseSequence, floorNumber:node.Load.Location.FloorNumber);
+            var data = ThPDSProjectGraphNodeData.Create();
+            data.Phase = node.Load.Phase;
+            data.Storey = node.Load.Location.FloorNumber;
+            data.PhaseSequence = node.Details.LoadCalculationInfo.PhaseSequence;
+            var target = CreatNewLoad(data);
             if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 target.Load.Phase = ThPDSPhase.一相;
@@ -851,7 +853,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.LoadCalculationInfo.PhaseSequence, floorNumber: node.Load.Location.FloorNumber);
+            var data = ThPDSProjectGraphNodeData.Create();
+            data.Phase = node.Load.Phase;
+            data.Storey = node.Load.Location.FloorNumber;
+            data.PhaseSequence = node.Details.LoadCalculationInfo.PhaseSequence;
+            var target = CreatNewLoad(data);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:获取对应的CircuitFormOutType
@@ -1033,6 +1039,24 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 node.Details.SecondaryCircuits.Remove(secondaryCircuit);
             }
+        }
+
+        /// <summary>
+        /// 设置回路锁状态
+        /// </summary>
+        public static void SetLockState(ThPDSProjectGraphEdge edge, bool state)
+        {
+            edge.Details.CircuitLock = state;
+        }
+
+        /// <summary>
+        /// 获取回路锁定状态
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public static bool LockState(ThPDSProjectGraphEdge edge)
+        {
+            return edge.Details.CircuitLock;
         }
 
         /// <summary>
@@ -1319,11 +1343,26 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 创建空项目
+        /// </summary>
+        public static void CreateNewProject()
+        {
+            PDSProject.Instance.SetDefaults();
+        }
+
+        /// <summary>
         /// 导入项目
         /// </summary>
         public static void ImportProject(string filePath)
         {
-            PDSProject.Instance.Load(filePath);
+            if(string.IsNullOrWhiteSpace(filePath))
+            {
+                PDSProject.Instance.SetDefaults();
+            }
+            else
+            {
+                PDSProject.Instance.LoadFromFile(filePath);
+            }
         }
 
         /// <summary>

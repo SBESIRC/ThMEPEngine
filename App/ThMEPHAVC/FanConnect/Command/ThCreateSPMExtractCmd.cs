@@ -64,6 +64,8 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     ///处理数据--删除不必要的线（图纸上不删除）
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                    //mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
+
                     var handlePipeService = new ThHandleFanPipeService()
                     {
                         StartPoint = startPt,
@@ -86,11 +88,14 @@ namespace ThMEPHVAC.FanConnect.Command
                     var badLines = handlePipeService.GetBadLine(tmpTree, mt);
                     var rightLines = handlePipeService.GetRightLine(tmpTree, mt);//已经处理好的线
 
+
+
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                     {
                         space = 150.0;
                     }
+
                     //构建Tree
                     ThFanTreeModel treeModel = new ThFanTreeModel(startPt, rightLines, space);
                     if (treeModel.RootNode == null)
@@ -122,17 +127,47 @@ namespace ThMEPHVAC.FanConnect.Command
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                     pipeExtendServiece.ConfigInfo = ConfigInfo;
                     pipeExtendServiece.PipeExtend(treeModel);
+
+
+
+                    ////计算流量
+                    //ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
+                    //if (pointTreeModel.RootNode == null)
+                    //{
+                    //    return;
+                    //}
+                    //pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2);
+
+
+
                     //计算流量
-                    ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
-                    if (pointTreeModel.RootNode == null)
+                    DrawUtils.ShowGeometry(rightLines, "l0rightline");
+                    var treenodes = treeModel.RootNode.GetDecendent();
+                    treenodes.Add(treeModel.RootNode);
+                    var lines = treenodes.Select(x => x.Item.PLine).ToList();
+                    DrawUtils.ShowGeometry(lines, "l0pline");
+                    var breakLine = ThPointTreeModelService.BreakLine(lines, mt);
+                    DrawUtils.ShowGeometry(breakLine, "l0breakline");
+                    var flowCalTree = ThPointTreeModelService.BuildTree(breakLine, startPt);
+                    if (flowCalTree != null)
                     {
-                        return;
+                        ThPointTreeModelService.CalNodeLevel(flowCalTree);
+                        ThPointTreeModelService.CheckMarkForLevel(flowCalTree);
+                        ThPointTreeModelService.CalNodeFlowValue(flowCalTree, fcus);
+                        ThPointTreeModelService.CalNodeDimValue(flowCalTree, ConfigInfo.WaterSystemConfigInfo.FrictionCoeff);
+                        ThPointTreeModelService.CheckDimChange(flowCalTree);
+
+                        ThPointTreeModelService.PrintTree(flowCalTree, "l0node");
+
+                        //标记流量
+                        ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
+                        pipeMarkServiece.ConfigInfo = ConfigInfo;
+                        //pipeMarkServiece.PipeMark(pointTreeModel);
+                        var pipeTreeNodes = treeModel.RootNode.GetDecendent();
+                        pipeTreeNodes.Add(treeModel.RootNode);
+                        pipeMarkServiece.CreateMark(flowCalTree, pipeTreeNodes);
                     }
-                    pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2);
-                    //标记流量
-                    ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
-                    pipeMarkServiece.ConfigInfo = ConfigInfo;
-                    pipeMarkServiece.PipeMark(pointTreeModel);
+
                     if (ConfigInfo.WaterSystemConfigInfo.IsGenerValve && ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
                         //插入阀门

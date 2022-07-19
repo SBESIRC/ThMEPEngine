@@ -64,10 +64,10 @@ namespace ThCADCore.NTS
             DissolveSharedEdges = true;
         }
 
-        public Geometry Build(MultiLineString lineStrings)
+        public Geometry Build(GeometryCollection g)
         {
             var polygonizer = new Polygonizer();
-            polygonizer.Add(lineStrings);
+            polygonizer.Add(g);
             var polys = polygonizer.GetPolygons();
             if (polys.Count == 0)
             {

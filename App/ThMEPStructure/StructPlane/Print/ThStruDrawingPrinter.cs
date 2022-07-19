@@ -6,6 +6,7 @@ using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
+using System;
 
 namespace ThMEPStructure.StructPlane.Print
 {
@@ -37,7 +38,7 @@ namespace ThMEPStructure.StructPlane.Print
             DocProperties = input.DocProperties;
             ComponentInfos = input.ComponentInfos;
             ObjIds = new ObjectIdCollection();
-            PrintParameter = printParameter;
+            PrintParameter = printParameter;            
             FlrHeight = DocProperties.GetFloorHeight();
             FlrBottomEle = DocProperties.GetFloorBottomElevation();
         }
