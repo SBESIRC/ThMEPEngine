@@ -761,6 +761,9 @@ namespace ThMEPHVAC.FanConnect.Service
         }
 
 
+
+        //----------------------------
+
         public void CreateMark(ThFanTreeNode<ThFanPointModelNew> node, List<ThFanTreeNode<ThFanPipeModel>> pipeTreeNodes)
         {
             GetMarkPosition(node, out var coolHotNodes, out var condNodes);
@@ -835,19 +838,11 @@ namespace ThMEPHVAC.FanConnect.Service
 
             foreach (var n in coolHotNodes)
             {
-                var isNearMark = CheckOriMark(n, markIndex, true, out var nearMark);
+                var isNearMark = CheckNearMarkBR(n, markIndex, out var nearMark);
                 if (isNearMark)
                 {
                     updateMark.Add(nearMark);
-                    var isSameBlock = CheckMarkBlock(n, nearMark);
-                    if (isSameBlock)
-                    {
-                        UpdateBlock(true);
-                    }
-                    else
-                    {
-                        UpdateBlock(false);
-                    }
+                    UpdateBlock(n, strMarkHeight, nearMark);
                 }
                 else
                 {
@@ -862,8 +857,22 @@ namespace ThMEPHVAC.FanConnect.Service
 
             foreach (var n in condNodes)
             {
+                var isNearMark = CheckNearMarkText(n, markIndex, out var nearMark);
+                if (isNearMark)
+                {
+                    updateMark.Add(nearMark);
+                    updateText(isSameBlock);
+                }
+                else
+                {
+                    if (n.Item.IsFlag == -1)
+                    {
+                        var markPt = n.Item.BasePt.GetMidPt(n.Parent.Item.BasePt);
+                        n.Item.IsFlag = CheckNodeFlag(markPt, pipeTreeNodes);
+                    }
+                    CondMarkNew(n);
 
-
+                }
             }
 
             var removeMark = marks.Except(updateMark);
@@ -871,59 +880,71 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 removeM(m);
             }
-
-
-
-
         }
 
-
-
         /// <summary>
-        /// 找垂直or同向的在线附近的标注
+        /// 找垂直在线附近的块标注
         /// </summary>
         /// <param name="node"></param>
         /// <param name="marksIndex"></param>
         /// <param name="isDirPerpendicular">t:垂直 blockReference f:平行 DBText</param>
         /// <param name="nearMark"></param>
         /// <returns></returns>
-        private static bool CheckOriMark(ThFanTreeNode<ThFanPointModelNew> node, ThCADCoreNTSSpatialIndex marksIndex, bool isDirPerpendicular, out Entity nearMark)
+        private bool CheckNearMarkBR(ThFanTreeNode<ThFanPointModelNew> node, ThCADCoreNTSSpatialIndex marksIndex, out BlockReference nearMark)
         {
             var breturn = false;
+            nearMark = null;
 
             if (node.Parent != null)
             {
                 var pipeL = new Line(node.Parent.Item.BasePt, node.Item.BasePt);
                 var pipeLBuffer = pipeL.BufferSquare(300);
-                var inBufferM = marksIndex.SelectCrossingPolygon(pipeLBuffer).OfType<Entity>();
+                var inBufferM = marksIndex.SelectCrossingPolygon(pipeLBuffer).OfType<BlockReference>();
+                var minDist = double.MaxValue;
 
                 foreach (var mark in inBufferM)
                 {
-                    if (isDirPerpendicular)
+                    //找出垂直的br
+                    var angleD = mark.Rotation - pipeL.Angle;
+                    if (Math.Abs(Math.Cos(angleD)) <= Math.Cos(89 * Math.PI / 180))
                     {
-                        if (mark is BlockReference bk)
+                        var isSameBlock = IsNearMarkSameBlk(nearMark);
+                        if (isSameBlock)
                         {
-                            
+                            //找出最近的
+                            var midPt = node.Item.BasePt.GetMidPt(node.Parent.Item.BasePt);
+                            var dist = mark.Position.DistanceTo(midPt);
+                            if (dist <= minDist)
+                            {
+                                nearMark = mark;
+                                minDist = dist;
+                                breturn = true;
+                            }
                         }
                     }
-                    else
-                    {
-                        var inBufferMList = inBufferM.OfType<DBText>();
-
-
-
-                    }
                 }
-              
-
-
             }
-
             return breturn;
 
         }
 
-        private int CheckNodeFlag(Point3d basePt, List<ThFanTreeNode<ThFanPipeModel>> pipeTreeNodes)
+
+        private bool IsNearMarkSameBlk(BlockReference nearMark)
+        {
+            var isSame = false;
+            if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0 && nearMark.GetEffectiveName() == ThFanConnectCommon.BlkName_PipeDim2)
+            {
+                isSame = true;
+            }
+            if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1 && nearMark.GetEffectiveName() == ThFanConnectCommon.BlkName_PipeDim4)
+            {
+                isSame = true;
+            }
+
+            return isSame;
+        }
+
+        private static int CheckNodeFlag(Point3d basePt, List<ThFanTreeNode<ThFanPipeModel>> pipeTreeNodes)
         {
             var flag = 0;
 
@@ -936,7 +957,7 @@ namespace ThMEPHVAC.FanConnect.Service
             return flag;
         }
 
-        public void CoolHotMarkNew(ThFanTreeNode<ThFanPointModelNew> node, string strMarkHeight)//冷热水管标记
+        private void CoolHotMarkNew(ThFanTreeNode<ThFanPointModelNew> node, string strMarkHeight)//冷热水管标记
         {
             if (!ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
             {
@@ -962,7 +983,7 @@ namespace ThMEPHVAC.FanConnect.Service
             List<string> property = new List<string>();
             if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
             {
-                blockName = "AI-水管多排标注(2排)";
+                blockName = ThFanConnectCommon.BlkName_PipeDim2;
                 var dim = node.Item.CoolDim >= node.Item.HotDim ? node.Item.CoolDim : node.Item.HotDim;
 
                 string strchs = "CHS " + "DN" + dim + strMarkHeight;
@@ -982,7 +1003,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
             {
-                blockName = "AI-水管多排标注(4排)";
+                blockName = ThFanConnectCommon.BlkName_PipeDim4;
                 string strcs = "CS " + "DN" + node.Item.CoolDim + strMarkHeight;
                 string strcr = "CR " + "DN" + node.Item.CoolDim + strMarkHeight;
                 string strhs = "HS " + "DN" + node.Item.HotDim + strMarkHeight;
@@ -1025,7 +1046,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             toDbServerviece.InsertPipeMark("H-PIPE-DIMS", blockName, markPt, markAg, property);
         }
-        public void CondMarkNew(ThFanTreeNode<ThFanPointModelNew> node)//冷凝水管标记
+        private void CondMarkNew(ThFanTreeNode<ThFanPointModelNew> node)//冷凝水管标记
         {
             if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
             {
@@ -1093,6 +1114,17 @@ namespace ThMEPHVAC.FanConnect.Service
             toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);
         }
 
+        private void UpdateBlock(ThFanTreeNode<ThFanPointModelNew> node, string strMarkHeight, ref BlockReference mark)
+        {
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+            {
+                return;
+            }
+            if (node.Parent == null)
+            {
+                return;
+            }
 
+        }
     }
 }
