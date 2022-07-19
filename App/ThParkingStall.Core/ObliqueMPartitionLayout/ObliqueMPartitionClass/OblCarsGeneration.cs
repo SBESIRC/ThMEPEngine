@@ -10,7 +10,7 @@ using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
-namespace ThParkingStall.Core.ObliqueMPartitionLayout.Services
+namespace ThParkingStall.Core.ObliqueMPartitionLayout
 {
     public partial class ObliqueMPartition
     {
