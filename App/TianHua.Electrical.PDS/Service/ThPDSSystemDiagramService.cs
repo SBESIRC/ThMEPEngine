@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
 using QuikGraph;
 using Dreambuild.AutoCAD;
@@ -77,17 +78,19 @@ namespace TianHua.Electrical.PDS.Service
                     return;
                 }
 
-                var basePoint = PointClone(selectPoint);
+                var basePoint = Point3d.Origin;
                 var scaleFactor = 1.0;
                 var scale = new Scale3d(scaleFactor, scaleFactor, scaleFactor);
                 activeDb.Layers.Import(configDb.Layers.ElementOrDefault("0"), false);
                 var insertEngine = new ThPDSBlockInsertEngine();
                 var assignment = new ThPDSDiagramAssignment();
+                var ucsToWcs = ThPDSUcsToWcsDecomposeService.Decompose();
+                var transform = ucsToWcs.PreMultiplyBy(Matrix3d.Displacement(selectPoint - Point3d.Origin));
+                var results = new List<Entity>();
 
                 // 插入内框
                 var rowCount = 1;
-                insertEngine.Insert2(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_TABLE_FRAME,
-                    basePoint, scale * 100.0, rowCount);
+                insertEngine.Insert2(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_TABLE_FRAME, basePoint, scale * 100.0, rowCount, results);
                 var nextInner = PointClone(basePoint);
                 basePoint = new Point3d(basePoint.X + 5700.0 * scaleFactor, basePoint.Y + 57400.0 * scaleFactor, 0);
                 var anotherStartPoint = new Point3d(basePoint.X + 36300 * scaleFactor, basePoint.Y, 0);
@@ -365,14 +368,16 @@ namespace TianHua.Electrical.PDS.Service
                                 anotherStartPoint = new Point3d(nextInner.X + 42000 * scaleFactor, nextInner.Y + 57400.0 * scaleFactor, 0);
                             }
                             insertEngine.Insert2(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_TABLE_FRAME,
-                                nextInner, scale * 100.0, rowCount);
+                                nextInner, scale * 100.0, rowCount, results);
                             basePoint = new Point3d(nextInner.X + 5700.0 * scaleFactor, nextInner.Y + 57400.0 * scaleFactor, 0);
                             var displaceMent = Matrix3d.Displacement(basePoint - startPoint);
                             tableObjs.ForEach(o => o.TransformBy(displaceMent));
                             basePoint += (endPoint - startPoint);
                         }
                     }
+                    results.AddRange(tableObjs);
                 }
+                results.ForEach(o => o.TransformBy(transform));
             }
         }
 
