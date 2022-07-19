@@ -11999,7 +11999,10 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               }
               else
               {
-                MaxBalconyToBalconyDistance.Outlet = THESAURUSINTENTIONAL;
+                if (MaxBalconyToBalconyDistance.Runs.TryGet(THESAURUSSTAMPEDE)?.Exists ?? INTRAVASCULARLY)
+                {
+                  MaxBalconyToBalconyDistance.Outlet = THESAURUSINTENTIONAL;
+                }
               }
             }
             if (MaxBalconyToBalconyDistance.PipeType is PipeType.NL)
@@ -12019,14 +12022,16 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
             {
               if (MaxBalconyToBalconyDistance.PipeType is PipeType.Y1L)
               {
-                var wbk = MaxBalconyToBalconyDistance.Runs.FirstOrDefault(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.WaterBucket is not null);
-                if (wbk is null)
+                var run = MaxBalconyToBalconyDistance.Runs.FirstOrDefault(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.WaterBucket is not null);
+                if (run is null)
                 {
-                  for (int MAX_ANGEL_TOLLERANCE = MaxBalconyToBalconyDistance.Runs.Count - THESAURUSHOUSING; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; --MAX_ANGEL_TOLLERANCE)
+                  if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) == THESAURUSHOUSING)
                   {
-                    var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
-                    DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
-                    DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
+                    var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs.TryGet(MaxBalconyToBalconyDistance.Runs.IndexOf(MaxBalconyToBalconyDistance.Runs.First(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists)) + THESAURUSHOUSING);
+                    if (DEFAULT_FIRE_VALVE_WIDTH is not null)
+                    {
+                      DEFAULT_FIRE_VALVE_WIDTH.WaterBucket = THESAURUSIMPOUND;
+                    }
                   }
                 }
               }
