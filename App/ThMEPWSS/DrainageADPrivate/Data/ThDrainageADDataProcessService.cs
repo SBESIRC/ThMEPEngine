@@ -115,30 +115,31 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             {
                 var pt = (pipe.Outline as DBPoint).Position;
 
-                if (pipe.Data is BlockReference || pipe.Data is Circle)
-                {
+                //这里不考虑是不是天正管了。一律当圆圈处理
+                //if (pipe.Data is BlockReference || pipe.Data is Circle)
+                //{
                     var nearPipe = FindClosePipe(allpipe, pt);
                     var vpipeLine = CreateBlkCVPipe(nearPipe, pt);
                     if (vpipeLine != null)
                     {
                         VerticalPipe.Add(vpipeLine);
                     }
-                }
-                else if (pipe.Data is Entity entity)
-                {
-                    //天正
-                    //var entity = pipe.Data;
-                    var pipeParameters = ThOPMTools.GetOPMProperties(entity.Id);
-                    var start = Convert.ToDouble(pipeParameters["起点标高"]);
-                    var end = Convert.ToDouble(pipeParameters["终点标高"]);
+                //}
+                //else if (pipe.Data is Entity entity)
+                //{
+                //    //天正
+                //    //var entity = pipe.Data;
+                //    var pipeParameters = ThOPMTools.GetOPMProperties(entity.Id);
+                //    var start = Convert.ToDouble(pipeParameters["起点标高"]);
+                //    var end = Convert.ToDouble(pipeParameters["终点标高"]);
 
-                    var pts = new Point3d(pt.X, pt.Y, start);
-                    var pte = new Point3d(pt.X, pt.Y, end);
+                //    var pts = new Point3d(pt.X, pt.Y, start);
+                //    var pte = new Point3d(pt.X, pt.Y, end);
 
-                    var trueVertical = new Line(pts, pte);
+                //    var trueVertical = new Line(pts, pte);
 
-                    VerticalPipe.Add(trueVertical);
-                }
+                //    VerticalPipe.Add(trueVertical);
+                //}
             }
         }
         private static List<Point3d> FindClosePipe(List<Line> allpipe, Point3d pt)

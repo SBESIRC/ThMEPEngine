@@ -82,7 +82,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         /// <param name="framePts"></param>
         private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
         {
-            var layer = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D };
+            var layer = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D, ThDrainageADCommon.Layer_CoolPipe_v };
             var vertical = new ThMEPWSS.Service.ThVerticalPipeExtractService()
             {
                 LayerFilterTch = layer,
