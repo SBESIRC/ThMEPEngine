@@ -471,6 +471,20 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
+        public static void SetPortDynBlockProperity(ObjectId obj, Dictionary<string, object> propertyValues)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var data = new ThBlockReferenceData(obj);
+                foreach (var item in propertyValues)
+                {
+                    if (data.CustomProperties.Contains(item.Key))
+                    {
+                        data.CustomProperties.SetValue(item.Key, item.Value);
+                    }
+                }
+            }
+        }
         public static void GetVerticalPipeDynBlockProperity(ObjectId obj, out double pipeWidth, out double pipeHeight)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

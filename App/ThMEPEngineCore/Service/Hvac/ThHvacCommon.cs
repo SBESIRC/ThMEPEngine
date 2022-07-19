@@ -144,6 +144,8 @@
 
         //风口动态块属性名
         public const string BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER = "风口长度";
+        public const string SQUARE_DIFFUSER_THROAT_WIDTH = "方形散流器喉部宽度";
+        public const string CIRCULAR_AIRPORT_DIAMETER = "圆形风口直径";
         public const string BLOCK_DYNAMIC_PORT_HEIGHT = "风口宽度";
         public const string BLOCK_DYNAMIC_PORT_RANGE = "风口类型";
 
