@@ -148,7 +148,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         else if(cnt==3)
                         {
                             double offsetX = 1000;
-                            double offsetY = 1000;
+                            double offsetY = 400;
                             if(alarmValveVisited)
                             {
                                 sprayOut.PipeLine.Add(new Line(ept1.OffsetX(-branchIndex * alarmGap - offsetX),
