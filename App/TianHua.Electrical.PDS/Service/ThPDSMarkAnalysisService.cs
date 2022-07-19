@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.Service
             };
             thPDSDistBox.SetLocation(new ThPDSLocation
             {
-                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position.TransformBy(distBoxData.OwnerSpace2WCS)),
             });
 
             var descriptionAssign = true;
@@ -369,7 +369,7 @@ namespace TianHua.Electrical.PDS.Service
             thPDSLoad.SetLocation(new ThPDSLocation
             {
                 ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position.TransformBy(distBoxData.OwnerSpace2WCS)),
             });
 
             if (distBoxData.FireLoad == ThPDSFireLoad.FireLoad)

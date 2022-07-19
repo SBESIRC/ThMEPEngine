@@ -104,6 +104,13 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                     if (!string.IsNullOrEmpty(otherDistBoxID) && srcPanelID.Last().Equals(otherDistBoxID))
                     {
+                        // 对末端配电箱做特殊处理
+                        if (ThPDSTerminalPanelService.IsTerminalPanel( cabletrayEdgeList[i].Target)
+                            && cabletrayEdgeList[j].Target.Loads[0].Location.FloorNumber != cabletrayEdgeList[i].Target.Loads[0].Location.FloorNumber)
+                        {
+                            continue;
+                        }
+
                         var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
                             srcPanelID, circuitID);
                         edge.Circuit.ViaCableTray = true;
@@ -307,7 +314,8 @@ namespace TianHua.Electrical.PDS.Engine
         private bool IsContains(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
             ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
         {
-            if (node.NodeType != PDSNodeType.Unkown && !node.Loads[0].Location.IsStandardStorey)
+            if (node.NodeType != PDSNodeType.Unkown && !node.Loads[0].Location.IsStandardStorey
+                && !ThPDSTerminalPanelService.IsTerminalPanel(node))
             {
                 if (!string.IsNullOrEmpty(node.Loads[0].ID.LoadID))
                 {

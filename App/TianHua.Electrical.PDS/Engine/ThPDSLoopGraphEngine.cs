@@ -213,7 +213,12 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 // 搜索框线中的配电箱
                 var cacheNodes = new List<ThPDSCircuitGraphNode>();
-                var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame);
+                var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame)
+                    .OfType<BlockReference>().Where(b => frame.Contains(b.Position)).ToList();
+                if (distBoxes.Count == 0)
+                {
+                    return;
+                }
 
                 var bufferFrame = ThPDSBufferService.Buffer(frame);
                 var onLightingCableTray = false;
@@ -231,7 +236,7 @@ namespace TianHua.Electrical.PDS.Engine
                 var cacheMarkList = new List<ThPDSTextInfo>();
                 for (var i = 0; i < 2; i++)
                 {
-                    distBoxes.OfType<BlockReference>().ForEach(distBox =>
+                    distBoxes.ForEach(distBox =>
                     {
                         if (cacheDistBoxes.Contains(distBox))
                         {
@@ -738,7 +743,7 @@ namespace TianHua.Electrical.PDS.Engine
                             }
                         }
                     }
-                    else if(item.Key is Curve curve)
+                    else if (item.Key is Curve curve)
                     {
                         // 未知负载
                         newLoads.Add(curve);
