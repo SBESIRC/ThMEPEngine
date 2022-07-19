@@ -232,6 +232,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     {
                         spraySystem.MaxOffSetX = firePt.X;
                     }
+
+                    sprayOut.SupportLines.Add(new Line(firePt, tpt._pt));
                 }
                 if (termPt.Type == 2)//其他楼层
                 {
@@ -271,10 +273,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayOut.FireDistrictLefts.Add(fireDistrict);
                     }
                     index++;
+
+                    sprayOut.SupportLines.Add(new Line(fireStpt, tpt._pt));
                 }
                 if (termPt.Type == 3)//水泵接合器
                 {
                     Type3.Get(stPt, termPt, DN, sprayOut);
+                    sprayOut.SupportLines.Add(new Line(stPt, tpt._pt));
                 }
                 if (termPt.Type == 4 || termPt.Type == 5)
                 {
@@ -324,6 +329,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         var text = new Text(termPt.PipeNumber, pt5);
                         sprayOut.Texts.Add(text);
 
+                        sprayOut.SupportLines.Add(new Line(pt3, tpt._pt));
+
                     }
                     else
                     {
@@ -367,6 +374,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayOut.Texts.Add(dn);
                         stPt4 = stPt4.OffsetX(600);
                         signelBranch = false;
+
+                        sprayOut.SupportLines.Add(new Line(pt3, tpt._pt));
                     }
                     type4Nums++;
                 }

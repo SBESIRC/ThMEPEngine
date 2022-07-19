@@ -8,10 +8,6 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Command;
 using ThMEPWSS.UndergroundSpraySystem.Method;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
-using GeometryExtensions;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Command
 {
@@ -43,7 +39,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
                     {
                         CreateSpraySystem(currentDb);
                     }
-                    
                 }
             }
             catch (Exception ex)
@@ -101,18 +96,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             var alarmValve = new AlarmValveTCH();
             var alarmPts = alarmValve.Extract(curDb.Database, selectArea);
             var sprayType = CheckSprayType.IsAcrossFloor(sprayIn, alarmPts);
-            
-            if(sprayType == 0)
+
+            var rstGetInput = SpraySysWithAcrossFloor.GetInput2(curDb, sprayIn, selectArea, startPt);//提取输入参数
+            if (!rstGetInput) return;
+            if (sprayType == 0)
             {
-                //var rstGetInput = SpraySys.GetInput(curDb, sprayIn, selectArea, startPt);//提取输入参数
-                var rstGetInput = SpraySysWithAcrossFloor.GetInput2(curDb, sprayIn, selectArea, startPt);//提取输入参数
-                if (!rstGetInput) return;
                 CmdWithoutAcrossLayers(curDb, sprayIn, spraySystem, sprayOut);
             }
             else
             {
-                var rstGetInput = SpraySysWithAcrossFloor.GetInput2(curDb, sprayIn, selectArea, startPt);//提取输入参数
-                if (!rstGetInput) return;
                 CmdWithAcrossLayers(curDb, sprayIn, spraySystem, sprayOut);
             }
 

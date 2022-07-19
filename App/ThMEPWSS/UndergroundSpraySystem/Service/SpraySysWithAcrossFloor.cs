@@ -34,7 +34,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.LeadLines = leadLine.GetLines();
             var alarmValve = new AlarmValveTCH();
             var alarmPts = alarmValve.Extract(database, selectArea);
-            pipeLines = LineTools.PipeLineAutoConnect(pipeLines, sprayIn.PtDic);//1. 对齐的线自动连接
+            pipeLines = LineTools.PipeLineAutoConnect2(pipeLines, sprayIn);//1. 对齐的线自动连接
 
             pipeLines = LineTools.ConnectVerticalLine(pipeLines, sprayIn);//2. 依靠立管的线连接
 

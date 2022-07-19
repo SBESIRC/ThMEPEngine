@@ -38,8 +38,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static List<Line> PipeLineAutoConnect(List<Line> lineList, Dictionary<Point3dEx, List<Point3dEx>> ptDic)
+        public static List<Line> PipeLineAutoConnect2(List<Line> lineList, SprayIn sprayIn)
         {
+            var ptDic = sprayIn.PtDic;
+            var verticals = new List<Polyline>();
+            foreach(var vpt in sprayIn.Verticals)
+            {
+                var rect = vpt._pt.GetRect(20);
+                verticals.Add(rect);
+            }
+            var verticalSpatialIndex = new ThCADCoreNTSSpatialIndex(verticals.ToCollection());
             var GLineSegList = new List<GLineSegment>();
             foreach (var l in lineList)
             {
@@ -63,8 +71,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     }
                 }
                 var line = new Line(pt1._pt, pt2._pt);
-
-                lineList.Add(line);
+                var rst = verticalSpatialIndex.SelectFence(line);
+                if(rst.Count<=1)
+                {
+                    lineList.Add(line);
+                }
             }
 
             //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
