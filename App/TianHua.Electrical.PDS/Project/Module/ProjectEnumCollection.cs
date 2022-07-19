@@ -154,13 +154,13 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum ConductorLayingPath
     {
         [Description("无敷设路径")]
-        None = 0,
+        None = 1,
         [Description("桥架")]
-        ViaCableTray = 1,
+        ViaCableTray = 2,
         [Description("穿管")]
-        ViaConduit = 2,
+        ViaConduit = 3,
         [Description("桥架/穿管")]
-        ViaCableTrayAndViaConduit = 3,
+        ViaCableTrayAndViaConduit = 4,
     }
 
     /// <summary>

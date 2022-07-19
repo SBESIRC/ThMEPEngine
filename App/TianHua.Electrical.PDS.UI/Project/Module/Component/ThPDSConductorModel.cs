@@ -170,8 +170,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _conductor.SetLayingSite1(value);
-                OnPropertyChanged();
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(LayingSite1));
             }
         }
 
@@ -188,8 +188,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _conductor.SetLayingSite2(value);
-                OnPropertyChanged();
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(LayingSite2));
             }
         }
 
