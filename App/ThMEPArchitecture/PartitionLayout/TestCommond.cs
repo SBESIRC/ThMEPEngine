@@ -18,7 +18,7 @@ using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using ThParkingStall.Core.MPartitionLayout;
-using ThParkingStall.Core.ObliqueMPartitionLayout.Services;
+using ThParkingStall.Core.ObliqueMPartitionLayout;
 using ThMEPArchitecture.MultiProcess;
 using Converter = ThMEPArchitecture.MultiProcess.Converter;
 using ThMEPArchitecture.ViewModel;
