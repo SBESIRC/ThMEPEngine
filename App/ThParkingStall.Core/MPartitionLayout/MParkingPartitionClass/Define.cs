@@ -19,12 +19,11 @@ namespace ThParkingStall.Core.MPartitionLayout
         public MParkingPartitionPro(List<LineString> walls, List<LineSegment> inilanes,
             List<Polygon> obstacles, Polygon boundary, MViewModel viewModel = null, bool gpillars = true)
         {
-            //viewmodel
-            DisParallelCarLength = VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth;
-            DisParallelCarWidth = VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength;
-            //DisVertCarLength = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength + 200 : VMStock.VerticalSpotWidth + 200;
+            //从ViewModel赋值
+            DisParallelCarLength = Math.Max(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth);
+            DisParallelCarWidth = Math.Min(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth);
             DisVertCarLength = 5300;
-            DisVertCarWidth = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength;
+            DisVertCarWidth = Math.Min(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
             DisLaneWidth = VMStock.RoadWidth;
             PillarSpacing = VMStock.ColumnWidth;
             GenerateMiddlePillars = VMStock.MidColumnInDoubleRowModular;
@@ -33,10 +32,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             PillarNetLength = VMStock.ColumnSizeOfParalleToRoad;
             PillarNetDepth = VMStock.ColumnSizeOfPerpendicularToRoad;
             ThicknessOfPillarConstruct = VMStock.ColumnAdditionalSize;
-            //VMStock缺少RunMode参数
-            //LayoutMode = ((int)VMStock.RunMode);
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;
-            //viewmodel参数赋值完毕
+            //LayoutMode = ((int)VMStock.RunMode);
+
+            //其它参数设置
             GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;
             DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
             DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
@@ -60,9 +59,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             BoundingBox = (Polygon)boundary.Envelope;
             MaxLength = BoundingBox.Length / 2;
             InitialzeDatas(inilanes);
-            //var boundcoords = JoinCurves(walls, inilanes)[0].Coordinates;
-            //boundcoords = boundcoords.Append(boundcoords.First()).ToArray();
-            //Boundary = new Polygon(new LinearRing(boundcoords));
             DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
             if (!ScareEnabledForBackBackModule)
             {
