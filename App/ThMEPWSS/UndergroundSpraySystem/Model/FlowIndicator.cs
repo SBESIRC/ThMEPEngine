@@ -35,7 +35,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     //.Where(o => IsTargetLayer(o.Layer))
                     .Where(o => IsTarget(o))
                     .ToList();
-
+                if (Results.Count == 0) return;
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
 

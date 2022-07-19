@@ -116,9 +116,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                     if (termPt.Type == 3)//水泵接合器
                     {
-                        Type3.Get(stPt, termPt, DN, sprayOut);
+                        sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(3000)));
+                        Type3.Get(stPt.OffsetX(3000), termPt, DN, sprayOut);
                     }
-                    if (termPt.Type == 4)
+                    if (termPt.Type == 4 || termPt.Type == 5)
                     {
                         double length = Tool.GetLength(termPt.PipeNumber) + 100;
                         var firePt = fireStpt;
@@ -134,8 +135,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt2, 0));
                         var text = new Text(termPt.PipeNumber, pt4);
                         sprayOut.Texts.Add(text);
+                        if (firePt.X > spraySystem.MaxOffSetX)
+                        {
+                            spraySystem.MaxOffSetX = firePt.X;
+                        }
                     }
                 }
+
             }
         }
 

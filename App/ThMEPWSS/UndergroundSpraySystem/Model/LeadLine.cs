@@ -75,7 +75,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                    layer.Contains("-FRPT-HYDT-DIMS") ||
                    layer.Contains("-SHET-PROF") ||
                    layer.Contains("-FRPT-SPRL-DIMS")) ||
-                   layer.Contains("TWT_TEXT");
+                   layer.Contains("TWT_TEXT") ||
+                   layer.Contains("TWT_LEAD");
         }
         private bool IsTCHNote(Entity entity)
         {
