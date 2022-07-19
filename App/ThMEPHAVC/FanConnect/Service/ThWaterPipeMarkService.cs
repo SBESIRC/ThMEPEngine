@@ -763,9 +763,35 @@ namespace ThMEPHVAC.FanConnect.Service
 
         public void CreateMark(ThFanTreeNode<ThFanPointModelNew> node, List<ThFanTreeNode<ThFanPipeModel>> pipeTreeNodes)
         {
+            GetMarkPosition(node, out var coolHotNodes, out var condNodes);
+            string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString("f2") + ")";
+
+            foreach (var n in coolHotNodes)
+            {
+                if (n.Item.IsFlag == -1)
+                {
+                    var markPt = n.Item.BasePt.GetMidPt(n.Parent.Item.BasePt);
+                    n.Item.IsFlag = CheckNodeFlag(markPt, pipeTreeNodes);
+                }
+                CoolHotMarkNew(n, strMarkHeight);
+            }
+
+            foreach (var n in condNodes)
+            {
+                if (n.Item.IsFlag == -1)
+                {
+                    var markPt = n.Item.BasePt.GetMidPt(n.Parent.Item.BasePt);
+                    n.Item.IsFlag = CheckNodeFlag(markPt, pipeTreeNodes);
+                }
+                CondMarkNew(n);
+            }
+        }
+
+        private void GetMarkPosition(ThFanTreeNode<ThFanPointModelNew> node, out List<ThFanTreeNode<ThFanPointModelNew>> coolHotNodes, out List<ThFanTreeNode<ThFanPointModelNew>> condNodes)
+        {
             var allNodes = node.GetDecendent();
-            var coolHotNodes = new List<ThFanTreeNode<ThFanPointModelNew>>();
-            var condNodes = new List<ThFanTreeNode<ThFanPointModelNew>>();
+            coolHotNodes = new List<ThFanTreeNode<ThFanPointModelNew>>();
+            condNodes = new List<ThFanTreeNode<ThFanPointModelNew>>();
 
             if (ConfigInfo.WaterSystemConfigInfo.SystemType == 0)//水系统
             {
@@ -792,30 +818,108 @@ namespace ThMEPHVAC.FanConnect.Service
             if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
             {
                 condNodes.AddRange(allNodes.Where(x => x.Item.IsCapaChangeMarked || x.Item.IsLevelChangeMark));
-
             }
 
+        }
+
+        public void UpdateMark(ThFanTreeNode<ThFanPointModelNew> node, List<ThFanTreeNode<ThFanPipeModel>> pipeTreeNodes, List<Entity> marks)
+        {
+            GetMarkPosition(node, out var coolHotNodes, out var condNodes);
+
             string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString("f2") + ")";
+            var updateMark = new List<Entity>();
+
+            var markObj = new DBObjectCollection();
+            marks.ForEach(x => markObj.Add(x));
+            var markIndex = new ThCADCoreNTSSpatialIndex(markObj);
 
             foreach (var n in coolHotNodes)
             {
-                if (n.Item.IsFlag == -1)
+                var isNearMark = CheckOriMark(n, markIndex, true, out var nearMark);
+                if (isNearMark)
                 {
-                    var markPt = n.Item.BasePt.GetMidPt(n.Parent.Item.BasePt);
-                    n.Item.IsFlag = CheckNodeFlag(markPt, pipeTreeNodes);
+                    updateMark.Add(nearMark);
+                    var isSameBlock = CheckMarkBlock(n, nearMark);
+                    if (isSameBlock)
+                    {
+                        UpdateBlock(true);
+                    }
+                    else
+                    {
+                        UpdateBlock(false);
+                    }
                 }
-                CoolHotMarkNew(n, strMarkHeight);
+                else
+                {
+                    if (n.Item.IsFlag == -1)
+                    {
+                        var markPt = n.Item.BasePt.GetMidPt(n.Parent.Item.BasePt);
+                        n.Item.IsFlag = CheckNodeFlag(markPt, pipeTreeNodes);
+                    }
+                    CoolHotMarkNew(n, strMarkHeight);
+                }
             }
 
             foreach (var n in condNodes)
             {
-                if (n.Item.IsFlag == -1)
-                {
-                    var markPt = n.Item.BasePt.GetMidPt(n.Parent.Item.BasePt);
-                    n.Item.IsFlag = CheckNodeFlag(markPt, pipeTreeNodes);
-                }
-                CondMarkNew(n);
+
+
             }
+
+            var removeMark = marks.Except(updateMark);
+            foreach (var m in removeMark)
+            {
+                removeM(m);
+            }
+
+
+
+
+        }
+
+
+
+        /// <summary>
+        /// 找垂直or同向的在线附近的标注
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="marksIndex"></param>
+        /// <param name="isDirPerpendicular">t:垂直 blockReference f:平行 DBText</param>
+        /// <param name="nearMark"></param>
+        /// <returns></returns>
+        private static bool CheckOriMark(ThFanTreeNode<ThFanPointModelNew> node, ThCADCoreNTSSpatialIndex marksIndex, bool isDirPerpendicular, out Entity nearMark)
+        {
+            var breturn = false;
+
+            if (node.Parent != null)
+            {
+                var pipeL = new Line(node.Parent.Item.BasePt, node.Item.BasePt);
+                var pipeLBuffer = pipeL.BufferSquare(300);
+                var inBufferM = marksIndex.SelectCrossingPolygon(pipeLBuffer).OfType<Entity>();
+
+                foreach (var mark in inBufferM)
+                {
+                    if (isDirPerpendicular)
+                    {
+                        if (mark is BlockReference bk)
+                        {
+                            
+                        }
+                    }
+                    else
+                    {
+                        var inBufferMList = inBufferM.OfType<DBText>();
+
+
+
+                    }
+                }
+              
+
+
+            }
+
+            return breturn;
 
         }
 

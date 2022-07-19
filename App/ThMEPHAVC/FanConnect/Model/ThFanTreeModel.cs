@@ -77,7 +77,19 @@ namespace ThMEPHVAC.FanConnect.Model
 
             return descendant;
         }
+
+        public List<ThFanTreeNode<T>> GetAllTreeNode()
+        {
+            var nodeList = new List<ThFanTreeNode<T>>();
+
+            nodeList.Add(this);
+            nodeList.AddRange(this.GetDecendent());
+
+            return nodeList;
+        }
     }
+
+
     public class ThFanTreeModel
     {
         public ThFanTreeNode<ThFanPipeModel> RootNode { set; get; }
