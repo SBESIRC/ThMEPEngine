@@ -183,7 +183,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 allStoreys.Add("RF");
                 var iRF = allStoreys.IndexOf("RF");
                 Point3d getStoreyBsPt(int i) => basePoint.OffsetY(HEIGHT * i);
-                void drawSimpleSpray(Func<int,int,Point3d> getGeneralBsPt)
+                void drawSimpleSpray(Func<int, int, Point3d> getGeneralBsPt)
                 {
                     for (int i = 0; i < allStoreys.Count; i++)
                     {
@@ -193,6 +193,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             {
                                 var count = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items[j].SimpleSprayCount;
                                 if (count == 0) continue;
+                                var dn = count switch
+                                {
+                                    1 => "DN25",
+                                    2 => "DN32",
+                                    3 => "DN32",
+                                    4 => "DN40",
+                                    _ => throw new NotSupportedException(),
+                                };
                                 var px = getGeneralBsPt(i, j);
                                 if (j == 0)
                                 {
@@ -204,7 +212,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-926, 1297), px.OffsetXY(-1325 + SPRAY_STEP - count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
-                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-1040, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 1300), px.OffsetXY(0, 1200)), "W-FRPT-HYDT-PIPE"));
+                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-1040, 1440), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                 }
                                 else
                                 {
@@ -216,7 +225,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     if (count >= 4) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2654, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(926, 1297), px.OffsetXY(1325 - SPRAY_STEP + count * SPRAY_STEP, 1297)), "W-FRPT-HYDT-PIPE"));
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(326, 1300), px.OffsetXY(0, 1300)), "W-FRPT-HYDT-PIPE"));
-                                    textInfos.Add(new DBTextInfo(px.OffsetXY(200, 1440), "DN40", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 1300), px.OffsetXY(0, 1200)), "W-FRPT-HYDT-PIPE"));
+                                    textInfos.Add(new DBTextInfo(px.OffsetXY(200, 1440), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                 }
                             }
                         }
