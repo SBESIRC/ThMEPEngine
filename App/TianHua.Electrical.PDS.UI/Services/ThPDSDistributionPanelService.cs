@@ -3719,31 +3719,33 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         var menu = new ContextMenu();
                         cvs.ContextMenu = menu;
                         {
-                            var mi = new MenuItem();
+                            var mi = ThPDSContextMenuYamlParser.LoadAddCircuitMenuItem();
+                            foreach (MenuItem item in mi.Items)
+                            {
+                                foreach (MenuItem subitem in item.Items)
+                                {
+                                    subitem.Command = new RelayCommand(() =>
+                                    {
+                                        ThPDSProjectGraphService.AddCircuit(
+                                            graph,
+                                            vertice,
+                                            item.Header as string,
+                                            subitem.Header as string);
+                                        UpdateCanvas();
+                                    });
+                                }
+                            }
                             menu.Items.Add(mi);
-                            mi.Header = "新建回路";
-                            var outTypes = ThPDSProjectGraphService.AvailableTypes();
-                            foreach (var outType in outTypes)
+                        }
+                        {
+                            var mi = new MenuItem();
+                            mi.Header = "分支母排";
+                            mi.Command = new RelayCommand(() =>
                             {
-                                var m = new MenuItem();
-                                mi.Items.Add(m);
-                                m.Header = outType;
-                                m.Command = new RelayCommand(() =>
-                                {
-                                    ThPDSProjectGraphService.AddCircuit(graph, vertice, outType);
-                                    UpdateCanvas();
-                                });
-                            }
-                            {
-                                var m = new MenuItem();
-                                mi.Items.Add(m);
-                                m.Header = "分支母排";
-                                m.Command = new RelayCommand(() =>
-                                {
-                                    ThPDSProjectGraphService.AddSmallBusbar(graph, vertice);
-                                    UpdateCanvas();
-                                });
-                            }
+                                ThPDSProjectGraphService.AddSmallBusbar(graph, vertice);
+                                UpdateCanvas();
+                            });
+                            menu.Items.Add(mi);
                         }
                         {
                             var mi = new MenuItem();

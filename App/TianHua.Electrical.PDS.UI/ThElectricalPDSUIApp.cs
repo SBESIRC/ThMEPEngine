@@ -2,6 +2,7 @@
 using TianHua.Electrical.PDS.UI.UI;
 using TianHua.Electrical.PDS.Service;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Electrical.PDS.UI.Services;
 
 namespace TianHua.Electrical.PDS.UI
 {
@@ -60,6 +61,12 @@ namespace TianHua.Electrical.PDS.UI
         public static void THPDSUPDATEDWG()
         {
             new ThPDSUpdateToDwgService().Update();
+        }
+
+        [CommandMethod("TIANHUACAD", "THPARSEYAML", CommandFlags.Modal)]
+        public static void THPARSEYAML()
+        {
+            var menuitem = ThPDSContextMenuYamlParser.LoadAddCircuitMenuItem();
         }
     }
 }

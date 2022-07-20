@@ -1,0 +1,131 @@
+﻿---
+Header: "新建回路"
+Items:
+   - Header: "照明回路"
+     Items:
+        - Header: "正常照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防备用照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "机房照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "管井照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "电梯井道照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "市电监测"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "正常照明（带接触器）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "井道照明（带漏电保护）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "夹层检修照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "插座回路"
+     Items:
+        - Header: "单相插座"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "检修插座"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "热水器插座"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "小厨宝"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "烘手机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "单相空调插座（立式）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "单相空调插座（壁挂）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "三相空调插座（立式）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "三相空调插座（壁挂）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "三相插座"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "配电回路"
+     Items:
+        - Header: "防火卷帘"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "电动挡烟垂壁"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "电动排烟窗"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "气体灭火控制器"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "计量回路"
+     Items:
+        - Header: "套内配电箱（单相）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "套内配电箱（三相）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "用户配电箱"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "交流充电桩"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "直流非车载充电机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "单速风机回路"
+     Items:
+        - Header: "消防排烟风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防补风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防加压送风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防排烟兼平时排风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防补风兼平时送风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "平时排风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "平时送风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "事故风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "厨房排油烟风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "双速风机回路"
+     Items:
+        - Header: "消防排烟风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防补风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防加压送风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防排烟兼平时排风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "消防补风兼平时送风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "平时排风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "平时送风风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "事故风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "厨房排油烟风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "水泵回路"
+     Items:
+        - Header: "潜水泵"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "生活水泵"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
+   - Header: "备用回路"
+     Items:
+        - Header: "单相备用"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "单相备用（带漏电保护）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "三相备用"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - Header: "三相备用（带漏电保护）"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+     attributes: { "IsVisible": true, "IsEnabled": true }
