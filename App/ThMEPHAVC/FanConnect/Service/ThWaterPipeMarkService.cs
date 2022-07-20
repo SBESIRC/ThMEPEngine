@@ -10,11 +10,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPHVAC.Service;
 using ThMEPHVAC.FanConnect.Command;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.ViewModel;
 using ThMEPHVAC.FanLayout.Service;
+
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -31,6 +34,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 return;
             }
+
             //标记冷热水管
             ThFanToDBServiece toDbServerviece = new ThFanToDBServiece();
             var vector = node.Parent.Item.CntPoint.GetVectorTo(node.Item.CntPoint).GetNormal();
@@ -827,22 +831,38 @@ namespace ThMEPHVAC.FanConnect.Service
 
         public void UpdateMark(ThFanTreeNode<ThFanPointModelNew> node, List<ThFanTreeNode<ThFanPipeModel>> pipeTreeNodes, List<Entity> marks)
         {
-            GetMarkPosition(node, out var coolHotNodes, out var condNodes);
-
             string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString("f2") + ")";
             var updateMark = new List<Entity>();
+            var markBoundaryDict = new Dictionary<Polyline, Entity>();
+
+            GetMarkPosition(node, out var coolHotNodes, out var condNodes);
 
             var markObj = new DBObjectCollection();
-            marks.ForEach(x => markObj.Add(x));
+            foreach (var m in marks)
+            {
+                Polyline pl = null;
+                if (m is BlockReference br)
+                {
+                    pl = ThGeomUtil.GetVisibleOBB(br);
+                }
+                if (m is DBText dt)
+                {
+                    pl = dt.GeometricExtents.ToRectangle();
+                }
+                ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(pl, "l0mark", colorIndex: 4);
+                markBoundaryDict.Add(pl, m);
+                markObj.Add(pl);
+            }
+
             var markIndex = new ThCADCoreNTSSpatialIndex(markObj);
 
             foreach (var n in coolHotNodes)
             {
-                var isNearMark = CheckNearMarkBR(n, markIndex, out var nearMark);
+                var isNearMark = CheckNearMark(n, markIndex, markBoundaryDict, true, out var nearMark);
                 if (isNearMark)
                 {
                     updateMark.Add(nearMark);
-                    UpdateBlock(n, strMarkHeight, nearMark);
+                    UpdateBlock(n, strMarkHeight, nearMark as BlockReference);
                 }
                 else
                 {
@@ -857,11 +877,11 @@ namespace ThMEPHVAC.FanConnect.Service
 
             foreach (var n in condNodes)
             {
-                var isNearMark = CheckNearMarkText(n, markIndex, out var nearMark);
+                var isNearMark = CheckNearMark(n, markIndex, markBoundaryDict, false, out var nearMark);
                 if (isNearMark)
                 {
                     updateMark.Add(nearMark);
-                    updateText(isSameBlock);
+                    UpdateText(n, nearMark as DBText);
                 }
                 else
                 {
@@ -875,10 +895,19 @@ namespace ThMEPHVAC.FanConnect.Service
                 }
             }
 
-            var removeMark = marks.Except(updateMark);
-            foreach (var m in removeMark)
+            var removeMark = marks.Except(updateMark).ToList();
+
+            RemoveMark(removeMark);
+
+        }
+
+        private void RemoveMark(List<Entity> marks)
+        {
+            foreach (var mark in marks)
             {
-                removeM(m);
+                mark.UpgradeOpen();
+                mark.Erase();
+                mark.DowngradeOpen();
             }
         }
 
@@ -890,7 +919,7 @@ namespace ThMEPHVAC.FanConnect.Service
         /// <param name="isDirPerpendicular">t:垂直 blockReference f:平行 DBText</param>
         /// <param name="nearMark"></param>
         /// <returns></returns>
-        private bool CheckNearMarkBR(ThFanTreeNode<ThFanPointModelNew> node, ThCADCoreNTSSpatialIndex marksIndex, out BlockReference nearMark)
+        private bool CheckNearMark(ThFanTreeNode<ThFanPointModelNew> node, ThCADCoreNTSSpatialIndex marksIndex, Dictionary<Polyline, Entity> marksBoundaryDict, bool isBlockref, out Entity nearMark)
         {
             var breturn = false;
             nearMark = null;
@@ -898,27 +927,55 @@ namespace ThMEPHVAC.FanConnect.Service
             if (node.Parent != null)
             {
                 var pipeL = new Line(node.Parent.Item.BasePt, node.Item.BasePt);
-                var pipeLBuffer = pipeL.BufferSquare(300);
-                var inBufferM = marksIndex.SelectCrossingPolygon(pipeLBuffer).OfType<BlockReference>();
+                var pipeLBuffer = pipeL.BufferSquare(300 * 2);
+                var inBufferM = marksIndex.SelectCrossingPolygon(pipeLBuffer).OfType<Polyline>();
                 var minDist = double.MaxValue;
+                ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(pipeLBuffer, "l0linebuffer");
 
                 foreach (var mark in inBufferM)
                 {
-                    //找出垂直的br
-                    var angleD = mark.Rotation - pipeL.Angle;
-                    if (Math.Abs(Math.Cos(angleD)) <= Math.Cos(89 * Math.PI / 180))
+                    if (marksBoundaryDict.TryGetValue(mark, out var m) && (isBlockref == true && m is BlockReference == false ||
+                        isBlockref == false && m is DBText == false))
                     {
-                        var isSameBlock = IsNearMarkSameBlk(nearMark);
-                        if (isSameBlock)
+                        continue;
+                    }
+
+                    //找出平行的mark
+                    if (m is BlockReference br)
+                    {
+                        var angleD = br.Rotation- pipeL.Angle;
+
+                        if (Math.Abs(Math.Cos(angleD)) >= Math.Cos(1 * Math.PI / 180))
+                        {
+                            var isSameBlock = IsNearMarkSameBlk(br);
+                            if (isSameBlock)
+                            {
+                                //找出最近的
+                                var midPt = node.Item.BasePt.GetMidPt(node.Parent.Item.BasePt);
+                                var dist = br.Position.DistanceTo(midPt);
+                                if (dist <= minDist)
+                                {
+                                    nearMark = br;
+                                    minDist = dist;
+                                    breturn = true;
+                                }
+                            }
+                        }
+                    }
+                    if (m is DBText dt)
+                    {
+                        var angleD = dt.Rotation;
+                        if (Math.Abs(Math.Cos(angleD)) >= Math.Cos(1 * Math.PI / 180))
                         {
                             //找出最近的
                             var midPt = node.Item.BasePt.GetMidPt(node.Parent.Item.BasePt);
-                            var dist = mark.Position.DistanceTo(midPt);
+                            var dist = dt.Position.DistanceTo(midPt);
                             if (dist <= minDist)
                             {
-                                nearMark = mark;
+                                nearMark = dt;
                                 minDist = dist;
                                 breturn = true;
+
                             }
                         }
                     }
@@ -928,6 +985,39 @@ namespace ThMEPHVAC.FanConnect.Service
 
         }
 
+        //private bool CheckNearMarkText(ThFanTreeNode<ThFanPointModelNew> node, ThCADCoreNTSSpatialIndex marksIndex, out DBText nearMark)
+        //{
+        //    var breturn = false;
+        //    nearMark = null;
+
+        //    if (node.Parent != null)
+        //    {
+        //        var pipeL = new Line(node.Parent.Item.BasePt, node.Item.BasePt);
+        //        var pipeLBuffer = pipeL.BufferSquare(300 * 2);
+        //        var inBufferM = marksIndex.SelectCrossingPolygon(pipeLBuffer).OfType<DBText>();
+        //        var minDist = double.MaxValue;
+
+        //        foreach (var mark in inBufferM)
+        //        {
+        //            //找出垂直的br
+        //            var angleD = mark.Rotation - pipeL.Angle;
+        //            if (Math.Abs(Math.Cos(angleD)) >= Math.Cos(1 * Math.PI / 180))
+        //            {
+        //                //找出最近的
+        //                var midPt = node.Item.BasePt.GetMidPt(node.Parent.Item.BasePt);
+        //                var dist = mark.Position.DistanceTo(midPt);
+        //                if (dist <= minDist)
+        //                {
+        //                    nearMark = mark;
+        //                    minDist = dist;
+        //                    breturn = true;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return breturn;
+
+        //}
 
         private bool IsNearMarkSameBlk(BlockReference nearMark)
         {
@@ -1114,8 +1204,9 @@ namespace ThMEPHVAC.FanConnect.Service
             toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);
         }
 
-        private void UpdateBlock(ThFanTreeNode<ThFanPointModelNew> node, string strMarkHeight, ref BlockReference mark)
+        private void UpdateBlock(ThFanTreeNode<ThFanPointModelNew> node, string strMarkHeight, BlockReference mark)
         {
+            //方向问题
             if (!ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
             {
                 return;
@@ -1125,6 +1216,44 @@ namespace ThMEPHVAC.FanConnect.Service
                 return;
             }
 
+            List<string> property = new List<string>();
+            if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
+            {
+                var dim = node.Item.CoolDim >= node.Item.HotDim ? node.Item.CoolDim : node.Item.HotDim;
+                string strchs = "CHS " + "DN" + dim + strMarkHeight;
+                string strchr = "CHR " + "DN" + dim + strMarkHeight;
+                property.Add(strchs);
+                property.Add(strchr);
+            }
+            else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
+            {
+                string strcs = "CS " + "DN" + node.Item.CoolDim + strMarkHeight;
+                string strcr = "CR " + "DN" + node.Item.CoolDim + strMarkHeight;
+                string strhs = "HS " + "DN" + node.Item.HotDim + strMarkHeight;
+                string strhr = "HR " + "DN" + node.Item.HotDim + strMarkHeight;
+                property.Add(strcs);
+                property.Add(strcr);
+                property.Add(strhs);
+                property.Add(strhr);
+            }
+
+            Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+            for (int i = 0; i < property.Count; i++)
+            {
+                string strKey = "水管标注" + (i + 1).ToString();
+                attNameValues.Add(strKey, property[i]);
+            }
+
+            mark.ObjectId.UpdateAttributesInBlock(attNameValues);
+
+        }
+
+        private void UpdateText(ThFanTreeNode<ThFanPointModelNew> node, DBText mark)
+        {
+            var strText = "C " + "DN" + node.Item.CoolCapaDim;
+            mark.UpgradeOpen();
+            mark.TextString = strText;
+            mark.DowngradeOpen();
         }
     }
 }

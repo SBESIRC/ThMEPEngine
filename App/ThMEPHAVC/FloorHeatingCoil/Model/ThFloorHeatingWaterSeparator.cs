@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 
 using ThCADExtension;
 
-using ThMEPHVAC.FloorHeatingCoil.Service;
+using ThMEPHVAC.Service;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
