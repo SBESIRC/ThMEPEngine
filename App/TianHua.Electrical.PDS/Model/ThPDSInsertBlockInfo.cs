@@ -10,11 +10,6 @@ namespace TianHua.Electrical.PDS.Model
         public Point3d InsertPoint { get; set; }
 
         /// <summary>
-        /// 标注插入点
-        /// </summary>
-        public Point3d FirstPoint { get; set; }
-
-        /// <summary>
         /// 引线端点
         /// </summary>
         public Point3d SecondPoint { get; set; }

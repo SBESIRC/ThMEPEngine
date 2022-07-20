@@ -207,13 +207,13 @@ namespace TianHua.Electrical.PDS.Engine
                 if (dimensionVector.DotProduct(wcsVector) >= 0)
                 {
                     var dimension = insertEngine.InsertCircuitDimension(activeDb, configDb, ThPDSCommon.LOAD_DIMENSION_R,
-                        insertInfo.FirstPoint, insertInfo.Scale);
+                        insertInfo.InsertPoint + match.LabelOffset, insertInfo.Scale);
                     CircuitDimensionAssign(dimension, insertInfo.SecondPoint, insertInfo.Scale, attributes);
                 }
                 else
                 {
                     var dimension = insertEngine.InsertCircuitDimension(activeDb, configDb, ThPDSCommon.LOAD_DIMENSION_L,
-                        insertInfo.FirstPoint, insertInfo.Scale);
+                        insertInfo.InsertPoint + match.LabelOffset, insertInfo.Scale);
                     CircuitDimensionAssign(dimension, insertInfo.SecondPoint, insertInfo.Scale, attributes);
                 }
             }
