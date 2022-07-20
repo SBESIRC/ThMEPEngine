@@ -13063,7 +13063,10 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                     if (_tolReturnValueRange.PipeType is PipeType.FL)
                     {
                       maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
-                      COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDERELICTION)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                      if (MAX_ANGEL_TOLLERANCE != eMax)
+                      {
+                        COMMONRADIUS.Add(new(THESAURUSAGILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSDERELICTION)) { ScaleEx = new(-THESAURUSHOUSING, THESAURUSHOUSING, THESAURUSHOUSING) });
+                      }
                       maxBalconywashingmachineToBalconybasinline._LaneOffset();
                       var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
                       max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.CheckPoint, () =>
