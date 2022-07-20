@@ -704,8 +704,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
                 case ImageLoadType.RS:
                     {
-                        node.Type = PDSNodeType.DistributionBox;
-                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
                         node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireResistantShutter;
                         node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
                         break;
@@ -793,6 +793,69 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 新建负载
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static ThPDSProjectGraphNode CreatNewLoad(CircuitCreator data)
+        {
+            //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
+            var node = new ThPDSProjectGraphNode();
+            if(data.Phase == "L")
+            {
+                node.Load.Phase = ThPDSPhase.一相;
+                node.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L;
+            }
+            else
+            {
+                node.Load.Phase = data.Phase == "单相" ? ThPDSPhase.一相 : ThPDSPhase.三相;
+                node.Details.LoadCalculationInfo.PhaseSequence = data.Phase == "单相" ? Circuit.PhaseSequence.L1 : Circuit.PhaseSequence.L123;
+            }
+            node.Type = data.NodeType;
+            node.Load.LoadTypeCat_1 = data.LoadTypeCat_1;
+            node.Load.LoadTypeCat_2 = data.LoadTypeCat_2;
+            node.Load.LoadTypeCat_3 = data.LoadTypeCat_3;
+            node.Details.LoadCalculationInfo.IsDualPower = data.IsDualPower;
+            node.Details.LoadCalculationInfo.LowPower = data.LowPower;
+            if(data.HighPower < 0)
+            {
+                if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter)
+                {
+                    node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.FireproofShutterPower;
+                }
+                else if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger)
+                {
+                    node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.ACChargerPower;
+                }
+                else if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger)
+                {
+                    node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.DCChargerPower;
+                }
+                else if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+                {
+                    if(PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType == MeterBoxCircuitType.江苏住宅)
+                    {
+                        node.Details.LoadCalculationInfo.HighPower = data.Phase == "单相" ? 16 : 20;
+                    }
+                    else
+                    {
+                        node.Details.LoadCalculationInfo.HighPower = data.Phase == "单相" ? 8 : 12;
+                    }
+                }
+            }
+            else
+            {
+                node.Details.LoadCalculationInfo.HighPower = data.HighPower;
+            }
+            node.Load.ID.Description = data.Description;
+            node.Load.SetFireLoad(data.FireLoad);
+            PDSProject.Instance.graphData.Graph.AddVertex(node);
+            node.ComponentSelection(new List<ThPDSProjectGraphEdge>(), false);
+            return node;
+        }
+
+        /// <summary>
         /// 编辑负载
         /// </summary>
         /// <param name="load">负载</param>
@@ -850,6 +913,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
+        [Obsolete]
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
@@ -873,6 +937,49 @@ namespace TianHua.Electrical.PDS.Project.Module
                 newEdge.Circuit.ID.Description = "疏散照明/指示灯";
             }
             return newEdge;
+        }
+
+        public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string menuOptions, string submenuOptions)
+        {
+            var CircuitCreatorInfo = CircuitConfiguration.CircuitCreatorInfos.FirstOrDefault(o => o.MenuOptions.Equals(menuOptions) && o.SubmenuOptions.Equals(submenuOptions));
+            if(!CircuitCreatorInfo.IsNull())
+            {
+                //Step 1:新建负载
+                var target = CreatNewLoad(CircuitCreatorInfo);
+                target.Load.SetLocation(new ThPDSLocation() { FloorNumber = node.Load.Location.FloorNumber });
+                //Step 2:新建回路
+                var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
+                //Step 3:获取对应的CircuitFormOutType
+                var CircuitFormOutType = Switch(newEdge, CircuitCreatorInfo.CircuitFormOutType);
+                //Step 4:回路选型
+                newEdge.ComponentSelection(CircuitFormOutType);
+                //Step 5:根据配置修改选型
+                if (CircuitCreatorInfo.ProtectionSwitchType == "组合式RCD")
+                {
+                    newEdge.Details.CircuitForm.ReviseBreaker()?.SetBreakerType(ComponentType.组合式RCD);
+                }
+                var conductors = newEdge.Details.CircuitForm.GetCircuitConductors();
+                conductors.ForEach(o =>
+                {
+                    if (menuOptions != "备用回路" && menuOptions != "集中电源")
+                    {
+                        o.SetConductorType(CircuitCreatorInfo.ConductorType);
+                        o.SetConductorLayingPath(CircuitCreatorInfo.ConductorLaying);
+                        o.SetLayingSite1(CircuitCreatorInfo.LayingSite1);
+                        o.SetLayingSite2(CircuitCreatorInfo.LayingSite2);
+                    }
+                });
+                //Step 6:添加到Graph
+                graph.AddEdge(newEdge);
+                //Step 7:检查回路
+                newEdge.Source.CheckWithNode();
+                return newEdge;
+
+            }
+            else
+            {
+                throw new NotSupportedException("不支持的回路类型");
+            }
         }
 
         /// <summary>
@@ -1326,6 +1433,44 @@ namespace TianHua.Electrical.PDS.Project.Module
             else if (circuitName == "消防应急照明回路（WFEL）")
             {
                 return CircuitFormOutType.消防应急照明回路WFEL;
+            }
+            else if (circuitName == "计量")
+            {
+                switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType)
+                {
+                    case MeterBoxCircuitType.上海住宅:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_上海直接表;
+                            else
+                                return CircuitFormOutType.配电计量_上海CT;
+                        }
+                    case MeterBoxCircuitType.江苏住宅:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_直接表在前;
+                            else
+                                return CircuitFormOutType.配电计量_CT表在前;
+                        }
+                    case MeterBoxCircuitType.国标_表在断路器前:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_直接表在前;
+                            else
+                                return CircuitFormOutType.配电计量_CT表在前;
+                        }
+                    case MeterBoxCircuitType.国标_表在断路器后:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_直接表在后;
+                            else
+                                return CircuitFormOutType.配电计量_CT表在后;
+                        }
+                    default:
+                        {
+                            throw new NotSupportedException();
+                        }
+                }
             }
             else
             {

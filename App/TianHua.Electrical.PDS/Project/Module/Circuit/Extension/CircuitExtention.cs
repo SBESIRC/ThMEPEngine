@@ -105,6 +105,44 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
             return result;
         }
 
+        public static Breaker ReviseBreaker(this PDSBaseOutCircuit circuit)
+        {
+            if (!circuit.IsNull())
+            {
+                foreach (PropertyInfo prop in circuit.GetType().GetProperties())
+                {
+                    if (prop.PropertyType == typeof(Breaker))
+                    {
+                        if (prop.Name == "breaker" || prop.Name == "breaker2")
+                        {
+                            Breaker oValue = (Breaker)prop.GetValue(circuit);
+                            return oValue;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static List<Conductor> GetCircuitConductors(this PDSBaseOutCircuit circuit)
+        {
+            List<Conductor> result = new List<Conductor>();
+            if (!circuit.IsNull())
+            {
+                foreach (PropertyInfo prop in circuit.GetType().GetProperties())
+                {
+                    if (prop.PropertyType == typeof(Conductor))
+                    {
+                        object oValue = prop.GetValue(circuit);
+                        if (oValue.IsNull())
+                            continue;
+                        result.Add(oValue as Conductor);
+                    }
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// 是否是电动机回路
         /// </summary>

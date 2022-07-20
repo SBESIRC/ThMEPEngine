@@ -386,6 +386,12 @@ namespace TianHua.Electrical.PDS.Project
                     {
                         newConductor.SetConductorCrossSectionalArea(conductor.ConductorCrossSectionalArea);
                     }
+                    newConductor.SetConductorType(conductor.ConductorType);
+                    newConductor.SetMaterialStructure(conductor.OuterSheathMaterial);
+                    newConductor.SetConductorMaterial(conductor.ConductorMaterial);
+                    newConductor.SetConductorLayingPath(conductor.ConductorLayingPath);
+                    newConductor.SetLayingSite1(conductor.LayingSite1);
+                    newConductor.SetLayingSite2(conductor.LayingSite2);
                 }
                 else if (!component.IsNull())//为了支持空负载没有导体的case
                 {
@@ -1423,10 +1429,14 @@ namespace TianHua.Electrical.PDS.Project
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
-
             node.ComponentCheckCascade(CascadeCurrent);
 
-            node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+            var cascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+            if (node.Details.CascadeCurrent > cascadeCurrent)
+            {
+                return;
+            }
+            node.Details.CascadeCurrent = cascadeCurrent;
             edges = _projectGraph.InEdges(node).ToList();
             edges.ForEach(e => e.CheckCascadeWithEdge());
         }
@@ -1458,7 +1468,12 @@ namespace TianHua.Electrical.PDS.Project
         {
             edge.ComponentCheckCascade();
             //统计回路级联电流
-            edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            var cascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            if (edge.Details.CascadeCurrent > cascadeCurrent)
+            {
+                return;
+            }
+            edge.Details.CascadeCurrent = cascadeCurrent;
 
             var node = edge.Source;
             var miniBusbar = node.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge)).Key;
