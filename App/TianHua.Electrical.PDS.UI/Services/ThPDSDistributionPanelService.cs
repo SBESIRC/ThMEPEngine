@@ -923,6 +923,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var dy = .0;
                 var insertGaps = new List<GLineSegment>();
                 insertGaps.Add(new GLineSegment(busEnd, busEnd.OffsetXY(500, 0)));
+                var edgeToCps = new Dictionary<ThPDSProjectGraphEdge, List<BlockInfo>>();
+                var edgeToContactors = new Dictionary<ThPDSProjectGraphEdge, List<BlockInfo>>();
                 void DrawEdge(ThPDSProjectGraphEdge edge)
                 {
                     {
@@ -1009,6 +1011,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         }
                         var item = PDSItemInfo.Create(edgeName, new Point(busStart.X, dy + 10));
                         if (item is null) throw new NotSupportedException(edgeName);
+
+                        edgeToCps[edge] = item.brInfos.Where(x => x.IsCPS()).ToList();
+                        edgeToContactors[edge] = item.brInfos.Where(x => x.IsContactor()).ToList();
                         var circuitVM = new ThPDSCircuitModel(edge);
                         var glyphs = new List<Glyphs>();
                         {
@@ -1411,7 +1416,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            contactor1 = motor_CPSStarTriangleStartCircuit.contactor1;
+                                                            contactor2 = motor_CPSStarTriangleStartCircuit.contactor2;
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
                                                         {
@@ -3179,6 +3185,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var visitedSecondaryCircuits = new HashSet<SecondaryCircuit>();
                 var visitedEdges = new HashSet<ThPDSProjectGraphEdge>();
                 {
+                    Action cb = null;
                     var fs = new Dictionary<ThPDSProjectGraphEdge, Action>();
                     foreach (var kv in vertice.Details.SecondaryCircuits)
                     {
@@ -3251,63 +3258,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     busEnd = end;
                                     dy -= end.Y - start.Y;
                                     var pt = new Point(start.X - 205, start.Y);
+                                    cb += () =>
                                     {
-                                        var h = 38.0 * (edges.Count - 1);
-                                        switch (edges.Last().Details.CircuitForm.CircuitFormType)
+                                        if (hasCPS)
                                         {
-                                            case CircuitFormOutType.None:
-                                                break;
-                                            case CircuitFormOutType.常规:
-                                                break;
-                                            case CircuitFormOutType.漏电:
-                                                break;
-                                            case CircuitFormOutType.接触器控制:
-                                                break;
-                                            case CircuitFormOutType.热继电器保护:
-                                                break;
-                                            case CircuitFormOutType.配电计量_上海CT:
-                                                break;
-                                            case CircuitFormOutType.配电计量_上海直接表:
-                                                break;
-                                            case CircuitFormOutType.配电计量_CT表在前:
-                                                break;
-                                            case CircuitFormOutType.配电计量_直接表在前:
-                                                break;
-                                            case CircuitFormOutType.配电计量_CT表在后:
-                                                break;
-                                            case CircuitFormOutType.配电计量_直接表在后:
-                                                break;
-                                            case CircuitFormOutType.电动机_分立元件:
-                                                break;
-                                            case CircuitFormOutType.电动机_CPS:
-                                                break;
-                                            case CircuitFormOutType.电动机_分立元件星三角启动:
-                                                break;
-                                            case CircuitFormOutType.电动机_CPS星三角启动:
-                                                break;
-                                            case CircuitFormOutType.双速电动机_分立元件detailYY:
-                                                h += 100;
-                                                break;
-                                            case CircuitFormOutType.双速电动机_分立元件YY:
-                                                h += 60;
-                                                break;
-                                            case CircuitFormOutType.双速电动机_CPSdetailYY:
-                                                h += 100;
-                                                break;
-                                            case CircuitFormOutType.双速电动机_CPSYY:
-                                                h += 60;
-                                                break;
-                                            case CircuitFormOutType.消防应急照明回路WFEL:
-                                                break;
-                                            default:
-                                                break;
+                                            pts.AddRange(edges.SelectMany(edge => edgeToCps[edge]).Select(x => new Point(x.BasePoint.X, -x.BasePoint.Y + 8)));
                                         }
-                                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - h);
-                                        var ed = st;
-                                        ed.Y = pt.Y + 40;
-                                        pts.Add(st);
-                                        pts.Add(ed);
-                                    }
+                                        else
+                                        {
+                                            pts.AddRange(edges.SelectMany(edge => edgeToContactors[edge]).Select(x => new Point(x.BasePoint.X, -x.BasePoint.Y + 8)));
+                                        }
+                                    };
                                     pt.Y = -pt.Y;
                                     var item = PDSItemInfo.Create(hasCPS ? "控制（从属CPS）" : "控制（从属接触器）", pt);
                                     {
@@ -3452,7 +3413,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 var st = info.Line.StartPoint;
                                                 var ed = info.Line.EndPoint;
                                                 var ln = CreateLine(trans, strockBrush, st, ed);
-                                                if (!isBlock) ln.StrokeDashArray = currentDashArr;
+                                                if (!isBlock)
+                                                {
+                                                    ln.StrokeDashArray = currentDashArr;
+                                                    cb += () => { pts.Add(new(st.X, -st.Y)); };
+                                                }
                                                 yield return ln;
                                             }
                                             {
@@ -3541,14 +3506,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         }
                                     }
                                 }
+                                cb += () =>
                                 {
-                                    var st = new Point(pts[0].X, pts.Select(x => x.Y).Min());
-                                    var ed = new Point(pts[0].X, pts.Select(x => x.Y).Max());
-                                    var ln = CreateLine(null, Brushes.Black, st, ed);
-                                    ln.StrokeDashCap = PenLineCap.Square;
-                                    ln.StrokeDashArray = currentDashArr;
-                                    canvas.Children.Add(ln);
-                                }
+                                    if (pts.Count > 0)
+                                    {
+                                        var st = new Point(pts.Select(x => x.X).Max(), pts.Select(x => x.Y).Min());
+                                        var ed = new Point(pts.Select(x => x.X).Max(), pts.Select(x => x.Y).Max());
+                                        var ln = CreateLine(null, Brushes.Black, st, ed);
+                                        ln.StrokeDashCap = PenLineCap.Square;
+                                        ln.StrokeDashArray = currentDashArr;
+                                        canvas.Children.Add(ln);
+                                    }
+                                };
                             }
                         });
                     }
@@ -3556,6 +3525,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         fs[edge]();
                     }
+                    cb?.Invoke();
                 }
                 void SetSel(Rect r)
                 {
