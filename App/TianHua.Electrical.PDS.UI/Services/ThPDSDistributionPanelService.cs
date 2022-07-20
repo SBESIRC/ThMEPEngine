@@ -2284,7 +2284,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         DrawEdge(edge);
                     }
                 }
-                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                if (vertice.IsCentralizedPowerCircuit())
                 {
                     var cvs = new Canvas() { Width = 100, Height = 320, Background = Brushes.Transparent, };
                     Canvas.SetLeft(cvs, 98);
@@ -2294,15 +2294,27 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
                     if (edges.Count < 8)
                     {
-                        cm.Items.Add(new MenuItem()
+                        var parser = new ThPDSContextMenuYamlParser()
                         {
-                            Header = "增加消防应急照明回路（WFEL）",
-                            Command = new RelayCommand(() =>
+                            IsCentralizedPowerCircuit = true,
+                        };
+                        var mi = parser.Parse();
+                        foreach (MenuItem item in mi.Items)
+                        {
+                            foreach (MenuItem subitem in item.Items)
                             {
-                                ThPDSProjectGraphService.AddCircuit(graph, vertice, "消防应急照明回路（WFEL）");
-                                UpdateCanvas();
-                            }),
-                        });
+                                subitem.Command = new RelayCommand(() =>
+                                {
+                                    ThPDSProjectGraphService.AddCircuit(
+                                        graph,
+                                        vertice,
+                                        item.Header as string,
+                                        subitem.Header as string);
+                                    UpdateCanvas();
+                                });
+                            }
+                        }
+                        cm.Items.Add(mi);
                     }
                     cvs.ContextMenu = cm;
                     cvs.MouseUp += (s, e) =>
@@ -3689,31 +3701,34 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         var menu = new ContextMenu();
                         cvs.ContextMenu = menu;
                         {
-                            var mi = new MenuItem();
+                            var parser = new ThPDSContextMenuYamlParser();
+                            var mi = parser.Parse();
+                            foreach (MenuItem item in mi.Items)
+                            {
+                                foreach (MenuItem subitem in item.Items)
+                                {
+                                    subitem.Command = new RelayCommand(() =>
+                                    {
+                                        ThPDSProjectGraphService.AddCircuit(
+                                            graph,
+                                            vertice,
+                                            item.Header as string,
+                                            subitem.Header as string);
+                                        UpdateCanvas();
+                                    });
+                                }
+                            }
                             menu.Items.Add(mi);
-                            mi.Header = "新建回路";
-                            var outTypes = ThPDSProjectGraphService.AvailableTypes();
-                            foreach (var outType in outTypes)
+                        }
+                        {
+                            var mi = new MenuItem();
+                            mi.Header = "分支母排";
+                            mi.Command = new RelayCommand(() =>
                             {
-                                var m = new MenuItem();
-                                mi.Items.Add(m);
-                                m.Header = outType;
-                                m.Command = new RelayCommand(() =>
-                                {
-                                    ThPDSProjectGraphService.AddCircuit(graph, vertice, outType);
-                                    UpdateCanvas();
-                                });
-                            }
-                            {
-                                var m = new MenuItem();
-                                mi.Items.Add(m);
-                                m.Header = "分支母排";
-                                m.Command = new RelayCommand(() =>
-                                {
-                                    ThPDSProjectGraphService.AddSmallBusbar(graph, vertice);
-                                    UpdateCanvas();
-                                });
-                            }
+                                ThPDSProjectGraphService.AddSmallBusbar(graph, vertice);
+                                UpdateCanvas();
+                            });
+                            menu.Items.Add(mi);
                         }
                         {
                             var mi = new MenuItem();

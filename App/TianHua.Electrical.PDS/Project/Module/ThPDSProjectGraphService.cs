@@ -913,32 +913,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        [Obsolete]
-        public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
-        {
-            //Step 1:新建空负载
-            var data = ThPDSProjectGraphNodeData.Create();
-            data.Phase = node.Load.Phase;
-            data.Storey = node.Load.Location.FloorNumber;
-            data.PhaseSequence = node.Details.LoadCalculationInfo.PhaseSequence;
-            var target = CreatNewLoad(data);
-            //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
-            //Step 3:获取对应的CircuitFormOutType
-            var CircuitFormOutType = Switch(newEdge, type);
-            //Step 4:回路选型
-            newEdge.ComponentSelection(CircuitFormOutType);
-            //Step 5:添加到Graph
-            graph.AddEdge(newEdge);
-            if (type.Contains("消防应急照明回路"))
-            {
-                target.Load.Phase = ThPDSPhase.一相;
-                target.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L;
-                newEdge.Circuit.ID.Description = "疏散照明/指示灯";
-            }
-            return newEdge;
-        }
-
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string menuOptions, string submenuOptions)
         {
             var CircuitCreatorInfo = CircuitConfiguration.CircuitCreatorInfos.FirstOrDefault(o => o.MenuOptions.Equals(menuOptions) && o.SubmenuOptions.Equals(submenuOptions));
@@ -1183,28 +1157,6 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// 获取可新建出线回路列表
-        /// </summary>
-        /// <returns></returns>
-        public static List<string> AvailableTypes()
-        {
-            return new List<string>()
-            {
-                "常规配电回路",
-                "漏电保护回路",
-                "带接触器回路",
-                "带热继电器回路",
-                "计量(上海)",
-                "计量(表在前)",
-                "计量(表在后)",
-                "电动机配电回路",
-                "双速电机D-YY",
-                "双速电机Y-Y",
-                /*"分支母排"*/
-            };
         }
 
         /// <summary>
