@@ -162,7 +162,21 @@ namespace ThMEPWSS.Pipe.Model
             }
         }
 
-        private bool _ShouldRaiseWashingMachine = false;
+        private bool _ShouldSetCheckPortAtUpperFloor = true;
+        public bool ShouldSetCheckPortAtUpperFloor
+        {
+            get
+            {
+                return _ShouldSetCheckPortAtUpperFloor;
+            }
+            set
+            {
+                _ShouldSetCheckPortAtUpperFloor = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private bool _ShouldRaiseWashingMachine;
         public bool ShouldRaiseWashingMachine
         {
             get

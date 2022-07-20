@@ -116,6 +116,8 @@
 
                 </Grid>
                 <Rectangle Height="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
+                <CheckBox IsChecked="{Binding ShouldSetCheckPortAtUpperFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">转管上一层是否设检查口</CheckBox>
+                <Rectangle Height="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
                 <CheckBox IsChecked="{Binding HasAirConditionerFloorDrain,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">空调夹板地漏</CheckBox>
                 <Rectangle Height="5" Fill="Transparent" Stroke="Transparent"></Rectangle>
                 <CheckBox IsChecked="{Binding HasAiringForCondensePipe,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">冷凝立管设通气</CheckBox>
