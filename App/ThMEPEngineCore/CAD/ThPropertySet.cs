@@ -29,9 +29,15 @@ namespace ThMEPEngineCore.CAD
             foreach(var property in properties)
             {
                 var keyValue = Regex.Split(property, "：");
-                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(keyValue[0]))
+                if(keyValue.Length<2)
                 {
-                    propertySet.Properties.Add(keyValue[0], keyValue[1]);
+                    continue;
+                }
+                var key = keyValue[0].Trim();
+                var value = keyValue[1].Trim();
+                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(key))
+                {
+                    propertySet.Properties.Add(key, value);
                 }
             }
 
@@ -48,9 +54,15 @@ namespace ThMEPEngineCore.CAD
             foreach (var property in properties)
             {
                 var keyValue = Regex.Split(property, "：");
-                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(keyValue[0]))
+                if (keyValue.Length < 2)
                 {
-                    propertySet.Properties.Add(keyValue[0], keyValue[1]);
+                    continue;
+                }
+                var key = keyValue[0].Trim();
+                var value = keyValue[1].Trim();
+                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(key))
+                {
+                    propertySet.Properties.Add(key, value);
                 }
             }
 
