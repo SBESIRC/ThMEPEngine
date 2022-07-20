@@ -16,197 +16,203 @@
     </UserControl.Resources>
     <Grid Background="White">
         <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Right">
+                <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnImportSet" Click="btnImportSetting"></cus:ImageButton>
+                <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnExportSet" Click="btnExportSetting"></cus:ImageButton>
+                <cus:ImageButton Content="应用设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnApplySetting"></cus:ImageButton>
+            </StackPanel>
             <ScrollViewer>
-                <StackPanel Orientation="Vertical" Margin="5">
-                    <Label Content="供配电系统" FontSize="16" FontWeight="Black"></Label>
-                    <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Visibility="Visible" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label Content="市政电源线路默认长度" Width="190"></Label>
-                            <hc:NumericUpDown Value="{Binding DefaultLengthOfMunicipalPowerLine}"></hc:NumericUpDown>
-                            <Label Content="m"></Label>
-                            <Label Content="树干式配电的电流≤" Margin="20,0,0,0"></Label>
-                            <hc:NumericUpDown Value="{Binding CurrentOfTrunkDistribution}"></hc:NumericUpDown>
-                            <Label Content="A时，默认采用"></Label>
-                            <ComboBox ItemsSource="{Binding DefaultFeeder,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding DefaultFeeder}"></ComboBox>
-                            <Label Content="馈线，否则采用"></Label>
-                            <ComboBox ItemsSource="{Binding ElseFeeder,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding ElseFeeder}"></ComboBox>
-                            <Label Content="馈线。"></Label>
-                        </StackPanel>
-                        <StackPanel Visibility="Visible" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label Content="至第一级配电箱线路的默认长度" Width="190"></Label>
-                            <hc:NumericUpDown Value="{Binding DefaultLengthOfCircuitToTheFirstLevelDistributionBox}"></hc:NumericUpDown>
-                            <Label Content="m"></Label>
-                            <Label Content="回路整定电流≥" Margin="20,0,0,0"></Label>
-                            <hc:NumericUpDown Value="{Binding LoopSettingCurrent}"></hc:NumericUpDown>
-                            <Label Content="A时，默认采用密集型母线槽馈线。"></Label>
-                        </StackPanel>
-                        <StackPanel Visibility="Visible" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label Content="后续线路的默认长度" Width="190"></Label>
-                            <hc:NumericUpDown Value="{Binding DefaultLengthOfSubsequentLines}"></hc:NumericUpDown>
-                            <Label Content="m"></Label>
-                            <Label Margin="20,0,0,0">额定电流放大倍数：</Label>
-                            <hc:NumericUpDown Value="{Binding CalculateCurrentMagnification}"></hc:NumericUpDown>
-                            <Label>倍计算电流。</Label>
-                        </StackPanel>
-                        <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                        <Rectangle Stroke="Black" Fill="Transparent" StrokeThickness="1"></Rectangle>
-                        <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                        <Label Content="导体及敷设管材选择" FontSize="16" FontWeight="Black"></Label>
+                <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="3">
+                    <StackPanel Orientation="Vertical" Margin="5">
+                        <Label Content="供配电系统" FontSize="16" FontWeight="Black"></Label>
                         <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="默认导体材料"></Label>
-                            <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
-                            <RadioButton Margin="10,0,0,0" Padding="0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables}">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <Label>消防配电干线及分支电缆采用</Label>
-                                    <ComboBox ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource,Mode=OneTime}" SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
-                                    <Label>矿物绝缘电缆</Label>
-                                </StackPanel>
-                            </RadioButton>
-                            <RadioButton IsChecked="{Binding FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution}" Style="{x:Null}" Margin="10,0,0,0" Padding="0" VerticalAlignment="Center" VerticalContentAlignment="Center">
-                                <Label>消防配电干线及分支电缆采用阻燃耐火电力电缆【慎用】</Label>
-                            </RadioButton>
-                        </StackPanel>
-                        <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                        <WrapPanel>
-                            <DataGrid ItemsSource="{Binding ConductorUsages}" Grid.Row="2" RowHeight="25" RowHeaderWidth="0" CanUserAddRows="False" AutoGenerateColumns="False">
-                                <DataGrid.Columns>
-
-                                    <DataGridTemplateColumn Header="导体用途" Width="150" CanUserSort="False" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Center" Text="{Binding ConductorType}"></TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-
-
-                                    <DataGridTemplateColumn Header="无卤" Width="40" CanUserSort="False">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding HalogenFree,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="低烟" Width="40" CanUserSort="False">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowSmoke,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="低毒" Width="40" CanUserSort="False">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowToxicity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="阻燃" Width="40" CanUserSort="False">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding FlameRetardant,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="耐火" Width="40" CanUserSort="False">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding Refractory,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="级别" Width="60" CanUserSort="False" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Level,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding Level,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <DataGridTemplateColumn Header="材料特征及结构" Width="100" CanUserSort="False" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding ConductorMaterialAndStructure, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ConductorMaterialAndStructureItemsSource}"></ComboBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <DataGridTemplateColumn Header="导体标注样式预览" Width="110" CanUserSort="False" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding Content,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <Border Visibility="Collapsed" BorderThickness="1" BorderBrush="Black" Grid.Column="1" Margin="10,0,0,0">
-                                <StackPanel Orientation="Vertical" Margin="5,0,5,10">
-                                    <Label Content="载流量计算相关参数：" FontSize="14" FontWeight="Black"></Label>
-                                    <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
-                                        <Label Content="环境温度" Width="120"></Label>
-                                        <ComboBox SelectedItem="{Binding AmbientTemperature}" Width="70" Height="22"></ComboBox>
-                                        <Label Content="℃"></Label>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Visibility="Visible" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Label Content="市政电源线路默认长度" Width="190"></Label>
+                                <hc:NumericUpDown Value="{Binding DefaultLengthOfMunicipalPowerLine}"></hc:NumericUpDown>
+                                <Label Content="m"></Label>
+                                <Label Content="树干式配电的电流≤" Margin="20,0,0,0"></Label>
+                                <hc:NumericUpDown Value="{Binding CurrentOfTrunkDistribution}"></hc:NumericUpDown>
+                                <Label Content="A时，默认采用"></Label>
+                                <ComboBox ItemsSource="{Binding DefaultFeeder,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding DefaultFeeder}"></ComboBox>
+                                <Label Content="馈线，否则采用"></Label>
+                                <ComboBox ItemsSource="{Binding ElseFeeder,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding ElseFeeder}"></ComboBox>
+                                <Label Content="馈线。"></Label>
+                            </StackPanel>
+                            <StackPanel Visibility="Visible" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Label Content="至第一级配电箱线路的默认长度" Width="190"></Label>
+                                <hc:NumericUpDown Value="{Binding DefaultLengthOfCircuitToTheFirstLevelDistributionBox}"></hc:NumericUpDown>
+                                <Label Content="m"></Label>
+                                <Label Content="回路整定电流≥" Margin="20,0,0,0"></Label>
+                                <hc:NumericUpDown Value="{Binding LoopSettingCurrent}"></hc:NumericUpDown>
+                                <Label Content="A时，默认采用密集型母线槽馈线。"></Label>
+                            </StackPanel>
+                            <StackPanel Visibility="Visible" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Label Content="后续线路的默认长度" Width="190"></Label>
+                                <hc:NumericUpDown Value="{Binding DefaultLengthOfSubsequentLines}"></hc:NumericUpDown>
+                                <Label Content="m"></Label>
+                                <Label Margin="20,0,0,0">额定电流放大倍数：</Label>
+                                <hc:NumericUpDown Value="{Binding CalculateCurrentMagnification}"></hc:NumericUpDown>
+                                <Label>倍计算电流。</Label>
+                            </StackPanel>
+                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                            <Rectangle Stroke="Black" Fill="Transparent" StrokeThickness="1"></Rectangle>
+                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                            <Label Content="导体及敷设管材选择" FontSize="16" FontWeight="Black"></Label>
+                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="默认导体材料"></Label>
+                                <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <RadioButton Margin="10,0,0,0" Padding="0" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Label>消防配电干线及分支电缆采用</Label>
+                                        <ComboBox ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource,Mode=OneTime}" SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
+                                        <Label>矿物绝缘电缆</Label>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
-                                        <Label Content="土壤热阻系数" Width="120"></Label>
-                                        <ComboBox SelectedItem="{Binding SoilThermalResistanceCoefficient}" Width="70" Height="22"></ComboBox>
-                                        <Label Content="(K·m)/W"></Label>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
-                                        <Label Content="消防配电电缆采用" Width="120"></Label>
-                                        <ComboBox SelectedItem="{Binding FireFightingDistributionCable}" Width="70" Height="22"></ComboBox>
-                                        <Label Content="敷设"></Label>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
-                                        <Label Content="非消防配电电缆采用" Width="120"></Label>
-                                        <ComboBox SelectedItem="{Binding NonFirePowerDistributionCable}" Width="70" Height="22"></ComboBox>
-                                        <Label Content="敷设"></Label>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
-                                        <Label Content="成束敷设降低系数按" Width="120"></Label>
-                                        <ComboBox SelectedItem="{Binding ReductionFactorOfBundleLaying}" Width="70" Height="22"></ComboBox>
-                                        <Label Content="根电缆计算"></Label>
-                                    </StackPanel>
-                                    <TextBlock Margin="5,10,0,0" FontWeight="Black" TextWrapping="Wrap" LineHeight="20" Text="注：
+                                </RadioButton>
+                                <RadioButton IsChecked="{Binding FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution}" Style="{x:Null}" Margin="10,0,0,0" Padding="0" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                                    <Label>消防配电干线及分支电缆采用阻燃耐火电力电缆【慎用】</Label>
+                                </RadioButton>
+                            </StackPanel>
+                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                            <WrapPanel>
+                                <DataGrid ItemsSource="{Binding ConductorUsages}" Grid.Row="2" RowHeight="25" RowHeaderWidth="0" CanUserAddRows="False" AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+
+                                        <DataGridTemplateColumn Header="导体用途" Width="150" CanUserSort="False" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock HorizontalAlignment="Center" Text="{Binding ConductorType}"></TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+
+
+                                        <DataGridTemplateColumn Header="无卤" Width="40" CanUserSort="False">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding HalogenFree,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="低烟" Width="40" CanUserSort="False">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowSmoke,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="低毒" Width="40" CanUserSort="False">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowToxicity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="阻燃" Width="40" CanUserSort="False">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding FlameRetardant,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="耐火" Width="40" CanUserSort="False">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding Refractory,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="级别" Width="60" CanUserSort="False" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Level,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding Level,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="材料特征及结构" Width="100" CanUserSort="False" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding ConductorMaterialAndStructure, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ConductorMaterialAndStructureItemsSource}"></ComboBox>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="导体标注样式预览" Width="110" CanUserSort="False" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding Content,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border Visibility="Collapsed" BorderThickness="1" BorderBrush="Black" Grid.Column="1" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Vertical" Margin="5,0,5,10">
+                                        <Label Content="载流量计算相关参数：" FontSize="14" FontWeight="Black"></Label>
+                                        <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
+                                            <Label Content="环境温度" Width="120"></Label>
+                                            <ComboBox SelectedItem="{Binding AmbientTemperature}" Width="70" Height="22"></ComboBox>
+                                            <Label Content="℃"></Label>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
+                                            <Label Content="土壤热阻系数" Width="120"></Label>
+                                            <ComboBox SelectedItem="{Binding SoilThermalResistanceCoefficient}" Width="70" Height="22"></ComboBox>
+                                            <Label Content="(K·m)/W"></Label>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
+                                            <Label Content="消防配电电缆采用" Width="120"></Label>
+                                            <ComboBox SelectedItem="{Binding FireFightingDistributionCable}" Width="70" Height="22"></ComboBox>
+                                            <Label Content="敷设"></Label>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
+                                            <Label Content="非消防配电电缆采用" Width="120"></Label>
+                                            <ComboBox SelectedItem="{Binding NonFirePowerDistributionCable}" Width="70" Height="22"></ComboBox>
+                                            <Label Content="敷设"></Label>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
+                                            <Label Content="成束敷设降低系数按" Width="120"></Label>
+                                            <ComboBox SelectedItem="{Binding ReductionFactorOfBundleLaying}" Width="70" Height="22"></ComboBox>
+                                            <Label Content="根电缆计算"></Label>
+                                        </StackPanel>
+                                        <TextBlock Margin="5,10,0,0" FontWeight="Black" TextWrapping="Wrap" LineHeight="20" Text="注：
                                    &#13;1.自动计算及选型结构仅供参考。
                                    &#13;2.载流量计算结果仅适用于单层敷设、尺寸和负荷相同的线缆束，其它情况的载流量需要自行复核。
                                    &#13;3.成束敷设时的载流量计算结果基于电缆托盘间的垂直距离300mm，且托盘与墙之间距离不小于20mm的情况下，小于此距离时载流量降低系数应进一步减小"></TextBlock>
-                                </StackPanel>
-                            </Border>
+                                    </StackPanel>
+                                </Border>
 
-                            <Border BorderBrush="Black" BorderThickness="0" Margin="10,0,5,0">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="90"></ColumnDefinition>
-                                        <ColumnDefinition Width="200"></ColumnDefinition>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="30"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                        <RowDefinition Height="Auto"></RowDefinition>
-                                    </Grid.RowDefinitions>
-                                    <Label Content="管材敷设原则：" FontSize="14" FontWeight="Black" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"></Label>
-                                    <Label Grid.Row="1" Grid.Column="0" Content="通用要求：" VerticalAlignment="Top" FontWeight="Black" VerticalContentAlignment="Center"></Label>
-                                    <WrapPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                                        <TextBlock TextWrapping="Wrap">
+                                <Border BorderBrush="Black" BorderThickness="0" Margin="10,0,5,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"></ColumnDefinition>
+                                            <ColumnDefinition Width="200"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="30"></RowDefinition>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Label Content="管材敷设原则：" FontSize="14" FontWeight="Black" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"></Label>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="通用要求：" VerticalAlignment="Top" FontWeight="Black" VerticalContentAlignment="Center"></Label>
+                                        <WrapPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap">
                                     潮湿场所、埋于素土内敷设的保护管默认采用
                                             <ComboBox ItemsSource="{Binding GeneralRequirements,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding GeneralRequirements}"></ComboBox>
                                     管，管径大于
                                             <ComboBox ItemsSource="{Binding UniversalPipeDiameterItemsSource}" SelectedItem="{Binding UniversalPipeDiameter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
                                             时明敷。
-                                        </TextBlock>
-                                        <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                                    </WrapPanel>
-                                    <Label Grid.Row="2" Grid.Column="0" Content="消防线路：" FontWeight="Black" VerticalAlignment="Top" VerticalContentAlignment="Center"></Label>
-                                    <WrapPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                                        <TextBlock TextWrapping="Wrap">
+                                            </TextBlock>
+                                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                                        </WrapPanel>
+                                        <Label Grid.Row="2" Grid.Column="0" Content="消防线路：" FontWeight="Black" VerticalAlignment="Top" VerticalContentAlignment="Center"></Label>
+                                        <WrapPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap">
                                     正负零以上非潮湿场所敷设的保护管默认采用
                                             <ComboBox ItemsSource="{Binding FireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireFightingLineLess}"></ComboBox>
                                     管，管径大于
@@ -214,13 +220,13 @@
                                             采用
                                             <ComboBox ItemsSource="{Binding FireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireFightingLineMore}"></ComboBox>
                                     管。
-                                        </TextBlock>
-                                        <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                                    </WrapPanel>
-                                    <Label Content="非消防线路：" FontWeight="Black" Grid.Row="3" Grid.Column="0" VerticalAlignment="Top" VerticalContentAlignment="Center"></Label>
+                                            </TextBlock>
+                                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                                        </WrapPanel>
+                                        <Label Content="非消防线路：" FontWeight="Black" Grid.Row="3" Grid.Column="0" VerticalAlignment="Top" VerticalContentAlignment="Center"></Label>
 
-                                    <WrapPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                                        <TextBlock TextWrapping="Wrap">
+                                        <WrapPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap">
                                     正负零以上非潮湿场所敷设的保护管默认采用
                                             <ComboBox ItemsSource="{Binding NonFireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding NonFireFightingLineLess}"></ComboBox>
                                     管，管径大于
@@ -228,91 +234,86 @@
                                             采用
                                             <ComboBox ItemsSource="{Binding NonFireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding NonFireFightingLineMore}"></ComboBox>
                                      管。
-                                        </TextBlock>
-                                    </WrapPanel>
-                                </Grid>
-                            </Border>
+                                            </TextBlock>
+                                        </WrapPanel>
+                                    </Grid>
+                                </Border>
 
 
-                            <StackPanel Visibility="Collapsed" Orientation="Vertical" Grid.Row="4" HorizontalAlignment="Left">
-                                <Label Content="元器件选型" FontSize="16" FontWeight="Black" Height="40" Padding="0" VerticalContentAlignment="Center"></Label>
-                                <DataGrid RowHeight="25" RowHeaderWidth="0" CanUserAddRows="False" AutoGenerateColumns="False" Width="700" ItemsSource="{Binding FunctionTableItems,Mode=OneWay}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="设备名称" Width="1*" Binding="{ Binding Title}" IsReadOnly="True"></DataGridTextColumn>
-                                        <DataGridComboBoxColumn Header="选型表" Width="2*"></DataGridComboBoxColumn>
-                                        <DataGridTemplateColumn Header="操作" Width="60">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <cus:ImageButton Width="50" ImageTextLocation="TextOnly" Height="22" CornerRadius="2" Content="导入" ToolTip="导入选型"></cus:ImageButton>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </StackPanel>
+                                <StackPanel Visibility="Collapsed" Orientation="Vertical" Grid.Row="4" HorizontalAlignment="Left">
+                                    <Label Content="元器件选型" FontSize="16" FontWeight="Black" Height="40" Padding="0" VerticalContentAlignment="Center"></Label>
+                                    <DataGrid RowHeight="25" RowHeaderWidth="0" CanUserAddRows="False" AutoGenerateColumns="False" Width="700" ItemsSource="{Binding FunctionTableItems,Mode=OneWay}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="设备名称" Width="1*" Binding="{ Binding Title}" IsReadOnly="True"></DataGridTextColumn>
+                                            <DataGridComboBoxColumn Header="选型表" Width="2*"></DataGridComboBoxColumn>
+                                            <DataGridTemplateColumn Header="操作" Width="60">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <cus:ImageButton Width="50" ImageTextLocation="TextOnly" Height="22" CornerRadius="2" Content="导入" ToolTip="导入选型"></cus:ImageButton>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
 
-                        </WrapPanel>
-                        <StackPanel Orientation="Vertical">
-                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                            <Rectangle Stroke="Black" Fill="Transparent" StrokeThickness="1"></Rectangle>
-                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                            <Label Content="常用用电设备配电" FontSize="16" FontWeight="Black"></Label>
-                            <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="电动机主回路选用"></Label>
-                                <ComboBox ItemsSource="{Binding SelectionOfMainCircuitOfMotor,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding SelectionOfMainCircuitOfMotor}"></ComboBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="消防电动机功率小于"></Label>
-                                <hc:NumericUpDown Value="{Binding FireMotorPowerLess}"></hc:NumericUpDown>
-                                <Label Content="kW时直接启动，超过此功率时采用"></Label>
-                                <ComboBox ItemsSource="{Binding FireMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireMotorPowerMore}"></ComboBox>
-                                <Label Content="方式启动"></Label>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="普通电动机功率小于"></Label>
-                                <hc:NumericUpDown Value="{Binding CommonMotorPowerLess}"></hc:NumericUpDown>
-                                <Label Content="kW时直接启动，超过此功率时采用"></Label>
-                                <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding CommonMotorPowerMore}"></ComboBox>
-                                <Label Content="方式启动"></Label>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="电表箱出线回路原则"></Label>
-                                <ComboBox ItemsSource="{Binding MeterBoxCircuitType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding MeterBoxCircuitType}"></ComboBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label>消防应急照明与疏散指示系统采用</Label>
-                                <ComboBox ItemsSource="{Binding FireEmergencyLightingModel,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireEmergencyLightingModel}"></ComboBox>
-                                <ComboBox ItemsSource="{Binding FireEmergencyLightingType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireEmergencyLightingType}"></ComboBox>
-                                <Label>供电，线路采用</Label>
-                                <ComboBox ItemsSource="{Binding CircuitSystem,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding CircuitSystem}"></ComboBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label>交流充电桩除标注外单枪的额定功率均为：</Label>
-                                <hc:NumericUpDown Value="{Binding ACChargerPower}"></hc:NumericUpDown>
-                                <Label>kW</Label>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label>直流非车载充电机除标注外额定功率均为：</Label>
-                                <hc:NumericUpDown Value="{Binding DCChargerPower}"></hc:NumericUpDown>
-                                <Label>kW</Label>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label>防火卷帘控制盒除标注外额定功率均为：</Label>
-                                <hc:NumericUpDown Value="{Binding FireproofShutterPower}"/>
-                                <Label>kW</Label>
+                            </WrapPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                                <Rectangle Stroke="Black" Fill="Transparent" StrokeThickness="1"></Rectangle>
+                                <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
+                                <Label Content="常用用电设备配电" FontSize="16" FontWeight="Black"></Label>
+                                <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="电动机主回路选用"></Label>
+                                    <ComboBox ItemsSource="{Binding SelectionOfMainCircuitOfMotor,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding SelectionOfMainCircuitOfMotor}"></ComboBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="消防电动机功率小于"></Label>
+                                    <hc:NumericUpDown Value="{Binding FireMotorPowerLess}"></hc:NumericUpDown>
+                                    <Label Content="kW时直接启动，超过此功率时采用"></Label>
+                                    <ComboBox ItemsSource="{Binding FireMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireMotorPowerMore}"></ComboBox>
+                                    <Label Content="方式启动"></Label>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="普通电动机功率小于"></Label>
+                                    <hc:NumericUpDown Value="{Binding CommonMotorPowerLess}"></hc:NumericUpDown>
+                                    <Label Content="kW时直接启动，超过此功率时采用"></Label>
+                                    <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding CommonMotorPowerMore}"></ComboBox>
+                                    <Label Content="方式启动"></Label>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="电表箱出线回路原则"></Label>
+                                    <ComboBox ItemsSource="{Binding MeterBoxCircuitType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding MeterBoxCircuitType}"></ComboBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label>消防应急照明与疏散指示系统采用</Label>
+                                    <ComboBox ItemsSource="{Binding FireEmergencyLightingModel,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireEmergencyLightingModel}"></ComboBox>
+                                    <ComboBox ItemsSource="{Binding FireEmergencyLightingType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireEmergencyLightingType}"></ComboBox>
+                                    <Label>供电，线路采用</Label>
+                                    <ComboBox ItemsSource="{Binding CircuitSystem,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding CircuitSystem}"></ComboBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label>交流充电桩除标注外单枪的额定功率均为：</Label>
+                                    <hc:NumericUpDown Value="{Binding ACChargerPower}"></hc:NumericUpDown>
+                                    <Label>kW</Label>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label>直流非车载充电机除标注外额定功率均为：</Label>
+                                    <hc:NumericUpDown Value="{Binding DCChargerPower}"></hc:NumericUpDown>
+                                    <Label>kW</Label>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label>防火卷帘控制盒除标注外额定功率均为：</Label>
+                                    <hc:NumericUpDown Value="{Binding FireproofShutterPower}"/>
+                                    <Label>kW</Label>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
+                        <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
                     </StackPanel>
-                    <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-                    <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Right">
-                        <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnImportSet" Click="btnImportSetting"></cus:ImageButton>
-                        <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnExportSet" Click="btnExportSetting"></cus:ImageButton>
-                        <cus:ImageButton Content="应用设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnApplySetting"></cus:ImageButton>
-                    </StackPanel>
-                </StackPanel>
+                </Border>
             </ScrollViewer>
         </DockPanel>
-
     </Grid>
 </UserControl>
