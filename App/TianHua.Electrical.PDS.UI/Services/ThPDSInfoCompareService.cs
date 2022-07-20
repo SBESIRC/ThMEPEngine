@@ -176,8 +176,22 @@ namespace TianHua.Electrical.PDS.UI.Services
                     var w = new ThPDSCreateLoad();
                     if (w.ShowDialog() == true)
                     {
+                        // 更新数据
                         var vm = w.DataContext as ThPDSCreateLoadVM;
-                        ThPDSProjectGraphService.CreatNewLoad(CreateData(vm));
+                        var node = ThPDSProjectGraphService.CreatNewLoad(CreateData(vm));
+
+                        // 更新图纸
+                        var window = System.Windows.Window.GetWindow(panel);
+                        using (var vo = new ThPDSWindowVisibleOverride(window))
+                        {
+                            // 切回CAD画布
+                            ThPDSCADService.FocusToCAD();
+
+                            // 绘制到图纸上
+                            ThPDSInsertLoadService.Draw(node, vm.Type.Type);
+                        }
+
+                        // 更新界面
                         UpdateView(panel);
                     }
                 }),

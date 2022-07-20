@@ -50,6 +50,7 @@
     <Compile Include="Project\PDSProjectEventArgs.cs" />
     <Compile Include="Service\ThPDSBlockNameMap.cs" />
     <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
+    <Compile Include="Service\ThPDSInsertLoadService.cs" />
     <Compile Include="Service\ThPDSLoadIDMatchService.cs" />
     <Compile Include="Service\ThPDSMotorInfo.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
