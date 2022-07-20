@@ -546,7 +546,7 @@ namespace ThParkingStall.Core.Tools
             if (pts.Item1!= null)//坐标减少方向有区域交点
             {
                 if (IntSecPoints.Count != 0) BasePt = IntSecPoints.First();
-                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth / 2) -0.5, segline);
+                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth / 2) +0.05, segline);
                 var buffer = baseLine.GetHalfBuffer(segline.Extend(1), false);
                 var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
                 var distance = baseLine.ToLineString().Distance(objs)-1;
@@ -556,7 +556,7 @@ namespace ThParkingStall.Core.Tools
             if (pts.Item2 != null)//坐标增加方向有区域交点
             {
                 if (IntSecPoints.Count != 0) BasePt = IntSecPoints.Last();
-                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth / 2) - 0.5, segline);
+                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth / 2) + 0.05, segline);
                 var buffer = baseLine.GetHalfBuffer(segline.Extend(1), true);
                 var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
                 var distance = baseLine.ToLineString().Distance(objs)-1;
