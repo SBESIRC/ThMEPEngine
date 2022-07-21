@@ -15,6 +15,7 @@ namespace ThMEPStructure.StructPlane.Service
         private const string UpperFloorShearWallColor = "#ff7f00";
         private const string BelowFloorShearWallColor1 = "#ffff00";
         private const string BelowFloorShearWallColor2 = "Yellow";
+        private const string CantiSlabSign = "CANTISLAB";
 
         public static List<string> GetSlabElevations(this List<ThGeometry> geos)
         {
@@ -38,6 +39,14 @@ namespace ThMEPStructure.StructPlane.Service
                 .Where(g => g.Properties.GetCategory() == ThIfcCategoryManager.SlabCategory && !(g.Boundary is DBText))
                 .ToList();
         }
+        public static List<ThGeometry> GetCantiSlabGeos(this List<ThGeometry> geos)
+        {
+            // 获取IfcSlab几何物体
+            return geos
+                .Where(g => IsCantiSlab(g) && !(g.Boundary is DBText))
+                .ToList();
+        }
+
         public static List<ThGeometry> GetSlabMarks(this List<ThGeometry> geos)
         {
             // 获取IfcSlab标注
@@ -101,6 +110,12 @@ namespace ThMEPStructure.StructPlane.Service
             return category == ThIfcCategoryManager.WallCategory &&
                 (fillColor == BelowFloorShearWallColor1 || 
                 fillColor == BelowFloorShearWallColor2);
+        }
+        public static bool IsCantiSlab(this ThGeometry geo)
+        {
+            string category = geo.Properties.GetCategory();
+            string name = geo.Properties.GetName().ToUpper();
+            return category == ThIfcCategoryManager.SlabCategory && name.StartsWith(CantiSlabSign);
         }
     }
 }

@@ -206,11 +206,6 @@ namespace ThMEPStructure.StructPlane.Print
                         else if (category == ThIfcCategoryManager.BeamCategory)
                         {
                             UpdateBeamText(o);
-                            if(dbText.Position.DistanceTo(new Point3d(139269.7813, 149347.2188, 0))<=50 ||
-                            dbText.AlignmentPoint.DistanceTo(new Point3d(139269.7813, 149347.2188, 0)) <= 50)
-                            {
-
-                            }
                             Vector3d textMoveDir = new Vector3d();
                             if(o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
                             {

@@ -155,12 +155,12 @@ namespace ThMEPStructure.StructPlane
                 var svg = new ThStructureSVGReader();
                 svg.ReadFromFile(svgFile);
 
-                // 处理
+                #region ---------- 数据处理 ----------
                 // 对剪力墙造洞
                 var buildAreaSevice = new ThWallBuildAreaService();
                 var newGeos = buildAreaSevice.BuildArea(svg.Geos);
 
-                #region ---------- 梁处理 ----------
+                // 梁处理
                 // 用下层墙、柱对梁线进行Trim+合并梁线
                 var beamGeos = newGeos.GetBeamGeos();
                 var beamMarkGeos = newGeos.GetBeamMarks();
@@ -169,8 +169,15 @@ namespace ThMEPStructure.StructPlane
                 var newBeamGeos = ThBeamLineCleaner.Clean(beamGeos, belowObjs,
                     beamMarkGeos.Select(o => o.Boundary).ToCollection());
                 passGeos.AddRange(newBeamGeos);
+
+                // 处理空调板
+                if (PrintParameter.IsFilterCantiSlab)
+                {
+                    passGeos = ThCantiSlabFilter.Filter(passGeos);
+                }
                 #endregion
 
+                // 打印
                 var svgInput = new ThSvgInput()
                 {
                     Geos = passGeos,
@@ -183,6 +190,7 @@ namespace ThMEPStructure.StructPlane
             });
             return results;
         }
+
         private DBObjectCollection GetBelowObjs(List<ThGeometry> geos)
         {
             var polygons = new DBObjectCollection();

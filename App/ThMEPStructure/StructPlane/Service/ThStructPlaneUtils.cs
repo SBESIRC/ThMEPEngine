@@ -125,6 +125,18 @@ namespace ThMEPStructure.StructPlane.Service
                 return (string)value;
             }
         }
+        public static string GetName(this Dictionary<string, object> properties)
+        {
+            var value = properties.GetPropertyValue(ThSvgPropertyNameManager.NamePropertyName);
+            if (value == null)
+            {
+                return "";
+            }
+            else
+            {
+                return (string)value;
+            }
+        }
         private static object GetPropertyValue(this Dictionary<string, object> properties, string key)
         {
             foreach (var item in properties)

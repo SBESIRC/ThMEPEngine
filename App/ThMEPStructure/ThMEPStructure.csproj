@@ -187,6 +187,7 @@
     <Compile Include="StructPlane\Service\ThBeamLineCleaner.cs" />
     <Compile Include="StructPlane\Service\ThBeamLineClipper.cs" />
     <Compile Include="StructPlane\Service\ThAdjustShortBeamLTypeService.cs" />
+    <Compile Include="StructPlane\Service\ThCantiSlabFilter.cs" />
     <Compile Include="StructPlane\Service\ThColliearLineGrouper.cs" />
     <Compile Include="StructPlane\Service\ThBeamMarkParseTool.cs" />
     <Compile Include="StructPlane\Service\ThBuildStairSlabLineService.cs" />
