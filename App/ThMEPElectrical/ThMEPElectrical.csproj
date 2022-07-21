@@ -50,6 +50,7 @@
     <Compile Include="BlockConvert\ThBConvertCompareModel.cs" />
     <Compile Include="BlockConvert\ThBConvertCompareService.cs" />
     <Compile Include="BlockConvert\ThBConvertCompareUpdateService.cs" />
+    <Compile Include="BlockConvert\ThBConvertDamperAvoidService.cs" />
     <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />

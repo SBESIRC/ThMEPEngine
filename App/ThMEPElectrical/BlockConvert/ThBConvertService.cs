@@ -60,6 +60,9 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         public bool ConvertManualActuator { get; set; }
 
+        /// <summary>
+        /// 转换结果
+        /// </summary>
         public List<ThBConvertEntityInfos> EntityInfos { get; set; }
 
         public ThBConvertService(AcadDatabase currentDb, Polyline frame, ConvertMode mode, ConvertCategory category, double scale,
@@ -388,6 +391,14 @@ namespace ThMEPElectrical.BlockConvert
                     });
                 }
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THPUMPREVCLOUD");
+
+                // 设备避让
+                var avoidService = new ThBConvertDamperAvoidService
+                {
+                    Scale = Scale,
+                    EntityInfos = EntityInfos,
+                };
+                avoidService.Avoid();
             }
         }
 

@@ -68,6 +68,7 @@
 
         public const string SINGLE_SUBMERSIBLE_PUMP = "单台潜水泵";
         public const string MANUAL_ACTUATOR_OF_SMOKE_EXHAUST_VALVE = "手动执行机构";
+        public const string FIRE_DAMPER = "防火阀";
 
         public const string HIDING_LAYER = "AI-提资比对";
 
