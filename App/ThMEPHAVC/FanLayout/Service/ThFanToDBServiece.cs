@@ -85,6 +85,7 @@ namespace ThMEPHVAC.FanLayout.Service
             //attNameValues.Add("风量", cexh.FanVolume);
             //attNameValues.Add("电量", cexh.FanPower);
             var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-吊顶式排风扇", cexh.FanPosition, new Scale3d(1, 1, 1), cexh.RotateAngle, attNameValues);
+            ThMEPHVACService.SetAttr(blkId, attNameValues, cexh.RotateAngle);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
             {
