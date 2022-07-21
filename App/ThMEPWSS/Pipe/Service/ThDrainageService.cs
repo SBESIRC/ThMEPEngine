@@ -11636,7 +11636,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                         if (IsDrainageLabel(SidewaterbucketYIndent))
                         {
                           toilet_wells_interval.UserData = SidewaterbucketYIndent;
-                          if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
+                          if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > MISAPPREHENSIVE)
                           {
                             MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
                           }
@@ -11658,7 +11658,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                         if (IsDrainageLabel(SidewaterbucketYIndent) && !IsTL(SidewaterbucketYIndent))
                         {
                           toilet_wells_interval.UserData = SidewaterbucketYIndent;
-                          if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > THESAURUSHYPNOTIC)
+                          if (toilet_wells_interval.GetCenter().GetDistanceTo(ToiletWellsInterval.GetCenter()) > MISAPPREHENSIVE)
                           {
                             MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
                             {
@@ -11750,6 +11750,26 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                         }
                       }
                       MaxDeviceToBalcony.Add(wp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                    }
+                    if (MaxDeviceToBalcony.Count == THESAURUSSTAMPEDE)
+                    {
+                      if (IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
+                      {
+                        var ToiletBufferDistance = GeoFac.CreateGeometry(TextHeight(toilet_wells_interval.Buffer(THESAURUSACRIMONIOUS)));
+                        foreach (var wp in BalconyBufferDistance(ToiletBufferDistance))
+                        {
+                          foreach (var sidewaterbucket_y_indent in MinBalconybasinToBalcony(wp))
+                          {
+                            var repeated_point_distance = TryParseWrappingPipeDNText(sidewaterbucket_y_indent.UserData as string);
+                            if (repeated_point_distance is not null)
+                            {
+                              MaxDeviceToDevice[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = repeated_point_distance;
+                              break;
+                            }
+                          }
+                          MaxDeviceToBalcony.Add(wp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
+                        }
+                      }
                     }
                     if (IsRainLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
                     {
