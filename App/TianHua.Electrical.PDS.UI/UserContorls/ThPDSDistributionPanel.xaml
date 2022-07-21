@@ -30,7 +30,7 @@
         <Grid Grid.Row="0" Grid.Column="0">
             <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="3">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}">
+                    <Canvas Background="Transparent" x:Name="canvas" Width="2000" Height="2000">
                         <Canvas.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
