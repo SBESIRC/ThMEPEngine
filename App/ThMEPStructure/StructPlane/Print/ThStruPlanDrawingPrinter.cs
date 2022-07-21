@@ -29,13 +29,26 @@ namespace ThMEPStructure.StructPlane.Print
             elevations = elevations.FilterSlabElevations(FlrHeight);
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
 
+            //调整梁标注的方向
+            UpdateBeamTextRotation(Geos.GetBeamMarks());
+
+            // 处理双梁
+            // 双梁是要单独处理的
+            var dblRowbeamMarks = FilterDoubleRowBeamMarks(Geos.GetBeamMarks());
+            Geos = Geos.Except(dblRowbeamMarks.SelectMany(o => o)).ToList();
+
             // 打印对象
             var res = PrintGeos(db, Geos, slabHatchConfigs); //BeamLines,BeamTexts
+            var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowbeamMarks);
+            dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
 
             // 过滤多余文字
             var beamLines = res.Item1.ToDBObjectCollection(db);
             var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
             var removedTexts = FilterBeamMarks(beamLines, beamTexts);
+
+            // 对双梁文字调整位置
+            AdjustDblRowMarkPos(db, dblRowBeamMarkIds, beamLines);
 
             // 将带有标高的文字，换成两行
             var beamTextInfos = new Dictionary<DBText, Vector3d>();
@@ -82,6 +95,23 @@ namespace ThMEPStructure.StructPlane.Print
 
             // 过滤无效Id
             ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+        }
+
+        private void AdjustDblRowMarkPos(Database db, List<Tuple<ObjectIdCollection, Vector3d>> dblRowTexts,DBObjectCollection beamLines)
+        {
+            // 调整双梁标注文字的位置
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                var handler = new ThAdjustBeamMarkPosService(beamLines, 70, 50);
+                dblRowTexts.ForEach(g =>
+                {
+                    var beamTexts = g.Item1
+                    .OfType<ObjectId>()
+                    .Select(o=>acadDb.Element<DBObject>(o,true))
+                    .ToCollection();
+                    handler.Adjust(beamTexts, g.Item2);
+                });
+            }
         }
 
         private DBObjectCollection FilterBeamMarks(
@@ -175,42 +205,24 @@ namespace ThMEPStructure.StructPlane.Print
                         }
                         else if (category == ThIfcCategoryManager.BeamCategory)
                         {
-                            var decription = o.Properties.GetDescription();
-                            if(string.IsNullOrEmpty(decription))
+                            UpdateBeamText(o);
+                            if(dbText.Position.DistanceTo(new Point3d(139269.7813, 149347.2188, 0))<=50 ||
+                            dbText.AlignmentPoint.DistanceTo(new Point3d(139269.7813, 149347.2188, 0)) <= 50)
                             {
-                                if (dbText.TextString.IsEqualElevation(FlrHeight))
-                                {
-                                    dbText.TextString = dbText.TextString.GetBeamSpec();
-                                }
-                                else
-                                {
-                                    // update to BG 
-                                    dbText.TextString = dbText.TextString.UpdateBGElevation(FlrHeight);
-                                }
-                            }
-                            else
-                            {
-                                var spec = dbText.TextString.GetBeamSpec();
-                                var elevation = decription.GetObliqueBeamBGElevation();
-                                dbText.TextString = spec+ elevation;
-                            }
 
-                            // svg转换的文字角度是0
+                            }
                             Vector3d textMoveDir = new Vector3d();
                             if(o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
                             {
                                 textMoveDir = o.Properties.GetDirection().ToVector();
                             }
-                            if(textMoveDir.Length==0.0)
+                            if(textMoveDir.Length<=1e-6)
                             {
-                                textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector();
+                                textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector().Negate();
                             }
-                            ThAdjustDbTextRotationService.Adjust(dbText, textMoveDir.GetPerpendicularVector());
-                            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
-                            var printer = new ThAnnotationPrinter(config);
-                            var beamAnnotions = printer.Print(db, dbText);
+                            var beamAnnotions = PrintBeams(db, dbText);
                             Append(beamAnnotions);
-                            beamAnnotions.OfType<ObjectId>().ForEach(e => beamTexts.Add(e, textMoveDir));
+                            beamAnnotions.OfType<ObjectId>().ForEach(e => beamTexts.Add(e, textMoveDir)); // 把文字的移动方向传出去
                         }
                         else
                         {
@@ -280,7 +292,71 @@ namespace ThMEPStructure.StructPlane.Print
                 
                 return Tuple.Create(beamLines, beamTexts);
             }   
-        }      
+        }
+
+        private List<Tuple<ObjectIdCollection,Vector3d>> PrintDoubleRowBeams(Database db, List<List<ThGeometry>> doubleRowBeams)
+        {
+            var results = new List<Tuple<ObjectIdCollection, Vector3d>>();
+            // 打印到图纸中
+            doubleRowBeams.ForEach(g =>
+            {
+                var beamIds = new ObjectIdCollection();
+                Vector3d textMoveDir = new Vector3d();
+                int i = 1;
+                g.ForEach(o =>
+                {
+                    if (o.Boundary is DBText dbText)
+                    {
+                        if (o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName) && textMoveDir.Length <= 1e-6)
+                        {
+                            textMoveDir = o.Properties.GetDirection().ToVector();
+                        }
+                        dbText.TextString = dbText.TextString + "（" + i++ + "）";                        
+                        beamIds.AddRange(PrintBeams(db, dbText));                        
+                    }
+                });
+                if(textMoveDir.Length <= 1e-6 && g.Count>0)
+                {
+                    var dbText = g.First().Boundary as DBText;
+                    textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector().Negate();
+                }
+                results.Add(Tuple.Create(beamIds,textMoveDir));
+            });
+            return results;
+        }
+
+        private void UpdateBeamText(ThGeometry beamMark)
+        {
+            if(beamMark.Boundary is DBText dbText)
+            {
+                var decription = beamMark.Properties.GetDescription();
+                if (string.IsNullOrEmpty(decription))
+                {
+                    if (dbText.TextString.IsEqualElevation(FlrHeight))
+                    {
+                        dbText.TextString = dbText.TextString.GetBeamSpec();
+                    }
+                    else
+                    {
+                        // update to BG 
+                        dbText.TextString = dbText.TextString.UpdateBGElevation(FlrHeight);
+                    }
+                }
+                else
+                {
+                    var spec = dbText.TextString.GetBeamSpec();
+                    var elevation = decription.GetObliqueBeamBGElevation();
+                    dbText.TextString = spec + elevation;
+                }
+            }
+        }
+
+        private ObjectIdCollection PrintBeams(Database db,DBText dbText)
+        {
+            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
+            var printer = new ThAnnotationPrinter(config);
+            return printer.Print(db, dbText);
+        }
 
         private PrintConfig GetBeamConfig(Dictionary<string,object> properties)
         {
@@ -321,6 +397,44 @@ namespace ThMEPStructure.StructPlane.Print
                 }
             }
             return results;
+        }
+        private List<List<ThGeometry>> FilterDoubleRowBeamMarks(List<ThGeometry> beamMarks)
+        {
+            var results = new List<List<ThGeometry>>(); 
+            var beamTexts = beamMarks.Select(o => o.Boundary).ToCollection();
+            var handler = new ThDoubleRowBeamMarkHandler();
+            var groups = handler.Handle(beamTexts);
+            groups.ForEach(g =>
+            {
+                var groupMarks = new List<ThGeometry>();
+                g.OfType<DBObject>().ForEach(b =>
+                {
+                    var index = beamTexts.IndexOf(b);
+                    groupMarks.Add(beamMarks[index]);
+                });
+                results.Add(groupMarks);
+            });
+            return results;
+        }
+        private void UpdateBeamTextRotation(List<ThGeometry> beamMarks)
+        {
+            // svg转换的文字角度是0
+            beamMarks.ForEach(o =>
+            {
+                if(o.Boundary is DBText dbText)
+                {
+                    var textMoveDir = new Vector3d();
+                    if (o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
+                    {
+                        textMoveDir = o.Properties.GetDirection().ToVector();
+                    }
+                    if (textMoveDir.Length == 0.0)
+                    {
+                        textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector();
+                    }
+                    ThAdjustDbTextRotationService.Adjust(dbText, textMoveDir.GetPerpendicularVector());
+                }
+            });
         }
     }
 }

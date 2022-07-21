@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
 using ThCADCore.NTS;
@@ -9,13 +10,56 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.StructPlane.Service
 {
+    internal class ThDoubleRowBeamMarkHandler
+    {
+        public List<DBObjectCollection> Handle(DBObjectCollection beamTexts)
+        {
+            var groups = Group(beamTexts);
+            return groups
+                .Where(g => g.Count > 1)
+                .Where(g => IsDoubleRowBeamMark(g)) // 按标高不同来判断是不是双梁
+                .Select(g => Sort(g))
+                .ToList();
+        }
+
+        private bool IsDoubleRowBeamMark(DBObjectCollection beamTexts)
+        {
+            // 业务叫双梁标注，但实际Case会有三梁或，四梁
+            var elevations = beamTexts.OfType<DBText>().Select(o => o.TextString.GetElevation().Value).ToList();
+            bool isSameElevaton = true;
+            for(int i=1;i<elevations.Count;i++)
+            {
+                if(Math.Abs(elevations[i]- elevations[0])>1.0)
+                {
+                    isSameElevaton = false;
+                    break;
+                }
+            }
+            return !isSameElevaton;
+        }
+
+        private DBObjectCollection Sort(DBObjectCollection beamTexts)
+        {
+            return beamTexts
+                .OfType<DBText>()
+                .OrderByDescending(o => o.TextString.GetElevation().Value)
+                .ToCollection();
+        }
+
+        private List<DBObjectCollection> Group(DBObjectCollection texts)
+        {
+            var grouper = new ThFullOverlapBeamMarkGrouper(texts);
+            grouper.Group();
+            return grouper.Groups;
+        }
+    }
     internal class ThFullOverlapBeamMarkGrouper
     {
         private double TextParallelTolerance = 1.0; // 文字平行容差
         private double ClosestDistanceTolerance = 50.0; // 文字中心到文字中心的距离范围
         private Dictionary<DBText, Point3d> TextCenterDict { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        public List<DBObjectCollection> Groups { get; set; }
+        public List<DBObjectCollection> Groups { get; private set; }
         public ThFullOverlapBeamMarkGrouper(DBObjectCollection beamMarks)
         {
             Groups = new List<DBObjectCollection>();
@@ -35,10 +79,9 @@ namespace ThMEPStructure.StructPlane.Service
                 }
                 var envelope = CreateEnvelope(item.Value, ClosestDistanceTolerance, ClosestDistanceTolerance);
                 var objs = Query(SpatialIndex, envelope);
-                objs.Remove(item.Key);
                 objs = objs.OfType<DBText>()
-                .Where(o => IsParallel(item.Key.Rotation, o.Rotation, TextParallelTolerance))
-                .ToCollection();
+                    .Where(o => IsParallel(item.Key.Rotation, o.Rotation, TextParallelTolerance))
+                    .ToCollection();
                 Groups.Add(objs);
             }
         }

@@ -44,11 +44,11 @@ namespace ThMEPStructure.StructPlane.Service
                 BeamTexts.ForEach(o =>
                 {
                     var text = acadDb.Element<DBText>(o.Key.ObjectId, true);
-                    if(IsBeamSpec(text.TextString))
+                    if (IsBeamSpec(text.TextString))
                     {
                         Move(text, o.Value);
                     }
-                    else if(IsBeamBgMark(text.TextString))
+                    else if (IsBeamBgMark(text.TextString))
                     {
                         var texts = Split(text); // spec,bg
                         if (texts != null)
@@ -62,7 +62,7 @@ namespace ThMEPStructure.StructPlane.Service
                         }
                     }
                 });
-            }     
+            }
         }
 
         private void Move(DBText beamMark,Vector3d moveVec)
