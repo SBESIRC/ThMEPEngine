@@ -69,7 +69,7 @@ namespace ThMEPArchitecture.PartitionLayout
                    .Where(o => o is Hatch)
                    .Select(o => o.Clone() as Hatch)
                    .ToList();
-                var edges=new List<Polyline>();
+                var edges = new List<Polyline>();
                 foreach (Hatch obj in objs)
                 {
                     var pl = (Polyline)obj.Boundaries()[0];

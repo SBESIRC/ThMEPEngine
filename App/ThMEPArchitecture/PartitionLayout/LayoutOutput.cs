@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPEngineCore;
+using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -52,13 +54,13 @@ namespace ThMEPArchitecture.PartitionLayout
             int color_dark_yellow = 47;
             int colorgray = 8;
             double CT = 1400;
-            var width = 2400;
+            var width = Math.Min(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth); 
             var widthDa = 700;
             var widthDb = 500;
             var widthDc = 750;
             var widthDd = 600;
             var thickness = 100;
-            var length = 6000;
+            var length = Math.Max(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth); ;
             var doorlength = 1200;
             List<Entity> ents = new List<Entity>();
             var ori = Point3d.Origin;
@@ -141,10 +143,10 @@ namespace ThMEPArchitecture.PartitionLayout
             int color_cyan = 4;
             int colorgray = 8;
             double CT = 1400;
-            var width = 2400;
+            var width = Math.Min(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
             var widthD = 300;
             var thickness = 100;
-            var length = 5100;
+            var length = Math.Max(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth)- MParkingPartitionPro.DifferenceFromBackBcek;
             var doorlength = 1200;
             List<Entity> ents = new List<Entity>();
             var ori = Point3d.Origin;
@@ -227,10 +229,10 @@ namespace ThMEPArchitecture.PartitionLayout
             int color_darkgreen = 74;
             int colorgray = 8;
             double CT = 1400;
-            var width = 2400;
+            var width = Math.Min(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
             var widthD = 300;
             var thickness = 100;
-            var length = 5300;
+            var length = Math.Max(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
             var doorlength = 1200;
             List<Entity> ents = new List<Entity>();
             var ori = Point3d.Origin;
@@ -501,6 +503,17 @@ namespace ThMEPArchitecture.PartitionLayout
                     return e;
                 }).AddToCurrentSpace();
             }
+        }
+        public static void RefreshBlocks()
+        {
+            var parallelwidth = Math.Min(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth).ToString().Substring(0, 2);
+            var parallellength = Math.Max(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth).ToString().Substring(0, 2);
+            var vertlength = Math.Max(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth).ToString().Substring(0, 2);
+            var vertwidth = Math.Min(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth).ToString().Substring(0, 2);
+            var vertlength_backback = (Math.Max(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth) - 200).ToString().Substring(0, 2);
+            PCARBLKNAME = "AI-平行式" + parallelwidth + parallellength;
+            VCARBLKNAME = "AI-垂直式车位" + vertlength + vertwidth;
+            VCARBLKNAMEDOUBLEBACK = "AI-背靠背垂直式车位" + vertlength_backback + vertwidth;
         }
     }
 }

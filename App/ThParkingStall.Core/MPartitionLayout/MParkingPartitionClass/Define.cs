@@ -22,7 +22,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             //从ViewModel赋值
             DisParallelCarLength = Math.Max(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth);
             DisParallelCarWidth = Math.Min(VMStock.ParallelSpotLength, VMStock.ParallelSpotWidth);
-            DisVertCarLength = 5300;
+            DisVertCarLength = Math.Max(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth); 
             DisVertCarWidth = Math.Min(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
             DisLaneWidth = VMStock.RoadWidth;
             PillarSpacing = VMStock.ColumnWidth;
@@ -68,7 +68,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             else
             {
-                DisVertCarLengthBackBack = 5100;
+                DisVertCarLengthBackBack = DisVertCarLength- DifferenceFromBackBcek;
                 DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
                 DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
             }
@@ -100,6 +100,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<Ramp> RampList = new List<Ramp>();
         public List<Polygon> IniPillar = new List<Polygon>();
 
+        public static double DifferenceFromBackBcek = 200;
         public static double ScareFactorForCollisionCheck = 0.999999;
         public static bool ScareEnabledForBackBackModule = true;
         public static bool GeneratePillars = true;
