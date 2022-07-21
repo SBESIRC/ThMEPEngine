@@ -87,6 +87,7 @@ namespace TianHua.Electrical.PDS.Service
                 var ucsToWcs = ThPDSUcsToWcsDecomposeService.Decompose();
                 var transform = ucsToWcs.PreMultiplyBy(Matrix3d.Displacement(selectPoint - Point3d.Origin));
                 var results = new List<Entity>();
+                var meterLocation = MeterLocation.None;
 
                 // 插入内框
                 var rowCount = 1;
@@ -156,7 +157,7 @@ namespace TianHua.Electrical.PDS.Service
 
                     // 所有不在小母排/控制回路上的分支
                     var ordinaryEdges = ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode).GetSortedEdges().ToList();
-                    DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint);
+                    DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, meterLocation, ref basePoint);
                     edgeCount += ordinaryEdges.Count;
 
                     // 小母排节下分支
@@ -168,7 +169,7 @@ namespace TianHua.Electrical.PDS.Service
                         basePoint = new Point3d(basePoint.X, basePoint.Y + 500.0 * scaleFactor, 0);
 
                         var smallBusbarEdges = ThPDSProjectGraphService.GetSmallBusbarCircuit(Graph, thisNode, o).GetSortedEdges().ToList();
-                        DrawCircuit(smallBusbarEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, true);
+                        DrawCircuit(smallBusbarEdges, activeDb, configDb, scale, scaleFactor, tableObjs, meterLocation, ref basePoint, true);
                         edgeCount += smallBusbarEdges.Count;
 
                         if (smallBusbarEdges.Count < 2)
@@ -205,7 +206,7 @@ namespace TianHua.Electrical.PDS.Service
                                 var controlStartPoint2 = new Point3d(basePoint.X + 3979.3671 * scaleFactor, basePoint.Y - 156.25 * scaleFactor, 0);
                                 var belongToCPS = false;
 
-                                DrawCircuit(controlEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, ref belongToCPS);
+                                DrawCircuit(controlEdges, activeDb, configDb, scale, scaleFactor, tableObjs, meterLocation, ref basePoint, ref belongToCPS);
                                 edgeCount += controlEdges.Count;
                                 circuitDatas.Add(circuitData);
                                 circuitData.BelongToCPS = belongToCPS;
@@ -335,8 +336,6 @@ namespace TianHua.Electrical.PDS.Service
                                     });
                                 }
                             });
-
-
                         }
                     }
 
@@ -382,7 +381,7 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         private static void DrawCircuit(List<ThPDSProjectGraphEdge> edges, AcadDatabase activeDb, AcadDatabase configDb,
-            Scale3d scale, double scaleFactor, List<Entity> tableObjs, ref Point3d basePoint, bool isSmallBusbar = false)
+            Scale3d scale, double scaleFactor, List<Entity> tableObjs, MeterLocation meterLocation, ref Point3d basePoint, bool isSmallBusbar = false)
         {
             foreach (var edge in edges)
             {
@@ -398,13 +397,14 @@ namespace TianHua.Electrical.PDS.Service
                 var insertEngine = new ThPDSBlockInsertEngine();
                 var assignment = new ThPDSDiagramAssignment();
                 var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
-                assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, tableObjs);
+                var circuitEntities = assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, ref meterLocation, ref basePoint);
+                tableObjs.AddRange(circuitEntities);
                 basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
             }
         }
 
         private static void DrawCircuit(List<ThPDSProjectGraphEdge> edges, AcadDatabase activeDb, AcadDatabase configDb,
-            Scale3d scale, double scaleFactor, List<Entity> tableObjs, ref Point3d basePoint, ref bool belongToCPS)
+            Scale3d scale, double scaleFactor, List<Entity> tableObjs, MeterLocation meterLocation, ref Point3d basePoint, ref bool belongToCPS)
         {
             foreach (var edge in edges)
             {
@@ -420,7 +420,8 @@ namespace TianHua.Electrical.PDS.Service
                 var insertEngine = new ThPDSBlockInsertEngine();
                 var assignment = new ThPDSDiagramAssignment();
                 var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
-                assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, tableObjs);
+                var circuitEntities = assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge,  scale, ref meterLocation,ref basePoint);
+                tableObjs.AddRange(circuitEntities);
                 basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
             }
         }
@@ -665,5 +666,13 @@ namespace TianHua.Electrical.PDS.Service
         {
             throw new NotImplementedException();
         }
+    }
+
+    public enum MeterLocation
+    {
+        None,
+        Head,
+        Middle,
+        Tail,
     }
 }

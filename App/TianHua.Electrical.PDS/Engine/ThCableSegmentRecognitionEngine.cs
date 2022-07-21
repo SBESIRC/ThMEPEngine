@@ -51,7 +51,7 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         var curves = new DBObjectCollection();
                         pline.Explode(curves);
-                        foreach (var curve in curves)
+                        foreach (var curve in curves.OfType<Curve>().Where(c => c.GetLength() > 1.0))
                         {
                             if (curve is Line line)
                             {

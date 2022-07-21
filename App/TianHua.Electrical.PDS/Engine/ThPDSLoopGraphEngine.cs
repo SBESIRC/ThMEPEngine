@@ -167,7 +167,10 @@ namespace TianHua.Electrical.PDS.Engine
                             var objs = new DBObjectCollection();
                             block.Explode(objs);
                             var motor = objs.OfType<BlockReference>().First();
-                            GeometryMap.Add(block, motor);
+                            var newObjs = new DBObjectCollection();
+                            motor.Explode(newObjs);
+                            var circle = newObjs.OfType<Circle>().First().TessellateCircleWithArc(200.00);
+                            GeometryMap.Add(block, circle);
                         }
                         else if (blockName.Equals("E-BDB054"))
                         {

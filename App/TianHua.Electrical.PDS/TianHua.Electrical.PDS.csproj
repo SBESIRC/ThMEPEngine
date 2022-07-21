@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Diagram\ThPDSMotorInfoService.cs" />
+    <Compile Include="Diagram\ThPDSTextHandleService.cs" />
     <Compile Include="Extension\ThPDSProjectGraphNodeExtension.cs" />
     <Compile Include="Model\ThPDSFilterBlockInfo.cs" />
     <Compile Include="Model\ThPDSInsertBlockInfo.cs" />
