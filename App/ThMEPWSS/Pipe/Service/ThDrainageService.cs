@@ -10413,6 +10413,7 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSGETAWAY = 450;
         public const int ACANTHOCEPHALANS = 18;
         public const int PHYSIOLOGICALLY = 250;
+        public const int THESAURUSNOTORIETY = 3000;
         public const double THESAURUSDISPASSIONATE = .7;
         public const string CONTROVERSIALLY = "TH-STYLE3";
         public const int THESAURUSLITANY = 2200;
@@ -10876,6 +10877,12 @@ cb: tolReturnValueRangeTo =>
         public const string STEREOREGULARITY = "DN150";
         public const string THESAURUSCONDESCEND = @"\s*(?:DN)?\d+\s*";
         public const double PITHECANTHROPOID = 7000.0;
+        public const int THESAURUSMAMMOTH = 3910;
+        public const int DELIGNIFICATION = 4000;
+        public const int BENZENECARBONYL = 3213;
+        public const int PHOSPHONITRILIC = 3121;
+        public const int QUOTATIONPUERPERAL = 178;
+        public const int THESAURUSPORTABLE = 605;
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -11752,26 +11759,6 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                       hasWp = THESAURUSOBSTINACY;
                     }
                     if (!hasWp)
-                    {
-                      if (IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
-                      {
-                        var ToiletBufferDistance = GeoFac.CreateGeometry(TextHeight(toilet_wells_interval.Buffer(THESAURUSACRIMONIOUS)));
-                        foreach (var wp in BalconyBufferDistance(ToiletBufferDistance))
-                        {
-                          foreach (var sidewaterbucket_y_indent in MinBalconybasinToBalcony(wp))
-                          {
-                            var repeated_point_distance = TryParseWrappingPipeDNText(sidewaterbucket_y_indent.UserData as string);
-                            if (repeated_point_distance is not null)
-                            {
-                              MaxDeviceToDevice[MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE] = repeated_point_distance;
-                              break;
-                            }
-                          }
-                          MaxDeviceToBalcony.Add(wp.Clone().Tag(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE));
-                        }
-                      }
-                    }
-                    if (MaxDeviceToBalcony.Count == THESAURUSSTAMPEDE)
                     {
                       if (IsDraiLabel(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) || IsFL0(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE))
                       {
@@ -12771,11 +12758,25 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                 if (_tolReturnValueRange.PipeType is PipeType.FL && _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].HasBasin && MAX_ANGEL_TOLLERANCE != THESAURUSSTAMPEDE && MAX_ANGEL_TOLLERANCE != eMax)
                 {
                   maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
-                  COMMONRADIUS.Add(new(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, PROMORPHOLOGIST + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
-                  MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
-                  MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, THESAURUSEFFICACY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), QUOTATIONBREWSTER, QUOTATIONBENJAMIN, CONTROVERSIALLY));
+                  var DEFAULT_FIRE_VALVE_WIDTH = _tolReturnValueRange.Runs.TryGet(MAX_ANGEL_TOLLERANCE - THESAURUSHOUSING);
+                  if (DEFAULT_FIRE_VALVE_WIDTH is not null && DEFAULT_FIRE_VALVE_WIDTH.Exists && DEFAULT_FIRE_VALVE_WIDTH.HasLong)
+                  {
+                    MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAMMOTH, THESAURUSEFFICACY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), QUOTATIONBREWSTER, QUOTATIONBENJAMIN, CONTROVERSIALLY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAMMOTH, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-DELIGNIFICATION, THESAURUSDIFFICULTY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-BENZENECARBONYL, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSMAMMOTH, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PHOSPHONITRILIC, QUOTATIONPUERPERAL + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PHOSPHONITRILIC, -THESAURUSDEGREE)), THESAURUSADVERSITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PHOSPHONITRILIC, -THESAURUSDEGREE), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSNOTORIETY, -THESAURUSPORTABLE)), THESAURUSADVERSITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-PHOSPHONITRILIC, QUOTATIONPUERPERAL + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-BENZENECARBONYL, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
+                    COMMONRADIUS.Add(new(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE - THESAURUSNOTORIETY, THESAURUSDIFFICULTY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
+                  }
+                  else
+                  {
+                    COMMONRADIUS.Add(new(UNACCEPTABILITY, THESAURUSJUBILEE, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)) { Scale = THESAURUSPERMUTATION, DynaDict = new() { { THESAURUSENTERPRISE, PERIODONTOCLASIA } } });
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-POLYOXYMETHYLENE, THESAURUSDIFFICULTY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, PROMORPHOLOGIST + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
+                    MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSPERVADE, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, PHOTOSYNTHETICALLY + ParkingPolyEnlargeLength - QUOTATIONBASTARD)), THESAURUSADVERSITY));
+                    MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSATTENDANT, THESAURUSEFFICACY + ParkingPolyEnlargeLength - QUOTATIONBASTARD), QUOTATIONBREWSTER, QUOTATIONBENJAMIN, CONTROVERSIALLY));
+                  }
                   maxBalconywashingmachineToBalconybasinline._LaneOffset();
                   var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
                   max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.Basin, () =>
