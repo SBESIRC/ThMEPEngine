@@ -201,7 +201,9 @@ FocusToCAD();
             Vector3d basVector = new Vector3d(1, 0, 0);
             Vector3d refVector = new Vector3d(0, 0, 1);
             Vector3d vector = point1.GetVectorTo(point2).GetNormal();
-            double fanAngle = basVector.GetAngleTo(vector, refVector) - Math.PI/2.0;
+            var ucsMatrix = Active.Editor.CurrentUserCoordinateSystem;
+            double fanAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector, refVector) - Math.PI/2.0;
+            double rotateAngle = Vector3d.XAxis.GetAngleTo(ucsMatrix.CoordinateSystem3d.Xaxis, Vector3d.ZAxis);
             double fontScale = ThFanLayoutDealService.GetFontHeight(1, mapScale);
             double fontHeight = ThFanLayoutDealService.GetFontHeight(0, mapScale);
             string strFanVolume = ThFanLayoutDealService.GetFanVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
@@ -211,7 +213,7 @@ FocusToCAD();
             string strFanMark = ThFanLayoutDealService.GetFanHoleMark(info.FanSideConfigInfo.MarkHeigthType, info.FanSideConfigInfo.FanMarkHeight);
             //插入风机侧元素
             //插入风机
-            InsertWAFFan(acadDatabase , info.FanSideConfigInfo.FanConfigInfo, point2, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
+            InsertWAFFan(acadDatabase , info.FanSideConfigInfo.FanConfigInfo, point2, fanAngle, rotateAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
                 , info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength, info.FanSideConfigInfo.FanConfigInfo.FanNumber
                 , strFanVolume, strFanPower, strFanWeight, strFanNoise, strFanMark);
             //插入墙洞
@@ -219,13 +221,14 @@ FocusToCAD();
             {
                 string strFanHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength);
                 string strFanHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.FanSideConfigInfo.MarkHeigthType, info.FanSideConfigInfo.FanMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point2, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth + 100.0, strFanHoleSize, strFanHoleMark);
+                InsertFanHole(acadDatabase, point2, fanAngle, rotateAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth + 100.0, strFanHoleSize, strFanHoleMark);
             }
             //插入防火阀
             Point3d pt = point2 - vector * (info.FanSideConfigInfo.FanConfigInfo.FanDepth - 10);//沿着vector反方向平移电机深度
             Vector3d tmpV = new Vector3d(Math.Cos(fanAngle + Math.PI), Math.Sin(fanAngle + Math.PI), 0.0);//沿着vector垂直方向平移电机宽度
             pt = pt + (tmpV * info.FanSideConfigInfo.FanConfigInfo.FanWidth / 2.0);
-            InsertFireValve(acadDatabase, pt, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth, "70度防火阀FD");
+            double fireAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            InsertFireValve(acadDatabase, pt, fireAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth, "70度防火阀FD");
             
             if(!info.AirPortSideConfigInfo.IsInsertAirPort)
             {
@@ -244,13 +247,14 @@ FocusToCAD();
             //插入风口
             Vector3d vector1 = point4.GetVectorTo(point3).GetNormal();
             double airPortAngle = basVector.GetAngleTo(vector1, refVector) + Math.PI / 2.0;
+            double airHoleAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector1, refVector) + Math.PI / 2.0;
             InsertAirPort(acadDatabase, point3, airPortAngle, info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortDeepth, "侧回风口", 0);
             //插入墙洞
             if (isInsertHole)
-            {
+            {   
                 string strAirPortHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
                 string strAirPortHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
+                InsertFanHole(acadDatabase, point3, airHoleAngle - Math.PI, rotateAngle, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
             }
             //插入防火阀
             if (info.AirPortSideConfigInfo.IsInsertValve)
@@ -265,7 +269,7 @@ FocusToCAD();
             string strAirPortMark = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
             string strAirPortMarkVolume = ThFanLayoutDealService.GetAirPortMarkVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
             string strAirPortHeightMark = ThFanLayoutDealService.GetAirPortHeightMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight);
-            InsertAirPortMark(acadDatabase, point3, point3, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume, strAirPortHeightMark);
+            InsertAirPortMark(acadDatabase, point3, point3, rotateAngle, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume, strAirPortHeightMark);
         }
         /// <summary>
         /// 插入壁式排气扇
@@ -288,7 +292,10 @@ FocusToCAD();
             Vector3d basVector = new Vector3d(1, 0, 0);
             Vector3d refVector = new Vector3d(0, 0, 1);
             Vector3d vector = point1.GetVectorTo(point2).GetNormal();
-            double fanAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            var ucsMatrix = Active.Editor.CurrentUserCoordinateSystem;
+            double fanAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            double fireAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            double rotateAngle = Vector3d.XAxis.GetAngleTo(ucsMatrix.CoordinateSystem3d.Xaxis, Vector3d.ZAxis);
             double fontScale = ThFanLayoutDealService.GetFontHeight(1, mapScale);
             double fontHeight = ThFanLayoutDealService.GetFontHeight(0, mapScale);
             string strFanVolume = ThFanLayoutDealService.GetFanVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
@@ -298,7 +305,7 @@ FocusToCAD();
             string strFanMark = ThFanLayoutDealService.GetFanHoleMark(info.FanSideConfigInfo.MarkHeigthType, info.FanSideConfigInfo.FanMarkHeight);
             //插入风机侧元素
             //插入风机
-            InsertWEXHFan(acadDatabase, info.FanSideConfigInfo.FanConfigInfo, point2, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
+            InsertWEXHFan(acadDatabase, info.FanSideConfigInfo.FanConfigInfo, point2, fanAngle, rotateAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
                 , info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength, info.FanSideConfigInfo.FanConfigInfo.FanNumber
                 , strFanVolume, strFanPower, strFanWeight, strFanNoise, strFanMark);
             //插入墙洞
@@ -306,13 +313,13 @@ FocusToCAD();
             {
                 string strFanHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength);
                 string strFanHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.FanSideConfigInfo.MarkHeigthType, info.FanSideConfigInfo.FanMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point2, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth + 100.0, strFanHoleSize, strFanHoleMark);
+                InsertFanHole(acadDatabase, point2, fanAngle, rotateAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth + 100.0, strFanHoleSize, strFanHoleMark);
             }
             //插入防火阀
             Point3d pt = point2 - vector * (info.FanSideConfigInfo.FanConfigInfo.FanDepth - 10);//沿着vector反方向平移电机深度
             Vector3d tmpV = new Vector3d(Math.Cos(fanAngle + Math.PI), Math.Sin(fanAngle + Math.PI), 0.0);//沿着vector垂直方向平移电机宽度
             pt = pt + (tmpV * info.FanSideConfigInfo.FanConfigInfo.FanWidth / 2.0);
-            InsertFireValve(acadDatabase, pt, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth, "70度防火阀FD");
+            InsertFireValve(acadDatabase, pt, fireAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth, "70度防火阀FD");
 
             if (!info.AirPortSideConfigInfo.IsInsertAirPort)
             {
@@ -330,13 +337,14 @@ FocusToCAD();
             //插入风口
             Vector3d vector1 = point4.GetVectorTo(point3).GetNormal();
             double airPortAngle = basVector.GetAngleTo(vector1, refVector) + Math.PI / 2.0;
+            double airHoleAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector1, refVector) + Math.PI / 2.0;
             InsertAirPort(acadDatabase, point3, airPortAngle, info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortDeepth, "侧回风口", 0);
             //插入墙洞
             if (isInsertHole)
             {
                 string strAirPortHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
                 string strAirPortHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
+                InsertFanHole(acadDatabase, point3, airHoleAngle - Math.PI, rotateAngle, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
             }
             //插入防火阀
             if (info.AirPortSideConfigInfo.IsInsertValve)
@@ -351,7 +359,7 @@ FocusToCAD();
             string strAirPortMark = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
             string strAirPortMarkVolume = ThFanLayoutDealService.GetAirPortMarkVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
             string strAirPortHeightMark = ThFanLayoutDealService.GetAirPortHeightMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight);
-            InsertAirPortMark(acadDatabase, point3, point3, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume, strAirPortHeightMark);
+            InsertAirPortMark(acadDatabase, point3, point3, rotateAngle, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume, strAirPortHeightMark);
         }
         /// <summary>
         /// 吊顶式排气扇
@@ -375,14 +383,19 @@ FocusToCAD();
             Vector3d basVector = new Vector3d(1, 0, 0);
             Vector3d refVector = new Vector3d(0, 0, 1);
             Vector3d vector = point2.GetVectorTo(point1).GetNormal();
-            double fanAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            var ucsMatrix = Active.Editor.CurrentUserCoordinateSystem;
+            double fanAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            double fireAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+            double rotateAngle = Vector3d.XAxis.GetAngleTo(ucsMatrix.CoordinateSystem3d.Xaxis, Vector3d.ZAxis);
             double fontHeight = ThFanLayoutDealService.GetFontHeight(0, mapScale);
             double fontScale = ThFanLayoutDealService.GetFontHeight(1, mapScale);
             string strFanVolume = ThFanLayoutDealService.GetFanVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
             string strFanPower = ThFanLayoutDealService.GetFanPower(info.FanSideConfigInfo.FanConfigInfo.FanPower);
             string strFanWeight = ThFanLayoutDealService.GetFanWeight(info.FanSideConfigInfo.FanConfigInfo.FanWeight);
             string strFanNoise = ThFanLayoutDealService.GetFanNoise(info.FanSideConfigInfo.FanConfigInfo.FanNoise);
-            InsertCEXHFan(acadDatabase, info.FanSideConfigInfo.FanConfigInfo, point1, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
+
+            //插入吊顶式排风扇块
+            InsertCEXHFan(acadDatabase, info.FanSideConfigInfo.FanConfigInfo, point1, fanAngle, rotateAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
                 , info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength, info.FanSideConfigInfo.FanConfigInfo.FanNumber
                 , strFanVolume, strFanPower, strFanWeight, strFanNoise);
             
@@ -393,16 +406,16 @@ FocusToCAD();
                 {
                     string strFanHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPipeConfigInfo.AirPortLength, info.AirPipeConfigInfo.AirPortHeight,100);
                     string strFanHoleMark = ThFanLayoutDealService.GetFanHoleMark(1, info.AirPipeConfigInfo.AirPortMarkHeight);
-                    InsertFanHole(acadDatabase, point2, fanAngle + Math.PI, fontHeight, info.AirPipeConfigInfo.AirPortLength + 50.0, strFanHoleSize, strFanHoleMark);
+                    InsertFanHole(acadDatabase, point2, fanAngle + Math.PI, rotateAngle, fontHeight, info.AirPipeConfigInfo.AirPortLength + 50.0, strFanHoleSize, strFanHoleMark);
                 }
                 //插入风口
-                InsertAirPort(acadDatabase, point2, fanAngle, info.AirPipeConfigInfo.AirPortLength, info.AirPipeConfigInfo.AirPortDeepth, "外墙防雨百叶", 1);
+                InsertAirPort(acadDatabase, point2, fireAngle, info.AirPipeConfigInfo.AirPortLength, info.AirPipeConfigInfo.AirPortDeepth, "外墙防雨百叶", 1);
 
                 //插入防火阀
                 Point3d pt = point2 + vector * 200;//沿着vector方向平移200
-                Vector3d tmpV = new Vector3d(Math.Cos(fanAngle + Math.PI), Math.Sin(fanAngle + Math.PI), 0.0);
+                Vector3d tmpV = new Vector3d(Math.Cos(fireAngle + Math.PI), Math.Sin(fireAngle + Math.PI), 0.0);
                 pt = pt - (tmpV * info.AirPipeConfigInfo.AirPortLength / 2.0);//沿着vector垂直方向平移风口宽度
-                InsertFireValve(acadDatabase, pt, fanAngle + Math.PI, fontHeight, info.AirPipeConfigInfo.AirPortLength, "70度防火阀FD");
+                InsertFireValve(acadDatabase, pt, fireAngle + Math.PI, fontHeight, info.AirPipeConfigInfo.AirPortLength, "70度防火阀FD");
 
                 //插入排风管
                 Point3d pt0 = point1 - (vector * (info.FanSideConfigInfo.FanConfigInfo.FanWidth / 2.0 + 100));
@@ -437,13 +450,14 @@ FocusToCAD();
             //插入风口
             Vector3d vector1 = point4.GetVectorTo(point3).GetNormal();
             double airPortAngle = basVector.GetAngleTo(vector1, refVector) + Math.PI / 2.0;
+            double airHoleAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector1, refVector) + Math.PI / 2.0;
             InsertAirPort(acadDatabase, point3, airPortAngle, info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortDeepth, "外墙防雨百叶", 0);
             //插入墙洞
             if (isInsertHole)
             {
                 string strAirPortHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
                 string strAirPortHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
+                InsertFanHole(acadDatabase, point3, airHoleAngle - Math.PI, rotateAngle, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
             }
             //插入防火阀
             if (info.AirPortSideConfigInfo.IsInsertValve)
@@ -458,15 +472,16 @@ FocusToCAD();
             string strAirPortMark = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
             string strAirPortMarkVolume = ThFanLayoutDealService.GetAirPortMarkVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
             string strAirPortHeightMark = ThFanLayoutDealService.GetAirPortHeightMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight);
-            InsertAirPortMark(acadDatabase, point3, point3, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume, strAirPortHeightMark);
+            InsertAirPortMark(acadDatabase, point3, point3, rotateAngle, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume, strAirPortHeightMark);
 
         }
-        private void InsertWAFFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle, double fontHeight, double depth, double width, double length
+        private void InsertWAFFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle, double rotateAngle, double fontHeight, double depth, double width, double length
                             , string strNumber, string strVolume, string strPower, string strWeight, string strNoise, string strMark)
         {
             var WAFFan = new ThFanWAFModel();
             WAFFan.FanPosition = pt;
             WAFFan.FanAngle = angle;
+            WAFFan.RotateAngle = rotateAngle;
             WAFFan.FontHeight = fontHeight;
             WAFFan.FanDepth = depth;
             WAFFan.FanWidth = width;
@@ -480,12 +495,13 @@ FocusToCAD();
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
             toDbServiece.InsertWAFFan(acadDatabase, WAFFan, info);
         }
-        private void InsertWEXHFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle,double fontHeight, double depth, double width, double length
+        private void InsertWEXHFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle, double rotateAngle, double fontHeight, double depth, double width, double length
                             , string strNumber, string srtVolume, string strPower, string strWeight, string strNoise, string strMark)
         {
             var WEXFan = new ThFanWEXHModel();
             WEXFan.FanPosition = pt;
             WEXFan.FanAngle = angle;
+            WEXFan.RotateAngle = rotateAngle;
             WEXFan.FontHeight = fontHeight;
             WEXFan.FanDepth = depth;
             WEXFan.FanWidth = width;
@@ -499,12 +515,13 @@ FocusToCAD();
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
             toDbServiece.InsertWEXHFan(acadDatabase, WEXFan, info);
         }
-        private void InsertCEXHFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle,double fontHeigth,double depth,double width,double length
+        private void InsertCEXHFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle, double rotateAngle, double fontHeigth,double depth,double width,double length
             , string strNumber,string srtVolume,string strPower,string strWeight,string strNoise)
         {
             var CEXHFan = new ThFanCEXHModel();
             CEXHFan.FanPosition = pt;
             CEXHFan.FanAngle = angle;
+            CEXHFan.RotateAngle = rotateAngle;
             CEXHFan.FontHeight = fontHeigth;
             CEXHFan.FanDepth = depth;
             CEXHFan.FanWidth = width;
@@ -517,13 +534,14 @@ FocusToCAD();
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
             toDbServiece.InsertCEXHFan(acadDatabase, CEXHFan, info);
         }
-        private void InsertFanHole(AcadDatabase acadDatabase, Point3d pt, double angle,double fontHeight , double width,string strSize,string mark)
+        private void InsertFanHole(AcadDatabase acadDatabase, Point3d pt, double angle, double rotateAngle, double fontHeight , double width,string strSize,string mark)
         {
             var fanHole = new ThFanHoleModel();
             fanHole.FanHolePosition = pt;
             fanHole.FontHeight = fontHeight;
             fanHole.FanHoleWidth = width;
             fanHole.FanHoleAngle = angle;
+            fanHole.RotateAngle = rotateAngle;
             fanHole.FanHoleSize = strSize;
             fanHole.FanHoleMark = mark;
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
@@ -540,7 +558,7 @@ FocusToCAD();
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
             toDbServiece.InsertFireValve(acadDatabase, fireValve);
         }
-        private void InsertAirPortMark(AcadDatabase acadDatabase,Point3d fanPt, Point3d markPt,
+        private void InsertAirPortMark(AcadDatabase acadDatabase,Point3d fanPt, Point3d markPt, double rotateAngle,
             double fontHeight,string markName,string markSize,string markCount,string markVolume,string heightMark)
         {
             var airPortMark = new ThFanAirPortMarkModel();
@@ -552,10 +570,11 @@ FocusToCAD();
             airPortMark.AirPortMarkCount = markCount;
             airPortMark.AirPortMarkVolume = markVolume;
             airPortMark.AirPortHeightMark = heightMark;
+            airPortMark.RotateAngle = rotateAngle;
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
             toDbServiece.InsertAirPortMark(acadDatabase, airPortMark);
         }
-        private void InsertAirPort(AcadDatabase acadDatabase, Point3d portPt,double angle,double length,double depth,string type,short strDirection)
+        private void InsertAirPort(AcadDatabase acadDatabase, Point3d portPt,double angle, double length,double depth,string type,short strDirection)
         {
             var airPort = new ThFanAirPortModel();
             airPort.AirPortPosition = portPt;

@@ -17,6 +17,7 @@ namespace ThMEPHVAC.FanLayout.Model
     {
         public Point3d FanPosition { set; get; }//风机位置
         public double FanAngle { set; get; }//风机角度
+        public double RotateAngle { set; get; }//风机角度
         public double FontHeight { set; get; }//文字高度
         public string FanNumber { set; get; }//设备编号
         public string FanVolume { set; get; }//风量

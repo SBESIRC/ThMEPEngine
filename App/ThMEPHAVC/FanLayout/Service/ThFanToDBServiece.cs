@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPHVAC.FanLayout.Model;
 using ThMEPHVAC.FanLayout.ViewModel;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.FanLayout.Service
 {
@@ -24,7 +25,8 @@ namespace ThMEPHVAC.FanLayout.Service
             attNameValues.Add("数量", airPortMark.AirPortMarkCount);
             attNameValues.Add("风量", airPortMark.AirPortMarkVolume);
             attNameValues.Add("安装属性", airPortMark.AirPortHeightMark);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-DIMS-DUCT", "AI-风口标注1", airPortMark.AirPortMarkPosition, new Scale3d(airPortMark.FontHeight, airPortMark.FontHeight, airPortMark.FontHeight), 0, attNameValues);
+            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-DIMS-DUCT", "AI-风口标注1", airPortMark.AirPortMarkPosition, new Scale3d(airPortMark.FontHeight, airPortMark.FontHeight, airPortMark.FontHeight), airPortMark.RotateAngle, attNameValues);
+            ThMEPHVACService.SetAttr(blkId, attNameValues, airPortMark.RotateAngle);
         }
         public void InsertAirPort(AcadDatabase acadDatabase,ThFanAirPortModel airPort)
         {
@@ -82,7 +84,7 @@ namespace ThMEPHVAC.FanLayout.Service
             attNameValues.Add("设备编号", cexh.FanNumber);
             //attNameValues.Add("风量", cexh.FanVolume);
             //attNameValues.Add("电量", cexh.FanPower);
-            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-吊顶式排风扇", cexh.FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
+            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-吊顶式排风扇", cexh.FanPosition, new Scale3d(1, 1, 1), cexh.RotateAngle, attNameValues);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
             {
@@ -146,7 +148,8 @@ namespace ThMEPHVAC.FanLayout.Service
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("标高", hole.FanHoleMark);
             attNameValues.Add("洞口尺寸", hole.FanHoleSize);
-            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-HOLE", "AI-洞口", hole.FanHolePosition, new Scale3d(1, 1, 1), 0, attNameValues);
+            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-HOLE", "AI-洞口", hole.FanHolePosition, new Scale3d(1, 1, 1), hole.RotateAngle, attNameValues);
+            ThMEPHVACService.SetAttr(blkId, attNameValues, hole.RotateAngle);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
             {
@@ -175,7 +178,8 @@ namespace ThMEPHVAC.FanLayout.Service
             //attNameValues.Add("风量", waf.FanVolume);
             //attNameValues.Add("电量", waf.FanPower);
             //attNameValues.Add("标高", waf.FanMark);
-            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式轴流风机", waf.FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
+            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式轴流风机", waf.FanPosition, new Scale3d(1, 1, 1), waf.RotateAngle, attNameValues);
+            ThMEPHVACService.SetAttr(blkId, attNameValues, waf.RotateAngle);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
             {
@@ -207,6 +211,7 @@ namespace ThMEPHVAC.FanLayout.Service
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPower));
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataAsciiString, waf.FanMark));
             blkId.AddXData("FanProperty", tvs);
+            //blk.Rotate = waf.RotateAngle;
         }
         public void InsertWEXHFan(AcadDatabase acadDatabase , ThFanWEXHModel wexh, ThFanConfigInfo info)
         {
@@ -215,7 +220,8 @@ namespace ThMEPHVAC.FanLayout.Service
             //attNameValues.Add("风量", wexh.FanVolume);
             //attNameValues.Add("电量", wexh.FanPower);
             //attNameValues.Add("标高", wexh.FanMark);
-            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式排风扇", wexh.FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
+            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式排风扇", wexh.FanPosition, new Scale3d(1, 1, 1), wexh.RotateAngle, attNameValues);
+            ThMEPHVACService.SetAttr(blkId, attNameValues, wexh.RotateAngle);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
             {
