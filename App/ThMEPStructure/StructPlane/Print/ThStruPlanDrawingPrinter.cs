@@ -30,8 +30,18 @@ namespace ThMEPStructure.StructPlane.Print
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
 
             //调整梁标注的方向
+            var stairSlabCorners = new DBObjectCollection();
             UpdateBeamTextRotation(Geos.GetBeamMarks());
-
+            // 创建楼梯板对角线            
+            var tenThckSlabMarks = Geos.GetTenThickSlabMarks();            
+            if (tenThckSlabMarks.Count>0)
+            {
+                var slabs = Geos.GetSlabGeos().Select(o => o.Boundary).ToCollection();
+                var tenThickSlabTexts = tenThckSlabMarks.Select(o => o.Boundary).ToCollection();                
+                stairSlabCorners = CreateStairSlabCorner(tenThickSlabTexts, slabs);
+                Geos = Geos.Except(tenThckSlabMarks).ToList(); // 10mm厚的楼板标注不要打印
+            }
+            
             // 处理双梁
             // 双梁是要单独处理的
             var dblRowbeamMarks = FilterDoubleRowBeamMarks(Geos.GetBeamMarks());
@@ -41,6 +51,7 @@ namespace ThMEPStructure.StructPlane.Print
             var res = PrintGeos(db, Geos, slabHatchConfigs); //BeamLines,BeamTexts
             var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowbeamMarks);
             dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
+            Append(PrintStairSlabCorner(db, stairSlabCorners));
 
             // 过滤多余文字
             var beamLines = res.Item1.ToDBObjectCollection(db);
@@ -95,6 +106,14 @@ namespace ThMEPStructure.StructPlane.Print
 
             // 过滤无效Id
             ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+        }
+
+        private DBObjectCollection CreateStairSlabCorner(DBObjectCollection tenThckSlabTexts,
+            DBObjectCollection slabs)
+        {
+            // 创建楼梯间楼板斜线标记
+            var builder = new ThBuildStairSlabLineService();
+            return builder.Build(tenThckSlabTexts, slabs);
         }
 
         private void AdjustDblRowMarkPos(Database db, List<Tuple<ObjectIdCollection, Vector3d>> dblRowTexts,DBObjectCollection beamLines)
@@ -175,10 +194,6 @@ namespace ThMEPStructure.StructPlane.Print
                 var beamLines = new ObjectIdCollection();
                 var beamTexts = new Dictionary<ObjectId,Vector3d>();
 
-                // 这两个数据是为了给10mm楼板用的
-                var slabs = new DBObjectCollection();
-                var tenThckSlabTexts = new DBObjectCollection();
-                
                 // 打印到图纸中
                 geos.ForEach(o =>
                 {
@@ -189,19 +204,8 @@ namespace ThMEPStructure.StructPlane.Print
                         // 文字为注释
                         if (category == ThIfcCategoryManager.SlabCategory)
                         {
-                            if(dbText.TextString.IsTenThickSlab())
-                            {
-                                // 不要打印到界面上
-                                //tenThckSlabTexts.Add(dbText); // 后面打开
-
-                                var printer = new ThSlabAnnotationPrinter();
-                                Append(printer.Print(db, dbText));
-                            }
-                            else
-                            {
-                                var printer = new ThSlabAnnotationPrinter();
-                                Append(printer.Print(db, dbText));
-                            }
+                            var printer = new ThSlabAnnotationPrinter();
+                            Append(printer.Print(db, dbText));
                         }
                         else if (category == ThIfcCategoryManager.BeamCategory)
                         {
@@ -247,22 +251,20 @@ namespace ThMEPStructure.StructPlane.Print
                         else if (category == ThIfcCategoryManager.SlabCategory)
                         {
                             var outlineConfig = ThSlabPrinter.GetSlabConfig();
-                            var bg = o.Properties.GetElevation();                            
-                            if(slabHatchConfigs.ContainsKey(bg))
+                            var bg = o.Properties.GetElevation();  
+                            var hatchConfig = slabHatchConfigs.ContainsKey(bg) ? slabHatchConfigs[bg] : null;
+                            if(hatchConfig!=null)
                             {
-                                var hatchConfig = slabHatchConfigs[bg];
                                 var printer = new ThSlabPrinter(hatchConfig, outlineConfig);
                                 if (o.Boundary is Polyline polyline)
                                 {
-                                    slabs.Add(polyline);
                                     Append(printer.Print(db, polyline));
                                 }
                                 else if (o.Boundary is MPolygon mPolygon)
                                 {
-                                    slabs.Add(mPolygon);
                                     Append(printer.Print(db, mPolygon));
                                 }
-                            }                            
+                            }
                         }
                         else if (category == ThIfcCategoryManager.OpeningElementCategory)
                         {
@@ -274,17 +276,6 @@ namespace ThMEPStructure.StructPlane.Print
                     }
                 });
 
-                // 创建楼梯间楼板斜线标记
-                var builder = new ThBuildStairSlabLineService();
-                var slabCorners = builder.Build(tenThckSlabTexts,slabs);
-                if(slabCorners.Count>0)
-                {
-                    var textConfig = ThStairLineMarkPrinter.GetTextConfig(PrintParameter.DrawingScale);
-                    var lineConfig = ThStairLineMarkPrinter.GetLineConfig();
-                    var stairLinePrinter = new ThStairLineMarkPrinter(lineConfig, textConfig);
-                    slabCorners.OfType<Line>().ForEach(l => Append(stairLinePrinter.Print(db, l)));
-                }
-                
                 return Tuple.Create(beamLines, beamTexts);
             }   
         }
@@ -351,6 +342,19 @@ namespace ThMEPStructure.StructPlane.Print
             var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
             var printer = new ThAnnotationPrinter(config);
             return printer.Print(db, dbText);
+        }
+
+        private ObjectIdCollection PrintStairSlabCorner(Database db,DBObjectCollection corners)
+        {
+            var results = new ObjectIdCollection();
+            if (corners.Count > 0)
+            {
+                var textConfig = ThStairLineMarkPrinter.GetTextConfig(PrintParameter.DrawingScale);
+                var lineConfig = ThStairLineMarkPrinter.GetLineConfig();
+                var stairLinePrinter = new ThStairLineMarkPrinter(lineConfig, textConfig);
+                corners.OfType<Line>().ForEach(l => results.AddRange(stairLinePrinter.Print(db, l)));
+            }
+            return results;
         }
 
         private PrintConfig GetBeamConfig(Dictionary<string,object> properties)

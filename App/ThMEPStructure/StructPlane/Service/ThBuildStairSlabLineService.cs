@@ -18,23 +18,31 @@ namespace ThMEPStructure.StructPlane.Service
                 return results;
             }
             var spatialIndex = new ThCADCoreNTSSpatialIndex(texts);
-            texts.OfType<Polyline>().ForEach(p =>
+            slabs.OfType<Polyline>().Where(p=>p.Area>1.0).ForEach(p =>
             {
-               var marks =  spatialIndex.SelectWindowPolygon(p);
-                if (marks.Count == 1)
+                if(IsRectangle(p))
                 {
-                    results.Add(CreateCornerLine(p));
+                    var marks = spatialIndex.SelectWindowPolygon(p);
+                    if (marks.Count == 1)
+                    {
+                        results.Add(CreateCornerLine(p));
+                    }
                 }
             });
-            texts.OfType<MPolygon>().ForEach(m =>
-            {
-                var marks = spatialIndex.SelectWindowPolygon(m);
-                if (marks.Count == 1)
-                {
-                    results.Add(CreateCornerLine(m));
-                }
-            });
+            //slabs.OfType<MPolygon>().ForEach(m =>
+            //{
+            //    var marks = spatialIndex.SelectWindowPolygon(m);
+            //    if (marks.Count == 1)
+            //    {
+            //        results.Add(CreateCornerLine(m));
+            //    }
+            //});
             return results;
+        }
+
+        private bool IsRectangle(Polyline frame)
+        {
+            return frame.IsRectangle();
         }
 
         private Line CreateCornerLine(Polyline polygon)

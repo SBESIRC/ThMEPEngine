@@ -43,11 +43,8 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 return results;
             }
-            if (HatchConfig != null && polygon.Hatch != null)
-            {
-                var hatchIds = polygon.Print(db,HatchConfig, OutlineConfig);
-                hatchIds.OfType<ObjectId>().ForEach(o => results.Add(o));
-            }
+            var hatchIds = polygon.Print(db, HatchConfig, OutlineConfig);
+            hatchIds.OfType<ObjectId>().ForEach(o => results.Add(o));
             return results;
         }
 

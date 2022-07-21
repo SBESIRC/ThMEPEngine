@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
@@ -52,6 +53,14 @@ namespace ThMEPStructure.StructPlane.Service
             // 获取IfcSlab标注
             return geos
                 .Where(g => g.Properties.GetCategory() == ThIfcCategoryManager.SlabCategory && g.Boundary is DBText)
+                .ToList();
+        }
+
+        public static List<ThGeometry> GetTenThickSlabMarks(this List<ThGeometry> geos)
+        {
+            // 获取10mm厚度的IfcSlab标注
+            return GetSlabMarks(geos)
+                .Where(g => g.Boundary is DBText dbText && IsTenThickSlab(dbText.TextString))
                 .ToList();
         }
 
@@ -116,6 +125,15 @@ namespace ThMEPStructure.StructPlane.Service
             string category = geo.Properties.GetCategory();
             string name = geo.Properties.GetName().ToUpper();
             return category == ThIfcCategoryManager.SlabCategory && name.StartsWith(CantiSlabSign);
+        }
+        public static bool IsTenThickSlab(this string content)
+        {
+            var values = content.GetDoubles();
+            if (values.Count == 1)
+            {
+                return Math.Abs(values[0] - 10.0) <= 1e-4;
+            }
+            return false;
         }
     }
 }

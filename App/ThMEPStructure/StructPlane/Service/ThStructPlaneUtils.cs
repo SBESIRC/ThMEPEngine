@@ -335,16 +335,7 @@ namespace ThMEPStructure.StructPlane.Service
                     }
                 }
             }).ToList();
-        }
-        public static bool IsTenThickSlab(this string content)
-        {
-            var values = content.GetDoubles();
-            if (values.Count == 1)
-            {
-                return Math.Abs(values[0] - 10.0) <= 1e-4;
-            }
-            return false;
-        }
+        }        
         public static string GetFloorRange(this List<ThFloorInfo> floorInfos,double flrBottomEle)
         {
             var result = "";
