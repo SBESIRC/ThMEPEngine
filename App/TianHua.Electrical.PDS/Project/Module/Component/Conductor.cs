@@ -1041,7 +1041,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     }
                     else
                     {
-                        return $"{this.BridgeLaying}/ {ViaConduitStr}";
+                        return $"{this.BridgeLaying}/{ViaConduitStr}";
                     }
                 }
                 else if (ConductorLayingPath == ConductorLayingPath.ViaCableTray)
