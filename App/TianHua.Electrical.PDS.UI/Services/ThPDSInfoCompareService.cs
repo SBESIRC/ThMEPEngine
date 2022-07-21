@@ -215,6 +215,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             var data = ThPDSProjectGraphNodeData.Create();
             data.Power = vm.Power;
             data.Type = vm.Type.Type;
+            data.KV = vm.RatedVoltage;
             data.FireLoad = vm.FireLoad;
             data.Storey ??= vm.Storey;
             data.Number ??= vm.Number;

@@ -5,6 +5,7 @@ namespace TianHua.Electrical.PDS.Project.Module
 {
     public struct ThPDSProjectGraphNodeData
     {
+        public double KV;
         public double Power;
         public bool FireLoad;
         public string Number;
@@ -16,12 +17,12 @@ namespace TianHua.Electrical.PDS.Project.Module
 
         public void Sync()
         {
-            if (Power == 0.38)
+            if (KV == 0.38)
             {
                 Phase = ThPDSPhase.三相;
                 PhaseSequence = PhaseSequence.L123;
             }
-            else if (Power == 0.22)
+            else if (KV == 0.22)
             {
                 Phase = ThPDSPhase.一相;
                 PhaseSequence = PhaseSequence.L1;
@@ -32,8 +33,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             return new ThPDSProjectGraphNodeData()
             {
+                KV = 0.38,
                 Number = "",
-                Power = 0.38,
+                Power = 0.0,
                 Storey = "1F",
                 FireLoad = false,
                 Description = "备用",
