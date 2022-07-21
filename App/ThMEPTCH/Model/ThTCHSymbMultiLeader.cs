@@ -52,5 +52,6 @@ namespace ThMEPTCH.Model
         public int IsParallel = 0;//引线平行
         [ProtoMember(15)]
         public int IsMask = 0;//背景屏蔽
+        public Vector3d LeaderVector=new Vector3d();
     }
 }

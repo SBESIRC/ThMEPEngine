@@ -42,14 +42,14 @@ namespace ThMEPTCH.TCHDrawServices
                 var pipeModel = GetTCHPipe(id, twtBtPoint.ID, twtTopPoint.ID, item);
                 WriteModelToTCH(pipeModel, ThMEPTCHCommon.TCHTableName_TwtVerticalPipe, ref id);
 
-                if (string.IsNullOrEmpty(item.TextStyle))
-                    continue;
-                var dimTurnPoint = ThSQLHelper.PointToTwtPointModel(id, item.TurnPoint);
-                WriteModelToTCH(dimTurnPoint, ThMEPTCHCommon.TCHTableName_TwtPoint, ref id);
-                var dimDir = ThSQLHelper.VectorToTwtVectorModel(id, item.TextDirection);
-                WriteModelToTCH(dimDir, ThMEPTCHCommon.TCHTableName_TwtVector, ref id);
-                var pipeDimModel = GetTCHPipeDim(id, pipeModel.ID, pipeModel.StartPtID, dimTurnPoint.ID, dimDir.ID, item);
-                WriteModelToTCH(pipeDimModel, ThMEPTCHCommon.TCHTableName_TwtVerticalPipeDim, ref id);
+                //if (string.IsNullOrEmpty(item.TextStyle))
+                //    continue;
+                //var dimTurnPoint = ThSQLHelper.PointToTwtPointModel(id, item.TurnPoint);
+                //WriteModelToTCH(dimTurnPoint, ThMEPTCHCommon.TCHTableName_TwtPoint, ref id);
+                //var dimDir = ThSQLHelper.VectorToTwtVectorModel(id, item.TextDirection);
+                //WriteModelToTCH(dimDir, ThMEPTCHCommon.TCHTableName_TwtVector, ref id);
+                //var pipeDimModel = GetTCHPipeDim(id, pipeModel.ID, pipeModel.StartPtID, dimTurnPoint.ID, dimDir.ID, item);
+                //WriteModelToTCH(pipeDimModel, ThMEPTCHCommon.TCHTableName_TwtVerticalPipeDim, ref id);
             }
         }
         TCHTwtVerticalPipe GetTCHPipe(ulong pipeId, ulong startPtId, ulong endPtId,ThTCHVerticalPipe verticalPipe) 

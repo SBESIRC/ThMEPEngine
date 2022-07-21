@@ -70,7 +70,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                             locpoint = firstelement.baseCurce.StartPoint;
                             basepoint = firstelement.baseCurce.EndPoint;
                         }
+                        var dir_vector = CreateVector(line);
+                        if (line.StartPoint.DistanceTo(locpoint) > 10)
+                            dir_vector = -dir_vector;
                         ThTCHSymbMultiLeader symbMultiLeader = new ThTCHSymbMultiLeader(basepoint, locpoint, line.Length / 100, text.dbText.TextString, corresponding_text, "W-RAIN-NOTE");
+                        symbMultiLeader.LeaderVector = dir_vector;
                         symbMultiLeaders.Add(symbMultiLeader);
                     }
                 }

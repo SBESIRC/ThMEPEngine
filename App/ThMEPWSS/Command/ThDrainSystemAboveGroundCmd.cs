@@ -28,6 +28,7 @@ using ThMEPWSS.ViewModel;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentPipeConvertion;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentSymbMultiLeaderConvertion;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.CoordinateTransformation;
+using static ThMEPWSS.DrainageSystemAG.Bussiness.TCHDimensionsPatch;
 using GeometryExtensions;
 
 namespace ThMEPWSS.Command
@@ -321,8 +322,11 @@ namespace ThMEPWSS.Command
             ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
             tchPipeService.InitPipe(verPipes);
             tchPipeService.DrawExecute(false);
-            tchsymbMultiLeaderService.Init(symbMultiLeaders);
-            tchsymbMultiLeaderService.DrawExecute(false,false);
+            //tchsymbMultiLeaderService.Init(symbMultiLeaders);
+            //tchsymbMultiLeaderService.DrawExecute(false,false);
+            DrawTCHPipeDimensions(verPipes);
+            DrawTCHSymbMultiLeader(symbMultiLeaders);
+
         }
         void InitData(Database database)
         {
