@@ -278,5 +278,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         public bool IsCustom => _conductor.IsCustom;
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsBAControl => _conductor.IsBAControl;
     }
 }

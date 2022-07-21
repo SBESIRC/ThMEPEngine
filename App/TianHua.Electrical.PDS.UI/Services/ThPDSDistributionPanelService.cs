@@ -3927,6 +3927,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     default:
                         throw new NotSupportedException();
                 }
+                
+                if (conductor.IsBAControl)
+                {
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("Type", false);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", false);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", false);
+                }
+                else
+                {
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("Type", true);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", true);
+                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", true);
+                }
 
                 if (conductor.ComponentType == ComponentType.Conductor)
                 {
@@ -3941,6 +3954,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", true);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("NumberOfPhaseWire", false);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCrossSectionalArea", false);
+
+                    if (conductor.IsBAControl)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", true);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException();
                 }
             }
             pg.SelectedObject = vm ?? new object();
