@@ -214,11 +214,11 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             var data = ThPDSProjectGraphNodeData.Create();
             data.Power = vm.Power;
-            data.Storey = vm.Storey;
-            data.Number = vm.Number;
             data.Type = vm.Type.Type;
             data.FireLoad = vm.FireLoad;
-            data.Description = vm.Description;
+            data.Storey ??= vm.Storey;
+            data.Number ??= vm.Number;
+            data.Description ??= vm.Description;
             data.Sync();
             return data;
         }
