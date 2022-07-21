@@ -300,7 +300,7 @@
       <Version>7.1.2</Version>
     </PackageReference>
     <PackageReference Include="YamlDotNet">
-      <Version>8.0.0</Version>
+      <Version>11.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
