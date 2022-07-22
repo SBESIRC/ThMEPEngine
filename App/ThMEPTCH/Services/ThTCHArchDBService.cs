@@ -12,24 +12,29 @@ namespace ThMEPTCH.Services
     public class ThTCHArchDBService
     {
         private TCHArchDBData archDBData;
+        private string prorjectId="";
         public ThTCHArchDBService(string dbPath) 
         {
+            prorjectId = dbPath;
             archDBData = new TCHArchDBData(dbPath);
         }
         public ThTCHProject TCHDBDataToProject() 
         {
             var thPrj = new ThTCHProject();
+            thPrj.Uuid = prorjectId;
             thPrj.ProjectName = "测试项目";
             var thSite = new ThTCHSite();
+            thSite.Uuid = prorjectId + "site";
             var thBuilding = new ThTCHBuilding();
-
+            thBuilding.Uuid = prorjectId + "building";
             var buildingStorey = new ThTCHBuildingStorey();
+            buildingStorey.Uuid = buildingStorey + "1";
             buildingStorey.Number = "1";
             buildingStorey.Height = 3000;
             buildingStorey.Elevation = 0.0;
             buildingStorey.Origin = new Point3d(0, 0,0);
 
-            var entityConvert = new TCHDBEntityConvert();
+            var entityConvert = new TCHDBEntityConvert(prorjectId);
 
             var dbWalls = archDBData.GetDBWallDatas();
             var dbDoors = archDBData.GetDBDoorDatas();

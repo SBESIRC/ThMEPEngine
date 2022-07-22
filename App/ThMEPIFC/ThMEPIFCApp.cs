@@ -83,8 +83,8 @@ namespace ThMEPIFC
                 File.Delete(ifcPath);
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
-            var service = new ThTCHArchDBService(filePath);
-            var project = service.TCHDBDataToProject();
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProject(false);
             if (project == null)
             {
                 return;
@@ -115,8 +115,8 @@ namespace ThMEPIFC
                 File.Delete(midFilePath);
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
-            var service = new ThTCHArchDBService(filePath);
-            var project = service.TCHDBDataToProject();
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProject(false);
             if (project == null)
             {
                 return;
@@ -187,8 +187,8 @@ namespace ThMEPIFC
             Stopwatch sw = new Stopwatch();
             sw.Start();
             // 读入并解析TGL XML文件
-            var service = new ThTCHArchDBService(filePath);
-            var project = service.TCHDBDataToProject();
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProject(true);
             if (project == null)
             {
                 return;

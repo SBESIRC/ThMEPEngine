@@ -36,14 +36,22 @@ namespace ThMEPTCH.Services
         {
             if (null == archDBData)
                 return null;
+            string prjId = "";
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                prjId = acdb.Database.VersionGuid.ToString();
+            }
             var thPrj = new ThTCHProject();
+            thPrj.Uuid = prjId;
             thPrj.ProjectName = "测试项目";
             var thSite = new ThTCHSite();
+            thSite.Uuid = prjId + "site";
             var thBuilding = new ThTCHBuilding();
+            thBuilding.Uuid = prjId + "Building";
             var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = archDBData.AllTArchEntitys();
             InitFloorDBEntity(allEntitys);
-            var entityConvert = new TCHDBEntityConvert();
+            var entityConvert = new TCHDBEntityConvert(prjId);
             foreach (var floor in floorOrigin)
             {
                 var floorEntitys = FloorEntitys(floor.FloorOutLine, out List<FloorCurveEntity> curveEntities);
@@ -111,6 +119,7 @@ namespace ThMEPTCH.Services
                 if (levelEntitys == null)
                     continue;
                 var buildingStorey = new ThTCHBuildingStorey();
+                buildingStorey.Uuid = prjId + floor.Num.ToString();
                 buildingStorey.Number = floor.Num.ToString();
                 buildingStorey.Height = floor.LevelHeight;
                 buildingStorey.Elevation = floor.Elevtion;
