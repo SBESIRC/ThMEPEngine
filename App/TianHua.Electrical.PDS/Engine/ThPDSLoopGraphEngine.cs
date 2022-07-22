@@ -1887,7 +1887,8 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         e.SetLocation(new ThPDSLocation());
                     }
-                    e.Location.FloorNumber = storeys.StoreyNumber;
+                    e.Location.StoreyNumber = storeys.StoreyNumber;
+                    e.Location.StoreyTypeString = storeys.StoreyTypeString;
                     e.Location.StoreyBasePoint = ThPDSPoint3dService.ToPDSPoint3d(storeyBasePoint);
                     e.Location.ReferenceDWG = Path.GetFileNameWithoutExtension(database.Filename);
                     e.Location.IsStandardStorey = isStandardStorey;

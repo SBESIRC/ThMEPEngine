@@ -106,7 +106,8 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         // 对末端配电箱做特殊处理
                         if (ThPDSTerminalPanelService.IsTerminalPanel( cabletrayEdgeList[i].Target)
-                            && cabletrayEdgeList[j].Target.Loads[0].Location.FloorNumber != cabletrayEdgeList[i].Target.Loads[0].Location.FloorNumber)
+                            && cabletrayEdgeList[j].Target.Loads[0].Location.StoreyNumber != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyNumber
+                            && cabletrayEdgeList[j].Target.Loads[0].Location.StoreyTypeString != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyTypeString)
                         {
                             continue;
                         }
@@ -375,7 +376,8 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         private bool StoreyCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
         {
-            return vertex.Loads[0].Location.FloorNumber == node.Loads[0].Location.FloorNumber;
+            return vertex.Loads[0].Location.StoreyNumber == node.Loads[0].Location.StoreyNumber
+                && vertex.Loads[0].Location.StoreyTypeString == node.Loads[0].Location.StoreyTypeString;
         }
 
         /// <summary>
@@ -436,7 +438,8 @@ namespace TianHua.Electrical.PDS.Engine
         private bool LocationEquals(ThPDSLocation first, ThPDSLocation second)
         {
             return first.ReferenceDWG.Equals(second.ReferenceDWG)
-                && first.FloorNumber.Equals(second.FloorNumber)
+                && first.StoreyNumber.Equals(second.StoreyNumber)
+                && first.StoreyTypeString.Equals(second.StoreyTypeString)
                 && first.RoomType.Equals(second.RoomType)
                 && ThPDSPoint3dService.PDSPoint3dToPoint3d(first.StoreyBasePoint).DistanceTo(ThPDSPoint3dService.PDSPoint3dToPoint3d(second.StoreyBasePoint)) < 1.0
                 && ThPDSPoint3dService.PDSPoint3dToPoint3d(first.BasePoint).DistanceTo(ThPDSPoint3dService.PDSPoint3dToPoint3d(second.BasePoint)) < 1.0;

@@ -636,7 +636,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             node.Details.LoadCalculationInfo.HighPower = data.Power;
             node.Load.ID.Description = data.Description;
             node.Load.SetFireLoad(data.FireLoad);
-            node.Load.SetLocation(new ThPDSLocation() { FloorNumber = data.Storey });
+            node.Load.SetLocation(new ThPDSLocation() { StoreyNumber = data.Storey });
             switch (data.Type)
             {
                 case ImageLoadType.None:
@@ -887,7 +887,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             //Step 1:新建空负载
             var data = ThPDSProjectGraphNodeData.Create();
             data.Phase = node.Load.Phase;
-            data.Storey = node.Load.Location.FloorNumber;
+            data.Storey = node.Load.Location.StoreyNumber;
             data.PhaseSequence = node.Details.LoadCalculationInfo.PhaseSequence;
             var target = CreatNewLoad(data);
             if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
@@ -920,7 +920,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 //Step 1:新建负载
                 var target = CreatNewLoad(CircuitCreatorInfo);
-                target.Load.SetLocation(new ThPDSLocation() { FloorNumber = node.Load.Location.FloorNumber });
+                target.Load.SetLocation(new ThPDSLocation() { StoreyNumber = node.Load.Location.StoreyNumber });
                 //Step 2:新建回路
                 var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
                 //Step 3:获取对应的CircuitFormOutType

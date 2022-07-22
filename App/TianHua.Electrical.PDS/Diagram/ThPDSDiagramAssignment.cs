@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 安装位置
             var location = texts.Where(t => t.TextString == ThPDSCommon.LOCATION).First();
-            location.TextString = node.Load.Location.FloorNumber;
+            location.TextString = node.Load.Location.StoreyNumber;
 
             // 安装方式
             var installMethod = texts.Where(t => t.TextString == ThPDSCommon.INSTALLMETHOD).First();
