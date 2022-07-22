@@ -1,160 +1,170 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0"
-    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{7292613F-E26A-4FD8-883B-E2E136CC3A96}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>TianHua.Structure.WPF.UI</RootNamespace>
-        <AssemblyName>TianHua.Structure.WPF.UI</AssemblyName>
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-    </PropertyGroup>
-    <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-    <ItemGroup>
-        <Reference Include="PresentationCore" />
-        <Reference Include="PresentationFramework" />
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Xaml" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Net.Http" />
-        <Reference Include="System.Xml" />
-        <Reference Include="WindowsBase" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="BeamStructure\BuildBeam\BuildBeamUI.xaml.cs">
-            <DependentUpon>BuildBeamUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="BeamStructure\BuildBeam\BuildBeamConfigModel.cs" />
-        <Compile Include="BeamStructure\BuildBeam\BuildBeamViewModel.cs" />
-        <Compile Include="BeamStructure\MainBeamConnect\MainBeamConfigModel.cs" />
-        <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConfigModel.cs" />
-        <Compile Include="BeamStructure\MainBeamConnect\MainBeamConnectUI.xaml.cs">
-            <DependentUpon>MainBeamConnectUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml.cs">
-            <DependentUpon>SecondaryBeamConnectUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="Command\WallColumnReinforceSetCmd.cs" />
-        <Compile Include="Command\MainBeamCmd.cs" />
-        <Compile Include="Command\BuildBeamCmd.cs" />
-        <Compile Include="Command\SecondaryBeamCmd.cs" />
-        <Compile Include="Reinforcement\EdgeComponentDrawModel.cs" />
-        <Compile Include="Reinforcement\EdgeComponentDrawUI.xaml.cs">
-            <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="Reinforcement\EdgeComponentDrawVM.cs" />
-        <Compile Include="Reinforcement\WallColumnReinforceSetModel.cs" />
-        <Compile Include="Reinforcement\WallColumnReinforceSetUI.xaml.cs">
-            <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="Reinforcement\WallColumnReinforceSetVM.cs" />
-        <Compile Include="StructureWPFUIApp.cs" />
-        <Compile Include="Validations\GreaterThanZeroRule.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <Page Include="BeamStructure\BuildBeam\BuildBeamUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="BeamStructure\MainBeamConnect\MainBeamConnectUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="Reinforcement\EdgeComponentDrawUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="Reinforcement\WallColumnReinforceSetUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\CADExtension\CADExtension.csproj">
-            <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
-            <Name>CADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
-            <Project>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</Project>
-            <Name>ThCADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
-            <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
-            <Name>ThControlLibraryWPF</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-            <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
-            <Name>ThMEPEngineCore</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPStructure\ThMEPStructure.csproj">
-            <Project>{0D803D87-011D-48EE-AF5C-B1216BE7F8AB}</Project>
-            <Name>ThMEPStructure</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <ItemGroup>
-        <Resource Include="Resource\Image\Layer.ico" />
-    </ItemGroup>
-    <Choose>
-        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-    </Choose>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <PropertyGroup>
-        <PostBuildEvent>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7292613F-E26A-4FD8-883B-E2E136CC3A96}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TianHua.Structure.WPF.UI</RootNamespace>
+    <AssemblyName>TianHua.Structure.WPF.UI</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BeamStructure\BuildBeam\BuildBeamUI.xaml.cs">
+      <DependentUpon>BuildBeamUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="BeamStructure\BuildBeam\BuildBeamConfigModel.cs" />
+    <Compile Include="BeamStructure\BuildBeam\BuildBeamViewModel.cs" />
+    <Compile Include="BeamStructure\MainBeamConnect\MainBeamConfigModel.cs" />
+    <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConfigModel.cs" />
+    <Compile Include="BeamStructure\MainBeamConnect\MainBeamConnectUI.xaml.cs">
+      <DependentUpon>MainBeamConnectUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml.cs">
+      <DependentUpon>SecondaryBeamConnectUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Command\WallColumnReinforceSetCmd.cs" />
+    <Compile Include="Command\MainBeamCmd.cs" />
+    <Compile Include="Command\BuildBeamCmd.cs" />
+    <Compile Include="Command\SecondaryBeamCmd.cs" />
+    <Compile Include="Converter\StoreySelectOpsBooleanConverter.cs" />
+    <Compile Include="Reinforcement\EdgeComponentDrawModel.cs" />
+    <Compile Include="Reinforcement\EdgeComponentDrawUI.xaml.cs">
+      <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reinforcement\EdgeComponentDrawVM.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetModel.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetUI.xaml.cs">
+      <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetVM.cs" />
+    <Compile Include="StructurePlane\DrawingParameterSetModel.cs" />
+    <Compile Include="StructurePlane\DrawingParameterSetUI.xaml.cs">
+      <DependentUpon>DrawingParameterSetUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StructurePlane\DrawingParameterSetVM.cs" />
+    <Compile Include="StructureWPFUIApp.cs" />
+    <Compile Include="Validations\GreaterThanZeroRule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="BeamStructure\BuildBeam\BuildBeamUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="BeamStructure\MainBeamConnect\MainBeamConnectUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reinforcement\EdgeComponentDrawUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reinforcement\WallColumnReinforceSetUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="StructurePlane\DrawingParameterSetUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPStructure\ThMEPStructure.csproj">
+      <Project>{0D803D87-011D-48EE-AF5C-B1216BE7F8AB}</Project>
+      <Name>ThMEPStructure</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource\Image\Layer.ico" />
+  </ItemGroup>
+  <ItemGroup />
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
             if $(Configuration)==Debug-NET45 (
             Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
             )
@@ -169,5 +179,5 @@
             )
             Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"
         </PostBuildEvent>
-    </PropertyGroup>
+  </PropertyGroup>
 </Project>

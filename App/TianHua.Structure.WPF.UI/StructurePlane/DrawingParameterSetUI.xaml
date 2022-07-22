@@ -1,0 +1,56 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Structure.WPF.UI.StructurePlane.DrawingParameterSetUI"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+                    xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    xmlns:validations ="clr-namespace:TianHua.Structure.WPF.UI.Validations"
+                    xmlns:converters="clr-namespace:TianHua.Structure.WPF.UI.Converter"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="成图参数设置">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:StoreySelectOpsBooleanConverter x:Key="storeySelectConverter"/>            
+        </ResourceDictionary>
+    </Window.Resources>
+    <StackPanel Margin="3" Orientation="Vertical">
+        <GroupBox Margin="0">
+            <GroupBox.Header>
+                <Label>楼层选择</Label>
+            </GroupBox.Header>
+            <StackPanel Orientation="Vertical" Margin="5">
+                <RadioButton x:Name="rbAllStorey" Content="  全部楼层" GroupName="StoreySelect" IsThreeState="False" 
+                             IsChecked="{Binding Model.StoreySelectOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                    Converter={StaticResource storeySelectConverter},ConverterParameter=1}" Checked="rbAllStorey_Checked" />
+                <RadioButton x:Name="rbSingleStorey" Content="  逐层插入" GroupName="StoreySelect" IsThreeState="False" Margin="0,5,0,5"
+                             IsChecked="{Binding Model.StoreySelectOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                    Converter={StaticResource storeySelectConverter},ConverterParameter=0}" Checked="rbSingleStorey_Checked"/>
+                <ComboBox Name="cbStoreies" Width="120" Height="20"
+                          ItemsSource="{Binding Model.Storeies,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding Model.Storey,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Orientation="Vertical" Margin="5">
+            
+            <StackPanel Orientation="Horizontal">
+                <Label Content="默认板厚："/>
+                <TextBox Name="tbDefaultSlabThick" Width="60" Height="20"
+                             Text="{Binding Model.DefaultSlabThick,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             InputMethod.IsInputMethodEnabled="False"
+                             PreviewKeyDown="TextBox_PreviewKeyDown"
+                             PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="绘图比例："/>
+                <ComboBox Name="cbDrawingScale" Width="60" Height="20"
+                          ItemsSource="{Binding Model.DrawingScales,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                          Text="{Binding Model.DrawingScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,5">
+            <Button x:Name="btnOK" Content="确定" Width="60" Height="18" Click="btnConfirm_Click"/>
+        </StackPanel>
+    </StackPanel>
+</cus:ThCustomWindow>
