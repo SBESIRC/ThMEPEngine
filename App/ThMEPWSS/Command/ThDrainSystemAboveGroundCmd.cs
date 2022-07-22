@@ -300,6 +300,7 @@ namespace ThMEPWSS.Command
                     else if (pipeTags.Any(c => c == item.tag))
                     {
                         pipeElems.Add(item);
+                        createBlockInfos.Add(item);
                     }
                     else
                     {
