@@ -15,7 +15,6 @@ using ThMEPEngineCore.AFASRegion.Utls;
 using Dreambuild.AutoCAD;
 using ThMEPArchitecture.PartitionLayout;
 using TianHua.Mep.UI.Data;
-using ThMEPWSS.CADExtensionsNs;
 
 namespace TianHua.Mep.UI.Command
 {
@@ -385,7 +384,7 @@ namespace TianHua.Mep.UI.Command
             {
                 if (door2Lines.Any(o => ThGeometryTool.IsCollinearEx(o.StartPoint, o.EndPoint, line.StartPoint, line.EndPoint, 5)))
                 {
-                    var pts = pts1.Where(o => !line.PointOnLine(o, true, 5)).Union(pts2.Where(o => !line.PointOnLine(o, true, 5)));
+                    var pts = pts1.Where(o => !line.IsPointOnLine(o, true, 5)).Union(pts2.Where(o => !line.IsPointOnLine(o, true, 5)));
                     var vectors = pts.Select(o => o - o.GetProjectPtOnLine(line.StartPoint, line.EndPoint));
                     if (vectors.All(o => o.IsParallelTo(vectors.First())))
                     {
