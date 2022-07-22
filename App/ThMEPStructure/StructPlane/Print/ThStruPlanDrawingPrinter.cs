@@ -242,11 +242,25 @@ namespace ThMEPStructure.StructPlane.Print
                         }
                         else if (category == ThIfcCategoryManager.ColumnCategory)
                         {
-                            Append(PrintColumn(db,o));
+                            if(o.IsUpperFloorColumn())
+                            {
+                                Append(PrintUpperColumn(db, o));
+                            }
+                            else if(o.IsBelowFloorColumn())
+                            {
+                                Append(PrintBelowColumn(db,o));
+                            }
                         }
                         else if (category == ThIfcCategoryManager.WallCategory)
                         {
-                            Append(PrintShearWall(db,o));
+                            if (o.IsUpperFloorShearWall())
+                            {
+                                Append(PrintUpperShearWall(db, o));
+                            }
+                            else if (o.IsBelowFloorShearWall())
+                            {
+                                Append(PrintBelowShearWall(db, o));
+                            }
                         }
                         else if (category == ThIfcCategoryManager.SlabCategory)
                         {

@@ -43,31 +43,42 @@ namespace ThMEPStructure.StructPlane.Print
             FlrBottomEle = DocProperties.GetFloorBottomElevation();
         }
         public abstract void Print(Database database);
-        protected ObjectIdCollection PrintColumn(Database db, ThGeometry column)
+        protected ObjectIdCollection PrintUpperColumn(Database db, ThGeometry column)
         {
-            bool isUpper = column.IsUpperFloorColumn();
-            bool isBelow = column.IsBelowFloorColumn();
-            var outlineConfig = new PrintConfig();
-            var hatchConfig = new HatchPrintConfig();
-            if (isUpper || isBelow)
-            {
-                outlineConfig = isUpper ? ThColumnPrinter.GetUpperColumnConfig() : ThColumnPrinter.GetBelowColumnConfig();
-                hatchConfig = isUpper ? ThColumnPrinter.GetUpperColumnHatchConfig() : ThColumnPrinter.GetBelowColumnHatchConfig();
-            }
+            var outlineConfig = ThColumnPrinter.GetUpperColumnConfig();
+            var hatchConfig = ThColumnPrinter.GetUpperColumnHatchConfig();
             var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
             return printer.Print(db, column.Boundary as Polyline);
         }
-        protected ObjectIdCollection PrintShearWall(Database db, ThGeometry shearwall)
+        protected ObjectIdCollection PrintBelowColumn(Database db, ThGeometry column)
         {
-            bool isUpper = shearwall.IsUpperFloorShearWall();
-            bool isBelow = shearwall.IsBelowFloorShearWall();
-            var outlineConfig = new PrintConfig();
-            var hatchConfig = new HatchPrintConfig();
-            if (isUpper || isBelow)
+            var outlineConfig = ThColumnPrinter.GetBelowColumnConfig();
+            var hatchConfig = ThColumnPrinter.GetBelowColumnHatchConfig();
+            var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
+            return printer.Print(db, column.Boundary as Polyline);
+        }
+        protected ObjectIdCollection PrintUpperShearWall(Database db, ThGeometry shearwall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetUpperShearWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetUpperShearWallHatchConfig();
+            var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
+            if (shearwall.Boundary is Polyline polyline)
             {
-                outlineConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallConfig() : ThShearwallPrinter.GetBelowShearWallConfig();
-                hatchConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallHatchConfig() : ThShearwallPrinter.GetBelowShearWallHatchConfig();
+                return printer.Print(db, polyline);
             }
+            else if (shearwall.Boundary is MPolygon mPolygon)
+            {
+                return printer.Print(db, mPolygon);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+        protected ObjectIdCollection PrintBelowShearWall(Database db, ThGeometry shearwall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetBelowShearWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetBelowShearWallHatchConfig();
             var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
             if (shearwall.Boundary is Polyline polyline)
             {

@@ -45,11 +45,17 @@ namespace ThMEPStructure.StructPlane.Print
                 {
                     if (category == ThIfcCategoryManager.ColumnCategory)
                     {
-                        Append(PrintColumn(database, o));
+                        if(o.IsBelowFloorColumn())
+                        {
+                            Append(PrintBelowColumn(database, o));
+                        }                       
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
-                        Append(PrintShearWall(database, o));
+                        if(o.IsBelowFloorShearWall())
+                        {
+                            Append(PrintBelowShearWall(database, o));
+                        }                        
                     }
                 }
             });
