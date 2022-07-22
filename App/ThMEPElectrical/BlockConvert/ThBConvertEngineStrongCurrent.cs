@@ -118,7 +118,7 @@ namespace ThMEPElectrical.BlockConvert
                         // 插入水泵标注，并获得其id
                         var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                                     "0",
-                                    "水泵标注",
+                                    ThBConvertCommon.BLOCK_PUMP_LABEL,
                                     targetBlockData.Position,
                                     scale,
                                     0.0,
@@ -196,7 +196,7 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var targetBlock = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                var targetBlock = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
                 //如果不是动态块，则返回
                 if (targetBlock == null || !targetBlock.IsDynamicBlock)
                 {
@@ -243,11 +243,27 @@ namespace ThMEPElectrical.BlockConvert
                         .TransformBy(Matrix3d.Rotation(-sourceBlockData.Rotation * sourceBlockData.ScaleFactors.X * sourceBlockData.ScaleFactors.Y,
                         Vector3d.ZAxis, Point3d.Origin));
                     labelPoint = new Point3d(label_x + labelPoint.X, label_y + labelPoint.Y, 0);
+
+                    // 文字方向矫正
+                    var ucsToWcs = ThBConvertMatrix3dTools.DecomposeWithoutDisplacement();
+                    targetBlockData.Transform(targetBlock, ucsToWcs);
+
                     if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {
-                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, labelPoint.X);
-                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, labelPoint.Y);
+                        Matrix3d roration;
+                        if (targetBlockData.ScaleFactors.X > 0)
+                        {
+                            roration = Matrix3d.Rotation(targetBlockData.Rotation, Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        else
+                        {
+                            roration = Matrix3d.Rotation(-targetBlockData.Rotation, Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        var vector = new Vector3d(labelPoint.X, labelPoint.Y, 0).TransformBy(ucsToWcs.Inverse().PreMultiplyBy(roration));
+
+                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, vector.X);
+                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, vector.Y);
                     }
                 }
                 // 部分风机
@@ -320,21 +336,21 @@ namespace ThMEPElectrical.BlockConvert
                 if (convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT].Equals(false))
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
-                    targetBlockData.Position = blockReference.Position;
                 }
                 else
                 {
                     if (rotation > Math.PI / 2 && rotation < Math.PI * 3 / 2)
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position));
-                        targetBlockData.Position = blockReference.Position;
                     }
                     else
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
-                        targetBlockData.Position = blockReference.Position;
                     }
                 }
+
+                targetBlockData.Position = blockReference.Position;
+                targetBlockData.Rotation = targetBlockData.ObjId.GetBlockRotation();
             }
         }
 
@@ -398,6 +414,7 @@ namespace ThMEPElectrical.BlockConvert
                     }
                 }
                 blockReference.TransformBy(mirror);
+                targetBlockData.ScaleFactors = targetBlockData.ObjId.GetScaleFactors();
             }
         }
 

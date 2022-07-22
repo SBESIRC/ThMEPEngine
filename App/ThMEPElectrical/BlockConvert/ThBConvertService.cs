@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 using NFox.Cad;
 using AcHelper;
@@ -13,10 +12,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.BlockConvert
@@ -110,7 +106,7 @@ namespace ThMEPElectrical.BlockConvert
             manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
             {
                 var targetBlock = o.Transformation.Item2;
-                if ((Category.Equals(ConvertCategory.WSS) 
+                if ((Category.Equals(ConvertCategory.WSS)
                     && !targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Equals(ConvertCategory.WSS.GetDescription()))
                     || (Category.Equals(ConvertCategory.HVAC)
                     && !targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Equals(ConvertCategory.HVAC.GetDescription())))
@@ -138,7 +134,8 @@ namespace ThMEPElectrical.BlockConvert
             };
             targetEngine.NameFilter.Add(ThBConvertCommon.BLOCK_PUMP_LABEL);
             targetEngine.ExtractFromMS(CurrentDb.Database);
-            return targetEngine.Results.Count > 0 ? SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
+            return targetEngine.Results.Count > 0
+                ? ThBConvertSpatialIndexService.SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
         }
 
         public void Convert(ThBConvertManager manager, List<string> srcNames, List<ThBlockReferenceData> targetBlocks, bool setLayer)
@@ -160,7 +157,7 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     return;
                 }
-                var srcBlocks = SelectCrossingPolygon(rEngine.Results, Frame);
+                var srcBlocks = ThBConvertSpatialIndexService.SelectCrossingPolygon(rEngine.Results, Frame);
                 if (srcBlocks.Count == 0)
                 {
                     return;
@@ -438,20 +435,6 @@ namespace ThMEPElectrical.BlockConvert
                 // Erase
                 blkref.Erase();
             }
-        }
-
-        private List<ThBlockReferenceData> SelectCrossingPolygon(List<ThRawIfcDistributionElementData> blocks, Polyline frame)
-        {
-            var objs = blocks.Select(o => o.Geometry).ToCollection();
-            var transformer = new ThMEPOriginTransformer(objs);
-            transformer.Transform(objs);
-            transformer.Transform(frame);
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var result = spatialIndex.SelectCrossingPolygon(frame.Vertices());
-            var filters = blocks.Where(o => result.Contains(o.Geometry)).ToList();
-            transformer.Reset(objs);
-            transformer.Reset(frame);
-            return filters.Select(o => o.Data as ThBlockReferenceData).ToList();
         }
     }
 }

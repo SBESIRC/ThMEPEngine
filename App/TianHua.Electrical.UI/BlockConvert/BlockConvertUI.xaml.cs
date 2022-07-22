@@ -70,6 +70,18 @@ namespace TianHua.Electrical.UI.BlockConvert
         }
 
         /// <summary>
+        /// 更新标注角度
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnRefreshLabel_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            this.Hide();
+            BlockConvertVM.BlockRefresh();
+            this.Show();
+        }
+
+        /// <summary>
         /// 忽略变化
         /// </summary>
         /// <param name="sender"></param>

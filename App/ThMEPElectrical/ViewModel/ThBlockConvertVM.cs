@@ -111,6 +111,16 @@ namespace ThMEPElectrical.ViewModel
         }
 
         /// <summary>
+        /// 更新标注角度
+        /// </summary>
+        public void BlockRefresh()
+        {
+            // 矫正负载标注的文字方向
+            var service = new ThBConvertRefreshService();
+            service.Refresh();
+        }
+
+        /// <summary>
         /// 忽略变化
         /// </summary>
         public void IgnoreChange(List<string> ids)

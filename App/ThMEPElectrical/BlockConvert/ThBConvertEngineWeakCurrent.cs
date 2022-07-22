@@ -92,7 +92,7 @@ namespace ThMEPElectrical.BlockConvert
                         if (Math.Sign(rotate[0, 0]) == -1)
                         {
                             blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position).PreMultiplyBy(rotate));
-                            blockReference.TransformBy(Matrix3d.Rotation(-2* blockReference.Rotation, Vector3d.ZAxis, position));
+                            blockReference.TransformBy(Matrix3d.Rotation(-2 * blockReference.Rotation, Vector3d.ZAxis, position));
                         }
                         else
                         {
@@ -100,7 +100,6 @@ namespace ThMEPElectrical.BlockConvert
                             blockReference.TransformBy(Matrix3d.Rotation(-2 * blockReference.Rotation, Vector3d.ZAxis, position));
                         }
                     }
-                    targetBlockData.Position = blockReference.Position;
                 }
                 else
                 {
@@ -108,15 +107,14 @@ namespace ThMEPElectrical.BlockConvert
                     if (rotation > Math.PI / 2 && rotation < Math.PI * 3 / 2)
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position).PostMultiplyBy(rotate));
-                        targetBlockData.Position = blockReference.Position;
                     }
                     else
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position)
-                            .PostMultiplyBy(rotate));
-                        targetBlockData.Position = blockReference.Position;
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position).PostMultiplyBy(rotate));
                     }
                 }
+                targetBlockData.Position = blockReference.Position;
+                targetBlockData.Rotation = targetBlockData.ObjId.GetBlockRotation();
             }
         }
 
@@ -182,10 +180,11 @@ namespace ThMEPElectrical.BlockConvert
 
                 srcBlockData.OwnerSpace2WCS.Decompose(out _, out _, out var UCSMirror, out _);
                 blockReference.TransformBy(mirror.PreMultiplyBy(UCSMirror));
+                targetBlockData.ScaleFactors = targetBlockData.ObjId.GetScaleFactors();
             }
         }
 
-        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, 
+        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData,
             List<ThRawIfcDistributionElementData> list, Scale3d scale, List<ThBlockReferenceData> targetBlocks)
         {
             //
