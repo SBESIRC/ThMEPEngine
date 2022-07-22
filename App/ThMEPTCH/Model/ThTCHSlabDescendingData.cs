@@ -9,31 +9,31 @@ namespace ThMEPTCH.Model
         /// <summary>
         /// 降板高度
         /// </summary>
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public double DescendingHeight { get; set; }
 
         /// <summary>
         /// 降板厚度
         /// </summary>
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public double DescendingThickness { get; set; }
 
         /// <summary>
         /// 降板包围厚度
         /// </summary>
-        [ProtoMember(3)]
+        [ProtoMember(13)]
         public double DescendingWrapThickness { get; set; }
 
         /// <summary>
         /// 是否是降板
         /// </summary>
-        [ProtoMember(4)]
+        [ProtoMember(14)]
         public bool IsDescending { get; set; }
 
         /// <summary>
         /// 降板轮廓线
         /// </summary>
-        [ProtoMember(5)]
+        [ProtoMember(15)]
         public Polyline Outline { get; set; }
     }
 }

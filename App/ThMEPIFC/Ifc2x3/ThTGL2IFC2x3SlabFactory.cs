@@ -73,7 +73,7 @@ namespace ThMEPIFC.Ifc2x3
                 // create extruded solid body 
                 var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
                 {
-                    s.Depth = slab.Thickness;
+                    s.Depth = slab.Height;
                     s.ExtrudedDirection = model.ToIfcDirection(slab.ExtrudedDirection);
                 });
 
@@ -137,7 +137,7 @@ namespace ThMEPIFC.Ifc2x3
 
                         // create extruded solid body 
                         var holesbody = model.Instances.New<IfcExtrudedAreaSolid>();
-                        holesbody.Depth = slab.Thickness;
+                        holesbody.Depth = slab.Height;
                         holesbody.ExtrudedDirection = model.ToIfcDirection(slab.ExtrudedDirection);
 
                         //build 2d area

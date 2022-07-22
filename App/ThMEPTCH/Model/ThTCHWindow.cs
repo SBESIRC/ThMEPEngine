@@ -2,26 +2,23 @@
 using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using System;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHWindow : ThIfcWindow, ICloneable
+    public class ThTCHWindow : ThTCHElement, ICloneable
     {
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public Point3d CenterPoint { get; set; }
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public double Width { get; set; }
-        [ProtoMember(3)]
+        [ProtoMember(13)]
         public double Thickness { get; set; }
-        [ProtoMember(4)]
+        [ProtoMember(14)]
         public Vector3d XVector { get; set; }
         //X轴方向和宽度方向一致
-        [ProtoMember(5)]
+        [ProtoMember(15)]
         public Vector3d ExtrudedDirection { get; }
-        [ProtoMember(6)]
-        public string OpenDirection { get; set; }
         private double Angle { get; }
         private ThTCHWindow()
         {
@@ -29,7 +26,6 @@ namespace ThMEPTCH.Model
         }
         public ThTCHWindow(Point3d centerPoint, double width, double height, double thickness, double angle)
         {
-            OpenDirection = "(0,1)";
             ExtrudedDirection = Vector3d.ZAxis;
             CenterPoint = centerPoint;
             XVector = Vector3d.XAxis.RotateBy(angle, Vector3d.ZAxis);

@@ -5,11 +5,11 @@ using ThMEPEngineCore.Model;
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHBuilding : ThIfcBuilding
+    public class ThTCHBuilding : ThTCHElement
     {
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public string BuildingName { get; set; }
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public List<ThTCHBuildingStorey> Storeys { get; set; }
         public ThTCHBuilding() 
         {

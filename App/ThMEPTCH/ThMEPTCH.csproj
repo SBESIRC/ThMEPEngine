@@ -77,6 +77,7 @@
     <Compile Include="Model\SurrogateModel\PolylineSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Vector3DSurrogate.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
+    <Compile Include="Model\ThTCHElement.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
     <Compile Include="Model\ThTCHSlabDescendingData.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />

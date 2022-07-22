@@ -4,11 +4,11 @@ using ThMEPEngineCore.Model;
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHProject : ThIfcProject
+    public class ThTCHProject : ThTCHElement
     {
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public string ProjectName { get; set; }
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public ThTCHSite Site { get; set; }
     }
 }

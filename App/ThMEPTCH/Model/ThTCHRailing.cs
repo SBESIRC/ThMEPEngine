@@ -8,13 +8,13 @@ namespace ThMEPTCH.Model
     /// 栏杆
     /// </summary>
     [ProtoContract]
-    public class ThTCHRailing : ThIfcRailing
+    public class ThTCHRailing : ThTCHElement
     {
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public double Depth { get; set; }
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public double Thickness { get; set; }
-        [ProtoMember(3)]
+        [ProtoMember(13)]
         public Vector3d ExtrudedDirection { get; set; }
     }
 }

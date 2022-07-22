@@ -80,7 +80,7 @@ namespace ThMEPTCH.TCHXmlDataConvert.TCHEntityToThIfc
             SetPropertiesValue(xmlEntity,opening);
             return opening;
         }
-        void SetPropertiesValue( TCH_OPENING xmlEntity, ThIfcElement ifcElement) 
+        void SetPropertiesValue( TCH_OPENING xmlEntity, ThTCHElement ifcElement) 
         {
             ifcElement.Uuid = xmlEntity.Object_ID.value;
             ifcElement.Useage = GetLinkWallIds(xmlEntity);

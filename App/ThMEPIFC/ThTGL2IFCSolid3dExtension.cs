@@ -91,7 +91,7 @@ namespace ThMEPIFC
             {
                 moveVector += slab.ExtrudedDirection.MultiplyBy(pline.Elevation);
                 var outPolyline = pline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
-                var slabSolid = CreateExtrudedSolid(outPolyline, -slab.Thickness, 0.0);
+                var slabSolid = CreateExtrudedSolid(outPolyline, -slab.Height, 0.0);
                 if (slabSolid != null)
                 { 
                     // 首先拉伸板的轮廓，等所有轮廓都融合完成后再进行剪切
@@ -120,7 +120,7 @@ namespace ThMEPIFC
                         else
                         {
                             var outLine = data.Outline.GetTransformedCopy(Matrix3d.Displacement(moveVector + slab.ExtrudedDirection.MultiplyBy(1))) as Polyline;
-                            var holeSolid = CreateExtrudedSolid(outLine, -(slab.Thickness + 2), 0.0);
+                            var holeSolid = CreateExtrudedSolid(outLine, -(slab.Height + 2), 0.0);
                             slabSolid.BooleanOperation(BooleanOperationType.BoolSubtract, holeSolid);
                         }
                     }

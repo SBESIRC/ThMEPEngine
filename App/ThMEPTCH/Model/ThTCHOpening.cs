@@ -7,20 +7,18 @@ using ThMEPEngineCore.Model;
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHOpening : ThIfcOpeningElement, ICloneable
+    public class ThTCHOpening : ThTCHElement, ICloneable
     {
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public Point3d CenterPoint { get; set; }
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public double Width { get; set; }
-        [ProtoMember(3)]
-        public double Height { get; set; }
-        [ProtoMember(4)]
+        [ProtoMember(13)]
         public double Thickness { get; set; }
-        [ProtoMember(5)]
+        [ProtoMember(14)]
         public Vector3d ExtrudedDirection { get; }
         //X轴方向和宽度方向一致
-        [ProtoMember(6)]
+        [ProtoMember(15)]
         public Vector3d XVector { get; set; }
 
         private ThTCHOpening()

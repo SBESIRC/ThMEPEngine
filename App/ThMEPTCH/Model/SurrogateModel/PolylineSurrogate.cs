@@ -20,6 +20,7 @@ namespace ThMEPTCH.Model.SurrogateModel
         {
             this.Points = pts;
             this.IsClosed = closed;
+            this.InnerPolylines = new List<PolylineSurrogate>();
         }
 
         [ProtoMember(1)]
@@ -27,6 +28,8 @@ namespace ThMEPTCH.Model.SurrogateModel
 
         [ProtoMember(2)]
         public bool IsClosed { get; set; }
+        [ProtoMember(3)]
+        public List<PolylineSurrogate> InnerPolylines { get; set; }
 
         public static implicit operator Polyline(PolylineSurrogate surrogate)
         {
@@ -52,6 +55,24 @@ namespace ThMEPTCH.Model.SurrogateModel
         }
 
         public static implicit operator PolylineSurrogate(Polyline polyline)
+        {
+            return PolylineChange(polyline);
+        }
+        public static implicit operator PolylineSurrogate(Entity entity)
+        {
+            if (entity is Polyline polyline)
+                return PolylineChange(polyline);
+            else if (entity is MPolygon polygon) 
+            {
+            
+            }
+            return new PolylineSurrogate(new List<Point3DCollectionSurrogate>(), false);
+        }
+        public static implicit operator Entity(PolylineSurrogate surrogate)
+        {
+            return null;
+        }
+        public static PolylineSurrogate PolylineChange(Polyline polyline) 
         {
             if (polyline.IsNull())
                 return new PolylineSurrogate(new List<Point3DCollectionSurrogate>(), false);

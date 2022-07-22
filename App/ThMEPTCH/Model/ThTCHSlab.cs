@@ -2,23 +2,22 @@
 using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using System.Collections.Generic;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHSlab : ThIfcSlab
+    public class ThTCHSlab : ThTCHElement
     {
         /// <summary>
         /// 降板信息
         /// </summary>
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public List<ThTCHSlabDescendingData> Descendings { get; set; }
 
         /// <summary>
         /// 拉伸方向
         /// </summary>
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public Vector3d ExtrudedDirection { get; private set; }
 
         private ThTCHSlab()
@@ -35,7 +34,7 @@ namespace ThMEPTCH.Model
         public ThTCHSlab(MPolygon polygon, double thickness, Vector3d extVector)
         {
             Outline = polygon;
-            Thickness = thickness;
+            Height = thickness;
             ExtrudedDirection = extVector;
             Descendings = new List<ThTCHSlabDescendingData>();
         }
@@ -43,7 +42,7 @@ namespace ThMEPTCH.Model
         public ThTCHSlab(Polyline pline, double thickness, Vector3d extVector)
         {
             Outline = pline;
-            Thickness = thickness;
+            Height = thickness;
             ExtrudedDirection = extVector;
             Descendings = new List<ThTCHSlabDescendingData>();
         }

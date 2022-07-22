@@ -83,8 +83,8 @@ namespace ThMEPIFC
                 File.Delete(ifcPath);
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
-            var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false);
+            var service = new ThTCHArchDBService(filePath);
+            var project = service.TCHDBDataToProject();
             if (project == null)
             {
                 return;
@@ -115,8 +115,8 @@ namespace ThMEPIFC
                 File.Delete(midFilePath);
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
-            var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false);
+            var service = new ThTCHArchDBService(filePath);
+            var project = service.TCHDBDataToProject();
             if (project == null)
             {
                 return;
@@ -187,8 +187,8 @@ namespace ThMEPIFC
             Stopwatch sw = new Stopwatch();
             sw.Start();
             // 读入并解析TGL XML文件
-            var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false);
+            var service = new ThTCHArchDBService(filePath);
+            var project = service.TCHDBDataToProject();
             if (project == null)
             {
                 return;
@@ -224,11 +224,15 @@ namespace ThMEPIFC
                 {
                     ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Polyline), false).SetSurrogate(typeof(PolylineSurrogate));
                 }
+                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Entity)))
+                {
+                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Entity), false).SetSurrogate(typeof(PolylineSurrogate));
+                }
                 Serializer.Serialize(pipeClient, project);
                 pipeClient.Close();
                 Active.Database.GetEditor().WriteMessage("已发送至Viewer\r\n");
             }
-            catch
+            catch(System.Exception ex)
             {
                 pipeClient.Dispose();
                 Active.Database.GetEditor().WriteMessage("未连接到Viewer\r\n");

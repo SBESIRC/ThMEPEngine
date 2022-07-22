@@ -6,31 +6,26 @@ using ThMEPEngineCore.Model;
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHBuildingStorey : ThIfcBuildingStorey
+    public class ThTCHBuildingStorey : ThTCHElement
     {
-        [ProtoMember(10)]
+        [ProtoMember(98)]
         public string MemoryStoreyId { get; set; }
-        [ProtoMember(11)]
+        [ProtoMember(99)]
         public Matrix3d MemoryMatrix3d { get; set; }
         /// <summary>
         /// 编号
         /// </summary>
-        [ProtoMember(1)]
+        [ProtoMember(11)]
         public string Number { get; set; }
         /// <summary>
         /// 标高
         /// </summary>
-        [ProtoMember(2)]
+        [ProtoMember(12)]
         public double Elevation { get; set; }
-        /// <summary>
-        /// 层高
-        /// </summary>
-        [ProtoMember(3)]
-        public double Height { get; set; }
         /// <summary>
         /// 基点
         /// </summary>
-        [ProtoMember(4)]
+        [ProtoMember(13)]
         public Point3d Origin { get; set; }
         public ThTCHBuildingStorey()
         {
@@ -41,15 +36,15 @@ namespace ThMEPTCH.Model
             Railings = new List<ThTCHRailing>();
             MemoryStoreyId = null;
         }
-        [ProtoMember(5)]
+        [ProtoMember(14)]
         public List<ThTCHWall> Walls { get; set; }
-        [ProtoMember(6)]
+        [ProtoMember(15)]
         public List<ThTCHWindow> Windows { get; set; }
-        [ProtoMember(7)]
+        [ProtoMember(16)]
         public List<ThTCHDoor> Doors { get; set; }
-        [ProtoMember(8)]
+        [ProtoMember(17)]
         public List<ThTCHSlab> Slabs { get; set; }
-        [ProtoMember(9)]
+        [ProtoMember(18)]
         public List<ThTCHRailing> Railings { get; set; }
     }
 }
