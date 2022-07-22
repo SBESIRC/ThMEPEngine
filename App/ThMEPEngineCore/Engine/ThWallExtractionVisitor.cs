@@ -8,6 +8,18 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThWallExtractionVisitor : ThBuildingElementExtractionVisitor
     {
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is Polyline || dbObj is Arc || dbObj is Line)
@@ -25,7 +37,14 @@ namespace ThMEPEngineCore.Engine
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+                if(xclip.Inverted)
+                {
+                    elements.RemoveAll(o => xclip.Contains(o.Geometry as Curve));
+                }
+                else
+                {
+                    elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+                }
             }
         }  
         private List<ThRawIfcBuildingElementData> HandleCurve(Curve curve, Matrix3d matrix)

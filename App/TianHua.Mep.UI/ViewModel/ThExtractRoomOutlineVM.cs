@@ -15,6 +15,7 @@ using TianHua.Mep.UI.Command;
 using ThMEPEngineCore.Model.Common;
 using ThControlLibraryWPF.ControlUtils;
 using ThCADExtension;
+using AcHelper.Commands;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -51,31 +52,23 @@ namespace TianHua.Mep.UI.ViewModel
                 cmd.Execute();
                 if (cmd.RangePts.Count>=3)
                 {
-                    if (cmd.Walls.Count > 0)
-                    {
-                        Active.Database.CreateAILayer(AIWallLayer,7);
-                        EraseEntities(cmd.RangePts, AIWallLayer);
-                        PrintEntities(cmd.Walls, AIWallLayer);
-                    }
-                    if (cmd.Columns.Count>0)
-                    {
-                        Active.Database.CreateAIColumnLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
-                        PrintEntities(cmd.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
-                    }
-                    if (cmd.Doors.Count > 0)
-                    {
-                        Active.Database.CreateAIDoorLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
-                        PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
-                    }
-                    if(cmd.ShearWalls.Count>0)
-                    {
-                        Active.Database.CreateAIShearWallLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
-                        PrintEntities(cmd.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
-                    }
-                    SetCurrentLayer(ThMEPEngineCoreLayerUtils.WALL);
+                    Active.Database.CreateAILayer(AIWallLayer, 7);
+                    EraseEntities(cmd.RangePts, AIWallLayer);
+                    PrintEntities(cmd.Walls, AIWallLayer);
+
+                    Active.Database.CreateAIColumnLayer();
+                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
+                    PrintEntities(cmd.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
+
+                    Active.Database.CreateAIDoorLayer();
+                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
+                    PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
+
+                    Active.Database.CreateAIShearWallLayer();
+                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                    PrintEntities(cmd.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
+
+                    SetCurrentLayer(AIWallLayer);
                 }
             }
         }
@@ -126,7 +119,11 @@ namespace TianHua.Mep.UI.ViewModel
                 }
             }
         }
-
+        public void BlockConfig()
+        {
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THWTKSB");
+        }
         public void Confirm()
         {
             SaveLayers();
