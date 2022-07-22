@@ -204,6 +204,7 @@ FocusToCAD();
             var ucsMatrix = Active.Editor.CurrentUserCoordinateSystem;
             double fanAngle = ucsMatrix.CoordinateSystem3d.Xaxis.GetAngleTo(vector, refVector) - Math.PI/2.0;
             double rotateAngle = Vector3d.XAxis.GetAngleTo(ucsMatrix.CoordinateSystem3d.Xaxis, Vector3d.ZAxis);
+            double fireAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
             double fontScale = ThFanLayoutDealService.GetFontHeight(1, mapScale);
             double fontHeight = ThFanLayoutDealService.GetFontHeight(0, mapScale);
             string strFanVolume = ThFanLayoutDealService.GetFanVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
@@ -225,9 +226,8 @@ FocusToCAD();
             }
             //插入防火阀
             Point3d pt = point2 - vector * (info.FanSideConfigInfo.FanConfigInfo.FanDepth - 10);//沿着vector反方向平移电机深度
-            Vector3d tmpV = new Vector3d(Math.Cos(fanAngle + Math.PI), Math.Sin(fanAngle + Math.PI), 0.0);//沿着vector垂直方向平移电机宽度
+            Vector3d tmpV = new Vector3d(Math.Cos(fireAngle + Math.PI), Math.Sin(fireAngle + Math.PI), 0.0);//沿着vector垂直方向平移电机宽度
             pt = pt + (tmpV * info.FanSideConfigInfo.FanConfigInfo.FanWidth / 2.0);
-            double fireAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
             InsertFireValve(acadDatabase, pt, fireAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth, "70度防火阀FD");
             
             if(!info.AirPortSideConfigInfo.IsInsertAirPort)
@@ -317,7 +317,7 @@ FocusToCAD();
             }
             //插入防火阀
             Point3d pt = point2 - vector * (info.FanSideConfigInfo.FanConfigInfo.FanDepth - 10);//沿着vector反方向平移电机深度
-            Vector3d tmpV = new Vector3d(Math.Cos(fanAngle + Math.PI), Math.Sin(fanAngle + Math.PI), 0.0);//沿着vector垂直方向平移电机宽度
+            Vector3d tmpV = new Vector3d(Math.Cos(fireAngle + Math.PI), Math.Sin(fireAngle + Math.PI), 0.0);//沿着vector垂直方向平移电机宽度
             pt = pt + (tmpV * info.FanSideConfigInfo.FanConfigInfo.FanWidth / 2.0);
             InsertFireValve(acadDatabase, pt, fireAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanWidth, "70度防火阀FD");
 
