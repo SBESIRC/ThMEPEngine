@@ -12,6 +12,7 @@ using ThCADExtension;
 using ThMEPHVAC.FanLayout.Model;
 using ThMEPHVAC.FanLayout.ViewModel;
 using ThMEPHVAC.Model;
+using ThMEPHVAC.FanConnect;
 
 namespace ThMEPHVAC.FanLayout.Service
 {
@@ -278,7 +279,7 @@ namespace ThMEPHVAC.FanLayout.Service
                 entity.ColorIndex = colorIndex;
             }
         }
-        public void InsertPipeMark(string layer, string blockName, Point3d position,double angle,List<string> properties)
+        public void InsertPipeMark(string layer, string blockName, Point3d position,double angle,List<string> properties,double pipeInterval,bool bReverse)
         {
             using (var database = AcadDatabase.Active())
             {
@@ -293,7 +294,11 @@ namespace ThMEPHVAC.FanLayout.Service
                 {
                     if (property.PropertyName.Contains("管间距"))
                     {
-                        property.Value = 300.0;
+                        property.Value = pipeInterval;
+                    }
+                    if (bReverse == true && property.PropertyName.Contains(ThFanConnectCommon.BlkVisibility_Turn))
+                    {
+                        property.Value = (short)1; //翻转
                     }
                 }
             }

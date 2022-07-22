@@ -64,7 +64,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     ///处理数据--删除不必要的线（图纸上不删除）
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                    //mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
+                    mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
 
                     var handlePipeService = new ThHandleFanPipeService()
                     {
@@ -137,12 +137,9 @@ namespace ThMEPHVAC.FanConnect.Command
                     //pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2);
 
                     //计算流量
-                    DrawUtils.ShowGeometry(rightLines, "l0rightline");
                     var pipeTreeNodes = treeModel.RootNode.GetAllTreeNode();
                     var lines = pipeTreeNodes.Select(x => x.Item.PLine).ToList();
-                    DrawUtils.ShowGeometry(lines, "l0pline");
                     var breakLine = ThPointTreeModelService.BreakLine(lines, mt);
-                    DrawUtils.ShowGeometry(breakLine, "l0breakline");
                     var flowCalTree = ThPointTreeModelService.BuildTree(breakLine, startPt);
                     if (flowCalTree != null)
                     {
