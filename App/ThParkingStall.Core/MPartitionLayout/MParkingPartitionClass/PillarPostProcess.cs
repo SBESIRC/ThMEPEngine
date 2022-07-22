@@ -14,18 +14,22 @@ namespace ThParkingStall.Core.MPartitionLayout
     {
         public void PostProcessPillars()
         {
-            CarSpatialIndex=new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
-            Pillars = Pillars.Distinct().ToList();
-            //删除孤立在车位旁边之外的柱子
-            RemoveInvalidPillars();
-            //在转角处，两个方向排布的车位柱子碰车位，将该柱子朝车道方向外偏一点————设计师是这么做的
-            MovePillarInCorner();
-            //删除与车位相交的柱子
-            RemovePillarIntersectWithCar();
-            //在指定的距离范围内，保留一个柱子（删除近似重复等）
-            RemoveDuplicatePillarWithinTheSpecifiedRange();
-            //删除在剪力墙附近的柱子
-            RemovePillarNearBuildings();
+            try
+            {
+                CarSpatialIndex = new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
+                Pillars = Pillars.Distinct().ToList();
+                //删除孤立在车位旁边之外的柱子
+                RemoveInvalidPillars();
+                //在转角处，两个方向排布的车位柱子碰车位，将该柱子朝车道方向外偏一点————设计师是这么做的
+                MovePillarInCorner();
+                //删除与车位相交的柱子
+                RemovePillarIntersectWithCar();
+                //在指定的距离范围内，保留一个柱子（删除近似重复等）
+                RemoveDuplicatePillarWithinTheSpecifiedRange();
+                //删除在剪力墙附近的柱子
+                RemovePillarNearBuildings();
+            }
+            catch { }
         }
         private void RemoveInvalidPillars()
         {
