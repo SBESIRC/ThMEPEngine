@@ -55,7 +55,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowPts = flowIndicator.CreatePts( sprayIn);
             var objs = flowIndicator.CreatBlocks();
             pipeLines.PipeLineSplit(flowPts);
-
+            var flowSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             pipeLines.CreatePtDic(sprayIn);
 
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);
@@ -66,7 +66,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.PumpTexts = pumpText.GetTexts();
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(pumpText.DBObjs);
 
-            sprayIn.CreateTermPt(textSpatialIndex);//针对存在缺省立管的标注
+            sprayIn.CreateTermPt(textSpatialIndex, flowSpatialIndex);//针对存在缺省立管的标注
 
             DicTools.CreatePtDic(sprayIn);
         }

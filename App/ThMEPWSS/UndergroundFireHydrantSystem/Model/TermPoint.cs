@@ -6,9 +6,6 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPEngineCore;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {

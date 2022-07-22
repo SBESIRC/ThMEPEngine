@@ -42,11 +42,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                 var tpts = spraySystem.BranchDic[pt];
 
-                tpts.Reverse();
-
                 var needNewDrawings = Tool.NeedNewDrawing(tpts, sprayIn);//同时存在采用新的画法
 
                 int type4Nums = 0;//类型为4的数目
+                int type1Nums = 0;//类型为1的数目
+                double curX = fireStpt.X;
                 foreach (var tpt in tpts)// tpt 支路端点
                 {
                     if (!sprayIn.TermPtDic.ContainsKey(tpt))
@@ -59,9 +59,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                     if (termPt.Type == 1)//防火分区
                     {
-                        type4Nums = 0;
-
-                        var firePt = fireStpt.OffsetX(fireAreaIndex * 5500);
+                        var firePt = new Point3d(curX+1000, fireStpt.Y -1200, 0);//fireStpt.OffsetX(fireAreaIndex * 5500 + type4Nums * 2000).OffsetY(-1200);
                         fireAreaIndex++;
                         bool hasFlow = false;
                         string flowType = "";
@@ -79,6 +77,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         {
                             spraySystem.MaxOffSetX = firePt.X;
                         }
+                        type1Nums++;
+                        curX = firePt.X + 4000;
+                        sprayOut.SupportLines.Add(new Line(firePt, tpt._pt));
                     }
                     if (termPt.Type == 2)//其他楼层
                     {
@@ -113,32 +114,39 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             sprayOut.FireDistrictLefts.Add(fireDistrict);
                         }
                         index++;
+                        sprayOut.SupportLines.Add(new Line(fireStpt, tpt._pt));
                     }
                     if (termPt.Type == 3)//水泵接合器
                     {
                         sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(3000)));
                         Type3.Get(stPt.OffsetX(3000), termPt, DN, sprayOut);
+                        sprayOut.SupportLines.Add(new Line(stPt.OffsetX(3000), tpt._pt));
                     }
                     if (termPt.Type == 4 || termPt.Type == 5)
                     {
                         double length = Tool.GetLength(termPt.PipeNumber) + 100;
                         var firePt = fireStpt;
-                        var pt1 = new Point3d(firePt.X + type4Nums * (length + 500) + 1000, stPt.Y, 0);
+                        var pt1 = new Point3d(curX + Math.Max(length,1200), stPt.Y, 0);
                         type4Nums++;
-                        var pt2 = pt1.OffsetX(1200);
-                        var pt3 = pt2.OffsetY(-1200);
-                        var pt4 = pt3.OffsetX(-length);
+                        var pt2 = pt1.OffsetY(-1200);
+                        var pt3 = pt2.OffsetX(1200);
+                        var pt4 = pt3.OffsetY(-600);
+                        var pt5 = pt4.OffsetX(-length);
                         sprayOut.PipeLine.Add(new Line(stPt, pt1));
                         sprayOut.PipeLine.Add(new Line(pt1, pt2));
-                        sprayOut.NoteLine.Add(new Line(pt2, pt3));
+                        sprayOut.PipeLine.Add(new Line(pt2, pt3));
                         sprayOut.NoteLine.Add(new Line(pt3, pt4));
-                        sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt2, 0));
-                        var text = new Text(termPt.PipeNumber, pt4);
+                        sprayOut.NoteLine.Add(new Line(pt4, pt5));
+                        sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, 0));
+                        var text = new Text(termPt.PipeNumber, pt5);
                         sprayOut.Texts.Add(text);
-                        if (firePt.X > spraySystem.MaxOffSetX)
+    
+                        curX = pt3.X;
+                        if (curX > spraySystem.MaxOffSetX)
                         {
-                            spraySystem.MaxOffSetX = firePt.X;
+                            spraySystem.MaxOffSetX = curX;
                         }
+                        sprayOut.SupportLines.Add(new Line(pt2, tpt._pt));
                     }
                 }
 
@@ -452,79 +460,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             stPt4 = stPt4.OffsetX(600);
             signelBranch = false;
         }
-
-        public static void Type5NeedEvade(ref Point3d stPt4, ref bool signelBranch, Point3dEx tpt, string pipeNumber,
-            string DN, SprayOut sprayOut, SpraySystem spraySystem)
-        {
-            bool needEvade = true;//默认需要躲避
-            var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 400, 0);
-            var pt2 = pt1.OffsetX(650);
-            var pt3 = pt2.OffsetY(1300);
-            double length = Tool.GetLength(pipeNumber) + 100;
-            if (pipeNumber.Equals(""))
-            {
-                length = Tool.GetLength("DNXXX") + 100;
-            }
-            double stepSize = 450;
-            int indx = 0;
-            while (needEvade)
-            {
-                var textPt = pt3.OffsetXY(-length, 900 + stepSize * indx);
-                var text2 = new Text(pipeNumber, textPt);
-                var texts = new List<DBText>() { text2.DbText };
-                var line34 = new Line(pt3, pt3.OffsetY(900 + stepSize * indx));
-                var lines = new List<Line>() { line34 };
-                if (spraySystem.BlockExtents.SelectAll().Count == 0)//外包框数目为0
-                {
-                    spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
-                    spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
-                    break;
-                }
-                else
-                {
-                    var rect = Tool.GetRect(text2.DbText);//提框
-                    var dbObjs = spraySystem.BlockExtents.SelectCrossingPolygon(rect);
-                    if (dbObjs.Count == 0)
-                    {
-                        spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
-                        spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
-                        break;
-                    }
-                }
-                indx++;
-            }
-            var pt4 = pt3.OffsetY(900 + stepSize * indx);
-            var pt5 = pt4.OffsetX(-length);
-            if (signelBranch)
-            {
-                sprayOut.PipeLine.Add(new Line(stPt4, pt1));
-
-            }
-            sprayOut.PipeLine.Add(new Line(pt1, pt2));
-            if (spraySystem.ValveDic.Contains(tpt))
-            {
-                sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetY(50)));
-                sprayOut.PipeLine.Add(new Line(pt2.OffsetY(350), pt3));
-                sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt2.OffsetY(50), Math.PI / 2));
-            }
-            else
-            {
-                sprayOut.PipeLine.Add(new Line(pt2, pt3));
-            }
-
-            sprayOut.NoteLine.Add(new Line(pt3, pt4));
-            sprayOut.NoteLine.Add(new Line(pt4, pt5));
-            sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
-            var text = new Text(pipeNumber, pt5);
-            var dn = new Text(DN, pt5.OffsetXY(50, -400));
-            sprayOut.Texts.Add(text);
-            sprayOut.Texts.Add(dn);
-            stPt4 = stPt4.OffsetX(600);
-            signelBranch = false;
-        }
-
-        
-       
     }
 }
 

@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             visited.Add(sprayIn.LoopStartPt);
             tempPath.Add(sprayIn.LoopStartPt);
             //主环路提取
-            DepthSearch.DfsMainLoopWithMainLoopAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
+            Dfs.DfsMainLoopWithMainLoopAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
             DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
             Draw.MainLoop(acadDatabase, mainPathList);

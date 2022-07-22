@@ -385,7 +385,6 @@
     <Compile Include="UndergroundFireHydrantSystem\Method\ValveCasing.cs" />
     <Compile Include="UndergroundSpraySystem\Service\AlarmValveSys.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BranchFunc\Tool.cs" />
-    <Compile Include="UndergroundSpraySystem\Service\BranchFunc\Type1.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BranchFunc\Type3.cs" />
     <Compile Include="UndergroundSpraySystem\Service\MainLoop3.cs" />
     <Compile Include="UndergroundSpraySystem\Test\Draw.cs" />
@@ -442,7 +441,6 @@
     <Compile Include="UndergroundSpraySystem\Model\PipeDnNew.cs" />
     <Compile Include="UndergroundSpraySystem\Model\PipeLineTool.cs" />
     <Compile Include="UndergroundSpraySystem\Model\PumpTextNew.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\SiglValveFlowIndicator.cs" />
     <Compile Include="UndergroundSpraySystem\Model\VerticalPipeNew.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BranchAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BranchLoopAcrossFloor.cs" />
@@ -842,15 +840,11 @@
     <Compile Include="UndergroundSpraySystem\Method\Draw.cs" />
     <Compile Include="UndergroundSpraySystem\Method\SubLoopDeal.cs" />
     <Compile Include="UndergroundSpraySystem\Method\TermPtDeal.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\AlarmText.cs" />
     <Compile Include="UndergroundSpraySystem\Model\AlarmValve.cs" />
     <Compile Include="UndergroundSpraySystem\Model\AlarmValveTCH.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\Floor.cs" />
     <Compile Include="UndergroundSpraySystem\Model\FlowIndicator.cs" />
     <Compile Include="UndergroundSpraySystem\Model\LeadLine.cs" />
     <Compile Include="UndergroundSpraySystem\Model\LoopMarkPt.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\PipeDN.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\PipeNo.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayIn.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayOut.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayPipe.cs" />

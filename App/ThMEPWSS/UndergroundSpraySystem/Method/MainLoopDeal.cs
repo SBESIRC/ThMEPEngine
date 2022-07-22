@@ -79,7 +79,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 visited.Remove(p);
             }
         }
-
-
     }
 }

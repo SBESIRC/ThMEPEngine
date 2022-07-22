@@ -45,7 +45,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var flag = false;
                         var branchLoop = new List<Point3dEx>();
                         string floorNumber = "";
-                        DepthSearch.DfsBranchLoop(pts[i], pts[i], pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
+                        Dfs.DfsBranchLoop(pts[i], pts[i], pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
                         if (branchLoop.Count > 5 && flag)
                         {
                             usedPtNUms.Add(i);
@@ -97,7 +97,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var flag = false;
                         var branchLoop = new List<Point3dEx>();
                         string floorNumber = "";
-                        DepthSearch.DfsBranchLoop(pts[i], pts[i], pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
+                        Dfs.DfsBranchLoop(pts[i], pts[i], pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
                         if (branchLoop.Count > 5 && flag)
                         {
                             usedPtNUms.Add(i);
@@ -158,7 +158,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var flag = false;
                     var branchLoop = new List<Point3dEx>();
                     var floorNumber = "";
-                    DepthSearch.DfsCurrentFloorBranchLoop(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
+                    Dfs.DfsCurrentFloorBranchLoop(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
                     if (branchLoop.Count > 5 && flag)
                     {
                         usedPtNUms.Add(i);
@@ -215,7 +215,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var flag = false;
                     var branchLoop = new List<Point3dEx>();
                     var floorNumber = "";
-                    DepthSearch.DfsBranchLoop(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
+                    Dfs.DfsBranchLoop(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
                     if (branchLoop.Count > 5 && flag)
                     {
                         usedPtNUms.Add(i);
@@ -316,7 +316,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var floorNumber = "";
                     var throughoutCnts = 0;
 
-                    DepthSearch.DfsBranchLoop2(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber, ref throughoutCnts);
+                    Dfs.DfsBranchLoop2(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber, ref throughoutCnts);
                     if (branchLoop.Count > 5 && flag)
                     {
                         usedPtNUms.Add(i);
@@ -402,7 +402,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var flag = false;
                     var branchLoop = new List<Point3dEx>();
                     var floorNumber = "";
-                    DepthSearch.DfsBranchLoopInCurrentFloor(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
+                    Dfs.DfsBranchLoopInCurrentFloor(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts, ref floorNumber);
                     if (branchLoop.Count > 5 && flag)
                     {
                         usedPtNUms.Add(i);
@@ -415,7 +415,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     ;
                     branchLoop.Clear();
                     int throughoutCnts = 0;//穿越点数目
-                    DepthSearch.DfsMainLoopInOtherFloor(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, 
+                    Dfs.DfsMainLoopInOtherFloor(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, 
                         ref flag, pts, ref floorNumber, ref throughoutCnts);//提取跨层主环
                     if(branchLoop.Count > 20)
                     {

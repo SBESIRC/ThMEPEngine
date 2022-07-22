@@ -13,7 +13,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void AlarmValveGet(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
         {
             var alarmNums = 0;//支路数
-            var drawPt = sprayOut.InsertPoint.OffsetY(5000);
+            var drawPt = sprayOut.InsertPoint.OffsetY(6200);
             foreach (var pt in sprayIn.AlarmValveStPts)
             {
                 var fireAreaNums = 0;//防火分区数
@@ -27,9 +27,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 q.Enqueue(pt);
                 HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                 visited.Add(pt);
+                int level = 0;
+                var ptLevelDic = new Dictionary<Point3dEx, int>();//每个点及其level
+
                 while (q.Count > 0)
                 {
                     var curPt = q.Dequeue();
+                    if (!ptLevelDic.ContainsKey(curPt))
+                    {
+                        ptLevelDic.Add(curPt, 0);
+                    }
                     if (sprayIn.PtTypeDic.ContainsKey(curPt))
                     {
                         if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
@@ -63,6 +70,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                         visited2.Add(adj);
                         q.Enqueue(adj);
+                        if(ptLevelDic.ContainsKey(adj))
+                        {
+                            ;
+                        }
+                        else
+                        {
+                            if (adjs.Count == 3)
+                            {
+                                ptLevelDic.Add(adj, ptLevelDic[curPt] + 1);
+                            }
+                            else
+                            {
+                                ptLevelDic.Add(adj, ptLevelDic[curPt]);
+                            }
+                        }
+
                     }
                 }
                 if (termPts.Count != 0)
@@ -87,6 +110,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
             }
         }
+        
+        
         public static void Get(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             MainLoopGet(ref visited, sprayIn, spraySystem);
@@ -111,6 +136,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
+        
         public static void BfsBranch(out int alarmNums, out int fireAreaNums, List<Point3dEx> branchLoop, 
             HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
@@ -132,9 +158,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     q.Enqueue(pt);
                     HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                     visited.Add(pt);
+                    int level = 0;
+                    var ptLevelDic = new Dictionary<Point3dEx, int>();//每个点及其level
                     while (q.Count > 0)
                     {
                         var curPt = q.Dequeue();
+                        if (!ptLevelDic.ContainsKey(curPt))
+                        {
+                            ptLevelDic.Add(curPt, 0);
+                        }
                         if (sprayIn.PtTypeDic.ContainsKey(curPt))
                         {
                             if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
@@ -167,6 +199,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                             visited2.Add(adj);
                             q.Enqueue(adj);
+                            if (adjs.Count == 3)
+                            {
+                                ptLevelDic.Add(adj, ptLevelDic[curPt] + 1);
+                            }
+                            else
+                            {
+                                ptLevelDic.Add(adj, ptLevelDic[curPt]);
+                            }
                         }
                     }
                     if (termPts.Count != 0)
@@ -190,6 +230,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         {
                             continue;
                         }
+                        termPts = termPts.OrderBy(p => ptLevelDic[p]).ToList();
                         spraySystem.BranchDic.Add(pt, termPts);
 
                     }
@@ -235,6 +276,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
+        
         public static void SubLoopAdd(SpraySystem spraySystem, List<Point3dEx> subLoop, List<Point3dEx> branchLoop, int alarmNums, int fireAreaNums)
         {
             if (subLoop.Contains(branchLoop.Last()))
@@ -325,6 +367,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
+        
         private static void MainLoopGet(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var mainLoop = spraySystem.MainLoop;
@@ -397,6 +440,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
+        
         private static void SubLoopGet(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             foreach (var subLoop in spraySystem.SubLoops)

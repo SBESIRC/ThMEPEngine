@@ -24,6 +24,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
             }
         }
+        
+        
         public static void Get(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             for (int j = 0; j < spraySystem.MainLoops.Count; j++)
@@ -177,9 +179,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 spraySystem.MainLoops[j] = branchLoop;
             }
         }
-
-
-
 
         public static void DfsBranch(Point3dEx start, Point3dEx cur, Point3dEx target, List<Point3dEx> branchLoop, List<Point3dEx> tempPath, HashSet<Point3dEx> visited,
     SprayIn sprayIn, ref bool hasValve, ref bool hasFlow, Stopwatch stopwatch, bool flag,ref string flowType)

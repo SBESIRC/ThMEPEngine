@@ -28,19 +28,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             var vertical = new VerticalPipeNew();
             vertical.Extract(database, selectArea, sprayIn);//提取竖管
-            
+
             var leadLine = new LeadLineNew();//提取引线
             leadLine.Extract(database, selectArea);//3,283ms
             sprayIn.LeadLines = leadLine.GetLines();
             var alarmValve = new AlarmValveTCH();
             var alarmPts = alarmValve.Extract(database, selectArea);
-            pipeLines = LineTools.PipeLineAutoConnect2(pipeLines, sprayIn);//1. 对齐的线自动连接
 
-            pipeLines = LineTools.ConnectVerticalLine(pipeLines, sprayIn);//2. 依靠立管的线连接
 
-            pipeLines = LineTools.ConnectWithAlarmValve(pipeLines, sprayIn, alarmPts);//3. 连接报警阀连接的线
+            pipeLines = LineTools.DealPipeLines(pipeLines, alarmPts, sprayIn);
 
-            pipeLines = LineTools.PipeLineSplit(pipeLines);
+
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             DicTools.CreatePtTypeDic(sprayIn.PtDic.Keys.ToList(), "MainLoop", sprayIn);
             foreach (var line in pipeLines.ToList())
@@ -56,8 +54,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                 }
             }
-            //pipeLines = PipeLineTool.PipeLineDeal(sprayIn, vertical, pipeLines, alarmPts);//管线自动连接，节点打断以及短线删除等操作
-
 
             var valve = new Valve();
             valve.Extract(database, sprayIn);//提取阀门
@@ -116,17 +112,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
 
             DicTools.CreatePtDic(sprayIn);//针对跨层
-            ThMEPWSS.UndergroundSpraySystem.Test.Draw.DrawLine(pipeLines, "处理后的管线2");
+            //ThMEPWSS.UndergroundSpraySystem.Test.Draw.DrawLine(pipeLines, "处理后的管线2");
             return true;
         }
 
         /// <summary>
         /// 判断跨楼层类型 1：主环跨楼层；0：报警阀跨楼层
         /// </summary>
-        /// <param name="acadDatabase"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="spraySystem"></param>
-        /// <returns></returns>
         public static bool AcrossFloorTypeCheck(AcadDatabase acadDatabase, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var allPts = sprayIn.ThroughPt;
@@ -134,13 +126,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             allPts.ForEach(p => dbPts.Add(new DBPoint(p._pt)));
             var ptSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
             var ptsls = new List<List<Point3dEx>>();
-            foreach(var rect in sprayIn.FloorRectDic.Values)
+            foreach (var rect in sprayIn.FloorRectDic.Values)
             {
                 var pts = new List<Point3dEx>();
-                if(CheckSprayType.HasAlarmValveWithoutStartPt(sprayIn.LoopStartPt, rect, sprayIn.AlarmTextDic.Keys.ToList()))
+                if (CheckSprayType.HasAlarmValveWithoutStartPt(sprayIn.LoopStartPt, rect, sprayIn.AlarmTextDic.Keys.ToList()))
                 {
                     var rstPts = ptSpatialIndex.SelectCrossingPolygon(rect);
-                    foreach(var p in rstPts)
+                    foreach (var p in rstPts)
                     {
                         var ptex = new Point3dEx((p as DBPoint).Position);
                         pts.Add(ptex);
@@ -148,7 +140,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
                 ptsls.Add(pts);
             }
-            ;
             Draw.throughPtsInOtherFloor(ptsls);
             return MainLoopDeal.MainLoopDfs(ptsls, sprayIn);//判断其他楼层是否存在主环
         }
@@ -164,7 +155,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             visited.Add(sprayIn.LoopStartPt);
             tempPath.Add(sprayIn.LoopStartPt);
             //主环路提取
-            DepthSearch.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
+            Dfs.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
             Draw.MainLoop(acadDatabase, mainPathList);
             DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
@@ -196,7 +187,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             visited.Add(sprayIn.LoopStartPt);
             tempPath.Add(sprayIn.LoopStartPt);
             //主环路提取
-            DepthSearch.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
+            Dfs.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
             DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
             Draw.MainLoop(acadDatabase, mainPathList);
@@ -212,19 +203,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         {
             StoreyLine.Get(sprayOut, spraySystem, sprayIn);
             MainLoopWithAcrossFloor.Get(sprayOut, spraySystem, sprayIn);
-            try
-            {
-                BranchLoop1.Get(sprayOut, spraySystem, sprayIn);
-                BranchLoop2.Get(sprayOut, spraySystem, sprayIn);
-                BranchLoop3.Get(sprayOut, spraySystem, sprayIn);
-                BranchAcrossFloor.Get(sprayOut, spraySystem, sprayIn);
-                PipeLine.Split(sprayOut);
-            }
-            catch(Exception ex)
-            {
-                ;
-            }
-           
+
+            BranchLoop1.Get(sprayOut, spraySystem, sprayIn);
+            BranchLoop2.Get(sprayOut, spraySystem, sprayIn);
+            BranchLoop3.Get(sprayOut, spraySystem, sprayIn);
+            BranchAcrossFloor.Get(sprayOut, spraySystem, sprayIn);
+            PipeLine.Split(sprayOut);
         }
     }
 }

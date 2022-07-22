@@ -64,5 +64,29 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
             return pl;
         }
+
+        public static Polyline GetRect(Point3d pt1, Point3d pt2)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+
+            pts.Add(new Point2d(pt1.X, pt1.Y));
+            pts.Add(new Point2d(pt1.X, pt2.Y));
+            pts.Add(new Point2d(pt2.X, pt2.Y));
+            pts.Add(new Point2d(pt2.X, pt1.Y));
+            pts.Add(new Point2d(pt1.X, pt1.Y));
+
+            pl.CreatePolyline(pts);
+
+            return pl;
+        }
+
+        public static Polyline GetRect(this BlockReference br)
+        {
+            var minPt = br.GeometricExtents.MinPoint;
+            var maxPt = br.GeometricExtents.MaxPoint;
+
+            return GetRect(minPt, maxPt);
+        }
     }
 }

@@ -212,7 +212,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             spraySystem.BranchLoopPtDic[pt] = pt2;
             spraySystem.BranchLoopPtNewDic[pt] = pt1;
         }
-        private static void CountfireAreaNums(Point3dEx pt, SpraySystem spraySystem, SprayIn sprayIn, ref int fireAreaIndex)
+        public static void CountfireAreaNums(Point3dEx pt, SpraySystem spraySystem, SprayIn sprayIn, ref int fireAreaIndex)
         {
             if (!spraySystem.BranchDic.ContainsKey(pt))
             {
@@ -232,7 +232,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             }
         }
 
-        private static void AddAlarmValve(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, int fireAreaIndex, Point3d ePt2, ref Point3d nextPt, ref Point3d curPt, ref bool valveFlag, Point3dEx pt)
+        public static void AddAlarmValve(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, int fireAreaIndex, Point3d ePt2, ref Point3d nextPt, ref Point3d curPt, ref bool valveFlag, Point3dEx pt)
         {
             double floorHeight = sprayIn.FloorHeight;
             double alarmGap = sprayIn.PipeGap;
@@ -255,7 +255,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             AddAlarmText(sprayOut, sprayIn, pt, insertPt);//添加报警阀编号
             spraySystem.FireAreaStPtDic.Add(pt, ePt2.OffsetXY(sprayIn.PipeGap, 3900));
         }
-        private static void AddAlarmText(SprayOut sprayOut, SprayIn sprayIn, Point3dEx pt, Point3d insertPt)
+        public static void AddAlarmText(SprayOut sprayOut, SprayIn sprayIn, Point3dEx pt, Point3d insertPt)
         {
             double minDist = 500;
             string alarmText = "";//报警阀编号

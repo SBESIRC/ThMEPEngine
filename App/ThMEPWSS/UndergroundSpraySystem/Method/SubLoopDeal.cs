@@ -47,7 +47,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 tempPath.Add(sePt[0]);
                 visited.Add(sePt[0]);
                 var subLoop = new List<Point3dEx>();
-                DepthSearch.DfsSubLoop(sePt[0], sePt[1], tempPath, ref visited, ref subLoop, sprayIn);
+                Dfs.DfsSubLoop(sePt[0], sePt[1], tempPath, ref visited, ref subLoop, sprayIn);
                 spraySystem.SubLoops.Add(subLoop);
                 spraySystem.SubLoopBranchDic.Add(subLoop.First(), 0);
                 spraySystem.SubLoopBranchDic.Add(subLoop.Last(), 0);
