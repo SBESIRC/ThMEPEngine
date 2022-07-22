@@ -2207,10 +2207,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "删除回路";
                                     m.Command = new RelayCommand(() =>
                                     {
-                                        var r = System.Windows.MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-                                        if (r == MessageBoxResult.Cancel) return;
+                                        var uid = edge.Target.Load.LoadUID;
+                                        var puid = GetCurrentNode(tv, graph).Load.LoadUID;
                                         ThPDSProjectGraphService.DeleteCircuit(graph, edge);
-                                        UpdateTreeView(panel.tv, graph);
+                                        if (tv.DataContext is ThPDSProjectGraphNodeTreeViewVM vm)
+                                        {
+                                            vm.RemoveNode(uid, puid);
+                                        };
                                         UpdateCanvas();
                                     });
                                 }
@@ -3927,7 +3930,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     default:
                         throw new NotSupportedException();
                 }
-                
+
                 if (conductor.IsBAControl)
                 {
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("Type", false);

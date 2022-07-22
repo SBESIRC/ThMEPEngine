@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -127,6 +128,20 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         private ThPDSProjectGraphNode GetProjectGraphNode(ThPDSCircuitGraphTreeModel item, PDSGraph graph)
         {
             return graph.Vertices.FirstOrDefault(o => o.Load.LoadUID.Equals(item.NodeUID));
+        }
+        public void RemoveNode(string uid, string puid)
+        {
+            var tokills = new List<ThPDSCircuitGraphTreeModel>();
+            void dfs(ThPDSCircuitGraphTreeModel md)
+            {
+                if (md.NodeUID == uid && md.Parent?.NodeUID == puid) tokills.Add(md);
+                foreach (var ch in md.DataList) dfs(ch);
+            }
+            dfs(Root);
+            foreach (var md in tokills)
+            {
+                md.Parent?.DataList?.Remove(md);
+            }
         }
     }
 }
