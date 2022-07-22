@@ -14,5 +14,18 @@ namespace ThMEPEngineCore.IO.SVG
         public string Bottom_elevation { get; set; } = "";
         public string Height { get; set; } = "";
         public string Description { get; set; } = "";
+        public double BottomElevation
+        {
+            get
+            {
+                return Get_Bottom_elevation(Bottom_elevation);
+            }
+        }
+        private double Get_Bottom_elevation(string bottom_elevation)
+        {
+            double bottomElevation = 0.0;
+            double.TryParse(bottom_elevation, out bottomElevation);
+            return bottomElevation;
+        }
     }
 }

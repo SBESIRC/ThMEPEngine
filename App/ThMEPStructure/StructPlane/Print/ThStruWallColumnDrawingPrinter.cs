@@ -77,6 +77,16 @@ namespace ThMEPStructure.StructPlane.Print
             var mt = Matrix3d.Displacement(elevationTblBasePt - Point3d.Origin);
             objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt));
             Append(objs.Print(db));
-        }   
+        }
+        private void PrintHeadText(Database database)
+        {
+            // 打印自然层标识, eg 一层~五层结构平面层
+            var flrRange = FloorInfos.GetFloorHeightRange(FlrBottomEle);
+            if (string.IsNullOrEmpty(flrRange))
+            {
+                return;
+            }            
+            Append(PrintHeadText(database,flrRange)); // 把结果存到ObjIds中
+        }
     }
 }

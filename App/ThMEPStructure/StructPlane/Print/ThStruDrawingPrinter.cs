@@ -93,15 +93,10 @@ namespace ThMEPStructure.StructPlane.Print
                 return new ObjectIdCollection();
             }
         }
-        protected void PrintHeadText(Database database)
+
+        protected ObjectIdCollection PrintHeadText(Database database,string flrRange)
         {
-            // 打印自然层标识, eg 一层~五层结构平面层
-            var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
-            if (string.IsNullOrEmpty(flrRange))
-            {
-                return;
-            }
-            var extents = ObjIds.ToDBObjectCollection(database).ToExtents2d();
+            var extents = GetPrintObjsExtents(database);
             var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
                 extents.MinPoint.Y - PrintParameter.HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
             var printService = new ThPrintDrawingHeadService()
@@ -110,9 +105,15 @@ namespace ThMEPStructure.StructPlane.Print
                 DrawingSacle = PrintParameter.DrawingScale,
                 BasePt = textCenter,
             };
-            Append(printService.Print(database)); // 把结果存到ObjIds中
+            return printService.Print(database);
         }
 
+        private Extents2d GetPrintObjsExtents(Database database)
+        {
+            // ObjIds 是收集每层打印的物体
+            return ObjIds.ToDBObjectCollection(database).ToExtents2d();
+        }
+        
         protected void Append(ObjectIdCollection objIds)
         {
             foreach (ObjectId objId in objIds)

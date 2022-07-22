@@ -449,5 +449,15 @@ namespace ThMEPStructure.StructPlane.Print
                 }
             });
         }
+        private void PrintHeadText(Database database)
+        {
+            // 打印自然层标识, eg 一层~五层结构平面层
+            var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
+            if (string.IsNullOrEmpty(flrRange))
+            {
+                return;
+            }
+            Append(PrintHeadText(database, flrRange));
+        }
     }
 }
