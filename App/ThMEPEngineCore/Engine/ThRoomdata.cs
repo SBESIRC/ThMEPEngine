@@ -321,7 +321,12 @@ namespace ThMEPEngineCore.Engine
         {
             var results = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
-            var transformer = new ThMEPOriginTransformer(objs);
+            if (objs.Count==0)
+            {
+                return results;
+            }
+            var center = objs.GeometricExtents().Flatten().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
             transformer.Transform(objs);
             var newPts = transformer.Transform(polygon);
             recognition.Recognize(datas, newPts);

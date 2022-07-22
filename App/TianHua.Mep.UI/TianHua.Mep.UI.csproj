@@ -32,6 +32,9 @@
     <Compile Include="Command\ThBuildDoorsCmd.cs" />
     <Compile Include="Command\ThExtractRoomDataCmd.cs" />
     <Compile Include="Converter\BeamEngineOpsBooleanConverter.cs" />
+    <Compile Include="Data\ThConfigDataTool.cs" />
+    <Compile Include="Data\ThDoorZoneRecognitionEngine.cs" />
+    <Compile Include="Data\ThDoorZoneExtractionVisitor.cs" />
     <Compile Include="Data\ThOtherShearWallExtractionVisitor.cs" />
     <Compile Include="Data\ThOtherShearWallRecognitionEngine.cs" />
     <Compile Include="FrameCompare\FrameCompareUI.xaml.cs">
@@ -103,6 +106,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
+      <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
+      <Name>ThMEPWSS</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
