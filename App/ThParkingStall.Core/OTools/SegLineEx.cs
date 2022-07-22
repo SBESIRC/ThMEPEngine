@@ -107,13 +107,37 @@ namespace ThParkingStall.Core.OTools
             return new LineSegment(spt, ept).Extend(ExtendTol);
         }
         #endregion
+        #region 更新分割线
+        //输入:未处理的分割线（可能刚移动，还未保持连接关系）
+        //     分割线连接关系
+        //     地库信息（边界--无孔polygon，Spindex--空间索引）
+        //输出:符合车道宽的部分，或null 
+
+        //1.将分割线按连接关系连到其他线上
+        //2.求中间部分，判断中间部分是否满足车道宽度，不满足则返回null
+        //3.所有线缩回到边界内
+        //3.利用地库的连接关系，正向或负向连到边界
+        public static void UpdateSegLine(this List<SegLine> seglines, List<(List<int>, List<int>)> SeglineIndex,
+            Polygon shell, MNTSSpatialIndex BoundarySpatialIndex)
+        {
+            var splitters = seglines.Select(seg => seg.Splitter).ToList().RebuildSegLines(SeglineIndex, shell);
+            for (int i = 0; i < seglines.Count; i++)
+            {
+                var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
+                var splitter = splitters[i];
+                var vaildLane = splitter.GetVaildLane(connections, BoundarySpatialIndex);
+                seglines[i].Splitter = splitter;
+                seglines[i].VaildLane = vaildLane;
+            }
+        }
         //求单个有效车道
         //输入 连接到其他线上 + 求中间部分 + 连接到边界的线 
         //     分割线连接到边界的关系
         //     所有地库障碍物的spatial index
         //输出 满足车道宽的线
-        public static LineSegment GetVaildLane(this LineSegment connectedPart, int idx, (bool, bool) Connections,
-            Polygon totalArea, MNTSSpatialIndex BoundarySpatialIndex)
+
+        //效率提高：因为障碍物要外扩，可以预处理时将所有障碍物外扩合并之后再传入
+        public static LineSegment GetVaildLane(this LineSegment connectedPart, (bool, bool) Connections, MNTSSpatialIndex BoundarySpatialIndex)
         {
             double halfWidth = (VMStock.RoadWidth / 2);
             if(connectedPart == null) return null;
@@ -146,53 +170,52 @@ namespace ThParkingStall.Core.OTools
             }
             return new LineSegment(p0, p1);
         }
-        //所有有效车道
-        //输入:未处理的分割线（可能刚移动，还未保持连接关系）
-        //     分割线连接关系
-        //     地库
-        //输出:符合车道宽的部分，或null 
+        #endregion
+        #region 重塑分割线(可用于分割的分割线）
+        //根据连接关系重塑分割线
+        //输入:移动后的分割线，连接关系,以及地库边界（无孔polygon）
 
-        //1.将分割线按连接关系连到其他线上
-        //2.求中间部分，判断中间部分是否满足车道宽度，不满足则返回null
-        //3.所有线缩回到边界内
-        //3.利用地库的连接关系，正向或负向连到边界
-        public static void UpdateVaildLane(this List<SegLine> seglines, List<(List<int>, List<int>)> SeglineIndex, 
-            Polygon totalArea, MNTSSpatialIndex BoundarySpatialIndex)
+        //输出:重塑后的线
+        //重塑后的线该连接到边界的会连到边界
+        //不该连到边界的会内缩回边界内
+        //线会出头1mm
+
+        public static List<LineSegment> RebuildSegLines(this List<LineSegment> seglines, List<(List<int>, List<int>)> SeglineIndex, Polygon shell)
         {
-            var splitters = seglines.Select(seg => seg.Splitter).ToList();
+            var splitters = new List<LineSegment>();
             for (int i = 0; i < seglines.Count; i++)
             {
-                splitters[i] = splitters.RebuildLine(i, SeglineIndex, totalArea.Shell);//分割线按连接关系重构
+                splitters[i] = splitters.ConnectLines(i, SeglineIndex, shell.Shell);//分割线按连接关系重构
             }
-            for (int i = 0; i < seglines.Count; i++)
+            var Rebuilded = new List<LineSegment>();
+            for (int i = 0; i < splitters.Count; i++)
             {
                 var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
-                var connectedPart = splitters.GetMiddlePart(i).ConnectToBound(connections,totalArea);//获取中间部分 +连到边界(不连到边界的自动缩回）
-                var vaildLane = connectedPart.GetVaildLane(i, connections, totalArea, BoundarySpatialIndex);
-                seglines[i].VaildLane = vaildLane;
+                var connectedPart = splitters.GetMiddlePart(i).ConnectToBound(connections, shell);//获取中间部分 +连到边界(不连到边界的自动缩回）
+                Rebuilded.Add(connectedPart);
             }
+            return Rebuilded;
         }
-        #region 重塑线
-        //根据连接关系重塑分割线返回null则重塑的分割线不存在或不合理
-        public static LineSegment RebuildLine(this List<LineSegment> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex, LinearRing shell=null)
+
+        //根据连接关系连接分割线,返回null则不合理
+        public static LineSegment ConnectLines(this List<LineSegment> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex, LinearRing shell=null)
         {
             Coordinate startPt;
             Coordinate endPt;
             (startPt,endPt) = seglines.GetStartEndPt(idx,SeglineIndex,shell);
             if(startPt==null||endPt ==null) return null;
             var tempLine = new LineSegment(startPt, endPt);
-            if (tempLine.IsPositive()) return tempLine;
-            else return null;
+            if (!tempLine.IsPositive()) return null;
+            return tempLine;
         }
-        public static SegLine RebuildLine(this List<SegLine> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex, LinearRing shell = null)
+        public static SegLine ConnectLines(this List<SegLine> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex, LinearRing shell = null)
         {
-            var line = seglines.Select(l => l.Splitter).ToList().RebuildLine(idx,SeglineIndex,shell);
+            var line = seglines.Select(l => l.Splitter).ToList().ConnectLines(idx,SeglineIndex,shell);
             var segLine = seglines[idx].Clone();
             segLine.Splitter = line;
             return segLine;
         }
         #endregion
-
         #region 获取起点和终点
         public static (Coordinate,Coordinate) GetStartEndPt(this List<LineSegment> seglines, int idx, 
             List<(List<int>, List<int>)> SeglineIndex, LinearRing shell = null)
