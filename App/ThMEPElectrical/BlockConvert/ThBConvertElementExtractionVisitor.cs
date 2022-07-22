@@ -1,10 +1,12 @@
-﻿using ThCADExtension;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -101,7 +103,13 @@ namespace ThMEPElectrical.BlockConvert
                     var name = blockTableRecord.Name;
                     if (!string.IsNullOrEmpty(name))
                     {
-                        var c = name.ToUpper()[0];
+                        var r = new Regex(@"([a-zA-Z])");
+                        var m = r.Match(name.ToUpper());
+                        if (!m.Success)
+                        {
+                            return false;
+                        }
+                        var c = m.Value[0];
                         var flag = false;
                         switch (Category)
                         {
