@@ -131,7 +131,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private void RemovePillarNearBuildings()
         {
-            double tol = 2000;
+            double tol = 3000;
             for (int i = 0; i < Pillars.Count; i++)
             {
                 var ob=Obstacles.OrderBy(e => e.ClosestPoint(Pillars[i].Centroid.Coordinate).Distance(Pillars[i].Centroid.Coordinate)).First();
