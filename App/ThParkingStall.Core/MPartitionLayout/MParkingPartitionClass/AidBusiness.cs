@@ -403,20 +403,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             Cars = tps;
         }
-        private void RemoveInvalidPillars()
-        {
-            List<Polygon> tmps = new List<Polygon>();
-            foreach (var t in Pillars)
-            {
-                var clone = t.Clone();
-                clone=clone.Scale( 0.5);
-                if (ClosestPointInCurveInAllowDistance(clone.Envelope.Centroid.Coordinate, CarSpots, DisPillarLength + DisHalfCarToPillar))
-                {
-                    tmps.Add(t);
-                }
-            }
-            Pillars = tmps;
-        }
         public void ReDefinePillarDimensions()
         {
             IniPillar.AddRange(Pillars.Select(e => e.Clone()));

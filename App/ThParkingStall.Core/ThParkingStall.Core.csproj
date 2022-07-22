@@ -75,6 +75,7 @@
     <Compile Include="MPartitionLayout\MParkingPartitionClass\LanesProcessingEntry.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\ModuleLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\PerpModule.cs" />
+    <Compile Include="MPartitionLayout\MParkingPartitionClass\PillarPostProcess.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\PreProcess.cs" />
     <Compile Include="MPartitionLayout\PostProcess\MGlobalProcess.cs" />
     <Compile Include="MPartitionLayout\PostProcess\MPostProcessingEndLanes.cs" />

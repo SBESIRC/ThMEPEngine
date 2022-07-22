@@ -74,7 +74,7 @@ namespace ThParkingStall.Core.InterProcess
                     fs.Close();
 #endif
                     //mParkingPartitionPro.GenerateParkingSpaces();
-                    mParkingPartitionPro.Process();
+                    mParkingPartitionPro.Process(IgnoreCache);
                 }
                 catch (Exception ex)
                 {

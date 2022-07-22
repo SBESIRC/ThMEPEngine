@@ -130,9 +130,12 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void PostProcess()
         {
             RemoveDuplicateCars();
-            RemoveCarsIntersectedWithBoundary();
-            RemoveInvalidPillars();
-            ReDefinePillarDimensions();
+            RemoveCarsIntersectedWithBoundary();      
+            if (AccurateCalculate)
+            {
+                PostProcessPillars();
+                ReDefinePillarDimensions();
+            }            
             InsuredForTheCaseOfoncaveBoundary();
             if (!DisplayFinal)
                 ClassifyLanesForLayoutFurther();
