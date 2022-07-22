@@ -11078,6 +11078,16 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           }
           FixStoreys(KITCHEN_BUFFER_DISTANCE);
         }
+        {
+          var tmp = KITCHEN_BUFFER_DISTANCE.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers).ToHashSet();
+          foreach (var MAX_ANGEL_TOLLERANCE in KITCHEN_BUFFER_DISTANCE.SelectMany(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Numbers))
+          {
+            if (!tmp.Remove(MAX_ANGEL_TOLLERANCE))
+            {
+              throw new System.Exception($"存在重复楼层：{MAX_ANGEL_TOLLERANCE}F");
+            }
+          }
+        }
         var max_balconywashingfloordrain_to_rainpipe = CreateEnvelopeTester(KITCHEN_BUFFER_DISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Boundary).ToList());
         foreach (var maxToiletToCondensepipeDistance in adb.ModelSpace.OfType<Entity>())
           {
@@ -12173,6 +12183,21 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                 DEFAULT_FIRE_VALVE_WIDTH.FDSCount = THESAURUSSTAMPEDE;
               }
             }
+            if (MaxBalconyToBalconyDistance.Runs.Count(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists) == THESAURUSHOUSING)
+            {
+              for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < MaxBalconyToBalconyDistance.Runs.Count; MAX_ANGEL_TOLLERANCE++)
+              {
+                var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE];
+                if (DEFAULT_FIRE_VALVE_WIDTH.Exists)
+                {
+                  if (DEFAULT_FIRE_VALVE_WIDTH.Storey == THESAURUSREGION)
+                  {
+                    DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs.TryGet(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING);
+                    if (DEFAULT_FIRE_VALVE_WIDTH is not null) DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                  }
+                }
+              }
+            }
             if (MaxBalconyToBalconyDistance.Runs.All(TolLightRangeSingleSideMax => !TolLightRangeSingleSideMax.Exists))
             {
               foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
@@ -12399,6 +12424,14 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                   if (MAX_ANGEL_TOLLERANCE == eMin)
                   {
                     if (_tolReturnValueRange.Runs.TryGet(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING)?.WaterBucket is not null)
+                    {
+                      wellToWallOffset.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED));
+                      toiletWellsInterval.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED - ASSOCIATIONISTS));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONPITUITARY)), CIRCUMCONVOLUTION));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-REPRESENTATIONAL, -QUOTATIONPITUITARY)), CIRCUMCONVOLUTION));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSFRISKY, -QUOTATIONWITTIG), THESAURUSEXECUTIVE + _tolReturnValueRange.Runs[MAX_ANGEL_TOLLERANCE].Storey, CIRCUMCONVOLUTION, CONTROVERSIALLY));
+                    }
+                    else if (IsRainType(_tolReturnValueRange.PipeType))
                     {
                       wellToWallOffset.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED));
                       toiletWellsInterval.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, THESAURUSSURPRISED - ASSOCIATIONISTS));
@@ -13274,14 +13307,16 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                     if (IsRainType(_tolReturnValueRange.PipeType))
                     {
                       maxBalconywashingmachineToBalconybasinline._tol_blk_max_connect();
+                      var MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = QUOTATIONTRANSFERABLE;
+                      if (_tolReturnValueRange.Runs.TryGet(MAX_ANGEL_TOLLERANCE - THESAURUSHOUSING)?.HasLong ?? INTRAVASCULARLY) MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = THESAURUSDERELICTION + THESAURUSDISAGREEABLE;
                       COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, Scale = THESAURUSPERMUTATION, });
-                      COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(NEUROPSYCHIATRIST, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), });
+                      COMMONRADIUS.Add(new(PERSUADABLENESS, DENDROCHRONOLOGIST, MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(NEUROPSYCHIATRIST + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, -THESAURUSINTRENCH)) { DynaDict = new() { { THESAURUSENTERPRISE, ADENOHYPOPHYSIS } }, ScaleEx = new(-THESAURUSPERMUTATION, THESAURUSPERMUTATION, THESAURUSPERMUTATION), });
                       MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
                       MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
                       MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSSTAMPEDE, -SEMICONSCIOUSNESS), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
-                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEUPHORIA, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
+                      MAX_BALCONYBASIN_TO_BALCONY.Add(new(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSDETERMINED, -QUOTATIONPITUITARY), MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(THESAURUSEUPHORIA + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, -QUOTATIONPITUITARY)), INSTRUMENTALITY));
                       MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(-THESAURUSSEDATE, -THESAURUSGETAWAY), QUOTATIONBREWSTER, GetDimLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
-                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(PSEUDEPIGRAPHOS, -THESAURUSMANIFESTATION), QUOTATIONBREWSTER, GetDimLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
+                      MAX_RAINPIPE_TO_WASHMACHINE.Add(new(MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE.OffsetXY(PSEUDEPIGRAPHOS + MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN, -THESAURUSMANIFESTATION), QUOTATIONBREWSTER, GetDimLayer(_tolReturnValueRange.PipeType), CONTROVERSIALLY));
                       maxBalconywashingmachineToBalconybasinline._LaneOffset();
                       var tolReturnValueMinRange = maxBalconywashingmachineToBalconybasinline._ParkingStallGroupWidthRestrict();
                       max_balcony_to_balcony_distance.Enqueue((int)ParkingStallGroupLengthRestrict.FloorDrain, () =>
@@ -13990,36 +14025,17 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           {
             dynamic o = maxToiletToCondensepipeDistance.AcadObject;
             var repeated_point_distance = (string)o.DimStyleText + THESAURUSSPECIFICATION + (string)o.VPipeNum;
-            var colle = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
-            var ts = new List<DBText>();
-            foreach (var tolReturnValue0Approx in colle.OfType<Entity>().Where(IsLayerVisible))
+            if (IsDrainageLabel(repeated_point_distance))
             {
-              if (tolReturnValue0Approx is Line TolUniformSideLenth && isDrainageLayer(TolUniformSideLenth.Layer))
+              var MAX_TAG_YPOSITION = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
+              var TolLane = MAX_TAG_YPOSITION.OfType<Line>().Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToGLineSegment()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsValid).Distinct().ToList();
+              var points = GeoFac.GetAlivePoints(TolLane, THESAURUSHOUSING);
+              var _tol_avg_column_dist = points.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToNTSPoint()).ToList();
+              points = points.Except(GeoFac.CreateIntersectsSelector(_tol_avg_column_dist)(GeoFac.CreateGeometryEx(TolLane.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsHorizontal(THESAURUSHOUSING)).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Extend(THESAURUSPERMUTATION).Buffer(THESAURUSHOUSING)).ToList())).Select(_tol_avg_column_dist).ToList(points)).ToList();
+              foreach (var MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN in points)
               {
-                if (TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
-                {
-                  var default_fire_valve_length = TolUniformSideLenth.ToGLineSegment().TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-                  _tol_lane_protect(maxToiletToFloordrainDistance, default_fire_valve_length, MAX_TOILET_TO_KITCHEN_DISTANCE1);
-                  continue;
-                }
+                MAX_DEVICEPLATFORM_AREA.Add(MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN.ToNTSPoint().Tag(repeated_point_distance));
               }
-              else if (tolReturnValue0Approx.GetRXClass().DxfName.ToUpper() == THESAURUSDURESS)
-              {
-                ts.AddRange(tolReturnValue0Approx.ExplodeToDBObjectCollection().OfType<DBText>().Where(IsLayerVisible));
-                continue;
-              }
-            }
-            if (ts.Count > THESAURUSSTAMPEDE)
-            {
-              GRect maxKitchenToBalconyDistance;
-              if (ts.Count == THESAURUSHOUSING) maxKitchenToBalconyDistance = ts[THESAURUSSTAMPEDE].Bounds.ToGRect();
-              else
-              {
-                maxKitchenToBalconyDistance = GeoFac.CreateGeometry(ts.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Bounds.ToGRect()).Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.IsValid).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.ToPolygon())).EnvelopeInternal.ToGRect();
-              }
-              maxKitchenToBalconyDistance = maxKitchenToBalconyDistance.TransformBy(MAX_RAINPIPE_TO_BALCONYFLOORDRAIN);
-              var ct = new CText() { Text = repeated_point_distance, Boundary = maxKitchenToBalconyDistance };
-              _tol_lane_protect(maxToiletToFloordrainDistance, ct, MAX_BALCONY_TO_BALCONY_DISTANCE);
             }
             return;
           }
