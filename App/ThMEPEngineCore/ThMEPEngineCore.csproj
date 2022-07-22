@@ -719,6 +719,7 @@
     <Compile Include="ThMEPEngineCoreRoomService.cs" />
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
+    <Compile Include="Algorithm\ThMEPMaximumInscribedRectangleByDirection.cs" />
     <Compile Include="UCSDivisionService\DivisionMethod\GridDivision.cs" />
     <Compile Include="UCSDivisionService\DivisionMethod\LayoutPointDivision.cs" />
     <Compile Include="UCSDivisionService\UCSService.cs" />

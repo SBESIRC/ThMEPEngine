@@ -326,6 +326,65 @@ namespace ThMEPEngineCore.Test
             }
         }
 
+
+
+        [CommandMethod("TIANHUACAD", "THTESTMD", CommandFlags.Modal)]
+        public void THTestMaximumRactangleByDir()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取外包框
+                List<Polyline> frameLst = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+
+                foreach (var pFrame in frameLst)
+                {
+                    var pline = pFrame.Clone() as Polyline;
+                    var allLines = new List<Line>();
+                    for (int i = 1; i < pline.NumberOfVertices; i++)
+                    {
+                        allLines.Add(new Line(pline.GetPoint3dAt(i - 1), pline.GetPoint3dAt(i)));
+                    }
+                    var longestLine = allLines.OrderByDescending(x => x.Length).First();
+                    var dir = (longestLine.EndPoint - longestLine.StartPoint).GetNormal();
+                    ThMEPMaximumInscribedRectangleByDirection thMEPMaximumInscribedRectangleByDirection = new ThMEPMaximumInscribedRectangleByDirection();
+                    var rectangle = thMEPMaximumInscribedRectangleByDirection.GetRectangle(pline, dir);
+                    if (rectangle != null)
+                    {
+                        acdb.ModelSpace.Add(rectangle);
+                        rectangle.Layer = "0";
+                        rectangle.ColorIndex = (int)ColorIndex.Blue;
+                    }
+                    else
+                    {
+                        //分割段太小，找不到最大内接矩形
+                    }
+                }
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THTestOldBuildingExtractor", CommandFlags.Modal)]
         public void THTestOldBuildingExtractor()
         {
