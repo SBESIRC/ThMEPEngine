@@ -23,6 +23,8 @@ panels:
         items:
           - text: "梁配置"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "选项"
+            attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "房间框线"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "框线对比"

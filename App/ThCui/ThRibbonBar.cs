@@ -1068,6 +1068,16 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THLPZ_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
+                // 选项
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("选项",
+                    "天华选项",
+                    "THMEPOPTIONS",
+                    "天华选项",
+                    "IDI_THCAD_THOPTIONS_SMALL",
+                    "IDI_THCAD_THOPTIONS_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
                 // 房间框线
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("房间框线",
