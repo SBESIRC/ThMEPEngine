@@ -55,7 +55,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     //获取标记
                     var markes = ThEquipElementExtractService.GetPipeMarkes("H-PIPE-DIMS");
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                    mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
+                    //mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
 
                     var handlePipeService = new ThHandleFanPipeService()
                     {

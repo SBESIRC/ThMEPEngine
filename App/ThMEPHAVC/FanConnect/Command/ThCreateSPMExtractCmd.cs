@@ -64,7 +64,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     ///处理数据--删除不必要的线（图纸上不删除）
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                    mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
+                    //mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
 
                     var handlePipeService = new ThHandleFanPipeService()
                     {
