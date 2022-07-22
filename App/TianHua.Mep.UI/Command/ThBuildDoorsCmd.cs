@@ -13,8 +13,8 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.AFASRegion.Utls;
 using Dreambuild.AutoCAD;
-using ThMEPArchitecture.PartitionLayout;
 using TianHua.Mep.UI.Data;
+using DotNetARX;
 
 namespace TianHua.Mep.UI.Command
 {
@@ -135,7 +135,7 @@ namespace TianHua.Mep.UI.Command
                         }
                     }
                     //过滤
-                    if (line.Length < 210 || (isColumnLine? _columnThickness : _wallThickness).Any(o => Math.Abs(line.Length - o) <= 10))
+                    if (line.Length < 210 || (isColumnLine ? _columnThickness : _wallThickness).Any(o => Math.Abs(line.Length - o) <= 10))
                     {
                         var pl = line.ExtendLine(10).Buffer(10);
                         var intersectingLines = spatialIndex.SelectFence(pl).OfType<Line>().ToList();
@@ -184,7 +184,7 @@ namespace TianHua.Mep.UI.Command
                                 if (_shearwallSpacing.Any(o => Math.Abs(dis - o) <= 15))
                                 {
                                     var door = BuildDoor(reasonableWall.Key, line);
-                                    if(!door.IsNull())
+                                    if (!door.IsNull())
                                     {
                                         doors.Add(door);
                                     }
@@ -193,7 +193,7 @@ namespace TianHua.Mep.UI.Command
                             }
                             else
                             {
-                                if(_OtherwallSpacing.Any(o => Math.Abs(dis - o) <= 10))
+                                if (_OtherwallSpacing.Any(o => Math.Abs(dis - o) <= 10))
                                 {
                                     var door = BuildDoor(reasonableWall.Key, line);
                                     if (!door.IsNull())
@@ -214,7 +214,7 @@ namespace TianHua.Mep.UI.Command
                 Transformer.Transform(doorZones);
                 var doorZoneSpatialIndex = new ThCADCoreNTSSpatialIndex(doorZones);
                 var bufferDoorZones = new DBObjectCollection();
-                while(doorZones.Count > 0)
+                while (doorZones.Count > 0)
                 {
                     var door = doorZones[0] as Polyline;
                     var pl = door.Buffer(100)[0] as Polyline;
@@ -224,7 +224,7 @@ namespace TianHua.Mep.UI.Command
                     {
                         bufferDoorZones.Add(door);
                     }
-                    else if(objs.Count == 1)
+                    else if (objs.Count == 1)
                     {
                         var obj = objs[0] as Polyline;
                         if (doorZones.Contains(obj))
@@ -255,7 +255,7 @@ namespace TianHua.Mep.UI.Command
                 foreach (Polyline doorZone in bufferDoorZones)
                 {
                     var objs = doorSpatialIndex.SelectCrossingPolygon(doorZone);
-                    if(objs.Count == 0)
+                    if (objs.Count == 0)
                     {
                         //此处有门块，但之前逻辑并没有识别出门，所以，我们要补一个门
                         var doorZoneLines = doorZone.GetAllLinesInPolyline();
@@ -279,7 +279,7 @@ namespace TianHua.Mep.UI.Command
                                     doors.Add(door);
                                 }
                             }
-                            else if(FindDoorByGroup(group2, wallLines, out line1, out line2) && (line1.Length < 1000 || line2.Length < 1000))
+                            else if (FindDoorByGroup(group2, wallLines, out line1, out line2) && (line1.Length < 1000 || line2.Length < 1000))
                             {
                                 //doors.Add(BuildDoor(internalWall[0], internalWall[1]));
                                 var door = BuildDoor(line1, line2);
@@ -295,7 +295,7 @@ namespace TianHua.Mep.UI.Command
             }
         }
 
-        private bool FindDoorByGroup(Tuple<Line, Line> group, IEnumerable<Line> wallLines,out Line line1,out Line line2)
+        private bool FindDoorByGroup(Tuple<Line, Line> group, IEnumerable<Line> wallLines, out Line line1, out Line line2)
         {
             line1 = line2 = null;
             var IsParallelWalls = wallLines.Where(o => o.IsParallelToEx(group.Item1));
@@ -304,7 +304,7 @@ namespace TianHua.Mep.UI.Command
             {
                 line1 = IsParallelWalls.Where(o => o.Distance(group.Item1) < 50).OrderByDescending(o => o.Length).FirstOrDefault();
             }
-            if(!line1.IsNull())
+            if (!line1.IsNull())
             {
                 line2 = IsParallelWalls.Where(o => o.Distance(group.Item2) < 10).OrderBy(o => o.Length % 50).FirstOrDefault();
                 if (line2.IsNull())
@@ -333,21 +333,21 @@ namespace TianHua.Mep.UI.Command
             {
                 if (pt2.IsPointOnLine(maxLine, 10))
                 {
-                    return GeoUtilities.CreatePolyFromPoints(new Point3d[] { minLine.StartPoint, pt1, pt2, minLine.EndPoint });
+                    return CreatePolyFromPoints(new Point3d[] { minLine.StartPoint, pt1, pt2, minLine.EndPoint });
                 }
                 else
                 {
                     var pt3 = maxLine.StartPoint.GetProjectPtOnLine(minLine.StartPoint, minLine.EndPoint);
                     if (pt3.IsPointOnLine(minLine, 10))
                     {
-                        return GeoUtilities.CreatePolyFromPoints(new Point3d[] { minLine.StartPoint, pt1, maxLine.StartPoint, pt3 });
+                        return CreatePolyFromPoints(new Point3d[] { minLine.StartPoint, pt1, maxLine.StartPoint, pt3 });
                     }
                     else
                     {
                         var pt4 = maxLine.EndPoint.GetProjectPtOnLine(minLine.StartPoint, minLine.EndPoint);
                         if (pt4.IsPointOnLine(minLine, 10))
                         {
-                            return GeoUtilities.CreatePolyFromPoints(new Point3d[] { minLine.StartPoint, pt1, maxLine.EndPoint, pt4 });
+                            return CreatePolyFromPoints(new Point3d[] { minLine.StartPoint, pt1, maxLine.EndPoint, pt4 });
                         }
                     }
                 }
@@ -359,19 +359,29 @@ namespace TianHua.Mep.UI.Command
                     var pt3 = maxLine.StartPoint.GetProjectPtOnLine(minLine.StartPoint, minLine.EndPoint);
                     if (pt3.IsPointOnLine(minLine, 10))
                     {
-                        return GeoUtilities.CreatePolyFromPoints(new Point3d[] { minLine.EndPoint, pt2, maxLine.StartPoint, pt3 });
+                        return CreatePolyFromPoints(new Point3d[] { minLine.EndPoint, pt2, maxLine.StartPoint, pt3 });
                     }
                     else
                     {
                         var pt4 = maxLine.EndPoint.GetProjectPtOnLine(minLine.StartPoint, minLine.EndPoint);
                         if (pt4.IsPointOnLine(minLine, 10))
                         {
-                            return GeoUtilities.CreatePolyFromPoints(new Point3d[] { minLine.EndPoint, pt2, maxLine.EndPoint, pt4 });
+                            return CreatePolyFromPoints(new Point3d[] { minLine.EndPoint, pt2, maxLine.EndPoint, pt4 });
                         }
                     }
                 }
             }
             return null;
+        }
+
+        private Polyline CreatePolyFromPoints(Point3d[] points)
+        {
+            var poly = new Polyline()
+            {
+                Closed = true,
+            };
+            poly.CreatePolyline(new Point3dCollection(points));
+            return poly;
         }
 
         private bool IsNeighborDoor(Polyline door1, Polyline door2)
@@ -380,7 +390,7 @@ namespace TianHua.Mep.UI.Command
             var door2Lines = door2.GetAllLinesInPolyline();
             var pts1 = door1.Vertices().Cast<Point3d>().ToList();
             var pts2 = door2.Vertices().Cast<Point3d>().ToList();
-            foreach(Line line in door1Lines)
+            foreach (Line line in door1Lines)
             {
                 if (door2Lines.Any(o => ThGeometryTool.IsCollinearEx(o.StartPoint, o.EndPoint, line.StartPoint, line.EndPoint, 5)))
                 {
