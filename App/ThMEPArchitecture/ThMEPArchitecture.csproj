@@ -67,6 +67,7 @@
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="ParkingStallArrangement\PostProcess\ArrangementInfo.cs" />
     <Compile Include="ParkingStallArrangement\PreProcess\LayoutData.cs" />
+    <Compile Include="ParkingStallArrangement\PreProcess\OLayoutData.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallDirectGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />
