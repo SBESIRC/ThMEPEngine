@@ -26,6 +26,10 @@ namespace ThParkingStall.Core.OInterProcess
         private static MNTSSpatialIndex _BuildingSpatialIndex;//所有障碍物，包含坡道的spatialindex
         public static MNTSSpatialIndex BuildingSpatialIndex { get { return _BuildingSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
 
+
+        private static MNTSSpatialIndex _BoundarySpatialIndex;//边界打成断线 + 障碍物 + 坡道的spatialindex(所有边界）
+        public static MNTSSpatialIndex BoundarySpatialIndex { get { return _BoundarySpatialIndex; } }//边界打成断线 + 障碍物 + 坡道的spatialindex(所有边界）
+
         public static List<(List<int>, List<int>)> SeglineIndex;//分区线（起始终止点连接关系），数量为0则连到边界，其余为其他分区线的index
         public static void Init(DataWraper dataWraper)
         {
@@ -33,6 +37,10 @@ namespace ThParkingStall.Core.OInterProcess
             //_InitSegLines = dataWraper.SegLines;//初始分区线
             _Buildings = dataWraper.Buildings;//所有障碍物，包含坡道
             _BuildingSpatialIndex = new MNTSSpatialIndex(dataWraper.Buildings);
+
+            var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
+            allObjs.AddRange(Buildings);
+            _BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
         }
         //返回长度为0则为不合理解
         public static List<OSubArea> GetSubAreas()
@@ -69,20 +77,16 @@ namespace ThParkingStall.Core.OInterProcess
             return subAreas;
         }
 
-        //输出的分区线数量一致
-        //public static List<LineSegment> ProcessToSegLines(List<double> gene)
-        //{
-        //    var movedLines = new List<LineSegment>();
-        //    for (int i = 0; i < InitSegLines.Count; i++)
-        //    {
-        //        movedLines.Add(InitSegLines[i].GetMovedLine(gene[i]));
-        //    }
-        //    var segLines = new List<LineSegment>();
-        //    for (int i = 0; i < InitSegLines.Count; i++)
-        //    {
-        //        segLines.Add(movedLines.RebuildLine(i, SeglineIndex, TotalArea.Shell));
-        //    }
-        //    return segLines;
-        //}
+        //输出的分区线数量一致，需要求最大全连接组
+        public static List<SegLine> ProcessToSegLines(List<double> gene)
+        {
+            var newSegLines = new List<SegLine>();
+            for (int i = 0; i < InitSegLines.Count; i++)
+            {
+                newSegLines.Add(InitSegLines[i].GetMovedLine(gene[i]));
+            }
+            newSegLines.UpdateSegLine(SeglineIndex, TotalArea, BoundarySpatialIndex);
+            return newSegLines;
+        }
     }
 }

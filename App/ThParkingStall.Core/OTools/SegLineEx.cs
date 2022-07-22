@@ -125,7 +125,7 @@ namespace ThParkingStall.Core.OTools
             {
                 var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
                 var splitter = splitters[i];
-                var vaildLane = splitter.GetVaildLane(connections, BoundarySpatialIndex);
+                var vaildLane = splitter.GetVaildLane(connections, BoundarySpatialIndex, seglines[i].RoadWidth );
                 seglines[i].Splitter = splitter;
                 seglines[i].VaildLane = vaildLane;
             }
@@ -137,9 +137,12 @@ namespace ThParkingStall.Core.OTools
         //输出 满足车道宽的线
 
         //效率提高：因为障碍物要外扩，可以预处理时将所有障碍物外扩合并之后再传入
-        public static LineSegment GetVaildLane(this LineSegment connectedPart, (bool, bool) Connections, MNTSSpatialIndex BoundarySpatialIndex)
+        public static LineSegment GetVaildLane(this LineSegment connectedPart, (bool, bool) Connections, MNTSSpatialIndex BoundarySpatialIndex,
+            int roadWidth = -1)
         {
-            double halfWidth = (VMStock.RoadWidth / 2);
+            double halfWidth;
+            if (roadWidth == -1) halfWidth = (VMStock.RoadWidth / 2);
+            else halfWidth = (roadWidth / 2);
             if(connectedPart == null) return null;
             //筛选车道范围内的障碍物
             var bounds = BoundarySpatialIndex.SelectCrossingGeometry(connectedPart.GetRect(halfWidth));
