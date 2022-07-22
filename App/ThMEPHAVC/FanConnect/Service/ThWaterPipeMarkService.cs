@@ -1323,39 +1323,48 @@ namespace ThMEPHVAC.FanConnect.Service
 
         private void CreateCondMarkNew(ThFanTreeNode<ThFanPointModelNew> node)//冷凝水管标记
         {
-            
-            var vector = node.Parent.Item.BasePt.GetVectorTo(node.Item.BasePt).GetNormal();
-            var markAg = ThFanConnectUtils.GetVectorAngle(vector);
+            var dir = (node.Parent.Item.BasePt - node.Item.BasePt).GetNormal();
+            var markAg = ThFanConnectUtils.GetVectorAngle(dir);
             var markPt = node.Item.BasePt.GetMidPt(node.Parent.Item.BasePt);
-            var direct = new Vector3d(Math.Cos(markAg + Math.PI / 2.0), Math.Sin(markAg + Math.PI / 2.0), 0.0);
 
-            //根据direct平移
-            if (node.Item.IsFlag == 1)
+            var moveDir = dir.RotateBy(Math.PI / 2, Vector3d.ZAxis); //默认左边
+            if (node.Item.IsFlag == 0) //冷凝往右
             {
-                direct = -direct;
+                moveDir = -moveDir;
             }
+
+            //根据角度调整标签角度
+            var tmpPt1 = node.Parent.Item.BasePt.TransformBy(Active.Editor.WCS2UCS());
+            var tmpPt2 = node.Item.BasePt.TransformBy(Active.Editor.WCS2UCS());
+            var tmpVector = (tmpPt1 - tmpPt2).GetNormal();
+            var tmpAg = ThFanConnectUtils.GetVectorAngle(tmpVector);
+            if (tmpAg > Math.PI / 2.0 && tmpAg <= Math.PI * 3.0 / 2.0)
+            {
+                markAg = markAg + Math.PI;
+            }
+
             if (ConfigInfo.WaterSystemConfigInfo.SystemType == 0)//水系统
             {
                 if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)//两管制
                 {
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
-                        markPt = markPt - direct * (300.0 * 1 + 140);
+                        markPt = markPt + moveDir * (ThFanConnectCommon.MoveLength * 1 + 140);
                     }
                     else
                     {
-                        markPt = markPt - direct * 140;
+                        markPt = markPt + moveDir * 140;
                     }
                 }
                 else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)//四管制
                 {
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
-                        markPt = markPt - direct * (300.0 * 2 + 140);
+                        markPt = markPt+moveDir * (ThFanConnectCommon.MoveLength * 2 + 140);
                     }
                     else
                     {
-                        markPt = markPt - direct * 140;
+                        markPt = markPt + moveDir * 140;
                     }
                 }
             }
@@ -1363,31 +1372,18 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                 {
-                    markPt = markPt - direct * (300.0 * 1 + 140);
+                    markPt = markPt + moveDir * (ThFanConnectCommon.MoveLength * 1 + 140);
                 }
                 else
                 {
-                    markPt = markPt - direct * 140;
+                    markPt = markPt + moveDir * 140;
                 }
             }
-
-            //根据角度调整标签角度
-            var tmpPt1 = node.Parent.Item.BasePt.TransformBy(Active.Editor.WCS2UCS());
-            var tmpPt2 = node.Item.BasePt.TransformBy(Active.Editor.WCS2UCS());
-            var tmpVector = tmpPt1.GetVectorTo(tmpPt2).GetNormal();
-            var tmpAg = ThFanConnectUtils.GetVectorAngle(tmpVector);
-            if (tmpAg > Math.PI / 2.0 && tmpAg <= Math.PI * 3.0 / 2.0)
-            {
-                markAg = markAg + Math.PI;
-            }
-
 
             var strText = "C " + "DN" + node.Item.CoolCapaDim;
             ThFanToDBServiece toDbServerviece = new ThFanToDBServiece();
             toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);
         }
-
-
 
         private void UpdateCoolHotMark(ThFanTreeNode<ThFanPointModelNew> node, string strMarkHeight, BlockReference mark)
         {
