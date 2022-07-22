@@ -151,12 +151,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
                 return null;
             try
             {
-                var conductor = new Conductor(_maxCalculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+                var conductor = new Conductor(_maxCalculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
                 return conductor;
             }
             catch (NotFoundComponentException)
             {
-                var conductor = new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+                var conductor = new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
                 return conductor;
             }
             catch
@@ -167,7 +167,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public Conductor GetSecondaryCircuitConductor(SecondaryCircuitInfo secondaryCircuitInfo)
         {
-            return new Conductor(secondaryCircuitInfo.Conductor, secondaryCircuitInfo.ConductorCategory, _edge.Target.Load.Phase, ThPDSCircuitType.Control, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, LayingSite.CC, LayingSite.None);
+            return new Conductor(secondaryCircuitInfo.Conductor, secondaryCircuitInfo.ConductorCategory, _edge.Target.Load.Phase, ThPDSCircuitType.Control, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, LayingSite.CC, LayingSite.None);
         }
 
         public override Contactor CreatContactor()

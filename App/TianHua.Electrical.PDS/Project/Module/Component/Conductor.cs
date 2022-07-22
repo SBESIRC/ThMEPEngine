@@ -16,7 +16,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2, bool isResidentialDistributionPanel)
+        public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2, bool isResidentialDistributionPanel)
         {
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
@@ -29,14 +29,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             Phase = phase;
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(calculateCurrent);
-            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+            ChooseLaying(FloorNumber, StoreyTypeString, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
             ChooseConductorType();
         }
 
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
+        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
@@ -50,14 +50,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             //3x2.5+E2.5
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(conductorConfig);
-            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+            ChooseLaying(FloorNumber, StoreyTypeString, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
             ChooseConductorType();
         }
 
         /// <summary>
         /// 导体(消防应急照明回路导体)
         /// </summary>
-        public Conductor(string conductorConfig,MaterialStructure materialStructure, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
+        public Conductor(string conductorConfig,MaterialStructure materialStructure, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
@@ -71,14 +71,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             this.OuterSheathMaterial = materialStructure;
             ChooseCrossSectionalArea(conductorConfig);
-            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+            ChooseLaying(FloorNumber, StoreyTypeString, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
             ChooseConductorType();
         }
 
         /// <summary>
         /// 导体(控制回路导体)
         /// </summary>
-        public Conductor(string conductorConfig, string conductorType, ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
+        public Conductor(string conductorConfig, string conductorType, ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.ControlConductor;
             this.LayingSite1 = layingSite1;
@@ -93,14 +93,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             ChooseMaterial(conductorType);
             ChooseCrossSectionalArea(conductorConfig);
-            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+            ChooseLaying(FloorNumber, StoreyTypeString, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
             ChooseConductorType();
         }
 
         /// <summary>
         /// 导体(电表箱)
         /// </summary>
-        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2, bool isResidentialDistributionPanel)
+        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2, bool isResidentialDistributionPanel)
         {
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
@@ -114,7 +114,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             //3x2.5+E2.5
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(conductorConfig);
-            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+            ChooseLaying(FloorNumber, StoreyTypeString, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
             ChooseConductorType();
         }
 
@@ -531,7 +531,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 桥架/穿管敷设方式选型
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
-        private void ChooseLaying(string floorNumber, ThPDSCircuitType circuitType, ThPDSPhase phase, bool viaConduit, bool viaCableTray, bool fireLoad)
+        private void ChooseLaying(string floorNumber, string StoreyTypeString, ThPDSCircuitType circuitType, ThPDSPhase phase, bool viaConduit, bool viaCableTray, bool fireLoad)
         {
             if (viaCableTray && viaConduit)
             {
@@ -603,7 +603,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
                 else
                 {
-                    bool IsBasement = floorNumber.Contains('B');
+                    bool IsBasement = floorNumber.Contains('B') || StoreyTypeString.Contains("大屋面") || StoreyTypeString.Contains("小屋面") || StoreyTypeString.Contains("裙房");
                     var phapeNum = phase == ThPDSPhase.一相 ? "1P" : "3P";
                     var CableCondiutConfigs = (IsWire ? CableCondiutConfiguration.CondiutInfos : CableCondiutConfiguration.CableInfos).Where(o => (IsWire || o.FireCoating == Refractory) && o.Phase == phapeNum);
                     var CableCondiutConfig = CableCondiutConfigs.First(o => o.WireSphere >= ConductorCrossSectionalArea);
