@@ -92,11 +92,41 @@ namespace TianHua.Mep.UI.Command
                 var otherShearWalls = GetOtherShearwalls(acadDb.Database, RangePts);
                 ShearWalls = ShearWalls.Union(otherShearWalls);
 
+                // 过滤孤立柱
+                var centerPt = RangePts.Envelope().CenterPoint();
+                var transformer = new ThMEPOriginTransformer(centerPt);
+                transformer.Transform(Walls);
+                transformer.Transform(Doors);
+                transformer.Transform(Columns);
+                transformer.Transform(ShearWalls);
+                var wallSpatialIndex = new ThCADCoreNTSSpatialIndex(Walls);
+                var doorSpatialIndex = new ThCADCoreNTSSpatialIndex(Doors);
+                var shearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(ShearWalls);
+                var bufferService = new ThNTSBufferService();
+                Columns = Columns.OfType<Entity>().Where(o =>
+                {
+                    var entity = bufferService.Buffer(o, 5.0);
+                    bool result = HasNeibours(entity, wallSpatialIndex) ||
+                    HasNeibours(entity, doorSpatialIndex) ||
+                    HasNeibours(entity, shearwallSpatialIndex);
+                    entity.Dispose();
+                    return result;
+                }).ToCollection();
+                transformer.Reset(Walls);
+                transformer.Reset(Doors);
+                transformer.Reset(Columns);
+                transformer.Reset(ShearWalls);
+
                 // 转成Curve
                 ShearWalls = ToCurves(ShearWalls);
                 Columns = ToCurves(Columns);
                 Walls = ToCurves(Walls);
             }
+        }
+
+        private bool HasNeibours(Entity entity,ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            return spatialIndex.SelectCrossingPolygon(entity).Count > 0;
         }
 
         private DBObjectCollection ToCurves(DBObjectCollection objs)
