@@ -63,5 +63,10 @@ namespace TianHua.Mep.UI.UI
             this.listBox.ItemsSource = null;
             this.listBox.ItemsSource = RoomOutlineVM.LayerInfos;
         }
+
+        private void btnBlkConfig_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            RoomOutlineVM.BlockConfig();
+        }
     }
 }

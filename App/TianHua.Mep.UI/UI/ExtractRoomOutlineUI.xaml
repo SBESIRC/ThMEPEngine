@@ -47,7 +47,8 @@
         <StackPanel Margin="0,5,0,10" Orientation="Horizontal" HorizontalAlignment="Left">
             <CheckBox Margin="5,0" x:Name="chkYnAddShearWall" IsThreeState="False" Content="自动提取剪力墙"
                           IsChecked="{Binding YnExtractShearWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
-            <Button Content="保 存" Width="50" Name="btnOk" Margin="75,0" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>            
+            <Button Content="块配置" Width="50" Name="btnBlkConfig" Margin="10,0" Template="{StaticResource ButtonTemplate}" Click="btnBlkConfig_Click"></Button>
+            <Button Content="保 存" Width="50" Name="btnOk" Margin="0,0" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>            
         </StackPanel>
         <Line Grid.Row="4" Margin="0,0,0,5" X1="0" Y1="0" X2="250" Y2="0" Stroke="Gray" 
                       StrokeThickness="1" VerticalAlignment="Center"/>
