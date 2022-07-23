@@ -878,6 +878,33 @@ namespace TianHua.Electrical.PDS.Project.Module
             return node;
         }
 
+        /// <summary>
+        /// 检查Drag&Drop合法性
+        /// </summary>
+        public static bool LegalDragDrop(ProjectGraph graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
+        {
+            //抽空要研究一下这个API，这个API无法"取出值"，很怪(QuikGraph.Algorithms.TreeDepthFirstSearch)
+            //所以我们自己暂时先写一套自己的DFSNode
+            //var sourceNodes = graph.TreeDepthFirstSearch(source);
+            //var targetNodes = graph.TreeDepthFirstSearch(target);
+
+            var sourceList = new List<ThPDSProjectGraphNode>();
+            var targetList = new List<ThPDSProjectGraphNode>();
+            DFSNode(source, ref sourceList);
+            DFSNode(target, ref targetList);
+            return sourceList.Intersect(targetList).Count() == 0;
+            void DFSNode(ThPDSProjectGraphNode node, ref List<ThPDSProjectGraphNode> list)
+            {
+                if (list.Contains(node))
+                    return;
+                list.Add(node);
+                var edges = graph.OutEdges(node);
+                foreach (var edge in edges)
+                {
+                    DFSNode(edge.Target, ref list);
+                }
+            }
+        }
 
         /// <summary>
         /// 新建回路
