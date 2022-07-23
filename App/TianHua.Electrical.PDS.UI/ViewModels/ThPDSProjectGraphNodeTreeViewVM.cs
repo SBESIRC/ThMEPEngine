@@ -49,7 +49,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 }
                 else
                 {
-                    if (CanAcceptChildren(targetItem))
+                    if (CanAcceptChildren(targetItem, sourceItem))
                     {
                         // Move to be target's child
                         dropInfo.Effects = DragDropEffects.Move;
@@ -97,7 +97,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 }
                 else
                 {
-                    if (CanAcceptChildren(targetItem))
+                    if (CanAcceptChildren(targetItem, sourceItem))
                     {
                         var oldsourceNode = GetProjectGraphNode(sourceItem.Parent, _graph);
                         var newSourceNode = GetProjectGraphNode(targetItem, _graph);
@@ -123,6 +123,24 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             var node = GetProjectGraphNode(item, _graph);
             return !item.IsRoot && !node.IsTerminalPanel();
         }
+
+        private bool CanAcceptChildren(ThPDSCircuitGraphTreeModel targetItem, ThPDSCircuitGraphTreeModel sourceItem)
+        {
+            if (!CanAcceptChildren(targetItem))
+            {
+                return false;
+            }
+
+            var targetNode = GetProjectGraphNode(targetItem, _graph);
+            var sourceNode = GetProjectGraphNode(sourceItem, _graph);
+            if (!ThPDSProjectGraphService.LegalDragDrop(_graph, sourceNode, targetNode))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         #endregion
 
         private ThPDSProjectGraphNode GetProjectGraphNode(ThPDSCircuitGraphTreeModel item, PDSGraph graph)
