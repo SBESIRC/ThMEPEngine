@@ -16,7 +16,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 strDN = QuerySupplyPipeDN150(flow);
             }
-            else if(coeff.Equals("200"))
+            else if (coeff.Equals("200"))
             {
                 strDN = QuerySupplyPipeDN200(flow);
             }
@@ -27,11 +27,11 @@ namespace ThMEPHVAC.FanConnect.Service
         public string QueryCondPipeDN(double flow)//查询冷凝水管 管径
         {
             string strDN = "DN25";
-            if(flow < 25)
+            if (flow < 25)
             {
                 strDN = "DN25";
             }
-            else if(flow >= 25 && flow < 100)
+            else if (flow >= 25 && flow < 100)
             {
                 strDN = "DN32";
             }
@@ -55,7 +55,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 strDN = "DN125";
             }
-            else if(flow >= 12000)
+            else if (flow >= 12000)
             {
                 strDN = "DN150";
             }
@@ -251,5 +251,250 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             return strDN;
         }
+
+        public static int QuerySupplyPipeDNInt(string coeff, double flow)
+        {
+            int dn = 100;
+            if (coeff.Equals("150"))
+            {
+                dn = QuerySupplyPipeDN150Int(flow);
+            }
+            else if (coeff.Equals("200"))
+            {
+                dn = QuerySupplyPipeDN200Int(flow);
+            }
+
+            return dn;
+        }
+
+        public static int QueryCondPipeDNInt(double flow)//查询冷凝水管 管径
+        {
+            int dn = 25;
+            if (flow < 25)
+            {
+                dn = 25;
+            }
+            else if (flow >= 25 && flow < 100)
+            {
+                dn = 32;
+            }
+            else if (flow >= 100 && flow < 300)
+            {
+                dn = 40;
+            }
+            else if (flow >= 300 && flow < 800)
+            {
+                dn = 50;
+            }
+            else if (flow >= 800 && flow < 1600)
+            {
+                dn = 80;
+            }
+            else if (flow >= 1600 && flow < 3000)
+            {
+                dn = 100;
+            }
+            else if (flow >= 3000 && flow < 12000)
+            {
+                dn = 125;
+            }
+            else if (flow >= 12000)
+            {
+                dn = 150;
+            }
+            return dn;
+        }
+        private static int QuerySupplyPipeDN150Int(double flow)
+        {
+            int dn = 100;
+            if (flow <= 0.2)
+            {
+                dn = 15;
+            }
+            else if (flow > 0.2 && flow <= 0.44)
+            {
+                dn = 20;
+            }
+            else if (flow > 0.44 && flow <= 0.85)
+            {
+                dn = 25;
+            }
+            else if (flow > 0.85 && flow <= 1.8)
+            {
+                dn = 32;
+            }
+            else if (flow > 1.8 && flow <= 2.5)
+            {
+                dn = 40;
+            }
+            else if (flow > 2.5 && flow <= 5.1)
+            {
+                dn = 50;
+            }
+            else if (flow > 5.1 && flow <= 9.8)
+            {
+                dn = 70;
+            }
+            else if (flow > 9.8 && flow <= 15.5)
+            {
+                dn = 80;
+            }
+            else if (flow > 15.5 && flow <= 33)
+            {
+                dn = 100;
+            }
+            else if (flow > 33.0 && flow <= 57)
+            {
+                dn = 125;
+            }
+            else if (flow > 57 && flow <= 90)
+            {
+                dn = 150;
+            }
+            else if (flow > 90 && flow <= 215)
+            {
+                dn = 200;
+            }
+            else if (flow > 215 && flow <= 340)
+            {
+                dn = 250;
+            }
+            else if (flow > 340 && flow <= 550)
+            {
+                dn = 300;
+            }
+            else if (flow > 550 && flow <= 880)
+            {
+                dn = 350;
+            }
+            else if (flow > 880 && flow <= 1200)
+            {
+                dn = 400;
+            }
+            else if (flow > 1200 && flow <= 1600)
+            {
+                dn = 450;
+            }
+            else if (flow > 1600 && flow <= 2100)
+            {
+                dn = 500;
+            }
+            else if (flow > 2100 && flow <= 3250)
+            {
+                dn = 600;
+            }
+            else if (flow > 3250 && flow <= 4250)
+            {
+                dn = 700;
+            }
+            else if (flow > 4250 && flow <= 5600)
+            {
+                dn = 800;
+            }
+            else if (flow > 5600)
+            {
+                dn = 900;
+            }
+            return dn;
+        }
+        private static int QuerySupplyPipeDN200Int(double flow)
+        {
+            int dn = 100;
+            if (flow <= 0.22)
+            {
+                dn = 15;
+            }
+            else if (flow > 0.22 && flow <= 0.5)
+            {
+                dn = 20;
+            }
+            else if (flow > 0.5 && flow <= 1.1)
+            {
+                dn = 25;
+            }
+            else if (flow > 1.1 && flow <= 2.1)
+            {
+                dn = 32;
+            }
+            else if (flow > 2.1 && flow <= 3.0)
+            {
+                dn = 40;
+            }
+            else if (flow > 3.0 && flow <= 6.0)
+            {
+                dn = 50;
+            }
+            else if (flow > 6.0 && flow <= 11.5)
+            {
+                dn = 70;
+            }
+            else if (flow > 11.5 && flow <= 18.0)
+            {
+                dn = 80;
+            }
+            else if (flow > 18 && flow <= 38)
+            {
+                dn = 100;
+            }
+            else if (flow > 38 && flow <= 66)
+            {
+                dn = 125;
+            }
+            else if (flow > 66 && flow <= 105)
+            {
+                dn = 150;
+            }
+            else if (flow > 105 && flow <= 250)
+            {
+                dn = 200;
+            }
+            else if (flow > 250 && flow <= 400)
+            {
+                dn = 250;
+            }
+            else if (flow > 400 && flow <= 650)
+            {
+                dn = 300;
+            }
+            else if (flow > 650 && flow <= 1000)
+            {
+                dn = 350;
+            }
+            else if (flow > 1000 && flow <= 1400)
+            {
+                dn = 400;
+            }
+            else if (flow > 1400 && flow <= 1800)
+            {
+                dn = 450;
+            }
+            else if (flow > 1800 && flow <= 2250)
+            {
+                dn = 500;
+            }
+            else if (flow > 2250 && flow <= 3250)
+            {
+                dn = 600;
+            }
+            else if (flow > 3250 && flow <= 4250)
+            {
+                dn = 700;
+            }
+            else if (flow > 4250 && flow <= 5600)
+            {
+                dn = 800;
+            }
+            else if (flow > 5600 && flow <= 7000)
+            {
+                dn = 900;
+            }
+            else if (flow > 7000)
+            {
+                dn = 1000;
+            }
+            return dn;
+        }
+
+
     }
 }

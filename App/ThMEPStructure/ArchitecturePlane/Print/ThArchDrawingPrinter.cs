@@ -23,8 +23,8 @@ namespace ThMEPStructure.ArchitecturePlane.Print
         /// 收集所有当前图纸打印的物体
         /// </summary>
         public ObjectIdCollection ObjIds { get; protected set; }
-        protected ThPlanePrintParameter PrintParameter { get; set; }
-        public ThArchDrawingPrinter(ThArchSvgInput input, ThPlanePrintParameter printParameter)
+        protected ThPlanePrintParameter PrintParameter { get; set; }       
+        public ThArchDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
         {
             Geos = input.Geos;
             FloorInfos = input.FloorInfos;

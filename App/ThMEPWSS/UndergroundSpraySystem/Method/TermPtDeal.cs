@@ -18,18 +18,86 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
     public static class TermPtDeal
     {
-        public static void CreateTermPt(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex, bool acrossFloor = false)
+        public static void CreateTermPt(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
+            bool acrossFloor = false)
         {
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.LeadLines.ToCollection());
+
             foreach (var pt in sprayIn.PtDic.Keys)
             {
-                if(pt._pt.DistanceTo(new Point3d(1666461.3, 952521.8,0))<10)
+                bool flag = false;
+                if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
-                    ;
+                    if (sprayIn.PtTextDic[pt].First() is null)
+                    {
+                        sprayIn.PtTextDic.Remove(pt);//删掉空标注
+                    }
+                    else if (!sprayIn.PtTextDic[pt].First().Equals(""))//标注不是null, 且不为 ""
+                    {
+                        continue;//直接退出
+                    }
+                    else//标注为空
+                    {
+                        sprayIn.PtTextDic.Remove(pt);//删掉空标注
+                    }
                 }
-                if (pt._pt.DistanceTo(new Point3d(1666812.1, 952522.2,0)) < 10)
+                if (sprayIn.PtDic[pt].Count == 1)
                 {
-                    ;
+                    foreach (var v in sprayIn.Verticals)
+                    {
+                        if (v._pt.DistanceTo(pt._pt) < 100)
+                        {
+                            if (sprayIn.PtTextDic.ContainsKey(v))
+                            {
+                                sprayIn.PtTextDic.Add(pt, sprayIn.PtTextDic[v]);
+                            }
+                            if (sprayIn.TermPtTypeDic.ContainsKey(v))
+                            {
+                                if (!sprayIn.TermPtTypeDic.ContainsKey(pt))
+                                {
+                                    sprayIn.TermPtTypeDic.Add(pt, sprayIn.TermPtTypeDic[v]);
+                                }
+                                else
+                                {
+                                    ;
+                                }
+                            }
+                            if (sprayIn.TermPtDic.ContainsKey(v))
+                            {
+                                if (!sprayIn.TermPtDic.ContainsKey(pt))
+                                {
+                                    sprayIn.TermPtDic.Add(pt, sprayIn.TermPtDic[v]);
+                                }
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (flag)
+                    {
+                        continue;
+                    }
+                    var tpt = new TermPoint2(pt);
+
+
+                    tpt.SetLines(sprayIn);
+                    tpt.SetPipeNumber(textSpatialIndex);
+                    tpt.SetType(sprayIn, acrossFloor);
+                    var strs = new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 };
+                    sprayIn.PtTextDic.Add(pt, strs);
+                    sprayIn.TermPtTypeDic.Add(pt, tpt.Type);
+                    sprayIn.TermPtDic.Add(pt, tpt);
                 }
+            }
+        }
+
+        public static void CreateTermPt(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex, 
+            ThCADCoreNTSSpatialIndex flowSpatialIndex, bool acrossFloor = false)
+        {
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.LeadLines.ToCollection());
+
+            foreach (var pt in sprayIn.PtDic.Keys)
+            {
                 bool flag = false;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
@@ -83,9 +151,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         continue;
                     }
                     var tpt = new TermPoint2(pt);
-                    tpt.SetLines(sprayIn);
-                    tpt.SetPipeNumber(textSpatialIndex);
-                    tpt.SetType(sprayIn, acrossFloor);
+                    var rst = flowSpatialIndex.SelectCrossingPolygon(pt._pt.GetRect(200));
+                    if(rst.Count>0)
+                    {
+                        var rect = rst[0] as Polyline;
+                        tpt.Type = 1;
+                    }
+                    else
+                    {
+                        tpt.SetLines(sprayIn);
+                        tpt.SetPipeNumber(textSpatialIndex);
+                        tpt.SetType(sprayIn, acrossFloor);
+
+                    }
+
+                    
                     var strs = new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 };
                     sprayIn.PtTextDic.Add(pt, strs);
                     sprayIn.TermPtTypeDic.Add(pt, tpt.Type);

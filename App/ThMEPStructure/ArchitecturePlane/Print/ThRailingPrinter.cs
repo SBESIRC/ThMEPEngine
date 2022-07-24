@@ -14,8 +14,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
         public ObjectIdCollection Print(Database db, Curve curve)
         {
             var results = new ObjectIdCollection();
-            var beamId = curve.Print(db, Config);
-            results.Add(beamId);
+            results.Add(curve.Print(db, Config));
             return results;
         }
         public static PrintConfig GetPlanConfig()

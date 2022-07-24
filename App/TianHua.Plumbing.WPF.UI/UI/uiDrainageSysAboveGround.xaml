@@ -23,7 +23,7 @@
                 <cus:ImageButton Height="22" Content="读取楼层" Margin="0" Name="btnReadFloor" Click="btnReadFloor_Click"></cus:ImageButton>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Vertical">
-                <cus:ImageButton Name="btnDrawPipe" Height="22"  Content="立管绘制" Margin="5,0,0,5" Click="btnDrawPipe_Click"></cus:ImageButton>
+                <cus:ImageButton Name="btnDrawPipe" Height="22"  Content="立管图块" Margin="5,0,0,5" Click="btnDrawPipe_Click"></cus:ImageButton>
                 <cus:ImageButton Name="btnSet" Height="22" Content="参数设置" Margin="5,0,0,0" Click="btnSet_Click"></cus:ImageButton>
             </StackPanel>
         </Grid>

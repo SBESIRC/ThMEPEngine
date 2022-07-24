@@ -107,6 +107,14 @@ namespace ThMEPElectrical.BlockConvert
                 target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT] =
                     string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
 
+                // 来源专业
+                column++;
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY] = StringFilter(table.Rows[row][column].ToString());
+
+                // 设备类型
+                column++;
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT] = StringFilter(table.Rows[row][column].ToString());
+
                 // 创建映射规则
                 rules.Add(new ThBConvertRule()
                 {

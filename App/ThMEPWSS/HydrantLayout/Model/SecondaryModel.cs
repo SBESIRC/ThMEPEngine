@@ -43,6 +43,12 @@ namespace ThMEPWSS.HydrantLayout.Model
         public double againstWallLength = 0;
         public int doorGood = 0;
 
+        //单柱子新晋指标
+        //3最高，横着摆  ； 2大部分优先情况 ；0没啥优先级的情况
+        public double PositionScore = 0;
+        public double DoorScore = 0;
+        public int BasePointPosition = -2;
+
         //绘图属性
         public double ShortSide = Info.ShortSide;
         public double LongSide = Info.LongSide;

@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.Diagram
 {
@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.Diagram
             return activeDb.Element<BlockReference>(tableTitleId, true);
         }
 
-        public void Insert2(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale, int frameNum)
+        public void Insert2(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale, int frameNum, List<Entity> results)
         {
             var key = "内框名称";
             var value = "配电箱系统图（" + NumberToChineseFilter(((frameNum / 2) + 1).NumberToChinese()) + "）";
@@ -52,23 +52,8 @@ namespace TianHua.Electrical.PDS.Diagram
             {
                 { key, value },
             };
-            Insert(activeDb, configDb, blockName, basePoint, scale, dictionary);
-        }
-
-        public BlockReference Insert3(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale, Dictionary<string, string> dictionary)
-        {
-            var block = Insert(activeDb, configDb, blockName, basePoint, scale, dictionary);
-            return activeDb.Element<BlockReference>(block, true);
-        }
-
-        public BlockReference InsertHeader(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale)
-        {
-            var header = Insert1(activeDb, configDb, blockName, basePoint, scale);
-            var objs = ThPDSExplodeService.BlockExplode(activeDb, header);
-            var title = objs.OfType<BlockReference>()
-                .Where(o => o.Name == ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TITLE)
-                .FirstOrDefault();
-            return title;
+            var objId = Insert(activeDb, configDb, blockName, basePoint, scale, dictionary);
+            results.Add(activeDb.Element<BlockReference>(objId, true));
         }
 
         public void InsertBlankLine(AcadDatabase activeDb, AcadDatabase configDb, Point3d basePoint, Scale3d scale, List<Entity> tableObjs)

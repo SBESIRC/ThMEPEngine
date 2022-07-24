@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.UserContorls;
 using Microsoft.Toolkit.Mvvm.Input;
 using PDSGraph = QuikGraph.BidirectionalGraph<
@@ -173,8 +174,32 @@ namespace TianHua.Electrical.PDS.UI.Services
                 CreateCmd = new RelayCommand(() =>
                 {
                     var w = new ThPDSCreateLoad();
-                    w.ShowDialog();
-                    UpdateView(panel);
+                    if (w.ShowDialog() == true)
+                    {
+                        if ((w.Mode & ThPDSCreateLoad.ActionMode.Create) == ThPDSCreateLoad.ActionMode.Create)
+                        {
+                            // 更新数据
+                            var vm = w.DataContext as ThPDSCreateLoadVM;
+                            var node = ThPDSProjectGraphService.CreatNewLoad(CreateData(vm));
+
+                            // 更新图纸
+                            if ((w.Mode & ThPDSCreateLoad.ActionMode.Insert) == ThPDSCreateLoad.ActionMode.Insert)
+                            {
+                                var window = System.Windows.Window.GetWindow(panel);
+                                using (var vo = new ThPDSWindowVisibleOverride(window))
+                                {
+                                    // 切回CAD画布
+                                    ThPDSCADService.FocusToCAD();
+
+                                    // 绘制到图纸上
+                                    ThPDSLoadService.Draw(node, vm.Type.Type);
+                                }
+                            }
+
+                            // 更新界面
+                            UpdateView(panel);
+                        }
+                    }
                 }),
                 UpdateCmd = new RelayCommand(() =>
                 {
@@ -203,6 +228,29 @@ namespace TianHua.Electrical.PDS.UI.Services
                     UpdateView(panel);
                 }),
             };
+        }
+
+        private ThPDSProjectGraphNodeData CreateData(ThPDSCreateLoadVM vm)
+        {
+            var data = ThPDSProjectGraphNodeData.Create();
+            data.Power = vm.Power;
+            data.Type = vm.Type.Type;
+            data.KV = vm.RatedVoltage;
+            data.FireLoad = vm.FireLoad;
+            if (!string.IsNullOrWhiteSpace(vm.Storey))
+            {
+                data.Storey = vm.Storey;
+            }
+            if (!string.IsNullOrWhiteSpace(vm.Number))
+            {
+                data.Number = vm.Number;
+            }
+            if (!string.IsNullOrWhiteSpace(vm.Description))
+            {
+                data.Description = vm.Description;
+            }
+            data.Sync();
+            return data;
         }
 
         private ContextMenu GetContextMenu(DataGrid dataGrid)

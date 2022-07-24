@@ -49,6 +49,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             "双速电机D-YY",
         };
 
+        public static List<ConductorType> FireDistributionCircuit = new List<ConductorType> { ConductorType.消防配电干线, ConductorType.消防配电分支线路, ConductorType.消防配电电线};
+
+        public static List<ConductorType> NonFireDistributionCircuit = new List<ConductorType> { ConductorType.非消防配电电缆, ConductorType.非消防配电电线 };
+
+        public static List<ConductorType> FireControlLoop = new List<ConductorType> { ConductorType.消防配电控制电缆, ConductorType.消防控制信号软线};
+
+        public static List<ConductorType> NonFireControlLoop = new List<ConductorType> { ConductorType.非消防配电控制电缆, ConductorType.非消防控制信号软线 };
+
         public static char[] NumberArray = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         public static List<string> CircuitIDSortNames = new List<string>() { "WPE", "WP", "WLE", "WL", "WS", "WFEL" };
@@ -60,5 +68,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
 
         //暗敷
         public static LayingSite[] LayingSiteC = new LayingSite[] { LayingSite.CC, LayingSite.WC, LayingSite.CLC, LayingSite.BC, LayingSite.FC };
+
+
     }
 }

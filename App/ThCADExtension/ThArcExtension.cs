@@ -228,5 +228,21 @@ namespace ThCADExtension
                 StartAngle = cArc.StartAngle + angle,
             };
         }
+
+        // 根据三点创建弧,弧的顺序由参数决定。firstPoint -> secondPoint -> thirdPoint
+        public static Arc CreateArcWith3PointsOrder(Point3d firstPoint, Point3d secondPoint, Point3d thirdPoint)
+        {
+            // https://www.theswamp.org/index.php?topic=40382.0
+            CircularArc3d cArc = new CircularArc3d(firstPoint, secondPoint, thirdPoint);
+            double angle = cArc.ReferenceVector.AngleOnPlane(new Plane(cArc.Center, cArc.Normal));
+            return new Arc()
+            {
+                Normal = cArc.Normal,
+                Radius = cArc.Radius,
+                Center = cArc.Center,
+                EndAngle = cArc.EndAngle + angle,
+                StartAngle = cArc.StartAngle + angle,
+            };
+        }
     }
 }

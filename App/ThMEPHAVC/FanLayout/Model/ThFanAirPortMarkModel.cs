@@ -21,5 +21,6 @@ namespace ThMEPHVAC.FanLayout.Model
         public string AirPortMarkCount { set; get; }//风口数量
         public string AirPortMarkVolume { set; get; }//风量
         public string AirPortHeightMark { set; get; }//标高
+        public double RotateAngle { set; get; }//旋转角度
     }
 }

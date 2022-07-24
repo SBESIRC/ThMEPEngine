@@ -2,17 +2,20 @@
 using System.Linq;
 using System.Collections.Generic;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
+using AcHelper.Commands;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service.Hvac;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -77,16 +80,32 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData,
+            List<ThRawIfcDistributionElementData> list, Scale3d scale, List<ThBlockReferenceData> targetBlocks)
         {
             // 先做泵的常规处理
             Displacement(targetBlockData, srcBlockData);
+
+            // 若该位置已存在“水泵标注”则忽略后续转换
+            var continueToDo = true;
+            targetBlocks.Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName).Equals(ThBConvertCommon.BLOCK_PUMP_LABEL))
+                .ForEach(t =>
+                {
+                    if (continueToDo && t.Position.DistanceTo(targetBlockData.Position) < 10.0)
+                    {
+                        continueToDo = false;
+                    }
+                });
+            if (!continueToDo)
+            {
+                return;
+            }
 
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
                 foreach (var block in list)
                 {
-                    var br = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                    var br = (block.Data as ThBlockReferenceData).ObjId.GetObject(OpenMode.ForRead) as BlockReference;
                     //如果不是动态块，则返回
                     if (br == null || !br.IsDynamicBlock)
                     {
@@ -99,8 +118,8 @@ namespace ThMEPElectrical.BlockConvert
                         // 插入水泵标注，并获得其id
                         var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                                     "0",
-                                    "水泵标注",
-                                    srcBlockData.Position,
+                                    ThBConvertCommon.BLOCK_PUMP_LABEL,
+                                    targetBlockData.Position,
                                     scale,
                                     0.0,
                                     new Dictionary<string, string>(srcBlockData.Attributes));
@@ -143,7 +162,7 @@ namespace ThMEPElectrical.BlockConvert
                             if (quantity != sum.ToString())
                             {
                                 var obb = pumpLabel.GetBlockOBB();
-                                ThBConvertUtils.InsertRevcloud(obb);
+                                ThInsertRevcloud.Set(acadDatabase.Database, obb, 1, "ByLayer", scale.X / 100);
                             }
                         }
                         break;
@@ -177,7 +196,7 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var targetBlock = targetBlockData.ObjId.GetObject(OpenMode.ForRead) as BlockReference;
+                var targetBlock = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
                 //如果不是动态块，则返回
                 if (targetBlock == null || !targetBlock.IsDynamicBlock)
                 {
@@ -224,11 +243,27 @@ namespace ThMEPElectrical.BlockConvert
                         .TransformBy(Matrix3d.Rotation(-sourceBlockData.Rotation * sourceBlockData.ScaleFactors.X * sourceBlockData.ScaleFactors.Y,
                         Vector3d.ZAxis, Point3d.Origin));
                     labelPoint = new Point3d(label_x + labelPoint.X, label_y + labelPoint.Y, 0);
+
+                    // 文字方向矫正
+                    var ucsToWcs = ThBConvertMatrix3dTools.DecomposeWithoutDisplacement();
+                    targetBlockData.Transform(targetBlock, ucsToWcs);
+
                     if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X)
                         && targetProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
                     {
-                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, labelPoint.X);
-                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, labelPoint.Y);
+                        Matrix3d roration;
+                        if (targetBlockData.ScaleFactors.X > 0)
+                        {
+                            roration = Matrix3d.Rotation(targetBlockData.Rotation, Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        else
+                        {
+                            roration = Matrix3d.Rotation(-targetBlockData.Rotation, Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        var vector = new Vector3d(labelPoint.X, labelPoint.Y, 0).TransformBy(ucsToWcs.Inverse().PreMultiplyBy(roration));
+
+                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X, vector.X);
+                        targetProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y, vector.Y);
                     }
                 }
                 // 部分风机
@@ -301,21 +336,21 @@ namespace ThMEPElectrical.BlockConvert
                 if (convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT].Equals(false))
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
-                    targetBlockData.Position = blockReference.Position;
                 }
                 else
                 {
                     if (rotation > Math.PI / 2 && rotation < Math.PI * 3 / 2)
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position));
-                        targetBlockData.Position = blockReference.Position;
                     }
                     else
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
-                        targetBlockData.Position = blockReference.Position;
                     }
                 }
+
+                targetBlockData.Position = blockReference.Position;
+                targetBlockData.Rotation = targetBlockData.ObjId.GetBlockRotation();
             }
         }
 
@@ -379,6 +414,7 @@ namespace ThMEPElectrical.BlockConvert
                     }
                 }
                 blockReference.TransformBy(mirror);
+                targetBlockData.ScaleFactors = targetBlockData.ObjId.GetScaleFactors();
             }
         }
 

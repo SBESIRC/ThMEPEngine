@@ -42,6 +42,29 @@ namespace ThMEPEngineCore.Service
             return results;
         }
 
+        public DBObjectCollection TPSimplify(DBObjectCollection objs)
+        {
+            var results = new DBObjectCollection();
+            objs.OfType<Entity>().ForEach(o =>
+            {
+                if (o is AcPolygon polyline)
+                {
+                    results.Add(polyline.TPSimplify(DISTANCETOLERANCE));
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    var shell = mPolygon.Shell().TPSimplify(DISTANCETOLERANCE);
+                    var holes = mPolygon.Holes().Select(h => h.TPSimplify(DISTANCETOLERANCE) as Curve);
+                    results.Add(ThMPolygonTool.CreateMPolygon(shell, holes.Where(h => h.Area > AREATOLERANCE).ToList()));
+                }
+                else
+                {
+                    results.Add(o);
+                }
+            });
+            return results;
+        }
+
         public override DBObjectCollection Normalize(DBObjectCollection objs)
         {
             var results = new DBObjectCollection();

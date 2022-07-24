@@ -27,21 +27,34 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Diagram\ThPDSMotorInfoService.cs" />
+    <Compile Include="Diagram\ThPDSTextHandleService.cs" />
+    <Compile Include="Extension\ThPDSProjectGraphNodeExtension.cs" />
     <Compile Include="Model\ThPDSFilterBlockInfo.cs" />
+    <Compile Include="Model\ThPDSInsertBlockInfo.cs" />
     <Compile Include="Model\ThPDSLightingCableTray.cs" />
     <Compile Include="Model\ThPDSLowVoltageCabinetEdge.cs" />
     <Compile Include="Model\THPDSSubstation.cs" />
+    <Compile Include="Project\Module\Component\Extension\CableTypeAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\InsulationAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\MaterialAttribute.cs" />
+    <Compile Include="Project\Module\Component\Extension\MaterialStructureExtension.cs" />
+    <Compile Include="Project\Module\Component\Extension\ScopeOfApplicationAttribute.cs" />
+    <Compile Include="Project\Module\Configure\CircuitConfiguration.cs" />
     <Compile Include="Project\Module\Configure\DistributionMeteringConfiguration.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\CompensationCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\FeederCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PDSBaseLowVoltageCabinet.cs" />
     <Compile Include="Project\Module\LowVoltageCabinet\PowerReceivingCabinet.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeData.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeExtension.cs" />
     <Compile Include="Project\Module\THPDSProjectSubstation.cs" />
     <Compile Include="Project\Module\THPDSSubstationMap.cs" />
     <Compile Include="Project\PDSProjectManagement.cs" />
+    <Compile Include="Project\PDSProjectEventArgs.cs" />
+    <Compile Include="Service\ThPDSBlockNameMap.cs" />
     <Compile Include="Service\ThPDSFilterBlockExtractService.cs" />
     <Compile Include="Service\ThPDSLoadIDMatchService.cs" />
+    <Compile Include="Service\ThPDSLoadService.cs" />
     <Compile Include="Service\ThPDSMotorInfo.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
     <Compile Include="Engine\ThPDSBlcokObbEngine.cs" />
@@ -66,6 +79,7 @@
     <Compile Include="Service\ThPDSSelectPointService.cs" />
     <Compile Include="Service\ThPDSTerminalPanelService.cs" />
     <Compile Include="Service\ThPDSTransientService.cs" />
+    <Compile Include="Service\ThPDSUcsToWcsDecomposeService.cs" />
     <Compile Include="Service\ThPDSZoomService.cs" />
     <Compile Include="Service\ThPDSInsertRevcloudService.cs" />
     <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
@@ -215,10 +229,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="QuikGraph">
-      <Version>2.3.0</Version>
+      <Version>2.5.0</Version>
     </PackageReference>
     <PackageReference Include="QuikGraph.Serialization">
-      <Version>2.3.0</Version>
+      <Version>2.5.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

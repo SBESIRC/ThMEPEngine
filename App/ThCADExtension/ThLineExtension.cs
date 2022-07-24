@@ -28,6 +28,12 @@ namespace ThCADExtension
             return false;
         }
 
+        public static bool IsPointOnLine(this Line line, Point3d pt, bool extend, double tolerance)
+        {
+            var closetPt = line.GetClosestPointTo(pt, extend);
+            return closetPt.DistanceTo(pt) < tolerance;
+        }
+
         public static Polyline Tesslate(this Line line,double length)
         {
             var pts = new Point3dCollection();

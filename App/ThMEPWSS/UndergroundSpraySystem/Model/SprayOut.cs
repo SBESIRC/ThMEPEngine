@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
 using System.Collections.Generic;
+using ThMEPEngineCore;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Block;
 using ThMEPWSS.UndergroundSpraySystem.General;
@@ -29,6 +30,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public List<FireDistrictRight> FireDistricts { get; set; }
         public List<FireDistrictLeft> FireDistrictLefts { get; set; }
         public List<WaterPump>  WaterPumps{ get; set; }
+        public List<Line> SupportLines { get; set; }
         public SprayOut(Point3d insertPt)
         {
             InsertPoint = insertPt;
@@ -43,6 +45,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             FireDistricts = new List<FireDistrictRight>();
             FireDistrictLefts = new List<FireDistrictLeft>();
             WaterPumps = new List<WaterPump>();
+            SupportLines = new List<Line>();
         }
         public void Draw(AcadDatabase acadDatabase)
         {
@@ -99,6 +102,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 pump.Insert(acadDatabase);
             }
+#if DEBUG
+            var layerNames = "末端辅助线";
+            if (!acadDatabase.Layers.Contains(layerNames))
+            {
+                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+            }
+            foreach (var line in SupportLines)
+            {
+                line.TransformBy(u2wMat);
+                line.LayerId = DbHelper.GetLayerId(layerNames);
+                currentSpace.Add(line);
+            }
+#endif
         }
     }
 }

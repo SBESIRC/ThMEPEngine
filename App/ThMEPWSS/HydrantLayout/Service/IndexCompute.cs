@@ -57,6 +57,14 @@ namespace ThMEPWSS.HydrantLayout.Service
             }
         }
 
+        public static double ComputeOverlapScore(Polyline area, Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
+        {
+            double score = 0;
+            double overlapArea = ComputeOverlapArea(area, shell, forbidden);
+            if (overlapArea == 0) return 100;
+            else return ((area.Area - overlapArea) / area.Area) * 100;
+        }
+
         public static double ComputeOverlapArea(Polyline area ,Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
         {
             double overlapArea = 0;
@@ -64,13 +72,21 @@ namespace ThMEPWSS.HydrantLayout.Service
             var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
             //List<Polyline> pakings = ProcessedData.ParkingIndex.SelectCrossingPolygon(shell).OfType<Polyline>().ToList();
             DBObjectCollection pakings = ProcessedData.ParkingIndex.SelectCrossingPolygon(shell);
-            List<Polyline> obj = pl.Intersection(pakings).OfType<Polyline>().ToList();
-            for (int i = 0; i < obj.Count; i++) 
+            List<Polyline> pakingList = pakings.OfType<Polyline>().ToList();
+            DrawUtils.ShowGeometry(pakingList, "l2paking", 4);
+
+            if (pakings.Count > 0)
             {
-                overlapArea = overlapArea + obj[i].Area;
+                List<Polyline> obj = pl.Intersection(pakings).OfType<Polyline>().ToList();
+                for (int i = 0; i < obj.Count; i++)
+                {
+                    overlapArea = overlapArea + obj[i].Area;
+                }
+                return overlapArea;
             }
 
-            return overlapArea;
+            return 0;
+            
         }
     }
 }

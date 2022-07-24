@@ -48,7 +48,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             return retLines;
         }
-        public ThFanTreeModel HandleFanPipe(Matrix3d mt)
+        public List<Line> CleanPipe(Matrix3d mt)
         {
             ///将数据移动到原点附近
             foreach (var l in AllLine)
@@ -70,6 +70,31 @@ namespace ThMEPHVAC.FanConnect.Service
                 var line = l as Line;
                 tmpAllLines.Add(line);
             }
+
+            return tmpAllLines;
+        }
+        public ThFanTreeModel HandleFanPipe(Matrix3d mt, List<Line> tmpAllLines)
+        {
+            /////将数据移动到原点附近
+            //foreach (var l in AllLine)
+            //{
+            //    l.TransformBy(mt);
+            //}
+            //StartPoint = StartPoint.TransformBy(mt);
+            //foreach (var f in AllFan)
+            //{
+            //    f.FanObb.TransformBy(mt);
+            //    f.FanPoint = f.FanPoint.TransformBy(mt);
+            //}
+            //// 处理pipes 1.清除重复线段 ；2.将线在交点处打断
+            //ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+            //var allLineColles = cleanServiec.CleanNoding(AllLine.ToCollection());
+            //var tmpAllLines = new List<Line>();
+            //foreach (var l in allLineColles)
+            //{
+            //    var line = l as Line;
+            //    tmpAllLines.Add(line);
+            //}
             ThFanTreeModel treeModel = new ThFanTreeModel(StartPoint, tmpAllLines, 300);
             if (treeModel.RootNode == null)
             {

@@ -1,6 +1,6 @@
 ﻿namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
-    class TArchWall
+    class TArchWall : TArchEntity
     {
         /*
         CREATE TABLE TArchWall(
@@ -32,7 +32,6 @@
         ID
     )
 );*/
-        public ulong Id { get; set; }
         public double MidPointZ { get; set; }
         public double MidPointX { get; set; }
         public double MidPointY { get; set; }
@@ -51,8 +50,6 @@
         public double Height { get; set;}
         public double Elevtion { get; set; }
         public double DocScale { get; set; }
-        public string LineType { get; set; }
-        public string Layer { get; set; }
         public int UsageId { get; set; }
         public string UsageName { get; set; }
         public int MaterialID { get; set; }

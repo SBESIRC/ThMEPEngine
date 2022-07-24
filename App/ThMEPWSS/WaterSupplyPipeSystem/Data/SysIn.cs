@@ -43,6 +43,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
         public List<int> NotExistFloor { get; set; }//不存在楼层
         public List<double[]> BlockSize { get; set; }//块尺寸
 
+
         public SysIn()
         {
             PipeOffset_X = 1e4;
@@ -51,6 +52,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
             FloorLength = 20000;
             WaterEquivalent = new double[] { 0.5, 0.75, 1, 0.75, 1, 0.5, 1, 1.2 };
         }
+
 
         public bool Set(AcadDatabase acadDatabase, WaterSupplyVM uiConfigs, Dictionary<string, List<string>> blockConfig)
         {
@@ -85,7 +87,31 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
             PipeFloorList = pipeFloorList;
             NotExistFloor = Tool.GetNotExistFloor(FloorNumbers, FloorNumList);
 
-            WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
+            var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
+            BlockSize = ThWCompute.CreateBlockSizeList(bt);//获取并添加 block 尺寸
+
+            return true;
+        }
+
+        public bool TankSet(AcadDatabase acadDatabase, WaterSupplyVM uiConfigs, Dictionary<string, List<string>> blockConfig)
+        {
+            var setViewModel = uiConfigs.SetViewModel;
+            InsertPt = uiConfigs.InsertPt;
+            AreaIndex = Tool.GetAreaIndex(uiConfigs);
+            FloorHeight = setViewModel.FloorLineSpace;
+            BlockConfig = blockConfig;
+            FlushFaucet = Tool.GetFlushFaucet(setViewModel, out bool rstFlush);
+            if (!rstFlush) return false;
+            SelectedArea = uiConfigs.SelectedArea;
+            FloorAreaList = uiConfigs.FloorAreaList;
+            FloorNumList = uiConfigs.FloorNumList;
+            CleanToolFlag = setViewModel.CleanToolDynamicRadios[0].IsChecked;
+            FloorNumbers = Tool.GetFloorNumbers(FloorNumList);
+            FloorHeightDic = FloorHeightsViewModel.Instance.GetSpecialFloorHeightsDict(FloorNumbers);
+            MaxDayQuota = setViewModel.MaxDayQuota;
+            MaxDayHourCoefficient = Convert.ToDouble(setViewModel.MaxDayHourCoefficient.ToString("0.0"));
+            NumberOfHouseholds = Convert.ToDouble(setViewModel.NumberOfHouseholds.ToString("0.0"));
+
             var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
             BlockSize = ThWCompute.CreateBlockSizeList(bt);//获取并添加 block 尺寸
 

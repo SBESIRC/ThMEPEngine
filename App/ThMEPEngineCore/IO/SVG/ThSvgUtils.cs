@@ -493,7 +493,7 @@ namespace ThMEPEngineCore.IO.SVG
         /// <summary>
         /// 结构图
         /// </summary>
-        Structure,
+        Structure,        
         /// <summary>
         /// 未知
         /// </summary>

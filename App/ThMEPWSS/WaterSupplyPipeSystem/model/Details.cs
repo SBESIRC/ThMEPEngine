@@ -197,11 +197,11 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         }
 
 
-
         public static Scale3d GetScalce(double ratio)
         {
             return new Scale3d(ratio, ratio, ratio);
         }
+
 
         public static Scale3d GetScalce(double ratio, int layingMethod)
         {

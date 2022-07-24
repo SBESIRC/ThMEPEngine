@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NFox.Cad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.SVG;
+using Linq2Acad;
+using ThCADExtension;
 
 namespace ThMEPStructure.StructPlane.Service
 {
@@ -35,6 +39,16 @@ namespace ThMEPStructure.StructPlane.Service
                 return (string)value;
             }
         }
+
+        public static void UpdateLineType(this Dictionary<string, object> properties,string lineType)
+        {
+            string lineTypeKWord = ThSvgPropertyNameManager.LineTypePropertyName;
+            if(properties.ContainsKey(lineTypeKWord))
+            {
+                properties[lineTypeKWord] = lineType;
+            }
+        }
+
         public static string GetCategory(this Dictionary<string, object> properties)
         {
             var value = properties.GetPropertyValue(ThSvgPropertyNameManager.CategoryPropertyName);
@@ -257,6 +271,122 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     return new Vector3d();
                 }
+            }
+        }
+        public static DBObjectCollection Clip(this Entity polygon,
+           DBObjectCollection curves, bool inverted = false)
+        {
+            var results = new DBObjectCollection();
+            if (polygon is Polyline polyline)
+            {
+                results = ThCADCoreNTSGeometryClipper.Clip(polyline, curves, inverted);
+            }
+            else if (polygon is MPolygon mPolygon)
+            {
+                results = ThCADCoreNTSGeometryClipper.Clip(mPolygon, curves, inverted);
+            }
+            return results.OfType<Curve>().ToCollection();
+        }
+
+        public static DBObjectCollection CollinearMerge(this DBObjectCollection lines)
+        {
+            var grouper = new ThColliearLineGrouper(lines);
+            var groups = grouper.Group();
+            // 再对组内的线按连接关系分组
+            return groups.Select(g => Create(g)).ToCollection();
+        }
+
+        private static Line Create(DBObjectCollection colliearLines)
+        {
+            var ptPair = ThGeometryTool.GetCollinearMaxPts(colliearLines.OfType<Line>().ToList());
+            return new Line(ptPair.Item1, ptPair.Item2);
+        }
+
+        public static List<string> FilterSlabElevations(this List<string> elevations,double flrHeight)
+        {
+            return elevations.Where(o =>
+            {
+                if (string.IsNullOrEmpty(o))
+                {
+                    return false;
+                }
+                else
+                {
+                    double tempV = 0.0;
+                    if (double.TryParse(o, out tempV))
+                    {
+                        return Math.Abs(tempV - flrHeight) <= 1.0 ? false : true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }).ToList();
+        }
+        public static bool IsTenThickSlab(this string content)
+        {
+            var values = content.GetDoubles();
+            if (values.Count == 1)
+            {
+                return Math.Abs(values[0] - 10.0) <= 1e-4;
+            }
+            return false;
+        }
+        public static string GetFloorRange(this List<ThFloorInfo> floorInfos,double flrBottomEle)
+        {
+            var result = "";
+            var stdFloors = floorInfos.Where(o =>
+            {
+                double bottomElevation = 0.0;
+                if (double.TryParse(o.Bottom_elevation, out bottomElevation))
+                {
+                    if (Math.Abs(bottomElevation - flrBottomEle) <= 1e-4)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (stdFloors.Count() == 1)
+            {
+                var stdFlr = stdFloors.First().StdFlrNo;
+                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlr);
+                if (floors.Count() == 1)
+                {
+                    result = floors.First().FloorNo.NumToChinese() + "层结构平面图";
+                }
+                else if (floors.Count() > 1)
+                {
+                    var startRange = floors.First().FloorNo.NumToChinese();
+                    var endRange = floors.Last().FloorNo.NumToChinese();
+                    result = startRange + "~" + endRange + "层结构平面图";
+                }
+            }
+            return result;
+        }
+        public static void ImportStruPlaneTemplate(this Database database)
+        {
+            using (var acadDb = AcadDatabase.Use(database))
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.StructPlanePath(), DwgOpenMode.ReadOnly, false))
+            {
+                // 导入图层
+                ThPrintLayerManager.AllLayers.ForEach(layer =>
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), true);
+                });
+
+                // 导入样式
+                ThPrintStyleManager.AllTextStyles.ForEach(style =>
+                {
+                    acadDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(style), false);
+                });
+
+                // 导入块
+                ThPrintBlockManager.AllBlockNames.ForEach(b =>
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(b), true);
+                });
             }
         }
     }

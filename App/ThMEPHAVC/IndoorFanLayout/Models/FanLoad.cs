@@ -82,6 +82,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
             double width = 0.0;
             length = 0.0;
             var sizeStr = fanCount>1? FanBase.AirSupplyOutletTwoSize: FanBase.AirSupplyOutletOneSize;
+            if (string.IsNullOrEmpty(sizeStr) || !sizeStr.Contains("x"))
+                sizeStr = FanBase.AirSupplyOutletOneSize;
             if (string.IsNullOrEmpty(sizeStr))
                 return width;
             sizeStr = sizeStr.ToLower();

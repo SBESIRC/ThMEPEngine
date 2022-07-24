@@ -155,7 +155,8 @@ namespace ThMEPWSS.ViewModel
             Blocks.Add("空调内机--柜机");
             BlockNameConfigList.Add("空调内机--柜机", new List<List<string>>() { new List<string>(), new List<string>() });
 
-
+            Blocks.Add("门块");
+            BlockNameConfigList.Add("门块", new List<List<string>>() { new List<string>(), new List<string>() });
         }
         public void AddToTransient(string blkConfigName)
         {

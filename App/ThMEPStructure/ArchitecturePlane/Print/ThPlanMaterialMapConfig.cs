@@ -19,6 +19,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             Config.Add(ThTextureMaterialManager.THShiCai, CreateThShiCai());
             Config.Add(ThTextureMaterialManager.THBaoWenCeng, CreateThBaoWenCeng());
             Config.Add(ThTextureMaterialManager.ThMenChuangKaiqiShikuai, CreateMenChuangKaiqiShikuai());
+            Config.Add(ThTextureMaterialManager.THLanGan, CreateThLanGan());
         }
         public static Tuple<HatchPrintConfig,PrintConfig> GetHatchPrintConfig(string materialName)
         {
@@ -141,6 +142,14 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             };
             return Tuple.Create(hatchConfig, outlineConfig);
         }
-
+        private static Tuple<HatchPrintConfig, PrintConfig> CreateThLanGan()
+        {
+            HatchPrintConfig hatchConfig = null;
+            var outlineConfig = new PrintConfig
+            {
+                LayerName = ThArchPrintLayerManager.AEHDWR,
+            };
+            return Tuple.Create(hatchConfig, outlineConfig);
+        }
     }
 }

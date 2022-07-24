@@ -1,22 +1,19 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using GeometryExtensions;
 using System.Windows;
-using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
-using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.WaterSupplyPipeSystem.Command;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
-    /// <summary>
-    /// DrainageSystemUI.xaml 的交互逻辑
-    /// </summary>
     public partial class WaterSupplySystem : ThCustomWindow
     {
         static WaterSupplyVM viewModel;
+
+
         public WaterSupplySystem()
         {
             InitializeComponent();
@@ -26,10 +23,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.DataContext = viewModel;
         }
 
+
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            var oldViewModel = viewModel.SetViewModel?.Clone();
-            WaterSupplySystemSet systemSet = new WaterSupplySystemSet(viewModel.SetViewModel);
+            var oldViewModel = viewModel.SetViewModel?.Clone(viewModel.MaxFloor);
+            WaterSupplySystemSet systemSet = new WaterSupplySystemSet(viewModel.SetViewModel,viewModel.MaxFloor);
             systemSet.Owner = this;
             var ret = systemSet.ShowDialog();
             if (ret == false)
@@ -40,7 +38,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
         }
 
-        //run
+
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -57,15 +55,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     }
                 }
             }
-            catch
-            {
-
-            }
+            catch{}
         }
 
-        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-        }
 
         private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
         {
@@ -73,11 +65,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 viewModel.CreateFloorFraming();
             }
-            catch
-            {
-
-            }
+            catch{}
         }
+
 
         private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
@@ -85,11 +75,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 viewModel.InitListDatas();
             }
-            catch
-            {
-
-            }
+            catch{}
         }
+
 
         private void ThCustomWindow_Loaded(object sender, RoutedEventArgs e)
         {

@@ -10,6 +10,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 变电所
     /// </summary>
+    [Serializable]
     public class THPDSProjectSubstation
     {
         public THPDSProjectSubstation()

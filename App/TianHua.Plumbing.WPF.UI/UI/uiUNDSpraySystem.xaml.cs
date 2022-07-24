@@ -43,6 +43,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
+            viewModel.IsAlarmValveSys = false;
             using (var cmd = new ThSpraySystemCmd(viewModel))
             {
                 cmd.Execute();

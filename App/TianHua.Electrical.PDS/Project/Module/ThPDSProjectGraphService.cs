@@ -623,24 +623,21 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建负载
         /// </summary>
-        /// <param name="defaultPhase">项数</param>
-        /// <param name="defaultPhaseSequence">相序</param>
-        /// <param name="defaultLoadID">设备编号</param>
-        /// <param name="defaultPower">设备功率</param>
-        /// <param name="defaultDescription">描述信息</param>
-        /// <param name="defaultFireLoad">是否消防</param>
-        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "备用", bool defaultFireLoad = false, ImageLoadType imageLoadType = ImageLoadType.None ,string floorNumber = "1F")
+        /// <param name="data"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSProjectGraphNodeData data)
         {
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
-            node.Load.Phase = defaultPhase;
-            node.Details.LoadCalculationInfo.PhaseSequence = defaultPhaseSequence;
-            node.Load.ID.LoadID = defaultLoadID;
-            node.Details.LoadCalculationInfo.HighPower = defaultPower;
-            node.Load.ID.Description = defaultDescription;
-            node.Load.SetFireLoad(defaultFireLoad);
-            node.Load.SetLocation(new ThPDSLocation() { FloorNumber = floorNumber });
-            switch (imageLoadType)
+            node.Load.Phase = data.Phase;
+            node.Details.LoadCalculationInfo.PhaseSequence = data.PhaseSequence;
+            node.Load.ID.LoadID = data.Number;
+            node.Details.LoadCalculationInfo.HighPower = data.Power;
+            node.Load.ID.Description = data.Description;
+            node.Load.SetFireLoad(data.FireLoad);
+            node.Load.SetLocation(new ThPDSLocation() { StoreyNumber = data.Storey });
+            switch (data.Type)
             {
                 case ImageLoadType.None:
                     {
@@ -707,8 +704,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
                 case ImageLoadType.RS:
                     {
-                        node.Type = PDSNodeType.DistributionBox;
-                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
                         node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireResistantShutter;
                         node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
                         break;
@@ -733,7 +730,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     {
                         node.Type = PDSNodeType.DistributionBox;
                         node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
-                        node.Load.LoadTypeCat_2 = defaultPhase == ThPDSPhase.一相? ThPDSLoadTypeCat_2.OnePhaseSocket: ThPDSLoadTypeCat_2.ThreePhaseSocket;
+                        node.Load.LoadTypeCat_2 = data.Phase == ThPDSPhase.一相 ? ThPDSLoadTypeCat_2.OnePhaseSocket : ThPDSLoadTypeCat_2.ThreePhaseSocket;
                         node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
                         break;
                     }
@@ -791,6 +788,70 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
             }
             PDSProject.Instance.graphData.Graph.AddVertex(node);
+            node.ComponentSelection(new List<ThPDSProjectGraphEdge>(), false);
+            return node;
+        }
+
+        /// <summary>
+        /// 新建负载
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static ThPDSProjectGraphNode CreatNewLoad(CircuitCreator data)
+        {
+            //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
+            var node = new ThPDSProjectGraphNode();
+            if(data.Phase == "L")
+            {
+                node.Load.Phase = ThPDSPhase.一相;
+                node.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L;
+            }
+            else
+            {
+                node.Load.Phase = data.Phase == "单相" ? ThPDSPhase.一相 : ThPDSPhase.三相;
+                node.Details.LoadCalculationInfo.PhaseSequence = data.Phase == "单相" ? Circuit.PhaseSequence.L1 : Circuit.PhaseSequence.L123;
+            }
+            node.Type = data.NodeType;
+            node.Load.LoadTypeCat_1 = data.LoadTypeCat_1;
+            node.Load.LoadTypeCat_2 = data.LoadTypeCat_2;
+            node.Load.LoadTypeCat_3 = data.LoadTypeCat_3;
+            node.Details.LoadCalculationInfo.IsDualPower = data.IsDualPower;
+            node.Details.LoadCalculationInfo.LowPower = data.LowPower;
+            if(data.HighPower < 0)
+            {
+                if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter)
+                {
+                    node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.FireproofShutterPower;
+                }
+                else if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger)
+                {
+                    node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.ACChargerPower;
+                }
+                else if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger)
+                {
+                    node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.DCChargerPower;
+                }
+                else if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+                {
+                    if(PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType == MeterBoxCircuitType.江苏住宅)
+                    {
+                        node.Details.LoadCalculationInfo.HighPower = data.Phase == "单相" ? 16 : 20;
+                    }
+                    else
+                    {
+                        node.Details.LoadCalculationInfo.HighPower = data.Phase == "单相" ? 8 : 12;
+                    }
+                }
+            }
+            else
+            {
+                node.Details.LoadCalculationInfo.HighPower = data.HighPower;
+            }
+            node.Load.ID.Description = data.Description;
+            node.Load.SetFireLoad(data.FireLoad);
+            PDSProject.Instance.graphData.Graph.AddVertex(node);
+            node.ComponentSelection(new List<ThPDSProjectGraphEdge>(), false);
             return node;
         }
 
@@ -817,6 +878,33 @@ namespace TianHua.Electrical.PDS.Project.Module
             return node;
         }
 
+        /// <summary>
+        /// 检查Drag&Drop合法性
+        /// </summary>
+        public static bool LegalDragDrop(ProjectGraph graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
+        {
+            //抽空要研究一下这个API，这个API无法"取出值"，很怪(QuikGraph.Algorithms.TreeDepthFirstSearch)
+            //所以我们自己暂时先写一套自己的DFSNode
+            //var sourceNodes = graph.TreeDepthFirstSearch(source);
+            //var targetNodes = graph.TreeDepthFirstSearch(target);
+
+            var sourceList = new List<ThPDSProjectGraphNode>();
+            var targetList = new List<ThPDSProjectGraphNode>();
+            DFSNode(source, ref sourceList);
+            DFSNode(target, ref targetList);
+            return sourceList.Intersect(targetList).Count() == 0;
+            void DFSNode(ThPDSProjectGraphNode node, ref List<ThPDSProjectGraphNode> list)
+            {
+                if (list.Contains(node))
+                    return;
+                list.Add(node);
+                var edges = graph.OutEdges(node);
+                foreach (var edge in edges)
+                {
+                    DFSNode(edge.Target, ref list);
+                }
+            }
+        }
 
         /// <summary>
         /// 新建回路
@@ -824,7 +912,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.LoadCalculationInfo.PhaseSequence, floorNumber:node.Load.Location.FloorNumber);
+            var data = ThPDSProjectGraphNodeData.Create();
+            data.Phase = node.Load.Phase;
+            data.Storey = node.Load.Location.StoreyNumber;
+            data.PhaseSequence = node.Details.LoadCalculationInfo.PhaseSequence;
+            var target = CreatNewLoad(data);
             if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 target.Load.Phase = ThPDSPhase.一相;
@@ -848,25 +940,47 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
+        public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string menuOptions, string submenuOptions)
         {
-            //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase, node.Details.LoadCalculationInfo.PhaseSequence, floorNumber: node.Load.Location.FloorNumber);
-            //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
-            //Step 3:获取对应的CircuitFormOutType
-            var CircuitFormOutType = Switch(newEdge, type);
-            //Step 4:回路选型
-            newEdge.ComponentSelection(CircuitFormOutType);
-            //Step 5:添加到Graph
-            graph.AddEdge(newEdge);
-            if (type.Contains("消防应急照明回路"))
+            var CircuitCreatorInfo = CircuitConfiguration.CircuitCreatorInfos.FirstOrDefault(o => o.MenuOptions.Equals(menuOptions) && o.SubmenuOptions.Equals(submenuOptions));
+            if(!CircuitCreatorInfo.IsNull())
             {
-                target.Load.Phase = ThPDSPhase.一相;
-                target.Details.LoadCalculationInfo.PhaseSequence = Circuit.PhaseSequence.L;
-                newEdge.Circuit.ID.Description = "疏散照明/指示灯";
+                //Step 1:新建负载
+                var target = CreatNewLoad(CircuitCreatorInfo);
+                target.Load.SetLocation(new ThPDSLocation() { StoreyNumber = node.Load.Location.StoreyNumber });
+                //Step 2:新建回路
+                var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
+                //Step 3:获取对应的CircuitFormOutType
+                var CircuitFormOutType = Switch(newEdge, CircuitCreatorInfo.CircuitFormOutType);
+                //Step 4:回路选型
+                newEdge.ComponentSelection(CircuitFormOutType);
+                //Step 5:根据配置修改选型
+                if (CircuitCreatorInfo.ProtectionSwitchType == "组合式RCD")
+                {
+                    newEdge.Details.CircuitForm.ReviseBreaker()?.SetBreakerType(ComponentType.组合式RCD);
+                }
+                var conductors = newEdge.Details.CircuitForm.GetCircuitConductors();
+                conductors.ForEach(o =>
+                {
+                    if (menuOptions != "备用回路" && menuOptions != "集中电源")
+                    {
+                        o.SetConductorType(CircuitCreatorInfo.ConductorType);
+                        o.SetConductorLayingPath(CircuitCreatorInfo.ConductorLaying);
+                        o.SetLayingSite1(CircuitCreatorInfo.LayingSite1);
+                        o.SetLayingSite2(CircuitCreatorInfo.LayingSite2);
+                    }
+                });
+                //Step 6:添加到Graph
+                graph.AddEdge(newEdge);
+                //Step 7:检查回路
+                newEdge.Source.CheckWithNode();
+                return newEdge;
+
             }
-            return newEdge;
+            else
+            {
+                throw new NotSupportedException("不支持的回路类型");
+            }
         }
 
         /// <summary>
@@ -1036,6 +1150,24 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 设置回路锁状态
+        /// </summary>
+        public static void SetLockState(ThPDSProjectGraphEdge edge, bool state)
+        {
+            edge.Details.CircuitLock = state;
+        }
+
+        /// <summary>
+        /// 获取回路锁定状态
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public static bool LockState(ThPDSProjectGraphEdge edge)
+        {
+            return edge.Details.CircuitLock;
+        }
+
+        /// <summary>
         /// 指定回路至控制回路
         /// </summary>
         public static void AssignCircuit2ControlCircuit(ThPDSProjectGraphNode node, SecondaryCircuit secondaryCircuit, ThPDSProjectGraphEdge edge)
@@ -1052,28 +1184,6 @@ namespace TianHua.Electrical.PDS.Project.Module
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// 获取可新建出线回路列表
-        /// </summary>
-        /// <returns></returns>
-        public static List<string> AvailableTypes()
-        {
-            return new List<string>()
-            {
-                "常规配电回路",
-                "漏电保护回路",
-                "带接触器回路",
-                "带热继电器回路",
-                "计量(上海)",
-                "计量(表在前)",
-                "计量(表在后)",
-                "电动机配电回路",
-                "双速电机D-YY",
-                "双速电机Y-Y",
-                /*"分支母排"*/
-            };
         }
 
         /// <summary>
@@ -1303,6 +1413,44 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 return CircuitFormOutType.消防应急照明回路WFEL;
             }
+            else if (circuitName == "计量")
+            {
+                switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType)
+                {
+                    case MeterBoxCircuitType.上海住宅:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_上海直接表;
+                            else
+                                return CircuitFormOutType.配电计量_上海CT;
+                        }
+                    case MeterBoxCircuitType.江苏住宅:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_直接表在前;
+                            else
+                                return CircuitFormOutType.配电计量_CT表在前;
+                        }
+                    case MeterBoxCircuitType.国标_表在断路器前:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_直接表在前;
+                            else
+                                return CircuitFormOutType.配电计量_CT表在前;
+                        }
+                    case MeterBoxCircuitType.国标_表在断路器后:
+                        {
+                            if (edge.Target.Details.LoadCalculationInfo.HighPower < 100)
+                                return CircuitFormOutType.配电计量_直接表在后;
+                            else
+                                return CircuitFormOutType.配电计量_CT表在后;
+                        }
+                    default:
+                        {
+                            throw new NotSupportedException();
+                        }
+                }
+            }
             else
             {
                 //其他目前暂不支持
@@ -1319,11 +1467,26 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 创建空项目
+        /// </summary>
+        public static void CreateNewProject()
+        {
+            PDSProject.Instance.SetDefaults();
+        }
+
+        /// <summary>
         /// 导入项目
         /// </summary>
         public static void ImportProject(string filePath)
         {
-            PDSProject.Instance.Load(filePath);
+            if(string.IsNullOrWhiteSpace(filePath))
+            {
+                PDSProject.Instance.SetDefaults();
+            }
+            else
+            {
+                PDSProject.Instance.LoadFromFile(filePath);
+            }
         }
 
         /// <summary>

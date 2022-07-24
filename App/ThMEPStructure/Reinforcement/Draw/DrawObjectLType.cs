@@ -1500,8 +1500,14 @@ namespace ThMEPStructure.Reinforcement.Draw
         }
         public override void DrawCJin()
         {
+            try
+            {
             StrToReinforce LReinStr = new StrToReinforce();
             LReinStr = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
+            if (LReinStr.Rein_Detail_list.Count == 0)
+            {
+                return;
+            }
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
             L_FindCJin(points, LReinStr, ZongjinPoints); 
             if (thLTypeEdgeComponent.Bf < 300 && thLTypeEdgeComponent.Bw < 300)
@@ -1782,7 +1788,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                 if (idx != -1)
                                 {
-                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                 }
                                 else
                                 {
@@ -1792,7 +1798,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                 RightNum = RightNum - 1;
                             }
                         }
@@ -1820,7 +1826,20 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (LReinStr.Rein_Detail_list[0].TypeNum <= LReinStr.num / 2)
                     {
-                        if (Cnum == 4)
+
+                        if (Cnum == 2)
+                        {
+                                if (Step == 5)
+                                {
+                                    Helper.CreateRectAndLabel(points[0], points[7], 4, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                }
+                                else
+                                {
+                                    Helper.CreateRectAndLabel(points[0], points[7], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                }
+
+                        }
+                        else if (Cnum == 4)
                         {
                             if (Step == 5)
                             {
@@ -2033,7 +2052,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                     if (idx != -1)
                                     {
-                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     }
                                     else
                                     {
@@ -2043,7 +2062,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 }
                                 else
                                 {
-                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                     RightNum = RightNum -1;
                                 }
                             }
@@ -2072,6 +2091,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             else
             {
+
+                
                 int Cnum = LReinStr.Rein_Detail_list[0].TypeNum;
                 int Csize = LReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
@@ -2549,7 +2570,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                 if (idx != -1)
                                 {
-                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                    Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                 }
                                 else
                                 {
@@ -2559,7 +2580,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                 RightNum = RightNum - 1;
                             }
                         }
@@ -3000,7 +3021,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[5], points[4], 2, ZongjinPoints[5].size, LabelAndRect, CJintText, 400, 800, 2, 200);
+                                Helper.CreateRectAndLabel(points[5], points[4], 3, ZongjinPoints[5].size, LabelAndRect, CJintText, 400, 800, 2, 200);
                             }
 
                         }
@@ -3029,7 +3050,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     int idx = Helper.FindClosePoint(points, rightIdx, 6, 6);
                                     if (idx != -1)
                                     {
-                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 2, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                        Helper.CreateRectAndLabel(points[idx], points[Helper.FindPairPoint(points, rightIdx, 2)], Helper.NumOfTwoPoint(points, rightIdx, idx) * 2 + 4, ZongjinPoints[rightIdx].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     }
                                     else
                                     {
@@ -3039,7 +3060,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 }
                                 else
                                 {
-                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
+                                    rightIdx = Helper.FindClosePoint(points, rightIdx, 6, rightIdx);
                                     RightNum = RightNum - 1;
                                 }
                             }
@@ -3066,6 +3087,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                     }
                 }
 
+            }
+            }
+            catch (Exception ex)
+            {
+                string message= ex.Message;
+                return;
             }
 
         }

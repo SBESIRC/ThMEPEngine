@@ -1,6 +1,7 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPStructure.Common;
 
 namespace ThMEPStructure.Model.Printer
 {
@@ -88,5 +89,14 @@ namespace ThMEPStructure.Model.Printer
         /// 倾斜角度
         /// </summary>
         public double Oblique { get; set; }
+        /// <summary>
+        /// 按比例缩放文字高度
+        /// </summary>
+        /// <param name="drawingScale"></param>
+        public void ScaleHeight(string drawingScale)
+        {
+            var pair = drawingScale.GetDrawScaleValue();
+            Height = Height.GetScaleTextHeight(pair.Item1, pair.Item2);
+        }
     }
 }

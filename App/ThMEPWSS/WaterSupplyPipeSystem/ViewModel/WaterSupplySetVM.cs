@@ -5,17 +5,20 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPWSS.WaterSupplyPipeSystem.ViewModel;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
-    public enum WaterMeterLocation { SameFloor, HalfFloor }
+    public enum WaterMeterLocation { SameFloor, HalfFloor, RoofTank }
     public enum CommandTypeEnum { RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically }//directly, with splitters, without splitters
 
     public class WaterSupplySetVM : NotifyPropertyChangedBase
     {
+        public int MaxFloor = 1;
 
-        public WaterSupplySetVM()
+        public WaterSupplySetVM(int maxfloor)
         {
+            MaxFloor = maxfloor;
             FloorLineSpace = 1800;
             FaucetFloor = "1";
             NoCheckValve = "";
@@ -52,6 +55,8 @@ namespace ThMEPWSS.Diagram.ViewModel
             CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "图纸", GroupName = "type2", IsChecked = true });
             CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "缺省", GroupName = "type2", IsChecked = false });
 
+            tankViewModel = new RoofTankVM(maxfloor);
+
         }
         private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
         public CommandTypeEnum CommandType
@@ -76,6 +81,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 _MeterType = value;
                 RaisePropertyChanged("MeterType");
                 RaisePropertyChanged("IsHalfFloor");
+                RaisePropertyChanged("RoofTank");
             }
         }
         public bool IsHalfFloor
@@ -284,11 +290,12 @@ namespace ThMEPWSS.Diagram.ViewModel
         }
 
         public HalfPlatformSetVM halfViewModel { get; set; } = new HalfPlatformSetVM();
+        public RoofTankVM tankViewModel { get; set; }
 
-
-        public WaterSupplySetVM Clone()
+        public WaterSupplySetVM Clone(int maxFloor)
         {
-            var cloned = new WaterSupplySetVM();
+            var cloned = new WaterSupplySetVM(maxFloor);
+            cloned.MaxFloor = maxFloor;
             cloned.FloorLineSpace = this.floorLineSpace;
             cloned.FaucetFloor = FaucetFloor;
             cloned.NoCheckValve = NoCheckValve;

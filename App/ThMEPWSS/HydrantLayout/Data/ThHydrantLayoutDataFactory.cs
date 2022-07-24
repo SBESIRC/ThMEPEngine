@@ -170,7 +170,7 @@ namespace ThMEPWSS.HydrantLayout.Data
         {
             var hydrantVisitor = new ThHydrantExtractionVisitor()
             {
-                BlkNames = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher },
+                BlkNames = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Hydrant2 },
             };
             var hydrantRecog = new ThHydrantRecognitionEngine(hydrantVisitor);
             hydrantRecog.RecognizeMS(database, framePts);

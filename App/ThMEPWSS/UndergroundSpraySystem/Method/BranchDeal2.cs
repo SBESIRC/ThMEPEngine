@@ -10,6 +10,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
     public class BranchDeal2
     {
+        private static void GetAlarmText(Point3dEx pt, SprayIn sprayIn)
+        {
+            if (!sprayIn.AlarmTextDic.ContainsKey(pt))
+            {
+                foreach (var apt in sprayIn.AlarmTextDic.Keys)
+                {
+                    if (apt._pt.DistanceTo(pt._pt) < 150)
+                    {
+                        sprayIn.AlarmTextDic.Add(pt, sprayIn.AlarmTextDic[apt]);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        
         public static void Get(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             for (int j = 0; j < spraySystem.MainLoops.Count; j++)
@@ -18,27 +34,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 branchLoop.AddRange(spraySystem.MainLoops[j]);
                 var alarmNums = 0;//支路数
                 var fireAreaNums = 0;//防火分区数
-                for (int i = branchLoop.Count - 1; i >= 0; i--)
+                for (int i = branchLoop.Count()-1; i >=0; i--)
                 {
                     var pt = branchLoop[i];
 
-                    if (!sprayIn.PtTypeDic[pt].Contains("AlarmValve"))
+                    if (!sprayIn.PtTypeDic[pt].Contains("AlarmValve") && sprayIn.PtDic[pt].Count < 3)
                     {
                         branchLoop.Remove(pt);
                     }
                     else
                     {
-                        if (!sprayIn.AlarmTextDic.ContainsKey(pt))
-                        {
-                            foreach (var apt in sprayIn.AlarmTextDic.Keys)
-                            {
-                                if (apt._pt.DistanceTo(pt._pt) < 150)
-                                {
-                                    sprayIn.AlarmTextDic.Add(pt, sprayIn.AlarmTextDic[apt]);
-                                    break;
-                                }
-                            }
-                        }
+                        GetAlarmText(pt, sprayIn);
                     }
                 }
 
@@ -48,6 +54,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     if (sprayIn.PtTypeDic[pt].Contains("Alarm"))
                     {
                         alarmNums += 1;
+                    }
+                    {
                         var termPts = new List<Point3dEx>();
                         var flowPts = new List<Point3dEx>();
                         Queue<Point3dEx> q = new Queue<Point3dEx>();
@@ -129,6 +137,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
                 foreach (var spt in branchLoop)//每个支路起点
                 {
+                    if(!spraySystem.BranchDic.ContainsKey(spt))
+                    {
+                        continue;
+                    }
                     foreach (var ept in spraySystem.BranchDic[spt])//每个支路终点
                     {
                         var tempPath = new List<Point3dEx>();
@@ -138,14 +150,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var stopwatch = new Stopwatch();
                         stopwatch.Start();
                         bool flag = true;
-                        DfsBranch(spt, spt, ept, spraySystem.MainLoops[j], tempPath, visited2, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag);
+                        string flowType = "";
+                        DfsBranch(spt, spt, ept, spraySystem.MainLoops[j], tempPath, visited2, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag,ref flowType);
                         if (hasValve)
                         {
                             spraySystem.ValveDic.Add(ept);
                         }
                         if (hasFlow)
                         {
-                            spraySystem.FlowDIc.Add(ept);
+                            if(!flowType.Equals(""))
+                            spraySystem.FlowDIc.Add(ept,flowType);
                         }
                     }
                 }
@@ -167,7 +181,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         }
 
         public static void DfsBranch(Point3dEx start, Point3dEx cur, Point3dEx target, List<Point3dEx> branchLoop, List<Point3dEx> tempPath, HashSet<Point3dEx> visited,
-    SprayIn sprayIn, ref bool hasValve, ref bool hasFlow, Stopwatch stopwatch, bool flag)
+    SprayIn sprayIn, ref bool hasValve, ref bool hasFlow, Stopwatch stopwatch, bool flag,ref string flowType)
         {
             if (!flag) return;
             if(stopwatch.Elapsed.TotalSeconds > 5)
@@ -196,6 +210,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     if (qureys.Count > 0)
                     {
                         hasFlow = true;
+                        if(flowType.Equals(""))
+                        {
+                            foreach(var fpt in sprayIn.FlowTypeDic.Keys)
+                            {
+                                if(fpt._pt.DistanceTo(pt._pt)<1000)
+                                {
+                                    flowType = sprayIn.FlowTypeDic[fpt];
+                                    break;
+                                }
+                            }
+                        }
+                        
                     }
                 }
                 flag = true;
@@ -208,7 +234,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 if (branchLoop.Contains(p)) continue;
                 tempPath.Add(p);
                 visited.Add(p);
-                DfsBranch(start, p, target, branchLoop, tempPath, visited, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag);
+                DfsBranch(start, p, target, branchLoop, tempPath, visited, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag, ref flowType);
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }

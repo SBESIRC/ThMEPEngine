@@ -30,6 +30,17 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection _cornice = new DBObjectCollection(); //仅支持Polyline
         private DBObjectCollection _roomSplitline = new DBObjectCollection();
         private DBObjectCollection _curtainWall = new DBObjectCollection();
+
+        public DBObjectCollection ArchitectureWalls => _architectureWall;
+        public DBObjectCollection ShearWalls => _shearWall;
+        public DBObjectCollection Columns => _column;
+        public DBObjectCollection Doors => _door;
+        public DBObjectCollection Windows => _window;
+        public DBObjectCollection Slabs => _slab;
+        public DBObjectCollection Cornices => _cornice;
+        public DBObjectCollection RoomSplitlines => _roomSplitline;
+        public DBObjectCollection CurtainWalls => _curtainWall;
+
         public ThMEPOriginTransformer Transformer { get; private set; }
         private Action<Database, Point3dCollection> GetData;
 
@@ -310,7 +321,12 @@ namespace ThMEPEngineCore.Engine
         {
             var results = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
-            var transformer = new ThMEPOriginTransformer(objs);
+            if (objs.Count==0)
+            {
+                return results;
+            }
+            var center = objs.GeometricExtents().Flatten().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
             transformer.Transform(objs);
             var newPts = transformer.Transform(polygon);
             recognition.Recognize(datas, newPts);

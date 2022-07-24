@@ -31,6 +31,11 @@ namespace TianHua.Electrical.PDS.Service
         public const string ENTER_CIRCUIT_ATSE_320A_4P = "ATSE 320A 4P";
         public const string ENTER_CIRCUIT_MTSE_320A_4P = "MTSE 320A 4P";
 
+        public const int MAX_LENGTH_10 = 10;
+        public const int MAX_LENGTH_12 = 12;
+        public const int MAX_LENGTH_18 = 18;
+        public const int MAX_LENGTH_36 = 36;
+
         public const string OUT_CIRCUIT_CB = "CB";
         public const string OUT_CIRCUIT_CB1 = "CB1";
         public const string OUT_CIRCUIT_CB2 = "CB2";

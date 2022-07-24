@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -153,13 +154,13 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum ConductorLayingPath
     {
         [Description("无敷设路径")]
-        None = 0,
+        None = 1,
         [Description("桥架")]
-        ViaCableTray = 1,
+        ViaCableTray = 2,
         [Description("穿管")]
-        ViaConduit = 2,
+        ViaConduit = 3,
         [Description("桥架/穿管")]
-        ViaCableTrayAndViaConduit = 3,
+        ViaCableTrayAndViaConduit = 4,
     }
 
     /// <summary>
@@ -191,29 +192,77 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum MaterialStructure
     {
         [Description("YJY")]
-        YJY,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
+        YJY = 1,
         [Description("YJV")]
-        YJV,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
+        YJV = 2,
         [Description("BYJ")]
-        BYJ,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FlexibleCable)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
+        BYJ = 3,
         [Description("KYJY")]
-        KYJY,
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
+        KYJY = 4,
         [Description("RYJ")]
-        RYJ,
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.Cord)]
+        [Insulation(InsulationType.XLPE)]
+        [Material(MaterialType.Copper)]
+        RYJ = 5,
         [Description("BTTZ")]
-        BTTZ,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
+        BTTZ = 6,
         [Description("BTTRZ")]
-        BTTRZ,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
+        BTTRZ = 7,
         [Description("RTTZ")]
-        RTTZ,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
+        RTTZ = 8,
         [Description("NG-A(BTLY)")]
-        NG_A_BTLY,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.MICC)]
+        [Insulation(InsulationType.InorganicMaterial)]
+        [Material(MaterialType.Copper)]
+        NG_A_BTLY = 9,
         [Description("BV")]
-        BV,
+        [ScopeOfApplication(ScopeOfApplicationType.ForPowerCircuits)]
+        [CableType(CableType.FlexibleCable)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
+        BV = 10,
         [Description("KYJV")]
-        KYJV,
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.FixedCable)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
+        KYJV = 11,
         [Description("RVV")]
-        RVV,
+        [ScopeOfApplication(ScopeOfApplicationType.ForControlCircuits)]
+        [CableType(CableType.Cord)]
+        [Insulation(InsulationType.PVC)]
+        [Material(MaterialType.Copper)]
+        RVV = 12,
     }
 
     public enum ConductorLevel
@@ -235,15 +284,24 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum ConductorType
     {
-        非消防配电电线,
-        非消防配电电缆,
-        消防配电电线,
-        消防配电干线,
-        消防配电分支线路,
-        消防配电控制电缆,
-        非消防配电控制电缆,
-        消防控制信号软线,
-        非消防控制信号软线,
+        [Description("非消防配电电线")]
+        非消防配电电线 = 1,
+        [Description("非消防配电电缆")]
+        非消防配电电缆 = 2,
+        [Description("消防配电电线")]
+        消防配电电线 = 3,
+        [Description("消防配电干线")]
+        消防配电干线 = 4,
+        [Description("消防配电分支线路")]
+        消防配电分支线路 = 5,
+        [Description("消防配电控制电缆")]
+        消防配电控制电缆 = 6,
+        [Description("非消防配电控制电缆")]
+        非消防配电控制电缆 = 7,
+        [Description("消防控制信号软线")]
+        消防控制信号软线 = 8,
+        [Description("非消防控制信号软线")]
+        非消防控制信号软线 = 9,
     }
 
     /// <summary>

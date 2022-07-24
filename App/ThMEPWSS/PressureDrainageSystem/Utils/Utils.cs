@@ -125,7 +125,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             List<Point3d> intersectpts = line1.IntersectWithEx(line2).Cast<Point3d>().ToList();
             if (intersectpts.Count > 0)
             {
-                double tol1 = 10;
+                double tol1 = 200;
                 Point3d pt = intersectpts[0];
                 bool cand1 = line1.GetClosestPointTo(pt, false).DistanceTo(line1.StartPoint) > tol1;
                 bool cand2 = line1.GetClosestPointTo(pt, false).DistanceTo(line1.EndPoint) > tol1;
@@ -201,6 +201,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 }
                 else if (cond_QuitCycle == 0 && parallel && line1.GetClosestPointTo(line2.StartPoint, true).DistanceTo(line2.StartPoint) < 100)
                 {
+                    if (Math.Min(dis1, dis2) > 1000) return false;
                     return true;
                 }
                 else

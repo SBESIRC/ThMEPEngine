@@ -62,12 +62,12 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         /// <summary>
         /// 非消防配电电缆
         /// </summary>
-        public ConductorUse NonFireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电缆 , ItemsSource = new MaterialStructure[] { MaterialStructure.YJY, MaterialStructure.BV, } };
+        public ConductorUse NonFireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.A, ConductorType = ConductorType.非消防配电电缆 , ItemsSource = new MaterialStructure[] { MaterialStructure.YJY, MaterialStructure.BV, } };
 
         /// <summary>
         /// 非消防配电电线
         /// </summary>
-        public ConductorUse NonFireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电线, ItemsSource = new MaterialStructure[] { MaterialStructure.BYJ, MaterialStructure.KYJV, } };
+        public ConductorUse NonFireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = false, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电线, ItemsSource = new MaterialStructure[] { MaterialStructure.BYJ, MaterialStructure.BV, } };
 
         /// <summary>
         /// 消防配电控制电缆
@@ -117,6 +117,7 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
 
         public int ACChargerPower = 7;//交流电桩额定功率 kw
         public int DCChargerPower = 30;//直流电桩额定功率 kw
+        public double FireproofShutterPower = 1.5;//防火卷帘控制盒除标注外额定功率均为 kW
 
         public bool MineralInsulatedCablesAreUsedForFireDistributionTrunkAndBranchCables { get; set; } = true;
         public bool FireRetardantAndFireresistantPowerCablesShallBeUsedForFireDistributionTrunkAndBranchCablesUseWithCaution { get; set; }

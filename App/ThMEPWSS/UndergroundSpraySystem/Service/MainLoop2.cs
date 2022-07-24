@@ -64,10 +64,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                     //int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][j];
                     int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
+                    var branchNums = spraySystem.SubLoopAlarmsDic.Count - alarmValveNums;
                     var pipeLen = floorHeight - 1800;
                     var pt1 = stPt.OffsetY(-height);
-                    var spt1 = stPt.OffsetX(1000);
-                    var ept1 = pt1.OffsetX(500);
+                    var spt1 = stPt.OffsetX(1000 + branchNums * alarmGap);
+                    var ept1 = pt1.OffsetX(500 + branchNums * alarmGap);
                     var spt2 = spt1.OffsetY(-pipeLen);
                     var ept2 = ept1.OffsetY(-pipeLen);
                     var spt3 = spt2.OffsetX(1700 + (alarmValveNums - 1) * alarmGap + 1000);
@@ -92,13 +93,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     int fireAreaIndex = -1;//当前支管的防火分区index
                     int fireAreaNum = 0; //当前支管的防火分区数目
                     stPt = spt2.OffsetX(1700);
+                    int branchIndex = 0;
+                    bool alarmValveVisited = false;
                     for (int i = 0; i < rstPath.Count; i++)
                     {
                         var pt = rstPath[i];
                         var type = sprayIn.PtTypeDic[pt];
-
+                        var cnt = sprayIn.PtDic[pt].Count;
                         if (type.Contains("AlarmValve"))
                         {
+                            alarmValveVisited = true;
                             var alarmValve = new AlarmValveSys(stPt, fireAreaIndex, floorHeight);
                             if(spraySystem.BranchPtDic.ContainsKey(pt))
                             {
@@ -140,6 +144,24 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     fireAreaNum++;//防火分区数+1
                                 }
                             }
+                        }
+                        else if(cnt==3)
+                        {
+                            double offsetX = 1000;
+                            double offsetY = 400;
+                            if(alarmValveVisited)
+                            {
+                                sprayOut.PipeLine.Add(new Line(ept1.OffsetX(-branchIndex * alarmGap - offsetX),
+                                    ept1.OffsetXY(-branchIndex * alarmGap - offsetX, offsetY + height)));
+                                spraySystem.BranchPtDic.Add(pt, ept1.OffsetXY(-branchIndex * alarmGap - offsetX, offsetY + height));
+                            }
+                            else
+                            {
+                                sprayOut.PipeLine.Add(new Line(stPt1.OffsetX(branchIndex* alarmGap+ offsetX),
+                                    stPt1.OffsetXY(branchIndex * alarmGap + offsetX, offsetY)));
+                                spraySystem.BranchPtDic.Add(pt, stPt1.OffsetXY(branchIndex * alarmGap + offsetX, offsetY));
+                            }
+                            branchIndex++;
                         }
                     }
                     if (stPt.X > spraySystem.MaxOffSetX)

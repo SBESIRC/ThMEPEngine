@@ -84,6 +84,10 @@
       <DependentUpon>UIFanVolumeCalc.xaml</DependentUpon>
     </Compile>
     <Compile Include="EQPMUIServices.cs" />
+    <Compile Include="FloorHeatingCoil\FloorHeatingCoilViewModel.cs" />
+    <Compile Include="FloorHeatingCoil\uiFloorHeatingCoil.xaml.cs">
+      <DependentUpon>uiFloorHeatingCoil.xaml</DependentUpon>
+    </Compile>
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -342,6 +346,10 @@
     <Page Include="EQPMFanSelect\UIFanVolumeCalc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FloorHeatingCoil\uiFloorHeatingCoil.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="LoadCalculation\UI\ExtractRoomFunction.xaml">
       <Generator>MSBuild:Compile</Generator>

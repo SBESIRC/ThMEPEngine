@@ -134,6 +134,7 @@ namespace ThMEPArchitecture.PartitionLayout
             LayoutOutput.LaneLayerName = laneLayerName;
             LayoutOutput.LaneDisplayColorIndex = lanecolor;
             LayoutOutput.InitializeLayer();
+            LayoutOutput.RefreshBlocks();
             var vertcar = LayoutOutput.VCar;
             var vertbackcar = LayoutOutput.VBackCar;
             var pcar = LayoutOutput.PCar;

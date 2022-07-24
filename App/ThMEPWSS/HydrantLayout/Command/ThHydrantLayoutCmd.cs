@@ -35,6 +35,7 @@ namespace ThMEPWSS.HydrantLayout.Command
         private int _layoutMode = 2;
         private int _layoutObject = 2;
         private bool _avoidParking = true;
+        private bool _layoutInMiddle = false;
         public Dictionary<string, List<string>> _BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
         public ThHydrantLayoutCmd()
         {
@@ -54,6 +55,7 @@ namespace ThMEPWSS.HydrantLayout.Command
             _layoutMode = HydrantLayoutSetting.Instance.LayoutMode;
             _avoidParking = HydrantLayoutSetting.Instance.AvoidParking;
             _BlockNameDict = HydrantLayoutSetting.Instance.BlockNameDict;
+            _layoutInMiddle = HydrantLayoutSetting.Instance.LayoutInMiddle;
         }
 
         public override void SubExecute()
@@ -85,7 +87,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 var layerStatusDict = InsertBlkService.RecordLayerStatus(recordLayerStatus);
 
                 //var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
-                var blkList = new List<string> { ThHydrantCommon.BlkName_Vertical };
+                var blkList = new List<string> { ThHydrantCommon.BlkName_Vertical, ThHydrantCommon.BlkName_Vertical150 };
                 var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
                 InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
@@ -116,7 +118,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 dataQuery.Print();
 
                 //Engine start
-                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutMode, _avoidParking);
+                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutMode, _avoidParking, _layoutInMiddle);
                 Run run0 = new Run(dataQuery, dataPass0);
                 run0.Pipeline();
                 List<OutPutModel> outPutModels = run0.outPutModels;

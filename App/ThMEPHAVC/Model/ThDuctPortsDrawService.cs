@@ -148,7 +148,7 @@ namespace ThMEPHVAC.Model
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(portMarkLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(silencerLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(electrycityValveLayer));
-        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(holeLayer));
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(holeLayer));
         
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(portMarkName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(holeName), true);
@@ -467,6 +467,20 @@ namespace ThMEPHVAC.Model
                     {
                         attRef.Rotation = textAngle;
                         break;
+                    }
+                }
+            }
+        }
+        public static void SetPortDynBlockProperity(ObjectId obj, Dictionary<string, object> propertyValues)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var data = new ThBlockReferenceData(obj);
+                foreach (var item in propertyValues)
+                {
+                    if (data.CustomProperties.Contains(item.Key))
+                    {
+                        data.CustomProperties.SetValue(item.Key, item.Value);
                     }
                 }
             }

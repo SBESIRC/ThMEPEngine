@@ -117,6 +117,17 @@ namespace ThMEPHVAC.Model
                 ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange, ucsAngle, attr);
             }
         }
+
+        public void InsertPort1(Point3d pos, double angle,Dictionary<string,object> dynProperties,Dictionary<string,string> attributes)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            { 
+                var blkId = db.ModelSpace.ObjectId.InsertBlockReference(portLayer, portName, pos, new Scale3d(), angle, attributes);
+                ThMEPHVACService.SetAttr(blkId, attributes, angle);
+                ThDuctPortsDrawService.SetPortDynBlockProperity(blkId, dynProperties);
+            }
+        }
+
         public static void GetSidePortInsertPos(Vector3d dirVec, Point3d pos, double ductWidth, out Point3d pL, out Point3d pR)
         {
             var verticalLeft = ThMEPHVACService.GetLeftVerticalVec(dirVec);

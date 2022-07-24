@@ -66,7 +66,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     public class EquipmentBlcokModel
     {
         public EnumEquipmentType enumEquipmentType { get; }
-        public List<BlockReference> blockReferences { get; }
+        public List<BlockReference> blockReferences { get; set; }
         public EquipmentBlcokModel(EnumEquipmentType type, List<BlockReference> blockReferences = null)
         {
             this.enumEquipmentType = type;
@@ -218,6 +218,11 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// </summary>
         [Description("双盆洗手台")]
         doubleBasinWashingTable = 16,
+        /// <summary>
+        /// 污水立管
+        /// </summary>
+        [Description("污水立管")]
+        sewageWaterRiser = 17,
         /// <summary>
         /// 水管井
         /// </summary>

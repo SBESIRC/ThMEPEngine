@@ -3,24 +3,23 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using AcHelper;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.ArchitecturePlane.Print;
 using Autodesk.AutoCAD.ApplicationServices;
+using System;
 
 namespace ThMEPStructure.ArchitecturePlane
 {
     internal class ThArchitectureGenerator
     {
         private ThPlaneConfig Config { get; set; }
-        public ThArchitectureGenerator(ThPlaneConfig config)
+        private ThPlanePrintParameter PrintParameter { get; set; }
+        public ThArchitectureGenerator(ThPlaneConfig config, ThPlanePrintParameter printParameter)
         {
             Config = config;
-            Config.Configure();
+            PrintParameter = printParameter;
         }
         public void Generate()
         {
@@ -30,24 +29,27 @@ namespace ThMEPStructure.ArchitecturePlane
             Clear();
 
             // 成图
-            if(Config.DrawingType == DrawingType.Elevation || Config.DrawingType == DrawingType.Section)
+            if (Config.DrawingType == DrawingType.Elevation || Config.DrawingType == DrawingType.Section)
             {
                 // elevation的SvgSavePath需要FullFilePath
                 var argument = Config.BuildArgument(
                     Config.SvgConfigFilePath,
-                    Config.IfcFilePath, 
+                    Config.IfcFilePath,
                     Config.JsonConfig.SvgConfig.save_path,
                     Config.LogSavePath);
                 Plot(Config.ExeFilePath, argument);
             }
             else
             {
-                Plot(Config.ExeFilePath,Config.Arguments);
+                Plot(Config.ExeFilePath, Config.Arguments);
             }
 
             // 获取Svg
             var svgFiles = GetGeneratedSvgFiles();
-            svgFiles = Sort(svgFiles);
+            if (Config.DrawingType == DrawingType.Plan)
+            {
+                svgFiles = Sort(svgFiles);
+            }
 
             // 打印
             Print(svgFiles);
@@ -55,12 +57,12 @@ namespace ThMEPStructure.ArchitecturePlane
             // 删除
             Erase(svgFiles);
         }
-        private void Plot(string exeFilePath,string arguments)
+        private void Plot(string exeFilePath, string arguments)
         {
             using (var proc = new Process())
             {
-                object output = null;                           
-                proc.StartInfo.FileName = exeFilePath;                
+                object output = null;
+                proc.StartInfo.FileName = exeFilePath;
                 // 是否使用操作系统Shell启动
                 proc.StartInfo.UseShellExecute = false;
                 // 不显示程序窗口
@@ -74,12 +76,12 @@ namespace ThMEPStructure.ArchitecturePlane
 
                 // elevation-generator.exe--config_path config_path --input_path input_path --output_path output_path --log_path log_path
                 proc.StartInfo.Arguments = arguments;
-                    
+
                 proc.Start();
                 proc.WaitForExit();
                 if (proc.ExitCode == 0)
                 {
-                    output = proc.StandardOutput.ReadToEnd();                    
+                    output = proc.StandardOutput.ReadToEnd();
                 }
                 else
                 {
@@ -87,13 +89,23 @@ namespace ThMEPStructure.ArchitecturePlane
                 }
             }
         }
-        
+
         private void Print(List<string> svgFiles)
         {
+            if (svgFiles.Count == 0)
+            {
+                return;
+            }
+            // 从模板导入要打印的图层
+            if (!ThImportDatabaseService.ImportArchDwgTemplate(Active.Database))
+            {
+                return;
+            }
             var printers = PrintToCad(svgFiles);
-            Layout(printers.Select(o => o.ObjIds).ToList());
-            SetLayerOrder(printers.Select(o => o.ObjIds).ToList());
-            if (IsIncludeHatch(printers.Select(o => o.ObjIds).ToList()))
+            var floorObjIds = printers.Select(o => o.ObjIds).ToList();
+            floorObjIds.Layout(PrintParameter.FloorSpacing);
+            SetLayerOrder(floorObjIds);
+            if (floorObjIds.IsIncludeHatch())
             {
                 Active.Document.SendCommand("HatchToBack" + "\n");
             }
@@ -103,44 +115,10 @@ namespace ThMEPStructure.ArchitecturePlane
         {
             //AE-WALL＞AE-WIND＞AE-DOOR-INSD＞AE-FNSH＞AE-HDWR＞AE-FLOR
             //线重合时，根据优先级进行图层前后置，以来保证图面显示效果。
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var layerPriority = new List<string> { ThArchPrintLayerManager.AEWALL, ThArchPrintLayerManager.AEWIND,
+            var layerPriority = new List<string> { ThArchPrintLayerManager.AEWALL, ThArchPrintLayerManager.AEWIND,
             ThArchPrintLayerManager.AEDOORINSD,ThArchPrintLayerManager.AEFNSH,ThArchPrintLayerManager.AEHDWR,
             ThArchPrintLayerManager.AEFLOR};
-
-                // build dict
-                var dict = new Dictionary<string, ObjectIdCollection>();
-                floorObjIds.ForEach(o =>
-                {
-                    o.OfType<ObjectId>().ForEach(e =>
-                    {
-                        var entity = acadDb.Element<Entity>(e, true);
-
-                        if (dict.ContainsKey(entity.Layer))
-                        {
-                            dict[entity.Layer].Add(e);
-                        }
-                        else
-                        {
-                            var objIds = new ObjectIdCollection() { e };
-                            dict.Add(entity.Layer, objIds);
-                        }
-                    });
-                });
-
-                var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId);
-                var btrModelSpace = acadDb.Element<BlockTableRecord>(bt[BlockTableRecord.ModelSpace]);
-                var dot = acadDb.Element<DrawOrderTable>(btrModelSpace.DrawOrderTableId, true);
-
-                layerPriority.ForEach(layer =>
-                {
-                    if (dict.ContainsKey(layer))
-                    {
-                        dot.MoveToBottom(dict[layer]);
-                    }
-                });
-            }
+            floorObjIds.SetLayerOrder(layerPriority);
         }
 
         private void Clear()
@@ -151,46 +129,134 @@ namespace ThMEPStructure.ArchitecturePlane
 
         private List<string> Sort(List<string> svgFiles)
         {
-            //svgFiles已经经过合理性检查
-            //C: \Users\XXXX\AppData\Local\Temp\6#建筑结构合模-7-17F.svg
-            return svgFiles.OrderBy(o =>
+            if (svgFiles.Count == 1)
+            {
+                return svgFiles;
+            }
+            //C: \Users\XXXX\AppData\Local\Temp\6#建筑结构合模-01F.svg
+            var underGroundFlrs = new List<Tuple<string, float>>(); //B1F,B2F
+            var roofFlrs = new List<Tuple<string, float>>(); //R1F,R2F
+            var normalFlrs = new List<Tuple<string, float>>(); //1F,2F
+            var invalidFlrs = new List<string>(); // 
+            svgFiles.ForEach(o =>
             {
                 var fileName = Path.GetFileNameWithoutExtension(o);
                 var strs = fileName.Split('-');
-                if(strs.Length>2)
+                var flrNo = strs.Last();
+                if (IsUnderGroundFloor(flrNo))
                 {
-                    var str = strs[strs.Length - 2];                    
-                    if(IsInteger(str))
+                    var flrNoValue = ParseUnderFlrNo(flrNo);
+                    if(flrNoValue.HasValue)
                     {
-                        return int.Parse(str.Trim());
+                        underGroundFlrs.Add(Tuple.Create(o, flrNoValue.Value));
                     }
                     else
                     {
-                        return -1;
+                        invalidFlrs.Add(o);
+                    }
+                }
+                else if (IsRoofFloor(flrNo))
+                {
+                    var flrNoValue = ParseNormalFlrNo(flrNo);
+                    if(flrNoValue.HasValue)
+                    {
+                        roofFlrs.Add(Tuple.Create(o, flrNoValue.Value));
+                    }
+                    else
+                    {
+                        invalidFlrs.Add(o);
                     }
                 }
                 else
                 {
-                    return -1;
+                    var flrNoValue = ParseNormalFlrNo(flrNo);
+                    if(flrNoValue.HasValue)
+                    {
+                        normalFlrs.Add(Tuple.Create(o, flrNoValue.Value));
+                    }
+                    else
+                    {
+                        invalidFlrs.Add(o);
+                    }
                 }
-            }).ToList();
+            });
+            underGroundFlrs = underGroundFlrs.OrderBy(o => o.Item2).ToList();
+            normalFlrs = normalFlrs.OrderBy(o => o.Item2).ToList();
+            roofFlrs = roofFlrs.OrderBy(o => o.Item2).ToList();
+
+            var results = new List<string>();
+            results.AddRange(underGroundFlrs.Select(o => o.Item1));
+            results.AddRange(normalFlrs.Select(o => o.Item1));
+            results.AddRange(roofFlrs.Select(o => o.Item1));
+            //results.AddRange(invalidFlrs); //不合格的暂时不打印
+            return results;
         }
 
+        private float? ParseUnderFlrNo(string flrNo)
+        {
+            // B1F
+            var integers = ThPlaneUtils.GetIntegers(flrNo);
+            if (integers.Count > 0)
+            {
+                var value = integers[0];
+                if (IsMiddleFloor(flrNo))
+                {
+                    return -1.0F * (value + 0.5F);
+                }
+                else
+                {
+                    return -1.0F * value;
+                }
+            }
+            return null;
+        }
+        private float? ParseNormalFlrNo(string flrNo)
+        {
+            // 1F,2F,2FM ,R1F
+            var integers = ThPlaneUtils.GetIntegers(flrNo);
+            if (integers.Count > 0)
+            {
+                var value = integers[0];
+                if (IsMiddleFloor(flrNo))
+                {
+                    return value + 0.5F;
+                }
+                else
+                {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        private bool IsUnderGroundFloor(string flrNo)
+        {
+            return flrNo.ToUpper().StartsWith("B");
+        }
+        private bool IsRoofFloor(string flrNo)
+        {
+            return flrNo.ToUpper().StartsWith("R");
+        }
+        private bool IsMiddleFloor(string flrNo)
+        {
+            return flrNo.ToUpper().EndsWith("M");
+        }
         private void Erase(List<string> svgFiles)
         {
             svgFiles.ForEach(svgFile =>
             {
                 var fi = new FileInfo(svgFile);
-                if(fi.Exists)
+                if (fi.Exists)
                 {
                     fi.Delete();
                 }
             });
         }
 
-        private List<string> GetElevationSvgFiles()
+        private List<string> GetGeneratedSvgFiles()
         {
             var results = new List<string>();
+            //文件名，不含后缀
             var ifcFileName = Config.IfcFileName.ToUpper();
             var di = new DirectoryInfo(Config.SvgSavePath);
             foreach (var fileInfo in di.GetFiles())
@@ -201,112 +267,8 @@ namespace ThMEPStructure.ArchitecturePlane
                     results.Add(fileInfo.FullName);
                 }
             }
-            return results;
-        }
-
-        private List<string> GetGeneratedSvgFiles()
-        {
-            var results = new List<string>();
-            //文件名，不含后缀
-            var ifcFileName = Config.IfcFileName.ToUpper();
-            var di = new DirectoryInfo(Config.SvgSavePath);
-            foreach(var fileInfo in di.GetFiles())
-            {
-                if(fileInfo.Extension.ToUpper()==".SVG" &&
-                    fileInfo.Name.ToUpper().StartsWith(ifcFileName))
-                {
-                    results.Add(fileInfo.FullName);
-                }
-            }
             // 返回以Ifc文件名开始的所有Svg文件
             return results;
-
-            //if(Config.DrawingType == DrawingType.Elevation)
-            //{
-            //    return results
-            //   .Where(o => IsElevationSvgFile(o))
-            //   .ToList();
-            //}
-            //else
-            //{
-            //    return results
-            //    .Where(o => IsValidSvgFile(o))
-            //    .ToList();
-            //}
-        }
-
-        private bool IsElevationSvgFile(string svgFilePath)
-        {
-            //ifcFileName-> 0407-1
-            var ifcFileName = Config.IfcFileName.ToUpper();
-            // 0407-1-elevation-sdfs-sfsd-sfsd-sdfsd.svg
-            var svgFileName = Path.GetFileNameWithoutExtension(svgFilePath);
-            return svgFileName.ToUpper().StartsWith(ifcFileName);
-        }
-
-        private bool IsValidSvgFile(string svgFilePath)
-        {
-            //ifcFileName-> 0407-1
-            var ifcFileName = Config.IfcFileName.ToUpper();
-            // 0407-1-Floor_1-Floor_2
-            var fileName = Path.GetFileNameWithoutExtension(svgFilePath); 
-            if(!fileName.ToUpper().StartsWith(ifcFileName))
-            {
-                return false;
-            }
-            // 1-Floor_1-Floor_2
-            var restStr = fileName.Substring(ifcFileName.Length+1);
-            var strs = restStr.Split('-');
-            if(strs.Length<2)
-            {
-                return false;
-            }
-            if (!IsInteger(strs[0]))
-            {
-                return false;
-            }            
-            return true;
-        }
-        private bool IsInteger(string content)
-        {
-            string pattern = @"^\s*\d+\s*$";
-            return System.Text.RegularExpressions.Regex.IsMatch(content, pattern);
-        }
-
-        private void Layout(List<ObjectIdCollection> floorObjIds)
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                for (int i = 0; i < floorObjIds.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        continue;
-                    }
-                    var dir = new Vector3d(0, i * Config.FloorSpacing, 0);
-                    var mt = Matrix3d.Displacement(dir);
-                    floorObjIds[i].OfType<ObjectId>().ForEach(o =>
-                    {
-                        var entity = acadDb.Element<Entity>(o, true);
-                        entity.TransformBy(mt);
-                    });
-                }
-            }
-        }
-
-        private bool IsIncludeHatch(List<ObjectIdCollection> floorObjIds)
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                for(int i=0;i< floorObjIds.Count;i++)
-                {
-                    if (floorObjIds[i].OfType<ObjectId>().Where(id => acadDb.Element<Entity>(id) is Hatch).Any())
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
         }
 
         private List<ThArchDrawingPrinter> PrintToCad(List<string> svgFiles)
@@ -316,28 +278,24 @@ namespace ThMEPStructure.ArchitecturePlane
             {
                 var svg = new ThArchitectureSVGReader();
                 svg.ReadFromFile(svgFile);
-                var svgInput = new ThArchSvgInput()
+                var svgInput = new ThSvgInput()
                 {
                     Geos = svg.Geos,
                     FloorInfos = svg.FloorInfos,
                     DocProperties = svg.DocProperties,
                     ComponentInfos = svg.ComponentInfos,
                 };
-                var printParameter = new ThPlanePrintParameter()
-                {
-                    DrawingScale = "1:100"
-                };
                 ThArchDrawingPrinter printer = null;
                 switch (Config.DrawingType)
                 {
                     case DrawingType.Plan:
-                        printer = new ThArchPlanDrawingPrinter(svgInput, printParameter);
+                        printer = new ThArchPlanDrawingPrinter(svgInput, PrintParameter);
                         break;
                     case DrawingType.Elevation:
-                        printer = new ThArchElevationDrawingPrinter(svgInput, printParameter);
+                        printer = new ThArchElevationDrawingPrinter(svgInput, PrintParameter);
                         break;
                     case DrawingType.Section:
-                        printer = new ThArchSectionDrawingPrinter(svgInput, printParameter);
+                        printer = new ThArchSectionDrawingPrinter(svgInput, PrintParameter);
                         break;
                 }
                 if (printer != null)

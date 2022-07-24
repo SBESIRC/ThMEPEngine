@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.Service
             };
             thPDSDistBox.SetLocation(new ThPDSLocation
             {
-                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position.TransformBy(distBoxData.OwnerSpace2WCS)),
             });
 
             var descriptionAssign = true;
@@ -51,7 +51,12 @@ namespace TianHua.Electrical.PDS.Service
                 if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
                     && str.Contains("AR"))
                 {
-                    thPDSDistBox.ID.LoadID = str;
+                    var idRegex = new Regex(@"AR-[0-9]+");
+                    var idMatch = idRegex.Match(str);
+                    if (idMatch.Success)
+                    {
+                        thPDSDistBox.ID.LoadID = idMatch.Value;
+                    }
                 }
                 else
                 {
@@ -369,7 +374,7 @@ namespace TianHua.Electrical.PDS.Service
             thPDSLoad.SetLocation(new ThPDSLocation
             {
                 ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position.TransformBy(distBoxData.OwnerSpace2WCS)),
             });
 
             if (distBoxData.FireLoad == ThPDSFireLoad.FireLoad)
@@ -440,6 +445,10 @@ namespace TianHua.Electrical.PDS.Service
                     if (infos[i].Contains(key))
                     {
                         var check = "[a-zA-Z0-9-/]+";
+                        if (new Regex(@"[(][aAbBzZ][)]").Match(infos[i]).Success)
+                        {
+                            check = "[a-zA-Z0-9-/]+[(][aAbBzZ][)][a-zA-Z0-9-/]*";
+                        }
                         var r = new Regex(@check);
                         var m = r.Match(infos[i]);
                         if (m.Success)

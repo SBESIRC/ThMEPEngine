@@ -25,11 +25,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var objs = new DBObjectCollection();
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var Results = acadDatabase
-                    .ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(o => IsTraget(o))
-                    .ToList();
+                var Results = acadDatabase.ModelSpace.OfType<BlockReference>()
+                    .Where(o => IsTraget(o)).ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 foreach(var polygon in sprayIn.FloorRectDic.Values)
@@ -53,7 +50,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     .ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var dbObjs = spatialIndex.SelectCrossingPolygon(CreatePolyline(insertPt));
+                var dbObjs = spatialIndex.SelectCrossingPolygon(insertPt.GetRect(50));
                 if(dbObjs.Count > 0)
                 {
                     return true;
@@ -61,18 +58,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 return false;
 
             }
-        }
-        private static Polyline CreatePolyline(Point3d c, int tolerance = 50)
-        {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-            pts.Add(new Point2d(c.X - tolerance, c.Y - tolerance)); // low left
-            pts.Add(new Point2d(c.X - tolerance, c.Y + tolerance)); // high left
-            pts.Add(new Point2d(c.X + tolerance, c.Y + tolerance)); // high right
-            pts.Add(new Point2d(c.X + tolerance, c.Y - tolerance)); // low right
-            pts.Add(new Point2d(c.X - tolerance, c.Y - tolerance)); // low left
-            pl.CreatePolyline(pts);
-            return pl;
         }
 
         private bool IsTraget(BlockReference blockReference)

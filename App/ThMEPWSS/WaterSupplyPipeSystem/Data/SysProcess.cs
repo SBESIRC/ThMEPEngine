@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.WaterSupplyPipeSystem.Method;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
 
@@ -17,9 +14,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
         public int MaxHouseholdNums { get; set; }//
         public double[] PipeOffsetX { get; set; }
         public List<double> BranchPipeX { get; set; }
-
         public List<double[]> NGLIST { get; set; }
         public List<double[]> U0LIST { get; set; }
+
 
         public SysProcess()
         {
@@ -27,6 +24,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
              U0LIST = new List<double[]>();
             BranchPipeX = new List<double>();
         }
+
 
         public void Set(SysIn sysIn)
         {
@@ -38,6 +36,15 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
             PipeOffsetX = Tool.CreatePipeOffsetX(sysIn.FloorNumbers, sysIn.LowestStorey, sysIn.InsertPt);
             GetBranchPipeX();
         }
+
+        public void SetTank(SysIn sysIn)
+        {
+            Households = ThWCompute.CountKitchenNums(sysIn);
+            MaxHouseholds = ThWCompute.GetMaxHouseholds(Households, sysIn.FlushFaucet);
+            FloorCleanToolList = ThWCompute.CountCleanToolNums(sysIn, Households);
+            MaxHouseholdNums = Tool.GetMaxHouseholdNums(sysIn, FloorCleanToolList);
+        }
+
 
         private void GetBranchPipeX()
         {

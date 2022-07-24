@@ -12,47 +12,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 {
     public static class PtTools
     {
-        public static bool AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
+        public static bool AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3dEx pt, ref List<Line> lines)
         {
-            double tolerance = 120;
-            if (objs.Count <= 1) return false;//立管连接的管线数目小于2，直接pass
-            if(objs.Count != 2)
-            {
-                //不是两根线，不必进行连接
-                return false;
-            }
-            
-            var l1 = objs[0] as Line;
-            var l2 = objs[1] as Line;
+            if(objs.Count != 2) return false;//不是两根线，不必进行连接
 
-            Point3dEx pt1, pt2;
-            //找出和立管的连接点
-            if(l1.StartPoint.DistanceTo(pt) <tolerance)
-            {
-                pt1 = new Point3dEx(l1.StartPoint);
-            }
-            else
-            {
-                pt1 = new Point3dEx(l1.EndPoint);
-            }
-            if(l2.StartPoint.DistanceTo(pt) < tolerance)
-            {
-                pt2 = new Point3dEx(l2.StartPoint);
-            }
-            else
-            {
-                pt2 = new Point3dEx(l2.EndPoint);
-            }
+            var pt1 = new Point3dEx( (objs[0] as Line).GetClosedPt(pt));//获取最近点1
+            var pt2 = new Point3dEx((objs[1] as Line).GetClosedPt(pt));//获取最近点2
+
             //点集中不存在，就算了
-            if(!sprayIn.PtDic.ContainsKey(pt1) || !sprayIn.PtDic.ContainsKey(pt2))
-            {
+            if (!sprayIn.PtDic.ContainsKey(pt1) || !sprayIn.PtDic.ContainsKey(pt2))
                 return false;
-            }
+            
             //点集中邻接点数大于1也算了
             if(sprayIn.PtDic[pt1].Count != 1 || sprayIn.PtDic[pt2].Count != 1)
-            {
                 return false;
-            }
+            
             lines.Add(new Line(pt1._pt, pt2._pt));
             return true;
         }

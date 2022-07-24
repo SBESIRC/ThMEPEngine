@@ -1,14 +1,18 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
 using AcHelper;
 using Linq2Acad;
-using DotNetARX;
+using Autodesk.AutoCAD.DatabaseServices;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Autodesk.AutoCAD.Runtime;
-using System.Text.RegularExpressions;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -39,17 +43,33 @@ namespace ThMEPElectrical.BlockConvert
         /// <summary>
         /// 给排水
         /// </summary>
+        [Description("给排水")]
         WSS = 1,
 
         /// <summary>
         /// 暖通
         /// </summary>
+        [Description("暖通")]
         HVAC = 2,
 
         /// <summary>
         /// 所有
         /// </summary>
+        [Description("所有")]
         ALL = WSS | HVAC,
+    }
+
+    public enum BConvertCommand
+    {
+        /// <summary>
+        /// 提资转换
+        /// </summary>
+        BlockConvert,
+
+        /// <summary>
+        /// 提资比对
+        /// </summary>
+        BlockCompare,
     }
 
     public static class ThBConvertUtils
@@ -245,14 +265,22 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public static void InsertRevcloud(Polyline obb)
+        public static void InsertRevcloud(List<ThRevcloudParameter> ParameterList)
         {
-            using (var db = AcadDatabase.Active())
+            ParameterList.ForEach(parameter =>
+            {
+                InsertRevcloud(parameter.Database, parameter.Obb, parameter.ColorIndex, parameter.Linetype, parameter.Scale);
+            });
+        }
+
+        private static void InsertRevcloud(Database database, Polyline obb, short colorIndex, string linetype, double scale)
+        {
+            using (var db = AcadDatabase.Use(database))
             {
                 // 创建云线
                 var layerId = db.Database.CreateAILayer("AI-圈注", 1);
                 ObjectId revcloud = ObjectId.Null;
-                var buffer = obb.Buffer(300);
+                var buffer = obb.Buffer(300.0 * scale);
                 var objId = db.ModelSpace.Add(buffer[0] as Entity);
                 void handler(object s, ObjectEventArgs e)
                 {
@@ -280,7 +308,8 @@ namespace ThMEPElectrical.BlockConvert
                 // 设置运行属性
                 var revcloudObj = db.Element<Entity>(revcloud, true);
                 revcloudObj.LayerId = layerId;
-                revcloudObj.ColorIndex = (int)ColorIndex.BYLAYER;
+                revcloudObj.Linetype = linetype;
+                revcloudObj.ColorIndex = colorIndex;
             }
         }
     }

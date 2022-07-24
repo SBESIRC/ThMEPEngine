@@ -641,16 +641,6 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THXHSJH_SMALL",
                     "IDI_THCAD_THXHSJH_LARGE",
                     RibbonButtonStyle.SmallWithText);
-
-                // 距离校核
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("距离校核",
-                    "天华距离校核",
-                    "MEASUREPATH",
-                    "天华距离校核",
-                    "IDI_THCAD_MEASUREPATH_SMALL",
-                    "IDI_THCAD_MEASUREPATH_LARGE",
-                    RibbonButtonStyle.SmallWithText);
             }
         }
 
@@ -677,18 +667,8 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 连管标注
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("连管标注",
-                    "天华喷头连管标注",
-                    "THPTLGBZ",
-                    "天华喷头连管标注",
-                    "IDI_THCAD_THPTLGBZ_SMALL",
-                    "IDI_THCAD_THPTLGBZ_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-
                 // 喷淋系统
-                subRow = subPanel.AddNewRibbonRow();
+                var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("喷淋系统",
                     "天华地下喷淋系统图",
                     "THDXPLXTT",
@@ -1086,6 +1066,16 @@ namespace TianHua.AutoCAD.ThCui
                     "天华梁配置",
                     "IDI_THCAD_THLPZ_SMALL",
                     "IDI_THCAD_THLPZ_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 选项
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("选项",
+                    "天华选项",
+                    "THMEPOPTIONS",
+                    "天华选项",
+                    "IDI_THCAD_THOPTIONS_SMALL",
+                    "IDI_THCAD_THOPTIONS_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
                 // 房间框线

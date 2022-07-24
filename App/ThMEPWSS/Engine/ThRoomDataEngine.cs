@@ -84,7 +84,8 @@ namespace ThMEPWSS.Engine
                 {
                     if (room == null)
                         continue;
-                    var roomGeo = room.Boundary.ToNTSPolygonalGeometry();
+                    var copyRoom = ThIfcRoom.CreateWithTags(room.Boundary.Clone() as Entity,room.Tags);
+                    var roomGeo = copyRoom.Boundary.ToNTSPolygonalGeometry();
                     if (originTransformer != null)
                     {
                         //偏移数据，暂时不处理
@@ -92,7 +93,7 @@ namespace ThMEPWSS.Engine
                     else 
                     {
                         if (ntsGeom.Crosses(roomGeo) || ntsGeom.Intersects(roomGeo))
-                            rooms.Add(room);
+                            rooms.Add(copyRoom);
                     }
                 }
             }

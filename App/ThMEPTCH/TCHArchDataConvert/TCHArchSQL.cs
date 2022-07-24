@@ -31,6 +31,7 @@
                             window.Number,
                             window.StyleID,
                             window.Kind,
+                            window.Rotation,
                             window.SubKind
                     from TArchWindow window";
         }
@@ -44,6 +45,7 @@
                             door.dThickness as Thickness,
                             door.StyleID,
                             door.Kind,
+                            door.Rotation,
                             door.SubKind
                     from TArchDoor door";
         }

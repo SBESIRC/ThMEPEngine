@@ -8,7 +8,8 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSLocation()
         {
             ReferenceDWG = "";
-            FloorNumber = "";
+            StoreyNumber = "";
+            StoreyTypeString = "";
             IsStandardStorey = false;
             RoomType = "";
             BasePoint = new ThPDSPoint3d();
@@ -23,9 +24,14 @@ namespace TianHua.Electrical.PDS.Model
         public string ReferenceDWG { get; set; }
 
         /// <summary>
-        /// 楼层
+        /// 楼层编号
         /// </summary>
-        public string FloorNumber { get; set; }
+        public string StoreyNumber { get; set; }
+
+        /// <summary>
+        /// 楼层类型
+        /// </summary>
+        public string StoreyTypeString { get; set; }
 
         /// <summary>
         /// 是否为标准层

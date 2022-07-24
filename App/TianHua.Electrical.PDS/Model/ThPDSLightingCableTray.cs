@@ -1,7 +1,9 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 
 namespace TianHua.Electrical.PDS.Model
 {
+    [Serializable]
     public class ThPDSLightingCableTray
     {
         /// <summary>

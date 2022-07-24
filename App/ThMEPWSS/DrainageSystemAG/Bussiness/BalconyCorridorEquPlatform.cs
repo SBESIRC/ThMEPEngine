@@ -58,7 +58,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 foreach (var item in balcCoorEqus)
                 {
-                    if (item.enumEquipmentType == EnumEquipmentType.balconyRiser || item.enumEquipmentType == EnumEquipmentType.wastewaterRiser || item.enumEquipmentType == EnumEquipmentType.condensateRiser)
+                    if (item.enumEquipmentType == EnumEquipmentType.balconyRiser || item.enumEquipmentType == EnumEquipmentType.wastewaterRiser ||  item.enumEquipmentType == EnumEquipmentType.condensateRiser)
                     {
                         _riserPipe.Add(item);
                     }
@@ -107,10 +107,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             _balconyDrains.Clear();
             _pipeConverters.Clear();
             _allDrains.Clear();
-            if (null != balconyDrainCoverter && balconyDrainCoverter.Count > 0) 
+            if (null != balconyDrainCoverter && balconyDrainCoverter.Count > 0)
             {
-                List<string> pipeTags = new List<string> { "FL", "Y2", "NL" };
-                foreach (var item in balconyDrainCoverter) 
+                List<string> pipeTags = new List<string> { "FL", "Y2", "NL", "WL" };
+                foreach (var item in balconyDrainCoverter)
                 {
                     if (!string.IsNullOrEmpty(item.tag) && pipeTags.Any(c => item.tag.Contains(c)))
                         _pipeConverters.Add(item);

@@ -4,6 +4,7 @@ using System.Linq;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm.Hull;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Linemerge;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -85,15 +86,19 @@ namespace ThCADCore.NTS
             // 处理弧线（椭圆）
             objs = objs.Tessellate();
 
-            // 对每个Polygon进行修复
+            // 暂时只支持多段线
+            // 对每个多段线进行修复
             var filters = new DBObjectCollection();
             objs.OfType<Polyline>().ForEach(o =>
             {
-                o.Fix().OfType<Polyline>().ForEach(e => filters.Add(e));
+                foreach(Entity e in o.Fix())
+                {
+                    filters.Add(e);
+                }
             });
-            if (filters.Count == 0)
+            if (filters.Count == 0 || filters.Count == 1)
             {
-                return new DBObjectCollection();
+                return filters;
             }
 
             // 获取面域
@@ -153,22 +158,17 @@ namespace ThCADCore.NTS
             {
                 DissolveSharedEdges = false
             };
-            return builder.Build(objs.ToMultiLineString());
+            return builder.Build(objs.ToGeometryCollection());
         }
-    }
-    public enum ThBufferEndCapStyle
-    {
-        //
-        // 摘要:
-        //     Map NTS EndCapStyle's Round style.
-        Round = 1,
-        //
-        // 摘要:
-        //     Map NTS EndCapStyle's Flat style.
-        Flat = 2,
-        //
-        // 摘要:
-        //     Map NTS EndCapStyle's Square style.
-        Square = 3
+
+        public static Geometry OuterOutline(this DBObjectCollection objs)
+        {
+            var plines = objs.Fix().OfType<Polyline>().ToCollection();
+            if (plines.ToNTSMultiPolygon() is MultiPolygon polygons)
+            {
+                return ConcaveHullOfPolygons.ConcaveHullByLengthRatio(polygons, 0.05, true, false);
+            }
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+        }
     }
 }

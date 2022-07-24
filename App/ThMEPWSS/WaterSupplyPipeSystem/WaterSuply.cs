@@ -514,16 +514,20 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                         CleanToolList.Add(CleanTools);
                     }
                 }
-                foreach (var nf in notExistFloor)
+                if(!notExistFloor.IsNull())
                 {
-                    var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
-                    var CleanTools = new List<CleaningToolsSystem>();
-                    for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
+                    foreach (var nf in notExistFloor)
                     {
-                        CleanTools.Add(new CleaningToolsSystem(nf, j, 0, cleanTools));
+                        var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                        var CleanTools = new List<CleaningToolsSystem>();
+                        for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
+                        {
+                            CleanTools.Add(new CleaningToolsSystem(nf, j, 0, cleanTools));
+                        }
+                        CleanToolList.Add(CleanTools);
                     }
-                    CleanToolList.Add(CleanTools);
                 }
+                
                 CleanToolList = CleanToolList.OrderBy(l => l.First().GetFloorNumber()).ToList();
                 return CleanToolList;
             }
@@ -730,6 +734,87 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         }
 
 
+        //水箱立管管径计算
+        public static void U0NgCompute(int areaNums, int highestFloor, int NumberofPressurizedFloors, SysIn sysIn, SysProcess sysProcess)
+        {
+            var QL = sysIn.MaxDayQuota;  //最高日用水定额 QL
+            var Kh = sysIn.MaxDayHourCoefficient;  //最高日小时变化系数  Kh
+            var m = sysIn.NumberOfHouseholds;   //每户人数  m
+            var T = sysIn.T;
+
+            var floorCleanToolList = sysProcess.FloorCleanToolList;
+            var maxHouseholdNums = sysProcess.MaxHouseholdNums;
+
+            var minPrFloor = highestFloor - NumberofPressurizedFloors + 1;//最低压力层
+
+            for (int areaIndex = 1; areaIndex < areaNums + 1; areaIndex++)//分区遍历
+            {
+                for (int i = 0; i < 2; i++) //只存在两根立管
+                {
+                    //生成竖管对象并添加至竖管系统列表
+                    double[] NgList = new double[highestFloor];//每层楼的当量总数
+                    double[] NgTotalList = new double[highestFloor];//每层楼的当量总数
+                    double[] U0List = new double[highestFloor];//每层楼的出流概率
+                    double[] U0aveList = new double[highestFloor];//每层楼的平均出流概率，用于立管计算
+                    for(int j = 0; j< highestFloor; j++)//每层统计
+                    {
+                        var toolNums = floorCleanToolList[j][areaIndex].GetCleaningTools();//当前层的卫生洁具数
+                        var householdNum = floorCleanToolList[j][areaIndex].GetHouseholdNums();
+                        if (householdNum == 0) householdNum = maxHouseholdNums;
+
+                        NgList[j] = InnerProduct(toolNums, sysIn.WaterEquivalent);
+                        if (Math.Abs(NgList[j]) < 1e-6)  U0List[j] = 0;
+                        else U0List[j] = 100 * QL * m * Kh / (0.2 * (NgList[j] / householdNum) * T * 3600);
+                    }
+
+                    if(i==0)
+                    {
+                        for(int j = 0; j < minPrFloor - 1; j++)
+                        {
+                            U0aveList[j] = 0;
+                            NgTotalList[j] = 0;
+                            for (int k = 0; k < j + 1; k++)
+                            {
+                                U0aveList[j] += U0List[k] * NgList[k];
+                                NgTotalList[j] += NgList[k];
+                            }
+                            if (Math.Abs(NgTotalList[j]) > 1e-6)
+                            {
+                                U0aveList[j] /= NgTotalList[j];
+                            }
+                        }
+                        for(int j = minPrFloor - 1; j < highestFloor; j++)
+                        {
+                            U0aveList[j] = U0aveList[j - 1];
+                            NgTotalList[j] = NgTotalList[j - 1];
+                        }
+                    }
+                    else
+                    {
+                        U0aveList[minPrFloor - 2] = 0;
+                        NgTotalList[minPrFloor - 2] = 0;
+                        for (int j = minPrFloor - 1; j < highestFloor; j++)
+                        {
+                            U0aveList[j] = 0;
+                            NgTotalList[j] = 0;
+                            for (int k = minPrFloor - 1; k < j + 1; k++)
+                            {
+                                U0aveList[j] += U0List[k] * NgList[k];
+                                NgTotalList[j] += NgList[k];
+                            }
+                            if (Math.Abs(NgTotalList[j]) > 1e-6)
+                            {
+                                U0aveList[j] /= NgTotalList[j];
+                            }
+                        }
+                    }
+                    sysProcess.NGLIST.Add(NgTotalList);
+                    sysProcess.U0LIST.Add(U0aveList);
+                }
+            }
+        }
+
+
         public static double[] GetBlockSize(BlockTable bt, string BlockValue)//获取block尺寸
         {
             if (bt.Has(BlockValue))
@@ -914,6 +999,62 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             }
 
             return FloorPt;
+        }
+
+        public static List<List<int>> CreateFloorNumList(List<string> FloorNum, ref int maxFloor) //提取每张图纸的楼层号
+        {
+            var FNumSplit = new List<string[]>();
+            foreach (var f in FloorNum)
+            {
+                FNumSplit.Add(f.Split(','));
+            }
+
+            var FloorNumList = new List<List<int>>();
+
+            foreach (var f in FNumSplit)
+            {
+                var fiNum = new List<int>();
+                for (int i = 0; i < f.Length; i++)
+                {
+                    if (f[i].Trim().StartsWith("-"))
+                    {
+                        continue;
+                    }
+                    if (f[i].Contains('-'))
+                    {
+                        var start = Convert.ToInt32(f[i].Split('-')[0]);
+                        var end = Convert.ToInt32(f[i].Split('-')[1]);
+                        for (int j = start; j <= end; j++)
+                        {
+                            var hasNum = false;
+                            foreach (var fi in FNumSplit)
+                            {
+                                if (fi.Contains(Convert.ToString(j)))
+                                {
+                                    hasNum = true;
+                                    break;
+                                }
+                            }
+                            if (!hasNum)
+                            {
+                                fiNum.Add(j);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        fiNum.Add(Convert.ToInt32(f[i].Trim('B')));
+                    }
+                }
+                if (fiNum.Count != 0)
+                {
+                    FloorNumList.Add(fiNum);
+                    var maxFi = fiNum.Max();
+                    if (maxFi > maxFloor) maxFloor = maxFi;
+                }
+            }
+
+            return FloorNumList;
         }
 
         public static List<List<int>> CreateFloorNumList(List<string> FloorNum) //提取每张图纸的楼层号

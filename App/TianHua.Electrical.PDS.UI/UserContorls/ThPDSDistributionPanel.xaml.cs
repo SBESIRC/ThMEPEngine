@@ -20,13 +20,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         public ThPDSDistributionPanel()
         {
             InitializeComponent();
-            //注册TreeView
-            WeakReferenceMessenger.Default.Register<GraphNodeAddMessage>(this, (r, m) =>
-            {
-                Service.Init(this, Graph);
-                Service.UpdateTreeView(this.tv, Graph);
-            });
-            PDSProject.Instance.DataChanged += () =>
+            PDSProject.Instance.ProjectDataChanged += (sender , e) =>
             {
                 Service.Init(this, Graph);
                 Service.UpdateTreeView(this.tv, Graph);

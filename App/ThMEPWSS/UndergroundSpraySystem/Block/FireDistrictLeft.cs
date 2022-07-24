@@ -18,13 +18,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public string FloorNum { get; set; }
         public TermPoint2 TermPt { get; set; }
         private Matrix3d U2WMat { get; set; }
+        private string FlowType { get; set; }
 
-        public FireDistrictLeft(Point3d stPt, TermPoint2 termPoint)
+        public FireDistrictLeft(Point3d stPt, TermPoint2 termPoint, string DN, bool hasflow, string flowType)
         {
             StPt = stPt;
             FloorNum = termPoint.PipeNumber.Replace("接至", "").Split('喷')[0];
             TermPt = termPoint;
             U2WMat = Active.Editor.UCS2WCS();
+            if (flowType.Contains("闸") || flowType.Contains("070"))
+            {
+                FlowType = "信号闸阀2";
+            }
+            else
+            {
+                FlowType = "信号蝶阀2";
+            }
         }
 
         public void InsertBlock(AcadDatabase acadDatabase)
@@ -39,7 +48,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt.OffsetXReverse(600), StPt.OffsetXReverse(650), "W-FRPT-SPRL-PIPE");
 
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水流指示器",
-                    StPt.OffsetXReverse(770), new Scale3d(-1, 1, 1), 0);
+                    StPt.OffsetXReverse(770+350), new Scale3d(-1, 1, 1), 0);
+            objID.SetDynBlockValue("可见性", FlowType);
             blk = acadDatabase.Element<BlockReference>(objID);
             blk.TransformBy(U2WMat);
 

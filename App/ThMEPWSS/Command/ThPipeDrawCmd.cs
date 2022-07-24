@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using ThCADExtension;
@@ -19,6 +20,7 @@ namespace ThMEPWSS.Command
         public const string FloorDrain = "地漏-AI";
         public const string SewageWastePipe = "污废合流立管-AI";
         public const string WasteWaterPipe = "废水立管-AI";
+        public const string SewageWaterPipe = "污水立管-AI";
         public const string VentilatePipe = "通气立管-AI";
         public const string CaissonPipe = "沉箱立管-AI";
         public const string RoomCondensateFloorDrain = "屋面+冷凝+地漏-AI";
@@ -28,6 +30,7 @@ namespace ThMEPWSS.Command
         public const string BalconyFloorDrain = "阳台+地漏-AI";
         public const string SewageWasteFloorDrain = "污废+通气-AI";
         public const string WasteVentilateSewageWaste = "废水+通气+污废合流-AI";
+        public const string WasteVentilateSewage = "废水+通气+污水-AI";
     }
     public class ThPipeDrawCmd : IAcadCommand, IDisposable
     {
@@ -66,6 +69,10 @@ namespace ThMEPWSS.Command
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(PipeBlockNames.WasteWaterPipe));
                 }
+                if (!acadDb.Blocks.Contains(PipeBlockNames.SewageWaterPipe) && blockDb.Blocks.Contains(PipeBlockNames.SewageWaterPipe))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(PipeBlockNames.SewageWaterPipe));
+                }
                 if (!acadDb.Blocks.Contains(PipeBlockNames.VentilatePipe) && blockDb.Blocks.Contains(PipeBlockNames.VentilatePipe))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(PipeBlockNames.VentilatePipe));
@@ -102,6 +109,10 @@ namespace ThMEPWSS.Command
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(PipeBlockNames.WasteVentilateSewageWaste));
                 }
+                if (!acadDb.Blocks.Contains(PipeBlockNames.WasteVentilateSewage) && blockDb.Blocks.Contains(PipeBlockNames.WasteVentilateSewage))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(PipeBlockNames.WasteVentilateSewage));
+                }
             }
         }
         public void Execute()
@@ -125,14 +136,14 @@ namespace ThMEPWSS.Command
                             var pt = insertPtRst.Value;
                             var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(layerName, BlockName, pt, new Scale3d(1, 1, 1), 0);
                             var blk = acadDb.Element<BlockReference>(blkId);
-
+                            blk.TransformBy(Active.Editor.UCS2WCS());
                             if (blk.IsDynamicBlock)
                             {
                                 foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
                                 {
                                     if (property.PropertyName == "可见性1")
                                     {
-                                        property.Value = "DN:100";
+                                        property.Value = "DN100";
                                         break;
                                     }
                                 }

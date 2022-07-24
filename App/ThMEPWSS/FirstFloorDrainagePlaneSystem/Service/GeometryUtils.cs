@@ -356,7 +356,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                     polyline.ReverseCurve();
                 }
                 Polyline resPoly = new Polyline();
-                for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+                for (int i = 0; i < polyline.NumberOfVertices; i++)
                 {
                     var pt = polyline.GetPoint3dAt(i);
                     if (circle.EntityContains(pt))
@@ -365,6 +365,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                         break;
                     }
                     resPoly.AddVertexAt(resPoly.NumberOfVertices, pt.ToPoint2D(), 0, 0, 0);
+                }
+                if (resPoly.NumberOfVertices <= 1)
+                {
+                    return polyline;
                 }
                 if (shortStart)
                 {

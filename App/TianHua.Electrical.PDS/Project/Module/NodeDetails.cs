@@ -83,6 +83,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 负荷计算信息
     /// </summary>
+    [Serializable]
     public class LoadCalculationInfo
     {
         public LoadCalculationInfo()

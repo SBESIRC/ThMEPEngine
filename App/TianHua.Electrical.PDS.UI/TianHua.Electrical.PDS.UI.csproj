@@ -47,6 +47,8 @@
     <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorLayingPathPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorLayingSitePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorMaterialStructurePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorTypePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSSecondaryCircuitDescriptionEditPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
@@ -91,12 +93,18 @@
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Converters\RadioUiValueConverter.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Services\GeoExtensions.cs" />
     <Compile Include="Services\PDSItemInfo.cs" />
     <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
     <Compile Include="Services\ThPDSCADService.cs" />
     <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
     <Compile Include="Services\ThPDSComponentBlockInfoService.cs" />
+    <Compile Include="Services\ThPDSContextMenuYamlParser.cs" />
     <Compile Include="Services\ThPDSDistributionPanelConfig.cs" />
     <Compile Include="Services\ThPDSDistributionPanelService.cs" />
     <Compile Include="Services\ThPDSInfoCompareService.cs" />
@@ -173,8 +181,10 @@
     <Compile Include="ViewModels\ThPDSCircuitGraphWpfRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
+    <Compile Include="ViewModels\ThPDSCreateLoadVM.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
     <Compile Include="ViewModels\THPDSLoadCalculationVM.cs" />
+    <Compile Include="ViewModels\ThPDSLoadItemTypeVM.cs" />
     <Compile Include="ViewModels\ThPDSProjectGraphNodeTreeViewVM.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -289,8 +299,20 @@
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
       <Version>7.1.2</Version>
     </PackageReference>
+    <PackageReference Include="YamlDotNet">
+      <Version>11.2.1</Version>
+    </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\AddCircuit.yml" />
+    <None Include="Resources\AddCircuit_CentralizedPower.yml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

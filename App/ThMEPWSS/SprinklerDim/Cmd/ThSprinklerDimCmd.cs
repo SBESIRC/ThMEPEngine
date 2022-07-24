@@ -64,6 +64,8 @@ namespace ThMEPWSS.ThSprinklerDim.Cmd
                     return;
                 }
 
+                var printTag = ThMEPWSSUtils.SettingString("");
+
                 //转换器
                 //var transformer = ThMEPWSSUtils.GetTransformer(frames);
                 var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
@@ -90,7 +92,7 @@ namespace ThMEPWSS.ThSprinklerDim.Cmd
                 dataProcess.ProjectOntoXYPlane();
                 dataProcess.Print();
 
-                ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, out var DTTol);
+                ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, printTag);
 
 
             }

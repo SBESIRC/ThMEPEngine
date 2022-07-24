@@ -1,13 +1,10 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Uitl;
@@ -38,7 +35,78 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static List<Line> ConnectVerticalLine(this List<Line> pipeLines, SprayIn sprayIn)
+        public static List<Line> DealPipeLines(List<Line> pipeLines, List<Point3d> alarmPts, SprayIn sprayIn)
+        {
+            pipeLines = PipeLineAutoConnect2(pipeLines, sprayIn);//1. 对齐的线自动连接
+
+            pipeLines = ConnectVerticalLine(pipeLines, sprayIn);//2. 依靠立管的线连接
+
+            pipeLines = ConnectWithAlarmValve(pipeLines, sprayIn, alarmPts);//3. 连接报警阀连接的线
+
+            pipeLines = PipeLineSplit(pipeLines);//4. 节点处打断
+
+            return pipeLines;
+        }
+
+        public static List<Line> PipeLineAutoConnect2(List<Line> lineList, SprayIn sprayIn)
+        {
+            var ptDic = sprayIn.PtDic;
+            var verticals = new List<Polyline>();
+            foreach(var vpt in sprayIn.Verticals)
+            {
+                var rect = vpt._pt.GetRect(20);
+                verticals.Add(rect);
+            }
+            var verticalSpatialIndex = new ThCADCoreNTSSpatialIndex(verticals.ToCollection());
+            var GLineSegList = new List<GLineSegment>();
+            foreach (var l in lineList)
+            {
+                var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
+                GLineSegList.Add(GLineSeg);
+            }
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1001, 2);
+
+            foreach (var gl in GLineConnectList)
+            {
+                var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+
+                if (pt1.DistanceToEx(pt2) < 1) continue;
+
+                if (ptDic.ContainsKey(pt1) && ptDic.ContainsKey(pt2))
+                {
+                    if (ptDic[pt1].Count >= 2 || ptDic[pt2].Count >= 2)
+                    {
+                        continue;
+                    }
+                }
+                var line = new Line(pt1._pt, pt2._pt);
+                var rst = verticalSpatialIndex.SelectFence(line);
+                if(rst.Count<=1)
+                {
+                    lineList.Add(line);
+                }
+            }
+
+            //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+            if (GLineConnectList.Count() > 0)
+            {
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
+                var cleanLines = LineMerge.CleanLaneLines(tmpLines);
+                return cleanLines;
+            }
+
+            return lineList;//merge
+        }
+
+
+        public static List<Line> ConnectVerticalLine(List<Line> pipeLines, SprayIn sprayIn)
         {
             //基于竖管连接管线
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(pipeLines.ToCollection());
@@ -49,11 +117,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 var rect = ver._pt.GetRect(100);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
-                var flag = sprayIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
+                var flag = sprayIn.AddNewPtDic(dbObjs, ver, ref lines);
 
                 if (dbObjs.Count >= 2)
                 {
                     connectVreticals.Add(ver);
+                    var closedPt1 = (dbObjs[0] as Line).GetClosedPt(ver);//获取最近点1
+                    var closedPt2 = (dbObjs[1] as Line).GetClosedPt(ver);//获取最近点2
                 }
                 else if(dbObjs.Count == 1)
                 {
@@ -63,28 +133,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     if(cl.Length > 1.0 && cl.Length < 120)
                     {
                         pipeLines.Add(cl);
-#if DEBUG
-                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        {
-                            var layerNames = "立管和支管的单链接线";
-                            if (!acadDatabase.Layers.Contains(layerNames))
-                            {
-                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                            }
-                            cl.LayerId = DbHelper.GetLayerId(layerNames);
-                            cl.ColorIndex = (int)ColorIndex.Red;
-                            acadDatabase.CurrentSpace.Add(cl);
-
-                        }
-#endif
                     }
-
                 }
             }
             var leadLines = sprayIn.LeadLines.ToCollection();
             var leadLineSpatialIndex = new ThCADCoreNTSSpatialIndex(leadLines);
-
-
 
             foreach (var cv in connectVreticals)
             {
@@ -101,6 +154,48 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
             return pipeLines;
         }
+
+        public static List<Line> PipeLineSplit(List<Line> pipeLines)
+        {
+            var pts = GetPts(pipeLines);
+            foreach (var pt in pts)
+            {
+                var rect = pt.GetRect(5);
+                var linesSaptialIndex = new ThCADCoreNTSSpatialIndex(pipeLines.ToCollection());
+                var rst = linesSaptialIndex.SelectCrossingPolygon(rect);
+                foreach(var obj in rst)
+                {
+                    var line = obj as Line;
+                    var spt = line.StartPoint;
+                    var ept = line.EndPoint;
+                    if(pt.DistanceTo(spt) > 1 && pt.DistanceTo(ept) > 1)
+                    {
+                        var closedPt = line.GetClosestPointTo(pt,false);
+                        pipeLines.Remove(line);
+                        if(closedPt.DistanceTo(pt) > 1)
+                        {
+                            pipeLines.Add(new Line(closedPt, pt));
+                        }
+                        pipeLines.Add(new Line(closedPt, spt));
+                        pipeLines.Add(new Line(closedPt, ept));
+                    }
+                }
+            }
+
+            return pipeLines;
+        }
+
+        private static List<Point3d> GetPts(List<Line> pipeLines)
+        {
+            var pts = new List<Point3d>();
+            foreach(var line in pipeLines)
+            {
+                pts.Add(line.StartPoint);
+                pts.Add(line.EndPoint);
+            }
+            return pts;
+        }
+
 
         public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, ThCADCoreNTSSpatialIndex verticalSpatialIndex = null)
         {
@@ -143,20 +238,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     }
                 }
 
-#if DEBUG
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                {
-                    var layerNames = "自动连接线";
-                    if (!acadDatabase.Layers.Contains(layerNames))
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                    }
-                    line.LayerId = DbHelper.GetLayerId(layerNames);
-                    line.ColorIndex = (int)ColorIndex.Red;
-                    acadDatabase.CurrentSpace.Add(line);
 
-                }
-#endif
             }
 
             //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
@@ -171,63 +253,43 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 }
                 var cleanLines = LineMerge.CleanLaneLines(tmpLines);
 
-#if DEBUG
 
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                {
-                    var layerNames = "自动连接并合并的线";
-                    if (!acadDatabase.Layers.Contains(layerNames))
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                    }
-                    foreach (var line in cleanLines)
-                    {
-                        line.LayerId = DbHelper.GetLayerId(layerNames);
-                        line.ColorIndex = (int)ColorIndex.Red;
-                        acadDatabase.CurrentSpace.Add(line);
-                    }
-                }
-#endif
                 return cleanLines;
             }
 
             return lineList;//merge
         }
 
-        public static void PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)
+        public static List<Line> ConnectWithAlarmValve(List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)
         {
-            var dbPts = new List<DBPoint>();
-            sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
-            var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
-            foreach(var apt in alarmPts)
+            foreach (var apt in alarmPts)
             {
+                var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
                 var rect = apt.GetRect(210);
-                var rst = dbPtSpatialIndex.SelectCrossingPolygon(rect);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                var pts = new List<Point3d>();
                 foreach(var obj in rst)
                 {
-                    var pt = (obj as DBPoint).Position;
-                    var line = new Line(apt, pt);
-                    if(line.Length > 1.0)
-                    {
-                        lineList.Add(line);
-#if DEBUG
-                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        {
-                            var layerNames = "报警阀连接的线段";
-                            if (!acadDatabase.Layers.Contains(layerNames))
-                            {
-                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                            }
-                            line.LayerId = DbHelper.GetLayerId(layerNames);
-                            line.ColorIndex = (int)ColorIndex.Red;
-                            acadDatabase.CurrentSpace.Add(line);
-                        }
-#endif
-                    }
+                    var l = obj as Line;
+                    lineList.Remove(l);
+                    pts.Add(l.StartPoint);
+                    pts.Add(l.EndPoint);
+                }
+                var orderPts = pts.OrderByDescending(p=>p.DistanceTo(apt)).ToList();
+                if(orderPts.Count>3)
+                {
+                    lineList.Add(new Line(apt, orderPts[0]));
+                    lineList.Add(new Line(apt, orderPts[1]));
+                    lineList.Add(new Line(apt, orderPts[2]));
+                }
+                else
+                {
+                    ;
                 }
             }
-        }
 
+            return lineList;
+        }
 
         public static List<Line> ConnectBreakLine(this List<Line> lineList, SprayIn sprayIn)
         {

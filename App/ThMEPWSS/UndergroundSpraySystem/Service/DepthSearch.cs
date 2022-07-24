@@ -7,19 +7,17 @@ using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    public class DepthSearch
+    public class Dfs
     {
+        /// <summary>
+        /// 主环提取——无报警阀间
+        /// </summary>
         public static void DfsMainLoopWithoutAlarmValve(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited,
-           ref List<Point3dEx> rstPath, SprayIn sprayIn, Stopwatch stopwatch)
+           List<Point3dEx> rstPath, SprayIn sprayIn)
         {
-            //if (stopwatch.Elapsed.TotalSeconds > 10)//
-            //{
-            //    stopwatch.Stop();
-            //    return;
-            //}
-            if (cur.Equals(sprayIn.LoopEndPt))//找到目标点，返回最终路径
+            if (cur.Equals(sprayIn.LoopEndPt))
             {
-                rstPath.AddRange(new List<Point3dEx>(tempPath));//把当前路径加入
+                rstPath.AddRange(new List<Point3dEx>(tempPath));
                 return;
             }
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
@@ -27,29 +25,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 if (visited.Contains(p)) continue;
                 if (sprayIn.PtTypeDic[p].Contains("PressureValves")) continue;
-                if (sprayIn.PtTypeDic[p].Contains("AlarmValve")) 
-                    continue;
+                if (sprayIn.PtTypeDic[p].Contains("AlarmValve")) continue;
                 tempPath.Add(p);
                 visited.Add(p);
 
-                DfsMainLoopWithoutAlarmValve(p, tempPath, visited, ref rstPath, sprayIn, stopwatch);
+                DfsMainLoopWithoutAlarmValve(p, tempPath, visited, rstPath, sprayIn);
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }
         }
 
 
-
-        public static void DfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
-            ref List<List<Point3dEx>> rstPaths, SprayIn sprayIn, ref List<Point3dEx> extraNodes, HashSet<Point3dEx> neverVisited)
+        /// <summary>
+        /// 主环提取——有报警阀间
+        /// </summary>
+        public static void DfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited,
+            List<List<Point3dEx>> rstPaths, SprayIn sprayIn, List<Point3dEx> extraNodes, HashSet<Point3dEx> neverVisited)
         {
             if (cur.Equals(sprayIn.LoopEndPt))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
                 var flag = true;
-                foreach(var pt in rstPath)
+                foreach (var pt in rstPath)
                 {
-                    if(sprayIn.PtTypeDic[pt].Contains("AlarmValve"))
+                    if (sprayIn.PtTypeDic[pt].Contains("AlarmValve"))
                     {
                         neverVisited.Add(pt);
                         break;
@@ -61,7 +60,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
                 else//存在主环
                 {
-                    if(rstPath.Count > 20)
+                    if (rstPath.Count > 20)
                     {
                         rstPaths.Add(rstPath);
                         return;
@@ -107,43 +106,40 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             foreach (Point3dEx p in neighbors)
             {
-                try
-                {
-                    if (visited.Contains(p)) continue;
-                    if (neverVisited.Contains(p)) continue;
-                    if (sprayIn.PtTypeDic[p].Contains("PressureValves")) continue;
-                    tempPath.Add(p);
-                    visited.Add(p);
+                if (visited.Contains(p)) continue;
+                if (neverVisited.Contains(p)) continue;
+                if (sprayIn.PtTypeDic[p].Contains("PressureValves")) continue;
+                tempPath.Add(p);
+                visited.Add(p);
 
-                    DfsMainLoop(p, tempPath, visited, ref rstPaths, sprayIn, ref extraNodes, neverVisited);
-                    tempPath.RemoveAt(tempPath.Count - 1);
-                    visited.Remove(p);
-                }
-                catch(Exception ex)
-                {
-                    ;
-                }
+                DfsMainLoop(p, tempPath, visited, rstPaths, sprayIn, extraNodes, neverVisited);
+                tempPath.RemoveAt(tempPath.Count - 1);
+                visited.Remove(p);
             }
         }
 
+
+        /// <summary>
+        /// 主环提取——有报警阀间
+        /// </summary>
         public static void DfsMainLoopWithAcrossFloor(Point3dEx cur, List<Point3dEx> tempPath, ref HashSet<Point3dEx> visited,
             ref List<List<Point3dEx>> rstPaths, SprayIn sprayIn, ref List<Point3dEx> extraNodes)
         {
             if (cur.Equals(sprayIn.LoopEndPt))//找到目标点，返回最终路径
             {
-                if(tempPath.Count > 10)
+                if (tempPath.Count > 10)
                 {
                     var rstPath = new List<Point3dEx>(tempPath);
                     rstPaths.Add(rstPath);//把当前路径加入
                 }
-                
+
                 return;
             }
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
             foreach (Point3dEx p in neighbors)
             {
                 if (visited.Contains(p)) continue;
-                if(!sprayIn.PtTypeDic.ContainsKey(p))
+                if (!sprayIn.PtTypeDic.ContainsKey(p))
                 {
                     ;
                 }
@@ -152,7 +148,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
                         continue;
                 }
-     
+
                 tempPath.Add(p);
                 visited.Add(p);
 
@@ -177,7 +173,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (visited.Contains(p)) continue;
                 if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
                     continue;
-                if (sprayIn.ThroughPt.Contains(p)) 
+                if (sprayIn.ThroughPt.Contains(p))
                     continue;
                 tempPath.Add(p);
                 visited.Add(p);
@@ -188,13 +184,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-      
+
         public static void DfsSubLoop(Point3dEx cur, Point3dEx targetPt, List<Point3dEx> tempPath, ref HashSet<Point3dEx> visited,
            ref List<Point3dEx> rstPath, SprayIn sprayIn)
         {
             if (cur.Equals(targetPt))//找到目标点，返回最终路径
             {
-                if(tempPath.Last()._pt.DistanceTo(cur._pt) >1)
+                if (tempPath.Last()._pt.DistanceTo(cur._pt) > 1)
                 {
                     tempPath.Add(cur);
                 }
@@ -206,7 +202,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             foreach (Point3dEx p in neighbors)
             {
                 if (!p.Equals(targetPt) && visited.Contains(p)) continue;
-                if(!sprayIn.PtTypeDic.ContainsKey(p))
+                if (!sprayIn.PtTypeDic.ContainsKey(p))
                 {
                     continue;
                 }
@@ -227,13 +223,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 rstPath.AddRange(tempPath);
                 return;
             }
-            
+
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
             foreach (Point3dEx p in neighbors)
             {
                 if (cur.Equals(startPt) && p.Equals(targetPt)) continue;//起点和终点相邻
                 if (!p.Equals(targetPt) && visited.Contains(p)) continue;
-                if (pts.Contains(p) && !p.Equals(targetPt)) 
+                if (pts.Contains(p) && !p.Equals(targetPt))
                     continue;
                 if (!sprayIn.PtTypeDic.ContainsKey(p))
                 {
@@ -244,7 +240,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     floorNumber = p._pt.GetFloor(sprayIn.FloorRectDic);
                     flag = true;
                 }
-                
+
                 tempPath.Add(p);
                 visited.Add(p);
                 DfsBranchLoop(p, startPt, targetPt, tempPath, ref visited, ref rstPath, sprayIn, ref flag, pts, ref floorNumber);
@@ -256,16 +252,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <summary>
         /// 不跨层支环,深度优先查找本层支环
         /// </summary>
-        /// <param name="cur"></param>
-        /// <param name="startPt"></param>
-        /// <param name="targetPt"></param>
-        /// <param name="tempPath"></param>
-        /// <param name="visited"></param>
-        /// <param name="rstPath"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="flag"></param>
-        /// <param name="pts"></param>
-        /// <param name="floorNumber"></param>
         public static void DfsCurrentFloorBranchLoop(Point3dEx cur, Point3dEx startPt, Point3dEx targetPt, List<Point3dEx> tempPath, ref HashSet<Point3dEx> visited,
            ref List<Point3dEx> rstPath, SprayIn sprayIn, ref bool flag, List<Point3dEx> pts, ref string floorNumber)
         {
@@ -287,7 +273,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     continue;
                 }
 
-                if(sprayIn.ThroughPt.Contains(p))//跳过跨层点
+                if (sprayIn.ThroughPt.Contains(p))//跳过跨层点
                 {
                     continue;
                 }
@@ -317,10 +303,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
 
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
-            if(neighbors.Count == 1)
-            {
-                ;
-            }
             foreach (Point3dEx p in neighbors)
             {
                 if (cur.Equals(startPt) && p.Equals(targetPt)) continue;//起点和终点相邻
@@ -364,16 +346,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <summary>
         /// 针对主环跨楼层的情况
         /// </summary>
-        /// <param name="cur"></param>
-        /// <param name="startPt"></param>
-        /// <param name="targetPt"></param>
-        /// <param name="tempPath"></param>
-        /// <param name="visited"></param>
-        /// <param name="rstPath"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="flag"></param>
-        /// <param name="pts"></param>
-        /// <param name="floorNumber"></param>
         public static void DfsBranchLoopInCurrentFloor(Point3dEx cur, Point3dEx startPt, Point3dEx targetPt, List<Point3dEx> tempPath, ref HashSet<Point3dEx> visited,
                ref List<Point3dEx> rstPath, SprayIn sprayIn, ref bool flag, List<Point3dEx> pts, ref string floorNumber)
         {
@@ -414,12 +386,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         /// <summary>
         /// 深度优先查找跨层的主环
         /// </summary>
-        /// <param name="cur"></param>
-        /// <param name="tempPath"></param>
-        /// <param name="visited"></param>
-        /// <param name="rstPaths"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="extraNodes"></param>
         public static bool DfsMainLoopInOtherFloor(Point3dEx cur, Point3dEx startPt, Point3dEx targetPt, List<Point3dEx> tempPath, ref HashSet<Point3dEx> visited,
                ref List<Point3dEx> rstPath, SprayIn sprayIn, ref bool flag, List<Point3dEx> pts, ref string floorNumber, ref int throughoutCnts)
         {
@@ -434,7 +400,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 if (cur.Equals(startPt) && p.Equals(targetPt)) continue;//起点和终点相邻
                 if (!p.Equals(targetPt) && visited.Contains(p)) continue;
-                if (pts.Contains(p) && !p.Equals(targetPt))  continue;
+                if (pts.Contains(p) && !p.Equals(targetPt)) continue;
 
                 if (sprayIn.PtTypeDic.ContainsKey(p))
                 {
@@ -443,7 +409,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
                 }
-   
+
                 if (sprayIn.ThroughPt.Contains(p))
                 {
                     if (throughoutCnts < 4)

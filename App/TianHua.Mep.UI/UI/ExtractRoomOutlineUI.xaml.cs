@@ -24,7 +24,12 @@ namespace TianHua.Mep.UI.UI
 
         private void btnExtractWall_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            RoomOutlineVM.ExtractWalls();
+            RoomOutlineVM.ExtractRoomDatas();
+        }
+
+        private void btnBuildDoors_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            RoomOutlineVM.BuildDoors();
         }
 
         private void btnBuildRoomOutline_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -57,6 +62,11 @@ namespace TianHua.Mep.UI.UI
             RoomOutlineVM.RemoveLayers(layers);
             this.listBox.ItemsSource = null;
             this.listBox.ItemsSource = RoomOutlineVM.LayerInfos;
+        }
+
+        private void btnBlkConfig_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            RoomOutlineVM.BlockConfig();
         }
     }
 }

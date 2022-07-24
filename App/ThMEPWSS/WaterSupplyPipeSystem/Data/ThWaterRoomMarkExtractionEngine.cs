@@ -9,7 +9,7 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.Data
 {
-    class ThWaterRoomMarkExtractionEngine: ThAIRoomMarkExtractionEngine
+    public class ThWaterRoomMarkExtractionEngine: ThAIRoomMarkExtractionEngine
     {
         public override void Extract(Database database)
         {
@@ -21,6 +21,17 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
             extractor.Accept(visitor);
             extractor.Extract(database);
             Results = visitor.Results;
+        }
+    }
+
+    public class ThWaterRoomMarkExtractVisitor : ThAIRoomMarkExtractionVisitor
+    {
+        public override bool IsAnnotationElementBlock(BlockTableRecord blockTableRecord)
+        {
+            return
+                base.IsAnnotationElementBlock(blockTableRecord) &&
+                !blockTableRecord.IsFromExternalReference &&
+                !blockTableRecord.IsFromOverlayReference;
         }
     }
 }

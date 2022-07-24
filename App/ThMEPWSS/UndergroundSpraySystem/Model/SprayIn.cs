@@ -37,6 +37,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<LineSegEx, string> PtDNDic { get; set; }//当前点的DN字典对
         public DBObjectCollection FlowBlocks { get; set; }
         public List<Point3dEx> AlarmValveStPts { get; set; }//报警阀起点
+        public Dictionary<Point3dEx, string> FlowTypeDic { get; set; }//水流指示器类型
 
         public SprayIn(SprayVM _UiConfigs, List<Point3dEx> startPts = null) 
         {
@@ -83,6 +84,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 AlarmValveStPts = startPts;
             }
+            FlowTypeDic = new Dictionary<Point3dEx, string>();
         }
     }
 }

@@ -144,7 +144,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         else if (ptInfo.Type == 1)
                         {
                             var blk = ptInfo.OriginModel.Data as BlockReference;
-                            blkName = ThHydrantCommon.BlkName_Hydrant;
+                            blkName = blk.GetEffectiveName ();
                             var cpt = ptInfo.CenterPoint;
                             inputPt = FindInsertPt(ptInfo);
                             rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Dir, Vector3d.ZAxis);
@@ -154,7 +154,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         else if (ptInfo.Type == 2)
                         {
                             var blk = ptInfo.OriginModel.Data as BlockReference;
-                            blkName = ThHydrantCommon.BlkName_Hydrant_Extinguisher;
+                            blkName = blk.GetEffectiveName(); ;
                             inputPt = FindInsertPt(ptInfo);
                             rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Dir, Vector3d.ZAxis);
                             layerName = blk.Layer;

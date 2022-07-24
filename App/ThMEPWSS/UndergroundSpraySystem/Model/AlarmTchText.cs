@@ -29,7 +29,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => o.IsTCHText())
+                   .Where(o => o.IsTCHText() || o is DBText)
                    .Where(o => IsTargetLayer(o.Layer))
                    .ToList();
 
@@ -55,7 +55,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         }
         private bool IsTargetLayer(string layer)
         {
-            return layer.Contains("TWT_TEXT");
+            return layer.Contains("TWT_TEXT")
+                || layer.Contains("W-FRPT-SPRL-DIMS");
         }
         private bool IsTCHNote(Entity entity)
         {

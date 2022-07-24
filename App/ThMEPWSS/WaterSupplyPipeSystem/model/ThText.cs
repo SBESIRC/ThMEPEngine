@@ -40,5 +40,21 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             };
             return text;
         }
+
+        public static DBText DbText(Point3d position, string textString, string layer)
+        {
+            var text = new DBText
+            {
+                TextString = textString,
+                Position = position,
+                LayerId = DbHelper.GetLayerId(layer),
+                WidthFactor = 0.7,
+                Height = 350,
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                ColorIndex = (int)ColorIndex.BYLAYER
+            };
+            return text;
+        }
+
     }
 }

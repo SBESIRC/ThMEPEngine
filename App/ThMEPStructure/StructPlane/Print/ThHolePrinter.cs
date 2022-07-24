@@ -9,6 +9,7 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
+using ThCADCore.NTS;
 
 namespace ThMEPStructure.StructPlane.Print
 {
@@ -50,22 +51,30 @@ namespace ThMEPStructure.StructPlane.Print
         private Polyline Handle(Polyline polygon)
         {
             var objs = new DBObjectCollection() { polygon };
-            var simplifier = new ThPolygonalElementSimplifier()
+            if (polygon.IsRectangle())
             {
-                TESSELLATEARCLENGTH = 10.0,
-            };
-            objs = simplifier.Tessellate(objs); //去掉弧
-            objs = simplifier.MakeValid(objs);  //去除自交
-            objs = simplifier.Simplify(objs);   //合并近似平行的线
-            objs = simplifier.Normalize(objs);  //去除狭长线
-            objs = simplifier.Filter(objs); // 过滤面积很小的Polyline
-            if (objs.Count>0)
-            {
-                return objs.OfType<Polyline>().OrderByDescending(p => p.Area).First();
+                return polygon.OBB();
             }
             else
             {
-                return new Polyline();
+                var simplifier = new ThPolygonalElementSimplifier()
+                {
+                    TESSELLATEARCLENGTH = 10.0,
+                    DISTANCETOLERANCE = 2.0,
+                };
+                objs = simplifier.Tessellate(objs); //去掉弧
+                objs = simplifier.TPSimplify(objs);   //合并近似平行的线
+                objs = simplifier.Normalize(objs);  //去除狭长线
+                objs = simplifier.MakeValid(objs);  //去除自交
+                objs = simplifier.Filter(objs); // 过滤面积很小的Polyline
+                if (objs.Count > 0)
+                {
+                    return objs.OfType<Polyline>().OrderByDescending(p => p.Area).First();
+                }
+                else
+                {
+                    return new Polyline();
+                }
             }
         }
         private Polyline BuildHatchHole(Polyline polygon)
@@ -123,8 +132,8 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 var result = pairs
                 .OrderByDescending(p => Math.Round(polygon.GetPoint3dAt(p.Item1).DistanceTo(polygon.GetPoint3dAt(p.Item3))))
-                .ThenBy(p => polygon.GetPoint3dAt(p.Item2).X)
-                .ThenByDescending(p => polygon.GetPoint3dAt(p.Item2).Y)
+                .ThenByDescending(p => Math.Round(polygon.GetPoint3dAt(p.Item2).Y))
+                .ThenBy(p => Math.Round(polygon.GetPoint3dAt(p.Item2).X))
                 .First();
 
                 // 计算折点
@@ -134,9 +143,16 @@ namespace ThMEPStructure.StructPlane.Print
                 var length1 = pt1.DistanceTo(pt2);
                 var length2 = pt2.DistanceTo(pt3);
                 var distance = Math.Min(length1, length2)*0.15;
-                var projectionPt = pt2.GetProjectPtOnLine(pt1, pt3);
-                var cornerPt = pt2.GetExtentPoint(pt2.GetVectorTo(projectionPt), distance);
 
+                var dir1 = pt2.GetVectorTo(pt1);
+                var dir2 = pt2.GetVectorTo(pt3);
+                var jiajiao = dir1.GetAngleTo(dir2);
+                var avgVec = dir1.RotateBy(jiajiao / 2.0, Vector3d.ZAxis);
+                if(!polygon.EntityContains(pt2.GetExtentPoint(avgVec, distance)))
+                {
+                    avgVec = dir1.RotateBy(jiajiao / 2.0, Vector3d.ZAxis.Negate());
+                }
+                var cornerPt = pt2.GetExtentPoint(avgVec, distance);
                 var pts = new Point3dCollection() { 
                     polygon.GetPoint3dAt(result.Item1),
                     polygon.GetPoint3dAt(result.Item2),

@@ -79,6 +79,21 @@ namespace ThMEPWSS.HydrantLayout.Model
             }
         }
 
+        private bool _LayoutInMiddle { get; set; }
+        public bool LayoutInMiddle
+        {
+            //一字布置是否在柱子中间
+            get
+            {
+                return _LayoutInMiddle;
+            }
+            set
+            {
+                _LayoutInMiddle = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         public ThHydrantViewModel()
         {
             CheckHydrant = true;

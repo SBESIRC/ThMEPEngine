@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
@@ -34,7 +36,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     //.Where(o => IsTargetLayer(o.Layer))
                     .Where(o => IsTarget(o))
                     .ToList();
-
+                if (Results.Count == 0) return;
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
@@ -78,7 +80,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
         }
 
-        public List<Point3dEx> CreatePts()
+        public List<Point3dEx> CreatePts(SprayIn sprayIn)
         {
             var pts = new List<Point3dEx>();
             foreach (var db in DBObjs)
@@ -90,6 +92,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         (bounds.Value.MaxPoint.Y + bounds.Value.MinPoint.Y) / 2);
                     var newpt = pt.ToPoint3d();
                     pts.Add(new Point3dEx(newpt));
+                    sprayIn.FlowTypeDic.Add(new Point3dEx(newpt), br.ObjectId.GetDynBlockValue("可见性"));
+
                 }
             }
             return pts;
@@ -101,10 +105,88 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 if (db is BlockReference br)
                 {
-                    result.Add((DBObject)db);
+                    result.Add(GetFlowRect(br));
                 }
             }
             return result;
+        }
+
+
+        private Polyline GetFlowRect(BlockReference flow)
+        {
+            var objs = new DBObjectCollection();
+            flow.Explode(objs);
+            var rect1 = new Polyline();//水流指示器
+            var rect2 = new Polyline();//阀门
+            foreach(var obj in objs)
+            {
+                if(obj is BlockReference br)
+                {
+                    if(br.Name.Contains("水流指示器"))
+                    {
+                        rect1 = br.GetRect();
+                    }
+                    if(br.Name.Contains("阀"))
+                    {
+                        rect2 = br.GetRect();
+                    }
+                }
+            }
+            var centPt1 = rect1.GetCenter();
+            var centPt2 = rect2.GetCenter();
+            var pts = new List<Point3d>();
+            pts.AddRange(rect1.GetPoints());
+            pts.AddRange(rect2.GetPoints());
+            if (Math.Abs(centPt1.X - centPt2.X) < Math.Abs(centPt1.Y - centPt2.Y))//竖排
+            {
+                var orderPtY = pts.OrderBy(p => p.Y).ToList();
+                var rect = GetRectY(centPt1.X,orderPtY.First().Y, orderPtY.Last().Y);
+                return rect;
+            }
+            else
+            {
+                var orderPtX = pts.OrderBy(p => p.X).ToList();
+                var rect = GetRectX(centPt1.Y, orderPtX.First().X, orderPtX.Last().X);
+                return rect;
+            }
+        }
+        private Polyline GetRectY(double x,double minY,double maxY)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+
+            pts.Add(new Point2d(x - 180, minY)); // low left
+            pts.Add(new Point2d(x - 180, maxY)); // high left
+            pts.Add(new Point2d(x + 180, maxY)); // low right
+            pts.Add(new Point2d(x + 180, minY)); // high right
+            pts.Add(new Point2d(x - 180, minY)); // low left
+            pl.CreatePolyline(pts);
+#if DEBUG
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                currentDb.CurrentSpace.Add(pl);
+            }
+#endif
+            return pl;
+        }
+        private Polyline GetRectX(double y, double minX, double maxX)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+
+            pts.Add(new Point2d(minX, y-180)); // low left
+            pts.Add(new Point2d(minX, y + 180)); // high left
+            pts.Add(new Point2d(maxX, y + 180)); // low right
+            pts.Add(new Point2d(maxX, y - 180)); // high right
+            pts.Add(new Point2d(minX, y - 180)); // low left
+            pl.CreatePolyline(pts);
+#if DEBUG
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                currentDb.CurrentSpace.Add(pl);
+            }
+#endif
+            return pl;
         }
     }
 }

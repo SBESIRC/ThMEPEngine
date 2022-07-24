@@ -29,6 +29,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         {
             PtEx = ptEx;
             Tolerance = 100;
+            PipeNumber = "";
         }
         public void SetLines(SprayIn sprayIn)
         {
@@ -58,6 +59,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             var adjs = sprayIn.LeadLineDic[StartLine];
             adjs.OrderBy(l=> Math.Abs(Math.Sin(l.Angle)));
+            TextLine = adjs[0];
+        }
+
+        public void SetLines(SprayIn sprayIn, ThCADCoreNTSSpatialIndex lineSpatialIndex,Polyline blockRect)
+        {
+            var leadLines = lineSpatialIndex.SelectCrossingPolygon(blockRect);
+            if(leadLines.Count!=1)
+            {
+                return;
+            }
+            StartLine = leadLines[0] as Line;
+
+            if (!sprayIn.LeadLineDic.ContainsKey(StartLine))
+            {
+                TextLine = StartLine;
+                return;
+            }
+            var adjs = sprayIn.LeadLineDic[StartLine];
+            adjs.OrderBy(l => Math.Abs(Math.Sin(l.Angle)));
             TextLine = adjs[0];
         }
 

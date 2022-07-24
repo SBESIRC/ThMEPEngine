@@ -63,7 +63,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 _cretateFloorRooms.AddRange(thisFloorRooms);
             var pipeTags = new List<string>
             {
-                "Y1L","Y2L", "NL","FL","PL","TL","DL"
+                "Y1L","Y2L","FyL","FcL", "NL","FL","PL","TL","DL","WL"
             };
             foreach (var cBlock in thisFloorBlocks)
             {
@@ -126,9 +126,17 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 var spacePipes = allPipeLabels.Where(c => c.BasePoint.X > minX && c.BasePoint.X < maxX).ToList();
                 if (spacePipes == null || spacePipes.Count < 1)
                     continue;
+                var tmpBaseElements = createBasicElements;
                 var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
+                tmpBaseElements= createBasicElements.Except(tmpBaseElements).ToList();
                 if (null != addText && addText.Count > 0)
+                {
+                    if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                    {
+                        addText.ForEach(e => e.ConvertToTCHElement = true);
+                    }
                     allTexts.AddRange(addText);
+                }
             }
             if (createBasicElements.Count > 0)
                 createBasics.AddRange(createBasicElements);

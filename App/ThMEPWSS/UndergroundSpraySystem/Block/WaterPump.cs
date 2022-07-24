@@ -72,7 +72,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt.OffsetXY(-800, 700), StPt.OffsetX(-800));
             InsertLine(acadDatabase, StPt.OffsetXY(-3129, 1412), StPt.OffsetXY(-2829, 2012), "W-NOTE");
             InsertLine(acadDatabase, StPt.OffsetXY(-2529, 1412), StPt.OffsetXY(-2829, 2012), "W-NOTE");
-            InsertLine(acadDatabase, StPt.OffsetXY(670, 2012), StPt.OffsetXY(-2829, 2012), "W-NOTE");
+            InsertLine(acadDatabase, StPt.OffsetXY(-260, 2012), StPt.OffsetXY(-2829, 2012), "W-NOTE");
 
             InsertText(acadDatabase, StPt.OffsetXY(-2829, 2012), PumpText);
             if(!PipeDN.Equals(""))

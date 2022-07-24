@@ -5,12 +5,12 @@ using System.Collections.ObjectModel;
 namespace ThMEPElectrical.Model
 {
     public class ThBlockConvertModel : INotifyPropertyChanged
-    {        
+    {
         public ThBlockConvertModel()
         {
             blkScale = "1:100";
             blkFrame = "标注带边框";
-            equipOps = CapitalOP.All;
+            equipOps = CapitalOP.Strong;
             manualActuatorOps = false;
             havcOps = true;
             wssOps = true;
@@ -89,6 +89,19 @@ namespace ThMEPElectrical.Model
                 RaisePropertyChanged("BlkScale");
             }
         }
+        private double compareTolerance;
+        public double CompareTolerance
+        {
+            get
+            {
+                return compareTolerance;
+            }
+            set
+            {
+                compareTolerance = value;
+                RaisePropertyChanged("CompareTolerance");
+            }
+        }
         public double BlkScaleValue
         {
             get
@@ -129,10 +142,44 @@ namespace ThMEPElectrical.Model
             }
         }
     }
+
     public enum CapitalOP
     {
         Strong,
         Weak,
         All,
+    }
+
+    public class BlockConvertInfo
+    {
+        public string Guid { get; set; }
+
+        /// <summary>
+        /// 来源专业
+        /// </summary>
+        public string Category { get; set; } = "";
+
+        /// <summary>
+        /// 设备类型
+        /// </summary>
+        public string EquipmentType { get; set; } = "";
+
+        /// <summary>
+        /// 对比结果
+        /// </summary>
+        public string CompareResult { get; set; } = "";
+
+        public BlockConvertInfo()
+        {
+
+        }
+
+        public BlockConvertInfo(string guid, string category, string equipmentType, string compareResult)
+        {
+            Guid = guid;
+            Category = category;
+            EquipmentType = equipmentType;
+            CompareResult = compareResult;
+        }
     }
 }

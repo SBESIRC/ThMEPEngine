@@ -125,13 +125,19 @@ namespace ThMEPStructure.StructPlane.Print
                 LayerName = ThPrintLayerManager.StairSlabCornerLineLayerName,
             };
         }
-        public static AnnotationPrintConfig GetTextConfig()
+        public static AnnotationPrintConfig GetTextConfig(string drawingScale)
+        {
+            var config = GetTextConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
+        }
+        private static AnnotationPrintConfig GetTextConfig()
         {
             return new AnnotationPrintConfig
             {
                 LayerName = ThPrintLayerManager.StairSlabCornerTextLayerName,
                 TextStyleName = ThPrintStyleManager.THSTYLE3,
-                Height =250,
+                Height =2.5,
                 WidthFactor=0.7,
             };
         }

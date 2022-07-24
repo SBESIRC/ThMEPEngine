@@ -33,7 +33,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
             var name = blk.GetEffectiveName();
             var type = -1;
-            if (name.Contains(ThHydrantCommon.BlkName_Hydrant))
+            if (name.Contains(ThHydrantCommon.BlkName_Hydrant) || name.Contains(ThHydrantCommon.BlkName_Hydrant2))
             {
                 type = 0;
             }

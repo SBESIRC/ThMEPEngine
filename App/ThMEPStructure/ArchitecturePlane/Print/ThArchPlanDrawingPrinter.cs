@@ -18,18 +18,12 @@ namespace ThMEPStructure.ArchitecturePlane.Print
     /// </summary>
     internal class ThArchPlanDrawingPrinter: ThArchDrawingPrinter
     {
-        public ThArchPlanDrawingPrinter(ThArchSvgInput input, ThPlanePrintParameter printParameter) 
+        public ThArchPlanDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter) 
             :base(input, printParameter)
         {              
         }
         public override void Print(Database db)
         {
-            // 从模板导入要打印的图层
-            if(!ThImportDatabaseService.ImportArchDwgTemplate(db))
-            {
-                return;
-            }
-
             // 打印对象
             PrintGeos(db, Geos);
 
@@ -166,7 +160,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             var numbers = creator.Create(doors);
             
             // 打印，为了设置好文字高度和样式
-            var config = ThDoorMarkPrinter.GetConfig();
+            var config = ThDoorMarkPrinter.GetConfig(PrintParameter.DrawingScale);
             var printer = new ThDoorMarkPrinter(config);
             numbers.ForEach(o =>
             {
@@ -184,7 +178,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             var numbers = creator.Create(windows);
 
             // 打印，为了设置好文字高度和样式
-            var config = ThWindowMarkPrinter.GetConfig();
+            var config = ThWindowMarkPrinter.GetConfig(PrintParameter.DrawingScale);
             var printer = new ThWindowMarkPrinter(config);
             numbers.ForEach(o =>
             {

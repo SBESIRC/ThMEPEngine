@@ -2,8 +2,6 @@
 using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
-using ThMEPElectrical.Command;
-using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.Command;
 using TianHua.Electrical.UI.FireAlarm;
 using TianHua.Electrical.UI.ThBroadcast;
@@ -17,15 +15,18 @@ namespace TianHua.Electrical.UI
     public class ElectricalUIApp : IExtensionApplication
     {
         private fmSmokeLayout SmokeLayoutUI { get; set; }
+        private BlockConvertUI UiCapitalConverter { get; set; }
 
         public void Initialize()
         {
             SmokeLayoutUI = null;
+            UiCapitalConverter = null;
         }
 
         public void Terminate()
         {
             SmokeLayoutUI = null;
+            UiCapitalConverter = null;
         }
 
         [CommandMethod("TIANHUACAD", "THYWG", CommandFlags.Modal)]
@@ -51,50 +52,15 @@ namespace TianHua.Electrical.UI
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var uiCapitalConverter = new BlockConvertUI();
-                uiCapitalConverter.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-                AcadApp.ShowModalWindow(uiCapitalConverter);
-                if (!uiCapitalConverter.GoOn)
+                if (UiCapitalConverter != null && UiCapitalConverter.IsLoaded)
                 {
                     return;
                 }
-                // 执行命令
-                var cmd = new ThBConvertCommand()
+                UiCapitalConverter = new BlockConvertUI
                 {
-                    Scale = uiCapitalConverter.Parameter.BlkScaleValue,
-                    FrameStyle = uiCapitalConverter.Parameter.BlkFrameValue,
-                    ConvertManualActuator = uiCapitalConverter.Parameter.ManualActuatorOps,
+                    WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen,
                 };
-                if (uiCapitalConverter.Parameter.HavcOps &&
-                    uiCapitalConverter.Parameter.WssOps)
-                {
-                    cmd.Category = ConvertCategory.ALL;
-                }
-                else if (uiCapitalConverter.Parameter.HavcOps)
-                {
-                    cmd.Category = ConvertCategory.HVAC;
-                }
-                else if (uiCapitalConverter.Parameter.WssOps)
-                {
-                    cmd.Category = ConvertCategory.WSS;
-                }
-                else
-                {
-                    return;
-                }
-                switch (uiCapitalConverter.Parameter.EquipOps)
-                {
-                    case CapitalOP.Strong:
-                        cmd.Mode = ConvertMode.STRONGCURRENT;
-                        break;
-                    case CapitalOP.Weak:
-                        cmd.Mode = ConvertMode.WEAKCURRENT;
-                        break;
-                    case CapitalOP.All:
-                        cmd.Mode = ConvertMode.ALL;
-                        break;
-                }
-                cmd.Execute();
+                AcadApp.ShowModelessWindow(UiCapitalConverter);
             }
         }
 

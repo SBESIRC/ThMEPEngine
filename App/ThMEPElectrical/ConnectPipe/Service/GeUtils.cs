@@ -1,10 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.ConnectPipe.Service
 {
@@ -29,7 +28,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
             {
                 pts.Add(polyUp.GetPoint2dAt(i));
             }
-           
+
             var polyDown = newPoly.GetOffsetCurves(-distance)[0] as Polyline;
             for (int i = polyDown.NumberOfVertices - 1; i >= 0; i--)
             {
@@ -234,8 +233,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <returns></returns>
         public static bool IsPointOnLine(Line line, Point3d pt)
         {
-            var closetPt = line.GetClosestPointTo(pt, false);
-            return closetPt.DistanceTo(pt) < 1;
+            return line.IsPointOnLine(pt, false, 1);
         }
 
         /// <summary>
@@ -259,7 +257,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 }
             }
 
-            List<Point3d> pts = new List<Point3d>() { allPts.First()};
+            List<Point3d> pts = new List<Point3d>() { allPts.First() };
             for (int i = 1; i < allPts.Count - 1; i++)
             {
                 Line line = new Line(allPts[i - 1], allPts[i + 1]);

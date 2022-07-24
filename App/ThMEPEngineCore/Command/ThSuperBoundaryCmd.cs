@@ -10,6 +10,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThCADExtension;
 
 namespace ThMEPWSS.Command
 {
@@ -19,6 +20,8 @@ namespace ThMEPWSS.Command
         private DBObjectCollection CollectObjs { get; set; }
         public ThSuperBoundaryCmd(DBObjectCollection modelSpaceEnties)
         {
+            ActionName = "提取房间框线";
+            CommandName = "THEROC";
             ModelSpaceEnties = modelSpaceEnties;
             CollectObjs = new DBObjectCollection();
         }

@@ -1,0 +1,77 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.WaterSupplyRoofTank"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             Title="屋顶水箱设置" SizeToContent="Manual" Height="330" Width="210" MaxWidth="1000" MaxHeight="330" WindowStartupLocation="CenterScreen"
+             mc:Ignorable="d" >
+    
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            
+            <TextBlock Margin="10">水箱尺寸：</TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Name="length" Width="25" Margin="10,5,0,5" SelectionChanged="TextBox_SelectionChanged" Text="{Binding TankLength}"  KeyDown = "KeyPress_TankLength" TextChanged="TextChanged_TankLength"></TextBox>
+                <Label>m×</Label>
+                <TextBox Name="width" Width="25" Margin="0,5,0,5" SelectionChanged="TextBox_SelectionChanged"  Text="{Binding TankWidth}" KeyDown = "KeyPress_TankLength" TextChanged="TextChanged_TankLength"></TextBox>
+                <Label>m×</Label>
+                <TextBox Name="height" Width="25" Margin="0,5,0,5" SelectionChanged="TextBox_SelectionChanged" Text="{Binding TankHeight}" KeyDown = "KeyPress_TankLength" TextChanged="TextChanged_TankLength"></TextBox>
+                <Label>m(h)</Label>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="10,5,0,5">有效容积</TextBlock>
+                <TextBox Name="volum"  Width="50" Margin="0,5,0,5" Text="{Binding TankVolume}" IsReadOnly="True"></TextBox>
+                <Label>m³</Label>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="10,5,0,5">水箱底标高：</TextBlock>
+                <TextBox Width="50" Margin="0,5,0,5" Text="{Binding Elevation}"></TextBox>
+                <Label>m</Label>
+            </StackPanel>
+
+            <Label Margin="5,0,0,5" Content="消毒器类型："></Label>
+            <ItemsControl x:Name="消毒器类型" ItemsSource="{Binding SterilizerType}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"></WrapPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <Label Margin="5,0,0,5" Content="加压楼层："></Label>
+            <ItemsControl x:Name="加压楼层" ItemsSource="{Binding PressurizedFloor}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"></WrapPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Margin="5,0,0,5">供水楼层：</Label>
+                <TextBox Width="25" Margin="0,5,0,5" Text="{Binding LowestFloor}" KeyDown = "KeyPress_Floor" TextChanged="TextChanged_Floor"></TextBox>
+                <Label>~</Label>
+                <TextBox Width="25" Margin="0,5,0,5" Text="{Binding HighestFloor}" KeyDown = "KeyPress_Floor" TextChanged="TextChanged_Floor"></TextBox>
+                <Label>层</Label>
+            </StackPanel>
+            <DockPanel LastChildFill="False">
+                <Button Margin="40,10,0,5" DockPanel.Dock="Left" Width="50" Click="btnOk">确定</Button>
+                <Button Margin="0,10,40,5" DockPanel.Dock="Right" Width="50" Click="btnCancel">取消</Button>
+            </DockPanel>
+            
+        </StackPanel>
+    </Grid>
+    </cus:ThCustomWindow>

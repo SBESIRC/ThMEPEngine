@@ -167,7 +167,10 @@ namespace TianHua.Electrical.PDS.Engine
                             var objs = new DBObjectCollection();
                             block.Explode(objs);
                             var motor = objs.OfType<BlockReference>().First();
-                            GeometryMap.Add(block, motor);
+                            var newObjs = new DBObjectCollection();
+                            motor.Explode(newObjs);
+                            var circle = newObjs.OfType<Circle>().First().TessellateCircleWithArc(200.00);
+                            GeometryMap.Add(block, circle);
                         }
                         else if (blockName.Equals("E-BDB054"))
                         {
@@ -213,7 +216,12 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 // 搜索框线中的配电箱
                 var cacheNodes = new List<ThPDSCircuitGraphNode>();
-                var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame);
+                var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame)
+                    .OfType<BlockReference>().Where(b => frame.Contains(b.Position)).ToList();
+                if (distBoxes.Count == 0)
+                {
+                    return;
+                }
 
                 var bufferFrame = ThPDSBufferService.Buffer(frame);
                 var onLightingCableTray = false;
@@ -231,7 +239,7 @@ namespace TianHua.Electrical.PDS.Engine
                 var cacheMarkList = new List<ThPDSTextInfo>();
                 for (var i = 0; i < 2; i++)
                 {
-                    distBoxes.OfType<BlockReference>().ForEach(distBox =>
+                    distBoxes.ForEach(distBox =>
                     {
                         if (cacheDistBoxes.Contains(distBox))
                         {
@@ -344,7 +352,7 @@ namespace TianHua.Electrical.PDS.Engine
                             thisMark.Texts.AddRange(thisCircuitMark.Texts);
                             thisMark.ObjectIds.AddRange(thisCircuitMark.ObjectIds);
                             var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey, buffer);
-                            newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray, cableTray);
+                            newNode.SetOnLightingCableTray(onLightingCableTray, cableTray);
                             cacheNodes.Add(newNode);
                             cacheDistBoxes.Add(distBox);
                             if (!CacheDistBoxes.ContainsKey(distBox))
@@ -620,7 +628,7 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         var objectIds = new List<ObjectId>();
                         var newNode = ThPDSGraphService.CreateNode(distBox, Database, MarkService, DistBoxKey, objectIds);
-                        newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray, curve);
+                        newNode.SetOnLightingCableTray(onLightingCableTray, curve);
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
                         NodeMap.Add(newNode, objectIds);
@@ -704,11 +712,7 @@ namespace TianHua.Electrical.PDS.Engine
                             newLoads.Add(item.Key);
                             CacheLoads.Add(item.Key);
                             var nextLoops = new List<Entity>();
-                            if (item.Key is Curve curve)
-                            {
-                                nextLoops = FindNext(curve, ThPDSBufferService.Buffer(curve, Database));
-                            }
-                            else if (item.Key is BlockReference block)
+                            if (item.Key is BlockReference block)
                             {
                                 if (GeometryMap.ContainsKey(block))
                                 {
@@ -741,6 +745,12 @@ namespace TianHua.Electrical.PDS.Engine
                                 }
                             }
                         }
+                    }
+                    else if (item.Key is Curve curve)
+                    {
+                        // 未知负载
+                        newLoads.Add(curve);
+                        entityList.Add(Tuple.Create(sourceEntity, item.Key, logos, newLoads));
                     }
                 }
             }
@@ -831,7 +841,7 @@ namespace TianHua.Electrical.PDS.Engine
                 objectIds, ref attributesCopy);
             if (onLightingCableTray)
             {
-                newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray, cableTray);
+                newNode.SetOnLightingCableTray(onLightingCableTray, cableTray);
             }
             PDSGraph.Graph.AddVertex(newNode);
             NodeMap.Add(newNode, objectIds);
@@ -1640,10 +1650,10 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var distBoxesInAreas = PDSGraph.Graph.Vertices
                 .Where(v => v.NodeType == PDSNodeType.DistributionBox)
-                .Where(v => v.Loads[0].GetOnLightingCableTray().OnLightingCableTray).ToList();
+                .Where(v => v.LightingCableTray.OnLightingCableTray).ToList();
             var loadsInAreas = PDSGraph.Graph.Vertices
                 .Where(v => v.NodeType == PDSNodeType.Load)
-                .Where(v => v.Loads[0].GetOnLightingCableTray().OnLightingCableTray).ToList();
+                .Where(v => v.LightingCableTray.OnLightingCableTray).ToList();
             if (loadsInAreas.Count == 0)
             {
                 return;
@@ -1654,8 +1664,8 @@ namespace TianHua.Electrical.PDS.Engine
 
             cableTrayFrames.ForEach(frame =>
             {
-                var loads = loadsInAreas.Where(node => frame.Contains(node.Loads[0].GetOnLightingCableTray().CableTray)).ToList();
-                var distBoxes = distBoxesInAreas.Where(node => frame.Contains(node.Loads[0].GetOnLightingCableTray().CableTray)).ToList();
+                var loads = loadsInAreas.Where(node => frame.Contains(node.LightingCableTray.CableTray)).ToList();
+                var distBoxes = distBoxesInAreas.Where(node => frame.Contains(node.LightingCableTray.CableTray)).ToList();
                 if (loads.Count == 0 || distBoxes.Count == 0)
                 {
                     return;
@@ -1877,7 +1887,8 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         e.SetLocation(new ThPDSLocation());
                     }
-                    e.Location.FloorNumber = storeys.StoreyNumber;
+                    e.Location.StoreyNumber = storeys.StoreyNumber;
+                    e.Location.StoreyTypeString = storeys.StoreyTypeString;
                     e.Location.StoreyBasePoint = ThPDSPoint3dService.ToPDSPoint3d(storeyBasePoint);
                     e.Location.ReferenceDWG = Path.GetFileNameWithoutExtension(database.Filename);
                     e.Location.IsStandardStorey = isStandardStorey;

@@ -6,6 +6,7 @@ using TianHua.Hvac.UI.EQPMFanSelect.EventMonitor;
 using TianHua.Hvac.UI.SmokeProofSystemUI;
 using TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofEventMonitor;
 using TianHua.Hvac.UI.UI;
+using TianHua.Hvac.UI.FloorHeatingCoil;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI
@@ -33,7 +34,7 @@ namespace TianHua.Hvac.UI
                 {
                     uiAirPortParameter.Instance.Hide();
                 }
-                if(uiFGDXParameter.Instance!=null)
+                if (uiFGDXParameter.Instance != null)
                 {
                     uiFGDXParameter.Instance.Hide();
                 }
@@ -103,8 +104,8 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-        
-       [CommandMethod("TIANHUACAD", "THSNJ", CommandFlags.Modal)]
+
+        [CommandMethod("TIANHUACAD", "THSNJ", CommandFlags.Modal)]
         public void THSNJ()
         {
             using (var cmd = new ThHvacIndoorFanCmd())
@@ -112,8 +113,8 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-        
-       [CommandMethod("TIANHUACAD", "THFGLY", CommandFlags.Modal)]
+
+        [CommandMethod("TIANHUACAD", "THFGLY", CommandFlags.Modal)]
         public void THFGLY()
         {
             using (var cmd = new ThHvacRouteCmd())
@@ -140,7 +141,7 @@ namespace TianHua.Hvac.UI
                 }
                 return;
             }
-            uiAirPortParameter.Instance.WindowStartupLocation = 
+            uiAirPortParameter.Instance.WindowStartupLocation =
                 System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(uiAirPortParameter.Instance);
         }
@@ -193,7 +194,7 @@ namespace TianHua.Hvac.UI
             AcadApp.ShowModelessWindow(smokeCalculateUI);
         }
         #region 风机选型的相关事件
-        private void EQPMSelectAddEvents() 
+        private void EQPMSelectAddEvents()
         {
             AcadApp.BeginDoubleClick += EQPMEventMonitor.Application_BeginDoubleClick;
             AcadApp.DocumentManager.DocumentActivated += EQPMEventMonitor.DocumentManager_DocumentActivated;
@@ -202,7 +203,7 @@ namespace TianHua.Hvac.UI
             EQPMEventMonitor.SubscribeToObjectOverrule();
             EQPMEventMonitor.SubscribeToDocumentEvents(Active.Document);
         }
-        private void EQPMSelectRemoveEvents() 
+        private void EQPMSelectRemoveEvents()
         {
             AcadApp.BeginDoubleClick -= EQPMEventMonitor.Application_BeginDoubleClick;
             AcadApp.DocumentManager.DocumentActivated -= EQPMEventMonitor.DocumentManager_DocumentActivated;
@@ -227,5 +228,22 @@ namespace TianHua.Hvac.UI
             AcadApp.DocumentManager.DocumentLockModeChangeVetoed -= SmokeProofEventMonitor.DocumentManager_DocumentLockModeChangeVetoed;
         }
         #endregion
+
+        [CommandMethod("TIANHUACAD", "THDNPG", CommandFlags.Modal)]
+        public void THDNPG()
+        {
+            if (uiFloorHeatingCoil.Instance != null && uiFloorHeatingCoil.Instance.IsLoaded)
+            {
+                if (!uiFloorHeatingCoil.Instance.IsVisible)
+                {
+                    uiFloorHeatingCoil.Instance.Show();
+                }
+                return;
+            }
+
+            uiFloorHeatingCoil.Instance.WindowStartupLocation =
+                System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiFloorHeatingCoil.Instance);
+        }
     }
 }

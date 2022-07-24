@@ -64,7 +64,6 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public InputDataProcess(RawData rawData)
         {
             rawData0 = rawData;
-            
         }
 
         public void Pipeline()
@@ -78,9 +77,6 @@ namespace ThMEPWSS.HydrantLayout.Engine
             ForbiddenCreate();
             Classification();
         }
-
-
-
 
         //处理没有房间的情况
         public void OtherProcess() 

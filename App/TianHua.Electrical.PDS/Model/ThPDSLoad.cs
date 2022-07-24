@@ -1,5 +1,4 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using TianHua.Electrical.PDS.Project.Module;
@@ -351,7 +350,7 @@ namespace TianHua.Electrical.PDS.Model
             PowerFactor = 0.85;
             FireLoadWithNull = ThPDSFireLoad.Unknown;
             LocationList = new List<ThPDSLocation>();
-            LightingCableTray = new ThPDSLightingCableTray();
+            
             CableLayingMethod1 = LayingSite.CC;
             CableLayingMethod2 = LayingSite.None;
             PrimaryAvail = 1;
@@ -468,11 +467,6 @@ namespace TianHua.Electrical.PDS.Model
         public string AttributesCopy { get; set; }
 
         /// <summary>
-        /// 判断配电箱是否在照明桥架上
-        /// </summary>
-        private ThPDSLightingCableTray LightingCableTray { get; set; }
-
-        /// <summary>
         /// Cable laying method 1
         /// </summary>
         public LayingSite CableLayingMethod1 { get; set; }
@@ -500,31 +494,6 @@ namespace TianHua.Electrical.PDS.Model
             return this.ID.LoadID.GetHashCode();
         }
         #endregion
-
-        public ThPDSLightingCableTray GetOnLightingCableTray()
-        {
-            return LightingCableTray;
-        }
-
-        public void SetOnLightingCableTray(ThPDSLightingCableTray lightingCableTray)
-        {
-            LightingCableTray = lightingCableTray;
-        }
-
-        public void SetOnLightingCableTray(bool onLlightingCableTray, Curve cableTray)
-        {
-            if (!onLlightingCableTray)
-            {
-                return;
-            }
-
-            LightingCableTray = new ThPDSLightingCableTray
-            {
-                OnLightingCableTray = onLlightingCableTray,
-                CableTray = cableTray,
-            };
-        }
-
         public ThPDSFireLoad GetFireLoad()
         {
             return FireLoadWithNull;
@@ -577,7 +546,6 @@ namespace TianHua.Electrical.PDS.Model
                 PowerFactor = this.PowerFactor,
                 FireLoadWithNull = this.FireLoadWithNull,
                 LocationList = this.LocationList,
-                LightingCableTray = this.LightingCableTray,
                 CableLayingMethod1 = this.CableLayingMethod1,
                 CableLayingMethod2 = this.CableLayingMethod2,
                 PrimaryAvail = this.PrimaryAvail,

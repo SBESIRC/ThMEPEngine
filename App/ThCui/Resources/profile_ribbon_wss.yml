@@ -23,6 +23,8 @@ panels:
         items:
           - text: "梁配置"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "选项"
+            attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "房间框线"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "框线对比"
@@ -100,8 +102,6 @@ panels:
         items:
           - text: "范围校核"
             attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "距离校核"
-            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWSPRINKLER"
     name: "WSPRINKLER"
@@ -113,8 +113,6 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
-          - text: "连管标注"
-            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷淋系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷头校核"

@@ -85,7 +85,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     }
                 }
             }
-            return pipeLines;
+            
+            return ThMEPWSS.UndergroundFireHydrantSystem.Service.PipeLineList.CleanLaneLines3(pipeLines);
         }
     }
 }

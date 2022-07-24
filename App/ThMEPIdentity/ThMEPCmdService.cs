@@ -60,7 +60,6 @@ namespace ThMEPIdentity
             {"REDIMLINE", "刷新线长"},
             {"GOW", "世界坐标系"},
             {"U2P", "两点坐标系"},
-            {"MEASUREPATH", "距离校核"},
             {"XTZS", "标准图库"},
             {"SETWALLXLINE", "设置墙身"},
             {"DRAWWALLXLINE", " 绘制墙身"},

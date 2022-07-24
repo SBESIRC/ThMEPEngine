@@ -8,7 +8,7 @@
                     xmlns:cvt="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
                     WindowStartupLocation="CenterOwner"
                     Title="高级设置"
-                    Width="250"
+                    Width="350"
                     SizeToContent="Height"
                     mc:Ignorable="d" >
     <Window.Resources>
@@ -50,6 +50,13 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox HorizontalAlignment="Center" Height="20" IsEnabled="{Binding HasFireHydrant}" Visibility="{Binding HasFireHydrant,Converter={StaticResource VisibilityConverter}}" IsChecked="{Binding IsHalfPlatform,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="简易喷淋数量" Width="80" CanUserSort="False" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <cus:InputTextBox TextAlignment="Center" Height="20" TextBoxInputType="InputInteger" IsEnabled="{Binding HasFireHydrant}" Visibility="{Binding HasFireHydrant,Converter={StaticResource VisibilityConverter}}" Text="{Binding SimpleSprayCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0"></cus:InputTextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
