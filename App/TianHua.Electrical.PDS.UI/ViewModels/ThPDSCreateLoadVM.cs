@@ -124,12 +124,22 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         /// <summary>
         /// 设备类型
         /// </summary>
-        public ThPDSLoadItemTypeVM Type { get; private set; }
+        private ThPDSLoadItemTypeVM _Type;
+        public ThPDSLoadItemTypeVM Type
+        {
+            get => _Type;
+            set => SetProperty(ref _Type, value);
+        }
 
         /// <summary>
         /// 额定电压
         /// </summary>
-        public double RatedVoltage { get; set; }
+        private double _RatedVoltage;
+        public double RatedVoltage
+        {
+            get => _RatedVoltage;
+            set => SetProperty(ref _RatedVoltage, value);
+        }
 
         /// <summary>
         /// 编号
