@@ -85,10 +85,10 @@ namespace ThMEPTCH.Services
                             if (railingToRegion) 
                             {
                                 var centerline = railing.Outline as Polyline;
-                                var outlines = centerline.BufferFlatPL(railing.Thickness / 2.0);
+                                var outlines = centerline.BufferFlatPL(railing.Width / 2.0);
                                 railing.Outline = outlines[0] as Polyline;
                             }
-                            railing.Depth = ralingHeight;
+                            railing.Height = ralingHeight;
                             thisRailingEntitys.Add(pLine, railing);
                         }
                     }
@@ -112,7 +112,7 @@ namespace ThMEPTCH.Services
                         var railing = thisRailingEntitys[polyline];
                         (railing.Outline as Polyline).Elevation = (wall.Outline as Polyline).Elevation + wall.Height;
                         railing.ZOffSet = wall.Height;
-                        railing.Depth = 800;
+                        railing.Height = 800;
                     }
                 }
                 floor.FloorEntitys.AddRange(allSlabs);
@@ -488,8 +488,8 @@ namespace ThMEPTCH.Services
         {
             return new ThTCHRailing()
             {
-                Depth = 1200,
-                Thickness = 60,
+                Height = 1200,
+                Width = 60,
                 Outline = pline,
                 ExtrudedDirection = Vector3d.ZAxis,
             };

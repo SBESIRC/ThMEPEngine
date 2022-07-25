@@ -1,46 +1,38 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using ProtoBuf;
-using ThMEPEngineCore.Model;
+using System;
 
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
     public class ThTCHOpening : ThTCHElement, ICloneable
     {
-        [ProtoMember(11)]
-        public Point3d CenterPoint { get; set; }
-        [ProtoMember(12)]
-        public double Width { get; set; }
-        [ProtoMember(13)]
-        public double Thickness { get; set; }
-        [ProtoMember(14)]
-        public Vector3d ExtrudedDirection { get; }
-        //X轴方向和宽度方向一致
-        [ProtoMember(15)]
-        public Vector3d XVector { get; set; }
-
-        private ThTCHOpening()
-        {
-
-        }
+        private ThTCHOpening() { }
         private double Angle { get; }
-        public ThTCHOpening(Point3d centerPoint, double width, double height, double thickness, double angle)
+        /// <summary>
+        /// 洞口的信息
+        /// </summary>
+        /// <param name="centerPoint">底部矩形轮廓的中心点</param>
+        /// <param name="width">长度</param>
+        /// <param name="height">高度</param>
+        /// <param name="width">宽度(厚度)</param>
+        /// <param name="angle">角度（计算X轴方向的）</param>
+        public ThTCHOpening(Point3d centerPoint, double length, double height, double width, double angle)
         {
             ExtrudedDirection = Vector3d.ZAxis;
-            CenterPoint = centerPoint;
+            Origin = centerPoint;
             XVector = Vector3d.XAxis.RotateBy(angle, Vector3d.ZAxis);
             Width = width;
             Height = height;
-            Thickness = thickness;
+            Length = length;
             Angle = angle;
         }
         public object Clone()
         {
             if (this == null)
                 return null;
-            var opening = new ThTCHOpening(this.CenterPoint, this.Width, this.Height, this.Thickness, this.Angle);
+            var opening = new ThTCHOpening(this.Origin, this.Length, this.Height, this.Width, this.Angle);
             opening.XVector = this.XVector;
             if (this.Outline != null)
             {

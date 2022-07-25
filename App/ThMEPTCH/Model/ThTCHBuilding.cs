@@ -1,15 +1,14 @@
 ﻿using ProtoBuf;
 using System.Collections.Generic;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
     public class ThTCHBuilding : ThTCHElement
     {
-        [ProtoMember(11)]
+        [ProtoMember(21)]
         public string BuildingName { get; set; }
-        [ProtoMember(12)]
+        [ProtoMember(22)]
         public List<ThTCHBuildingStorey> Storeys { get; set; }
         public ThTCHBuilding() 
         {
