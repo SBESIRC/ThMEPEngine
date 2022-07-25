@@ -23,4 +23,22 @@ namespace TianHua.Structure.WPF.UI.Converter
             return (StoreySelectOps)int.Parse(parameter.ToString());
         }
     }
+    public class FileFormatOpsBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            FileFormatOps s = (FileFormatOps)value;
+            return s == (FileFormatOps)int.Parse(parameter.ToString());
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isChecked = (bool)value;
+            if (!isChecked)
+            {
+                return null;
+            }
+            return (FileFormatOps)int.Parse(parameter.ToString());
+        }
+    }
 }

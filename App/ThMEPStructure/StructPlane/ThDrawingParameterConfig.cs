@@ -9,7 +9,8 @@ namespace ThMEPStructure.StructPlane
         internal ThDrawingParameterConfig()
         {
             DrawingScale = "1:100";
-            Storeies = new List<string>();
+            FileFormatOption = "IFC";
+            Storeies = new List<string>();            
             DrawingScales = new List<string> { "1:100", "1:150" };
         }
         static ThDrawingParameterConfig()
@@ -34,5 +35,9 @@ namespace ThMEPStructure.StructPlane
         /// 全部楼层
         /// </summary>
         public bool IsAllStorey { get; set; }
+        /// <summary>
+        /// 文件格式
+        /// </summary>
+        public string FileFormatOption { get; set; } = "";
     }
 }

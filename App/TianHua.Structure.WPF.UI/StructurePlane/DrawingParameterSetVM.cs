@@ -17,7 +17,6 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
         public void Run()
         {
             Model.Write();
-
         }
         private void SetFocusToDwgView()
         {
