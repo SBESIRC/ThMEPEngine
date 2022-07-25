@@ -19,6 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             _conductor = conductor;
         }
 
+        [Browsable(true)]
         [Category("电线电缆参数")]
         [DisplayName("燃料特性代号")]
         public string ConductorMaterial
@@ -31,6 +32,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Browsable(true)]
         [Category("电线电缆参数")]
         [DisplayName("材料特征及结构")]
         [Editor(typeof(ThPDSConductorMaterialStructurePropertyEditor), typeof(PropertyEditorBase))]
@@ -44,6 +46,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Browsable(true)]
         [Category("电线电缆参数")]
         [DisplayName("导体用途")]
         [Editor(typeof(ThPDSConductorTypePropertyEditor), typeof(PropertyEditorBase))]
@@ -194,6 +197,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Browsable(true)]
         [DisplayName("管材")]
         [Category("电线电缆参数")]
         [Editor(typeof(ThPDSEnumPropertyEditor<PipeMaterial>), typeof(PropertyEditorBase))]
@@ -203,6 +207,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Browsable(true)]
         [DisplayName("穿管直径")]
         [Category("电线电缆参数")]
         public int PipeDiameter
