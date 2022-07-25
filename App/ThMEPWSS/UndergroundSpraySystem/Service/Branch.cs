@@ -21,7 +21,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
                 int fireAreaIndex = 0;
-                var fireStpt = spraySystem.BranchPtDic[pt];//图纸绘制起始点;
+                var fireStpt = new Point3d(spraySystem.BranchPtDic[pt].X, spraySystem.AlarmValveStPtY[pt], 0);//spraySystem.BranchPtDic[pt];//图纸绘制起始点;
+                
                 if (sprayIn.TermPtDic.ContainsKey(pt))
                 {
                     var str = sprayIn.TermPtDic[pt].PipeNumber;
@@ -37,8 +38,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     return;
                 }
-                var stPt = spraySystem.BranchPtDic[pt];//图纸绘制起始点
-                var stPt4 = spraySystem.BranchPtDic[pt];//图纸绘制支路4起始点
+                var stPt = new Point3d(spraySystem.BranchPtDic[pt].X, spraySystem.AlarmValveStPtY[pt], 0);//图纸绘制起始点
+                var stPt4 = new Point3d(spraySystem.BranchPtDic[pt].X, spraySystem.AlarmValveStPtY[pt], 0); ;//图纸绘制支路4起始点
 
                 var tpts = spraySystem.BranchDic[pt];
 
