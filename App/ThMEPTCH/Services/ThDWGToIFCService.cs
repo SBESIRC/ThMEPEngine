@@ -32,7 +32,7 @@ namespace ThMEPTCH.Services
             if(!string.IsNullOrEmpty(dbPath) && File.Exists(dbPath))
                 archDBData = new TCHArchDBData(dbPath);
         }
-        public ThTCHProject DWGToProject(bool isMemoryStory)
+        public ThTCHProject DWGToProject(bool isMemoryStory,bool railingToRegion)
         {
             if (null == archDBData)
                 return null;
@@ -82,6 +82,12 @@ namespace ThMEPTCH.Services
                             var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
                             railingColls.Add(pLine);
                             var railing = CreateRailing(pLine);
+                            if (railingToRegion) 
+                            {
+                                var centerline = railing.Outline as Polyline;
+                                var outlines = centerline.BufferFlatPL(railing.Thickness / 2.0);
+                                railing.Outline = outlines[0] as Polyline;
+                            }
                             railing.Depth = ralingHeight;
                             thisRailingEntitys.Add(pLine, railing);
                         }
@@ -105,6 +111,7 @@ namespace ThMEPTCH.Services
                             continue;
                         var railing = thisRailingEntitys[polyline];
                         (railing.Outline as Polyline).Elevation = (wall.Outline as Polyline).Elevation + wall.Height;
+                        railing.ZOffSet = wall.Height;
                         railing.Depth = 800;
                     }
                 }

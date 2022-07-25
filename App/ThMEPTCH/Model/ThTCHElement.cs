@@ -29,6 +29,8 @@ namespace ThMEPTCH.Model
         public Entity Outline { get; set; }
         [ProtoMember(4)]
         public double Height { get; set; }
+        [ProtoMember(5)]
+        public double ZOffSet { get; set; }
         public Dictionary<string, object> Properties { get; }
         public ThTCHElement()
         {

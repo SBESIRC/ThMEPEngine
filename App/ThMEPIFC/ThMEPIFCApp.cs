@@ -84,7 +84,7 @@ namespace ThMEPIFC
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false);
+            var project = service.DWGToProject(false,false);
             if (project == null)
             {
                 return;
@@ -116,7 +116,7 @@ namespace ThMEPIFC
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false);
+            var project = service.DWGToProject(false,false);
             if (project == null)
             {
                 return;
@@ -188,7 +188,7 @@ namespace ThMEPIFC
             sw.Start();
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(true);
+            var project = service.DWGToProject(true,true);
             if (project == null)
             {
                 return;
