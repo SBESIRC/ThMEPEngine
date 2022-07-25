@@ -23,7 +23,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             DisParallelCarLength = VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth;
             DisParallelCarWidth = VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength;
             //DisVertCarLength = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength + 200 : VMStock.VerticalSpotWidth + 200;
-            DisVertCarLength = 5300;
+            DisVertCarLength = Math.Max(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
             DisVertCarWidth = VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength;
             DisLaneWidth = VMStock.RoadWidth;
             PillarSpacing = VMStock.ColumnWidth;
@@ -72,7 +72,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             else
             {
-                DisVertCarLengthBackBack = 5100;
+                DisVertCarLengthBackBack = DisVertCarLength-DifferenceFromBackBack;
                 DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
                 DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
             }
@@ -105,6 +105,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public List<Polygon> IniPillar = new List<Polygon>();
 
         public bool AccurateCalculate = true;
+        public static double DifferenceFromBackBack = 200;
         public static double ScareFactorForCollisionCheck = 0.999999;
         public static bool ScareEnabledForBackBackModule = true;
         public static bool GeneratePillars = true;

@@ -38,7 +38,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             try
             {
-                if (true)
+                if (false)
                 {
                     ParameterViewModel = new ParkingStallArrangementViewModel();
                     ParameterStock.Set(ParameterViewModel);
