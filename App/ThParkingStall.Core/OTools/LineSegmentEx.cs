@@ -54,7 +54,7 @@ namespace ThParkingStall.Core.OTools
             return new Polygon(new LinearRing(points));
         }
 
-        public static Polygon GetRect(this LineSegment lineSegment,double offsetSize)
+        public static Polygon OGetRect(this LineSegment lineSegment,double offsetSize)
         {
             var vector = lineSegment.NormalVector().Multiply(offsetSize);
             var orgpt = vector.Translate(lineSegment.P0);
@@ -63,11 +63,13 @@ namespace ThParkingStall.Core.OTools
             return new Polygon(new LinearRing(points));
         }
         //延长
-        public static LineSegment Extend(this LineSegment lineSegment,double distance,bool extendP0= true,bool extendP1 = true)
+        public static LineSegment OExtend(this LineSegment lineSegment,double distance,bool extendP0= true,bool extendP1 = true)
         {
+            var posLine = lineSegment.Positivize();
+            if (lineSegment == null) return null;
             var direction = lineSegment.DirVector();
-            var P0 = lineSegment.P0;
-            var P1 = lineSegment.P1;
+            var P0 = posLine.P0;
+            var P1 = posLine.P1;
             if (extendP0) P0 = direction.Negate().Multiply(distance).Translate(P0);
             if (extendP1) P1 = direction.Multiply(distance).Translate(P1);
             return new LineSegment(P0, P1);

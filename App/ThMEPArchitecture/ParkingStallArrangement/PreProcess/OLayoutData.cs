@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using System;
@@ -13,7 +14,9 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ViewModel;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
+using ThParkingStall.Core.OTools;
 using ThParkingStall.Core.Tools;
+
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 
@@ -238,11 +241,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         #endregion
 
-        //private void UpdateSegLines()
-        //{
-        //    SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLine(1)).Select(l => l.ToNTSLineSegment()).ToList();
-        //    //RemoveSortSegLine();
-        //}
+        public void ProcessSegLines()
+        {
+            var segLines = new List<SegLine>();
+            foreach(var line in CAD_SegLines)
+            {
+                var segLine = new SegLine(line.ToNTSLineSegment().OExtend(1), false, 5500, 0, 0);
+                segLines.Add(segLine);  
+            }
+            var segLineIndex = segLines.GetSegLineIndex(WallLine);
+
+            //segLines.ForEach(l => l.Splitter.GetBaseLine(WallLine)?.ToDbLine().AddToCurrentSpace());
+            segLines.UpdateSegLines(segLineIndex, WallLine, BoundarySpatialIndex);
+
+            segLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
+            segLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
+        }
         //更新障碍物
 
         //private void UpdateRamps()

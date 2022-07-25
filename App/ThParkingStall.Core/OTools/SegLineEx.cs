@@ -17,31 +17,64 @@ namespace ThParkingStall.Core.OTools
         public static double SegTol = 0.1;//分割线容差，距离大于半车道宽 -0.1则判断满足车道宽
         public static double ExtendTol = 1.0;//延长容差，分割线使用的延长或回缩容差
         public static double LengthTol = 100.0;//分割线过滤容差，小于该值自动丢弃
-        #region 获取某一根分割线在其他分割线的中间部分
-        //返回为null则当前分割线无交点,可丢弃
-        //返回长度为0 则只有一个交点，后续需连到边界 且判断方向是否正确
-        //其余情况则返回正常
-        public static LineSegment GetMiddlePart(this List<LineSegment> seglines, int idx)
+        #region 获取分割线关系
+        public static List<(List<int>, List<int>)> GetSegLineIndex(this List<LineSegment>segLines,Polygon shell)
         {
-            var coors =new List<Coordinate>();
+            var seglineIndex = new List<(List<int>, List<int>)>();
+            for(int i = 0; i < segLines.Count; i++)
+            {
+                List<int> item1;
+                List<int> item2;
+                var segLine = segLines[i];
+                var coors = segLines.GetIntersections(i).Where(pt => shell.Contains(pt.ToPoint())).ToList();
+                if (coors.Count == 0) throw new Exception("Found SegLine do not connect to others");
+                var shellIntSecs = segLine.ToLineString().Intersection(shell.Shell).Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
+                if(shellIntSecs.Count() > 0 && !shellIntSecs.First().PositiveTo(coors.First()))
+                {
+                    //无操作，负向连到边界
+                    item1 = new List<int>();
+                }
+                else
+                {
+                    //负向不连边界
+                    //筛选与第一个交点最近的线
+                    var spt = coors.First();
+                    item1 = Enumerable.Range(0, segLines.Count).
+                        Where(j => segLines[j].Distance(spt) < ExtendTol&& segLines[j].DirVector().Distance(segLine.DirVector())>0.01).ToList();
+                }
+                if (shellIntSecs.Count() > 0 && shellIntSecs.Last().PositiveTo(coors.Last()))
+                {
+                    //无操作，正向连到边界
+                    item2 = new List<int>();
+                }
+                else
+                {
+                    var ept = coors.Last();
+                    item2 = Enumerable.Range(0, segLines.Count).
+                        Where(j => segLines[j].Distance(ept) < ExtendTol && segLines[j].DirVector().Distance(segLine.DirVector()) > 0.01).ToList();
+                }
+                seglineIndex.Add((item1,item2));
+            }
+            return seglineIndex;
+        }
+        public static List<(List<int>, List<int>)> GetSegLineIndex(this List<SegLine> segLines, Polygon shell)
+        {
+            return segLines.Select(seg =>seg.Splitter).ToList().GetSegLineIndex(shell);
+        }
+        public static List<Coordinate> GetIntersections(this List<LineSegment> seglines, int idx)
+        {
+            var coors = new List<Coordinate>();
             var segLine = seglines[idx];
-            if(segLine == null) return null;
+            if (segLine == null) return null;
             for (int i = 0; i < seglines.Count; i++)
             {
                 if (i == idx) continue;
+                if (seglines[i] == null) continue;
                 var intSecPt = segLine.Intersection(seglines[i]);
-                if(intSecPt != null) coors.Add(intSecPt);
+                if (intSecPt != null) coors.Add(intSecPt);
             }
             var ordered = coors.OrderBy(c => c.X).ThenBy(c => c.Y);
-            if (coors.Count > 0) return new LineSegment(ordered.First(), ordered.Last());
-            return null;
-        }
-        public static SegLine GetMiddlePart(this List<SegLine> seglines,int idx)
-        {
-            var middlePart = seglines.Select(l => l.Splitter).ToList().GetMiddlePart(idx);
-            var segLine = seglines[idx].Clone();
-            segLine.Splitter = middlePart;
-            return segLine;
+            return ordered.ToList();
         }
         #endregion
         #region 获取基线(分割线在可布置区域内最长的部分）
@@ -70,41 +103,54 @@ namespace ThParkingStall.Core.OTools
             return clone;
         }
         #endregion
-        #region 分割线连到边界内
-        //如果相交到边界（距离大于1）缩回边界内
-        public static LineSegment IndentInside(this LineSegment segLine, Polygon shell)
+        #region 连接到其他分割线以及边界（迭代后处理为分割线）
+        public static LineSegment Connect(this List<LineSegment> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex,Polygon shell)
         {
-            var baseLine = segLine.GetBaseLine(shell);//基线 原分割线与地库交集
-            if (baseLine == null) return null;//不在边界内
-            if (baseLine.Length < LengthTol) return null;//太短不要了
-            Coordinate spt = baseLine.P0;
-            Coordinate ept = baseLine.P1;
-            //回缩
-            if (new Point(spt).Distance(shell.Shell) < ExtendTol) spt = baseLine.NormalVector().Multiply(2* ExtendTol).Translate(spt);
-            if (new Point(ept).Distance(shell.Shell) < ExtendTol) ept = baseLine.NormalVector().Negate().Multiply(2 * ExtendTol).Translate(ept);
-            return new LineSegment(spt, ept);
+            Coordinate spt = null;
+            Coordinate ept = null;
+            var segLine = seglines[idx];
+            IOrderedEnumerable<Coordinate> pts;
+            var boundPts = new List<Coordinate>();
+            if (SeglineIndex[idx].Item1.Count == 0 || SeglineIndex[idx].Item2.Count == 0)//需要连到边界
+            {
+                var baseLine = segLine.GetBaseLine(shell);
+                if (baseLine == null) return null;
+                var extended = baseLine.OExtend(MaxDistance).ToLineString();//无限延长+相交
+                var basePt = new Point(baseLine.MidPoint);//基线中点
+                var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
+                boundPts = intersection.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y).ToList();
+            }
+            if (SeglineIndex[idx].Item1.Count > 0)//需连到其他分割线
+            {
+                pts = seglines.Slice(SeglineIndex[idx].Item1).Select(l => l.LineIntersection(segLine)).
+                    Where(c =>c!= null).OrderBy(c => c.X).ThenBy(c => c.Y);
+                spt = pts.First();
+            }
+            else//需连到边界
+            {
+                spt = boundPts.First();
+            }
+            if (SeglineIndex[idx].Item2.Count > 0)
+            {
+                pts = seglines.Slice(SeglineIndex[idx].Item2).Select(l => l.LineIntersection(segLine)).
+                    Where(c => c != null).OrderBy(c => c.X).ThenBy(c => c.Y);
+                ept = pts.Last();
+            }
+            else
+            {
+                ept = boundPts.Last();
+            }
+            return new LineSegment(spt, ept).GetBaseLine(shell).OExtend(ExtendTol);
         }
-        //需要连到边界的连到边界
-        //无需连接的，内缩回边界内
-        //输出延长1
-        public static LineSegment ConnectToBound(this LineSegment segLine, (bool, bool) Connections, Polygon shell)
+
+        public static List<LineSegment> Connect(this List<LineSegment> seglines, List<(List<int>, List<int>)> SeglineIndex, Polygon shell)
         {
-            var baseLine = segLine.GetBaseLine(shell);//基线 原分割线与地库交集
-            if(baseLine == null) return null;
-            if (baseLine.Length < LengthTol) return null;//太短不要了
-            var extended = baseLine.Extend(MaxDistance).ToLineString();//无限延长+相交
-            var basePt = new Point(baseLine.MidPoint);//基线中点
-            var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
-            var orderedPts = intersection.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
-            Coordinate spt;
-            Coordinate ept;
-            if (Connections.Item1) spt = orderedPts.First();//P0需要连接
-            else if (baseLine.P0.Distance(orderedPts.First()) > ExtendTol) spt = baseLine.P0;
-            else spt = baseLine.NormalVector().Multiply(3* ExtendTol).Translate(orderedPts.First());//无需连接的移回到边界内
-            if (Connections.Item2) ept = orderedPts.Last();//P1需要连接
-            else if (baseLine.P0.Distance(orderedPts.Last()) > ExtendTol) ept = baseLine.P1;
-            else ept = baseLine.NormalVector().Negate().Multiply(3 * ExtendTol).Translate(orderedPts.Last());
-            return new LineSegment(spt, ept).Extend(ExtendTol);
+            var connected = new List<LineSegment>();
+            for(int i = 0; i < seglines.Count; i++)
+            {
+                connected.Add(seglines.Connect(i, SeglineIndex, shell));
+            }
+            return connected;
         }
         #endregion
         #region 更新分割线
@@ -117,10 +163,10 @@ namespace ThParkingStall.Core.OTools
         //2.求中间部分，判断中间部分是否满足车道宽度，不满足则返回null
         //3.所有线缩回到边界内
         //3.利用地库的连接关系，正向或负向连到边界
-        public static void UpdateSegLine(this List<SegLine> seglines, List<(List<int>, List<int>)> SeglineIndex,
+        public static void UpdateSegLines(this List<SegLine> seglines, List<(List<int>, List<int>)> SeglineIndex,
             Polygon shell, MNTSSpatialIndex BoundarySpatialIndex)
         {
-            var splitters = seglines.Select(seg => seg.Splitter).ToList().RebuildSegLines(SeglineIndex, shell);
+            var splitters = seglines.Select(seg => seg.Splitter).ToList().Connect(SeglineIndex, shell);
             for (int i = 0; i < seglines.Count; i++)
             {
                 var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
@@ -145,14 +191,18 @@ namespace ThParkingStall.Core.OTools
             else halfWidth = (roadWidth / 2);
             if(connectedPart == null) return null;
             //筛选车道范围内的障碍物
-            var bounds = BoundarySpatialIndex.SelectCrossingGeometry(connectedPart.GetRect(halfWidth));
+            //var bounds = BoundarySpatialIndex.SelectCrossingGeometry(connectedPart.GetRect(halfWidth));
             //2.分割线 - 障碍物外扩2750-0.1 的最长线
-            var bufferedBuildings =new MultiPolygon( bounds.Where(geo =>geo is Polygon).Cast<Polygon>().ToArray()).
+            //var bufferedBuildings =new MultiPolygon( bounds.Where(geo =>geo is Polygon).Cast<Polygon>().ToArray()).
+            //    Buffer(halfWidth - SegTol).Union().Get<Polygon>(true);//提取范围内全部障碍物 + 外扩 + 合并 + 去孔
+
+            var bounds = BoundarySpatialIndex.SelectCrossingGeometry(connectedPart.ToLineString().Buffer(halfWidth));
+            var bufferedBuildings = new GeometryCollection(bounds.ToArray()).
                 Buffer(halfWidth - SegTol).Union().Get<Polygon>(true);//提取范围内全部障碍物 + 外扩 + 合并 + 去孔
             var baseLine = connectedPart.GetBaseLine(new MultiPolygon(bufferedBuildings.ToArray()),false);//获取基线
             //3.(若需要连到边界)则以2的线中点为基点，左右buffer找到最远距离对应的线
             var basePt = baseLine.MidPoint;
-            var bufferLine = basePt.LineBuffer(halfWidth-(2*SegTol), baseLine.NormalVector());//buffer基线,确保不碰到上一步的障碍物
+            var bufferLine = basePt.LineBuffer(halfWidth-(2*SegTol), baseLine.DirVector());//buffer基线,确保不碰到上一步的障碍物
             var bufferLstr = bufferLine.ToLineString();
             var normalVec = bufferLine.NormalVector();
             Coordinate p0 = baseLine.P0;
@@ -172,94 +222,6 @@ namespace ThParkingStall.Core.OTools
                 p1 = normalVec.Multiply(distance).Translate(basePt);
             }
             return new LineSegment(p0, p1);
-        }
-        #endregion
-        #region 重塑分割线(可用于分割的分割线）
-        //根据连接关系重塑分割线
-        //输入:移动后的分割线，连接关系,以及地库边界（无孔polygon）
-
-        //输出:重塑后的线
-        //重塑后的线该连接到边界的会连到边界
-        //不该连到边界的会内缩回边界内
-        //线会出头1mm
-
-        public static List<LineSegment> RebuildSegLines(this List<LineSegment> seglines, List<(List<int>, List<int>)> SeglineIndex, Polygon shell)
-        {
-            var splitters = new List<LineSegment>();
-            for (int i = 0; i < seglines.Count; i++)
-            {
-                splitters[i] = splitters.ConnectLines(i, SeglineIndex, shell.Shell);//分割线按连接关系重构
-            }
-            var Rebuilded = new List<LineSegment>();
-            for (int i = 0; i < splitters.Count; i++)
-            {
-                var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
-                var connectedPart = splitters.GetMiddlePart(i).ConnectToBound(connections, shell);//获取中间部分 +连到边界(不连到边界的自动缩回）
-                Rebuilded.Add(connectedPart);
-            }
-            return Rebuilded;
-        }
-
-        //根据连接关系连接分割线,返回null则不合理
-        public static LineSegment ConnectLines(this List<LineSegment> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex, LinearRing shell=null)
-        {
-            Coordinate startPt;
-            Coordinate endPt;
-            (startPt,endPt) = seglines.GetStartEndPt(idx,SeglineIndex,shell);
-            if(startPt==null||endPt ==null) return null;
-            var tempLine = new LineSegment(startPt, endPt);
-            if (!tempLine.IsPositive()) return null;
-            return tempLine;
-        }
-        public static SegLine ConnectLines(this List<SegLine> seglines, int idx, List<(List<int>, List<int>)> SeglineIndex, LinearRing shell = null)
-        {
-            var line = seglines.Select(l => l.Splitter).ToList().ConnectLines(idx,SeglineIndex,shell);
-            var segLine = seglines[idx].Clone();
-            segLine.Splitter = line;
-            return segLine;
-        }
-        #endregion
-        #region 获取起点和终点
-        public static (Coordinate,Coordinate) GetStartEndPt(this List<LineSegment> seglines, int idx, 
-            List<(List<int>, List<int>)> SeglineIndex, LinearRing shell = null)
-        {
-            Coordinate startPt = null;
-            Coordinate endPt = null;
-            var segLine = seglines[idx];
-            IOrderedEnumerable<Coordinate> pts;
-            if (SeglineIndex[idx].Item1.Count == 0)//起始连接到边界最远点
-            {
-                if (shell!= null)
-                {
-                    pts = segLine.ToLineString().Intersection(shell).Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
-                    if (pts.Count()!= 0)startPt = pts.First();//返回最远交点
-                }
-            }
-            else
-            {
-                pts = seglines.Slice(SeglineIndex[idx].Item1).Select(l => l.LineIntersection(segLine)).OrderBy(c => c.X).ThenBy(c => c.Y);
-                startPt = pts.First();
-            }
-
-            if (SeglineIndex[idx].Item2.Count == 0)//终点连接到边界
-            {
-                if (shell != null)
-                {
-                    pts = segLine.ToLineString().Intersection(shell).Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
-                    if (pts.Count() != 0) endPt = pts.Last();
-                }
-            }
-            else
-            {
-                pts = seglines.Slice(SeglineIndex[idx].Item2).Select(l => l.LineIntersection(segLine)).OrderBy(c => c.X).ThenBy(c => c.Y);
-                endPt = pts.Last();
-            }
-            return (startPt, endPt);
-        }
-        public static (Coordinate, Coordinate) GetStartEndPt(this List<SegLine> seglines, int idx,
-    List<(List<int>, List<int>)> SeglineIndex, LinearRing shell=null)
-        {
-            return GetStartEndPt(seglines.Select(l => l.Splitter).ToList(), idx, SeglineIndex, shell);
         }
         #endregion
     }

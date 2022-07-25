@@ -7,6 +7,7 @@ using ThMEPEngineCore.Command;
 using ThMEPArchitecture.ViewModel;
 using System.IO;
 using Serilog;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 
 namespace ThMEPArchitecture
 {
@@ -31,10 +32,11 @@ namespace ThMEPArchitecture
         {
             try
             {
+                
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 {
-                    Run(acadDatabase);
+                    ORun(acadDatabase);
                 }
             }
             catch (Exception ex)
@@ -69,6 +71,20 @@ namespace ThMEPArchitecture
                     
                 }
             }
+        }
+
+        public void ORun(AcadDatabase acadDatabase)
+        {
+            ParameterStock.Set(new ParkingStallArrangementViewModel());
+            var blks = InputData.SelectBlocks(acadDatabase);
+            if (blks == null) return;
+            foreach(var blk in blks)
+            {
+                var layoutData = new OLayoutData(blk, Logger, out bool succeed);
+                if (!succeed) continue;
+                layoutData.ProcessSegLines();
+            }
+            
         }
     }
 }

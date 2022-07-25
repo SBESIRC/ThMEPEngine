@@ -85,7 +85,7 @@ namespace ThParkingStall.Core.OInterProcess
             {
                 newSegLines.Add(InitSegLines[i].GetMovedLine(gene[i]));
             }
-            newSegLines.UpdateSegLine(SeglineIndex, TotalArea, BoundarySpatialIndex);
+            newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex);
             return newSegLines;
         }
     }
