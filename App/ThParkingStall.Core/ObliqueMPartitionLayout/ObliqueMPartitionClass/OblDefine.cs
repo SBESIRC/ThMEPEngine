@@ -104,6 +104,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public List<Ramp> RampList = new List<Ramp>();
         public List<Polygon> IniPillar = new List<Polygon>();
 
+        public bool AccurateCalculate = true;
         public static double ScareFactorForCollisionCheck = 0.999999;
         public static bool ScareEnabledForBackBackModule = true;
         public static bool GeneratePillars = true;
@@ -155,8 +156,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             HORIZONTAL = 1,
             VERTICAL = 2
         }
-        public int Process()
+        public int Process(bool accurate)
         {
+            AccurateCalculate = accurate;
             GenerateParkingSpaces();
             return CarSpots.Count;
         }

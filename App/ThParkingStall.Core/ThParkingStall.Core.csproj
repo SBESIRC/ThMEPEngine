@@ -96,6 +96,7 @@
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblAidBusiness.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPerpModules.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPreProcess.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
     <Compile Include="OInterProcess\OInterParameter.cs" />
     <Compile Include="OInterProcess\ORamp.cs" />
     <Compile Include="OInterProcess\OSubArea.cs" />

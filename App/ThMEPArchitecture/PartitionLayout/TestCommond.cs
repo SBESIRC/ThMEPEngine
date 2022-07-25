@@ -38,9 +38,16 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             try
             {
-                ParameterViewModel = new ParkingStallArrangementViewModel();
-                ParameterStock.Set(ParameterViewModel);
-                ObliqueExecute();
+                if (true)
+                {
+                    ParameterViewModel = new ParkingStallArrangementViewModel();
+                    ParameterStock.Set(ParameterViewModel);
+                    ObliqueExecute();
+                }
+                else
+                {
+                    _ObliqueExecute();
+                }
             }
             catch (System.Exception ex)
             {
@@ -95,7 +102,7 @@ namespace ThMEPArchitecture.PartitionLayout
             mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
             //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
             mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
-            mParkingPartitionPro.Process();
+            mParkingPartitionPro.Process(true);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
             mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
         }
@@ -119,7 +126,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         mParkingPartitionPro.OutBoundary = oSubArea.Area;
                         mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
                         mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
-                        mParkingPartitionPro.Process();
+                        mParkingPartitionPro.Process(true);
                         MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
                         mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
                     }
