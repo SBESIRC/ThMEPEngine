@@ -67,8 +67,7 @@ namespace ThMEPArchitecture.PartitionLayout
                    .Where(o => o is Line || o is Polyline)
                    .Select(o => o.Clone() as Entity)
                    .ToList();
-                var edges = new List<Polyline>();
-                foreach (Hatch obj in objs)
+                foreach (var o in objs)
                 {
                     if (o.Layer == "inilanes") iniLanes.Add((Line)o);
                     else if (o.Layer == "walls")
@@ -130,23 +129,6 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                 }
             }
-            var boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
-            boundary.Closed = true;
-
-            var polygon_bound = new Polygon(new LinearRing(boundary.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray()));
-            ObliqueMPartition mParkingPartitionPro = new ObliqueMPartition(
-                walls.Select(e => new LineString(e.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray())).ToList(),
-                iniLanes.Select(e => new LineSegment(new Coordinate(e.StartPoint.X, e.StartPoint.Y), new Coordinate(e.EndPoint.X, e.EndPoint.Y))).ToList(),
-                obstacles.Select(e => new Polygon(new LinearRing(e.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray()))).ToList(),
-                polygon_bound);
-            mParkingPartitionPro.OutputLanes = new List<LineSegment>();
-            mParkingPartitionPro.OutBoundary = polygon_bound;
-            mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
-            //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
-            mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
-            mParkingPartitionPro.Process();
-            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
-            mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
         }
         private void Execute()
         {
@@ -195,7 +177,7 @@ namespace ThMEPArchitecture.PartitionLayout
             mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
             //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
             mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
-            mParkingPartitionPro.Process();
+            mParkingPartitionPro.Process(true);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro);
             mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
         }
