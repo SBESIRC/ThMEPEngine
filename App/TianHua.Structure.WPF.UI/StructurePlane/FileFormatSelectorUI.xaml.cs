@@ -6,17 +6,17 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
     public partial class FileFormatSelectorUI : ThCustomWindow
     {
         private FileFormatSelectVM ViewModel;
-        public FileFormatSelectorUI()
+        public FileFormatSelectorUI(FileFormatSelectVM vm)
         {
             InitializeComponent();
-            ViewModel = new FileFormatSelectVM();
+            ViewModel = vm;
             this.DataContext = ViewModel;
         }
 
         private void btnConfirm_Click(object sender, RoutedEventArgs e)
         {
+            ViewModel.Save();
             this.Close();
-            ViewModel.Run();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace ThMEPStructure.Common
     /// <summary>
     /// 用于成图的配置参数
     /// </summary>
-    internal class ThPlaneConfig
+    public class ThPlaneConfig
     {
         public PlaneJsonConfig JsonConfig { get; set; }
         /// <summary>

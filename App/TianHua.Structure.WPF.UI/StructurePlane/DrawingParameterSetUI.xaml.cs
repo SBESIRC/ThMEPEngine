@@ -8,10 +8,10 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
     public partial class DrawingParameterSetUI : ThCustomWindow
     {
         private DrawingParameterSetVM ViewModel;
-        public DrawingParameterSetUI(DrawingParameterSetVM viewmodel)
+        public DrawingParameterSetUI()
         {
             InitializeComponent();
-            ViewModel = viewmodel;
+            ViewModel = new DrawingParameterSetVM();
             this.DataContext = ViewModel;
         }
 

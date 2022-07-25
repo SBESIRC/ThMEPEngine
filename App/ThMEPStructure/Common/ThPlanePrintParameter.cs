@@ -3,7 +3,7 @@
     /// <summary>
     /// 通用的打印参数
     /// </summary>
-    internal class ThPlanePrintParameter
+    public class ThPlanePrintParameter
     {
         public double LtScale { get; set; } =500;
         public int Measurement { get; set; } = 0;
@@ -23,5 +23,9 @@
         /// 是否过滤空调板
         /// </summary>
         public bool IsFilterCantiSlab { get; set; } = false;
+        /// <summary>
+        /// 默认板厚
+        /// </summary>
+        public double DefaultSlabThick { get; set; }
     }
 }

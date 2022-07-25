@@ -18,20 +18,30 @@ using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane
 {
-    internal class ThStructurePlaneGenerator
+    public class ThStructurePlaneGenerator
     {
         /// <summary>
         /// 结构出图类型
         /// </summary>
-        public string DrawingType { get; set; }
+        private string DrawingType { get; set; } = "结构平面图";
+        /// <summary>
+        /// 用于Ifc或Get转Svg
+        /// </summary>
         private ThPlaneConfig Config { get; set; }
+        /// <summary>
+        /// 用于打印Svg
+        /// </summary>
         private ThPlanePrintParameter PrintParameter { get; set; }
-        public ThStructurePlaneGenerator(ThPlaneConfig config, ThPlanePrintParameter printParameter)
+        public ThStructurePlaneGenerator(ThPlaneConfig config, ThPlanePrintParameter printParameter,string drawingType)
         {
             Config = config;
+            DrawingType = drawingType;
             PrintParameter = printParameter;
         }
-        public void Generate()
+        /// <summary>
+        /// 转成Svg,附加：Storey.txt
+        /// </summary>
+        public void Convert()
         {
             // 先配置
             Config.Configure();
@@ -41,7 +51,10 @@ namespace ThMEPStructure.StructPlane
 
             // 成图
             Plot();
+        }
 
+        public void Generate()
+        {
             // 获取Svg
             var svgFiles = GetGeneratedSvgFiles();
             svgFiles = Sort(svgFiles);
@@ -52,6 +65,7 @@ namespace ThMEPStructure.StructPlane
             // 删除
             Erase(svgFiles);
         }
+
         private void Plot()
         {
             using (var proc = new Process())

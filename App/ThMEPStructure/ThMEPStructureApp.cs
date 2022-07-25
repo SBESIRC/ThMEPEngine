@@ -239,8 +239,8 @@ namespace ThMEPStructure
                 } 
             }
         }
-        [CommandMethod("TIANHUACAD", "THSMUTSC", CommandFlags.Modal)]
-        public void THSMUTSC()
+        [CommandMethod("TIANHUACAD", "THSMUTSC1", CommandFlags.Modal)]
+        public void THSMUTSC1()
         {
             var pofo = new PromptOpenFileOptions("\n选择要成图的Ydb文件");
             pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc|Ifc files (*.get)|*.get";
@@ -282,10 +282,8 @@ namespace ThMEPStructure
                     };
                     config.JsonConfig.GlobalConfig.eye_dir = new Direction(0, 0, -1);
                     config.JsonConfig.GlobalConfig.up = new Direction(0, 1, 0);
-                    var generator = new ThStructurePlaneGenerator(config, printParameter)
-                    {
-                        DrawingType = result1.StringResult,
-                    };
+                    var generator = new ThStructurePlaneGenerator(config, printParameter, result1.StringResult);
+                    generator.Convert();
                     generator.Generate();
                 }               
             }

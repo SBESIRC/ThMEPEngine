@@ -42,6 +42,7 @@
     <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml.cs">
       <DependentUpon>SecondaryBeamConnectUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Command\ThStructurePlaneCmd.cs" />
     <Compile Include="Command\WallColumnReinforceSetCmd.cs" />
     <Compile Include="Command\MainBeamCmd.cs" />
     <Compile Include="Command\BuildBeamCmd.cs" />
