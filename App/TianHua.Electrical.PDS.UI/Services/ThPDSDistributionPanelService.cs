@@ -3940,8 +3940,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 else
                 {
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("Type", true);
-                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", true);
-                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", true);
+
+                    switch(conductor.Type)
+                    {
+                        case ConductorType.配套防水电缆:
+                        case ConductorType.配套防水耐火电缆:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", false);
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", false);
+                            }
+                            break;
+                        default:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", true);
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", true);
+                            }
+                            break;
+                    }
                 }
 
                 if (conductor.ComponentType == ComponentType.Conductor)
