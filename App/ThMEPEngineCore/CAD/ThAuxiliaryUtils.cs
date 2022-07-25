@@ -213,13 +213,12 @@ namespace ThMEPEngineCore.CAD
             var projectionPt = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
             return first.StartPoint.DistanceTo(projectionPt);
         }
-        public static bool IsParallel(this double firstAng,double secondAng,double tolerance=1e-4)
+        public static bool IsAngleParallel(this double firstAng,double secondAng,double tolerance=1e-4)
         {
             firstAng = firstAng % 180.0;
             secondAng = secondAng % 180.0;
             var minus = Math.Abs(firstAng - secondAng);
             return minus <= tolerance || Math.Abs(180.0 - minus) <= tolerance;
-
         }
     }
 }

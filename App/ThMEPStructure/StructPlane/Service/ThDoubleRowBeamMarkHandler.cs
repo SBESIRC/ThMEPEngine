@@ -126,7 +126,7 @@ namespace ThMEPStructure.StructPlane.Service
         {
             var firstAng = firstRad.RadToAng();
             var secondAng = secondRad.RadToAng();
-            return firstAng.IsParallel(secondAng, tolerance);
+            return firstAng.IsAngleParallel(secondAng, tolerance);
         }
     }
 }

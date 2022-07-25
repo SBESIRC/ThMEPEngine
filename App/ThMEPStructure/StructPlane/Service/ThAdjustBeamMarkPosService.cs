@@ -63,11 +63,11 @@ namespace ThMEPStructure.StructPlane.Service
 
         private double GetTextMoveDisToBeam(Point3d textCenter,double textRotation,Vector3d moveDir,double queryLength)
         {
-            var textAng = textRotation.AngToRad();
+            var textAng = textRotation.RadToAng();
             var extendPt = textCenter.GetExtentPoint(moveDir, queryLength);
             var beamLines = QueryBeamLines(textCenter, extendPt, 2.0);            
             return beamLines.OfType<Line>()
-                .Where(o => textAng.IsParallel(o.Angle.AngToRad(), 1.0))
+                .Where(o => textAng.IsAngleParallel(o.Angle.RadToAng(), 1.0))
                 .Select(o =>
                 {
                     var projectionPt = textCenter.GetProjectPtOnLine(o.StartPoint, o.EndPoint);
