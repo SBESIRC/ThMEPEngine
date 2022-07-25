@@ -36,7 +36,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2)
+        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, ThPDSLoadTypeCat_3 loadType_3, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, string StoreyTypeString, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
@@ -48,7 +48,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 ViaCableTray = true;
             }
             //3x2.5+E2.5
-            ChooseMaterial(loadType, FireLoad, calculateCurrent);
+            ChooseMaterial(loadType, FireLoad, calculateCurrent, loadType_3);
             ChooseCrossSectionalArea(conductorConfig);
             ChooseLaying(FloorNumber, StoreyTypeString, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
             ChooseConductorType();
@@ -174,7 +174,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="circuitType"></param>
         /// <param name="fireLoad"></param>
         /// <exception cref="NotImplementedException"></exception>
-        private void ChooseMaterial(ThPDSLoadTypeCat_1 circuitType, bool fireLoad, double calculateCurrent)
+        private void ChooseMaterial(ThPDSLoadTypeCat_1 circuitType, bool fireLoad, double calculateCurrent, ThPDSLoadTypeCat_3 circuitType_3 = ThPDSLoadTypeCat_3.None)
         {
             var config = PDSProject.Instance.projectGlobalConfiguration;
             if(this.IsResidentialDistributionPanel)
@@ -299,6 +299,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         this.ConductorMaterial = ConductorUse.ConductorMaterial;
                         IsWire = false;
                     }
+                    if (circuitType_3 == ThPDSLoadTypeCat_3.SubmersiblePump)
+                    {
+                        this.ConductorType = ConductorType.配套防水耐火电缆;
+                    }
                 }
                 else
                 {
@@ -317,6 +321,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         this.OuterSheathMaterial = ConductorUse.OuterSheathMaterial;
                         this.ConductorMaterial = ConductorUse.ConductorMaterial;
                         IsWire =false;
+                    }
+                    if (circuitType_3 == ThPDSLoadTypeCat_3.SubmersiblePump)
+                    {
+                        this.ConductorType = ConductorType.配套防水电缆;
                     }
                 }
             }
@@ -653,7 +661,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativeConductorType = new List<ConductorType>();
             }
-            else if(ProjectSystemConfiguration.FireDistributionCircuit.Contains(ConductorType))
+            else if (ConductorType == ConductorType.配套防水电缆)
+            {
+                AlternativeConductorType = new List<ConductorType>() { ConductorType.配套防水电缆, ConductorType.非消防配电电缆, ConductorType.非消防配电电线 };
+            }
+            else if (ConductorType == ConductorType.配套防水耐火电缆)
+            {
+                AlternativeConductorType = new List<ConductorType>() { ConductorType.配套防水耐火电缆, ConductorType.消防配电干线, ConductorType.消防配电分支线路, ConductorType.消防配电电线 };
+            }
+            else if (ProjectSystemConfiguration.FireDistributionCircuit.Contains(ConductorType))
             {
                 AlternativeConductorType = ProjectSystemConfiguration.FireDistributionCircuit;
             }
@@ -683,6 +699,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             else
                 AlternativeOuterSheathMaterialType = OuterSheathMaterial.GetScopeOfApplicationType().GetSameMaterialStructureGroup();
         }
+
         /// <summary>
         /// 计算敷设部位选型
         /// </summary>
@@ -736,6 +753,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 if (ConductorType == ConductorType.消防配电干线)
                     return OuterSheathMaterial.GetDescription();
+                else if (ConductorType == ConductorType.配套防水电缆)
+                    return ConductorType.GetDescription();
+                else if (ConductorType == ConductorType.配套防水耐火电缆)
+                    return ConductorType.GetDescription();
                 else
                 {
                     var result = $"{ConductorMaterial}-{OuterSheathMaterial.GetDescription()}";
@@ -938,6 +959,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     this.ConductorType = ConductorUse.ConductorType;
                     this.OuterSheathMaterial = ConductorUse.OuterSheathMaterial;
                     this.ConductorMaterial = ConductorUse.ConductorMaterial;
+                    IsWire = false;
+                }
+                else if (ConductorType == ConductorType.配套防水电缆)
+                {
+                    this.ConductorType = ConductorType.配套防水电缆;
+                    IsWire = false;
+                }
+                else if (ConductorType == ConductorType.配套防水耐火电缆)
+                {
+                    this.ConductorType = ConductorType.配套防水电缆;
                     IsWire = false;
                 }
                 if (this.ConductorMaterial.Contains('N'))
