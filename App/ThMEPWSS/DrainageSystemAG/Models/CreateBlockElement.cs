@@ -75,7 +75,8 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public DBText dbText { get; set; }
         public string copyId { get; }
         public bool ConvertToTCHElement = false;
-        public CreateDBTextElement(string floorId, Point3d textPoint,DBText dBText,string belongId,string layerName,string textStyle,string copyId="")
+        public string Tag { get; }
+        public CreateDBTextElement(string floorId, Point3d textPoint,DBText dBText,string belongId,string layerName,string textStyle,string copyId="", string tag = "")
         {
             this.uid = Guid.NewGuid().ToString();
             this.layerName = layerName;
@@ -85,6 +86,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
             this.dbText = dBText;
             this.belongBlockId = belongId;
             this.copyId = copyId;
+            this.Tag = tag;
         }
     }
     public class CreateResult

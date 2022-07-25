@@ -8,7 +8,9 @@ using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
 using System;
+using System.Linq;
 using ThCADExtension;
+using ThMEPWSS.CADExtensionsNs;
 
 namespace ThMEPWSS.Command
 {
@@ -147,6 +149,12 @@ namespace ThMEPWSS.Command
                                         break;
                                     }
                                 }
+                            }
+                            if (BlockName.Contains("+"))
+                            {
+                                blk.Erase();
+                                var ents = blk.ExplodeToDBObjectCollection();
+                                ents.Cast<BlockReference>().AddToCurrentSpace();
                             }
                         }
                     }
