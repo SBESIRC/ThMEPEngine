@@ -26,6 +26,16 @@ namespace ThMEPEngineCore.Engine
                 LayerFilter = ThDbLayerManager.Layers(database),
             };
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThDB3ColumnRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -35,6 +45,16 @@ namespace ThMEPEngineCore.Engine
             var engine = new ThDB3ColumnExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)

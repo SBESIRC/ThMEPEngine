@@ -26,6 +26,16 @@ namespace ThMEPEngineCore.Engine
             Results = new List<ThRawIfcBuildingElementData>();
             Results.AddRange(stairVisitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ThDB3StairRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -486,6 +496,16 @@ namespace ThMEPEngineCore.Engine
                 });
             });
             return platformList;
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
         }
     }
 }

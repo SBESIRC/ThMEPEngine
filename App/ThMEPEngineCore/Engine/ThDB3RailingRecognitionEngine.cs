@@ -23,6 +23,16 @@ namespace ThMEPEngineCore.Engine
             extractor.Extract(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThDB3RailingRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -55,6 +65,16 @@ namespace ThMEPEngineCore.Engine
                 curves = objs.Cast<Curve>().ToList();
             }
             curves.ForEach(o => Elements.Add(ThIfcRailing.Create(o)));
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

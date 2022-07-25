@@ -27,6 +27,16 @@ namespace ThMEPEngineCore.Engine
                 LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
             };
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThShearWallRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -64,6 +74,16 @@ namespace ThMEPEngineCore.Engine
                 results = thShearWallSimplifier.Filter(results);
                 results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
             }
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

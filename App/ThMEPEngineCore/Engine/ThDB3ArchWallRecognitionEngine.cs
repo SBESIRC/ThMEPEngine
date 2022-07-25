@@ -30,6 +30,16 @@ namespace ThMEPEngineCore.Engine
             Results.AddRange(archWallVisitor.Results);
             Results.AddRange(pcArchWallVisitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThDB3ArchWallRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -69,6 +79,16 @@ namespace ThMEPEngineCore.Engine
                 results = ThArchitectureWallSimplifier.Filter(results);
                 results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
             }
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
