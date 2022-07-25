@@ -11,6 +11,8 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Diagnostics;
+
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -44,7 +46,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     //提取水管路由
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe);
-                    if(pipes.Count == 0)
+                    if (pipes.Count == 0)
                     {
                         return;
                     }
@@ -53,6 +55,8 @@ namespace ThMEPHVAC.FanConnect.Command
                     //获取标记
                     var markes = ThEquipElementExtractService.GetPipeMarkes("H-PIPE-DIMS");
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                    //mt = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(Point3d.Origin));
+
                     var handlePipeService = new ThHandleFanPipeService()
                     {
                         StartPoint = startPt,
@@ -67,7 +71,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     var badLines = handlePipeService.GetBadLine(tmpTree, mt);//已经处理的坏线
                     var rightLines = handlePipeService.GetRightLine(tmpTree, mt);//已经处理的好线
-                    
+
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                     {
@@ -133,22 +137,53 @@ namespace ThMEPHVAC.FanConnect.Command
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
                         RemoveSPMLine(badLines, ref pipeDims, ref cPipes);
                     }
+
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                     pipeExtendServiece.ConfigInfo = ConfigInfo;
                     pipeExtendServiece.PipeExtend(treeModel);
 
+                    ////计算流量
+                    //ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
+                    //if (pointTreeModel.RootNode == null)
+                    //{
+                    //    return;
+                    //}
+                    //pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe, ref markes);
+
+
+                    ////标记流量
+                    //ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
+                    //pipeMarkServiece.ConfigInfo = ConfigInfo;
+                    //pipeMarkServiece.UpdateMark(pointTreeModel, markes);
+
                     //计算流量
-                    ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
-                    if (pointTreeModel.RootNode == null)
+                    DrawUtils.ShowGeometry(rightLines, "l0rightline");
+                    var pipeTreeNodes = treeModel.RootNode.GetAllTreeNode();
+                    var lines = pipeTreeNodes.Select(x => x.Item.PLine).ToList();
+                    DrawUtils.ShowGeometry(lines, "l0pline");
+                    var breakLine = ThPointTreeModelService.BreakLine(lines, mt);
+                    DrawUtils.ShowGeometry(breakLine, "l0breakline");
+                    var flowCalTree = ThPointTreeModelService.BuildTree(breakLine, startPt);
+                    if (flowCalTree != null)
                     {
-                        return;
+                        ThPointTreeModelService.CalNodeLevel(flowCalTree);
+                        ThPointTreeModelService.CheckMarkForLevel(flowCalTree);
+                        ThPointTreeModelService.CalNodeFlowValue(flowCalTree, fcus);
+                        ThPointTreeModelService.CalNodeDimValue(flowCalTree, ConfigInfo.WaterSystemConfigInfo.FrictionCoeff);
+                        ThPointTreeModelService.CheckDimChange(flowCalTree);
+
+                        ThPointTreeModelService.PrintTree(flowCalTree, "l0node");
+
+                        //标记流量
+                        ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
+                        pipeMarkServiece.ConfigInfo = ConfigInfo;
+                        //pipeMarkServiece.PipeMark(pointTreeModel);
+                        pipeMarkServiece.UpdateMark(flowCalTree, pipeTreeNodes, markes);
                     }
-                    pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe, ref markes);
-                    //标记流量
-                    ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
-                    pipeMarkServiece.ConfigInfo = ConfigInfo;
-                    pipeMarkServiece.UpdateMark(pointTreeModel, markes);
+
+
+
                 }
             }
             catch (Exception ex)
@@ -156,9 +191,9 @@ namespace ThMEPHVAC.FanConnect.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-        public void RemoveSPMLine(List<Line> baseLines, ref List<Entity> dims,ref List<Line> lines)
+        public void RemoveSPMLine(List<Line> baseLines, ref List<Entity> dims, ref List<Line> lines)
         {
-            foreach(var l in baseLines)
+            foreach (var l in baseLines)
             {
                 RemoveSPMLine(l, ref dims, ref lines);
             }
@@ -177,7 +212,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 if (obj is Line)
                 {
                     var line = obj as Line;
-                    if(ThFanConnectUtils.IsParallelLine(baseLine, line))
+                    if (ThFanConnectUtils.IsParallelLine(baseLine, line))
                     {
                         remLines.Add(line);
                         RemoveDims(line, ref dims);
@@ -186,15 +221,15 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             lines = lines.Except(remLines).ToList();
         }
-        public void RemoveSPMLine(ThFanTreeNode<ThFanPipeModel> node,ref List<Entity> dims, ref List<Line> lines)
+        public void RemoveSPMLine(ThFanTreeNode<ThFanPipeModel> node, ref List<Entity> dims, ref List<Line> lines)
         {
-            foreach(var child in node.Children)
+            foreach (var child in node.Children)
             {
                 RemoveSPMLine(child, ref dims, ref lines);
             }
             RemoveSPMLine(node.Item.PLine, ref dims, ref lines);
         }
-        public void RemoveDims(Line line ,ref List<Entity> dims)
+        public void RemoveDims(Line line, ref List<Entity> dims)
         {
             var box = line.ExtendLine(10).Buffer(10);
             var remEntity = new List<Entity>();
@@ -211,12 +246,12 @@ namespace ThMEPHVAC.FanConnect.Command
                         remEntity.Add(e);
                     }
                 }
-                else if(e is BlockReference)
+                else if (e is BlockReference)
                 {
                     var blk = e as BlockReference;
-                    if(blk.GetEffectiveName().Contains("AI-分歧管"))
+                    if (blk.GetEffectiveName().Contains("AI-分歧管"))
                     {
-                        if(box.Contains(blk.Position))
+                        if (box.Contains(blk.Position))
                         {
                             blk.UpgradeOpen();
                             blk.Erase();

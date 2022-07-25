@@ -99,7 +99,6 @@
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThRoomSetModel.cs" />
     <Compile Include="FloorHeatingCoil\Service\LineStringEx.cs" />
-    <Compile Include="FloorHeatingCoil\Service\ThGeomUtil.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThMEPHVACCommonUtils.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThSelectFrameUtil.cs" />
     <Compile Include="FloorHeatingCoil\ThFloorHeatingCommon.cs" />
@@ -148,6 +147,7 @@
     <Compile Include="ParameterService\IndoorFanParameter.cs" />
     <Compile Include="Service\ThAirPortSizeCalculator.cs" />
     <Compile Include="Service\ThAirSpeedCalculator.cs" />
+    <Compile Include="Service\ThGeomUtil.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
     <Compile Include="Service\ThMEPHAVCDataManager.cs" />
     <Compile Include="Service\ThMepHAVCUtils.cs" />

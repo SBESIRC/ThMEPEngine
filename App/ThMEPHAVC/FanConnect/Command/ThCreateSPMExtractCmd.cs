@@ -128,8 +128,6 @@ namespace ThMEPHVAC.FanConnect.Command
                     pipeExtendServiece.ConfigInfo = ConfigInfo;
                     pipeExtendServiece.PipeExtend(treeModel);
 
-
-
                     ////计算流量
                     //ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
                     //if (pointTreeModel.RootNode == null)
@@ -138,16 +136,10 @@ namespace ThMEPHVAC.FanConnect.Command
                     //}
                     //pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2);
 
-
-
                     //计算流量
-                    DrawUtils.ShowGeometry(rightLines, "l0rightline");
-                    var treenodes = treeModel.RootNode.GetDecendent();
-                    treenodes.Add(treeModel.RootNode);
-                    var lines = treenodes.Select(x => x.Item.PLine).ToList();
-                    DrawUtils.ShowGeometry(lines, "l0pline");
+                    var pipeTreeNodes = treeModel.RootNode.GetAllTreeNode();
+                    var lines = pipeTreeNodes.Select(x => x.Item.PLine).ToList();
                     var breakLine = ThPointTreeModelService.BreakLine(lines, mt);
-                    DrawUtils.ShowGeometry(breakLine, "l0breakline");
                     var flowCalTree = ThPointTreeModelService.BuildTree(breakLine, startPt);
                     if (flowCalTree != null)
                     {
@@ -163,8 +155,6 @@ namespace ThMEPHVAC.FanConnect.Command
                         ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                         pipeMarkServiece.ConfigInfo = ConfigInfo;
                         //pipeMarkServiece.PipeMark(pointTreeModel);
-                        var pipeTreeNodes = treeModel.RootNode.GetDecendent();
-                        pipeTreeNodes.Add(treeModel.RootNode);
                         pipeMarkServiece.CreateMark(flowCalTree, pipeTreeNodes);
                     }
 
