@@ -26,11 +26,36 @@ namespace TianHua.Electrical.PDS.Diagram
                 0.0);
         }
 
+        public ObjectId Insert(AcadDatabase activeDb, AcadDatabase configDb, string layerName, string blockName, Point3d basePoint, Scale3d scale)
+        {
+            activeDb.Blocks.Import(configDb.Blocks.ElementOrDefault(blockName), false);
+            activeDb.Layers.Import(configDb.Layers.ElementOrDefault(layerName), false);
+            return activeDb.ModelSpace.ObjectId.InsertBlockReference(
+                layerName,
+                blockName,
+                basePoint,
+                scale,
+                0.0);
+        }
+
         public ObjectId Insert(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale, Dictionary<string, string> dictionary)
         {
             activeDb.Blocks.Import(configDb.Blocks.ElementOrDefault(blockName), false);
             return activeDb.ModelSpace.ObjectId.InsertBlockReference(
                 "0",
+                blockName,
+                basePoint,
+                scale,
+                0.0,
+                dictionary);
+        }
+
+        public ObjectId Insert(AcadDatabase activeDb, AcadDatabase configDb, string layerName, string blockName, Point3d basePoint, Scale3d scale, Dictionary<string, string> dictionary)
+        {
+            activeDb.Blocks.Import(configDb.Blocks.ElementOrDefault(blockName), false);
+            activeDb.Layers.Import(configDb.Layers.ElementOrDefault(layerName), false);
+            return activeDb.ModelSpace.ObjectId.InsertBlockReference(
+                layerName,
                 blockName,
                 basePoint,
                 scale,

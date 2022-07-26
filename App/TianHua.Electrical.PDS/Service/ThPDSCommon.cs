@@ -131,5 +131,9 @@ namespace TianHua.Electrical.PDS.Service
         public const string SECONDARY_JUNCTION_TEXT4 = "Text4";
         public const string SECONDARY_JUNCTION_TEXT5 = "Text5";
         public const string SECONDARY_JUNCTION_TEXT6 = "Text6";
+
+        public const string LAYER_E_POWR_EQPM = "E-POWR-EQPM";
+        public const string LAYER_E_POWR_DEVC = "E-POWR-DEVC";
+        public const string LAYER_E_LITE_LITE = "E-LITE-LITE";
     }
 }

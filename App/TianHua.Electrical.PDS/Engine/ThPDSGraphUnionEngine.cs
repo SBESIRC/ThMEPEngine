@@ -105,9 +105,9 @@ namespace TianHua.Electrical.PDS.Engine
                     if (!string.IsNullOrEmpty(otherDistBoxID) && srcPanelID.Last().Equals(otherDistBoxID))
                     {
                         // 对末端配电箱做特殊处理
-                        if (ThPDSTerminalPanelService.IsTerminalPanel( cabletrayEdgeList[i].Target)
-                            && cabletrayEdgeList[j].Target.Loads[0].Location.StoreyNumber != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyNumber
-                            && cabletrayEdgeList[j].Target.Loads[0].Location.StoreyTypeString != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyTypeString)
+                        if (ThPDSTerminalPanelService.IsTerminalPanel(cabletrayEdgeList[i].Target)
+                            && (cabletrayEdgeList[j].Target.Loads[0].Location.StoreyNumber != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyNumber
+                            || cabletrayEdgeList[j].Target.Loads[0].Location.StoreyTypeString != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyTypeString))
                         {
                             continue;
                         }
