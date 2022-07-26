@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
-    abstract class TArchEntity
+    public abstract class TArchEntity
     {
         public ulong Id { get; set; }
         public string StyleID { get; set; }

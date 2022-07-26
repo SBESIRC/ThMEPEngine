@@ -22,6 +22,11 @@ namespace ThMEPEngineCore.Engine
             Visitors.Add(visitor);
         }
 
+        public void Accept(ThBuildingElementExtractionVisitor[] visitors)
+        {
+            Visitors.AddRange(visitors);
+        }
+
         public virtual void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -65,6 +70,28 @@ namespace ThMEPEngineCore.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var psr = Active.Editor.SelectCrossingPolygon(frame);
+                if (psr.Status == PromptStatus.OK)
+                {
+                    psr.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var e = acadDatabase.ElementOrDefault<Entity>(o);
+                        if (e != null)
+                        {
+                            Visitors.ForEach(v =>
+                            {
+                                v.Results.AddRange(DoExtract(e, v));
+                            });
+                        }
+                    });
+                }
+            }
+        }
+
+        public virtual void ExtractFromEditor(Point3dCollection frame, SelectionFilter filter)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var psr = Active.Editor.SelectCrossingPolygon(frame, filter);
                 if (psr.Status == PromptStatus.OK)
                 {
                     psr.Value.GetObjectIds().ForEach(o =>

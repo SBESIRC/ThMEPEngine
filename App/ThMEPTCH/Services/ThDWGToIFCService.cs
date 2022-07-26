@@ -9,6 +9,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
+using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
@@ -32,6 +33,17 @@ namespace ThMEPTCH.Services
             if(!string.IsNullOrEmpty(dbPath) && File.Exists(dbPath))
                 archDBData = new TCHArchDBData(dbPath);
         }
+
+        public List<TArchEntity> GetArchEntities()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var engine = new ThTCHBuildingElementExtractionEngine();
+                engine.ExtractFromMS(acdb.Database);
+                return engine.Results.Select(o => o.Data as TArchEntity).ToList();
+            }
+        }
+
         public ThTCHProject DWGToProject(bool isMemoryStory,bool railingToRegion)
         {
             if (null == archDBData)

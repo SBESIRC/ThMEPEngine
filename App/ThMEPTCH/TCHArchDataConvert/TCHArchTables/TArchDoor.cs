@@ -1,6 +1,6 @@
 ﻿namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
-    class TArchDoor : TArchEntity
+    public class TArchDoor : TArchEntity
     {
         /*
         CREATE TABLE TArchDoor(
