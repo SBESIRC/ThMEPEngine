@@ -34,6 +34,7 @@ namespace ThMEPTCH.Model
                 return null;
             var opening = new ThTCHOpening(this.Origin, this.Length, this.Height, this.Width, this.Angle);
             opening.XVector = this.XVector;
+            opening.Uuid = this.Uuid;
             if (this.Outline != null)
             {
                 opening.Outline = this.Outline.Clone() as Entity;

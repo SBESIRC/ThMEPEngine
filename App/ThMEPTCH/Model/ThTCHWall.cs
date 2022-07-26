@@ -74,6 +74,7 @@ namespace ThMEPTCH.Model
             }
             if (cloneWall != null) 
             {
+                cloneWall.Uuid = this.Uuid;
                 foreach (var item in this.Openings) 
                 {
                     cloneWall.Openings.Add(item.Clone() as ThTCHOpening);

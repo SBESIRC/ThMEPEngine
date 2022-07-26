@@ -34,6 +34,7 @@ namespace ThMEPTCH.Model
                 return null;
             var door = new ThTCHDoor(this.Origin, this.Length, this.Height, this.Width, this.Angle);
             door.XVector = this.XVector;
+            door.Uuid = this.Uuid;
             if (this.Outline != null) 
             {
                 door.Outline = this.Outline.Clone() as Entity;
