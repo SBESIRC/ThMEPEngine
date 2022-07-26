@@ -239,6 +239,126 @@ namespace TianHua.Electrical.PDS.Model
     public enum ThPDSLoadTypeCat_3
     {
         /// <summary>
+        /// 防排烟风机配电箱
+        /// </summary>
+        [Description("防排烟风机配电箱")]
+        DistributionPanelForAntiSmokeFan,
+
+        /// <summary>
+        /// 防排烟风机控制箱
+        /// </summary>
+        [Description("防排烟风机控制箱")]
+        ControlPanelForAntiSmokeFan,
+
+        /// <summary>
+        /// 锅炉房配电箱
+        /// </summary>
+        [Description("锅炉房配电箱")]
+        DistributionPanelForBoiler,
+
+        /// <summary>
+        /// 锅炉房设备控制箱
+        /// </summary>
+        [Description("锅炉房设备控制箱")]
+        ControlPanelForBoiler,
+
+        /// <summary>
+        /// 通信机房配电箱
+        /// </summary>
+        [Description("通信机房配电箱")]
+        DistributionPanelForCommunicationEquipment,
+
+        /// <summary>
+        /// 电梯配电箱
+        /// </summary>
+        [Description("电梯配电箱")]
+        DistributionPanelForElevator,
+
+        /// <summary>
+        /// 电梯控制箱
+        /// </summary>
+        [Description("电梯控制箱")]
+        ControlPanelForElevator,
+
+        /// <summary>
+        /// 消防电梯配电箱
+        /// </summary>
+        [Description("消防电梯配电箱")]
+        DistributionPanelForFiremanElevator,
+
+        /// <summary>
+        /// 消防水泵配电箱
+        /// </summary>
+        [Description("消防水泵配电箱")]
+        DistributionPanelForFirePump,
+
+        /// <summary>
+        /// 发电机房配电箱
+        /// </summary>
+        [Description("发电机房配电箱")]
+        DistributionPanelForGenerator,
+
+        /// <summary>
+        /// 厨房配电箱
+        /// </summary>
+        [Description("厨房配电箱")]
+        DistribuitonPanelForKitchen,
+
+        /// <summary>
+        /// 泛光照明配电箱
+        /// </summary>
+        [Description("泛光照明配电箱")]
+        DistributionPanelForFloodlight,
+
+        /// <summary>
+        /// 机械停车设备配电箱
+        /// </summary>
+        [Description("机械停车设备配电箱")]
+        DistributionPanelForMechanicalParkingEquipment,
+
+        /// <summary>
+        /// 机械停车设备控制箱
+        /// </summary>
+        [Description("机械停车设备控制箱")]
+        ControlPanelForMechanicalParkingEquipment,
+
+        /// <summary>
+        /// 监控中心配电箱
+        /// </summary>
+        [Description("监控中心配电箱")]
+        DistributionPanelForSecurityCenter,
+
+        /// <summary>
+        /// 变电所配电箱
+        /// </summary>
+        [Description("变电所配电箱")]
+        DistributionPanelForSubstation,
+
+        /// <summary>
+        /// 有限电视机房配电箱
+        /// </summary>
+        [Description("有限电视机房配电箱")]
+        DistributionPanelForTelevisionEquipment,
+
+        /// <summary>
+        /// 生活水泵配电箱
+        /// </summary>
+        [Description("生活水泵配电箱")]
+        DistributionPanelForDomesticWaterPump,
+
+        /// <summary>
+        /// 生活水泵控制箱
+        /// </summary>
+        [Description("生活水泵控制箱")]
+        ControlPanelForDomesticWaterPump,
+
+        /// <summary>
+        /// 消防控制室配电箱
+        /// </summary>
+        [Description("消防控制室配电箱")]
+        DistributionPanelForFireControlRoom,
+
+        /// <summary>
         /// 消防排烟风机
         /// </summary>
         [Description("消防排烟风机")]

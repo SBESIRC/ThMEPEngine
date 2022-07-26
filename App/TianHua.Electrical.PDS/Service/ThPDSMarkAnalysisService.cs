@@ -129,6 +129,9 @@ namespace TianHua.Electrical.PDS.Service
                 thPDSDistBox.SetFireLoad(true);
             }
 
+            // 设置配电箱的三级分类
+            MatchLoadType3(thPDSDistBox);
+
             return thPDSDistBox;
         }
 
@@ -1049,6 +1052,263 @@ namespace TianHua.Electrical.PDS.Service
         {
             str = str.Replace(" ", "");
             return str;
+        }
+
+        private void MatchLoadType3(ThPDSLoad load)
+        {
+            var noneChar = "[^a-zA-Z]";
+            if (load.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.LightingDistributionPanel))
+            {
+                if (load.ID.LoadID.Contains("ALc"))
+                {
+                    var key = "ALc" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForCommunicationEquipment;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForCommunicationEquipment.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("ALk"))
+                {
+                    var key = "ALk" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistribuitonPanelForKitchen;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistribuitonPanelForKitchen.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("ALl"))
+                {
+                    var key = "ALl" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForFloodlight;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForFloodlight.GetDescription();
+                    }
+                }
+            }
+            else if (load.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.PowerDistributionPanel))
+            {
+                if (load.ID.LoadID.Contains("APb"))
+                {
+                    var key = "APb" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForBoiler;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForBoiler.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APc"))
+                {
+                    var key = "APc" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForCommunicationEquipment;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForCommunicationEquipment.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APe"))
+                {
+                    var key = "APe" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForElevator;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForElevator.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APg"))
+                {
+                    var key = "APg" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForGenerator;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForGenerator.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APk"))
+                {
+                    var key = "APk" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistribuitonPanelForKitchen;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistribuitonPanelForKitchen.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APp"))
+                {
+                    var key = "APp" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForMechanicalParkingEquipment;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForMechanicalParkingEquipment.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APs"))
+                {
+                    var key = "APs" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForSecurityCenter;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForSecurityCenter.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APt"))
+                {
+                    var key = "APs" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForSubstation;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForSubstation.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APv"))
+                {
+                    var key = "APv" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForTelevisionEquipment;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForTelevisionEquipment.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APw"))
+                {
+                    var key = "APw" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForDomesticWaterPump;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForDomesticWaterPump.GetDescription();
+                    }
+                }
+            }
+            else if (load.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel))
+            {
+                if (load.ID.LoadID.Contains("APEa"))
+                {
+                    var key = "APEa" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForAntiSmokeFan;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForAntiSmokeFan.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APEe"))
+                {
+                    var key = "APEe" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForFiremanElevator;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForFiremanElevator.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APEf"))
+                {
+                    var key = "APEf" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForFirePump;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForFirePump.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APEg"))
+                {
+                    var key = "APEg" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForGenerator;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForGenerator.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APEt"))
+                {
+                    var key = "APEt" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForSubstation;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForSubstation.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("APEx"))
+                {
+                    var key = "APEx" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.DistributionPanelForFireControlRoom;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.DistributionPanelForFireControlRoom.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("ACa"))
+                {
+                    var key = "ACa" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.ControlPanelForAntiSmokeFan;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.ControlPanelForAntiSmokeFan.GetDescription();
+                    }
+                }
+            }
+            else if (load.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ElectricalControlPanel))
+            {
+                if (load.ID.LoadID.Contains("ACb"))
+                {
+                    var key = "ACb" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.ControlPanelForBoiler;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.ControlPanelForBoiler.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("ACe"))
+                {
+                    var key = "ACe" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.ControlPanelForElevator;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.ControlPanelForElevator.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("ACp"))
+                {
+                    var key = "ACp" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.ControlPanelForMechanicalParkingEquipment;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.ControlPanelForMechanicalParkingEquipment.GetDescription();
+                    }
+                }
+                else if (load.ID.LoadID.Contains("ACw"))
+                {
+                    var key = "ACw" + noneChar;
+                    var regex = new Regex(@key);
+                    if (regex.Match(load.ID.LoadID).Success)
+                    {
+                        load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.ControlPanelForDomesticWaterPump;
+                        load.ID.DefaultDescription = ThPDSLoadTypeCat_3.ControlPanelForDomesticWaterPump.GetDescription();
+                    }
+                }
+            }
         }
     }
 }
