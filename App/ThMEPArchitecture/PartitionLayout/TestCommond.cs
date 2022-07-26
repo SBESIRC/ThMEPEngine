@@ -23,6 +23,7 @@ using ThMEPArchitecture.MultiProcess;
 using Converter = ThMEPArchitecture.MultiProcess.Converter;
 using ThMEPArchitecture.ViewModel;
 using ThParkingStall.Core.OInterProcess;
+using System.IO;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -38,7 +39,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             try
             {
-                if (false)
+                if (true)
                 {
                     ParameterViewModel = new ParkingStallArrangementViewModel();
                     ParameterStock.Set(ParameterViewModel);
@@ -126,6 +127,15 @@ namespace ThMEPArchitecture.PartitionLayout
                         mParkingPartitionPro.OutBoundary = oSubArea.Area;
                         mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
                         mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
+#if DEBUG
+                        var s = MDebugTools.AnalysisPolygon(mParkingPartitionPro.Boundary);
+                        string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                        FileStream fs = new FileStream(dir + "\\bound.txt", FileMode.Create, FileAccess.Write);
+                        StreamWriter sw = new StreamWriter(fs);
+                        sw.WriteLine(s);
+                        sw.Close();
+                        fs.Close();
+#endif
                         mParkingPartitionPro.Process(true);
                         MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
                         mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();

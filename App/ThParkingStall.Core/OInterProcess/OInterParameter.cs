@@ -20,6 +20,8 @@ namespace ThParkingStall.Core.OInterProcess
         private static List<SegLine> _InitSegLines;//所有初始分区线
         public static List<SegLine> InitSegLines { get { return _InitSegLines; } }//所有初始分区线
 
+        public static List<LineSegment> _SegLines;
+
         private static List<Polygon> _Buildings;// 所有障碍物，包含坡道
         private static List<Polygon> Buildings { get { return _Buildings; } }// 所有障碍物，包含坡道
 
@@ -34,7 +36,7 @@ namespace ThParkingStall.Core.OInterProcess
         public static void Init(DataWraper dataWraper)
         {
             _TotalArea = dataWraper.TotalArea;//总区域
-            //_InitSegLines = dataWraper.SegLines;//初始分区线
+            _SegLines = dataWraper.SegLines;//初始分区线
             _Buildings = dataWraper.Buildings;//所有障碍物，包含坡道
             _BuildingSpatialIndex = new MNTSSpatialIndex(dataWraper.Buildings);
 
@@ -46,7 +48,7 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<OSubArea> GetSubAreas()
         {
             var subAreas = new List<OSubArea>();
-            var SegLineStrings = InitSegLines.Select(seg =>seg.Splitter).ToList().ToLineStrings();
+            var SegLineStrings = _SegLines.ToLineStrings();
             var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
