@@ -566,6 +566,7 @@ namespace ThMEPTCH.Services
         {
             EntityCurve = curve;
             EntitySystem = system;
+            Id = id;
         }
     }
     class LevelElevtion
