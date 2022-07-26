@@ -10887,6 +10887,7 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSUNQUESTIONABLE = 384;
         public const string THESAURUSDAYDREAM = "600";
         public const int THESAURUSDEALER = 459;
+        public const int THESAURUSPALACE = 6000;
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -11978,11 +11979,23 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
             {
               if (TolLightRangeSingleSideMin is null) return THESAURUSSTAMPEDE;
               var maxBalconyrainpipeToFloordrainDistance = THESAURUSSTAMPEDE;
+              var max_basecircle_area = new List<Geometry>();
               foreach (var fd in max_toilet_to_kitchen_distance1[KITCHEN_BUFFER_DISTANCE.IndexOf(TolLightRangeSingleSideMin)])
               {
-                if (fd.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) ++maxBalconyrainpipeToFloordrainDistance;
+                if (fd.UserData as string == MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+                {
+                  ++maxBalconyrainpipeToFloordrainDistance;
+                  max_basecircle_area.Add(fd);
+                }
               }
               if (maxBalconyrainpipeToFloordrainDistance > INTROPUNITIVENESS) maxBalconyrainpipeToFloordrainDistance = INTROPUNITIVENESS;
+              if (maxBalconyrainpipeToFloordrainDistance == THESAURUSPERMUTATION)
+              {
+                if (max_basecircle_area[THESAURUSSTAMPEDE].GetCenter().GetDistanceTo(max_basecircle_area[THESAURUSHOUSING].GetCenter()) > THESAURUSPALACE)
+                {
+                  maxBalconyrainpipeToFloordrainDistance = THESAURUSHOUSING;
+                }
+              }
               return maxBalconyrainpipeToFloordrainDistance;
             }
             int maxDeviceToDevice()
