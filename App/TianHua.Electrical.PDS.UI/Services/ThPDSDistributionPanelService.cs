@@ -2168,7 +2168,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
                                                 if (!node.Equals(vertice))
-                                                    tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
+                                                {
+                                                    var text = node.LoadIdString();
+                                                    if (text == node.Load.ID.Description)
+                                                    {
+                                                        text += node.Load.LoadUID.Substring(node.Load.LoadUID.Length - 4);
+                                                    }
+                                                    tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = text, Tag = node });
+                                                }
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
@@ -3941,7 +3948,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("Type", true);
 
-                    switch(conductor.Type)
+                    switch (conductor.Type)
                     {
                         case ConductorType.配套防水电缆:
                         case ConductorType.配套防水耐火电缆:
