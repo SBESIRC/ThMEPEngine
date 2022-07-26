@@ -8,7 +8,7 @@ namespace TianHua.Mep.UI
     public class ThMepUIApp : IExtensionApplication
     {
         private RoomOutlineUI uiRoomOutline;
-
+        private ExtractRoomOutlineUI uiExtractRoomOutline;
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -49,10 +49,12 @@ namespace TianHua.Mep.UI
         [CommandMethod("TIANHUACAD", "THEROC", CommandFlags.Modal)]
         public void ThExtractRoomOutlineConfig()
         {
-            var roomOutlineUI = new ExtractRoomOutlineUI();
-            roomOutlineUI.WindowStartupLocation = System.Windows.
+            if (uiExtractRoomOutline != null && uiExtractRoomOutline.IsLoaded)
+                return;
+            uiExtractRoomOutline = new ExtractRoomOutlineUI();
+            uiExtractRoomOutline.WindowStartupLocation = System.Windows.
                 WindowStartupLocation.CenterScreen;
-            AcadApp.ShowModelessWindow(roomOutlineUI);
+            AcadApp.ShowModelessWindow(uiExtractRoomOutline);
         }
         /// <summary>
         /// 梁配置
