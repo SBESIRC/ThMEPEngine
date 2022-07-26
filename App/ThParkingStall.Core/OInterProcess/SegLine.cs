@@ -15,7 +15,7 @@ namespace ThParkingStall.Core.OInterProcess
     {
         public LineSegment Splitter=null;// 参与分割的线
         public LineSegment VaildLane=null;//有效车道，具有车道性质的部分
-        public int RoadWidth;//车道宽,
+        public int RoadWidth;//车道宽,-1代表取默认值
         public bool IsFixed =false;//是否固定
         private double _MinVal;
         public double MinVal//迭代最小值
@@ -34,8 +34,7 @@ namespace ThParkingStall.Core.OInterProcess
         {
             Splitter = inputLine.Positivize();
             IsFixed = isFixed;
-            if(roadWidth == -1) RoadWidth = VMStock.RoadWidth;
-            else RoadWidth = roadWidth;
+            RoadWidth = roadWidth;
             _MinVal = minVal;
             _MaxVal = maxVal;
             IsInitLine = true;

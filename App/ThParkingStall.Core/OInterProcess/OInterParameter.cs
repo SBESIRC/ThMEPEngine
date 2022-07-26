@@ -60,7 +60,6 @@ namespace ThParkingStall.Core.OInterProcess
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
                 var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
                 var subLanes = subLaneLineStrings.GetVaildParts(area);
-
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
                 Geometry geoWalls = area.Shell;
                 foreach (var subSegLine in subLaneLineStrings)

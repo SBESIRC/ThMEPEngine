@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.OTools;
 using ThParkingStall.Core.Tools;
 namespace ThParkingStall.Core.OInterProcess
@@ -18,13 +19,16 @@ namespace ThParkingStall.Core.OInterProcess
         public Vector2D Vector { get; set; }
         //坡道的面域
         public Polygon Area { get; set; }
-        public ORamp(LineSegment segLine, Polygon area)
+        public double RoadWidth { get; set; }
+        public ORamp(SegLine segLine, Polygon area)
         {
-            var segLineStr = segLine.GetLineString();
+            var segLineStr = segLine.Splitter.GetLineString();
             InsertPt = area.Shell.Intersection(segLineStr).Get<Point>().First();
             var outSidePart = segLineStr.Difference(area).Centroid;
-            Vector = new Vector2D(InsertPt.Coordinate, outSidePart.Coordinate);
+            Vector = new Vector2D(InsertPt.Coordinate, outSidePart.Coordinate).Normalize();
             Area = area;
+            if (segLine.RoadWidth == -1) RoadWidth = VMStock.RoadWidth;
+            else RoadWidth = segLine.RoadWidth;
         }
     }
 }

@@ -74,5 +74,10 @@ namespace ThParkingStall.Core.OTools
             return new LineSegment(P0, P1);
         }
 
+        public static bool ParallelTo(this LineSegment lineSegment, LineSegment other,double tol = 0.01)
+        {
+            return lineSegment.DirVector().Distance(other.DirVector()) < tol;
+        }
+
     }
 }
