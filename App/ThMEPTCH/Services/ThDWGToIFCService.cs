@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
@@ -46,22 +47,22 @@ namespace ThMEPTCH.Services
 
         public ThTCHProject DWGToProject(bool isMemoryStory,bool railingToRegion)
         {
-            if (null == archDBData)
-                return null;
             string prjId = "";
+            string prjName = "测试项目";
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                prjId = acdb.Database.VersionGuid.ToString();
+                prjName = Active.DocumentName;
+                prjId = Active.Document.UnmanagedObject.ToString();
             }
             var thPrj = new ThTCHProject();
             thPrj.Uuid = prjId;
-            thPrj.ProjectName = "测试项目";
+            thPrj.ProjectName = prjName;
             var thSite = new ThTCHSite();
             thSite.Uuid = prjId + "site";
             var thBuilding = new ThTCHBuilding();
             thBuilding.Uuid = prjId + "Building";
             var floorOrigin = GetFloorBlockPolylines();
-            var allEntitys = archDBData.AllTArchEntitys();
+            var allEntitys = null != archDBData? archDBData.AllTArchEntitys(): GetArchEntities();
             InitFloorDBEntity(allEntitys);
             var entityConvert = new TCHDBEntityConvert(prjId);
             foreach (var floor in floorOrigin)
@@ -84,6 +85,7 @@ namespace ThMEPTCH.Services
                         if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
                         {
                             var slab = CreateSlab(slab1, matrix);
+                            slab.Uuid = prjId + item.Id;
                             allSlabs.Add(slab);
                         }
                     }
@@ -101,6 +103,7 @@ namespace ThMEPTCH.Services
                                 railing.Outline = outlines[0] as Polyline;
                             }
                             railing.Height = ralingHeight;
+                            railing.Uuid = prjId + item.Id;
                             thisRailingEntitys.Add(pLine, railing);
                         }
                     }
@@ -138,7 +141,7 @@ namespace ThMEPTCH.Services
                 if (levelEntitys == null)
                     continue;
                 var buildingStorey = new ThTCHBuildingStorey();
-                buildingStorey.Uuid = prjId + floor.Num.ToString();
+                buildingStorey.Uuid = prjId + floor.Num.ToString()+"F";
                 buildingStorey.Number = floor.Num.ToString();
                 buildingStorey.Height = floor.LevelHeight;
                 buildingStorey.Elevation = floor.Elevtion;
@@ -284,7 +287,7 @@ namespace ThMEPTCH.Services
             }
             foreach (var keyValue in resSlab)
             {
-                var floorCurveEntity = new FloorCurveEntity(keyValue.OutPolyline, "楼板");
+                var floorCurveEntity = new FloorCurveEntity((ulong)keyValue.OutPolyline.Handle.Value,keyValue.OutPolyline, "楼板");
                 floorCurveEntity.FloorEntity = keyValue;
                 cadCurveEntitys.Add(floorCurveEntity);
             }
@@ -304,7 +307,7 @@ namespace ThMEPTCH.Services
                     {
                         if (p.Layer == "栏杆")
                         {
-                            cadCurveEntitys.Add(new FloorCurveEntity(p, "栏杆"));
+                            cadCurveEntitys.Add(new FloorCurveEntity((ulong)p.Handle.Value, p, "栏杆"));
                         }
                         else if (p.Layer == "楼板")
                         {
@@ -555,10 +558,11 @@ namespace ThMEPTCH.Services
     }
     class FloorCurveEntity 
     {
+        public ulong Id { get; }
         public Entity EntityCurve { get; }
         public string EntitySystem { get; }
         public object FloorEntity { get; set; }
-        public FloorCurveEntity(Entity curve,string system) 
+        public FloorCurveEntity(ulong id,Entity curve,string system) 
         {
             EntityCurve = curve;
             EntitySystem = system;

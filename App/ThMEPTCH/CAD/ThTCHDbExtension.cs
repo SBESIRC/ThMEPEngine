@@ -13,7 +13,10 @@ namespace ThMEPTCH.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var door = new TArchDoor();
+                var door = new TArchDoor()
+                {
+                    Id = (ulong)tch.Handle.Value,
+                };
                 var dxfData = GetDXFData(tch);
                 foreach (TypedValue tv in dxfData.AsArray())
                 {
@@ -59,7 +62,10 @@ namespace ThMEPTCH.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var window = new TArchWindow();
+                var window = new TArchWindow()
+                {
+                    Id = (ulong)tch.Handle.Value,
+                };
                 var dxfData = GetDXFData(tch);
                 foreach (TypedValue tv in dxfData.AsArray())
                 {
@@ -110,6 +116,7 @@ namespace ThMEPTCH.CAD
                 dynamic acadObj = curve.AcadObject;
                 var wall = new TArchWall
                 {
+                    Id = (ulong)tch.Handle.Value,
                     // 几何信息
                     StartPointX = curve.StartPoint.X,
                     StartPointY = curve.StartPoint.Y,

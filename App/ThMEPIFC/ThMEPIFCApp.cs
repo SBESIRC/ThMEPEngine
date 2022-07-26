@@ -13,13 +13,13 @@ using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using ThMEPTCH.Model.SurrogateModel;
 using Autodesk.AutoCAD.DatabaseServices;
+using CADApp = Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPIFC
 {
     public class ThMEPIFCApp : IExtensionApplication
     {
         string dbFilePath = @"C:\Tangent\TArchT20V8\SYS\output\TG20.db";
-        string tgExportArchCmd = "TGARCHEXPORT ";
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -70,17 +70,26 @@ namespace ThMEPIFC
         [CommandMethod("TIANHUACAD", "THDB2IFC", CommandFlags.Modal)]
         public void THDBL2IFC()
         {
-            var filePath = dbFilePath;
-            var ifcPath = Path.ChangeExtension(filePath, "ifc");
-            // 拾取TGL DB文件
-            //var filePath = OpenDBFile();
-            //if (string.IsNullOrEmpty(filePath))
-            //{
-            //    return;
-            //}
-
-            if (File.Exists(ifcPath))
-                File.Delete(ifcPath);
+            var isDB = (Convert.ToInt16(CADApp.Application.GetSystemVariable("USERR3")) == 1);
+            var ifcFilePath = "";
+            var filePath = "";
+            if (isDB)
+            {
+                // 拾取天正 DB文件
+                filePath = OpenDBFile();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+                ifcFilePath = Path.ChangeExtension(filePath, "ifc");
+            }
+            else 
+            {
+                //选择保存路径
+                ifcFilePath = SaveFilePath("ifc");
+            }
+            if (File.Exists(ifcFilePath))
+                File.Delete(ifcFilePath);
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
@@ -92,25 +101,40 @@ namespace ThMEPIFC
             var dwgDBDate = DateTime.Now;
             // 转换并保存IFC数据
             ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
-            Tgl2IfcService.GenerateIfcModelAndSave(project, ifcPath);
+            Tgl2IfcService.GenerateIfcModelAndSave(project, ifcFilePath);
             var endDate = DateTime.Now;
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 string msg = string.Format(
                     "读取DB数据楼层信息，分层组合数据时间：{0},分出组合数据转换IfcModel时间：{1},总时间：{2}",
-                    dwgDBDate - startDate,
-                    endDate - dwgDBDate,
-                    endDate - startDate);
+                    (dwgDBDate - startDate).TotalSeconds,
+                    (endDate - dwgDBDate).TotalSeconds,
+                    (endDate - startDate).TotalSeconds);
                 Active.Database.GetEditor().WriteMessage(msg);
             }
-
         }
 
         [CommandMethod("TIANHUACAD", "THDB2File", CommandFlags.Modal)]
         public void THDBL2MidFile()
         {
-            var filePath = dbFilePath;
-            var midFilePath = Path.ChangeExtension(filePath, "midfile");
+            var isDB = (Convert.ToInt16(CADApp.Application.GetSystemVariable("USERR3")) == 1);
+            var midFilePath = "";
+            var filePath = "";
+            if (isDB)
+            {
+                // 拾取天正 DB文件
+                filePath = OpenDBFile();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+                midFilePath = Path.ChangeExtension(filePath, "midfile");
+            }
+            else
+            {
+                //选择保存路径
+                midFilePath = SaveFilePath("midfile");
+            }
             if (File.Exists(midFilePath))
                 File.Delete(midFilePath);
             var startDate = System.DateTime.Now;
@@ -176,33 +200,36 @@ namespace ThMEPIFC
         public void THDB2Push()
         {
             Active.Database.GetEditor().WriteMessage($"Start");
-
-            // 拾取TGL DB文件
-            var filePath = OpenDBFile();
-            if (string.IsNullOrEmpty(filePath))
+            var isDB = (Convert.ToInt16(CADApp.Application.GetSystemVariable("USERR3")) == 1);
+            var filePath = "";
+            if (isDB)
             {
-                return;
+                // 拾取天正 DB文件
+                filePath = OpenDBFile();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
             }
             Active.Database.GetEditor().WriteMessage($"开始读入并解析TGL XML文件");
             Stopwatch sw = new Stopwatch();
             sw.Start();
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(true,true);
+            var project = service.DWGToProject(true,false);
             if (project == null)
             {
                 return;
             }
             sw.Stop();
-            Active.Database.GetEditor().WriteMessage($"读入并解析TGL XML文件完成，共用时{sw.ElapsedMilliseconds}s");
+            Active.Database.GetEditor().WriteMessage($"读入并解析TGL XML文件完成，共用时{sw.ElapsedMilliseconds}ms");
             sw.Reset();
             Active.Database.GetEditor().WriteMessage($"开始序列化project.");
             sw.Start();
 
             // 管道
             //"THDB2Push_TestPipe" 作为管道名称，两端管道名称需一致
-            var pipeClient =
-                    new NamedPipeClientStream(".", "THDB2Push_TestPipe",
+            var pipeClient = new NamedPipeClientStream(".", "THDB2Push_TestPipe",
                         PipeDirection.Out, PipeOptions.None,
                         TokenImpersonationLevel.Impersonation);
             try
@@ -254,6 +281,23 @@ namespace ThMEPIFC
             dlg.Filter = "TGL DB|*.db"; // Filter files by extension
             var result = dlg.ShowDialog();
             return (result == DialogResult.OK) ? dlg.FileName : string.Empty;
+        }
+        private string SaveFilePath(string fileExt)
+        {
+            var time = DateTime.Now.ToString("HHmmss");
+            var fileName = "模型数据" + time;
+            var fileDialog = new SaveFileDialog();
+            fileDialog.Title = "选择保存位置";
+            fileDialog.Filter = string.Format("模型数据(*.{0})|*.{0}", fileExt);
+            fileDialog.OverwritePrompt = true;
+            fileDialog.DefaultExt = fileExt;
+            fileDialog.FileName = fileName;
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string savePath = fileDialog.FileName;
+                return savePath;
+            }
+            return string.Empty;
         }
     }
 }
