@@ -23,14 +23,6 @@
             <Button Width="100" Click="btnOkClick">确定</Button>
             <Button Width="100" Click="btnCancelClick">取消</Button>
         </StackPanel>
-        <hc:TransitioningContentControl>
-            <hc:Transfer ItemsSource="{Binding DataList}" x:Name="ctl" Margin="32" Height="300">
-                <hc:Transfer.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}"/>
-                    </DataTemplate>
-                </hc:Transfer.ItemTemplate>
-            </hc:Transfer>
-        </hc:TransitioningContentControl>
+        <ListBox x:Name="ctl" ItemsSource="{Binding DataList}" DisplayMemberPath="Name" SelectionMode="Multiple"></ListBox>
     </DockPanel>
 </Window>
