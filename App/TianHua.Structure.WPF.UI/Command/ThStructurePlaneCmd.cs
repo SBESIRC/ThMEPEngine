@@ -18,7 +18,7 @@ namespace TianHua.Structure.WPF.UI.Command
         public ThStructurePlaneCmd()
         {
             ActionName = "结构成图";
-            CommandName = "THSMUTSC";
+            CommandName = "THSMBT";
         }
         public void Dispose()
         {

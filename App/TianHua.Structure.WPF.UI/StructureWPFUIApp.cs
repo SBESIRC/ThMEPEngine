@@ -59,8 +59,8 @@ namespace TianHua.Structure.WPF.UI
             AcadApp.ShowModalWindow(ui);
         }
 
-        [CommandMethod("TIANHUACAD", "THSMUTSC", CommandFlags.Modal)]
-        public void THSMUTSC()
+        [CommandMethod("TIANHUACAD", "THSMBT", CommandFlags.Modal)]
+        public void THSMBT()
         {
             using (var cmd = new ThStructurePlaneCmd())
             {
