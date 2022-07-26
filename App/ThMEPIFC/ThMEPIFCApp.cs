@@ -88,6 +88,10 @@ namespace ThMEPIFC
                 //选择保存路径
                 ifcFilePath = SaveFilePath("ifc");
             }
+            if (string.IsNullOrEmpty(ifcFilePath))
+            {
+                return;
+            }
             if (File.Exists(ifcFilePath))
                 File.Delete(ifcFilePath);
             var startDate = System.DateTime.Now;
@@ -134,6 +138,10 @@ namespace ThMEPIFC
             {
                 //选择保存路径
                 midFilePath = SaveFilePath("midfile");
+            }
+            if (string.IsNullOrEmpty(midFilePath))
+            {
+                return;
             }
             if (File.Exists(midFilePath))
                 File.Delete(midFilePath);
