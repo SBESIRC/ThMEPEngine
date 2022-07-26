@@ -160,7 +160,7 @@ namespace ThMEPEngineCore.IO.SVG
             }
             // 收集结果
             Geos = results;
-            FloorInfos = floorInfos;
+            FloorInfos = floorInfos.OrderBy(o=>o.BottomElevation).ToList();
             DocProperties = docProperties;
         }
         

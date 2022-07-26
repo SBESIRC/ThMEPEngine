@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
@@ -15,6 +16,7 @@ namespace ThMEPStructure.StructPlane.Service
         private const string UpperFloorShearWallColor = "#ff7f00";
         private const string BelowFloorShearWallColor1 = "#ffff00";
         private const string BelowFloorShearWallColor2 = "Yellow";
+        private const string CantiSlabSign = "CANTISLAB";
 
         public static List<string> GetSlabElevations(this List<ThGeometry> geos)
         {
@@ -38,11 +40,27 @@ namespace ThMEPStructure.StructPlane.Service
                 .Where(g => g.Properties.GetCategory() == ThIfcCategoryManager.SlabCategory && !(g.Boundary is DBText))
                 .ToList();
         }
+        public static List<ThGeometry> GetCantiSlabGeos(this List<ThGeometry> geos)
+        {
+            // 获取IfcSlab几何物体
+            return geos
+                .Where(g => IsCantiSlab(g) && !(g.Boundary is DBText))
+                .ToList();
+        }
+
         public static List<ThGeometry> GetSlabMarks(this List<ThGeometry> geos)
         {
             // 获取IfcSlab标注
             return geos
                 .Where(g => g.Properties.GetCategory() == ThIfcCategoryManager.SlabCategory && g.Boundary is DBText)
+                .ToList();
+        }
+
+        public static List<ThGeometry> GetTenThickSlabMarks(this List<ThGeometry> geos)
+        {
+            // 获取10mm厚度的IfcSlab标注
+            return GetSlabMarks(geos)
+                .Where(g => g.Boundary is DBText dbText && IsTenThickSlab(dbText.TextString))
                 .ToList();
         }
 
@@ -101,6 +119,21 @@ namespace ThMEPStructure.StructPlane.Service
             return category == ThIfcCategoryManager.WallCategory &&
                 (fillColor == BelowFloorShearWallColor1 || 
                 fillColor == BelowFloorShearWallColor2);
+        }
+        public static bool IsCantiSlab(this ThGeometry geo)
+        {
+            string category = geo.Properties.GetCategory();
+            string name = geo.Properties.GetName().ToUpper();
+            return category == ThIfcCategoryManager.SlabCategory && name.StartsWith(CantiSlabSign);
+        }
+        public static bool IsTenThickSlab(this string content)
+        {
+            var values = content.GetDoubles();
+            if (values.Count == 1)
+            {
+                return Math.Abs(values[0] - 10.0) <= 1e-4;
+            }
+            return false;
         }
     }
 }

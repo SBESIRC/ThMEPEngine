@@ -18,7 +18,7 @@ namespace ThMEPStructure.StructPlane.Service
         public static string BelowShearWallHatchLayerName = "S_WALL_BELW_DASH_HACH";
         public static string SlabLayerName = "S_PLAN_HACH";
         public static string SlabHatchLayerName = "S_PLAN_HACH";
-        public static string BeamTextLayName = "S_BEAM_TEXT_VERT";
+        public static string BeamTextLayerName = "S_BEAM_TEXT_VERT";
         public static string SlabTextLayerName = "S_FLOR_THIK";
         public static string ElevationTableLineLayerName = "S_TABL";
         public static string ElevationTableTextLayerName = "S_TABL_NUMB";
@@ -35,7 +35,7 @@ namespace ThMEPStructure.StructPlane.Service
                 var layers = new List<string>() { BeamLayerName , ColumnLayerName , ColumnHatchLayerName ,
                     BelowColumnLayerName,BelowColumnHatchLayerName,HoleLayerName,HoleHatchLayerName,
                     ShearWallLayerName,ShearWallHatchLayerName,BelowShearWallLayerName,
-                    BelowShearWallHatchLayerName,SlabLayerName,SlabHatchLayerName,BeamTextLayName,
+                    BelowShearWallHatchLayerName,SlabLayerName,SlabHatchLayerName,BeamTextLayerName,
                     SlabTextLayerName,ElevationTableLineLayerName,ElevationTableTextLayerName,
                     SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName,
                 StairSlabCornerLineLayerName,StairSlabCornerTextLayerName,DefpointsLayerName};

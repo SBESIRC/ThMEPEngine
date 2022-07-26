@@ -125,6 +125,18 @@ namespace ThMEPStructure.StructPlane.Service
                 return (string)value;
             }
         }
+        public static string GetName(this Dictionary<string, object> properties)
+        {
+            var value = properties.GetPropertyValue(ThSvgPropertyNameManager.NamePropertyName);
+            if (value == null)
+            {
+                return "";
+            }
+            else
+            {
+                return (string)value;
+            }
+        }
         private static object GetPropertyValue(this Dictionary<string, object> properties, string key)
         {
             foreach (var item in properties)
@@ -323,47 +335,58 @@ namespace ThMEPStructure.StructPlane.Service
                     }
                 }
             }).ToList();
-        }
-        public static bool IsTenThickSlab(this string content)
-        {
-            var values = content.GetDoubles();
-            if (values.Count == 1)
-            {
-                return Math.Abs(values[0] - 10.0) <= 1e-4;
-            }
-            return false;
-        }
+        }        
         public static string GetFloorRange(this List<ThFloorInfo> floorInfos,double flrBottomEle)
         {
             var result = "";
-            var stdFloors = floorInfos.Where(o =>
-            {
-                double bottomElevation = 0.0;
-                if (double.TryParse(o.Bottom_elevation, out bottomElevation))
-                {
-                    if (Math.Abs(bottomElevation - flrBottomEle) <= 1e-4)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            });
+            var stdFloors = floorInfos.GetFloors(flrBottomEle);
             if (stdFloors.Count() == 1)
             {
                 var stdFlr = stdFloors.First().StdFlrNo;
                 var floors = floorInfos.Where(o => o.StdFlrNo == stdFlr);
                 if (floors.Count() == 1)
                 {
-                    result = floors.First().FloorNo.NumToChinese() + "层结构平面图";
+                    result = floors.First().FloorNo.NumToChinese() + "层" + ThStructurePlaneCommon.StructurePlanName;
                 }
                 else if (floors.Count() > 1)
                 {
                     var startRange = floors.First().FloorNo.NumToChinese();
                     var endRange = floors.Last().FloorNo.NumToChinese();
-                    result = startRange + "~" + endRange + "层结构平面图";
+                    result = startRange + "~" + endRange + "层" + ThStructurePlaneCommon.StructurePlanName;
                 }
             }
             return result;
+        }
+        public static string GetFloorHeightRange(this List<ThFloorInfo> floorInfos, double flrBottomEle)
+        {
+            // 获取楼层标高范围
+            var result = "";
+            var stdFloors = floorInfos.GetFloors(flrBottomEle);
+            if (stdFloors.Count() == 1)
+            {
+                var stdFlr = stdFloors.First().StdFlrNo;
+                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlr);
+                if (floors.Count() > 0)
+                {
+                    var lastFlr = floors.Last();
+                    double lastFlrHeight = 0.0;
+                    double lastFlrBottomElevation = 0.0;                    
+                    if (double.TryParse(lastFlr.Height, out lastFlrHeight) &&
+                        double.TryParse(lastFlr.Bottom_elevation, out lastFlrBottomElevation))
+                    {
+                        double topElevation = (lastFlrBottomElevation + lastFlrHeight) / 1000.0;
+                        double bottomElevation = flrBottomEle / 1000.0;
+                        result = bottomElevation.ToString("N3") +"m"+ " ~ " +
+                            topElevation.ToString("N3")+"m" + " 墙柱平面图";
+                    }
+                }
+            }
+            return result;
+        }
+        public static List<ThFloorInfo> GetFloors(this List<ThFloorInfo> floorInfos, double flrBottomEle)
+        {
+            // 根据楼层底部标高获取楼层
+            return floorInfos.Where(o => Math.Abs(o.BottomElevation - flrBottomEle) <= 1e-4).ToList();
         }
         public static void ImportStruPlaneTemplate(this Database database)
         {

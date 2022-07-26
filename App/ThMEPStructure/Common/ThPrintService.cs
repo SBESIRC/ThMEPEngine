@@ -84,36 +84,38 @@ namespace ThMEPStructure.Common
                 var shellId = shell.Print(db, outlineConfig);
                 var holeIds = new ObjectIdCollection();
                 holes.ForEach(h => holeIds.Add(h.Print(db, outlineConfig)));
-
-                Hatch oHatch = new Hatch();
-                oHatch.HatchObjectType = HatchObjectType.HatchObject;
-                oHatch.Normal = hatchConfig.Normal;
-                oHatch.Elevation = hatchConfig.Elevation;
-                //oHatch.PatternAngle = config.PatternAngle;
-                oHatch.PatternScale = hatchConfig.PatternScale;
-                //oHatch.PatternSpace = config.PatternSpace;
-                oHatch.SetHatchPattern(hatchConfig.PatternType, hatchConfig.PatternName);
-                oHatch.ColorIndex = (int)ColorIndex.BYLAYER;
-                oHatch.Layer = hatchConfig.LayerName;                
-                var hatchId = acadDatabase.ModelSpace.Add(oHatch);
-                oHatch.Associative = hatchConfig.Associative;
-                if(holes.Count==0)
+                if(hatchConfig!=null)
                 {
-                    oHatch.AppendLoop((int)HatchLoopTypes.Default, 
-                        new ObjectIdCollection { shellId });
-                }
-                else
-                {
-                    oHatch.AppendLoop(HatchLoopTypes.Outermost,
-                            new ObjectIdCollection { shellId });
-                    holeIds.OfType<ObjectId>().ForEach(o =>
+                    Hatch oHatch = new Hatch();
+                    oHatch.HatchObjectType = HatchObjectType.HatchObject;
+                    oHatch.Normal = hatchConfig.Normal;
+                    oHatch.Elevation = hatchConfig.Elevation;
+                    //oHatch.PatternAngle = config.PatternAngle;
+                    oHatch.PatternScale = hatchConfig.PatternScale;
+                    //oHatch.PatternSpace = config.PatternSpace;
+                    oHatch.SetHatchPattern(hatchConfig.PatternType, hatchConfig.PatternName);
+                    oHatch.ColorIndex = (int)ColorIndex.BYLAYER;
+                    oHatch.Layer = hatchConfig.LayerName;
+                    var hatchId = acadDatabase.ModelSpace.Add(oHatch);
+                    oHatch.Associative = hatchConfig.Associative;
+                    if (holes.Count == 0)
                     {
-                        oHatch.AppendLoop(HatchLoopTypes.Default, 
-                            new ObjectIdCollection { o });
-                    });
+                        oHatch.AppendLoop((int)HatchLoopTypes.Default,
+                            new ObjectIdCollection { shellId });
+                    }
+                    else
+                    {
+                        oHatch.AppendLoop(HatchLoopTypes.Outermost,
+                                new ObjectIdCollection { shellId });
+                        holeIds.OfType<ObjectId>().ForEach(o =>
+                        {
+                            oHatch.AppendLoop(HatchLoopTypes.Default,
+                                new ObjectIdCollection { o });
+                        });
+                    }
+                    oHatch.EvaluateHatch(true);
+                    results.Add(hatchId);
                 }
-                oHatch.EvaluateHatch(true);
-                results.Add(hatchId);
                 results.Add(shellId);
                 holeIds.OfType<ObjectId>().ForEach(o => results.Add(o));
                 return results;

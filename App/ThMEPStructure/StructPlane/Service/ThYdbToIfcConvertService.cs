@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ThMEPStructure.StructPlane.Service
 {
-    internal class ThYdbToIfcConvertService
+    public class ThYdbToIfcConvertService
     {
         /// <summary>
         /// elevation-generator.exe的完整路径

@@ -30,7 +30,7 @@ namespace ThMEPStructure.StructPlane.Print
             // 1:1
             return new AnnotationPrintConfig
             {
-                LayerName = ThPrintLayerManager.BeamTextLayName,
+                LayerName = ThPrintLayerManager.BeamTextLayerName,
                 Height = 2.5,
                 WidthFactor = 0.7,
                 TextStyleName = ThPrintStyleManager.THSTYLE3,
