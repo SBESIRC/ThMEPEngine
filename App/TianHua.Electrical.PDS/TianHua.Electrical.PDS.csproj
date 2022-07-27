@@ -224,7 +224,6 @@
     <Compile Include="Service\ThConfigurationFileService.cs" />
     <Compile Include="Service\ThPDSCommon.cs" />
     <Compile Include="Service\ThPDSMarkAnalysisService.cs" />
-    <Compile Include="Service\ThPDSPolylineService.cs" />
     <Compile Include="Service\ThPDSTableAnalysisService.cs" />
   </ItemGroup>
   <ItemGroup>

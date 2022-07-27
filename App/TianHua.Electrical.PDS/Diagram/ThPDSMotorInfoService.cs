@@ -1,8 +1,6 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
 
@@ -109,9 +107,9 @@ namespace TianHua.Electrical.PDS.Diagram
 
         public static ThPDSMotorInfo Select(ThPDSLoadTypeCat_3 typeCat_3, bool fireLoad)
         {
-            if(typeCat_3.Equals(ThPDSLoadTypeCat_3.SubmersiblePump))
+            if (typeCat_3.Equals(ThPDSLoadTypeCat_3.SubmersiblePump))
             {
-                return MotorInfos.Where(info => info.TypeCat_3.Equals( typeCat_3)
+                return MotorInfos.Where(info => info.TypeCat_3.Equals(typeCat_3)
                     && info.FireLoad.Equals(fireLoad)).FirstOrDefault();
             }
             else

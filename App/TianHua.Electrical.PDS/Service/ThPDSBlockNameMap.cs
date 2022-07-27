@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.Service
         /// </summary>
         public Dictionary<string, string> AttNameValues { get; set; }
 
-        public ThPDSBlockNameMap(ImageLoadType loadType,string layerName, string blockName, Vector3d labelOffset, Dictionary<string, string> attNameValues)
+        public ThPDSBlockNameMap(ImageLoadType loadType, string layerName, string blockName, Vector3d labelOffset, Dictionary<string, string> attNameValues)
         {
             LoadType = loadType;
             LayerName = layerName;

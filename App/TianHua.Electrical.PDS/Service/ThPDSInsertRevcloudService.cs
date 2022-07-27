@@ -3,13 +3,12 @@ using System.Linq;
 
 using AcHelper;
 using Linq2Acad;
-using DotNetARX;
-using ThCADCore.NTS;
-using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADCore.NTS;
+using ThMEPEngineCore;
 
 namespace TianHua.Electrical.PDS.Service
 {

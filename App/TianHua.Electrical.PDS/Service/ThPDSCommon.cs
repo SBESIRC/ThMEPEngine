@@ -105,10 +105,10 @@ namespace TianHua.Electrical.PDS.Service
         public const string ELECTRICAL_FIRE_MONITORING_1 = "E-BEFPS201-1";
         public const string ELECTRICAL_FIRE_MONITORING_2 = "E-BEFPS201-2";
 
-        public static readonly Tuple<string, short> AI_POWR_AUXL1 = Tuple.Create("AI-POWR-AUXL1", (short)2); 
-        public static readonly Tuple<string, short> AI_POWR_AUXL2 = Tuple.Create("AI-POWR-AUXL2", (short)1); 
-        public static readonly Tuple<string, short> AI_POWR_AUXL3 = Tuple.Create("AI-POWR-AUXL3", (short)3); 
-    
+        public static readonly Tuple<string, short> AI_POWR_AUXL1 = Tuple.Create("AI-POWR-AUXL1", (short)2);
+        public static readonly Tuple<string, short> AI_POWR_AUXL2 = Tuple.Create("AI-POWR-AUXL2", (short)1);
+        public static readonly Tuple<string, short> AI_POWR_AUXL3 = Tuple.Create("AI-POWR-AUXL3", (short)3);
+
         public const string LOAD_DIMENSION = "AI-负载标注";
         public const string LOAD_DIMENSION_R = "AI-负载标注-R";
         public const string LOAD_DIMENSION_L = "AI-负载标注-L";
@@ -117,15 +117,15 @@ namespace TianHua.Electrical.PDS.Service
         public const string CIRCUIT_DIMENSION_L = "AI-回路标注-L";
 
         public const string POSITION_1_X = "位置1 X";
-        public const string POSITION_1_Y = "位置1 Y"; 
-        public const string PROPERTY_LOAD_FILP = "翻转状态1"; 
+        public const string POSITION_1_Y = "位置1 Y";
+        public const string PROPERTY_LOAD_FILP = "翻转状态1";
         public const string PROPERTY_TABLE_WIDTH = "标注表格宽度";
 
         public const string LOAD_ID_OR_PURPOSE = "设备编号或用途";
-        public const string LOAD_POWER = "设备功率"; 
-        public const string PRIMARY_AND_SPARE_AVAIL = "主备关系"; 
+        public const string LOAD_POWER = "设备功率";
+        public const string PRIMARY_AND_SPARE_AVAIL = "主备关系";
 
-        public const string SECONDARY_JUNCTION_TEXT1 = "Text1"; 
+        public const string SECONDARY_JUNCTION_TEXT1 = "Text1";
         public const string SECONDARY_JUNCTION_TEXT2 = "Text2";
         public const string SECONDARY_JUNCTION_TEXT3 = "Text3";
         public const string SECONDARY_JUNCTION_TEXT4 = "Text4";

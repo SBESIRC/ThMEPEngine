@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using TianHua.Electrical.PDS.Engine;
+﻿using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module;
 

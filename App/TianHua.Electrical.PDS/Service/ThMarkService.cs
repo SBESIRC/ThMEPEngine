@@ -3,17 +3,17 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using TianHua.Electrical.PDS.Model;
 using ThMEPEngineCore.Algorithm;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -271,10 +271,10 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var objs = new DBObjectCollection();
                 o.Entity.Explode(objs);
-                var basePoint = new List< Point3d>();
+                var basePoint = new List<Point3d>();
                 if (ThMEPTCHService.IsTCHWireDim2(o.Entity))
                 {
-                    if (objs.OfType<Line>().Count()>0)
+                    if (objs.OfType<Line>().Count() > 0)
                     {
                         basePoint.Add(objs.OfType<Line>().First().GetCenter());
                     }
@@ -285,7 +285,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         basePoint.Add(objs.OfType<Polyline>().First().GetCenter());
                     }
-                    else if(objs.OfType<Line>().Count() > 0)
+                    else if (objs.OfType<Line>().Count() > 0)
                     {
                         basePoint.Add(objs.OfType<Line>().First().StartPoint);
                         basePoint.Add(objs.OfType<Line>().First().EndPoint);
