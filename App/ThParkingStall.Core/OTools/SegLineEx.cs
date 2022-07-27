@@ -251,50 +251,133 @@ namespace ThParkingStall.Core.OTools
             return new LineSegment(p0, p1);
         }
         #endregion
-
-        #region
-        public static List<List<LineSegment>> GroupSegLines(this List<LineSegment> SegLines)
+        #region 分区线分组
+        public static List<List<int>> GroupSegLines(this List<SegLine> SegLines,int groupFlag = 0)
         {
-            var groups = new List<List<LineSegment>>();
+            switch (groupFlag)
+            {
+                case 0:
+                    return SegLines.Select(l => l.VaildLane).ToList().GroupSegLines(0);
+                case 1:
+                    return SegLines.Select(l => l.Splitter).ToList().GroupSegLines(0);
+                default:
+                    return null;
+            }
+        }
+
+        public static List<List<int>> GroupSegLines(this List<LineSegment> SegLines, int groupFlag = 0)
+        {
+            var groups = new List<List<int>>();
             var rest_idx = new List<int>();
             for (int i = 0; i < SegLines.Count; ++i) rest_idx.Add(i);
             while (rest_idx.Count != 0)
             {
-                bool new_group = true;
+                bool foundRelation = false;
                 foreach (var group in groups)
                 {
                     foreach (var idx in rest_idx)
                     {
                         var line = SegLines[idx];
-                        if (line.ConnectWithAny(group))
+                        switch (groupFlag)
                         {
-                            new_group = false;
-                            group.Add(line);
+                            case 0:
+                                foundRelation = line.ConnectWithAny(SegLines.Slice(group));
+                                break;
+                            case 1:
+                                foundRelation = line.CanMergeWithAny(SegLines.Slice(group));
+                                break;
+                        }
+                        if (foundRelation)
+                        {
+                            foundRelation = true;
+                            group.Add(idx);
                             rest_idx.Remove(idx);
                             break;
                         }
                     }
-                    if (!new_group) break;
+                    if (foundRelation) break;
                 }
-                if (new_group)
+                if (!foundRelation)
                 {
-                    groups.Add(new List<LineSegment> { SegLines[rest_idx.First()] });
+                    groups.Add(new List<int> { rest_idx.First() });
                     rest_idx.RemoveAt(0);
                 }
             }
             return groups;
         }
-
+        public static bool ConnectWithAny(this SegLine line, List<SegLine> otherLines)
+        {
+            return line.VaildLane.ConnectWithAny(otherLines.Select(l => l.VaildLane).ToList());
+        }
         public static bool ConnectWithAny(this LineSegment line, List<LineSegment> otherLines)
         {
+            if (line == null) return false;
             foreach (var l2 in otherLines)
             {
+                if (l2== null) continue;
                 if (!line.ParallelTo(l2) && line.Intersection(l2) != null) return true;
             }
             return false;
         }
 
-
+        public static bool CanMergeWithAny(this SegLine line, List<SegLine> otherLines)
+        {
+            return line.Splitter.CanMergeWithAny(otherLines.Select(l => l.Splitter).ToList());
+        }
+        public static bool CanMergeWithAny(this LineSegment line, List<LineSegment> otherLines)
+        {
+            if (line == null) return false;
+            foreach (var l2 in otherLines)
+            {
+                if (l2 == null) continue;
+                if (line.ParallelTo(l2) && line.Distance(l2) < ExtendTol) return true;
+            }
+            return false;
+        }
         #endregion
+        #region 分区线合并
+        public static List<LineSegment> MergeSegs(this List<LineSegment> segLines,List<int> idToMerge)
+        {
+            var newsegs = new List<LineSegment>();
+            return null;
+        }
+        public static LineSegment Merge(this List<LineSegment> lineSegments)
+        {
+            return null;
+        }
+        #endregion
+
+        //获取相同部分
+        public static List<LineSegment> GetCommonParts(this List<LineString> SegLines,LineString shell,double tol  = 0.01)
+        {
+            var vaildParts = new List<LineSegment>();
+            //var bounds = new MNTSSpatialIndex(shell.ToLineStrings());
+            var bound = shell.Buffer(tol);
+            foreach(var segLine in SegLines)
+            {
+                var commonPart = segLine.Intersection(bound);
+                if(commonPart.Length > LengthTol)
+                {
+                    var orderd = commonPart.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
+                    vaildParts.Add(new LineSegment(orderd.First(), orderd.Last()));
+                }
+            }
+            return vaildParts;
+        }
+
+        public static List<LineString> GetWalls(this List<LineString> SegLines, LineString shell, double tol = 0.01)
+        {
+            Geometry walls = shell.Copy();
+            foreach (var segLine in SegLines)
+            {
+                var bufferedLine = segLine.Buffer(tol);
+                var commonPart = bufferedLine.Intersection(walls);
+                if (commonPart.Length > LengthTol)
+                {
+                    walls = walls.Difference(bufferedLine);
+                }
+            }
+            return walls.Get<LineString>();
+        }
     }
 }

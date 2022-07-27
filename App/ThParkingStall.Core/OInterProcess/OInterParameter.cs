@@ -61,18 +61,11 @@ namespace ThParkingStall.Core.OInterProcess
                 //var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
                 //var subLanes = subLaneLineStrings.GetVaildParts(area);
 
-                var subLanes = SegLineStrings.GetVaildParts(area);
+                var subLanes = SegLineStrings.GetCommonParts(area.Shell);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
-                Geometry geoWalls = area.Shell;
-                foreach (var subSegLine in SegLineStrings)
-                {
-                    if (subSegLine.PartInCommon(geoWalls))
-                    {
-                        geoWalls = OverlayNGRobust.Overlay(geoWalls, subSegLine, SpatialFunction.Difference);
-                    }
-                }
-                var walls = geoWalls.Get<LineString>();
 
+
+                var walls = SegLineStrings.GetWalls(area.Shell);
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
                 var subArea = new OSubArea(area,subLanes,walls,subBuildings);
                 subAreas.Add(subArea);

@@ -258,16 +258,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         public bool ProcessSegLines()
         {
-            var init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment());
-            //1.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
+            //源数据
+            var init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment()).ToList();
+            //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）
+            var idToMerge = init_segs.GroupSegLines(1);
+            //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
             var baselines = init_segs.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l =>l!=null).
                 Select(l => new SegLine(l, false, -1, 0, 0)).ToList();
-            //2.判断起始、终结线是否明确 + 更新连接关系
+            //3.判断起始、终结线是否明确 + 更新连接关系
             var isVaild = FilteringSegLines(baselines);
-            //2.获取最大全连接组，若有未连接的，移除+标记+报错
-            //2.1获取有效车道
+            //4.获取最大全连接组，若有未连接的，移除+标记+报错
+            //4.1获取有效车道
             baselines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
-            //2.2获取最大全连接组
+            //4.2获取最大全连接组,存在其他组标记 + 报错
+            var groups = baselines.GroupSegLines().OrderBy(g =>g.Count).ToList();
             //3.处理坡道，跟坡道连接 且与其他分割线仅有一个交点的线，直接移除
 
             //4.判断剩余分割线是否有仅有一个交点的线，若有移除+标记+报错
