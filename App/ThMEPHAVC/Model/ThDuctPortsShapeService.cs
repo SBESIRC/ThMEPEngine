@@ -156,16 +156,18 @@ namespace ThMEPHVAC.Model
             GetCrossShrink(inW, branchW1, branchW2, out double inShrink, out double oInnerShrink, out double oOutterShrink, out double oCollinearShrink);
             dic.Add(inLine.GetHashCode(), inShrink);
             dic.Add(collinearLine.GetHashCode(), oCollinearShrink);
-            if (ThMEPHVACService.IsOutter(inVec, branch1Vec))
-            {
-                dic.Add(branch1.GetHashCode(), oOutterShrink);
-                dic.Add(branch2.GetHashCode(), oInnerShrink);
-            }
-            else
-            {
-                dic.Add(branch1.GetHashCode(), oInnerShrink);
-                dic.Add(branch2.GetHashCode(), oOutterShrink);
-            }
+            dic.Add(branch1.GetHashCode(), oInnerShrink);
+            dic.Add(branch2.GetHashCode(), oOutterShrink);
+            //if (ThMEPHVACService.IsOutter(inVec, branch1Vec))
+            //{
+            //    dic.Add(branch1.GetHashCode(), oOutterShrink);
+            //    dic.Add(branch2.GetHashCode(), oInnerShrink);
+            //}
+            //else
+            //{
+            //    dic.Add(branch1.GetHashCode(), oInnerShrink);
+            //    dic.Add(branch2.GetHashCode(), oOutterShrink);
+            //}
             return dic;
         }
         private static Dictionary<int, double> GetCrossShrink(Line inLine, Line otherLine1, Line otherLine2, Line otherLine3, double inW, double w1, double w2, double w3)
@@ -195,11 +197,11 @@ namespace ThMEPHVAC.Model
         {
             double maxW = Math.Max(innerW, outterW);
             double minW = Math.Min(innerW, outterW);
-            inShrink = maxW + 50;
+            inShrink = maxW * 0.7 + 50;
             oCollinearShrink = maxW * 0.5 + 100;
             // ThDuctPortsFactory.cs Line:138
-            oInnerShrink = (inW + minW) * 0.5 + 50;//和主路叉积z值<0共线的支路，用大的值
-            oOutterShrink = (inW + maxW) * 0.5 + 50;//和主路叉积z值>0共线的支路，用小的值
+            oInnerShrink = innerW * 0.7 - innerW / 2 + inW / 2 + 50;// (inW + minW) * 0.5 + 50;//和主路叉积z值<0共线的支路，用大的值
+            oOutterShrink = outterW * 0.7 - outterW / 2 + inW / 2 + 50;//(inW + maxW) * 0.5 + 50;//和主路叉积z值>0共线的支路，用小的值
         }
         public static Dictionary<int, double> GetTeeShrink(Line curLine, Line otherLine1, Line otherLine2, 
                                                            FanParam curParam, FanParam param1, FanParam param2)
@@ -300,16 +302,16 @@ namespace ThMEPHVAC.Model
         {
             if (type == TeeType.BRANCH_VERTICAL_WITH_OTTER)
             {
-                inShrink = branchW + 50;
+                inShrink = branchW * 0.7 + 50;
                 otherShrink = branchW * 0.5 + 100;//和主路共线的支路
-                branchShrink = (inW + branchW) * 0.5 + 50;//和主路垂直的支路
+                branchShrink = branchW * 0.7 - branchW / 2 + inW / 2 + 50;// (inW + branchW) * 0.5 + 50;//和主路垂直的支路
             }
             else
             {
                 double maxBranch = Math.Max(branchW, otherW);
-                inShrink = maxBranch + 50;
-                otherShrink = (inW + otherW) * 0.5 + 50;//和主路叉积z值<0共线的支路
-                branchShrink = (inW + branchW) * 0.5 + 50;//和主路叉积z值>0共线的支路
+                inShrink = maxBranch * 0.7 + 50;
+                otherShrink = otherW * 0.7 - otherW / 2 + 50 + inW / 2;// + (inW + otherW) * 0.5 + 50;//和主路叉积z值<0共线的支路
+                branchShrink = branchW * 0.7 - branchW / 2 + 50 + inW / 2; //(inW + branchW) * 0.5 + 50;//和主路叉积z值>0共线的支路
             }
         }
         private static List<Vector3d> GetConnectorDirection(Line inLine, DBObjectCollection otherLines)

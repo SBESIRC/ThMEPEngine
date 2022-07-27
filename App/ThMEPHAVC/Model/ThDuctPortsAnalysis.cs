@@ -46,7 +46,7 @@ namespace ThMEPHVAC.Model
             GetMainLineAndEndLine();
             if (endLines.Count() == 0)
                 throw new NotImplementedException("未搜索到任何中心线");
-            if (portParam.genStyle == GenerationStyle.Auto)
+            if (portParam.genStyle == GenerationStyle.Auto)   //
                 AutoDistributePort();
             else if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
             {

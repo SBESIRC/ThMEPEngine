@@ -41,8 +41,8 @@ namespace TianHua.Hvac.UI.Command
             var excludeLines = GetExcludeLine(brokenLineIds);
             var anayRes = new ThDuctPortsAnalysis(portParam, excludeLines, allFansDic);
             _ = new ThPortsDistribute(portParam, anayRes.endLinesInfos);
-            anayRes.CreatePortDuctGeo();// 获得风口位置后再调用(同时获得管段间变径)
-            anayRes.CreateReducing();
+            anayRes.CreatePortDuctGeo();    //计算风口位置，获得风口位置后再调用(同时获得管段间变径)
+            anayRes.CreateReducing();       //计算管径变径
             var painter = new ThDuctPortsDraw(portParam, curDbPath, service);
             painter.Draw(anayRes, ref gId);
         }

@@ -28,8 +28,8 @@ namespace ThMEPHVAC.TCH
             var mmElevation = elevation * 1000;
             var points = info.portWidths.Keys.ToList();
             var type = ThDuctPortsShapeService.GetTeeType(info.centerP, points[1], points[2]);
-            RecordTeeInfo(type, ref gId);
-            GetTeeInfo(info, mat, type, out TeeInfo teeInfo, out Point3d mainP, out Point3d branchP, out Point3d otherP);
+            RecordTeeInfo(type, ref gId);                                                           //绘出三通
+            GetTeeInfo(info, mat, type, out TeeInfo teeInfo, out Point3d mainP, out Point3d branchP, out Point3d otherP);           //获取三通截面信息
             var cP = info.centerP.TransformBy(mat);
             var gap = ThTCHCommonTables.flgThickness * 0.5;
             var v = (mainP - cP).GetNormal();
@@ -45,7 +45,7 @@ namespace ThMEPHVAC.TCH
                 heighVector = new Vector3d(0, 0, 1),
                 centerPoint = mainP - v * gap + centerEleDisVec
             };
-            flangesService.Draw(mainP + centerEleDisVec, param1.normalVector, iWidth, iHeight, ref gId);
+            flangesService.Draw(mainP + centerEleDisVec, param1.normalVector, iWidth, iHeight, ref gId); //现在不需要自己画法兰（用tch）
             v = (branchP - cP).GetNormal();
             ThMEPHVACService.GetWidthAndHeight(teeInfo.branch, out double bWidth, out double bHeight);
             centerEleDisVec = ThMEPHVACService.GetEleDis(mmElevation, mainHeight, bHeight);
@@ -59,7 +59,7 @@ namespace ThMEPHVAC.TCH
                 heighVector = new Vector3d(0, 0, 1),
                 centerPoint = branchP - v * gap + centerEleDisVec
             };
-            flangesService.Draw(branchP + centerEleDisVec, param2.normalVector, bWidth, bHeight, ref gId);
+            flangesService.Draw(branchP + centerEleDisVec, param2.normalVector, bWidth, bHeight, ref gId);//废弃
             v = (otherP - cP).GetNormal();
             ThMEPHVACService.GetWidthAndHeight(teeInfo.other, out double oWidth, out double oHeight);
             centerEleDisVec = ThMEPHVACService.GetEleDis(mmElevation, mainHeight, oHeight);
@@ -73,8 +73,8 @@ namespace ThMEPHVAC.TCH
                 heighVector = new Vector3d(0, 0, 1),
                 centerPoint = otherP - v * gap + centerEleDisVec
             };
-            flangesService.Draw(otherP + centerEleDisVec, param3.normalVector, oWidth, oHeight, ref gId);
-            ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { param1, param2, param3});
+            flangesService.Draw(otherP + centerEleDisVec, param3.normalVector, oWidth, oHeight, ref gId);//废弃
+            ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { param1, param2, param3}); 
             sqliteHelper.CloseConnect();
         }
 
