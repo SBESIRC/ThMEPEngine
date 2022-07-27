@@ -103,9 +103,9 @@ namespace TianHua.Electrical.PDS.Service
                                 match = match.NextMatch();
                             }
                         }
-                        else if (!string.IsNullOrEmpty(strClean) && Regex.IsMatch(strClean, @"[\u4e00-\u9fa5]") && descriptionAssign)
+                        else if (!string.IsNullOrEmpty(str) && Regex.IsMatch(str, @"[\u4e00-\u9fa5]") && descriptionAssign)
                         {
-                            thPDSDistBox.ID.Description = strClean;
+                            thPDSDistBox.ID.Description = str;
                             descriptionAssign = false;
                         }
                     }
