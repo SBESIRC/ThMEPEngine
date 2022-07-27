@@ -15,16 +15,17 @@ namespace ThParkingStall.Core.OInterProcess
         public readonly List<LineSegment> VaildLanes;//该区域全部车道线(目前是分区线）
         //public readonly List<LineString> SegLines;//该区域全部分区线
         public readonly List<Polygon> Buildings; //该区域全部建筑物,包含坡道
-        //public readonly List<Ramp> Ramps;//该区域全部的坡道
+        public readonly List<ORamp> Ramps;//该区域全部的坡道
         //public readonly List<Polygon> BoundingBoxes;//该区域所有建筑物的bounding box
         public int Count = -3;//车位总数
 
-        public OSubArea(Polygon area, List<LineSegment> vaildLanes, List<LineString> walls,List<Polygon> buildings)
+        public OSubArea(Polygon area, List<LineSegment> vaildLanes, List<LineString> walls,List<Polygon> buildings,List<ORamp> ramps = null)
         {
             Area = area;
             VaildLanes = vaildLanes;
             Walls = walls;
             Buildings = buildings;
+            Ramps = ramps;
         }
     }
 }

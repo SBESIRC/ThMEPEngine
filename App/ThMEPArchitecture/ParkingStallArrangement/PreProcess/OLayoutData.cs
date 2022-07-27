@@ -242,57 +242,36 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
         }
         #endregion
-        public void _ProcessSegLines()
-        {
-            var segLines = new List<SegLine>();
-            foreach(var line in CAD_SegLines)
-            {
-                var segLine = new SegLine(line.ToNTSLineSegment().OExtend(1), false, -1, 0, 0);
-                segLines.Add(segLine);  
-            }
-            //SeglineIndex = segLines.GetSegLineIndex(WallLine);
-            segLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex,BaseLineBoundary);
-            BaseLineBoundary.ToDbMPolygon().AddToCurrentSpace();
-            segLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
-            segLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
-        }
+        #region 分割线输入预处理
         public bool ProcessSegLines()
         {
+            // 标记圆半径5000
             //源数据
             var init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment()).ToList();
             //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）
             var idToMerge = init_segs.GroupSegLines(1);
+            var merged = init_segs.MergeSegs(idToMerge);
             //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
-            var baselines = init_segs.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l =>l!=null).
+            SegLines = merged.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l =>l!=null).
                 Select(l => new SegLine(l, false, -1, 0, 0)).ToList();
-            //3.判断起始、终结线是否明确 + 更新连接关系
-            var isVaild = FilteringSegLines(baselines);
-            //4.获取最大全连接组，若有未连接的，移除+标记+报错
-            //4.1获取有效车道
-            baselines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
-            //4.2获取最大全连接组,存在其他组标记 + 报错
-            var groups = baselines.GroupSegLines().OrderBy(g =>g.Count).ToList();
-            //3.处理坡道，跟坡道连接 且与其他分割线仅有一个交点的线，直接移除
-
-            //4.判断剩余分割线是否有仅有一个交点的线，若有移除+标记+报错
-
-            // 标记圆半径5000
-            // 判断每根分区线至少有两个交点(端点标记）
-            //if (!HaveAtLeastTwoIntsecPoints(true)) return false;
-            //// 先预切割
-            //SegLines.SeglinePrecut(WallLine);
-            //SeglineIndexList = SegLines.GetSegLineIntsecList();
-            //SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
-            ////获取有效分区线
-            //VaildLanes = SegLines.GetVaildLanes(WallLine, BoundaryObjectsSPIDX);
-            //// 判断分区线净宽（中点标记）
-            //if (!LaneWidthSatisfied()) return false;
-            //// 后预切割
-            //SegLines.SeglinePrecut(WallLine);
-            //// 判断每根分区线至少有两个交点(端点标记）
-            //if (!HaveAtLeastTwoIntsecPoints(false)) return false;
-            //// 判断车道是否全部相连（两个以上标记剩余中点，以下标记自己）
-            //if (!Allconnected()) return false;
+            //3,处理坡道
+            UpdateRamps();
+            //4.判断起始、终结线是否明确 + 更新连接关系
+            var isVaild = FilteringSegLines(SegLines);
+            //5.获取最大全连接车道，若有未连接的，移除+标记+报错
+            //5.1获取有效车道
+            SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
+            //5.2过滤有效车道为null的线
+            SegLines = SegLines.Where(l => l.VaildLane != null).ToList();
+            //5.5获取最大全连接组,存在其他组标记 + 报错
+            //警告存在无效连接，将抛弃部分分割线
+            var groups = SegLines.GroupSegLines().OrderBy(g =>g.Count).ToList();
+            SegLines = SegLines.Slice(groups.Last());
+            //6.再次判断起始、终结线是否明确 + 更新连接关系
+            isVaild = FilteringSegLines(SegLines);
+            SegLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
+            SegLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
+            // 暂未包含车道自动调整逻辑，自动调整要放到迭代求最大最小值时做
             return true;
         }
         //过滤起始、终结点不明确的线,获取线的连接关系
@@ -307,7 +286,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     if(SeglineIndex[i].Item1 == null || SeglineIndex[i].Item2 == null)
                     {
-                        //提示该分割线在有效范围内不与其他分割线连接
+                        //提示该分割线在满足车道宽内不与其他分割线连接
+                        //警告存在无效连接，将抛弃部分分割线
                         segLines.RemoveAt(i);
                         Isvaild = false;
                         stop = false;
@@ -317,6 +297,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     if(SeglineIndex[i].Item1.Count!=0 && SeglineIndex[i].Item2.Count != 0 
                         && SeglineIndex[i].Item1.Any(id => SeglineIndex[i].Item2.Contains(id)))
                     {
+                        //警告存在无效连接，将抛弃部分分割线
                         segLines.RemoveAt(i);
                         Isvaild = false;
                         stop = false;
@@ -326,11 +307,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 if (stop) break;
             }
             return Isvaild;
-        }
-
-        public bool FilteringLanes(List<SegLine> segLines)
-        {
-            return true;
         }
         //更新坡道
         private void UpdateRamps()
@@ -346,6 +322,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     if(lineSegs.GetIntersections( WallLine,i).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
                 }
             }
+        }
+        #endregion
+
+        public void SetInterParam()
+        {
+            OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,BaseLineBoundary,SeglineIndex);
         }
     }
 }

@@ -336,17 +336,31 @@ namespace ThParkingStall.Core.OTools
         }
         #endregion
         #region 分区线合并
-        public static List<LineSegment> MergeSegs(this List<LineSegment> segLines,List<int> idToMerge)
+        public static List<LineSegment> MergeSegs(this List<LineSegment> segLines,List<List<int>> idToMerge)
         {
             var newsegs = new List<LineSegment>();
-            return null;
+            foreach(var group in idToMerge)
+            {
+                var merged = segLines.Slice(group).Merge();
+                if(merged != null) newsegs.Add(merged);
+            }
+            return newsegs;
         }
         public static LineSegment Merge(this List<LineSegment> lineSegments)
         {
-            return null;
+            if (lineSegments.Count == 0) return null;
+            var coors = new List<Coordinate>();
+            foreach (var l in lineSegments)
+            {
+                coors.Add(l.P0);
+                coors.Add(l.P1);
+            }
+            var ordered = coors.OrderBy(c => c.X).ThenBy(c => c.Y);
+            return new LineSegment(coors.First(),coors.Last());
         }
         #endregion
 
+        #region 获取子区域内的车道，以及墙线
         //获取相同部分
         public static List<LineSegment> GetCommonParts(this List<LineString> SegLines,LineString shell,double tol  = 0.01)
         {
@@ -379,5 +393,6 @@ namespace ThParkingStall.Core.OTools
             }
             return walls.Get<LineString>();
         }
+        #endregion
     }
 }

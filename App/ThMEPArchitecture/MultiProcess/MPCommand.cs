@@ -39,6 +39,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThParkingStall.Core.IO;
+using ThParkingStall.Core.OInterProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -576,6 +577,25 @@ namespace ThMEPArchitecture.MultiProcess
     }
     public static class MPEX
     {
+        public static void Display(this OSubArea subArea, string blockName, string layer = "MPDebug")
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 0);
+            }
+            var entities = new List<Entity>();
+            entities.Add(subArea.Area.ToDbMPolygon());
+            entities[0].Layer = layer;
+            if (subArea.VaildLanes != null)
+                entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2, layer)));
+            entities.AddRange(subArea.Walls.Select(wall => wall.ToDbPolyline(1, layer)));
+            entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(5, layer)));
+            entities.AddRange(subArea.Ramps.Select(ramp => ramp.Area.ToDbMPolygon(3, layer)));
+            //entities.AddRange(subArea.BoundingBoxes.Select(polygon => polygon.ToDbMPolygon(4, layer)));
+            entities.ShowBlock(blockName, layer);
+        }
+
         public static void Display(this SubArea subArea,string blockName,string layer = "MPDebug")
         {
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -583,7 +603,6 @@ namespace ThMEPArchitecture.MultiProcess
                 if (!acad.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 0);
             }
-
             var entities = new List<Entity>();
             entities.Add(subArea.Area.ToDbMPolygon());
             entities[0].Layer = layer;
