@@ -19,6 +19,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
 
     public partial class ThSprinklerDimCmdEntrance
     {
+
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThSprinklerDimData", CommandFlags.Modal)]
         public void ThSprinklerDimData()
@@ -72,7 +73,5 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 cmd.Execute();
             }
         }
-
-
     }
 }

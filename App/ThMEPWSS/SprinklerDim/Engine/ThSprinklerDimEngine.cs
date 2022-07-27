@@ -12,14 +12,16 @@ namespace ThMEPWSS.SprinklerDim.Engine
 {
     public class ThSprinklerDimEngine
     {
-        public static List<ThSprinklerNetGroup> GetSprinklerPtNetwork(List<Point3d> sprinkPts, List<Line> pipeLine, string printTag)
+        public static List<ThSprinklerNetGroup> GetSprinklerPtNetwork(List<Point3d> sprinkPts, List<Line> pipeLine, string printTag, out double dtSeg)
         {
-            var netList = GetSprinklerPtOriginalNet(sprinkPts, pipeLine, out var dtSeg, printTag);
+            var netList = GetSprinklerPtOriginalNet(sprinkPts, pipeLine, out dtSeg, printTag);
 
             var opNetList = GetSprinklerPtOptimizedNet(netList, dtSeg, printTag);
             return opNetList;
+
+            //// test
         }
-           
+
 
         private static List<ThSprinklerNetGroup> GetSprinklerPtOriginalNet(List<Point3d> sprinkPts, List<Line> pipeLine, out double DTTol, string printTag)
         {

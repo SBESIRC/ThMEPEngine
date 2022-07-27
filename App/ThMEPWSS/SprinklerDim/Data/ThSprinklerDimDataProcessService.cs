@@ -44,7 +44,6 @@ namespace ThMEPWSS.SprinklerDim.Data
             TchPipe.ForEach(x => x.ProjectOntoXYPlane());
             SprinklerPt = SprinklerPt.Select(x => new Point3d(x.X, x.Y, 0)).ToList();
 
-
         }
         public void Print()
         {

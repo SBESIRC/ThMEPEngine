@@ -23,6 +23,7 @@ using ThMEPEngineCore.Command;
 using ThMEPWSS.Common;
 using ThMEPWSS.SprinklerDim.Data;
 using ThMEPWSS.SprinklerDim.Engine;
+using ThMEPWSS.SprinklerDim.Service;
 
 namespace ThMEPWSS.SprinklerDim.Cmd
 {
@@ -93,7 +94,9 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 dataProcess.ProjectOntoXYPlane();
                 dataProcess.Print();
 
-                ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, dataProcess.TchPipe, printTag);
+                double step = 0;
+                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out step);
+                ThSprinklerDimPosition.DrawDimLines(netList, printTag, step);
 
                 // 区域标注喷淋点
 
