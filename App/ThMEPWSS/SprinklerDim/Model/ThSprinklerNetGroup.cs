@@ -17,6 +17,8 @@ namespace ThMEPWSS.SprinklerDim.Model
         //public List<Line> Lines { get; private set; } = new List<Line>();//所有的线列表，包括和支干管相交的打断线
         public double Angle { get; set; } = 0;//组角度
 
+        public Matrix3d transformer { get; set; } = new Matrix3d();//转换矩阵
+
         public ThSprinklerNetGroup()
         {
 

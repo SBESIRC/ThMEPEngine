@@ -1,23 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
-using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Diagnostics;
-
-using ThMEPWSS.SprinklerDim.Service;
 using ThMEPWSS.SprinklerDim.Model;
-
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -73,5 +58,48 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             return newNetList;
         }
+
+        public static List<ThSprinklerNetGroup> ChangeToOrthogonalCoordinates(List<ThSprinklerNetGroup> netList)
+        {
+
+
+
+            return netList;
+        }
+
+        public static void CorrectGraphConnection(ref List<ThSprinklerNetGroup> netList, double tolerance = 45.0)
+        {
+            foreach(ThSprinklerNetGroup net in netList)
+            {
+                List<Point3d> pts = net.Pts;
+                foreach(ThSprinklerGraph graph in net.PtsGraph)
+                {
+                    List<ThSprinklerVertexNode> nodeList = graph.SprinklerVertexNodeList;
+                    foreach(ThSprinklerVertexNode node in nodeList)
+                    {
+                        Point3d currentPt = pts[node.NodeIndex];
+                        var edge = node.FirstEdge;
+                        while (edge != null)
+                        {
+                            Point3d connectPt = pts[nodeList[edge.EdgeIndex].NodeIndex];
+                            if(Math.Abs(currentPt.X-connectPt.X) > tolerance && Math.Abs(currentPt.Y - connectPt.Y) > tolerance)
+                            {
+                                graph.DeleteEdge(node.NodeIndex, nodeList[edge.EdgeIndex].NodeIndex);
+                                graph.DeleteEdge(nodeList[edge.EdgeIndex].NodeIndex, node.NodeIndex);
+                            }
+
+                            edge = edge.Next;
+                        }
+
+                    }
+
+                }
+                
+            }
+
+        }
+
+
+
     }
 }

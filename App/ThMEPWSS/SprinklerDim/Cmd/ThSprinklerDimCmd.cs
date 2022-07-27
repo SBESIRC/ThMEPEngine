@@ -95,6 +95,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
 
                 ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, dataProcess.TchPipe, printTag);
 
+                // 区域标注喷淋点
 
             }
         }
