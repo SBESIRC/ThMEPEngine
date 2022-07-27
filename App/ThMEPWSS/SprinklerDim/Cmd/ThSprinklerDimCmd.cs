@@ -21,10 +21,10 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Command;
 
 using ThMEPWSS.Common;
-using ThMEPWSS.ThSprinklerDim.Data;
-using ThMEPWSS.ThSprinklerDim.Engine;
+using ThMEPWSS.SprinklerDim.Data;
+using ThMEPWSS.SprinklerDim.Engine;
 
-namespace ThMEPWSS.ThSprinklerDim.Cmd
+namespace ThMEPWSS.SprinklerDim.Cmd
 {
     public class ThSprinklerDimCmd : ThMEPBaseCommand, IDisposable
     {
@@ -88,11 +88,12 @@ namespace ThMEPWSS.ThSprinklerDim.Cmd
                 };
 
                 // dataQuery.Transform(transformer);
+                dataProcess.RemoveDuplicateSprinklerPt();
                 dataProcess.CreateTchPipe();
                 dataProcess.ProjectOntoXYPlane();
                 dataProcess.Print();
 
-                ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, printTag);
+                ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, dataProcess.TchPipe, printTag);
 
 
             }

@@ -45,4 +45,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPWSS.ThHydrantCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThDrainageADPrivateCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThFirstFloorDrainningPlaneSystemCmd))]
-[assembly: CommandClass(typeof(ThMEPWSS.ThSprinklerDim.Cmd.ThSprinklerDimCmdEntrance))]
+[assembly: CommandClass(typeof(ThMEPWSS.SprinklerDim.Cmd.ThSprinklerDimCmdEntrance))]

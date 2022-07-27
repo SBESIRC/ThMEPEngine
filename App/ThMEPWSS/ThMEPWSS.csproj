@@ -229,9 +229,14 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
     <Compile Include="Engine\ThTCHWaterIndicatorRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Data\ThSprinklerDimDataProcessService.cs" />
+    <Compile Include="SprinklerDim\Data\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Engine\ThSprinklerDimEngine.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerEdgeNode.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerNetGroup.cs" />
     <Compile Include="SprinklerDim\Service\ThCreateGroupService.cs" />
-    <Compile Include="SprinklerDim\Service\ThSprinklerDimNetworkService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerLineService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerNetGraphService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerNetworkService.cs" />
     <Compile Include="SprinklerDim\ThSprinklerDimCommon.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorEngine.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />

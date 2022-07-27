@@ -15,7 +15,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 
-namespace ThMEPWSS.DrainageADPrivate.Data
+namespace ThMEPWSS.SprinklerDim.Data
 {
     public class ThTCHPipeExtractionVisitor : ThFlowSegmentExtractionVisitor
     {
@@ -25,11 +25,14 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             {
                 var geom = HandleTCHPipe(dbObj);
 
-                elements.Add(new ThRawIfcFlowSegmentData()
+                if (geom != null)
                 {
-                    Data = dbObj,
-                    Geometry = geom
-                });
+                    elements.Add(new ThRawIfcFlowSegmentData()
+                    {
+                        Data = dbObj,
+                        Geometry = geom
+                    });
+                }
             }
         }
 
@@ -38,13 +41,17 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             if (CheckLayerValid(dbObj) && dbObj.IsTCHPipe() && IsHorizontalPipe(dbObj))
             {
                 var geom = HandleTCHPipe(dbObj);
-                geom.TransformBy(matrix);
 
-                elements.Add(new ThRawIfcFlowSegmentData()
+                if (geom != null)
                 {
-                    Data = dbObj,
-                    Geometry = geom
-                });
+                    geom.TransformBy(matrix);
+
+                    elements.Add(new ThRawIfcFlowSegmentData()
+                    {
+                        Data = dbObj,
+                        Geometry = geom
+                    });
+                }
             }
         }
 
@@ -128,13 +135,51 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         /// <param name="pipe"></param>
         private Line HandleTCHPipe(Entity pipe)
         {
-            var extent = pipe.GeometricExtents;
-            var pl = new Line(extent.MinPoint, extent.MaxPoint);
-            pl.Layer = pipe.Layer;
+            Line returnLine = null;
+            var line = GetCurve(pipe.ObjectId) as Curve;
+            var lineClone = line.Clone() as Curve;
+            
 
-            return pl;
+            //var objs = pipe.ExplodeTCHElement();
+            //var lines = objs.OfType<Line>().Where(x => x.Length > 1).ToList();
+
+            //if (lines.Count() > 0)
+            //{
+            //    if (lines.Count() > 1)
+            //    {
+            //        var dir = (lines.First().EndPoint - lines.First().StartPoint).GetNormal();
+
+            //        var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
+            //        var matrix = Matrix3d.Displacement(lines.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+
+            //        lines.ForEach(x => x.TransformBy(matrix.Inverse()));
+            //        lines = lines.OrderBy(x => x.StartPoint.X).ToList();
+            //        lines.ForEach(x => x.TransformBy(matrix));
+            //    }
+
+            //    var startZ = 0.0;
+            //    var endZ = 0.0;
+            //    var pipeParameters = ThOPMTools.GetOPMProperties(pipe.Id);
+            //    if (pipeParameters.ContainsKey("起点标高") && pipeParameters.ContainsKey("终点标高") && pipeParameters.ContainsKey("管长"))
+            //    {
+            //        startZ = Convert.ToDouble(pipeParameters["起点标高"]);
+            //        endZ = Convert.ToDouble(pipeParameters["终点标高"]);
+            //    }
+
+            //    pl = new Line(new Point3d(lines.First().StartPoint.X, lines.First().StartPoint.Y, startZ), new Point3d(lines.Last().EndPoint.X, lines.Last().EndPoint.Y, endZ));
+            //    pl.Layer = pipe.Layer;
+            //}
+
+            returnLine = new Line(lineClone.StartPoint, lineClone.EndPoint);
+
+
+            return returnLine;
         }
 
+        private static Curve GetCurve(ObjectId tch)
+        {
+            return tch.GetObject(OpenMode.ForRead) as Curve;
+        }
     }
 
     public class ThTCHPipeExtractionEngine : ThFlowSegmentExtractionEngine

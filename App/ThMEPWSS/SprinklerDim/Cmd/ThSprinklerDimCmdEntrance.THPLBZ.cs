@@ -11,10 +11,10 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 
 using ThMEPWSS.Common;
-using ThMEPWSS.ThSprinklerDim.Data;
-using ThMEPWSS.ThSprinklerDim.Engine;
+using ThMEPWSS.SprinklerDim.Data;
+using ThMEPWSS.SprinklerDim.Engine;
 
-namespace ThMEPWSS.ThSprinklerDim.Cmd
+namespace ThMEPWSS.SprinklerDim.Cmd
 {
 
     public partial class ThSprinklerDimCmdEntrance

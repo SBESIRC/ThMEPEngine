@@ -15,11 +15,11 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Diagnostics;
 
-using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPWSS.SprinklerConnect.Model;
+using ThMEPWSS.SprinklerDim.Service;
+using ThMEPWSS.SprinklerDim.Model;
 
 
-namespace ThMEPWSS.ThSprinklerDim.Service
+namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimNetworkService
     {
@@ -37,7 +37,6 @@ namespace ThMEPWSS.ThSprinklerDim.Service
                     for (int i = 0; i < net.PtsGraph.Count(); i++)
                     {
                         var pts = net.GetGraphPts(i);
-                        var lines = net.GetGraphLines(i);
                         var dict = new Dictionary<int, int>();
                         for (int ptI = 0; ptI < pts.Count(); ptI++)
                         {
@@ -47,7 +46,6 @@ namespace ThMEPWSS.ThSprinklerDim.Service
                         var newNet = new ThSprinklerNetGroup();
                         var newGraph = new ThSprinklerGraph();
                         newNet.Angle = net.Angle;
-                        newNet.Lines.AddRange(lines);
                         newNet.Pts.AddRange(pts);
                         newNet.PtsGraph.Add(newGraph);
 
