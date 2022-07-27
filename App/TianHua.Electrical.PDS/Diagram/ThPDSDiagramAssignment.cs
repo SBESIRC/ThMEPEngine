@@ -410,9 +410,6 @@ namespace TianHua.Electrical.PDS.Diagram
             CellAssign(table.Cells[0, 5], node.Details.LoadCalculationInfo.HighDemandFactor);
             // cos(\Phi)
             CellAssign(table.Cells[0, 12], node.Details.LoadCalculationInfo.PowerFactor);
-
-            // 刷新表格中的公式计算值
-            table.GenerateLayout();
         }
 
         private void CellAssign(Cell cell, double value)
