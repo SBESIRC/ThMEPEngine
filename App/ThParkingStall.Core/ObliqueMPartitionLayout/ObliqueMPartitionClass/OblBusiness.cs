@@ -61,12 +61,12 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         {
             RemoveDuplicateCars();
             RemoveCarsIntersectedWithBoundary();
+            InsuredForTheCaseOfoncaveBoundary();
             if (AccurateCalculate)
             {
                 PostProcessPillars();
                 ReDefinePillarDimensions();
             }
-            InsuredForTheCaseOfoncaveBoundary();
         }
     }
 }

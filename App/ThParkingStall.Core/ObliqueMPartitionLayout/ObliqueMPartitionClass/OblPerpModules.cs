@@ -23,7 +23,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
 
         public void GenerateCarsInModules()
         {
-
             //UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             //var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
             //SortLaneByDirection(vertlanes, LayoutMode);
@@ -219,10 +218,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             else
                                 boxcrossed = carcrossed;
                         }
-                        boxpl = boxpl.Translation(lane.Vec.Normalize() * DisLaneWidth / 2);
+                        //20220727DEBUG时注释掉的以下这一行，忘了了是什么场景加了这段代码，结合下面面一起注释的这段————以前的偏移距离好像多检测了半车道
+                        //boxpl = boxpl.Translation(lane.Vec.Normalize() * DisLaneWidth / 2);
+                        //20220727DEBUG时注释掉的以下这一行，忘了了是什么场景加了这段代码，结合下面面一起注释的这段————以前的偏移距离好像多检测了半车道
+                        boxpl = PolyFromLines(boxsplit.Translation(lane.Vec.Normalize() * DisLaneWidth / 2), boxsplittest);
+                        boxpl = boxpl.Scale(ScareFactorForCollisionCheck);
+
                         //boxsplittest.TransformBy(Matrix3d.Displacement(lane.Vec.GetNormal() * DisLaneWidth / 2));
                         //boxpl = CreatPolyFromLines(boxsplit, boxsplittest);
                         //boxpl.Scale(boxpl.GetRecCentroid(), ScareFactorForCollisionCheck);
+                        //boxpl = PolyFromLines(TranslateReservedConnection(boxsplit, lane.Vec.Normalize() * (mindistance-DisLaneWidth/2)), boxsplittest);
                         boxcrossed.AddRange(LaneSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>());
                         //boxcrossed.AddRange(LaneBufferSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>());
                         var lnbox = LaneBufferSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>();
@@ -236,7 +241,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                         boxsplittest = TranslateReservedConnection(boxsplittest, lane.Vec.Normalize() * DisLaneWidth / 2, false);
                         var boxpoints = new List<Coordinate>();
-                        foreach (var cross in boxcrossed)
+                        foreach (var cross in boxcrossed.Select(e => e.Scale(ScareFactorForCollisionCheck)))
                         {
                             boxpoints.AddRange(cross.Coordinates);
                             boxpoints.AddRange(cross.IntersectPoint(boxpl));
@@ -265,16 +270,17 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         {
                             splits = splits.Where(e => !IsInAnyBoxes(e.MidPoint, CarBoxes, true));
                         }
-                        splits = splits.Where(e =>
-                        {
-                            var tlt = new LineSegment(boxsplit.ClosestPoint(e.P0), boxsplit.ClosestPoint(e.P1));
-                            var plt = PolyFromLines(tlt, e);
-                            foreach (var il in boxcrossed)
-                            {
-                                if (plt.Contains(il.Centroid)) return false;
-                            }
-                            return true;
-                        });
+                        //20220727DEBUG时注释掉的，忘了了是什么场景加了这段代码，结合上面一起注释的这句————以前的偏移距离好像多检测了半车道
+                        //splits = splits.Where(e =>
+                        //{
+                        //    var tlt = new LineSegment(boxsplit.ClosestPoint(e.P0), boxsplit.ClosestPoint(e.P1));
+                        //    var plt = PolyFromLines(tlt, e);
+                        //    foreach (var il in boxcrossed)
+                        //    {
+                        //        if (plt.Contains(il.Centroid)) return false;
+                        //    }
+                        //    return true;
+                        //});
                         foreach (var slit in splits)
                         {
                             var split = slit;

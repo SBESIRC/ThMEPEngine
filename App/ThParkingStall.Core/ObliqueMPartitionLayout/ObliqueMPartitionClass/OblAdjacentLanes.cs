@@ -126,7 +126,21 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             var pt_closest_onwall = _nearwall_seg.ClosestPoint(ps, true);
             var angle_pspt_pswall = new Vector2D(ps, pt).AngleTo(new Vector2D(ps, pt_closest_onwall));
-            var length = (DisCarAndHalfLane + CollisionD - CollisionTOP) / Math.Cos(angle_pspt_pswall);
+            var _nearwall_endpt = _nearwall_seg.P0.Distance(pt_closest_onwall) < _nearwall_seg.P1.Distance(pt_closest_onwall) ?
+                _nearwall_seg.P1 : _nearwall_seg.P0;
+            var pt_on_lane_project = new LineSegment(pt, ps).ClosestPoint(_nearwall_endpt, true);
+            var distance = pt_on_lane_project.Distance(pt);
+            var extend_offset_distance = distance < 100 && distance < _nearwall_seg.Length / 100 && distance > 0;
+            var angle_pspt_pswall_2 =new Vector2D(pt, pt_closest_onwall).AngleTo(new Vector2D(pt, _nearwall_endpt));
+            if (Math.Abs(angle_pspt_pswall_2) / Math.PI * 180 < 0.1)
+            {
+                angle_pspt_pswall += Math.Abs(angle_pspt_pswall_2);
+            }
+            if (!extend_offset_distance)
+            {
+                distance = 1;
+            }
+            var length = (DisCarAndHalfLane + distance + CollisionD - CollisionTOP) / Math.Cos(angle_pspt_pswall);
             if (isStart)
             {
                 pt = lane.Line.P0;
