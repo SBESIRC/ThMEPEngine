@@ -98,7 +98,7 @@ namespace ThMEPTCH.TCHArchDataConvert
                     var wall = wallDic[outLine];
                     var wallEntity = wallEntityDic[outLine];
                     var copyDoor = item.Value.Clone() as ThTCHDoor;
-                    copyDoor.Uuid += wallEntity.Id;
+                    copyDoor.Uuid += wallEntity.DBId.ToString();
                     wall.Doors.Add(copyDoor);
                     wall.Openings.Add(WallDoorOpening(wallEntity, doorEntity));
                 }
@@ -112,7 +112,7 @@ namespace ThMEPTCH.TCHArchDataConvert
                     var wall = wallDic[outLine];
                     var wallEntity = wallEntityDic[outLine];
                     var copyWindow = item.Value.Clone() as ThTCHWindow;
-                    copyWindow.Uuid += wallEntity.Id;
+                    copyWindow.Uuid += wallEntity.DBId.ToString();
                     wall.Windows.Add(copyWindow);
                     wall.Openings.Add(WallWindowOpening(wallEntity, windowEntity));
                 }
