@@ -1,6 +1,8 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Overlay;
@@ -14,6 +16,7 @@ using ThCADCore.NTS;
 using ThMEPArchitecture.MultiProcess;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ViewModel;
+using ThMEPEngineCore;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
 using ThParkingStall.Core.OTools;
@@ -249,6 +252,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         #region 分割线输入预处理
         public bool ProcessSegLines()
         {
+            bool isVaild = true;
             // 标记圆半径5000
             //源数据
             var init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment()).ToList();
@@ -261,7 +265,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //3,处理坡道
             UpdateRamps();
             //4.判断起始、终结线是否明确 + 更新连接关系
-            var isVaild = FilteringSegLines(SegLines);
+            isVaild = FilteringSegLines(SegLines);
             //5.获取最大全连接车道，若有未连接的，移除+标记+报错
             //5.1获取有效车道
             SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
@@ -270,9 +274,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //5.5获取最大全连接组,存在其他组标记 + 报错
             //警告存在无效连接，将抛弃部分分割线
             var groups = SegLines.GroupSegLines().OrderBy(g =>g.Count).ToList();
+            for(int i = 0; i < groups.Count-1; i++)
+            {
+                if (isVaild)
+                {
+                    isVaild = false;
+                    //提示该分割线在满足车道宽内不与其他分割线连接
+                    //警告存在无效连接，将抛弃部分分割线
+                    Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
+                    Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+                }
+                SegLines.Slice(groups[i]).ForEach(l => l.Splitter.MidPoint.MarkPoint());
+            }
             SegLines = SegLines.Slice(groups.Last());
             //6.再次判断起始、终结线是否明确 + 更新连接关系
-            isVaild = FilteringSegLines(SegLines);
+            isVaild =  FilteringSegLines(SegLines) && isVaild;
             SegLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
             SegLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
             // 暂未包含车道自动调整逻辑，自动调整要放到迭代求最大最小值时做
@@ -290,8 +306,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     if(SeglineIndex[i].Item1 == null || SeglineIndex[i].Item2 == null)
                     {
-                        //提示该分割线在满足车道宽内不与其他分割线连接
-                        //警告存在无效连接，将抛弃部分分割线
+                        if (Isvaild)
+                        {
+                            //提示该分割线在满足车道宽内不与其他分割线连接
+                            //警告存在无效连接，将抛弃部分分割线
+                            segLines[i].Splitter.MidPoint.MarkPoint();
+                            Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
+                            Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+                        }
                         segLines.RemoveAt(i);
                         Isvaild = false;
                         stop = false;
@@ -301,7 +323,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     if(SeglineIndex[i].Item1.Count!=0 && SeglineIndex[i].Item2.Count != 0 
                         && SeglineIndex[i].Item1.Any(id => SeglineIndex[i].Item2.Contains(id)))
                     {
-                        //警告存在无效连接，将抛弃部分分割线
+                        if (Isvaild)
+                        {
+                            //提示该分割线在满足车道宽内不与其他分割线连接
+                            //警告存在无效连接，将抛弃部分分割线
+                            segLines[i].Splitter.MidPoint.MarkPoint();
+                            Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
+                            Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+                        }
                         segLines.RemoveAt(i);
                         Isvaild = false;
                         stop = false;
