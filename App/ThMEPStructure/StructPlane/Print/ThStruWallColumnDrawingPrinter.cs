@@ -47,14 +47,14 @@ namespace ThMEPStructure.StructPlane.Print
                     {
                         if(o.IsBelowFloorColumn())
                         {
-                            Append(PrintBelowColumn(database, o));
+                            Append(PrintUpperColumn(database, o));
                         }                       
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
                         if(o.IsBelowFloorShearWall())
                         {
-                            Append(PrintBelowShearWall(database, o));
+                            Append(PrintUpperShearWall(database, o));
                         }                        
                     }
                 }

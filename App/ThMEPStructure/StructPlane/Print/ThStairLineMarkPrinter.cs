@@ -29,23 +29,33 @@ namespace ThMEPStructure.StructPlane.Print
                 results.Add(line.Print(db, LineConfig));
 
                 // 原点创建文字
-                var mark = CreateText("楼梯详图");
-                results.Add(mark.Print(db, TextConfig));
-                acadDb.Element<DBText>(mark.ObjectId,true);
-
-                // 向上移动
+                var mark = CreateText("楼梯详图");               
                 var textH = mark.GeometricExtents.MaxPoint.Y - mark.GeometricExtents.MinPoint.Y;
-                var mt1 = Matrix3d.Displacement(new Vector3d(0, textH/2.0+ TextPosDistanceToLine,0));
-                mark.TransformBy(mt1);
 
                 // 旋转文字
-                ThAdjustDbTextRotationService.Adjust(mark, line.StartPoint.GetVectorTo(line.EndPoint));
+                var textRotation = ThAdjustDbTextRotationService.GetRotation(line.StartPoint.GetVectorTo(line.EndPoint));
+                var mt1 = Matrix3d.Rotation(textRotation, Vector3d.ZAxis, Point3d.Origin);
+                mark.TransformBy(mt1);
 
                 // 移动文字
+                var oldCenter = mark.GetCenterPoint();
                 var midPt = line.StartPoint.GetMidPt(line.EndPoint);
-                var mt2 = Matrix3d.Displacement(midPt - Point3d.Origin);
+                var perpendVec = line.StartPoint.GetVectorTo(line.EndPoint).GetPerpendicularVector().GetNormal();
+                var newCenter = midPt;
+                if(perpendVec.DotProduct(Vector3d.YAxis)>0.0)
+                {
+                    newCenter = midPt + perpendVec.MultiplyBy(textH / 2.0 + TextPosDistanceToLine);
+                }
+                else
+                {
+                    newCenter = midPt - perpendVec.MultiplyBy(textH / 2.0 + TextPosDistanceToLine);
+                }
+                var mt2 = Matrix3d.Displacement(oldCenter.GetVectorTo(newCenter));
                 mark.TransformBy(mt2);
-              
+
+                // 打印
+                results.Add(mark.Print(db, TextConfig));
+                acadDb.Element<DBText>(mark.ObjectId, true);
                 return results;
             } 
         }
@@ -59,8 +69,7 @@ namespace ThMEPStructure.StructPlane.Print
             dbText.WidthFactor = 1.0;
             dbText.Position = Point3d.Origin;
             dbText.HorizontalMode = TextHorizontalMode.TextCenter;
-            dbText.VerticalMode = TextVerticalMode.TextVerticalMid;
-            dbText.AlignmentPoint = dbText.Position;
+            dbText.VerticalMode = TextVerticalMode.TextBottom;
             return dbText;
         }
 

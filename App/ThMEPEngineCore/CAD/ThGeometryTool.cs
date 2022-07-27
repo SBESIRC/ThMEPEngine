@@ -40,6 +40,28 @@ namespace ThMEPEngineCore.CAD
             var secondVec = second.LineDirection();
             return firstVec.IsParallelToEx(secondVec);
         }
+        public static bool IsParallelToXAix(Point3d firstPt, Point3d secondPt, double gap = 1e-6)
+        {
+            var yMinus = firstPt.Y - secondPt.Y;
+            return Math.Abs(yMinus) <= gap;
+        }
+        public static bool IsParallelToYAix(Point3d firstPt, Point3d secondPt, double gap = 1e-6)
+        {
+            var xMinus = firstPt.X - secondPt.X;
+            return Math.Abs(xMinus) <= gap;
+        }
+        public static bool IsParallelToXAix(this Vector3d vector, double gap = 1e-6)
+        {
+            var firstPt = Point3d.Origin;
+            var secondPt = Point3d.Origin + vector.MultiplyBy(100.0);
+            return IsParallelToXAix(firstPt,secondPt,gap);
+        }
+        public static bool IsParallelToYAix(this Vector3d vector, double gap = 1e-6)
+        {
+            var firstPt = Point3d.Origin;
+            var secondPt = Point3d.Origin + vector.MultiplyBy(100.0);
+            return IsParallelToYAix(firstPt, secondPt, gap);
+        }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
         {
@@ -126,7 +148,11 @@ namespace ThMEPEngineCore.CAD
             ang = ang % 180.0;
             return Math.Abs(ang - 90.0) <= angTolerance;
         }
-
+        public static bool IsEqual(Point3d firstSp, Point3d firstEp, Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
+        {
+            return (firstSp.DistanceTo(secondSp) <= tolerance && firstEp.DistanceTo(secondEp) <= tolerance) ||
+                (firstSp.DistanceTo(secondEp) <= tolerance && firstEp.DistanceTo(secondSp) <= tolerance);
+        }
         public static Polyline TextOBB(this DBText dBText)
         {
             try
@@ -185,6 +211,19 @@ namespace ThMEPEngineCore.CAD
             obb.TransformBy(counterClockwiseMat);
             return obb;
         }
+
+        public static Point3d GetCenterPoint(this DBText text)
+        {
+            var clone = text.Clone() as DBText;
+            var mt1 = Matrix3d.Rotation(-1.0 * text.Rotation, text.Normal, text.Position);
+            clone.TransformBy(mt1); // 转成0度
+            var centerPt = clone.GeometricExtents.MinPoint.GetMidPt(clone.GeometricExtents.MaxPoint);
+            var mt2 = Matrix3d.Rotation(text.Rotation, text.Normal, text.Position);
+            centerPt = centerPt.TransformBy(mt2);
+            clone.Dispose();
+            return centerPt;
+        }
+
         public static bool IsPerpendicular(Vector3d firstVec, Vector3d secondVec, double tolerance = 1.0)
         {
             double rad = firstVec.GetAngleTo(secondVec);
@@ -311,7 +350,10 @@ namespace ThMEPEngineCore.CAD
                 return false;
             }
         }
-
+        public static bool IsContains(this Point3dCollection pts,Point3d pt,double tolerance = 1e-6)
+        {
+            return pts.OfType<Point3d>().Where(p => p.DistanceTo(pt) <= tolerance).Any();
+        }
         public static List<Point3d> GetPoints(this Line line)
         {
             var result = new List<Point3d>();

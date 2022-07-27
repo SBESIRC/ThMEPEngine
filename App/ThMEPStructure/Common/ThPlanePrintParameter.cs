@@ -22,7 +22,7 @@
         /// <summary>
         /// 是否过滤空调板
         /// </summary>
-        public bool IsFilterCantiSlab { get; set; } = false;
+        public bool IsFilterCantiSlab { get; set; } = true;
         /// <summary>
         /// 默认板厚
         /// </summary>
