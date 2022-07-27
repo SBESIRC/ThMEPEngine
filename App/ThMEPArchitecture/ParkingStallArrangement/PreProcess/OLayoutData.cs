@@ -3,6 +3,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +83,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
             Buildings = Obstacles.Concat(RampPolgons).ToList();
-            Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
+            Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
+                Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
+            //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             UpdateSPIndex();//更新空间索引
             UpdateBasementInfo();
             GetSegLineBoundary();
