@@ -100,7 +100,7 @@ namespace ThParkingStall.Core.Tools
                 var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
                 if (intSection.Length > 0)
                 {
-                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                    var pts = intSection.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
                     VaildParts.Add(new LineSegment(pts.First(), pts.Last()));
                 }
             }

@@ -52,17 +52,19 @@ namespace ThParkingStall.Core.OInterProcess
             var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
-            var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
+            //var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
             // 创建子区域列表
             for (int i = 0; i < areas.Count; i++)
             {
                 var area = areas[i];
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
-                var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
-                var subLanes = subLaneLineStrings.GetVaildParts(area);
+                //var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
+                //var subLanes = subLaneLineStrings.GetVaildParts(area);
+
+                var subLanes = SegLineStrings.GetVaildParts(area);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
                 Geometry geoWalls = area.Shell;
-                foreach (var subSegLine in subLaneLineStrings)
+                foreach (var subSegLine in SegLineStrings)
                 {
                     if (subSegLine.PartInCommon(geoWalls))
                     {
