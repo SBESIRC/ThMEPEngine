@@ -763,6 +763,7 @@
                 <Command Local="THSGLY" Global="THSGLY" />
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
+                <Command Local="THFYJS" Global="THFYJS" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
             </Commands>
         </ComponentEntry>
@@ -788,6 +789,7 @@
                 <Command Local="THSGLY" Global="THSGLY" />
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
+                <Command Local="THFYJS" Global="THFYJS" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
             </Commands>
         </ComponentEntry>
@@ -813,6 +815,7 @@
                 <Command Local="THSGLY" Global="THSGLY" />
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
+                <Command Local="THFYJS" Global="THFYJS" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
             </Commands>
         </ComponentEntry>

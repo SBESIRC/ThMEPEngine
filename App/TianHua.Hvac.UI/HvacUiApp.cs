@@ -182,8 +182,8 @@ namespace TianHua.Hvac.UI
         }
 
         SmokeCalculateUI smokeCalculateUI;
-        [CommandMethod("TIANHUACAD", "THSMKPS", CommandFlags.Modal)]
-        public void ThWSSUI()
+        [CommandMethod("TIANHUACAD", "THFYJS", CommandFlags.Modal)]
+        public void THFYJS()
         {
             if (smokeCalculateUI != null && smokeCalculateUI.IsLoaded)
             {

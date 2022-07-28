@@ -44,7 +44,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofEventMonitor
                     using (AcadDatabase acadDatabase = AcadDatabase.Use(_selectedEntId.Database))
                     {
                         GetXRecordData(_selectedEntId);
-                        _customCmd = "THSMKPS";
+                        _customCmd = "THFYJS";
                     }
 
                     //Find mapped custom command name
