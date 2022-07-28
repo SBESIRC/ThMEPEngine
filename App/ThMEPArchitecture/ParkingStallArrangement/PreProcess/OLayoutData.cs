@@ -35,7 +35,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
 
         // NTS 数据结构
-        public Polygon Basement;//地库，面域部分为可布置区域
+        //public Polygon Basement;//地库，面域部分为可布置区域
         public Polygon WallLine;//初始边界线
         public List<SegLine> SegLines = new List<SegLine>();// 初始分区线
         public List<Polygon> Obstacles; // 初始障碍物,不包含坡道
@@ -86,8 +86,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
             Buildings = Obstacles.Concat(RampPolgons).ToList();
-            Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
-                Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
+            //Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
+            //    Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             UpdateSPIndex();//更新空间索引
             UpdateBasementInfo();

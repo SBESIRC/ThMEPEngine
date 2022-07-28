@@ -97,6 +97,8 @@ namespace ThParkingStall.Core.OTools
             var intSecPts = segLine.GetBaseLine(shell).OExtend(1).ToLineString().Intersection(shell.Shell).Coordinates;
             coors.AddRange(intSecPts);
             var ordered = coors.OrderBy(c => c.X).ThenBy(c => c.Y);
+            if (ordered.Count() == 0) return ordered.ToList();
+            if (ordered.Last().Distance(ordered.First())< ExtendTol) return new List<Coordinate> {  ordered.Last() };
             return ordered.ToList();
         }
         #endregion
@@ -362,12 +364,12 @@ namespace ThParkingStall.Core.OTools
 
         #region 获取子区域内的车道，以及墙线
         //获取相同部分
-        public static List<LineSegment> GetCommonParts(this List<LineString> SegLines,LineString shell,double tol  = 0.01)
+        public static List<LineSegment> GetCommonParts(this List<LineString> lanes,Polygon area,double tol  = 0.01)
         {
             var vaildParts = new List<LineSegment>();
             //var bounds = new MNTSSpatialIndex(shell.ToLineStrings());
-            var bound = shell.Buffer(tol);
-            foreach(var segLine in SegLines)
+            var bound = area.Buffer(tol);
+            foreach(var segLine in lanes)
             {
                 var commonPart = segLine.Intersection(bound);
                 if(commonPart.Length > LengthTol)

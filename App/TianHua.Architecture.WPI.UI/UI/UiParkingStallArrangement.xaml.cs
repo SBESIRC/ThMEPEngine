@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPArchitecture;
 using ThMEPArchitecture.MultiProcess;
 using ThMEPArchitecture.ParkingStallArrangement;
 using ThMEPArchitecture.ViewModel;
@@ -118,6 +119,14 @@ namespace TianHua.Architecture.WPI.UI.UI
         private void btnShowLog_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void oRun_Click(object sender, RoutedEventArgs e)
+        {
+            using (var cmd = new CreateAllSeglinesCmd(_ViewModel))
+            {
+                cmd.Execute();
+            }
         }
     }
 }
