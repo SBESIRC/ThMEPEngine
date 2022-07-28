@@ -1,6 +1,5 @@
 Supported versions of AutoCAD:
 ===============================
-SuperBoundary18	- AutoCAD 2010...2012
 SuperBoundary19	- AutoCAD 2013...2014
 SuperBoundary20	- AutoCAD 2015...2016
 SuperBoundary21	- AutoCAD 2017
@@ -17,3 +16,4 @@ Commands. I have changed command names:
 SBND - launches app with standard dialog mode.
 SBND_PICK - launches app with pick point mode.
 SBND_ALL - launches app with build all mode.
+SBND_CONFIG - for export/import settings file
