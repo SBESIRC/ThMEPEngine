@@ -16,6 +16,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
     {
         public void PreProcess()
         {
+            ConvertRampDatas();
+        }
+        private void GetValidPartOfLaneJudgeByObstacles()
+        {
             var iniLanes = IniLanes.Select(e => e.Line).ToList();
             for (int i = 0; i < IniLanes.Count; i++)
             {
@@ -57,6 +61,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     i--;
                 }
             }
+        }
+        private void ConvertRampDatas()
+        {
             if (RampList.Count > 0)
             {
                 var ramp = RampList[0];
@@ -91,5 +98,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
             }
         }
+
     }
 }

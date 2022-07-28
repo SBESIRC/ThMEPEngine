@@ -32,8 +32,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 var length_adj_lanes = ((int)GenerateAdjacentLanesOptimizedByRealLength(ref paras_adj_lanes));
                 var length_between_two_builds = ((int)GenerateLaneBetweenTwoBuilds(ref paras_between_two_builds));
                 var length_single_vert_modules = (int)GenerateLaneForLayoutingSingleVertModule(ref paras_single_vert_modules);
-                var max = Math.Max(Math.Max(length_integral_modules, length_adj_lanes), Math.Max(length_adj_lanes, length_between_two_builds));
-                max = Math.Max(max, length_single_vert_modules);
+                var max = new int[] { length_integral_modules, length_adj_lanes, length_between_two_builds, length_single_vert_modules }.Max();
                 if (max > 0)
                 {
                     if (max == length_integral_modules)
