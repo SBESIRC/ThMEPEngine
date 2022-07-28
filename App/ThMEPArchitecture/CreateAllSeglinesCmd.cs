@@ -19,6 +19,9 @@ using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThParkingStall.Core.IO;
+using Autodesk.AutoCAD.ApplicationServices;
+using System.Diagnostics;
 
 namespace ThMEPArchitecture
 {
@@ -29,7 +32,7 @@ namespace ThMEPArchitecture
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit:10).CreateLogger();
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
-
+        public string DrawingName;
         public CreateAllSeglinesCmd()
         {
             CommandName = "-THDXFGXSC";//天华地下分割线生成
@@ -92,6 +95,8 @@ namespace ThMEPArchitecture
         public void ORun(AcadDatabase acadDatabase)
         {
             ParameterStock.Set(new ParkingStallArrangementViewModel());
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+            DrawingName = Path.GetFileName(doc.Name);
             var blks = InputData.SelectBlocks(acadDatabase);
             if (blks == null) return;
             foreach(var blk in blks)
@@ -110,6 +115,13 @@ namespace ThMEPArchitecture
 
         public void ProcessABlock(BlockReference block)
         {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var blkName = block.GetEffectiveName();
+            UpdateLogger(blkName);
+            Logger?.Information("块名：" + blkName);
+            Logger?.Information("文件名：" + DrawingName);
+            Logger?.Information("用户名：" + Environment.UserName);
             var layoutData = new OLayoutData(block, Logger, out bool succeed);
             if (!succeed) return;
             layoutData.ProcessSegLines();
@@ -118,6 +130,7 @@ namespace ThMEPArchitecture
 #if DEBUG
             subAreas.ForEach(s => s.Display("MPDebug"));
 #endif
+            var totalParkingStallCount = 0;
             foreach (var oSubArea in subAreas)
             {
                 try
@@ -139,12 +152,34 @@ namespace ThMEPArchitecture
                     mParkingPartitionPro.Process(true);
                     MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
                     mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                    totalParkingStallCount += mParkingPartitionPro.Cars.Count;
                 }
                 catch (System.Exception ex)
                 {
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
+
+            var strBest = $"最大车位数{totalParkingStallCount}\n";
+            Logger?.Information(strBest);
+            Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
+            ReclaimMemory();
+        }
+
+        private void UpdateLogger(string blkName)
+        {
+            string modName = "斜交_";
+            var logFileName = Path.Combine(GetPath.GetAppDataPath(), modName + DrawingName.Split('.').First() + '(' + blkName + ')' + ".txt");
+            Logger = new Serilog.LoggerConfiguration().WriteTo
+                    .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+
+        }
+
+        private void ReclaimMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
         }
     }
 }

@@ -187,7 +187,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 //输入打成线+求面域+union
                 var UnionedObstacles = new MultiPolygon(CAD_Obstacles.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
                 //求和地库交集
-                Obstacles = UnionedObstacles.Intersection(WallLine).Get<Polygon>(true);
+                Obstacles = UnionedObstacles.Get<Polygon>(true);
             }
         }
         //更新坡道polygon
@@ -289,8 +289,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             SegLines = SegLines.Slice(groups.Last());
             //6.再次判断起始、终结线是否明确 + 更新连接关系
             isVaild =  FilteringSegLines(SegLines) && isVaild;
-            SegLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
-            SegLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
+            //SegLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
+            //SegLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
+            showVaildLanes();
             // 暂未包含车道自动调整逻辑，自动调整要放到迭代求最大最小值时做
             return true;
         }
@@ -361,6 +362,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public void SetInterParam()
         {
             OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,BaseLineBoundary,SeglineIndex);
+        }
+
+        private void showVaildLanes()
+        {
+            var layer = "分区线等价车道";
+            var vaildLanes = SegLines.Where(l => l.VaildLane != null).Select(l =>l.VaildLane).ToList();
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                var outSegLines = vaildLanes.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList();
+                outSegLines.ShowBlock(layer, layer);
+                //finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                //MPEX.HideLayer(layer);
+            }
         }
     }
 }
