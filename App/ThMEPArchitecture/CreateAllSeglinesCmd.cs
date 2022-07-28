@@ -18,6 +18,7 @@ using ThMEPArchitecture.PartitionLayout;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPArchitecture
 {
@@ -34,7 +35,12 @@ namespace ThMEPArchitecture
             CommandName = "-THDXFGXSC";//天华地下分割线生成
             ActionName = "生成";
         }
-
+        public CreateAllSeglinesCmd(ParkingStallArrangementViewModel vm)
+        {
+            CommandName = "THZDCWBZ";
+            ActionName = "斜交无迭代速排";
+            ParameterViewModel = vm;
+        }
         public void Dispose()
         {
         }
@@ -90,43 +96,55 @@ namespace ThMEPArchitecture
             if (blks == null) return;
             foreach(var blk in blks)
             {
-                var layoutData = new OLayoutData(blk, Logger, out bool succeed);
-                if (!succeed) continue;
-                layoutData.ProcessSegLines();
-                layoutData.SetInterParam();
-                var subAreas = OInterParameter.GetOSubAreas();
-#if DEBUG
-                subAreas.ForEach(s => s.Display("MPDebug"));
-#endif
-                foreach (var oSubArea in subAreas)
+                try
                 {
-                    try
-                    {
-                        ObliqueMPartition mParkingPartitionPro = new ObliqueMPartition(oSubArea.Walls, oSubArea.VaildLanes, oSubArea.Buildings, oSubArea.Area);
-                        mParkingPartitionPro.OutputLanes = new List<LineSegment>();
-                        mParkingPartitionPro.OutBoundary = oSubArea.Area;
-                        mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
-                        mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
-#if DEBUG
-                        var s = MDebugTools.AnalysisPolygon(mParkingPartitionPro.Boundary);
-                        string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                        FileStream fs = new FileStream(dir + "\\bound.txt", FileMode.Create, FileAccess.Write);
-                        StreamWriter sw = new StreamWriter(fs);
-                        sw.WriteLine(s);
-                        sw.Close();
-                        fs.Close();
-#endif
-                        mParkingPartitionPro.Process(true);
-                        MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
-                        mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Active.Editor.WriteMessage(ex.Message);
-                    }
+                    ProcessABlock(blk);
+                }
+                catch (Exception ex)
+                {
+                    Active.Editor.WriteMessage(ex.Message);
                 }
             }
             
+        }
+
+        public void ProcessABlock(BlockReference block)
+        {
+            var layoutData = new OLayoutData(block, Logger, out bool succeed);
+            if (!succeed) return;
+            layoutData.ProcessSegLines();
+            layoutData.SetInterParam();
+            var subAreas = OInterParameter.GetOSubAreas();
+#if DEBUG
+            subAreas.ForEach(s => s.Display("MPDebug"));
+#endif
+            foreach (var oSubArea in subAreas)
+            {
+                try
+                {
+                    ObliqueMPartition mParkingPartitionPro = new ObliqueMPartition(oSubArea.Walls, oSubArea.VaildLanes, oSubArea.Buildings, oSubArea.Area);
+                    mParkingPartitionPro.OutputLanes = new List<LineSegment>();
+                    mParkingPartitionPro.OutBoundary = oSubArea.Area;
+                    mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
+                    mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
+#if DEBUG
+                    var s = MDebugTools.AnalysisPolygon(mParkingPartitionPro.Boundary);
+                    string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                    FileStream fs = new FileStream(dir + "\\bound.txt", FileMode.Create, FileAccess.Write);
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.WriteLine(s);
+                    sw.Close();
+                    fs.Close();
+#endif
+                    mParkingPartitionPro.Process(true);
+                    MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
+                    mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                }
+                catch (System.Exception ex)
+                {
+                    Active.Editor.WriteMessage(ex.Message);
+                }
+            }
         }
     }
 }

@@ -80,7 +80,7 @@ namespace ThParkingStall.Core.OInterProcess
                 //var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
                 //var subLanes = subLaneLineStrings.GetVaildParts(area);
 
-                var subLanes = SegLineStrings.GetCommonParts(area.Shell);
+                var subLanes = SegLineStrings.GetCommonParts(area);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
                 var walls = SegLineStrings.GetWalls(area.Shell);
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
@@ -106,7 +106,7 @@ namespace ThParkingStall.Core.OInterProcess
             {
                 var area = areas[i];
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
-                var subLanes = vaildLanes.GetCommonParts(area.Shell);
+                var subLanes = vaildLanes.GetCommonParts(area);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
                 var walls = SegLineStrings.GetWalls(area.Shell);
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
