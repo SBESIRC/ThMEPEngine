@@ -170,11 +170,15 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                         found_backback = true;
                                         var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
                                         var car_exist_transform = PolyFromLines(car_exist_iniedge, car_exist_iniedge.Translation(Cars[exist_index].Vector.Normalize() * DisVertCarLengthBackBack));
-                                        Cars[exist_index].Polyline = car_exist_transform;
-                                        Cars[exist_index].CarLayoutMode = 2;
-                                        var carspots_index = CarSpots.IndexOf(crossed_back_car);
-                                        CarSpots[carspots_index] = car_exist_transform;
-                                        CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
+                                        //当面前的车位已经是5100时 当前车位信息不需要更新
+                                        if (Math.Abs(car_exist_transform.Area - crossed_back_car.Area) > 1 || Cars[exist_index].CarLayoutMode != 2)
+                                        {
+                                            Cars[exist_index].Polyline = car_exist_transform;
+                                            Cars[exist_index].CarLayoutMode = 2;
+                                            var carspots_index = CarSpots.IndexOf(crossed_back_car);
+                                            CarSpots[carspots_index] = car_exist_transform;
+                                            CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
+                                        }
 
                                         s = new LineSegment(seg);
                                         s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
