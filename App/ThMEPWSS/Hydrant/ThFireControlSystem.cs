@@ -208,7 +208,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         var count = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items[j].SimpleSprayCount;
                                         if (count == 0) continue;
                                         var dn = getDN(count);
-                                        var px = getGeneralBasePt(i, j, rgi);
+                                        var px = getGeneralBasePt(i, j, rgi).OffsetY(HEIGHT - 1800);
                                         if (j == 0)
                                         {
                                             brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-326, 1300)) { ScaleEx = new Scale3d(-1, 1, 1) });
@@ -251,7 +251,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     var count = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items[j].SimpleSprayCount;
                                     if (count == 0) continue;
                                     var dn = getDN(count);
-                                    var px = getGeneralBsPt(i, j);
+                                    var px = getGeneralBsPt(i, j).OffsetY(HEIGHT - 1800);
                                     if (j == 0)
                                     {
                                         brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-326, 1300)) { ScaleEx = new Scale3d(-1, 1, 1) });
