@@ -129,6 +129,7 @@ namespace ThMEPWSS.Command
                     CheckCreateLayer(layerName, Color.FromColorIndex(ColorMethod.ByLayer,253));
                     while (true)
                     {
+
                         using (var acadDb = Linq2Acad.AcadDatabase.Active())
                         {
                             var insertPtRst = Active.Editor.GetPoint("Specify Next Point (Press ESC to quit)\n");
@@ -136,25 +137,23 @@ namespace ThMEPWSS.Command
                                 break;
 
                             var pt = insertPtRst.Value;
-                            var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(layerName, BlockName, pt, new Scale3d(1, 1, 1), 0);
-                            var blk = acadDb.Element<BlockReference>(blkId);
-                            blk.TransformBy(Active.Editor.UCS2WCS());
-                            if (blk.IsDynamicBlock)
-                            {
-                                foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
-                                {
-                                    if (property.PropertyName == "可见性1")
-                                    {
-                                        property.Value = "DN100";
-                                        break;
-                                    }
-                                }
-                            }
+                            var blk = InsertBlock(layerName, BlockName, pt);
                             if (BlockName.Contains("+"))
                             {
                                 blk.Erase();
-                                var ents = blk.ExplodeToDBObjectCollection();
-                                ents.Cast<BlockReference>().AddToCurrentSpace();
+                                var ents = blk.ExplodeToDBObjectCollection().Cast<BlockReference>().ToList();
+                                var blockTableRecord = acadDb.Blocks.Element(blk.BlockTableRecord);
+                                foreach (var objId in blockTableRecord)
+                                {
+                                    var dbObj = acadDb.Element<BlockReference>(objId);
+                                    try
+                                    {
+                                        var name = dbObj.GetEffectiveName();
+                                        var position = ents.Where(e => e.Name.Equals(dbObj.Name)).First().Position;
+                                        var br = InsertBlock(layerName, name, position);
+                                    }
+                                    catch { }
+                                }
                             }
                         }
                     }
@@ -163,6 +162,27 @@ namespace ThMEPWSS.Command
             catch (Exception ex)
             {
                 Active.Editor.WriteMessage(ex.Message);
+            }
+        }
+        BlockReference InsertBlock(string layerName, string name, Point3d pt)
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(layerName, name, pt, new Scale3d(1, 1, 1), 0);
+                var blk = acadDb.Element<BlockReference>(blkId);
+                blk.TransformBy(Active.Editor.UCS2WCS());
+                if (blk.IsDynamicBlock)
+                {
+                    foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
+                    {
+                        if (property.PropertyName == "可见性1")
+                        {
+                            property.Value = "DN100";
+                            break;
+                        }
+                    }
+                }
+                return blk;
             }
         }
         bool CheckCreateLayer(string aimLayer, Color color)
