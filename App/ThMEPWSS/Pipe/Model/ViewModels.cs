@@ -385,6 +385,46 @@ namespace ThMEPWSS.Pipe.Model
             return floorHeightDic;
         }
 
+        public Dictionary<int, double> GetFloorHeightsDict(int maxFloorNum)
+        {
+            var dic = new Dictionary<int, double>();
+            foreach (var item in Items)
+            {
+                foreach (var floor in ParseFloorNums(item.Floor))
+                {
+                    if (floor == 0)
+                    {
+                        dic[floor] = 0;
+                    }
+                    else
+                    {
+                        dic[floor] = item.Height;//(item.Height / 1000.0).ToString("0.00");
+                    }
+                }
+            }
+            var floorHeightDic = new Dictionary<int, double>();
+            double floorHeight = 0.00;
+            for (int floor = 0; floor < maxFloorNum + 1; floor++)
+            {
+                if (floor == 0)
+                {
+                    floorHeight = 0;
+                }
+                else if (dic.ContainsKey(floor))
+                {
+                    floorHeight += dic[floor];
+                }
+                else
+                {
+                    floorHeight += _GeneralFloor;
+
+                }
+                floorHeightDic.Add(floor, floorHeight/1000);
+            }
+
+            return floorHeightDic;
+        }
+
         public static List<int> ParseFloorNums(string floorStr)
         {
             if (string.IsNullOrWhiteSpace(floorStr))
