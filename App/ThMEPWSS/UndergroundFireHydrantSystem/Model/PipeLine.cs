@@ -30,14 +30,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public static void AddPipeLine(DBObjectCollection dbObjs, FireHydrantSystemIn fireHydrantSysIn, 
             List<Point3dEx> pointList, List<Line> lineList)
         {
-            double pipeLenTor = 25.0;
+            double pipeLenTor = 20.0;
             foreach (var f in dbObjs)
             {
                 if (f is Line fline)
                 {
                     if(fline.Length < pipeLenTor)
                     {
-                        continue;//小于1的直线跳过
+                        continue;//小于20的直线跳过
                     }
                     var pt1 = new Point3dEx(fline.StartPoint.X, fline.StartPoint.Y, 0);
                     var pt2 = new Point3dEx(fline.EndPoint.X, fline.EndPoint.Y, 0);
