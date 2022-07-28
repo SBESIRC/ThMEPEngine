@@ -1430,7 +1430,7 @@ namespace TianHua.Electrical.PDS.Engine
                 }
 
                 var terminal = TerminalIndex.SelectCrossingPolygon(l.BufferSquare(10.0));
-                if (terminal.Count > 0)
+                if (terminal.Count > 0 && entities.Count > 1)
                 {
                     entities.Remove(l);
                 }
