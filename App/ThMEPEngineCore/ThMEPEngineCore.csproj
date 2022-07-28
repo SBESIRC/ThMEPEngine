@@ -22,8 +22,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -263,6 +265,14 @@
     <Compile Include="Model\ThIfcObjectDefinition.cs" />
     <Compile Include="Model\ThIfcProject.cs" />
     <Compile Include="Model\ThIfcTextNodeData.cs" />
+    <Compile Include="ProgressBar\dlgProgress.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProgressBar\dlgProgress.Designer.cs">
+      <DependentUpon>dlgProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProgressBar\ILongProcessingObject.cs" />
+    <Compile Include="ProgressBar\ProcessingProgressBar.cs" />
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
@@ -751,7 +761,11 @@
       <Name>ThCADExtension</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="ProgressBar\dlgProgress.resx">
+      <DependentUpon>dlgProgress.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
