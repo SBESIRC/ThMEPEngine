@@ -112,10 +112,12 @@ namespace ThMEPWSS.SprinklerDim.Engine
                     List<Line> remainingLines = graph.Print(pts);
                     ThSprinklerNetGroup newNetGroup = ThSprinklerNetGraphService.CreateNetwork(netGroup.Angle, remainingLines);
                     newNetGroup.Transformer = netGroup.Transformer;
+                    newNetGroup.XCollineationGroup = netGroup.XCollineationGroup;
+                    newNetGroup.YCollineationGroup = netGroup.YCollineationGroup;
                     opNetList.Add(newNetGroup);
                 }
             }
-            opNetList = ThSprinklerDimNetworkService.SeparateGraph(opNetList);
+            // opNetList = ThSprinklerDimNetworkService.SeparateGraph(opNetList);
 
             for (int i = 0; i < opNetList.Count; i++)
             {
