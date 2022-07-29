@@ -767,15 +767,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             for (int i = 0; i < ptDtDict.Count(); i++)
             {
                 var pt = ptDtDict.ElementAt(i).Key;
-                //debug
-                if (850764.7 - 0.5 <= pt.X && pt.X <= 850764.7 + 0.5 && 379077.3 - 0.5 <= pt.Y && pt.Y <= 379077.3 + 0.5)
-                {
-                    var a = 1;
-                }
-                if (951890.2 - 0.5 <= pt.X && pt.X <= 951890.2 + 0.5 && 317572.3 - 0.5 <= pt.Y && pt.Y <= 317572.3 + 0.5)
-                {
-                    var a = 1;
-                }
+                ////debug
+                //if (850764.7 - 0.5 <= pt.X && pt.X <= 850764.7 + 0.5 && 379077.3 - 0.5 <= pt.Y && pt.Y <= 379077.3 + 0.5)
+                //{
+                //    var a = 1;
+                //}
+                
                 if (addNew.ContainsKey(pt) == false)
                 {
                     addNew.Add(pt, new List<Line>());

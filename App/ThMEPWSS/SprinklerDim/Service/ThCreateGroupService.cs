@@ -163,18 +163,18 @@ namespace ThMEPWSS.SprinklerDim.Service
             //    }
             //}
 
-            var separateGraph = ThSprinklerNetGraphService.SeparateGraph(netList);
-            for (int i = 0; i < separateGraph.Count; i++)
-            {
-                var net = separateGraph[i];
-                for (int j = 0; j < net.PtsGraph.Count; j++)
-                {
-                    var lines = net.PtsGraph[j].Print(net.Pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("l7-{0}-separateGraph-{1}-{2}", printTag, i, j), i % 7);
-                }
-            }
+            //var separateGraph = ThSprinklerDimNetworkService.SeparateGraph(netList);
+            //for (int i = 0; i < separateGraph.Count; i++)
+            //{
+            //    var net = separateGraph[i];
+            //    for (int j = 0; j < net.PtsGraph.Count; j++)
+            //    {
+            //        var lines = net.PtsGraph[j].Print(net.Pts);
+            //        DrawUtils.ShowGeometry(lines, string.Format("l7-{0}-separateGraph-{1}-{2}", printTag, i, j), i % 7);
+            //    }
+            //}
 
-            return separateGraph;
+            return netList;
 
         }
 

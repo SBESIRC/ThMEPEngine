@@ -266,56 +266,56 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
         }
 
-        public static List<ThSprinklerNetGroup> SeparateGraph(List<ThSprinklerNetGroup> netList)
-        {
-            var newNetList = new List<ThSprinklerNetGroup>();
-            foreach (var net in netList)
-            {
-                if (net.PtsGraph.Count() == 1)
-                {
-                    newNetList.Add(net);
-                }
-                else
-                {
-                    for (int i = 0; i < net.PtsGraph.Count(); i++)
-                    {
-                        var pts = net.GetGraphPts(i);
-                        var dict = new Dictionary<int, int>();
-                        for (int ptI = 0; ptI < pts.Count(); ptI++)
-                        {
-                            dict.Add(net.Pts.IndexOf(pts[ptI]), ptI);
-                        }
+        //public static List<ThSprinklerNetGroup> SeparateGraph(List<ThSprinklerNetGroup> netList)
+        //{
+        //    var newNetList = new List<ThSprinklerNetGroup>();
+        //    foreach (var net in netList)
+        //    {
+        //        if (net.PtsGraph.Count() == 1)
+        //        {
+        //            newNetList.Add(net);
+        //        }
+        //        else
+        //        {
+        //            for (int i = 0; i < net.PtsGraph.Count(); i++)
+        //            {
+        //                var pts = net.GetGraphPts(i);
+        //                var dict = new Dictionary<int, int>();
+        //                for (int ptI = 0; ptI < pts.Count(); ptI++)
+        //                {
+        //                    dict.Add(net.Pts.IndexOf(pts[ptI]), ptI);
+        //                }
 
-                        var newNet = new ThSprinklerNetGroup();
-                        var newGraph = new ThSprinklerGraph();
-                        newNet.Angle = net.Angle;
-                        newNet.Pts.AddRange(pts);
-                        newNet.PtsGraph.Add(newGraph);
+        //                var newNet = new ThSprinklerNetGroup();
+        //                var newGraph = new ThSprinklerGraph();
+        //                newNet.Angle = net.Angle;
+        //                newNet.Pts.AddRange(pts);
+        //                newNet.PtsGraph.Add(newGraph);
 
-                        var oriGraph = net.PtsGraph[i];
-                        for (int j = 0; j < oriGraph.SprinklerVertexNodeList.Count(); j++)
-                        {
-                            var idxPt = dict[oriGraph.SprinklerVertexNodeList[j].NodeIndex];
-                            newGraph.AddVertex(idxPt);
+        //                var oriGraph = net.PtsGraph[i];
+        //                for (int j = 0; j < oriGraph.SprinklerVertexNodeList.Count(); j++)
+        //                {
+        //                    var idxPt = dict[oriGraph.SprinklerVertexNodeList[j].NodeIndex];
+        //                    newGraph.AddVertex(idxPt);
 
-                            var node = oriGraph.SprinklerVertexNodeList[j].FirstEdge;
-                            while (node != null)
-                            {
-                                var idxPtO = dict[oriGraph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
-                                newGraph.AddVertex(idxPtO);
-                                newGraph.AddEdge(idxPt, idxPtO);
-                                newGraph.AddEdge(idxPtO, idxPt);
+        //                    var node = oriGraph.SprinklerVertexNodeList[j].FirstEdge;
+        //                    while (node != null)
+        //                    {
+        //                        var idxPtO = dict[oriGraph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
+        //                        newGraph.AddVertex(idxPtO);
+        //                        newGraph.AddEdge(idxPt, idxPtO);
+        //                        newGraph.AddEdge(idxPtO, idxPt);
 
-                                node = node.Next;
-                            }
-                        }
-                        newNetList.Add(newNet);
-                    }
-                }
-            }
+        //                        node = node.Next;
+        //                    }
+        //                }
+        //                newNetList.Add(newNet);
+        //            }
+        //        }
+        //    }
 
-            return newNetList;
-        }
+        //    return newNetList;
+        //}
 
     }
 }
