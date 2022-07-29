@@ -103,9 +103,9 @@ namespace TianHua.Electrical.PDS.Service
                                 match = match.NextMatch();
                             }
                         }
-                        else if (!string.IsNullOrEmpty(str) && Regex.IsMatch(str, @"[\u4e00-\u9fa5]") && descriptionAssign)
+                        else if (!string.IsNullOrEmpty(strClean) && Regex.IsMatch(strClean, @"[\u4e00-\u9fa5]") && descriptionAssign)
                         {
-                            thPDSDistBox.ID.Description = str;
+                            thPDSDistBox.ID.Description = strClean;
                             descriptionAssign = false;
                         }
                     }
@@ -992,21 +992,19 @@ namespace TianHua.Electrical.PDS.Service
         private string StringClean(string str)
         {
             str = str.Replace(" ", "");
-            str = str.Replace("(", "");
-            str = str.Replace("（", "");
-            str = str.Replace(")", "");
-            str = str.Replace("）", "");
+            str = str.Replace("()", "");
+            str = str.Replace("（）", "");
             // 严格清理
-            //if (str.IndexOf("（") == 0 && str.LastIndexOf("）") == str.Count() - 1)
-            //{
-            //    str = str.Remove(str.Count() - 1);
-            //    str = str.Remove(0, 1);
-            //}
-            //else if (str.IndexOf("(") == 0 && str.LastIndexOf(")") == str.Count() - 1)
-            //{
-            //    str = str.Remove(str.Count() - 1);
-            //    str = str.Remove(0, 1);
-            //}
+            if (str.IndexOf("（") == 0 && str.LastIndexOf("）") == str.Count() - 1)
+            {
+                str = str.Remove(str.Count() - 1);
+                str = str.Remove(0, 1);
+            }
+            else if (str.IndexOf("(") == 0 && str.LastIndexOf(")") == str.Count() - 1)
+            {
+                str = str.Remove(str.Count() - 1);
+                str = str.Remove(0, 1);
+            }
             return str;
         }
 

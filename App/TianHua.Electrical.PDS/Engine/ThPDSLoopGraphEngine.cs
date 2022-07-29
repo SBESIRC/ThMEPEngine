@@ -545,7 +545,7 @@ namespace TianHua.Electrical.PDS.Engine
             else if (startingEntity is Curve curve)
             {
                 var onLightingCableTray = ThPDSLayerService.LightingCableTrayLayer().Contains(curve.Layer);
-                var polyline = ThPDSBufferService.Buffer(curve, 100.1);
+                var polyline = ThPDSBufferService.Buffer(curve, 4 * ThPDSCommon.ALLOWABLE_TOLERANCE);
                 // 首先遍历从桥架搭出去的线
                 var results = FindNextLine(curve, polyline).OfType<Curve>();
                 if (results.Count() > 0)
@@ -560,9 +560,9 @@ namespace TianHua.Electrical.PDS.Engine
                         }
 
                         var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false))
-                            < ThPDSCommon.ALLOWABLE_TOLERANCE;
+                            < 4 * ThPDSCommon.ALLOWABLE_TOLERANCE;
                         var IsEnd = findCurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findCurve.EndPoint, false))
-                            < ThPDSCommon.ALLOWABLE_TOLERANCE;
+                            < 4 * ThPDSCommon.ALLOWABLE_TOLERANCE;
                         //都不相邻即无关系，都相邻即近似平行，都不符合
                         if (IsStart != IsEnd)
                         {
@@ -1043,6 +1043,13 @@ namespace TianHua.Electrical.PDS.Engine
                             results.AddRange(Navigate(node, loads, new ThPDSTextInfo(), item.Key, entity));
                         }
                     }
+                    else
+                    {
+                        if (item.Value.Count > 0)
+                        {
+                            loads.Add(item.Value.Last());
+                        }
+                    }
                 }
                 else
                 {
@@ -1145,6 +1152,7 @@ namespace TianHua.Electrical.PDS.Engine
             var findPath = new Dictionary<Entity, List<Curve>>();
             if (sharedPath.Contains(sourceElement))
             {
+                findPath.Add(sharedPath.Last(), sharedPath);
                 return findPath;
             }
             sharedPath.Add(sourceElement);
