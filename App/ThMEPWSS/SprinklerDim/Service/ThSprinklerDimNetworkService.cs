@@ -148,9 +148,10 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
-
         private static List<int> GetCollineation(ref bool[] isContained, int ptIndex, List<Point3d> pts, ThSprinklerGraph graph, bool isXAxis, double tolerance = 45.0)
         {
+            if (graph.SearchNodeIndex(ptIndex) == -1)
+                return null;
 
             List<int> collineation = new List<int> { ptIndex};
             List<int> nodeIndexs = new List<int> { graph.SearchNodeIndex(ptIndex) };
@@ -185,5 +186,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             return collineation;
         }
+
+
     }
 }
