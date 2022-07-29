@@ -59,7 +59,8 @@ namespace TianHua.Mep.UI.Data
         private List<ThRawIfcBuildingElementData> HandleHatch(Hatch hatch, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (IsSolid(hatch) && !IsExistInBlacks(hatch) && IsBuildElement(hatch) && CheckLayerValid(hatch))
+            if (IsSolid(hatch) && !IsExistInBlacks(hatch) && IsBuildElement(hatch) &&
+                CheckLayerValid(hatch) && hatch.Visible && hatch.Bounds.HasValue)
             {
                 var polygons = HatchToPolygons(hatch.GetTransformedCopy(matrix) as Hatch);
                 polygons.OfType<Entity>().ForEach(e =>
@@ -73,10 +74,13 @@ namespace TianHua.Mep.UI.Data
             return results;
         }
 
+
+
         private List<ThRawIfcBuildingElementData> HandleSolid(Solid solid, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (!IsExistInBlacks(solid) && IsBuildElement(solid) && CheckLayerValid(solid))
+            if (!IsExistInBlacks(solid) && IsBuildElement(solid) &&
+                CheckLayerValid(solid) && solid.Visible && solid.Bounds.HasValue)
             {
                 // 可能存在2D Solid不规范的情况
                 // 这里将原始2d Solid“清洗”处理
