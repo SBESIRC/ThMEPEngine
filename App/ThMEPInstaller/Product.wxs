@@ -52,6 +52,7 @@
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R22" Name="2018">
                                         <Directory Id="DIR_Autoloader_Contents_App_Win64_R22_X64" Name="x64"/>
                                     </Directory>
+                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_Common" Name="Common"/>
                                 </Directory>
                                 <Directory Id="DIR_Autoloader_Contents_Resources" Name="Resources" />
                                 <Directory Id="DIR_Autoloader_Contents_Support" Name="Support">
