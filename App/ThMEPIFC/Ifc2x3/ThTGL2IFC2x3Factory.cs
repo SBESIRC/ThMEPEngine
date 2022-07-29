@@ -201,6 +201,7 @@ namespace ThMEPIFC.Ifc2x3
 
                 //now place the wall into the model
                 var lp = model.Instances.New<IfcLocalPlacement>();
+                
                 var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
                 {
                     p.Axis = model.ToIfcDirection(Vector3d.ZAxis);

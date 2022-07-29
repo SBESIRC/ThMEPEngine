@@ -274,6 +274,44 @@ namespace ThMEPIFC
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THIFCModelMerge", CommandFlags.Modal)]
+        public void THIFCModelMerge()
+        {
+            var filePath1 = OpenIFCFile("请选择需要合模的IFC文件 [1]:");
+            if (string.IsNullOrEmpty(filePath1))
+            {
+                return;
+            }
+            var filePath2 = OpenIFCFile("请选择需要合模的IFC文件 [2]:");
+            if (string.IsNullOrEmpty(filePath1))
+            {
+                return;
+            }
+            var ifcFilePath = SaveFilePath("ifc");
+            if (!string.IsNullOrWhiteSpace(ifcFilePath))
+            {
+                try
+                {
+                    THModelMergeService modelMergeService = new THModelMergeService();
+                    var MergeModel = modelMergeService.ModelMerge(filePath1, filePath2);
+                    if(!MergeModel.IsNull())
+                    {
+                        Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, ifcFilePath);
+                        MergeModel.Dispose();
+                        Active.Database.GetEditor().WriteMessage($"合模成功：已保存至目录:{ifcFilePath}");
+                    }
+                    else
+                    {
+                        throw new System.Exception("合模失败!");
+                    }
+                }
+                catch
+                {
+                    Active.Database.GetEditor().WriteMessage($"合模失败!");
+                }
+            }
+        }
+
         private string OpenTGLXMLFile()
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -306,6 +344,16 @@ namespace ThMEPIFC
                 return savePath;
             }
             return string.Empty;
+        }
+
+        private string OpenIFCFile(string Msg)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = Msg;
+            dlg.DefaultExt = ".ifc"; // Default file extension
+            dlg.Filter = "TGL IFC|*.ifc"; // Filter files by extension
+            var result = dlg.ShowDialog();
+            return (result == DialogResult.OK) ? dlg.FileName : string.Empty;
         }
     }
 }
