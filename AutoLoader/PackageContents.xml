@@ -44,6 +44,42 @@
             </Commands>
         </ComponentEntry>
     </Components>
+    <!--Assembly App, SuperBoundary, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/SuperBoundary19X64.arx" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="ARX app for Super Boundary." AppName="SuperBoundary" AppType="ARX">
+            <Commands GroupName="DBLE_SUPER_BOUNDARY">
+                <Command Local="SBND" Global="_SBND" />
+                <Command Local="SBND_ALL" Global="_SBND_ALL" />
+                <Command Local="SBND_PICK" Global="_SBND_PICK" />
+                <Command Local="SBND_CONFIG" Global="_SBND_CONFIG" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, SuperBoundary, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/SuperBoundary20X64.arx" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="ARX app for Super Boundary." AppName="SuperBoundary" AppType="ARX">
+            <Commands GroupName="DBLE_SUPER_BOUNDARY">
+                <Command Local="SBND" Global="_SBND" />
+                <Command Local="SBND_ALL" Global="_SBND_ALL" />
+                <Command Local="SBND_PICK" Global="_SBND_PICK" />
+                <Command Local="SBND_CONFIG" Global="_SBND_CONFIG" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, SuperBoundary, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/SuperBoundary22X64.arx" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="ARX app for Super Boundary." AppName="SuperBoundary" AppType="ARX">
+            <Commands GroupName="DBLE_SUPER_BOUNDARY">
+                <Command Local="SBND" Global="_SBND" />
+                <Command Local="SBND_ALL" Global="_SBND_ALL" />
+                <Command Local="SBND_PICK" Global="_SBND_PICK" />
+                <Command Local="SBND_CONFIG" Global="_SBND_CONFIG" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
     <!--Assembly App, ThMEPEngineCore, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />

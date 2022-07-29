@@ -1,38 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include>
-  <!-- The name of the product -->
-  <?define Name = "天华AI工具集" ?>
-  <!-- The Description of the product -->
-  <?define Description = "为设计师提供高效出图的软件解决方案" ?>
-  <!-- The manufacturer, for setup package publisher and folder info -->
-  <?define Manufacturer = "天华AI研究中心" ?>
-  <!-- The version number of this setup package-->
-  <?define Version = "1.9.35" ?>
-  <!-- Bundle logo-->
-  <?define Logo = "Resources\Logo.ico" ?>
-  <!-- Bundle EULA rtf document-->
-  <?define Eula = "Resources\License_zh-CN.rtf" ?>
-  <!-- Product code -->
-  <?define ProductCode = "E6CC95A3-9549-46F5-AD53-67257FD0BD05" ?>
-  <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
-  <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
-  <!-- Autoloader path. -->
-  <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
-  <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
-  <!-- Output root path. -->
-  <?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>
-  <!-- Lanuage. -->
-  <?define LanuageIdentifier = "zh-CN" ?>
-  <!-- Native. -->
-  <?define 64bitNative = "x64" ?>
-  <!-- Dotfuscated. -->
-  <?define Dotfuscated = "." ?>
-  <!-- DevExpress version suffix -->
-  <?define DevExpressVersionSuffix = "v17.2" ?>
-  <!-- GTE Path -->
-  <?define GTEPath = "$(var.ProjectDir)\..\..\Externals\GTE" ?>
-  <!-- CGAL path -->
-  <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
-  <!-- Xbim Geometry Engine path -->
-  <?define XbimGeoEngine = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry.Engine" ?>
+    <!-- The name of the product -->
+    <?define Name = "天华AI工具集" ?>
+    <!-- The Description of the product -->
+    <?define Description = "为设计师提供高效出图的软件解决方案" ?>
+    <!-- The manufacturer, for setup package publisher and folder info -->
+    <?define Manufacturer = "天华AI研究中心" ?>
+    <!-- The version number of this setup package-->
+    <?define Version = "1.9.35" ?>
+    <!-- Bundle logo-->
+    <?define Logo = "Resources\Logo.ico" ?>
+    <!-- Bundle EULA rtf document-->
+    <?define Eula = "Resources\License_zh-CN.rtf" ?>
+    <!-- Product code -->
+    <?define ProductCode = "E6CC95A3-9549-46F5-AD53-67257FD0BD05" ?>
+    <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
+    <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
+    <!-- Autoloader path. -->
+    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
+    <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
+    <!-- Output root path. -->
+    <?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>
+    <!-- Lanuage. -->
+    <?define LanuageIdentifier = "zh-CN" ?>
+    <!-- Native. -->
+    <?define 64bitNative = "x64" ?>
+    <!-- Dotfuscated. -->
+    <?define Dotfuscated = "." ?>
+    <!-- DevExpress version suffix -->
+    <?define DevExpressVersionSuffix = "v17.2" ?>
+    <!-- Super Boundary path -->
+    <?define SuperBoundaryPath = "$(var.ProjectDir)\..\..\Externals\SuperBoundary" ?>
+    <!-- GTE Path -->
+    <?define GTEPath = "$(var.ProjectDir)\..\..\Externals\GTE" ?>
+    <!-- CGAL path -->
+    <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
+    <!-- Xbim Geometry Engine path -->
+    <?define XbimGeoEngine = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry.Engine" ?>
 </Include>

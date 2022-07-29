@@ -33,6 +33,7 @@
             <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />
             <ComponentGroupRef Id="ProductComponentsStructureWin64" />
             <ComponentGroupRef Id="ProductComponentsArchitectureWin64" />
+            <ComponentGroupRef Id="ProductComponentsAppSuperBoundary" />
         </Feature>
         <UIRef Id="WixUI_Minimal"/>
         <WixVariable Id="WixUILicenseRtf" Value="$(var.Eula)" />
