@@ -24,7 +24,8 @@ namespace ThMEPStructure.StructPlane.Print
         }
         public override void Print(Database db)
         {
-            // 获取楼板的标高                
+            #region ---------- 前处理 -----------
+            // 获取楼板的填充
             var elevations = Geos.GetSlabElevations();
             elevations = elevations.FilterSlabElevations(FlrHeight);
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
@@ -32,6 +33,7 @@ namespace ThMEPStructure.StructPlane.Print
             //调整梁标注的方向
             var stairSlabCorners = new DBObjectCollection();
             UpdateBeamTextRotation(Geos.GetBeamMarks());
+
             // 创建楼梯板对角线            
             var tenThckSlabMarks = Geos.GetTenThickSlabMarks();            
             if (tenThckSlabMarks.Count>0)
@@ -46,46 +48,67 @@ namespace ThMEPStructure.StructPlane.Print
             // 双梁是要单独处理的
             var dblRowbeamMarks = FilterDoubleRowBeamMarks(Geos.GetBeamMarks());
             Geos = Geos.Except(dblRowbeamMarks.SelectMany(o => o)).ToList();
+            dblRowbeamMarks.SelectMany(o => o).ForEach(o => UpdateBeamText(o));
+            #endregion
 
             // 打印对象
+            // 用于把打印的文字转成块,最后把梁文字删除掉
+            var beamTextObjIds = new List<ObjectIdCollection>(); 
+
+            // 打印墙、柱、楼板、梁、洞、标注
             var res = PrintGeos(db, Geos, slabHatchConfigs); //BeamLines,BeamTexts
-            var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowbeamMarks);
-            dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
+
+            // 打印楼梯板对角线及标注
             Append(PrintStairSlabCorner(db, stairSlabCorners));
 
-            // 过滤多余文字
+            // 打印双梁标注
+            var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowbeamMarks);
+            dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
+            dblRowBeamMarkIds.ForEach(o => beamTextObjIds.Add(o.Item1));
+
+            // 过滤多余梁标注文字(后处理)
+            // 过滤一段上重复标注的梁文字
             var beamLines = res.Item1.ToDBObjectCollection(db);
             var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
             var removedTexts = FilterBeamMarks(beamLines, beamTexts);
 
-            // 对双梁文字调整位置
+            // 对双梁文字调整位置(后处理)
             AdjustDblRowMarkPos(db, dblRowBeamMarkIds, beamLines);
 
-            // 将带有标高的文字，换成两行
+            // 将带有标高的文字，换成两行(后处理)
             var beamTextInfos = new Dictionary<DBText, Vector3d>();
             beamTexts.Difference(removedTexts)
                 .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));           
             var adjustService = new ThAdjustBeamMarkService(db,beamLines, beamTextInfos);
             adjustService.Adjust();
-            adjustService.DoubleRowTexts.ForEach(x => removedTexts.Add(x.Item1));
 
             // 将生成的文字打印出来
             var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
             var printer = new ThAnnotationPrinter(config);
             adjustService.DoubleRowTexts.ForEach(x =>
             {
+                removedTexts.Add(x.Item1);
                 ObjIds.Remove(x.Item1.ObjectId);
-                var specAnnotions = printer.Print(db, x.Item2);
-                var bgAnnotions = printer.Print(db, x.Item3);
-                Append(specAnnotions);
-                Append(bgAnnotions);
+                var dblRowTextIds = new ObjectIdCollection();
+                dblRowTextIds.AddRange(printer.Print(db, x.Item2));
+                dblRowTextIds.AddRange(printer.Print(db, x.Item3));
+                Append(dblRowTextIds);
+                beamTextObjIds.Add(dblRowTextIds);
             });
-            
+
+            // 把不是双行标注的文字加入到beamTextObjIds中
+            beamTexts.Difference(removedTexts).OfType<DBText>().ForEach(o=> beamTextObjIds.Add(new ObjectIdCollection { o.ObjectId}));
+
+            // 把梁标注打成块(后处理)
+            var beamBlkIds = ConvertToBlock(db, beamTextObjIds);
+            Append(beamBlkIds);
+            beamTextObjIds.ForEach(o => o.ToDBObjectCollection(db).OfType<DBObject>().ForEach(e => removedTexts.Add(e)));
+
             // 删除不要的文字
             Erase(db, removedTexts);
 
             // 打印标题
-            PrintHeadText(db);
+            Append(PrintHeadText(db));
 
             // 打印柱表
             var maxX= Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
@@ -95,17 +118,24 @@ namespace ThMEPStructure.StructPlane.Print
             var elevationTblBasePt = new Point3d(maxX+1000.0, minY,0);
             var elevationInfos = GetElevationInfos();
             elevationInfos = elevationInfos.OrderBy(o => int.Parse(o.FloorNo)).ToList(); // 按自然层编号排序
-
-            PrintElevationTable(db, elevationTblBasePt, elevationInfos);
+            Append(PrintElevationTable(db, elevationTblBasePt, elevationInfos));
 
             // 打印楼板填充
             // 表右上基点
             var slabPatternTblRightUpBasePt = new Point3d(elevationTblBasePt.X, 
                 elevationTblBasePt.Y-1000.0,0);
-            PrintSlabPatternTable(db, slabPatternTblRightUpBasePt, slabHatchConfigs);
+            Append(PrintSlabPatternTable(db, slabPatternTblRightUpBasePt, slabHatchConfigs));
 
             // 过滤无效Id
             ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+        }
+
+        private ObjectIdCollection ConvertToBlock(Database db, List<ObjectIdCollection> beamTextObjIds)
+        {
+            // 需要把生成的文字转成块
+            var beamTextObjs = beamTextObjIds.Select(o => o.ToDBObjectCollection(db)).ToList();
+            var converter = new ThBeamTextBlkConverter();
+            return converter.Convert(db, beamTextObjs);
         }
 
         private DBObjectCollection CreateStairSlabCorner(DBObjectCollection tenThckSlabTexts,
@@ -152,7 +182,7 @@ namespace ThMEPStructure.StructPlane.Print
                 });
             }
         }
-        private void PrintSlabPatternTable(Database db,Point3d rightUpbasePt, 
+        private ObjectIdCollection PrintSlabPatternTable(Database db,Point3d rightUpbasePt, 
             Dictionary<string, HatchPrintConfig> hatchConfigs)
         {
             // 在原点创建的
@@ -174,15 +204,15 @@ namespace ThMEPStructure.StructPlane.Print
             };
             var builder = new ThSlabPatternTableBuilder(tblParameter);
             var results = builder.Build();
-            Append(results.OfType<Entity>().Select(o => o.ObjectId).ToCollection());
+            return results.OfType<Entity>().Select(o => o.ObjectId).ToCollection();
         }
-        private void PrintElevationTable(Database db, Point3d basePt,List<ElevationInfo> infos)
+        private ObjectIdCollection PrintElevationTable(Database db, Point3d basePt,List<ElevationInfo> infos)
         {
             var tblBuilder = new ThElevationTableBuilder(infos);
             var objs = tblBuilder.Build();
             var mt = Matrix3d.Displacement(basePt-Point3d.Origin);
             objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt));
-            Append(objs.Print(db));
+            return objs.Print(db);
         }
 
         private Tuple<ObjectIdCollection, Dictionary<ObjectId, Vector3d>> PrintGeos(
@@ -392,8 +422,7 @@ namespace ThMEPStructure.StructPlane.Print
                 }
                 return config;
             }
-        }        
-        
+        }
         private Dictionary<string,HatchPrintConfig> GetSlabHatchConfigs(List<string> elevations)
         {
             var results = new Dictionary<string,HatchPrintConfig>();
@@ -449,15 +478,15 @@ namespace ThMEPStructure.StructPlane.Print
                 }
             });
         }
-        private void PrintHeadText(Database database)
+        private ObjectIdCollection PrintHeadText(Database database)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
             var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
             if (string.IsNullOrEmpty(flrRange))
             {
-                return;
+                return new ObjectIdCollection();
             }
-            Append(PrintHeadText(database, flrRange));
+            return PrintHeadText(database, flrRange);
         }
     }
 }

@@ -4,9 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
-using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
-using System;
 
 namespace ThMEPStructure.StructPlane.Print
 {
@@ -116,6 +114,7 @@ namespace ThMEPStructure.StructPlane.Print
         
         protected void Append(ObjectIdCollection objIds)
         {
+            // 把objIds添加到 ObjIds 中，用于返回
             foreach (ObjectId objId in objIds)
             {
                 ObjIds.Add(objId);

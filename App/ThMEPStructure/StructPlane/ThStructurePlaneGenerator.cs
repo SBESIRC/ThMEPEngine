@@ -199,7 +199,6 @@ namespace ThMEPStructure.StructPlane
                 {
                     var entity = acadDb.Element<Entity>(o);
                     if (entity.Layer == ThPrintLayerManager.BeamLayerName ||
-                    entity.Layer == ThPrintLayerManager.BeamTextLayerName ||
                     entity.Layer == ThPrintLayerManager.BelowColumnLayerName ||
                     entity.Layer == ThPrintLayerManager.BelowColumnHatchLayerName ||
                     entity.Layer == ThPrintLayerManager.ColumnLayerName ||
@@ -321,7 +320,6 @@ namespace ThMEPStructure.StructPlane
         {
             return Config.IfcFileName + Guid.NewGuid().ToString();
         }
-
 
         private DBObjectCollection GetBelowObjs(List<ThGeometry> geos)
         {

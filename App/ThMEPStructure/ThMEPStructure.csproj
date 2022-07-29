@@ -171,6 +171,7 @@
     <Compile Include="Model\Printer\PrintConfig.cs" />
     <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThBeamTextBlkConverter.cs" />
     <Compile Include="StructPlane\Print\ThColumnPrinter.cs" />
     <Compile Include="StructPlane\Print\ThHolePrinter.cs" />
     <Compile Include="Common\ThPrintService.cs" />
