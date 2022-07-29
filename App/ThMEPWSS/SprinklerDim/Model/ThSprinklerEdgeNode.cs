@@ -74,6 +74,63 @@ namespace ThMEPWSS.SprinklerDim.Model
             }
         }
 
+
+        /// <summary>
+        /// 根据pt index找 图node index
+        /// </summary>
+        /// <param name="ptIndex"></param>
+        /// <returns></returns>
+        public int SearchNodeIndex(int ptIndex)
+        {
+            var idx = -1;
+            var vertexNode = SprinklerVertexNodeList.Where(x => x.NodeIndex == ptIndex);
+            if (vertexNode.Count() > 0)
+            {
+                idx = SprinklerVertexNodeList.IndexOf(vertexNode.First());
+            }
+
+            return idx;
+        }
+
+        public List<Line> Print(List<Point3d> pts)
+        {
+            var lines = new List<Line>();
+
+            for (int i = 0; i < SprinklerVertexNodeList.Count; i++)
+            {
+                var node = SprinklerVertexNodeList[i].FirstEdge;
+                while (node != null)
+                {
+                    var l = new Line(pts[SprinklerVertexNodeList[i].NodeIndex], pts[SprinklerVertexNodeList[node.EdgeIndex].NodeIndex]);
+
+
+
+                    if (ContainLine(l, lines) == false)
+                    {
+                        lines.Add(l);
+                    }
+                    node = node.Next;
+                }
+            }
+            return lines;
+        }
+
+        private bool ContainLine(Line l, List<Line> lList)
+        {
+            var tol = new Tolerance(10, 10);
+            var bReturn = false;
+            var contains = lList.Where(x => (x.StartPoint.IsEqualTo(l.StartPoint, tol) && x.EndPoint.IsEqualTo(l.EndPoint, tol)) ||
+                                           (x.EndPoint.IsEqualTo(l.StartPoint, tol) && x.StartPoint.IsEqualTo(l.EndPoint, tol)));
+            if (contains.Count() > 0)
+            {
+                bReturn = true;
+            }
+
+            return bReturn;
+        }
+
+
+
         public void DeleteEdge(int fromVertex, int toVertex)
         {
             var fromVertexIdx = SearchNodeIndex(fromVertex);
@@ -169,58 +226,5 @@ namespace ThMEPWSS.SprinklerDim.Model
         }
 
 
-        /// <summary>
-        /// 根据pt index找 图node index
-        /// </summary>
-        /// <param name="ptIndex"></param>
-        /// <returns></returns>
-        public int SearchNodeIndex(int ptIndex)
-        {
-            var idx = -1;
-            var vertexNode = SprinklerVertexNodeList.Where(x => x.NodeIndex == ptIndex);
-            if (vertexNode.Count() > 0)
-            {
-                idx = SprinklerVertexNodeList.IndexOf(vertexNode.First());
-            }
-
-            return idx;
-        }
-
-        public List<Line> Print(List<Point3d> pts)
-        {
-            var lines = new List<Line>();
-
-            for (int i = 0; i < SprinklerVertexNodeList.Count; i++)
-            {
-                var node = SprinklerVertexNodeList[i].FirstEdge;
-                while (node != null)
-                {
-                    var l = new Line(pts[SprinklerVertexNodeList[i].NodeIndex], pts[SprinklerVertexNodeList[node.EdgeIndex].NodeIndex]);
-
-
-
-                    if (ContainLine(l, lines) == false)
-                    {
-                        lines.Add(l);
-                    }
-                    node = node.Next;
-                }
-            }
-            return lines;
-        }
-
-        private bool ContainLine(Line l, List<Line> lList)
-        {
-            var tol = new Tolerance(10, 10);
-            var bReturn = false;
-            var contains = lList.Where(x => (x.StartPoint.IsEqualTo(l.StartPoint, tol) && x.EndPoint.IsEqualTo(l.EndPoint, tol)) ||
-                                           (x.EndPoint.IsEqualTo(l.StartPoint, tol) && x.StartPoint.IsEqualTo(l.EndPoint, tol)));
-            if (contains.Count() > 0)
-            {
-                bReturn = true;
-            }
-
-            return bReturn;
-        }
     }
 }

@@ -19,6 +19,30 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
+
+        public static Matrix3d GetCoordinateTransformer(Point3d fromOrigin, Point3d toOrigin, Double angle)
+        {
+            while(angle > (Math.PI / 2))
+            {
+                angle = angle - Math.PI / 2;
+            }
+            var matrix = Matrix3d.Displacement(toOrigin - fromOrigin) * Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+            return matrix.Inverse();
+
+        }
+
+        public static List<Point3d> MakeTransformation(List<Point3d> pts, Matrix3d transformer)
+        {
+            List<Point3d> transPts = new List<Point3d>();
+
+            foreach(Point3d pt in pts)
+            {
+                transPts.Add(pt.TransformBy(transformer));
+            }
+
+            return transPts;
+        }
+
         public static long GetValue(Point3d pt, bool isXAxis)
         {
             if (isXAxis)
@@ -28,7 +52,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-        public static double GetOriginallyValue(Point3d pt, bool isXAxis)
+        public static double GetOriginalValue(Point3d pt, bool isXAxis)
         {
             if (isXAxis)
                 return pt.X;

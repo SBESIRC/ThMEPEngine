@@ -9,19 +9,29 @@ namespace ThMEPWSS.SprinklerDim.Model
 {
     public class ThSprinklerNetGroup
     {
-        public List<Point3d> Pts { get; private set; } = new List<Point3d>();//在图里的喷头点，不在图里的散点，在图里的和支干管相交的虚拟点
+        public List<Point3d> Pts { get; set; } = new List<Point3d>();//在图里的喷头点
 
-        //public List<Point3d> PtsVirtual { get; private set; } = new List<Point3d>();//在图里的和支干管相交的虚拟点
-        public List<ThSprinklerGraph> PtsGraph { get; private set; } = new List<ThSprinklerGraph>();//图列表
+        public List<ThSprinklerGraph> PtsGraph { get; set; } = new List<ThSprinklerGraph>();//图列表
+
+        public List<List<List<int>>> XCollineationGroup { get; set; } = new List<List<List<int>>>();
+
+        public List<List<List<int>>> YCollineationGroup { get; set; } = new List<List<List<int>>>();
 
         //public List<Line> Lines { get; private set; } = new List<Line>();//所有的线列表，包括和支干管相交的打断线
         public double Angle { get; set; } = 0;//组角度
 
-        public Matrix3d transformer { get; set; } = new Matrix3d();//转换矩阵
+        public Matrix3d Transformer { get; set; } = new Matrix3d();//转换矩阵
 
         public ThSprinklerNetGroup()
         {
 
+        }
+
+        public ThSprinklerNetGroup(List<Point3d> pts, List<ThSprinklerGraph> ptsGraph, Matrix3d transformer)
+        {
+            this.Pts = pts;
+            this.PtsGraph = ptsGraph;
+            this.Transformer = transformer;
         }
 
         public int AddPt(Point3d pt)
