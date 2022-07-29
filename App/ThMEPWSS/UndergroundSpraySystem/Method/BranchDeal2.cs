@@ -116,16 +116,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         }
                         if (termPts.Count != 0)
                         {
-                            foreach (var tpt in termPts)
-                            {
-                                if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
-                                {
-                                    if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
-                                    {
-                                        fireAreaNums += 1;
-                                    }
-                                }
-                            }
+                            //foreach (var tpt in termPts)
+                            //{
+                            //    if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
+                            //    {
+                            //        if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
+                            //        {
+                            //            fireAreaNums += 1;
+                            //        }
+                            //    }
+                            //}
+                            fireAreaNums += termPts.Count;
                             if (spraySystem.BranchDic.ContainsKey(pt))
                             {
                                 continue;

@@ -227,19 +227,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
             foreach (Point3dEx p in neighbors)
             {
-                if (cur.Equals(startPt) && p.Equals(targetPt)) continue;//起点和终点相邻
-                if (!p.Equals(targetPt) && visited.Contains(p)) continue;
+                if (cur.Equals(startPt) && p.Equals(targetPt)) 
+                    continue;//起点和终点相邻
+                if (!p.Equals(targetPt) && visited.Contains(p)) 
+                    continue;
                 if (pts.Contains(p) && !p.Equals(targetPt))
                     continue;
-                if (!sprayIn.PtTypeDic.ContainsKey(p))
+                if (sprayIn.PtTypeDic.ContainsKey(p))
                 {
-                    continue;
+                    if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
+                    {
+                        floorNumber = p._pt.GetFloor(sprayIn.FloorRectDic);
+                        flag = true;
+                    }
                 }
-                if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
-                {
-                    floorNumber = p._pt.GetFloor(sprayIn.FloorRectDic);
-                    flag = true;
-                }
+
 
                 tempPath.Add(p);
                 visited.Add(p);
