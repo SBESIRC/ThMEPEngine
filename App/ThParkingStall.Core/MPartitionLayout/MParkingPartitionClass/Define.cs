@@ -39,6 +39,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;
             DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
             DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
+            DisPillarMoveDeeplyBackBack = DisPillarMoveDeeplyBackBack > DisPillarDepth / 2 ? DisPillarMoveDeeplyBackBack : DisPillarDepth / 2;
+            DisPillarMoveDeeplySingle= DisPillarMoveDeeplySingle > DisPillarDepth / 2 ? DisPillarMoveDeeplySingle : DisPillarDepth / 2;
             CountPillarDist = (int)Math.Floor((PillarSpacing - PillarNetLength - ThicknessOfPillarConstruct * 2) / DisVertCarWidth);
             DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
             DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
