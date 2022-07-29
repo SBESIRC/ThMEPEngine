@@ -3,42 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <?if $(var.Configuration) = Debug ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc_Debug" Guid="{9E991E98-F940-4911-A42B-9A07E9BB4245}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Ifc_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.Ifc.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc2x3_Debug" Guid="{B9A5E465-0FF3-4D09-B32F-2D3F865E71E5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Ifc2x3_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.Ifc2x3.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc4_Debug" Guid="{83A33E24-18E0-4E40-A1BE-8DDDC09106EA}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Ifc4_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.Ifc4.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_Esent_Debug" Guid="{D794E87F-3234-44BF-8B8E-D563809A566E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_IO_Esent_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.IO.Esent.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_MemoryModel_Debug" Guid="{668E8779-AC38-4FEC-9C62-E9CEBCCC4C1F}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_IO_MemoryModel_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.IO.MemoryModel.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine_Interop_Debug" Guid="{C6F579F3-4357-42ED-8EA0-941C3ADA60AB}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine_Interop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.Geometry.Engine.Interop.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Common_Debug" Guid="{12E38367-CBDF-4BD5-ACDA-A4521917B783}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Common_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.Common.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_ModelGeometry_Scene_Debug" Guid="{0697DAA9-F78D-49A1-8AFD-6459127499E7}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_ModelGeometry_Scene_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.ModelGeometry.Scene.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Tessellator_Debug" Guid="{759B768A-434B-4214-AAB9-AB84BA51475C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Tessellator_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Xbim.Tessellator.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine32_Debug" Guid="{A5FFAC79-8C32-412E-A5CC-F4152F8F48FE}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine32_Debug" KeyPath="yes" Source="$(var.XbimGeoEngine)\Xbim.Geometry.Engine32.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine64_Debug" Guid="{12CD6471-25E9-456B-82DA-B07F121F44DC}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine64_Debug" KeyPath="yes" Source="$(var.XbimGeoEngine)\Xbim.Geometry.Engine64.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc_Debug" Guid="{DE15506B-0446-46B5-B840-BC28E82B97C5}" Win64="yes">
@@ -112,42 +76,6 @@
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc_Release" Guid="{C0AABBB5-7B7C-4DAE-9F8B-2A300CC8D145}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Ifc_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.Ifc.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc2x3_Release" Guid="{ED389F60-9E32-47FF-82B3-5C8E321AD9DC}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Ifc2x3_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.Ifc2x3.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc4_Release" Guid="{FB2CEA0E-AFF6-489C-A2D9-700566785995}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Ifc4_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.Ifc4.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_Esent_Release" Guid="{B837F1BC-1716-4AA4-81B1-982FD7A7F60E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_IO_Esent_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.IO.Esent.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_MemoryModel_Release" Guid="{08650804-6511-4337-88E5-2CB5703CBA2E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_IO_MemoryModel_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.IO.MemoryModel.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine_Interop_Release" Guid="{5C78C8C2-809E-46DE-A0A5-14E4E193C22E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine_Interop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.Geometry.Engine.Interop.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Common_Release" Guid="{8CF3BAE3-4779-4C28-A713-160C8AAB0F11}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Common_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.Common.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_ModelGeometry_Scene_Release" Guid="{0E83C312-2AD2-4491-BB87-B359722A1F04}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_ModelGeometry_Scene_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.ModelGeometry.Scene.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Tessellator_Release" Guid="{D615244F-12A3-4AE9-A767-0F589215E1B0}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Tessellator_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Xbim.Tessellator.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine32_Release" Guid="{77BC85F7-2503-464A-9038-A89C7308E06D}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine32_Release" KeyPath="yes" Source="$(var.XbimGeoEngine)\Xbim.Geometry.Engine32.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine64_Release" Guid="{EA93F788-FE58-4CE2-8B8D-C459DE5FD66D}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine64_Release" KeyPath="yes" Source="$(var.XbimGeoEngine)\Xbim.Geometry.Engine64.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc_Release" Guid="{E14A8FEF-2CEC-4700-A037-B8066C4CCE04}" Win64="yes">
@@ -225,17 +153,6 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsAppXBim">
             <?if $(var.Configuration) = Debug ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc2x3_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc4_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_Esent_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_MemoryModel_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine_Interop_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Common_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_ModelGeometry_Scene_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Tessellator_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine32_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine64_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc2x3_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc4_Debug" />
@@ -259,17 +176,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Xbim_Geometry_Engine32_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Xbim_Geometry_Engine64_Debug" />
             <?elseif $(var.Configuration) = Release ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc2x3_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Ifc4_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_Esent_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_IO_MemoryModel_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine_Interop_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Common_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_ModelGeometry_Scene_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Tessellator_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine32_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Xbim_Geometry_Engine64_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc2x3_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Xbim_Ifc4_Release" />

@@ -3,18 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <?if $(var.Configuration) = Debug ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Debug" Guid="{87A7E45C-92A7-40C6-AD28-DF7D87A34F71}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.Extensions.Logging.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Abstractions_Debug" Guid="{B7404021-46ED-48D3-AEBC-322662623173}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Abstractions_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.Extensions.Logging.Abstractions.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Options_Debug" Guid="{0501865F-4DC7-450B-BE52-3C1ACDEF04C3}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Options_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.Extensions.Options.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Logging_Debug" Guid="{0D5E6060-3A48-4F85-85AE-2AD3EF213155}" Win64="yes">
@@ -40,18 +28,6 @@
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Release" Guid="{2951EC2F-9ECA-4119-8A29-43DA79040344}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.Extensions.Logging.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Abstractions_Release" Guid="{65CDD947-2A99-4AAA-9697-2117CB720B60}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Abstractions_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.Extensions.Logging.Abstractions.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Options_Release" Guid="{73074FB2-889C-4567-82E4-0DE090D387F4}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Options_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.Extensions.Options.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Logging_Release" Guid="{1DE2EAEB-1521-412B-9EAF-6665F1651ED8}" Win64="yes">
@@ -81,23 +57,17 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsAppMicrosoft">
             <?if $(var.Configuration) = Debug ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Abstractions_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Logging_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Logging_Abstractions_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_Extensions_Logging_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_Extensions_Logging_Abstractions_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Options_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Options_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_Extensions_Options_Debug" />
             <?elseif $(var.Configuration) = Release ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Logging_Abstractions_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Logging_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Logging_Abstractions_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_Extensions_Logging_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_Extensions_Logging_Abstractions_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_Extensions_Options_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_Extensions_Options_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_Extensions_Options_Release" />
             <?endif?>

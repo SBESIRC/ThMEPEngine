@@ -46,9 +46,6 @@
                         <Directory Id="INSTALLFOLDER" Name="ThMEPPlugin.bundle">
                             <Directory Id="DIR_Autoloader_Contents" Name="Contents">
                                 <Directory Id="DIR_Autoloader_Contents_App_Win64" Name="Win64">
-                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_R19" Name="2014">
-                                        <Directory Id="DIR_Autoloader_Contents_App_Win64_R19_X64" Name="x64"/>
-                                    </Directory>
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R20" Name="2016">
                                         <Directory Id="DIR_Autoloader_Contents_App_Win64_R20_X64" Name="x64"/>
                                     </Directory>

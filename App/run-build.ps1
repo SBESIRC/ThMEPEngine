@@ -51,28 +51,6 @@ Task Compile.Resource.R18 -Depends Requires.MSBuild {
     }
 }
 
-# $buildType build for AutoCAD R19
-Task Compile.Assembly.R19.Common -Depends Requires.MSBuild {
-    exec {
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\" ".\ThMEPEngine.sln" /p:Configuration="${buildType}-NET40" /t:restore
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\" ".\ThMEPEngine.sln" /p:Configuration="${buildType}-NET40" /t:rebuild
-    }
-}
-
-Task Compile.Assembly.R19.FanSelection -Depends Requires.MSBuild {
-    exec {
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\" ".\ThMEPEquipmentSelection.sln" /p:Configuration="${buildType}-NET40" /t:restore
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\" ".\ThMEPEquipmentSelection.sln" /p:Configuration="${buildType}-NET40" /t:rebuild
-    }
-}
-
-Task Compile.Resource.R19 -Depends Requires.MSBuild {
-    exec {
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\Dark\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\Dark\" ".\ThCuiRes\ThCuiRes.vcxproj" /t:rebuild
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\Light\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\Light\" ".\ThCuiRes\ThCuiRes_light.vcxproj" /t:rebuild
-    }
-}
-
 # $buildType build for AutoCAD R20
 Task Compile.Assembly.R20.Common -Depends Requires.MSBuild {
     exec {
@@ -125,17 +103,17 @@ Task Requires.BuildType {
     Write-Host "$buildType build confirmed"
 }
 
-Task Compile.Engine -Depends Requires.BuildType, Compile.Assembly.R19.Common, Compile.Assembly.R20.Common, Compile.Assembly.R22.Common
+Task Compile.Engine -Depends Requires.BuildType, Compile.Assembly.R20.Common, Compile.Assembly.R22.Common
 {
 
 }
 
-Task Compile.Resource -Depends Compile.Resource.R18, Compile.Resource.R19, Compile.Resource.R20, Compile.Resource.R22
+Task Compile.Resource -Depends Compile.Resource.R18, Compile.Resource.R20, Compile.Resource.R22
 {
 
 }
 
-Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R19.FanSelection, Compile.Assembly.R20.FanSelection, Compile.Assembly.R22.FanSelection
+Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R20.FanSelection, Compile.Assembly.R22.FanSelection
 {
     
 }
@@ -146,7 +124,6 @@ Task Requires.Dotfuscator {
 
 Task Dotfuscator -Depends Requires.Dotfuscator, Compile.Engine, Compile.Resource {
 	exec {
-		& $dotfuscatorCli -n "confusedDlls40.crproj" 
 		& $dotfuscatorCli -n "confusedDlls45.crproj"
 		& $dotfuscatorCli -n "confusedDlls46.crproj"
 	} 

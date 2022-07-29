@@ -3,15 +3,6 @@
   <?include Variable.wxi ?>
   <Fragment>
     <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_Debug" Guid="{09E916F0-793F-4818-9458-9A92241D72ED}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPHVAC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPHVAC.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_UI_Debug" Guid="{328F7F66-EEC2-445B-A1DA-01C81BE11090}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPHVAC_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Hvac.UI.dll" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHVAC_Debug" Guid="{630831DF-C2C0-469F-B0B0-FF60A5A4EDD9}" Win64="yes">
@@ -31,15 +22,6 @@
       </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_Release" Guid="{06144C28-5E5A-4BAA-8BDD-453C65108AC6}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPHVAC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPHVAC.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_UI_Release" Guid="{E84FC870-2FEB-4D74-99B0-7B0279A25250}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPHVAC_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Hvac.UI.dll" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Release="bin\Release-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHVAC_Release" Guid="{AE02BDBC-5A79-4607-884D-8736A353A648}" Win64="yes">
@@ -63,15 +45,11 @@
   <Fragment>
     <ComponentGroup Id="ProductComponentsHVACWin64">
       <?if $(var.Configuration) = Debug ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_UI_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHVAC_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHVAC_UI_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHVAC_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHVAC_UI_Debug" />
       <?elseif $(var.Configuration) = Release ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHVAC_UI_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHVAC_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHVAC_UI_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHVAC_Release" />

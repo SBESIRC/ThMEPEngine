@@ -3,15 +3,6 @@
   <?include Variable.wxi ?>
   <Fragment>
     <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_ARX_Debug" Guid="{066C6158-5246-4415-AAB9-CE19E559A16F}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_SuperBoundary_ARX_Debug" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary19X64.arx" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_CFG_Debug" Guid="{FAE8339F-7752-41C8-AE1A-CC82ACE3E931}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_SuperBoundary_CFG_Debug" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary.cfg" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Debug" Guid="{5322594A-7496-46B7-A6CC-9A509AF94C7A}" Win64="yes">
@@ -31,15 +22,6 @@
       </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_ARX_Release" Guid="{93F3F423-5669-47F9-8110-02E4D94794CF}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_SuperBoundary_ARX_Release" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary19X64.arx" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_CFG_Release" Guid="{EC380493-5B06-4501-AF34-671118365CC2}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_SuperBoundary_CFG_Release" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary.cfg" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Release="bin\Release-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Release" Guid="{5CC8B80F-6755-45A0-82C6-771A7FC3CF19}" Win64="yes">
@@ -63,15 +45,11 @@
   <Fragment>
     <ComponentGroup Id="ProductComponentsAppSuperBoundary">
       <?if $(var.Configuration) = Debug ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_ARX_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_CFG_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Debug" />
       <?elseif $(var.Configuration) = Release ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_ARX_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SuperBoundary_CFG_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Release" />

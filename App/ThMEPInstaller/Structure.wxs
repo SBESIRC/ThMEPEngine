@@ -3,15 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <?if $(var.Configuration) = Debug ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_CMD_Debug" Guid="{9A93D276-9763-4758-876D-DB76BDFB1FE8}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPStructure_CMD_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPStructure.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_UI_Debug" Guid="{99778786-307E-43DD-948A-E2FA1E49A5A5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPStructure_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Structure.WPF.UI.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPStructure_CMD_Debug" Guid="{326A52B7-5D5E-48B1-A39C-7127C524A558}" Win64="yes">
@@ -31,15 +22,6 @@
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_CMD_Release" Guid="{2A1A40B2-755D-4BAC-86D2-8F665C9BC550}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPStructure_CMD_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPStructure.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_UI_Release" Guid="{63FB8C1D-ED77-412D-B4F0-EF2FB72143CB}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPStructure_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Structure.WPF.UI.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPStructure_CMD_Release" Guid="{E315CD0B-DFDE-4DF0-B68B-D1E776CCFE75}" Win64="yes">
@@ -63,17 +45,13 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsStructureWin64">
             <?if $(var.Configuration) = Debug ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_CMD_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPStructure_CMD_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPStructure_CMD_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_UI_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPStructure_UI_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPStructure_UI_Debug" />
             <?elseif $(var.Configuration) = Release ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_CMD_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPStructure_CMD_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPStructure_CMD_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPStructure_UI_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPStructure_UI_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPStructure_UI_Release" />
             <?endif?>

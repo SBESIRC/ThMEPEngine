@@ -3,114 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <?if $(var.Configuration) = Debug ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" Guid="{219401F8-980F-4268-B8F8-7C9758B879AD}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\YamlDotNet.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Debug" Guid="{96A0549E-DEB1-43AA-B852-44475ADC8E74}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Debug" Guid="{9264C8B4-12E9-4B6C-B019-1602927A112C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Features_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.Features.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" Guid="{30161577-A902-4A60-9EC1-31FC99C32992}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" Guid="{467B1BA7-E779-4B52-96F1-20C101D7931A}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Newtonsoft.Json.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Debug" Guid="{1017FD4A-7F87-45F8-88F6-1464E06610EC}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ExcelDataReader.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" Guid="{1EAC766A-4E4A-4578-AB2A-13AF41A3BDA5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ExcelDataReader.DataSet.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" Guid="{B0FC1F73-6293-4EA9-A045-FCFC530BDCF6}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Catel.Core.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" Guid="{E89533EA-5033-4401-98AA-AB95C1990841}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\EPPlus.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Debug" Guid="{825E44B3-6BBA-4276-88FF-853AB8596097}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.IO.RecyclableMemoryStream.dll" />
-            </Component>    
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" Guid="{A14FD45E-1BDC-48AE-BB95-94FD6A9DF234}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuikGraph.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" Guid="{DDC373DB-491B-4609-9D35-91B85C30F9FA}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuikGraph.Serialization.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" Guid="{5B689620-B2C7-4D1B-A16D-E8072889B76A}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\RestSharp.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Debug" Guid="{3F937311-9641-4E7F-AA45-D5A727D60F26}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" Guid="{A50747C1-46E5-4D4F-8FDB-44C25BBE1259}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OOXML.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Debug" Guid="{9E2583FD-03F1-4836-972F-5FFA6FCD45E0}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OpenXml4Net.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" Guid="{5292C98D-05A6-44AB-82A9-913B6283CC4A}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OpenXmlFormats.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" Guid="{70B632FF-F99A-4B4A-BC56-65B3128D8BBE}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ICSharpCode.SharpZipLib.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Debug" Guid="{0F72870C-915B-41C2-B348-C4AEEE096D36}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\BouncyCastle.Crypto.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Debug" Guid="{9CA5C0FF-0B6F-441A-9994-A44C015DBDE3}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Serilog.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" Guid="{0DBC948F-6CD9-4EA0-93D5-ED2CEEE07DBC}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Serilog.Sinks.File.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Debug" Guid="{95DDC608-6BDE-4AB2-B936-5B45DD364BB1}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Debug" Guid="{48C2D904-3D19-43E2-A4B2-D498FE9E4B05}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Config_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.dll.config" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Debug" Guid="{7443AD40-4641-4E98-A13B-5B4A69F2E39C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.Math.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Debug" Guid="{7C84318D-482F-4FF7-AAEE-29794DC13D47}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.Math.Core.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" Guid="{6CA75497-88FD-42D3-AAA6-C875076144E1}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\HandyControl.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" Guid="{14468397-BCD4-4809-A9F1-2F3CAA2C2D26}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\MathNet.Numerics.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Debug" Guid="{4E7FD0D6-FB9B-4D5E-9C85-95F6574C669A}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Svg_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Svg.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" Guid="{9B7D73A4-6EF1-493D-8495-36FA7CE1BA31}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Fizzler.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Debug" Guid="{130CC348-AB59-483A-B244-C1A4F237D4F5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\GongSolutions.WPF.DragDrop.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Debug" Guid="{596C292E-4C3F-4CC3-A726-74946C9945F6}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Data.SQLite.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_EF6_Debug" Guid="{53AE2968-3AE1-4352-9165-0B6DD308DAA3}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_EF6_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Data.SQLite.EF6.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Linq_Debug" Guid="{87CE1AD4-92C8-41E2-905E-BB912CEE9A6D}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Linq_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Data.SQLite.Linq.dll" />
-            </Component>
-        </DirectoryRef>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_X64">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_SQLite_Interop_Debug" Guid="{2CC728EB-3943-4B9F-9BA8-991BEDB3BAB9}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Runtimes_X64_SQLite_Interop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\x64\SQLite.Interop.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" Guid="{96E812A6-8965-4A38-AC5C-43F43163EDEA}" Win64="yes">
@@ -214,7 +106,7 @@
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_X64">
-            <?define OutputPath_R19_Debug="bin\Debug-NET45" ?>
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_SQLite_Interop_Debug" Guid="{9937DC59-2025-4C93-95D7-27F0F574B29C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Runtimes_X64_SQLite_Interop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\x64\SQLite.Interop.dll" />
             </Component>
@@ -322,120 +214,12 @@
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_X64">
-            <?define OutputPath_R19_Debug="bin\Debug-NET46" ?>
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_SQLite_Interop_Debug" Guid="{5B711114-A552-4448-94B3-25F2FF34CEE7}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Runtimes_X64_SQLite_Interop_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\x64\SQLite.Interop.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" Guid="{B232B18A-A021-4987-A8DA-45481E2116FF}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\YamlDotNet.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" Guid="{EC1C4E50-FB56-41DD-8B1D-3272B0901BAD}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" Guid="{18ACD20E-A9F9-4C57-A2DB-C6FD5E7D8EBE}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.Features.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" Guid="{58B4CEB2-6EB7-4D57-888E-C6EE80567182}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.IO.GeoJSON.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" Guid="{3249A12B-1398-4CE1-AA80-D06CB4E4E8A2}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Newtonsoft.Json.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Release" Guid="{993494F4-6139-464D-8E0F-1FE7E230CE2E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ExcelDataReader.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" Guid="{38D2142E-4B26-432E-8FD5-0D0A5CE1ECED}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ExcelDataReader.DataSet.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" Guid="{7197DE3B-A941-4213-B6CF-B62729D83B0D}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Catel.Core.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" Guid="{3D99CBBA-2951-4C2C-84BC-67450D37F4F5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\EPPlus.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Release" Guid="{00E068D4-F645-4B7E-818A-25B8030DCE4A}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.IO.RecyclableMemoryStream.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" Guid="{4F7A3338-2713-4F30-B8FA-D38B181EAAD8}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuikGraph.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" Guid="{95A5560D-FA4A-4C98-A831-1A9A034D3935}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuikGraph.Serialization.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" Guid="{1766ED68-7672-477C-8353-178F681C179D}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\RestSharp.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Release" Guid="{BE7D5587-0764-4C4E-A225-3AA81B5D18D1}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" Guid="{0FCBA3CA-D8F2-4EB7-A932-67FDEB081260}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OOXML.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Release" Guid="{0DBE0778-0100-43C2-B952-B0767EF7056B}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OpenXml4Net.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" Guid="{21ACB337-C860-4F60-B538-1BDB0693CF1C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OpenXmlFormats.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" Guid="{A4DF40B5-D3B5-44BF-9548-1BC222042808}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ICSharpCode.SharpZipLib.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Release" Guid="{098E31DB-D9E9-4C35-A549-A9C6A6985DFD}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\BouncyCastle.Crypto.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Release" Guid="{86D5F492-0379-498E-B3F0-96695E1022C5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Serilog.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" Guid="{578442B8-64CE-4E56-886E-62767ACC4B0C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Serilog.Sinks.File.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Release" Guid="{20B16B74-E47E-4DFB-BC99-F22817DD6995}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Release" Guid="{10C561E7-F945-4E67-870D-04CB3CA08765}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Config_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.dll.config" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Release" Guid="{00285874-62C1-4C9E-89F5-EC464BDEE771}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.Math.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Release" Guid="{32BA1A8E-8ABD-4562-8987-D250B376DB84}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.Math.Core.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Release" Guid="{5EE220AE-5667-4492-9FD7-50538C43FBB0}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\HandyControl.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" Guid="{2B8F6B9E-CB3A-4DF9-AE93-80851E31DA55}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\MathNet.Numerics.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Release" Guid="{61E109DD-7731-4A46-A192-E2CD1207B007}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Svg_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Svg.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Release" Guid="{54D4C601-30E7-4E8A-9DAC-5CC2554B60A0}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Fizzler.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Release" Guid="{F2548D46-E922-4E41-B1E1-15F0EF710203}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\GongSolutions.WPF.DragDrop.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Release" Guid="{68039518-4519-43E4-B139-055D474B411E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Data.SQLite.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_EF6_Release" Guid="{A027DF02-483B-4FF4-A8E1-27584C9753DA}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_EF6_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Data.SQLite.EF6.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Linq_Release" Guid="{B2D73AB6-C214-4432-8F21-7C4F35A2E7E9}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Linq_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Data.SQLite.Linq.dll" />
-            </Component>
-        </DirectoryRef>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_X64">
-            <?define OutputPath_R19_Debug="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_SQLite_Interop_Release" Guid="{62844801-7772-450E-BBE4-B5A71A10FDC4}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Runtimes_X64_SQLite_Interop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\x64\SQLite.Interop.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" Guid="{4EBDB786-B7C7-4619-BC68-EA67A1D4DF9F}" Win64="yes">
@@ -538,14 +322,12 @@
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.Linq.dll" />
             </Component>
         </DirectoryRef>
-
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_X64">
-            <?define OutputPath_R19_Debug="bin\Release-NET45" ?>
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_SQLite_Interop_Release" Guid="{D0D629E5-69E8-4E5C-B1E6-25B03206099D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Runtimes_X64_SQLite_Interop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\x64\SQLite.Interop.dll" />
             </Component>
         </DirectoryRef>
-       
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" Guid="{A152E4EC-8C71-475E-B1D1-1B359E743813}" Win64="yes">
@@ -649,7 +431,7 @@
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_X64">
-            <?define OutputPath_R19_Debug="bin\Release-NET46" ?>
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_SQLite_Interop_Release" Guid="{A95137F5-9A7F-4F81-B8E3-80D5CE2B7C45}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Runtimes_X64_SQLite_Interop_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\x64\SQLite.Interop.dll" />
             </Component>
@@ -659,17 +441,6 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsAppExternal">
             <?if $(var.Configuration) = Debug ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Debug" />
@@ -693,10 +464,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Debug" />
@@ -705,57 +472,38 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_BouncyCastle_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_BouncyCastle_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Config_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Config_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_SQLite_Interop_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_SQLite_Interop_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_SQLite_Interop_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Svg_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Svg_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_EF6_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Linq_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_EF6_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Debug" />
@@ -763,17 +511,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_EF6_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Debug" />
             <?elseif $(var.Configuration) = Release ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Release" />
@@ -797,10 +534,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Release" />
@@ -809,57 +542,38 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_BouncyCastle_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_BouncyCastle_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Config_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Config_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_SQLite_Interop_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_SQLite_Interop_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_SQLite_Interop_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Svg_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Svg_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Gong_Wpf_Dragdrop_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Gong_Wpf_Dragdrop_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Gong_Wpf_Dragdrop_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_EF6_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Data_SQLite_Linq_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_EF6_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Release" />

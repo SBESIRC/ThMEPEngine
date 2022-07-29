@@ -3,15 +3,6 @@
 	<?include Variable.wxi ?>
 	<Fragment>
 		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_Debug" Guid="{53725BA4-259A-46DB-8792-0C0349DB7E1E}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_FanSelection_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.FanSelection.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_UI_Debug" Guid="{7F8A33CB-C1CB-4E0D-8B01-70B1CD314729}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_FanSelection_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.FanSelection.UI.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
 			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_FanSelection_Debug" Guid="{5000CFC9-1F88-466A-84BF-808658CB9650}" Win64="yes">
@@ -31,15 +22,6 @@
 			</Component>
 		</DirectoryRef>
 		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_Release" Guid="{92D748AC-4AF4-448D-9E20-68FBF304473A}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_FanSelection_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.FanSelection.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_UI_Release" Guid="{00888602-7C11-4060-9355-9B3944633ECC}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_FanSelection_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.FanSelection.UI.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
 			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_FanSelection_Release" Guid="{6764098C-C7C5-48DE-A805-82E2F709FD1B}" Win64="yes">
@@ -63,15 +45,11 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponentsFanSelectionWin64">
 			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_UI_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_FanSelection_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_FanSelection_UI_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_FanSelection_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_FanSelection_UI_Debug" />
 			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_FanSelection_UI_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_FanSelection_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_FanSelection_UI_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_FanSelection_Release" />
