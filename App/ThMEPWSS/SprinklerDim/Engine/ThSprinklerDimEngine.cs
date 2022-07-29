@@ -85,18 +85,6 @@ namespace ThMEPWSS.SprinklerDim.Engine
             List<ThSprinklerNetGroup> transNetList = ThSprinklerDimNetworkService.ChangeToOrthogonalCoordinates(netList);
             ThSprinklerDimNetworkService.CorrectGraphConnection(ref transNetList, 45.0);
 
-            for (int i = 0; i < transNetList.Count; i++)
-            {
-                var net = transNetList[i];
-                for (int j = 0; j < net.PtsGraph.Count; j++)
-                {
-                    List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
-                    var lines = net.PtsGraph[j].Print(pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("DTTol45-{2}-{0}-{1}", i, j, printTag), i % 7);
-                }
-            }
-
-
             ThSprinklerDimNetworkService.GenerateCollineationGroup(ref transNetList);
 
             List<ThSprinklerNetGroup> opNetList = new List<ThSprinklerNetGroup>();
@@ -117,7 +105,6 @@ namespace ThMEPWSS.SprinklerDim.Engine
                     opNetList.Add(newNetGroup);
                 }
             }
-            // opNetList = ThSprinklerDimNetworkService.SeparateGraph(opNetList);
 
             for (int i = 0; i < opNetList.Count; i++)
             {
