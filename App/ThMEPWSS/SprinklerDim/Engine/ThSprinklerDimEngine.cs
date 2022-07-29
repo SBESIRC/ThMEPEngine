@@ -78,7 +78,6 @@ namespace ThMEPWSS.SprinklerDim.Engine
         {
             List<ThSprinklerNetGroup> transNetList = ThSprinklerDimNetworkService.ChangeToOrthogonalCoordinates(netList);
             ThSprinklerDimNetworkService.CorrectGraphConnection(ref transNetList, 45.0);
-
             ThSprinklerDimNetworkService.GenerateCollineationGroup(ref transNetList);
 
             List<ThSprinklerNetGroup> opNetList = new List<ThSprinklerNetGroup>();
