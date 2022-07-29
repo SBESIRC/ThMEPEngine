@@ -113,12 +113,12 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="dtSeg"></param>
         /// <param name="pts"></param>
         /// <returns></returns>
-        public static List<ThSprinklerNetGroup> CreateSegGroup(List<Line> dtOrthogonalSeg, List<Line> dtSeg, List<Point3d> pts, Dictionary<Point3d, double> ptAngleDict, double DTTol, string printTag)
+        public static List<ThSprinklerNetGroup> CreateSegGroup(List<Line> dtOrthogonalSeg, string printTag)
         {
             var groupList = ThSprinklerNetworkService.ClassifyOrthogonalSeg(dtOrthogonalSeg);
             for (int i = 0; i < groupList.Count; i++)
             {
-                DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l1group{0}-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
+                DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l1-{0}-group-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
             }
 
             //groupList = ThSprinklerNetworkService.FilterGroupByPt(groupList);
@@ -127,18 +127,18 @@ namespace ThMEPWSS.SprinklerDim.Service
             //    DrawUtils.ShowGeometry(groupList.ElementAt(i).Value, string.Format("l2filterShortGroup{0}-{1}-{2}", printTag, i, groupList.ElementAt(i).Value.Count), i % 7);
             //}
 
-            // 往组里添加线
-            ThSprinklerNetworkService.AddSingleDTLineToGroup(dtSeg, groupList, DTTol * 1.5);
-            for (int i = 0; i < groupList.Count; i++)
-            {
-                DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l3addSameAngleDT{0}-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
-            }
+            //// 往组里添加线
+            //ThSprinklerNetworkService.AddSingleDTLineToGroup(dtSeg, groupList, DTTol * 1.5);
+            //for (int i = 0; i < groupList.Count; i++)
+            //{
+            //    DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l3addSameAngleDT{0}-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
+            //}
 
-            ThSprinklerNetworkService.AddSinglePTToGroup(groupList, pts, DTTol * 1.5);
-            for (int i = 0; i < groupList.Count; i++)
-            {
-                DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l4addLineInTol{0}-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
-            }
+            //ThSprinklerNetworkService.AddSinglePTToGroup(groupList, pts, DTTol * 1.5);
+            //for (int i = 0; i < groupList.Count; i++)
+            //{
+            //    DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l4addLineInTol{0}-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
+            //}
 
             var netList = ThSprinklerNetGraphService.ConvertToNet(groupList);
             for (int i = 0; i < netList.Count; i++)
@@ -147,7 +147,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 for (int j = 0; j < net.PtsGraph.Count; j++)
                 {
                     var lines = net.PtsGraph[j].Print(net.Pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("l5graphToNet{0}-{1}-{2}", printTag, i, j), i % 7);
+                    DrawUtils.ShowGeometry(lines, string.Format("l5-{0}-graphToNet-{1}-{2}", printTag, i, j), i % 7);
                 }
             }
 
@@ -170,7 +170,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 for (int j = 0; j < net.PtsGraph.Count; j++)
                 {
                     var lines = net.PtsGraph[j].Print(net.Pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("l7separateGraph-{2}-{0}-{1}", printTag, i, j), i % 7);
+                    DrawUtils.ShowGeometry(lines, string.Format("l7-{0}-separateGraph-{1}-{2}", printTag, i, j), i % 7);
                 }
             }
 

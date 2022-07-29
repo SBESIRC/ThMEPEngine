@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+
+using ThCADCore.NTS;
 
 using ThMEPEngineCore.Diagnostics;
 
@@ -32,25 +35,50 @@ namespace ThMEPWSS.SprinklerDim.Engine
             foreach (var pt in ptAngleDict)
             {
                 var dir = Vector3d.XAxis.RotateBy(pt.Value, Vector3d.ZAxis);
-                DrawUtils.ShowGeometry(pt.Key, dir, String.Format("l0prDir-{0}", printTag), 3, 30);
+                DrawUtils.ShowGeometry(pt.Key, dir, String.Format("l0-{0}-prDir", printTag), 3, 30);
             }
+
             var dtSeg = ThSprinklerNetworkService.GetDTSeg(sprinkPts);
+            DrawUtils.ShowGeometry(dtSeg, string.Format("l0-{0}-DT", printTag), 180);
 
-            var dtOrthogonalSeg = ThSprinklerNetworkService.FindOrthogonalAngleFromDT(sprinkPts, dtSeg);
-            DrawUtils.ShowGeometry(dtSeg, string.Format("l0DT-{0}", printTag), 140);
-            DrawUtils.ShowGeometry(dtOrthogonalSeg, string.Format("l0DTOrtho-{0}", printTag), 241);
+            var ptDtOriDict = ThSprinklerNetworkService.GetConnectPtDict(sprinkPts, dtSeg);
 
-            DTTol = ThSprinklerNetworkService.GetDTLength(dtOrthogonalSeg);
+            var ptDtDict = ThSprinklerNetworkService.FilterDTOrthogonalToPipeAngle(ptDtOriDict, ptAngleDict);
+            var allLine = ptDtDict.SelectMany(x => x.Value).Distinct().ToList();
+            DrawUtils.ShowGeometry(allLine, string.Format("l0-{0}-ptDTOrtho", printTag), 241, 30);
 
-            ThSprinklerNetworkService.FilterTooLongSeg(ref dtOrthogonalSeg, DTTol * 3);
+            ThSprinklerNetworkService.AddOrthoDTIfNoLine(ref ptDtDict, ptDtOriDict);
+            var allLine2 = ptDtDict.SelectMany(x => x.Value).Distinct().ToList();
+            DrawUtils.ShowGeometry(allLine2, string.Format("l0-{0}-ptDTOrthoAdd", printTag), 141, 30);
 
-            var filterDTAngle = ThSprinklerNetworkService.FilterDTOrthogonalToPipe(dtOrthogonalSeg, ptAngleDict);
-            filterDTAngle.ForEach(x => DrawUtils.ShowGeometry(x, string.Format("l0filterAngleDT-{0}", printTag), 140));
+            //var dtOrthogonalSeg = ThSprinklerNetworkService.FindOrthogonalAngleFromDT(sprinkPts, dtSeg);
+            //DrawUtils.ShowGeometry(dtOrthogonalSeg, string.Format("l0DTOrtho-{0}", printTag), 241);
 
-            var netList = ThCreateGroupService.CreateSegGroup(filterDTAngle, dtSeg, sprinkPts, ptAngleDict, DTTol, printTag);
+            //DTTol = ThSprinklerNetworkService.GetDTLength(dtOrthogonalSeg);
+
+            //ThSprinklerNetworkService.FilterTooLongSeg(ref dtOrthogonalSeg, DTTol * 3);
+
+            //var filterDTAngle = ThSprinklerNetworkService.FilterDTOrthogonalToPipe(dtOrthogonalSeg, ptAngleDict);
+            //filterDTAngle.ForEach(x => DrawUtils.ShowGeometry(x, string.Format("l0filterAngleDT-{0}", printTag), 102));
+
+            DTTol = ThSprinklerNetworkService.GetDTLength(allLine2);
+
+            ThSprinklerNetworkService.AddSinglePTToGroup(ref ptDtDict, ptAngleDict, DTTol * 1.5);
+            var allLineFinal = ptDtDict.SelectMany(x => x.Value).ToList();
+            ThSprinklerNetworkService.RemoveDuplicate(ref allLineFinal);
+            DrawUtils.ShowGeometry(allLineFinal, string.Format("l0-{0}-ptDTOrthoAdd2", printTag), 41, 30);
+
+            ThSprinklerNetworkService.FilterTooLongSeg(ref allLineFinal, DTTol * 3);
+            DrawUtils.ShowGeometry(allLineFinal, string.Format("l0-{0}-ptDTRemoveTooLong", printTag), 171, 30);
+
+            var netList = ThCreateGroupService.CreateSegGroup(allLineFinal, printTag);
 
             return netList;
         }
+
+
+
+
 
         private static List<ThSprinklerNetGroup> GetSprinklerPtOptimizedNet(List<ThSprinklerNetGroup> netList, double DTTol, string printTag)
         {

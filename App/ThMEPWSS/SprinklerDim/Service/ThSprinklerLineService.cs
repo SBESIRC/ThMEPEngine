@@ -9,9 +9,8 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     internal class ThSprinklerLineService
     {
-        public static List<Line> GetConnLine(Point3d pt, List<Line> lineList)
+        public static List<Line> GetConnLine(Point3d pt, List<Line> lineList, Tolerance tol)
         {
-            var tol = new Tolerance(10, 10);
             var connLines = lineList.Where(x => x.StartPoint.IsEqualTo(pt, tol) ||
                                                 x.EndPoint.IsEqualTo(pt, tol)).ToList();
             return connLines;
@@ -105,6 +104,26 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
 
             return bReturn;
+        }
+
+        public static bool IsOverlapLine(Line firLine, Line secLine)
+        {
+            var tol = new Tolerance(1, 1);
+            var seg1 = new LineSegment2d(firLine.StartPoint.ToPoint2D(), firLine.EndPoint.ToPoint2D());
+            var seg2 = new LineSegment2d(secLine.StartPoint.ToPoint2D(), secLine.EndPoint.ToPoint2D());
+            var b = IsOverlapLine(seg1, seg2, tol);
+
+            return b;
+        }
+
+        private static bool IsOverlapLine(LineSegment2d firLine, LineSegment2d secLine, Tolerance tol)
+        {
+            var overlapedSeg = firLine.Overlap(secLine, tol);
+            if (overlapedSeg != null)
+            {
+                return true;
+            }
+            return false;
         }
 
         public static List<Line> GetLineFromList(List<Line> lines, Point3d SP, Point3d EP)

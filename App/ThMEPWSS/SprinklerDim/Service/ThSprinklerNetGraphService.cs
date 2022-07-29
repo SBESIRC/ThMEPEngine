@@ -72,7 +72,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             var tol = new Tolerance(10, 10);
 
-            var connL = ThSprinklerLineService.GetConnLine(p, lines);
+            var connL = ThSprinklerLineService.GetConnLine(p, lines, tol);
 
             for (int i = 0; i < connL.Count; i++)
             {
