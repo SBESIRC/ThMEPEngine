@@ -17,10 +17,12 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             double generate_lane_length = -1;
             if (BuildingBoxes.Count <= 1) return generate_lane_length;
+            #region 生成判断函数
             for (int i = 0; i < BuildingBoxes.Count - 1; i++)
             {
                 for (int j = i + 1; j < BuildingBoxes.Count; j++)
                 {
+                    //计算出生成车道线
                     var pcenter_i = BuildingBoxes[i].Centroid.Coordinate;
                     var pcenter_j = BuildingBoxes[j].Centroid.Coordinate;
                     var line_ij = new LineSegment(pcenter_i, pcenter_j);
@@ -54,6 +56,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var line = lines.First();
                     line = ChangeLineToBeOrthogonal(line);
                     if (line.Length < DisCarAndHalfLane) continue;
+
                     Coordinate ps = new Coordinate();
                     if (Math.Abs(line.P0.X - line.P1.X) > 1)
                     {
@@ -65,6 +68,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         if (line.P0.Y < line.P1.Y) line = new LineSegment(line.P1, line.P0);
                         ps = line.P0.Translation(Vector(line).Normalize() * DisLaneWidth / 2);
                     }
+
                     var vec = Vector(line).GetPerpendicularVector().Normalize();
                     var gline = new LineSegment(ps.Translation(vec * MaxLength), ps.Translation(-vec * MaxLength));
                     var glines = SplitLine(gline, Boundary).Where(e => Boundary.Contains(e.MidPoint))
@@ -96,6 +100,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         }
                     }
                     if (quit) continue;
+                    //与障碍物相交处理
                     var gline_buffer = gline.Buffer(DisLaneWidth / 2);
                     gline_buffer = gline_buffer.Scale(ScareFactorForCollisionCheck);
                     var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(gline_buffer).Cast<Polygon>().ToList();
@@ -110,6 +115,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var gline_splits = SplitLine(gline, points);
                     if (gline_splits.Count > 0) gline = gline_splits[0];
                     if (gline.Length < DisCarAndHalfLane) continue;
+                    //生成参数赋值
                     if (IsConnectedToLane(gline) || IsConnectedToLane(gline, false))
                     {
                         paras.LanesToAdd.Add(new Lane(gline, Vector(line).Normalize()));
@@ -121,6 +127,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     }
                 }
             }
+            #endregion
             if (paras.LanesToAdd.Count > 0)
             {
                 switch (LayoutMode)

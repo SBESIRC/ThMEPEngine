@@ -19,6 +19,7 @@ bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_
 bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_collision = false)
         {
             int inipillar_count = Pillars.Count;
+            #region 允许柱子穿墙及背靠背对齐对车道线起始位置的调整
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
             {
@@ -91,6 +92,9 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     }
                 }
             }
+            #endregion
+
+            #region 长度划分
             //长度划分
             var segobjs = new List<LineSegment>();
             LineSegment[] segs;
@@ -110,10 +114,14 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
             int segscount = segs.Count();
             int c = 0;
             if (segscount == 0) line_align_backback_rest = new LineSegment();
+            #endregion
+
             foreach (var seg in segs)
             {
                 c++;
                 bool found_backback = false;
+
+                #region 对障碍物、（可能的车道模块CarBoxes）和已有车位（包含针对背靠背缩进情况处理）的判断处理
                 var s = new LineSegment(seg);
                 s = s.Translation(vec.Normalize() * (length_offset));
                 var car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
@@ -127,7 +135,6 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
                 else
                 {
-                    //cond = cond && CarSpatialIndex.SelectCrossingGeometry(carsc).Count == 0;
                     var crossedcarsc = CarSpatialIndex.SelectCrossingGeometry(carsc).Cast<Polygon>().ToList();
                     if (crossedcarsc.Count == 0) cond = true;
                     else
@@ -136,6 +143,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                         {
                             foreach (var crossed_back_car in crossedcarsc)
                             {
+                                #region 针对背靠背缩进的情况判断及车位调整处理
                                 var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
                                 if (g is Polygon && g.Area > 0)
                                 {
@@ -173,11 +181,15 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                     }
                                     else if (Cars[exist_index].CarLayoutMode == 1 || !cond_area) cond = false;
                                 }
+                                #endregion 
                             }
                         }
                         else cond = false;
                     }
                 }
+                #endregion
+
+                #region 车位碰撞检查
                 if (check_adj_collision)
                 {
                     if (Math.Abs(car.Area - DisVertCarLength * DisVertCarWidth) < 1 || Math.Abs(car.Area - DisVertCarLengthBackBack * DisVertCarWidth) < 1)
@@ -206,6 +218,8 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
                 if (judge_in_obstacles)
                     if (ObstaclesSpatialIndex.SelectCrossingGeometry(carsc).Count > 0) cond = false;
+                #endregion
+
                 if (cond)
                 {
                     if (add_to_car_spacialindex)
@@ -226,6 +240,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     //如果是生成该车道上的第一个车位，判断是否需要在前方生成柱子，如果需要则生成
                     if (precar.Area == 0)
                     {
+                        #region 当生成车位位车道线第一个车位是，需要考虑是否生成第一个柱子的场景处理
                         if (gfirstpillar && GeneratePillars)
                         {
                             var ed = seg;
@@ -261,10 +276,12 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             }
                         }
                         precar = car;
+                        #endregion
                     }
                     else
                     {
                         var dist = car.Envelope.Centroid.Coordinate.Distance(precar.Envelope.Centroid.Coordinate);
+                        #region 判断生成车位与上一个车位间距，以此判断中间是否为生成主子的空间，如果是，生成柱子
                         if (Math.Abs(dist - length_divided - DisPillarLength - DisHalfCarToPillar * 2) < 1 && GeneratePillars)
                         {
                             var ed = seg;
@@ -297,9 +314,11 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             }
                         }
                         else { }
+                        #endregion
                         precar = car;
                     }
-                    //判断是否需要生成最后一个柱子
+
+                    #region 判断是否需要生成最后一个柱子
                     if (glastpillar && c == segscount && GeneratePillars)
                     {
                         var ed = seg;
@@ -333,8 +352,11 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             vec = -vec;
                         }
                     }
+                    #endregion
                 }
             }
+
+            #region 对背靠背模块需要生成中柱的情况处理
             //判断是否需要生成中柱
             if (generate_middle_pillar)
             {
@@ -356,6 +378,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
                 Pillars.AddRange(middle_pillars);
             }
+            #endregion
         }
     }
 }

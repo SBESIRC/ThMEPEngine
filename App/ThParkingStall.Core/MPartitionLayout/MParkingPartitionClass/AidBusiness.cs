@@ -158,77 +158,83 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else return false;
             }
         }
+        /// <summary>
+        /// 已弃用
+        /// </summary>
+        /// <param name="lane"></param>
+        /// <param name="vec"></param>
+        /// <returns></returns>
         private double IsEssentialToCloseToBuilding(LineSegment lane, Vector2D vec)
         {
             return -1;
-            var line = lane.Scale(ScareFactorForCollisionCheck);
-            if (!GenerateLaneForLayoutingCarsInShearWall) return -1;
-            if (!IsPerpVector(vec, Vector2D.Create(1, 0))) return -1;
-            if (vec.Y < 0) return -1;
-            var bf = line.Buffer(DisLaneWidth / 2);
-            if (ObstaclesSpatialIndex.SelectCrossingGeometry(bf).Count > 0)
-            {
-                return -1;
-            }
-            var linetest = new LineSegment(line);
-            linetest=linetest.Translation(vec * MaxLength);
-            var pl = PolyFromLines(line, linetest);
-            var points = new List<Coordinate>();
-            points = ObstacleVertexes.Where(e => pl.IsPointInFast(e)).OrderBy(e => line.ClosestPoint(e).Distance(e)).ToList();
-            if (points.Count() < 1) return -1;
-            var crossedplys = ObstaclesSpatialIndex.SelectCrossingGeometry(pl).Cast<Polygon>();
-            double crossedlength = 0;
-            foreach (var c in crossedplys)
-            {
-                var crossededges = SplitCurve(c, pl).Where(e => pl.IsPointInFast(e.GetMidPoint()));
-                foreach (var ed in crossededges) crossedlength += ed.Length;
-            }
-            if (crossedlength < 10000) return -1;
-            var ltest_ob_near_boundary = LineSegmentSDL(points.First(), vec, DisVertCarLength);
-            if (ltest_ob_near_boundary.IntersectPoint(Boundary).Count() > 0) return -1;
-            var dist = line.ClosestPoint(points.First()).Distance(points.First());
-            var lperp = LineSegmentSDL(line.MidPoint.Translation(vec * 100), vec, dist + 1);
-            var lanes = IniLanes.Where(e => IsParallelLine(e.Line, line))
-                .Where(e => e.Line.IntersectPoint(lperp).Count() > 0);
-            if (lanes.Count() > 0) return -1;
-            var lt = new LineSegment(line);
-            lt=lt.Translation(vec * dist);
-            var ltbf = lt.Buffer(DisLaneWidth / 2);
-            points = points.Where(e => ltbf.IsPointInFast(e)).OrderBy(e => e.X).ToList();
-            if (points.Count() < 1) return -1;
-            var length = points.Last().X - points.First().X;
-            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-            int offsetcount = 0;
-            bool isvalid = false;
-            lt=lt.Translation(-vec * DisLaneWidth / 2);
-            int cyclecount = 5;
-            var moduledist = (dist - DisLaneWidth / 2) % DisModulus;
-            if (moduledist > 0 && moduledist <= DisVertCarLength)
-            {
-                dist = dist - DisLaneWidth / 2;
-                dist = dist - moduledist;
-                return dist;
-            }
-            for (int i = 0; i < cyclecount; i++)
-            {
-                var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, new Lane(lt, vec.Normalize()),true);
-                double validlength = 0;
-                vertlanes.ForEach(e => validlength += e.Line.Length);
-                if (validlength >= length / 2)
-                {
-                    isvalid = true;
-                    break;
-                }
-                offsetcount++;
-                lt=lt.Translation(-vec.Normalize() * (DisVertCarLength / cyclecount));
-            }
-            if (isvalid)
-            {
-                dist = dist - DisLaneWidth / 2;
-                dist = dist - offsetcount * (DisVertCarLength / cyclecount);
-                return dist;
-            }
-            return -1;
+            //var line = lane.Scale(ScareFactorForCollisionCheck);
+            //if (!GenerateLaneForLayoutingCarsInShearWall) return -1;
+            //if (!IsPerpVector(vec, Vector2D.Create(1, 0))) return -1;
+            //if (vec.Y < 0) return -1;
+            //var bf = line.Buffer(DisLaneWidth / 2);
+            //if (ObstaclesSpatialIndex.SelectCrossingGeometry(bf).Count > 0)
+            //{
+            //    return -1;
+            //}
+            //var linetest = new LineSegment(line);
+            //linetest=linetest.Translation(vec * MaxLength);
+            //var pl = PolyFromLines(line, linetest);
+            //var points = new List<Coordinate>();
+            //points = ObstacleVertexes.Where(e => pl.IsPointInFast(e)).OrderBy(e => line.ClosestPoint(e).Distance(e)).ToList();
+            //if (points.Count() < 1) return -1;
+            //var crossedplys = ObstaclesSpatialIndex.SelectCrossingGeometry(pl).Cast<Polygon>();
+            //double crossedlength = 0;
+            //foreach (var c in crossedplys)
+            //{
+            //    var crossededges = SplitCurve(c, pl).Where(e => pl.IsPointInFast(e.GetMidPoint()));
+            //    foreach (var ed in crossededges) crossedlength += ed.Length;
+            //}
+            //if (crossedlength < 10000) return -1;
+            //var ltest_ob_near_boundary = LineSegmentSDL(points.First(), vec, DisVertCarLength);
+            //if (ltest_ob_near_boundary.IntersectPoint(Boundary).Count() > 0) return -1;
+            //var dist = line.ClosestPoint(points.First()).Distance(points.First());
+            //var lperp = LineSegmentSDL(line.MidPoint.Translation(vec * 100), vec, dist + 1);
+            //var lanes = IniLanes.Where(e => IsParallelLine(e.Line, line))
+            //    .Where(e => e.Line.IntersectPoint(lperp).Count() > 0);
+            //if (lanes.Count() > 0) return -1;
+            //var lt = new LineSegment(line);
+            //lt=lt.Translation(vec * dist);
+            //var ltbf = lt.Buffer(DisLaneWidth / 2);
+            //points = points.Where(e => ltbf.IsPointInFast(e)).OrderBy(e => e.X).ToList();
+            //if (points.Count() < 1) return -1;
+            //var length = points.Last().X - points.First().X;
+            //UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            //int offsetcount = 0;
+            //bool isvalid = false;
+            //lt=lt.Translation(-vec * DisLaneWidth / 2);
+            //int cyclecount = 5;
+            //var moduledist = (dist - DisLaneWidth / 2) % DisModulus;
+            //if (moduledist > 0 && moduledist <= DisVertCarLength)
+            //{
+            //    dist = dist - DisLaneWidth / 2;
+            //    dist = dist - moduledist;
+            //    return dist;
+            //}
+            //for (int i = 0; i < cyclecount; i++)
+            //{
+            //    var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, new Lane(lt, vec.Normalize()),true);
+            //    double validlength = 0;
+            //    vertlanes.ForEach(e => validlength += e.Line.Length);
+            //    if (validlength >= length / 2)
+            //    {
+            //        isvalid = true;
+            //        break;
+            //    }
+            //    offsetcount++;
+            //    lt=lt.Translation(-vec.Normalize() * (DisVertCarLength / cyclecount));
+            //}
+            //if (isvalid)
+            //{
+            //    dist = dist - DisLaneWidth / 2;
+            //    dist = dist - offsetcount * (DisVertCarLength / cyclecount);
+            //    return dist;
+            //}
+            //return -1;
         }
         public void UpdateLaneBoxAndSpatialIndexForGenerateVertLanes()
         {
