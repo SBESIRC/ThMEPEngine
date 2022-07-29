@@ -9,11 +9,16 @@
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns:cusLocal="clr-namespace:ThControlLibraryWPF;assembly=ThControlLibraryWPF"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="400">
+             d:DesignHeight="555" d:DesignWidth="380">
     <UserControl.Resources>
         <ResourceDictionary>
             <cusLocal:EnumToVisibilty x:Key="enumToVisibility"/>
             <localRes:RadioUiValueConverter x:Key="RadioValueConverter"></localRes:RadioUiValueConverter>
+            <Style TargetType="Label">
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="3,0,0,0"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -40,51 +45,50 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.ColumnSpan="3" Margin="5,0,5,0">基本信息</Label>
-        <Label Grid.Row="1" Grid.ColumnSpan="3" Margin="5,0,5,0">系统负担高度：</Label>
+        <Label Grid.Row="1" Grid.ColumnSpan="3" Margin="8,0,5,0">系统负担高度：</Label>
         <RadioButton Grid.Row="2" Grid.Column="0" Name="rdbLowFloor" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True"
-                             TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding FloorType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">
+                             TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding FloorType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">
             <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="h&lt;=24m" ></Label>
         </RadioButton>
         <RadioButton Grid.Row="2" Grid.Column="1" Name="rdbMiddleFloor" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True"
-                             TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding FloorType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">
+                             TabIndex="4" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding FloorType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">
             <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="24m&lt;h&lt;=50m" ></Label>
         </RadioButton>
         <RadioButton Grid.Row="2" Grid.Column="2" Name="rdbHighFloor" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True"
-                             TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding FloorType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
+                             TabIndex="5" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding FloorType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
             <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="50m&lt;h&lt;=100m" ></Label>
         </RadioButton>
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="3" Margin="5,5,0,0">
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="3" Margin="5,0,0,0">
             <Label>系统楼层数：</Label>
-            <TextBox Name="txtfloorNums" Text="{Binding FloorNum, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <TextBox Name="txtfloorNums" Text="{Binding FloorNum, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="16" TabIndex="6" AcceptsTab="False"/>
             <Label>层</Label>
         </StackPanel>
-        <Label Grid.Row="4" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">疏散门（前室）</Label>
+        <Label Grid.Row="4" Margin="8,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">疏散门（前室）</Label>
         <StackPanel Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5,0,5,0">
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="+" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="+" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="7"
                                  x:Name="btnAddRowCopy"
                                  Click="btnAddRowCopy_Click" />
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="-" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="-" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="8"
                                  IsEnabled="{Binding HaveSelectItem,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
                                  x:Name="btnDelRow" Click="btnDelRow_Click"/>
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="∧" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="∧" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="9"
                                  IsEnabled="{Binding HaveSelectItem,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
                                  x:Name="btnMoveUpRow" Click="btnMoveUpRow_Click"></cus:ImageButton>
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="∨" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="∨" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="10"
                                  IsEnabled="{Binding HaveSelectItem,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
                                  x:Name="btnMoveDownRow" Click="btnMoveDownRow_Click"/>
         </StackPanel>
         <TabControl Name="FloorTab" ItemsSource="{Binding FrontRoomTabControl, NotifyOnSourceUpdated=True}" Grid.Row="5" Grid.ColumnSpan="3"
-                    HorizontalAlignment="Left" Height="120" Margin="10,10,10,10" VerticalAlignment="Top" Width="380"
+                    HorizontalAlignment="Stretch" Height="120" Margin="10,0,10,0" VerticalAlignment="Top" 
                     SelectedIndex="{Binding FrontRoomTabControlIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Label Content="{Binding FloorName}"></Label>
+                    <Label Content="{Binding FloorName}" Height="25" Padding="0" Margin="0"></Label>
                 </DataTemplate>
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <DataGrid ItemsSource="{Binding FloorInfoItems,Mode=TwoWay}" AutoGenerateColumns="False" RowHeight="25" SelectedItem="{Binding SelectInfoData, NotifyOnSourceUpdated=True}"
+                    <DataGrid ItemsSource="{Binding FloorInfoItems,Mode=TwoWay}" AutoGenerateColumns="False" ColumnHeaderHeight="25" RowHeight="22" SelectedItem="{Binding SelectInfoData, NotifyOnSourceUpdated=True}"
                               CellEditEnding="DataGrid_CellEditEnding">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="门形式" Width="*" CanUserSort="False" >
@@ -92,7 +96,7 @@
                                     <DataTemplate>
                                         <ComboBox ItemsSource="{Binding DoorTypeList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                                           SelectedItem="{Binding DoorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                                          SelectedIndex="{Binding DoorType.Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                          SelectedIndex="{Binding DoorType.Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Padding="0" Margin="0" Height="20">
                                         </ComboBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -108,29 +112,29 @@
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>
-        <Label Grid.Row="6" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">疏散门（楼梯间）</Label>
+        <Label Grid.Row="6" Margin="8,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">疏散门（楼梯间）</Label>
         <StackPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5,0,5,0">
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="+" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="+" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="11"
                                  x:Name="btnStairAdd"
                                  Click="btnAddStairRowCopy_Click" />
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="-" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="-" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="12"
                                  x:Name="btnStairDelRow" Click="btnDelStairRow_Click"/>
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="∧" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="∧" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="13"
                                  x:Name="btnStairMoveUpRow" Click="btnMoveUpStairRow_Click"></cus:ImageButton>
-            <cus:ImageButton ImageTextLocation="TextOnly" Content="∨" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="22" Width="22"
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="∨" Margin="5,0,5,0" TextMargin="5,0,5,0" Height="18" Width="18" TabIndex="14"
                                  x:Name="btnStairMoveDownRow" Click="btnMoveDownStairRow_Click"/>
         </StackPanel>
         <TabControl Name="StairTab" ItemsSource="{Binding StairRoomTabControl, NotifyOnSourceUpdated=True}" Grid.Row="7" Grid.ColumnSpan="3"
-                    HorizontalAlignment="Left" Height="120" Margin="10,10,10,10" VerticalAlignment="Top" Width="380"
+                    HorizontalAlignment="Stretch" Height="120" Margin="10,0,10,0" VerticalAlignment="Top"
                     SelectedIndex="{Binding StairRoomTabControlIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Label Content="{Binding FloorName}"></Label>
+                    <Label Content="{Binding FloorName}"  Height="25" Padding="0" Margin="0"></Label>
                 </DataTemplate>
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <DataGrid ItemsSource="{Binding FloorInfoItems,Mode=TwoWay}" AutoGenerateColumns="False" RowHeight="25" SelectedItem="{Binding SelectInfoData, NotifyOnSourceUpdated=True}"
+                    <DataGrid ItemsSource="{Binding FloorInfoItems,Mode=TwoWay}" AutoGenerateColumns="False" ColumnHeaderHeight="25"  RowHeight="22" SelectedItem="{Binding SelectInfoData, NotifyOnSourceUpdated=True}"
                               CellEditEnding="DataGrid_CellEditEnding">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="门宽（m）" Width="*" Binding="{Binding DoorWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" IsReadOnly="False" >
@@ -144,40 +148,40 @@
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>
-        <Label Grid.Row="8" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">送风阀</Label>
+        <Label Grid.Row="8" Margin="8,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">送风阀</Label>
         <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5,5,0,0">
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5,0,0,0">
                 <Label>截面长：</Label>
-                <TextBox Text="{Binding SectionLength, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="100" Height="22" TabIndex="1"/>
+                <TextBox Text="{Binding SectionLength, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="100" Height="16" TabIndex="15" AcceptsTab="False"/>
                 <Label>mm</Label>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="5,5,0,0">
+            <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="5,0,0,0">
                 <Label>截面宽：</Label>
-                <TextBox Text="{Binding SectionWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="100" Height="22" TabIndex="1"/>
+                <TextBox Text="{Binding SectionWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="100" Height="16" TabIndex="16" AcceptsTab="False"/>
                 <Label>mm</Label>
             </StackPanel>
         </Grid>
-        <Label Grid.Row="10" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">计算结果</Label>
-        <StackPanel Orientation="Horizontal" Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,5,0,0">
-            <Label Margin="0,0,3,0">Lj合计：</Label>
-            <TextBox Text="{Binding LjTotal, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="22" TabIndex="1"/>
-            <Label>m^2/h</Label>
+        <Label Grid.Row="10" Margin="8,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">计算结果</Label>
+        <StackPanel Orientation="Horizontal" Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,0,0,0">
+            <Label Margin="3,0,43,0">Lj合计：</Label>
+            <TextBox Text="{Binding LjTotal, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="16" TabIndex="17" AcceptsTab="False"/>
+            <Label>m^3/h</Label>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,5,0,0">
-            <Label Margin="0,0,3,0">L1门开启风量：</Label>
-            <TextBox Text="{Binding OpenDorrAirSupply, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="22" TabIndex="1"/>
-            <Label>m^2/h</Label>
+        <StackPanel Orientation="Horizontal" Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,0,0,0">
+            <Label Margin="3,0,3,0">L1门开启风量：</Label>
+            <TextBox Text="{Binding OpenDorrAirSupply, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="16" TabIndex="18" AcceptsTab="False"/>
+            <Label>m^3/h</Label>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,5,0,0">
-            <Label Margin="0,0,3,0">L3送风阀漏风：</Label>
-            <TextBox Text="{Binding VentilationLeakage, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="22" TabIndex="1"/>
-            <Label>m^2/h</Label>
+        <StackPanel Orientation="Horizontal" Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,0,0,0">
+            <Label Margin="3,0,3,0">L3送风阀漏风：</Label>
+            <TextBox Text="{Binding VentilationLeakage, NotifyOnSourceUpdated=True, Mode=TwoWay}" IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="150" Height="16" TabIndex="19" AcceptsTab="False"/>
+            <Label>m^3/h</Label>
         </StackPanel>
-        <TextBlock Name="txtResult" Grid.Row="14" Margin="5" Grid.ColumnSpan="3" IsEnabled="False"></TextBlock>
+        <TextBlock Name="txtResult" Grid.Row="14" Grid.ColumnSpan="3" IsEnabled="False"></TextBlock>
         <userCtrl:CheckValueUserControl Grid.Row="15" Grid.ColumnSpan="3" Visibility="{Binding FloorType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=1}"></userCtrl:CheckValueUserControl>
         <userCtrl:CheckValueUserControl Grid.Row="15" Grid.ColumnSpan="3" Visibility="{Binding FloorType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=2}"></userCtrl:CheckValueUserControl>
     </Grid>

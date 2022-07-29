@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="400">
+             d:DesignHeight="555" d:DesignWidth="380">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -27,21 +27,20 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.ColumnSpan="3" Margin="5,0,5,0">基本信息</Label>
         <Label Grid.Row="1" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">输入参数</Label>
         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="3" Margin="5,5,0,0">
             <Label Margin="0,0,12,0">净面积：</Label>
-            <TextBox Name="txtArea" Text="{Binding AreaNet, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <TextBox Name="txtArea" Text="{Binding AreaNet, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="3" AcceptsTab="False"/>
             <Label>m^2</Label>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="3" Margin="5,5,0,0">
             <Label>单位风量：</Label>
-            <TextBox Name="txtWindVolumn" Text="{Binding AirVolSpec, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <TextBox Name="txtWindVolumn" Text="{Binding AirVolSpec, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="4" AcceptsTab="False"/>
             <Label>m^3/hm^2</Label>
         </StackPanel>
         <Label Grid.Row="4" Margin="5,0,0,0" TextElement.FontWeight="Bold" TextElement.FontSize="15">计算结果</Label>
         <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" Margin="10,5,0,0">
-            <TextBox Name="txtResult" Text="{Binding WindVolume, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" IsEnabled="False"/>
+            <TextBox Name="txtResult" Text="{Binding WindVolume, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" IsEnabled="False"  TabIndex="5" AcceptsTab="False"/>
             <Label>m^3/h</Label>
         </StackPanel>
     </Grid>

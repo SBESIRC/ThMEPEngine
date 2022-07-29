@@ -36,7 +36,7 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             if (worker != null)
             {
                 var sourcesheet = Sourcebook.GetSheetFromSheetName(Model.ScenarioTitle);
-                worker.ExportToExcel(Model.baseSmokeProofViewModel, sourcesheet, Targetsheet, RangeCopyOperator);
+                worker.ExportToExcel(Model.baseSmokeProofViewModel, Model.SystemName, sourcesheet, Targetsheet, RangeCopyOperator);
             }
         }
     }

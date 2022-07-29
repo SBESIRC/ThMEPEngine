@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +18,10 @@ namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels.ThSmokeProofMappingMo
         /// 应用场景
         /// </summary>
         public string ScenarioTitle { get; set; }
+
+        /// <summary>
+        /// 系统名称
+        /// </summary>
+        public string SystemName { get; set; }
     }
 }

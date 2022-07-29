@@ -10,11 +10,10 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService.ExportWorkers
 {
     class StaircaseNoWindExportWorker : BaseExportWorker
     {
-        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
+        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, string systemName, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
         {
             StaircaseNoWindViewModel StaircaseNoAir = baseModel as StaircaseNoWindViewModel;
-            setsheet.Cells["D2"].Value = "";
-            setsheet.Cells["D3"].Value = "";
+            setsheet.Cells["D2"].Value = systemName;
             setsheet.Cells["D4"].Value = Math.Max(StaircaseNoAir.FinalValue, (StaircaseNoAir.OpenDorrAirSupply + StaircaseNoAir.VentilationLeakage)).ToString();
             setsheet.Cells["D5"].Value = (StaircaseNoAir.OpenDorrAirSupply + StaircaseNoAir.VentilationLeakage).ToString();
             setsheet.Cells["D6"].Value = StaircaseNoAir.OpenDorrAirSupply.ToString();

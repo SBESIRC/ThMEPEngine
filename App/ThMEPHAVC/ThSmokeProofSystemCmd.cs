@@ -43,11 +43,9 @@ namespace ThMEPHVAC
         [CommandMethod("TIANHUACAD", "THLXSPS", CommandFlags.Modal)]
         public void ThLXUcsCompass()
         {
-            var sltBlockType = ThMEPHVACStaticService.Instance.smokeCalculateViewModel.AirSupplySelectTableItem.Title;
             var sltTableType = ThMEPHVACStaticService.Instance.smokeCalculateViewModel.SelectTableItem;
             var smViewModel = MappingSmokeVM();
             string attriVal = GetWindVolumeAttri(sltTableType.Title, out string model);
-            var attri = new Dictionary<string, string>();
             while (true)
             {
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -55,15 +53,9 @@ namespace ThMEPHVAC
                     Active.Database.ImportCompassBlock(
                         ThMEPHAVCCommon.SMOKE_PROOF_BLOCK_NAME,
                         ThMEPHAVCCommon.SMOKE_PROOF_LAYER_NAME);
-                    if (sltBlockType == "自然送风")
-                    {
-                        attriVal = "自然";
-                        attri = new Dictionary<string, string>() { { "系统风量", attriVal } };
-                    }
-                    else
-                    {
-                        attri = new Dictionary<string, string>() { { "系统风量", attriVal } };
-                    }
+                    var attri = new Dictionary<string, string>() { { "系统编号", ThMEPHVACStaticService.Instance.smokeCalculateViewModel.SystemName } };
+                    attri.Add("系统风量", attriVal);
+                    attri.Add("房间功能", sltTableType.Title);
                     var objId = Active.Database.InsertCompassBlock(
                         ThMEPHAVCCommon.SMOKE_PROOF_BLOCK_NAME,
                         ThMEPHAVCCommon.SMOKE_PROOF_LAYER_NAME,
@@ -81,6 +73,26 @@ namespace ThMEPHVAC
                         break;
                     }
                     jig.TransformEntities();
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THMODIFYBLOCK", CommandFlags.Modal)]
+        public void ThModifyBlockInfo()
+        {
+            var blockId = ThMEPHVACStaticService.Instance.BlockId;
+            if (blockId != null)
+            {
+                var sltTableType = ThMEPHVACStaticService.Instance.smokeCalculateViewModel.SelectTableItem;
+                var smViewModel = MappingSmokeVM();
+                string attriVal = GetWindVolumeAttri(sltTableType.Title, out string model);
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    var attri = new Dictionary<string, string>() { { "系统编号", ThMEPHVACStaticService.Instance.smokeCalculateViewModel.SystemName } };
+                    attri.Add("系统风量", attriVal);
+                    attri.Add("房间功能", sltTableType.Title);
+                    blockId.UpdateAttributesInBlock(attri);
+                    SetModelData(blockId, smViewModel, model, attriVal);
                 }
             }
         }

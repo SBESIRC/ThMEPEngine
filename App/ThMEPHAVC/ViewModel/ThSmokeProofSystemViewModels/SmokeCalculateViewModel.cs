@@ -45,6 +45,20 @@ namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
         }
 
         /// <summary>
+        /// 系统名称
+        /// </summary>
+        private string _systemName = "";
+        public string SystemName
+        {
+            get { return _systemName; }
+            set
+            {
+                _systemName = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// 机械送风/自然送风
         /// </summary>
         private ObservableCollection<UTableItem> _airSupplyTableItems;
@@ -79,7 +93,7 @@ namespace ThMEPHVAC.ViewModel.ThSmokeProofSystemViewModels
                 new UTableItem("自然送风", null),
                 new UTableItem("机械送风", null),
             };
-            AirSupplySelectTableItem = AirSupplyTableItems[0];
+            AirSupplySelectTableItem = AirSupplyTableItems[1];
         }
     }
 

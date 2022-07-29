@@ -177,5 +177,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                 }
             }
         }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

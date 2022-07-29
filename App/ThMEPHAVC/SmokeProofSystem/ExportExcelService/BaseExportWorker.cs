@@ -171,7 +171,7 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             return string.Empty;
         }
 
-        public abstract void ExportToExcel(BaseSmokeProofViewModel baseModel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator excelfile);
+        public abstract void ExportToExcel(BaseSmokeProofViewModel baseModel, string systemName, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator excelfile);
 
         private static void RemoveFloorInfo(ObservableCollection<FloorInfo> floors, List<FloorInfo> removeFloors)
         {

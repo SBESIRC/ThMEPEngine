@@ -10,26 +10,25 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService.ExportWorkers
 {
     public class SeparateOrSharedWindExportWorker : BaseExportWorker
     {
-        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
+        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, string systemName, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
         {
             SeparateOrSharedWindViewModel frontRoomWind = baseModel as SeparateOrSharedWindViewModel;
-            setsheet.Cells["D2"].Value = "";
-            setsheet.Cells["D3"].Value = "";
-            setsheet.Cells["D4"].Value = Math.Max(frontRoomWind.FinalValue, (frontRoomWind.OpenDorrAirSupply + frontRoomWind.VentilationLeakage)).ToString();
-            setsheet.Cells["D5"].Value = (frontRoomWind.OpenDorrAirSupply + frontRoomWind.VentilationLeakage).ToString();
-            setsheet.Cells["D6"].Value = frontRoomWind.OpenDorrAirSupply.ToString();
-            setsheet.Cells["D8"].Value = frontRoomWind.VentilationLeakage.ToString();
-            setsheet.Cells["D9"].Value = frontRoomWind.OverAk.ToString();
-            setsheet.Cells["D10"].Value = "0.7";
-            setsheet.Cells["D11"].Value = Math.Min(frontRoomWind.FloorNum, 3).ToString();
-            setsheet.Cells["D12"].Value = (frontRoomWind.SectionLength * frontRoomWind.SectionWidth / 1000000).ToString();
-            setsheet.Cells["D13"].Value = (frontRoomWind.FloorNum < 3 ? 0 : frontRoomWind.FloorNum - 3).ToString();
-            setsheet.Cells["D14"].Value = frontRoomWind.FinalValue.ToString();
-            setsheet.Cells["D15"].Value = frontRoomWind.FloorNum.ToString();
-            setsheet.Cells["D16"].Value = GetLoadRange(frontRoomWind.FloorType.ToString());
-            setsheet.Cells["D17"].Value = frontRoomWind.SectionLength.ToString();
-            setsheet.Cells["D18"].Value = frontRoomWind.SectionWidth.ToString();
-            int rowNo = 19;
+            setsheet.Cells["D2"].Value = systemName;
+            setsheet.Cells["D3"].Value = Math.Max(frontRoomWind.FinalValue, (frontRoomWind.OpenDorrAirSupply + frontRoomWind.VentilationLeakage)).ToString();
+            setsheet.Cells["D4"].Value = (frontRoomWind.OpenDorrAirSupply + frontRoomWind.VentilationLeakage).ToString();
+            setsheet.Cells["D5"].Value = frontRoomWind.OpenDorrAirSupply.ToString();
+            setsheet.Cells["D7"].Value = frontRoomWind.VentilationLeakage.ToString();
+            setsheet.Cells["D8"].Value = frontRoomWind.OverAk.ToString();
+            setsheet.Cells["D9"].Value = "0.7";
+            setsheet.Cells["D10"].Value = Math.Min(frontRoomWind.FloorNum, 3).ToString();
+            setsheet.Cells["D11"].Value = (frontRoomWind.SectionLength * frontRoomWind.SectionWidth / 1000000).ToString();
+            setsheet.Cells["D12"].Value = (frontRoomWind.FloorNum < 3 ? 0 : frontRoomWind.FloorNum - 3).ToString();
+            setsheet.Cells["D13"].Value = frontRoomWind.FinalValue.ToString();
+            setsheet.Cells["D14"].Value = frontRoomWind.FloorNum.ToString();
+            setsheet.Cells["D15"].Value = GetLoadRange(frontRoomWind.FloorType.ToString());
+            setsheet.Cells["D16"].Value = frontRoomWind.SectionLength.ToString();
+            setsheet.Cells["D17"].Value = frontRoomWind.SectionWidth.ToString();
+            int rowNo = 18;
             for (int i = 1; i <= frontRoomWind.FrontRoomTabControl.Sum(f => f.FloorInfoItems.Count); i++)
             {
                 setsheet.CopyRangeToNext(19, 1, 21, 4, 3 * i);

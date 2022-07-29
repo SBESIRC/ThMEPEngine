@@ -11,6 +11,8 @@ namespace ThMEPHVAC.SmokeProofSystem.Model
     {
         public string ScenarioTitle { get; set; }
 
+        public string SystemName { get; set; }
+
         public BaseSmokeProofViewModel baseSmokeProofViewModel { get; set; }
     }
 }
