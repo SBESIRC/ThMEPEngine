@@ -71,9 +71,6 @@ namespace ThMEPWSS.SprinklerDim.Engine
         }
 
 
-
-
-
         private static List<ThSprinklerNetGroup> GetSprinklerPtOptimizedNet(List<ThSprinklerNetGroup> netList, double DTTol, string printTag)
         {
             List<ThSprinklerNetGroup> transNetList = ThSprinklerDimNetworkService.ChangeToOrthogonalCoordinates(netList);
@@ -84,19 +81,18 @@ namespace ThMEPWSS.SprinklerDim.Engine
             foreach (ThSprinklerNetGroup netGroup in transNetList)
             {
                 var pts = netGroup.Pts;
-                for(int i = 0; i < netGroup.PtsGraph.Count; i++)
+
+                List<Line> remainingLines = new List<Line>();
+                for (int i = 0; i < netGroup.PtsGraph.Count; i++)
                 {
                     ThSprinklerGraph graph = netGroup.PtsGraph[i];
                     ThOptimizeGroupService.CutoffLines(pts, ref graph, netGroup.XCollineationGroup[i], true);
                     ThOptimizeGroupService.CutoffLines(pts, ref graph, netGroup.YCollineationGroup[i], false);
-
-                    List<Line> remainingLines = graph.Print(pts);
-                    ThSprinklerNetGroup newNetGroup = ThSprinklerNetGraphService.CreateNetwork(netGroup.Angle, remainingLines);
-                    newNetGroup.Transformer = netGroup.Transformer;
-                    newNetGroup.XCollineationGroup = netGroup.XCollineationGroup;
-                    newNetGroup.YCollineationGroup = netGroup.YCollineationGroup;
-                    opNetList.Add(newNetGroup);
+                    remainingLines.AddRange(graph.Print(pts));
                 }
+                ThSprinklerNetGroup newNetGroup = ThSprinklerNetGraphService.CreateNetwork(netGroup.Angle, remainingLines);
+                newNetGroup.Transformer = netGroup.Transformer;
+                opNetList.Add(newNetGroup);
             }
 
             for (int i = 0; i < opNetList.Count; i++)
@@ -110,6 +106,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
                 }
             }
 
+            ThSprinklerDimNetworkService.GenerateCollineationGroup(ref opNetList);
             return opNetList;
         }
 
