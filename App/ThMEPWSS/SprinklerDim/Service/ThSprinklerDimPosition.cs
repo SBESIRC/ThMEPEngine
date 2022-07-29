@@ -297,10 +297,15 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<long> allreadydim = new();
             DimPoints = DimPoints.Concat(BoundaryMerge(bd, step, IsxAxis, out allreadydim)).ToList();
 
+            List<int> ints = new();
+            foreach(DimLinesGroup a in DimPoints)
+            {
+                ints = ints.Concat(a.tag).ToList();
+            }
 
             for (int j = 0; j < netList.Count; j++)
             {
-                if (DimPoints.Where(p => p.tag.Contains(j)) != null) continue;
+                if (ints.Contains(j)) continue;
                 DimLinesGroup t = GetProperFirstLine(netList[j].Pts, IsxAxis);
                 t.tag.Add(j);
                 DimPoints.Add(t);
