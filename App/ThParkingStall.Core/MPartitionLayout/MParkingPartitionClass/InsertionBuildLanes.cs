@@ -80,6 +80,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     gline = glines.First();
                     if (ClosestPointInCurves(gline.MidPoint, IniLanes.Select(e => e.Line.ToLineString()).ToList()) < 1)
                         continue;
+                    if (ClosestPointInCurves(gline.P0, IniLanes.Select(e => e.Line.ToLineString()).ToList()) > 1)
+                        gline = new LineSegment(gline.P1, gline.P0);
                     if (gline.Length < LengthCanGAdjLaneConnectSingle) continue;
                     if (!IsConnectedToLane(gline)) continue;
                     double dis_connected_double = 0;
@@ -107,12 +109,16 @@ namespace ThParkingStall.Core.MPartitionLayout
                     points = points.Where(p => gline_buffer.Contains(p)).Select(p => gline.ClosestPoint(p)).Where(p => p.Distance(gline.P0) > 1).ToList();
                     var gline_splits = SplitLine(gline, points);
                     if (gline_splits.Count > 0) gline = gline_splits[0];
-                    paras.LanesToAdd.Add(new Lane(gline, Vector(line).Normalize()));
-                    paras.LanesToAdd.Add(new Lane(gline, -Vector(line).Normalize()));
-                    paras.CarBoxesToAdd.Add(PolyFromLine(gline));
-                    generate_lane_length = gline.Length;
-                    if (generate_lane_length - dis_connected_double > 0)
-                        generate_lane_length -= dis_connected_double;
+                    if (gline.Length < DisCarAndHalfLane) continue;
+                    if (IsConnectedToLane(gline) || IsConnectedToLane(gline, false))
+                    {
+                        paras.LanesToAdd.Add(new Lane(gline, Vector(line).Normalize()));
+                        paras.LanesToAdd.Add(new Lane(gline, -Vector(line).Normalize()));
+                        paras.CarBoxesToAdd.Add(PolyFromLine(gline));
+                        generate_lane_length = gline.Length;
+                        if (generate_lane_length - dis_connected_double > 0)
+                            generate_lane_length -= dis_connected_double;
+                    }
                 }
             }
             if (paras.LanesToAdd.Count > 0)
