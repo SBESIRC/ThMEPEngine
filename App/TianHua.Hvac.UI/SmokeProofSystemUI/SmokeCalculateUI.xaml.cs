@@ -29,9 +29,9 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI
     {
         public SmokeCalculateUI()
         {
+            InitializeComponent();
             InitData();
             this.DataContext = ThMEPHVACStaticService.Instance.smokeCalculateViewModel;
-            InitializeComponent();
         }
 
         /// <summary>
@@ -59,8 +59,16 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI
                     ThMEPHVACStaticService.Instance.smokeCalculateViewModel.FunctionTableItems.FirstOrDefault(x => x.Title == ThMEPHVACStaticService.Instance.smokeCalculateMappingModel.ScenarioTitle);
                 ThMEPHVACStaticService.Instance.smokeCalculateViewModel.AirSupplySelectTableItem =
                     ThMEPHVACStaticService.Instance.smokeCalculateViewModel.AirSupplyTableItems.FirstOrDefault(x => x.Title == ThMEPHVACStaticService.Instance.smokeCalculateMappingModel.AirSupplyTitle);
+                ThMEPHVACStaticService.Instance.smokeCalculateViewModel.SystemName = ThMEPHVACStaticService.Instance.smokeCalculateMappingModel.SystemName;
                 ThMEPHVACStaticService.Instance.smokeCalculateMappingModel = null;
+                this.btnLayout.Visibility = Visibility.Hidden;
+                this.btnModify.Visibility = Visibility.Visible;
             }
+            else
+            {
+                this.btnLayout.Visibility = Visibility.Visible;
+                this.btnModify.Visibility = Visibility.Hidden;
+            }    
         }
 
         private void btnLayoutBlock_Click(object sender, RoutedEventArgs e)
@@ -75,6 +83,13 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI
             // 发送命令
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THSPEXPORT");
+        }
+
+        private void btnModify_Click(object sender, RoutedEventArgs e)
+        {
+             // 发送命令
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THMODIFYBLOCK");
         }
 
         /// <summary>

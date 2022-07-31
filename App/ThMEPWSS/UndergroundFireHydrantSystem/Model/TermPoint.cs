@@ -16,7 +16,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
         public string PipeNumber2 { get; set; }//标注
-        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器 ; 5 跨层点; 6 无立管有标注
+        public int Type { get; set; }//1 消火栓; 2 立管; 3 无立管; 4 水泵接合器 ; 5 跨层点; 
         private double Tolerance { get; set; }//容差
         public TermPoint(Point3dEx ptEx)
         {
@@ -57,28 +57,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 return;
             }
             var adjs = fireHydrantSysIn.LeadLineDic[StartLine];
-            if (adjs.Count > 1)
+            if (adjs.Count == 0)
             {
                 return;
             }
-            double minDist = 100;
-            foreach (var l in labelLine)
+            foreach(var adj in adjs)
             {
-                if (l is null)
+                var l = adj as Line;
+                if(l.IsHorizontalLine())
                 {
-                    continue;
-                }
-                var spt = l.StartPoint;
-                var ept = l.EndPoint;
-                var spt1 = StartLine.StartPoint;
-                var ept1 = StartLine.EndPoint;
-                if(!l.Equals(StartLine))
-                {
-                    if (StartLine.GetLinesDist(l)< minDist)
-                    {
-                        TextLine = l;
-                        minDist = StartLine.GetLinesDist(l);
-                    }
+                    TextLine = l;
+                    return;
                 }
             }
         }
@@ -135,27 +124,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return pipeNumber;
         }
 
-        public void SetType(bool verticalHasHydrant)
+        public void SetType(bool hasHydrant,bool hasVertical)
         {
             if(PipeNumber?.Contains("水泵接合器") == true)
             {
-                Type = 4;
+                Type = 4;//水泵接合器
                 return;
             }
-            if(!verticalHasHydrant)
+            if(hasHydrant)
             {
-                Type = 2;//只供给其他区域
+                Type = 1;//消火栓
+                return;
+            }
+            if(hasVertical)
+            {
+                Type = 2;//立管
             }
             else
             {
-                if (PipeNumber.IsCurrentFloor())
-                {
-                    Type = 1;//只供给消火栓
-                }
-                else
-                {
-                    Type = 3;//同时供消火栓与其他区域
-                }
+                Type = 3;//无立管
             }
         }
     }

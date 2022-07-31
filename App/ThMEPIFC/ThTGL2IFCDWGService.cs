@@ -69,8 +69,8 @@ namespace ThMEPIFC
         {
             return new ThTCHRailing()
             {
-                Depth = 1200,
-                Thickness = 60,
+                Height = 1200,
+                Width = 60,
                 Outline = pline,
                 ExtrudedDirection = Vector3d.ZAxis,
             };

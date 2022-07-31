@@ -77,7 +77,19 @@ namespace ThMEPHVAC.FanConnect.Model
 
             return descendant;
         }
+
+        public List<ThFanTreeNode<T>> GetAllTreeNode()
+        {
+            var nodeList = new List<ThFanTreeNode<T>>();
+
+            nodeList.Add(this);
+            nodeList.AddRange(this.GetDecendent());
+
+            return nodeList;
+        }
     }
+
+
     public class ThFanTreeModel
     {
         public ThFanTreeNode<ThFanPipeModel> RootNode { set; get; }
@@ -431,6 +443,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
             }
         }
+
         public void FindEndNode1(ThFanTreeNode<ThFanPointModel> node)
         {
             node.Item.Level = PIPELEVEL.LEVEL2;
@@ -442,17 +455,18 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
             }
         }
-        public void RemEndNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level)
-        {
-            foreach (var child in node.Children)
-            {
-                if (child.Item.Level != level)
-                {
-                    RemEndNode(child, level);
-                }
-            }
-            node.Children = node.Children.Where(o => o.Item.Level != level).ToList();
-        }
+
+        //public void RemEndNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level)
+        //{
+        //    foreach (var child in node.Children)
+        //    {
+        //        if (child.Item.Level != level)
+        //        {
+        //            RemEndNode(child, level);
+        //        }
+        //    }
+        //    node.Children = node.Children.Where(o => o.Item.Level != level).ToList();
+        //}
         public void RemEndNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level, bool isCodeAndHotPipe, bool isCwPipe, ref List<Entity> marks)
         {
             var remChildren = new List<ThFanTreeNode<ThFanPointModel>>();
@@ -588,24 +602,6 @@ namespace ThMEPHVAC.FanConnect.Model
 
             return root;
         }
-
-        //private static Point3d GetStartPt(Point3d startPt, Dictionary<Point3d, List<Line>> ptDict)
-        //{
-        //    var pt = new Point3d();
-        //    var key = ptDict.Where(x => x.Value.Contains(rootLine)).ToList();
-        //    if (key.Count() == 2)
-        //    {
-        //        if (key[0].Value.Count == 1)
-        //        {
-        //            pt = key[0].Key;
-        //        }
-        //        else if (key[1].Value.Count == 1)
-        //        {
-        //            pt = key[1].Key;
-        //        }
-        //    }
-        //    return pt;
-        //}
 
         public static Dictionary<Point3d, List<Line>> GetPtDict(List<Line> lines)
         {

@@ -105,9 +105,9 @@ namespace TianHua.Electrical.PDS.Engine
                     if (!string.IsNullOrEmpty(otherDistBoxID) && srcPanelID.Last().Equals(otherDistBoxID))
                     {
                         // 对末端配电箱做特殊处理
-                        if (ThPDSTerminalPanelService.IsTerminalPanel( cabletrayEdgeList[i].Target)
-                            && cabletrayEdgeList[j].Target.Loads[0].Location.StoreyNumber != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyNumber
-                            && cabletrayEdgeList[j].Target.Loads[0].Location.StoreyTypeString != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyTypeString)
+                        if (ThPDSTerminalPanelService.IsTerminalPanel(cabletrayEdgeList[i].Target)
+                            && (cabletrayEdgeList[j].Target.Loads[0].Location.StoreyNumber != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyNumber
+                            || cabletrayEdgeList[j].Target.Loads[0].Location.StoreyTypeString != cabletrayEdgeList[i].Target.Loads[0].Location.StoreyTypeString))
                         {
                             continue;
                         }
@@ -315,15 +315,21 @@ namespace TianHua.Electrical.PDS.Engine
         private bool IsContains(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
             ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
         {
-            if (node.NodeType != PDSNodeType.Unkown && !node.Loads[0].Location.IsStandardStorey
-                && !ThPDSTerminalPanelService.IsTerminalPanel(node))
+            if (node.NodeType != PDSNodeType.Unkown && !node.Loads[0].Location.IsStandardStorey)
             {
                 if (!string.IsNullOrEmpty(node.Loads[0].ID.LoadID))
                 {
+                    if (graph.ContainsVertex(node))
+                    {
+                        originalNode = node;
+                        return true;
+                    }
+
                     foreach (var vertex in graph.Vertices)
                     {
                         // id、楼层、位置判断
-                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && PositionCheck(vertex, node) && TypeCheck(vertex, node))
+                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && DifferentStoreyCheck(vertex, node)
+                            && PositionCheck(vertex, node) && TypeCheck(vertex, node))
                         {
                             if (!PowerCheck(vertex, node))
                             {
@@ -378,6 +384,19 @@ namespace TianHua.Electrical.PDS.Engine
         {
             return vertex.Loads[0].Location.StoreyNumber == node.Loads[0].Location.StoreyNumber
                 && vertex.Loads[0].Location.StoreyTypeString == node.Loads[0].Location.StoreyTypeString;
+        }
+
+        /// <summary>
+        /// 校核是否位于不同楼层
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool DifferentStoreyCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            return !vertex.Loads[0].Location.ReferenceDWG.Equals(node.Loads[0].Location.ReferenceDWG)
+                || (ThPDSPoint3dService.PDSPoint3dToPoint3d(vertex.Loads[0].Location.StoreyBasePoint) -
+                ThPDSPoint3dService.PDSPoint3dToPoint3d(node.Loads[0].Location.StoreyBasePoint)).Length > 10.0;
         }
 
         /// <summary>

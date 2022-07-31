@@ -91,7 +91,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayOut.PipeLine.Add(new Line(lastInsertPt.OffsetXY(-500, -height), stPt1.OffsetXY(-500, -height)));
                     }
                     int fireAreaIndex = -1;//当前支管的防火分区index
-                    int fireAreaNum = 0; //当前支管的防火分区数目
+                    int fireAreaNum = 1; //当前支管的防火分区数目，默认1个
                     stPt = spt2.OffsetX(1700);
                     int branchIndex = 0;
                     bool alarmValveVisited = false;
@@ -118,7 +118,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     sprayOut.Texts.Add(text);
                                 }
                             }
-                            spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(alarmGap, 3900));
+                            spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(alarmGap, 3900));//报警阀起点
                             stPt = stPt.OffsetX(alarmGap);
 
                             if (!spraySystem.BranchDic.ContainsKey(pt))
@@ -129,12 +129,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             {
                                 if (!sprayIn.TermPtDic.ContainsKey(tpt))
                                     continue;
-                                if (sprayIn.TermPtDic[tpt].Type == 1)//端点类型是防火分区
-                                {
-                                    fireAreaIndex++;//防火分区index+1
-                                    break;//统计到一个就退出
-                                }
+                                //if (sprayIn.TermPtDic[tpt].Type == 1)//端点类型是防火分区
+                                //{
+                                //    fireAreaIndex++;//防火分区index+1
+                                //    break;//统计到一个就退出
+                                //}
                             }
+                            fireAreaIndex++;
                             foreach (var tpt in spraySystem.BranchDic[pt])//遍历支路端点
                             {
                                 if (!sprayIn.TermPtDic.ContainsKey(tpt))
@@ -144,6 +145,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     fireAreaNum++;//防火分区数+1
                                 }
                             }
+                           
                         }
                         else if(cnt==3)
                         {

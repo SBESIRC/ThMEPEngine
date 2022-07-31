@@ -225,7 +225,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     var tpts = spraySystem.BranchDic[pt];
                     tpts.Reverse();
                     var hasAutoValve = Tool.HasAutoValve(pt, tpts, spraySystem, sprayIn);
-                    var needNewDrawings = Tool.NeedNewDrawing(tpts, sprayIn);//同时存在采用新的画法
 
                     if (hasAutoValve)
                     {
@@ -359,7 +358,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         {
                             double length = Tool.GetLength(termPt.PipeNumber) + 100;
 
-                            if (needNewDrawings)
                             {
                                 var fireStpt = spraySystem.FireAreaStPtDic[pt];
                                 if (lastFirePt.DistanceTo(new Point3d()) > 10)//前一个点不为空
@@ -386,41 +384,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 var text = new Text(termPt.PipeNumber, pt5);
                                 sprayOut.Texts.Add(text);
                             }
-                            else
-                            {
-                                var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y - floorHeight + 400, 0);
-                                var pt2 = pt1.OffsetX(650);
-                                var pt3 = pt2.OffsetY(1300);
-                                var pipeNumber = termPt.PipeNumber;
-                                var pt4 = Tool.GetEvadeStep(length, pt3, pipeNumber, spraySystem);
-                                var pt5 = pt4.OffsetX(-length);
-                                if (signelBranch)
-                                {
-                                    sprayOut.PipeLine.Add(new Line(stPt4, pt1));
 
-                                }
-                                sprayOut.PipeLine.Add(new Line(pt1, pt2));
-                                if (spraySystem.ValveDic.Contains(tpt))
-                                {
-                                    sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetY(50)));
-                                    sprayOut.PipeLine.Add(new Line(pt2.OffsetY(350), pt3));
-                                    sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt2.OffsetY(50), Math.PI / 2));
-                                }
-                                else
-                                {
-                                    sprayOut.PipeLine.Add(new Line(pt2, pt3));
-                                }
-
-                                sprayOut.NoteLine.Add(new Line(pt3, pt4));
-                                sprayOut.NoteLine.Add(new Line(pt4, pt5));
-                                sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
-                                var text = new Text(termPt.PipeNumber.Split('喷')[0], pt5);
-                                var dn = new Text(DN, pt5.OffsetXY(150, -400));
-                                sprayOut.Texts.Add(text);
-                                sprayOut.Texts.Add(dn);
-                                stPt4 = stPt4.OffsetX(600);
-                                signelBranch = false;
-                            }
                         }
                     }
                 }

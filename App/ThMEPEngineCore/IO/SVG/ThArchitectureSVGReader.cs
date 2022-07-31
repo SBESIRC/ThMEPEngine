@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml;
+using System.Linq;
 using System.Collections.Generic;
 using Svg;
 using ThMEPEngineCore.Model;
@@ -178,7 +179,7 @@ namespace ThMEPEngineCore.IO.SVG
             }
             // 收集结果
             Geos = results;
-            FloorInfos = floorInfos;
+            FloorInfos = floorInfos.OrderBy(o => o.BottomElevation).ToList();
             DocProperties = docProperties;
             ComponentInfos = componentInfos;
         }

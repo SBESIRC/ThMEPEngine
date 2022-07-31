@@ -1,4 +1,5 @@
 ﻿using System;
+
 using ThCADExtension;
 using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module.Component;
@@ -85,7 +86,7 @@ namespace TianHua.Electrical.PDS.Extension
                 return "3×" + meter.MeterParameter + "A";
             }
         }
-        
+
         public static string ContentMT(this CurrentTransformer meter)
         {
             if (meter.PolesNum == "1P")

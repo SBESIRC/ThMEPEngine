@@ -8,38 +8,33 @@ namespace ThMEPTCH.Model
     [ProtoContract]
     public class ThTCHWindow : ThTCHElement, ICloneable
     {
-        [ProtoMember(11)]
-        public Point3d CenterPoint { get; set; }
-        [ProtoMember(12)]
-        public double Width { get; set; }
-        [ProtoMember(13)]
-        public double Thickness { get; set; }
-        [ProtoMember(14)]
-        public Vector3d XVector { get; set; }
-        //X轴方向和宽度方向一致
-        [ProtoMember(15)]
-        public Vector3d ExtrudedDirection { get; }
         private double Angle { get; }
-        private ThTCHWindow()
-        {
-
-        }
-        public ThTCHWindow(Point3d centerPoint, double width, double height, double thickness, double angle)
+        private ThTCHWindow() { }
+        /// <summary>
+        /// 窗的几何信息构造
+        /// </summary>
+        /// <param name="centerPoint">底部中心点</param>
+        /// <param name="length">窗的宽度</param>
+        /// <param name="height">窗的高度</param>
+        /// <param name="width">窗的厚度</param>
+        /// <param name="angle">窗的角度</param>
+        public ThTCHWindow(Point3d centerPoint, double length, double height, double width, double angle)
         {
             ExtrudedDirection = Vector3d.ZAxis;
-            CenterPoint = centerPoint;
+            Origin = centerPoint;
             XVector = Vector3d.XAxis.RotateBy(angle, Vector3d.ZAxis);
             Width = width;
             Height = height;
-            Thickness = thickness;
+            Length = length;
             Angle = angle;
         }
         public object Clone()
         {
             if (this == null)
                 return null;
-            var window = new ThTCHWindow(this.CenterPoint, this.Width, this.Height, this.Thickness, this.Angle);
+            var window = new ThTCHWindow(this.Origin, this.Length, this.Height, this.Width, this.Angle);
             window.XVector = this.XVector;
+            window.Uuid = this.Uuid;
             if (this.Outline != null)
             {
                 window.Outline = this.Outline.Clone() as Entity;

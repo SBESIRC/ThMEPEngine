@@ -13,8 +13,9 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Engine;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.DrainageADPrivate.Data
 {
     public class ThTCHPipeExtractionVisitor : ThFlowSegmentExtractionVisitor
     {

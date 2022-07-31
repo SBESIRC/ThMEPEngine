@@ -42,52 +42,46 @@ namespace ThMEPHVAC.Command
             }
             var thisIdBlocks = eqpmDocument.GetDocumentFanBlocks(pFanModel);
             var needFanCount = pFanModel.ListVentQuan.Count;
-            if (thisIdBlocks.Count == 0)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                // 场景1：若检测到图纸中没有对应的风机图块
-                //  插入新的图块
-                ThFanSelectionEngine.InsertModels(pFanModel, cFanModel);
-            }
-            else if (thisIdBlocks.Count != needFanCount)
-            {
-                // 场景2：若检测到图纸中有对应的风机图块，但图块数量不同
-                // 删除已经生成的块，重新进入插块模式
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                if (thisIdBlocks.Count == 0)
                 {
+                    // 场景1：若检测到图纸中没有对应的风机图块
+                    //  插入新的图块
+                    ThFanSelectionEngine.InsertModels(pFanModel, cFanModel);
+                }
+                else if (thisIdBlocks.Count != needFanCount)
+                {
+                    // 场景2：若检测到图纸中有对应的风机图块，但图块数量不同
+                    // 删除已经生成的块，重新进入插块模式
                     thisIdBlocks.ForEach(o =>
                     {
                         o.Id.RemoveModel();
                     });
+                    ThFanSelectionEngine.InsertModels(pFanModel, cFanModel);
                 }
-                ThFanSelectionEngine.InsertModels(pFanModel,cFanModel);
-            }
-            else if (thisIdBlocks.Count == needFanCount) 
-            {
-                // 场景3：若检测到图纸中有对应的风机图块，且图块数量相同
-                var block = thisIdBlocks.First(); 
-                var allModels = eqpmDocument.DocumentFanToFanModels(thisIdBlocks);
-                var blockPModel = allModels.First();
-                if (FanSelectCheck.IsModelStyleChanged(blockPModel, pFanModel))
+                else if (thisIdBlocks.Count == needFanCount)
                 {
-                    // 风机形式变化
-                    // 删除已经生成的块，重新进入插块模式
-                    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                    // 场景3：若检测到图纸中有对应的风机图块，且图块数量相同
+                    var block = thisIdBlocks.First();
+                    var allModels = eqpmDocument.DocumentFanToFanModels(thisIdBlocks);
+                    var blockPModel = allModels.First();
+                    if (FanSelectCheck.IsModelStyleChanged(blockPModel, pFanModel))
                     {
+                        // 风机形式变化
+                        // 删除已经生成的块，重新进入插块模式
                         thisIdBlocks.ForEach(o =>
                         {
                             o.Id.RemoveModel();
                         });
+                        ThFanSelectionEngine.InsertModels(pFanModel, cFanModel);
                     }
-                    ThFanSelectionEngine.InsertModels(pFanModel, cFanModel);
-                }
-                else if (FanSelectCheck.IsModelBlockNameChanged(blockPModel, pFanModel))
-                {
-                    // 风机图块变化
-                    ThFanSelectionEngine.ReplaceModelsInplace(thisIdBlocks,pFanModel,cFanModel);
-                }
-                else
-                {
-                    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                    else if (FanSelectCheck.IsModelBlockNameChanged(blockPModel, pFanModel))
+                    {
+                        // 风机图块变化
+                        ThFanSelectionEngine.ReplaceModelsInplace(thisIdBlocks, pFanModel, cFanModel);
+                    }
+                    else
                     {
                         // 风机规格和型号变化
                         if (FanSelectCheck.IsModelNameChanged(block.Id, pFanModel))
@@ -126,14 +120,12 @@ namespace ThMEPHVAC.Command
                             ThFanSelectionEngine.ModifyModels(thisIdBlocks, pFanModel.Attributes());
                         }
                     }
-                    
+                    thisIdBlocks = eqpmDocument.GetDocumentFanBlocks(pFanModel);
+                    // 导航到图块
+                    Active.Editor.ZoomToObjects(thisIdBlocks.ToArray(), 2.0);
+                    Active.Editor.PickFirstObjects(thisIdBlocks.Select(o => o.ObjectId).ToArray());
                 }
-                thisIdBlocks = eqpmDocument.GetDocumentFanBlocks(pFanModel);
-                // 导航到图块
-                Active.Editor.ZoomToObjects(thisIdBlocks.ToArray(), 2.0);
-                Active.Editor.PickFirstObjects(thisIdBlocks.Select(o => o.ObjectId).ToArray());
             }
-
         }
         public void LoadBlockLayerToDocument(Database database)
         {

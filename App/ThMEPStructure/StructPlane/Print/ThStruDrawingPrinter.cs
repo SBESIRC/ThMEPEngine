@@ -4,9 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
-using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
-using System;
 
 namespace ThMEPStructure.StructPlane.Print
 {
@@ -43,31 +41,24 @@ namespace ThMEPStructure.StructPlane.Print
             FlrBottomEle = DocProperties.GetFloorBottomElevation();
         }
         public abstract void Print(Database database);
-        protected ObjectIdCollection PrintColumn(Database db, ThGeometry column)
+        protected ObjectIdCollection PrintUpperColumn(Database db, ThGeometry column)
         {
-            bool isUpper = column.IsUpperFloorColumn();
-            bool isBelow = column.IsBelowFloorColumn();
-            var outlineConfig = new PrintConfig();
-            var hatchConfig = new HatchPrintConfig();
-            if (isUpper || isBelow)
-            {
-                outlineConfig = isUpper ? ThColumnPrinter.GetUpperColumnConfig() : ThColumnPrinter.GetBelowColumnConfig();
-                hatchConfig = isUpper ? ThColumnPrinter.GetUpperColumnHatchConfig() : ThColumnPrinter.GetBelowColumnHatchConfig();
-            }
+            var outlineConfig = ThColumnPrinter.GetUpperColumnConfig();
+            var hatchConfig = ThColumnPrinter.GetUpperColumnHatchConfig();
             var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
             return printer.Print(db, column.Boundary as Polyline);
         }
-        protected ObjectIdCollection PrintShearWall(Database db, ThGeometry shearwall)
+        protected ObjectIdCollection PrintBelowColumn(Database db, ThGeometry column)
         {
-            bool isUpper = shearwall.IsUpperFloorShearWall();
-            bool isBelow = shearwall.IsBelowFloorShearWall();
-            var outlineConfig = new PrintConfig();
-            var hatchConfig = new HatchPrintConfig();
-            if (isUpper || isBelow)
-            {
-                outlineConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallConfig() : ThShearwallPrinter.GetBelowShearWallConfig();
-                hatchConfig = isUpper ? ThShearwallPrinter.GetUpperShearWallHatchConfig() : ThShearwallPrinter.GetBelowShearWallHatchConfig();
-            }
+            var outlineConfig = ThColumnPrinter.GetBelowColumnConfig();
+            var hatchConfig = ThColumnPrinter.GetBelowColumnHatchConfig();
+            var printer = new ThColumnPrinter(hatchConfig, outlineConfig);
+            return printer.Print(db, column.Boundary as Polyline);
+        }
+        protected ObjectIdCollection PrintUpperShearWall(Database db, ThGeometry shearwall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetUpperShearWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetUpperShearWallHatchConfig();
             var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
             if (shearwall.Boundary is Polyline polyline)
             {
@@ -82,15 +73,28 @@ namespace ThMEPStructure.StructPlane.Print
                 return new ObjectIdCollection();
             }
         }
-        protected void PrintHeadText(Database database)
+        protected ObjectIdCollection PrintBelowShearWall(Database db, ThGeometry shearwall)
         {
-            // 打印自然层标识, eg 一层~五层结构平面层
-            var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
-            if (string.IsNullOrEmpty(flrRange))
+            var outlineConfig = ThShearwallPrinter.GetBelowShearWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetBelowShearWallHatchConfig();
+            var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
+            if (shearwall.Boundary is Polyline polyline)
             {
-                return;
+                return printer.Print(db, polyline);
             }
-            var extents = ObjIds.ToDBObjectCollection(database).ToExtents2d();
+            else if (shearwall.Boundary is MPolygon mPolygon)
+            {
+                return printer.Print(db, mPolygon);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
+        protected ObjectIdCollection PrintHeadText(Database database,string flrRange)
+        {
+            var extents = GetPrintObjsExtents(database);
             var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
                 extents.MinPoint.Y - PrintParameter.HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
             var printService = new ThPrintDrawingHeadService()
@@ -99,11 +103,18 @@ namespace ThMEPStructure.StructPlane.Print
                 DrawingSacle = PrintParameter.DrawingScale,
                 BasePt = textCenter,
             };
-            Append(printService.Print(database)); // 把结果存到ObjIds中
+            return printService.Print(database);
         }
 
+        private Extents2d GetPrintObjsExtents(Database database)
+        {
+            // ObjIds 是收集每层打印的物体
+            return ObjIds.ToDBObjectCollection(database).ToExtents2d();
+        }
+        
         protected void Append(ObjectIdCollection objIds)
         {
+            // 把objIds添加到 ObjIds 中，用于返回
             foreach (ObjectId objId in objIds)
             {
                 ObjIds.Add(objId);

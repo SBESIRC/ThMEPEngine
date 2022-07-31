@@ -165,5 +165,15 @@ namespace TianHua.Mep.UI.Data
 
             return results;
         }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

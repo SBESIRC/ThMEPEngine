@@ -708,6 +708,7 @@
     <Compile Include="Stair\ThStairLayoutEngine.cs" />
     <Compile Include="Stair\ThStairEquimentLayout.cs" />
     <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
+    <Compile Include="SystemApi\SortService.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreExtractCmds.cs" />

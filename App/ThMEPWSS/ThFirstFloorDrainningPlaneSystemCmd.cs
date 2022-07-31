@@ -11,7 +11,7 @@ namespace ThMEPWSS
 {
     public class ThFirstFloorDrainningPlaneSystemCmd
     {
-        [CommandMethod("TIANHUACAD", "THPSSYS", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THPSLY", CommandFlags.Modal)] //天华排水路由
         public void CreateFirstFloorDrainningPlane()
         {
             ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(ThWSSUIService.Instance.PSPMParameter.config,

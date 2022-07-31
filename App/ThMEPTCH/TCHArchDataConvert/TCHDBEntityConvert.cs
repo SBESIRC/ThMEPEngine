@@ -96,8 +96,11 @@ namespace ThMEPTCH.TCHArchDataConvert
                 foreach (var outLine in crossPLines) 
                 {
                     var wall = wallDic[outLine];
-                    wall.Doors.Add(item.Value);
-                    wall.Openings.Add(WallDoorOpening(wallEntityDic[outLine], doorEntity));
+                    var wallEntity = wallEntityDic[outLine];
+                    var copyDoor = item.Value.Clone() as ThTCHDoor;
+                    copyDoor.Uuid += wallEntity.DBId.ToString();
+                    wall.Doors.Add(copyDoor);
+                    wall.Openings.Add(WallDoorOpening(wallEntity, doorEntity));
                 }
             }
             foreach (var item in windowDic)
@@ -107,8 +110,11 @@ namespace ThMEPTCH.TCHArchDataConvert
                 foreach (var outLine in crossPLines)
                 {
                     var wall = wallDic[outLine];
-                    wall.Windows.Add(item.Value);
-                    wall.Openings.Add(WallWindowOpening(wallEntityDic[outLine], windowEntity));
+                    var wallEntity = wallEntityDic[outLine];
+                    var copyWindow = item.Value.Clone() as ThTCHWindow;
+                    copyWindow.Uuid += wallEntity.DBId.ToString();
+                    wall.Windows.Add(copyWindow);
+                    wall.Openings.Add(WallWindowOpening(wallEntity, windowEntity));
                 }
             }
             var resList = new List<ThTCHWall>();
@@ -325,7 +331,7 @@ namespace ThMEPTCH.TCHArchDataConvert
         ThTCHDoor DoorEntityToTCHDoor(DoorEntity entity)
         {
             var newDoor = new ThTCHDoor(entity.MidPoint, entity.Width,entity.Height,entity.Thickness,entity.Rotation);
-            newDoor.Uuid = projectId + entity.DBId;
+            newDoor.Uuid = projectId + entity.DBId.ToString();
             return newDoor;
         }
         ThTCHWindow WindowEntityToTCHWindow(WindowEntity entity)
@@ -338,13 +344,13 @@ namespace ThMEPTCH.TCHArchDataConvert
         ThTCHOpening WallDoorOpening(WallEntity wallEntity, DoorEntity doorEntity) 
         {
             var opening = new ThTCHOpening(doorEntity.MidPoint, doorEntity.Width, doorEntity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, doorEntity.Rotation);
-            opening.Uuid = projectId + wallEntity.DBId + doorEntity.DBId;
+            opening.Uuid = projectId + wallEntity.DBId.ToString() + doorEntity.DBId.ToString();
             return opening;
         }
         ThTCHOpening WallWindowOpening(WallEntity wallEntity, WindowEntity entity)
         {
             var opening = new ThTCHOpening(entity.MidPoint, entity.Width, entity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, entity.Rotation);
-            opening.Uuid = projectId + wallEntity.DBId + entity.DBId;
+            opening.Uuid = projectId + wallEntity.DBId.ToString() + entity.DBId.ToString();
             return opening;
         }
     }

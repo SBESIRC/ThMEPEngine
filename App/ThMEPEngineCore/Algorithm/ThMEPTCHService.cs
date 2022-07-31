@@ -18,6 +18,16 @@ namespace ThMEPEngineCore.Algorithm
         public const string DXF_HVACDUCT = "TCH_DBHVACDUCT";
 
         /// <summary>
+        /// DXF (墙）
+        /// </summary>
+        public const string DXF_WALL = "TCH_WALL";
+
+        /// <summary>
+        /// DXF (开洞）
+        /// </summary>
+        public const string DXF_OPENING = "TCH_OPENING";
+
+        /// <summary>
         /// 是否是天正元素
         /// </summary>
         /// <param name="entity"></param>
@@ -145,6 +155,28 @@ namespace ThMEPEngineCore.Algorithm
         {
             var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("MULTILEADER");
+        }
+
+        /// <summary>
+        /// 天正墙
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHWall(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("WALL");
+        }
+
+        /// <summary>
+        /// 天正开洞（门，窗等）
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHOpening(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("OPENING");
         }
 
         /// <summary>

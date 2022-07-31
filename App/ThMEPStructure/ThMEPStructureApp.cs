@@ -239,57 +239,6 @@ namespace ThMEPStructure
                 } 
             }
         }
-        [CommandMethod("TIANHUACAD", "THSMUTSC", CommandFlags.Modal)]
-        public void THSMUTSC()
-        {
-            var pofo = new PromptOpenFileOptions("\n选择要成图的Ydb文件");
-            pofo.Filter = "Ydb files (*.ydb)|*.ydb|Ifc files (*.ifc)|*.ifc|Ifc files (*.get)|*.get";
-            var pfnr = Active.Editor.GetFileNameForOpen(pofo);
-            if (pfnr.Status == PromptStatus.OK)
-            {
-                string ifcFilePath = "";
-                if(System.IO.Path.GetExtension(pfnr.StringResult).ToUpper()==".YDB")
-                {
-                    var ydbToIfcService = new ThYdbToIfcConvertService();
-                    ifcFilePath = ydbToIfcService.Convert(pfnr.StringResult);
-                }
-                else
-                {
-                    ifcFilePath = pfnr.StringResult;
-                }
-                
-                if(!string.IsNullOrEmpty(ifcFilePath))
-                {
-                    var options = new PromptKeywordOptions("\n选择出图方式");
-                    options.Keywords.Add("结构平面图", "P", "结构平面图(P)");
-                    options.Keywords.Add("墙柱施工图", "D", "墙柱施工图(D)");
-                    options.Keywords.Default = "结构平面图";
-                    options.AllowArbitraryInput = true;
-                    var result1 = Active.Editor.GetKeywords(options);
-                    if (result1.Status != PromptStatus.OK)
-                    {
-                        return;
-                    }
-                    var printParameter = new ThPlanePrintParameter()
-                    {
-                        DrawingScale = "1:100",
-                    };
-                    var config = new ThPlaneConfig()
-                    {
-                        IfcFilePath = ifcFilePath,
-                        SvgSavePath = "",
-                        DrawingType = DrawingType.Structure,
-                    };
-                    config.JsonConfig.GlobalConfig.eye_dir = new Direction(0, 0, -1);
-                    config.JsonConfig.GlobalConfig.up = new Direction(0, 1, 0);
-                    var generator = new ThStructurePlaneGenerator(config, printParameter)
-                    {
-                        DrawingType = result1.StringResult,
-                    };
-                    generator.Generate();
-                }               
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "THAMUTSC", CommandFlags.Modal)]
         public void THAUTSC()

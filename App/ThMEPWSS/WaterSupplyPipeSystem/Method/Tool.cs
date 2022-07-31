@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterSupplyPipeSystem.Data;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
 using ThMEPWSS.WaterSupplyPipeSystem.tool;
@@ -15,7 +16,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
 {
     public static class Tool
     {
-        public static int GetPrValveGroupFloor(int i, WaterSupplyVM uiConfigs, List<int[]> households)
+        public static int GetPrValveGroupFloor(int i, WaterSupplyVM uiConfigs, List<int[]> households,Dictionary<int,double> floorHeightDic)
         {
             var prValveStyle = uiConfigs.SetViewModel.PRValveStyleDynamicRadios[1].IsChecked;//true表示一户一阀
             var lowestFloor = uiConfigs.SetViewModel.tankViewModel.LowestFloor;
@@ -28,8 +29,16 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
                 }
             }
             double tankElevation = uiConfigs.SetViewModel.tankViewModel.Elevation;
-            double floorHeight = uiConfigs.SetViewModel.FloorLineSpace/1000;
-            int floorNum = (int)Math.Floor((tankElevation - 42) / floorHeight) + 1;
+            double floorHeight = FloorHeightsViewModel.Instance.GeneralFloor / 1000;
+            int floorNum = 1;
+            for(int j = 1; j < households.Count+ 1; j++)
+            {
+                if (floorHeightDic[j] > tankElevation - 42)
+                {
+                    floorNum = j;
+                    break;
+                }
+            }
             if(prValveStyle)
             {
                 return Math.Max(floorNum, 3 + lowestFloor);

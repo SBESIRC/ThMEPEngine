@@ -6,13 +6,22 @@
              xmlns:local="clr-namespace:TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              mc:Ignorable="d" 
-             d:DesignHeight="140" d:DesignWidth="400">
+             d:DesignHeight="100" d:DesignWidth="400">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="3,0,0,0"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="25"></RowDefinition>
-            <RowDefinition Height="25"></RowDefinition>
-            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="18"></RowDefinition>
+            <RowDefinition Height="18"></RowDefinition>
+            <RowDefinition Height="18"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -21,7 +30,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="5,5,0,2.5">
             <Label>查表值：</Label>
-            <TextBox Text="{Binding CheckTableVal, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+            <TextBox Text="{Binding CheckTableVal, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" Grid.Row="0" Grid.Column="1" Width="130" Height="16" TabIndex="20"  AcceptsTab="False"/>
             <Label>m^3/h</Label>
         </StackPanel>
         <Border BorderBrush="Black" BorderThickness="1,1,0,1" Grid.Column="0" Grid.Row="1" Margin="5,0,0,0">
@@ -45,7 +54,7 @@
         <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="2" Margin="5,2.5,0,2.5">
             <Label TextElement.FontWeight="Bold">最终值：</Label>
             <TextBox Name="txtFinalVal" Text="{Binding FinalValue, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"
-                     IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
+                     IsEnabled="False" Grid.Row="0" Grid.Column="1" Width="130" Height="16" TabIndex="22" AcceptsTab="False"/>
             <Label>m^3/h</Label>
         </StackPanel>
     </Grid>

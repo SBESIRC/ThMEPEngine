@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -141,12 +141,12 @@ namespace TianHua.Electrical.PDS.Service
                 load.DemandFactor = config.DemandFactor;
                 load.PowerFactor = config.PowerFactor;
 
-                if(load.GetFireLoad() == ThPDSFireLoad.Unknown)
+                if (load.GetFireLoad() == ThPDSFireLoad.Unknown)
                 {
                     load.SetFireLoad(config.FireLoad);
                 }
 
-                if (string.IsNullOrEmpty( load.ID.Description ))
+                if (string.IsNullOrEmpty(load.ID.Description))
                 {
                     load.ID.DefaultDescription = config.DefaultDescription;
                 }

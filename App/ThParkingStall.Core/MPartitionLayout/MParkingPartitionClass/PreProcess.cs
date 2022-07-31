@@ -15,10 +15,18 @@ namespace ThParkingStall.Core.MPartitionLayout
     {
         /// <summary>
         /// 数据预处理
-        /// 1. 如果车道线穿过建筑物了（靠近边界的情况），分割该车道线取第一段
-        /// 2. 如果区域内含有坡道，从出入点到边界生成一条车道线
         /// </summary>
         public void PreProcess()
+        {
+            EliminateInvalidLanes();
+            ConvertRampDatas();
+            CorrectWallsWithTinyAngles();
+        }
+
+        /// <summary>
+        /// 如果车道线穿过建筑物了（靠近边界的情况），分割该车道线取第一段
+        /// </summary>
+        void EliminateInvalidLanes()
         {
             var iniLanes = IniLanes.Select(e => e.Line).ToList();
             for (int i = 0; i < IniLanes.Count; i++)
@@ -60,6 +68,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                     i--;
                 }
             }
+        }
+
+        /// <summary>
+        /// 如果区域内含有坡道，从出入点到边界生成一条车道线
+        /// </summary>
+        void ConvertRampDatas()
+        {
             if (RampList.Count > 0)
             {
                 var ramp = RampList[0];
@@ -93,7 +108,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                     }
                 }
             }
+        }
 
+        /// <summary>
+        /// 处理倾斜角度非常小的正交墙线
+        /// </summary>
+        void CorrectWallsWithTinyAngles()
+        {
             ProcessLanes(ref IniLanes, true);
             for (int i = 0; i < Walls.Count; i++)
             {
@@ -139,5 +160,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             catch (Exception ex) { }
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -66,5 +67,10 @@ namespace ThMEPHVAC
         /// 主面板映射model
         /// </summary>
         public SmokeCalculateMappingModel smokeCalculateMappingModel { get; set; }
+
+        /// <summary>
+        /// 当前选中块
+        /// </summary>
+        public ObjectId BlockId { get; set; }
     }
 }

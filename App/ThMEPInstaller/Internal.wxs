@@ -3,12 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <?if $(var.Configuration) = Debug ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" Guid="{068DAC6D-A7E8-423D-93A0-C5F7DF8052F8}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Publics.BaseCode.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" Guid="{08623593-86CB-49DC-BCBB-85E82513B616}" Win64="yes">
@@ -34,12 +28,6 @@
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" Guid="{C09DA21E-1817-46F1-9AAA-5D6A81CBB6B1}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Publics.BaseCode.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" Guid="{09718367-D0D7-4343-950D-D6C95B2AC2EF}" Win64="yes">
@@ -69,7 +57,6 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsAppInternal">
             <?if $(var.Configuration) = Debug ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Debug" />
@@ -77,7 +64,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" />
             <?elseif $(var.Configuration) = Release ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" />

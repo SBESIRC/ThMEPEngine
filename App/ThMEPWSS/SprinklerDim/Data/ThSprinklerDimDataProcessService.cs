@@ -16,7 +16,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Diagnostics;
 
 
-namespace ThMEPWSS.ThSprinklerDim.Data
+namespace ThMEPWSS.SprinklerDim.Data
 {
     public class ThSprinklerDimDataProcessService
     {
@@ -34,12 +34,15 @@ namespace ThMEPWSS.ThSprinklerDim.Data
             var line = TchPipeData.Select(o => o.Outline).OfType<Line>().Where(x => x.Length >= LineTol);
             TchPipe.AddRange(line);
         }
+        public void RemoveDuplicateSprinklerPt()
+        {
+            SprinklerPt = SprinklerPt.Distinct().ToList();
+        }
 
         public void ProjectOntoXYPlane()
         {
             TchPipe.ForEach(x => x.ProjectOntoXYPlane());
             SprinklerPt = SprinklerPt.Select(x => new Point3d(x.X, x.Y, 0)).ToList();
-
 
         }
         public void Print()

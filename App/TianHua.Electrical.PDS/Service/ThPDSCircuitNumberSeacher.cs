@@ -1,6 +1,8 @@
-﻿using QuikGraph;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
+
+using QuikGraph;
+
 using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.Service

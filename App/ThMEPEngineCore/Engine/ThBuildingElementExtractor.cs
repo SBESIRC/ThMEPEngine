@@ -1,7 +1,9 @@
-﻿using Linq2Acad;
+﻿using AcHelper;
+using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -18,6 +20,11 @@ namespace ThMEPEngineCore.Engine
         public void Accept(ThBuildingElementExtractionVisitor visitor)
         {
             Visitors.Add(visitor);
+        }
+
+        public void Accept(ThBuildingElementExtractionVisitor[] visitors)
+        {
+            Visitors.AddRange(visitors);
         }
 
         public virtual void Extract(Database database)
@@ -55,6 +62,50 @@ namespace ThMEPEngineCore.Engine
                             v.Results.AddRange(DoExtract(e, v));
                         });
                     });
+            }
+        }
+
+        public virtual void ExtractFromEditor(Point3dCollection frame)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var psr = Active.Editor.SelectCrossingPolygon(frame);
+                if (psr.Status == PromptStatus.OK)
+                {
+                    psr.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var e = acadDatabase.ElementOrDefault<Entity>(o);
+                        if (e != null)
+                        {
+                            Visitors.ForEach(v =>
+                            {
+                                v.Results.AddRange(DoExtract(e, v));
+                            });
+                        }
+                    });
+                }
+            }
+        }
+
+        public virtual void ExtractFromEditor(Point3dCollection frame, SelectionFilter filter)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var psr = Active.Editor.SelectCrossingPolygon(frame, filter);
+                if (psr.Status == PromptStatus.OK)
+                {
+                    psr.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var e = acadDatabase.ElementOrDefault<Entity>(o);
+                        if (e != null)
+                        {
+                            Visitors.ForEach(v =>
+                            {
+                                v.Results.AddRange(DoExtract(e, v));
+                            });
+                        }
+                    });
+                }
             }
         }
 

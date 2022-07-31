@@ -201,6 +201,7 @@ namespace ThMEPIFC.Ifc2x3
 
                 //now place the wall into the model
                 var lp = model.Instances.New<IfcLocalPlacement>();
+                
                 var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
                 {
                     p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
@@ -309,7 +310,7 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Name = "door";
 
                 //model as a swept area solid
-                var profile = model.ToIfcRectangleProfileDef(door.Width, door.Thickness - epsilon);
+                var profile = model.ToIfcRectangleProfileDef(door.Length, door.Width - epsilon);
                 var body = model.ToIfcExtrudedAreaSolid(profile, door.ExtrudedDirection, door.Height);
 
                 //Create a Definition shape to hold the geometry
@@ -331,7 +332,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
                     p.RefDirection = model.ToIfcDirection(door.XVector);
-                    p.Location = model.ToIfcCartesianPoint(door.CenterPoint + floor_origin.GetAsVector());
+                    p.Location = model.ToIfcCartesianPoint(door.Origin + floor_origin.GetAsVector());
                 });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;
@@ -372,7 +373,7 @@ namespace ThMEPIFC.Ifc2x3
 
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
-                    p.XDim = door.Width;
+                    p.XDim = door.Length;
                     p.YDim = thwall.Width;
                     p.ProfileType = IfcProfileTypeEnum.AREA;
                     p.Position = model.ToIfcAxis2Placement2D(default);
@@ -440,8 +441,8 @@ namespace ThMEPIFC.Ifc2x3
                 //represent wall as a rectangular profile
                 var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
-                    p.XDim = window.Width;
-                    p.YDim = window.Thickness - epsilon;
+                    p.XDim = window.Length;
+                    p.YDim = window.Width - epsilon;
                     p.ProfileType = IfcProfileTypeEnum.AREA;
                     p.Position = model.ToIfcAxis2Placement2D(default);
                 });
@@ -476,7 +477,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
                     p.RefDirection = model.ToIfcDirection(window.XVector);
-                    p.Location = model.ToIfcCartesianPoint(window.CenterPoint + floor_origin.GetAsVector());
+                    p.Location = model.ToIfcCartesianPoint(window.Origin + floor_origin.GetAsVector());
                 });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;
@@ -575,8 +576,8 @@ namespace ThMEPIFC.Ifc2x3
                 //represent wall as a rectangular profile
                 var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
-                    p.XDim = hole.Width;
-                    p.YDim = hole.Thickness - epsilon;
+                    p.XDim = hole.Length;
+                    p.YDim = hole.Width - epsilon;
                     p.ProfileType = IfcProfileTypeEnum.AREA;
                     p.Position = model.ToIfcAxis2Placement2D(default);
                 });
@@ -611,7 +612,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
                     p.RefDirection = model.ToIfcDirection(hole.XVector);
-                    p.Location = model.ToIfcCartesianPoint(hole.CenterPoint + floor_origin.GetAsVector());
+                    p.Location = model.ToIfcCartesianPoint(hole.Origin + floor_origin.GetAsVector());
                 });
                 lp.RelativePlacement = ax3D;
                 ret.ObjectPlacement = lp;

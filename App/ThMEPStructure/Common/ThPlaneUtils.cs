@@ -305,5 +305,9 @@ namespace ThMEPStructure.Common
             }
             return datas;
         }
+        public static void AddRange(this ObjectIdCollection first, ObjectIdCollection second)
+        {
+            second.OfType<ObjectId>().ForEach(o => first.Add(o));
+        }
     }
 }

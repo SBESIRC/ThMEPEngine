@@ -130,47 +130,47 @@ namespace TianHua.Electrical.PDS.Engine
                         ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
                         ThPDSGraphService.Transformer = transformer;
 
+                        var cableIndex = new ThCADCoreNTSSpatialIndex(cableEntities);
+                        var cableTrayIndex = new ThCADCoreNTSSpatialIndex(cableTrayEngine.Results);
+                        var markIndex = new ThCADCoreNTSSpatialIndex(markEntities);
+                        var tchWireDimIndex = new ThCADCoreNTSSpatialIndex(tchWireDimEntities);
+                        var markBlockIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.MarkBlocks.Keys.ToCollection());
+                        var distBoxIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.DistBoxBlocks.Keys.ToCollection());
+                        var loadIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.LoadBlocks.Keys.ToCollection());
+                        var distBoxFrameIndex = new ThCADCoreNTSSpatialIndex(allDistBoxFrame);
                         for (var i = 0; i < storeysEngine.Elements.Count; i++)
                         {
                             var x = storeysGeometry[i];
                             var storey = storeysEngine.Elements[i] as ThEStoreys;
 
                             // 回路
-                            var cableIndex = new ThCADCoreNTSSpatialIndex(cableEntities);
                             var cables = cableIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
 
                             // 桥架
-                            var cableTrayIndex = new ThCADCoreNTSSpatialIndex(cableTrayEngine.Results);
                             var cableTrays = cableTrayIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
 
                             // 标注
-                            var markIndex = new ThCADCoreNTSSpatialIndex(markEntities);
                             var marks = markIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
                             var marksInfo = markExtractor.Results.Where(r => marks.Contains(r.Entity)).ToList();
 
                             // 天正标注
-                            var tchWireDimIndex = new ThCADCoreNTSSpatialIndex(tchWireDimEntities);
                             var tchWireDims = tchWireDimIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
                             var tchWireDimsInfo = tchWireDimExtractor.Results.Where(r => tchWireDims.Contains(r.Entity)).ToList();
 
                             // 标注块
-                            var markBlockIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.MarkBlocks.Keys.ToCollection());
                             var markBlocks = markBlockIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
                             var markBlockData = loadExtractService.MarkBlocks
                                 .Where(o => markBlocks.Contains(o.Key))
                                 .ToDictionary(o => o.Key, o => o.Value);
 
                             // 配电箱
-                            var distBoxIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.DistBoxBlocks.Keys.ToCollection());
                             var distBoxes = distBoxIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
 
                             // 负载
-                            var loadIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.LoadBlocks.Keys.ToCollection());
                             var loads = loadIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
                             var loadsData = loadExtractService.LoadBlocks.Where(b => loads.Contains(b.Key)).ToList();
 
                             // 配电箱框线
-                            var distBoxFrameIndex = new ThCADCoreNTSSpatialIndex(allDistBoxFrame);
                             var distBoxFrames = distBoxFrameIndex.SelectCrossingPolygon(x).OfType<Polyline>().ToList();
 
                             //做一个标注的Service

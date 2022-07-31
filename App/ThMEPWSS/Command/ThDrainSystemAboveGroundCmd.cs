@@ -424,7 +424,7 @@ namespace ThMEPWSS.Command
             if (null != addLines && addLines.Count > 0)
                 createBasicElems.AddRange(addLines);
             if (null != addTexts && addTexts.Count > 0)
-                createTextElems.AddRange(addTexts);
+                createTextElems.AddRange(addTexts.Where(e => !e.Tag.Equals(DrainSysAGCommon.NOTCOPYTAG)));
         }
         void LivingFloorLabelLayout(double midY, List<RoomModel> thisFloorRooms) 
         {
@@ -442,7 +442,7 @@ namespace ThMEPWSS.Command
             var copyToOtherFloor = new CopyToOtherFloor(livingHighestFloor,
                 createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList(),
                 createBasicElems.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList(),
-                createTextElems.Where(c => c.floorUid.Equals(livingHighestFloor.floorUid)).ToList());
+                createTextElems.Where(c => c.floorUid.Equals(livingHighestFloor.floorUid) && !c.Tag.Equals(DrainSysAGCommon.NOTCOPYTAG)).ToList());
 
             //将标注复制到屋,先将数复制到大屋面，再根据大屋面数据到小屋面
             var maxRoofFloors = roofLayout.AllMaxRoofFloor();

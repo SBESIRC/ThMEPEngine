@@ -3,15 +3,6 @@
 	<?include Variable.wxi ?>
 	<Fragment>
 		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_Debug" Guid="{67A3CA29-45E2-453B-AED2-DEFF44367859}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.Toolkit.Mvvm.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_AsyncInterfaces_Debug" Guid="{5F0F5242-0146-4572-A97E-239DB00E31B6}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_AsyncInterfaces_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.Bcl.AsyncInterfaces.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
 			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Debug" Guid="{2DCBF477-ED4A-478F-B210-48A901C08BE1}" Win64="yes">
@@ -31,15 +22,6 @@
 			</Component>
 		</DirectoryRef>
 		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_Release" Guid="{0D883A34-6E60-4988-B63B-7E0708773889}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.Toolkit.Mvvm.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_AsyncInterfaces_Release" Guid="{235601C6-3FFA-4DF2-BA22-D18CC5C2E066}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_AsyncInterfaces_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.Bcl.AsyncInterfaces.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
 			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Release" Guid="{9105369F-F895-4B17-AF16-986A5C4F0535}" Win64="yes">
@@ -63,15 +45,11 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponentsAppToolkitMvvm">
 			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_AsyncInterfaces_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Debug" />
 			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ToolkitMvvm_AsyncInterfaces_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Release" />

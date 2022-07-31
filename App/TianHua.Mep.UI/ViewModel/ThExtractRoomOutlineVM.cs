@@ -16,6 +16,7 @@ using ThMEPEngineCore.Model.Common;
 using ThControlLibraryWPF.ControlUtils;
 using ThCADExtension;
 using AcHelper.Commands;
+using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -131,16 +132,57 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void SelectLayer()
         {
-            var layer = PickUp();
-            if (string.IsNullOrEmpty(layer))
+            using (var docLock = Active.Document.LockDocument())
+            using (var acdb = AcadDatabase.Active())
             {
-                return;
-            }
-            if (!IsExisted(layer))
-            {
-                AddLayer(layer);
+                SetFocusToDwgView();
+                while(true)
+                {
+                    var pneo = new PromptNestedEntityOptions("\n请选择墙体线:");
+                    var pner = Active.Editor.GetNestedEntity(pneo);
+                    if (pner.Status == PromptStatus.OK)
+                    {
+                        if (pner.ObjectId != ObjectId.Null)
+                        {
+                            var entity = acdb.Element<Entity>(pner.ObjectId);
+                            if (entity is Curve || entity is Mline)
+                            {
+                                var sameSuffixLayers = GetSameSuffixLayers(entity.Layer);
+                                sameSuffixLayers.ForEach(layer =>
+                                {
+                                    if (!IsExisted(layer))
+                                    {
+                                        AddLayer(layer);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    else if(pner.Status == PromptStatus.Cancel)
+                    {
+                        break;
+                    }
+                }
             }
         }
+
+        private List<string> GetSameSuffixLayers(string layer)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                var suffix= ThMEPXRefService.OriginalFromXref(layer).ToUpper();
+                return acdb.Layers
+                    .Where(o =>
+                    {
+                        var currentSuffix = ThMEPXRefService.OriginalFromXref(o.Name).ToUpper();
+                        return suffix == currentSuffix;
+                    })
+                    .Select(o => o.Name)
+                    .Distinct()
+                    .ToList();
+            }            
+        }
+
         public void RemoveLayers(List<string> layers)
         {
             if (layers.Count > 0)
@@ -174,36 +216,29 @@ namespace TianHua.Mep.UI.ViewModel
                     .ToList();
             }
         }
+        private List<string> GetAEWallLayers()
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                return acdb.Layers
+                    .Where(o => IsAEWallLayer(o.Name))
+                    .Select(o => o.Name)
+                    .ToList();
+            }
+        }
         private bool IsAWallLayer(string layer)
         {
             //以A-WALL结尾的所有图层
             return layer.ToUpper().EndsWith("A-WALL");
         }
+        private bool IsAEWallLayer(string layer)
+        {
+            //以AE-WALL结尾的所有图层
+            return layer.ToUpper().EndsWith("AE-WALL");
+        }
         private bool IsExisted(string layer)
         {
             return LayerInfos.Where(o => o.Layer == layer).Any();
-        }
-        private string PickUp()
-        {
-            using (var docLock = Active.Document.LockDocument())
-            using (var acdb = AcadDatabase.Active())
-            {
-                SetFocusToDwgView();
-                var pneo = new PromptNestedEntityOptions("\n请选择墙体线:");
-                var pner = Active.Editor.GetNestedEntity(pneo);
-                if (pner.Status == PromptStatus.OK)
-                {
-                    if (pner.ObjectId != ObjectId.Null)
-                    {
-                        var entity = acdb.Element<Entity>(pner.ObjectId);
-                        if (entity is Curve)
-                        {
-                            return entity.Layer;
-                        }
-                    }
-                }
-                return "";
-            }
         }
         private void PrintEntities(DBObjectCollection walls, string layer)
         {
@@ -264,12 +299,20 @@ namespace TianHua.Mep.UI.ViewModel
                 IsSelected = true,
             }).ToList();
 
+            var aeWallLayers = GetAEWallLayers().Select(o => new ThLayerInfo()
+            {
+                Layer = o,
+                IsSelected = true,
+            }).ToList();
+
             // 存在于DB中的
             var storeInfos = FilterLayers(ThExtratRoomOutlineConfig.Instance.LayerInfos);
             storeInfos = storeInfos.Where(o => !aWallLayers.Select(s => s.Layer).Contains(o.Layer)).ToList();
+            storeInfos = storeInfos.Where(o => !aeWallLayers.Select(s => s.Layer).Contains(o.Layer)).ToList();
 
             var results = new List<ThLayerInfo>();
             results.AddRange(aWallLayers);
+            results.AddRange(aeWallLayers);
             results.AddRange(storeInfos);
 
             //results = Sort(results);

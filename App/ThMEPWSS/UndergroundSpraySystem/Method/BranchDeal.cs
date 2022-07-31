@@ -106,7 +106,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     spraySystem.BranchDic.Add(pt, termPts);
                     spraySystem.BranchPtDic.Add(pt, drawPt);
-                    drawPt = drawPt.OffsetX(fireAreaNums * 5500 + 5000);
+                    drawPt = drawPt.OffsetX((fireAreaNums + 2.5) * 5500 + 5000);
                 }
             }
         }
@@ -211,21 +211,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     if (termPts.Count != 0)
                     {
-                        foreach (var tpt in termPts)
-                        {
-                            if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
-                            {
-                                if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
-                                {
-                                    hasFireArea = true;
-                                    fireAreaNums += 1;
-                                }
-                            }
-                        }
-                        if (!hasFireArea)
-                        {
-                            fireAreaNums += 1;
-                        }
+                        fireAreaNums += termPts.Count;
+                        //foreach (var tpt in termPts)
+                        //{
+                        //    if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
+                        //    {
+                        //        if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
+                        //        {
+                        //            hasFireArea = true;
+                        //            fireAreaNums += 1;
+                        //        }
+                        //    }
+                        //}
+                        //if (!hasFireArea)
+                        //{
+                        //    fireAreaNums += 1;
+                        //}
                         if (spraySystem.BranchDic.ContainsKey(pt))
                         {
                             continue;

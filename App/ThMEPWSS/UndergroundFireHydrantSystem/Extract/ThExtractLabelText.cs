@@ -168,7 +168,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
                 if (HasChinese(str))
                 {
-                    return;
+                    //return;
                 }
                 var dBText = CreateText(insertPt, str);//创建成标准文字
                 var tWidth = Math.Abs(dBText.GeometricExtents.MaxPoint.X - dBText.GeometricExtents.MinPoint.X);
@@ -180,10 +180,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 dBObjects.Add(dBText);
                 return;
             }
-            if(ent.IsTCHPipe())
+            if(ent.GetType().Name.Contains("ImpEntity"))
             {
                 var dbObjs = new DBObjectCollection();
                 ent.Explode(dbObjs);
+                if (dbObjs.Count > 1)
+                    ;
                 foreach(var db  in dbObjs)
                 {
                     if(db is Entity ent1)

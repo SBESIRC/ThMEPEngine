@@ -18,9 +18,9 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var centerline = railing.Outline as Polyline;
-                var outlines = centerline.BufferFlatPL(railing.Thickness / 2.0);
+                var outlines = centerline.BufferFlatPL(railing.Width / 2.0);
                 var profile = model.ToIfcArbitraryClosedProfileDef(outlines[0] as Entity);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, railing.ExtrudedDirection, railing.Depth);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, railing.ExtrudedDirection, railing.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement

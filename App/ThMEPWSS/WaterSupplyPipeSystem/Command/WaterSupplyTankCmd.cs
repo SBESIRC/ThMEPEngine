@@ -23,7 +23,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
         {
             var FloorHeightVM = FloorHeightsViewModel.Instance;
             var tankVM = uiConfigs.SetViewModel.tankViewModel;
-            
+            var floorHeightDic = FloorHeightsViewModel.Instance.GetFloorHeightsDict(100);
+
             var prValveStyle = uiConfigs.SetViewModel.PRValveStyleDynamicRadios[1].IsChecked;//true表示一户一阀
             var NumberofPressurizedFloors = 4;//加压楼层数
             if(tankVM.PressurizedFloor[0].IsChecked)
@@ -57,7 +58,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
                     var upperHeight = insertPt.Y + highestFloor * sysIn.FloorHeight;//楼顶高Y
                     double offsetX = 9500 + 5855 * i;
 
-                    var prValveGroupFloor = Tool.GetPrValveGroupFloor(i, uiConfigs, households);//减压阀组所在楼层
+                    var prValveGroupFloor = Tool.GetPrValveGroupFloor(i, uiConfigs, households, floorHeightDic);//减压阀组所在楼层
                     var prValveGroupPt = insertPt.OffsetXY(offsetX + 600, prValveGroupFloor * sysIn.FloorHeight - 700);
 
                     sysOut.PrValveGroups.Add(prValveGroupPt);//减压阀组

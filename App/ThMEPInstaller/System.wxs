@@ -3,24 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <?if $(var.Configuration) = Debug ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" Guid="{4BFB5AD0-8661-404A-918A-9257A01EE14E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Buffers.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" Guid="{F18B5C4E-38F0-4DAF-8DD4-E1FA18FAF7B3}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Memory.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Debug" Guid="{681893F3-A4AE-4975-86EC-8B8438C77134}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Numerics.Vectors.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" Guid="{3A86EAE5-7857-4C26-A139-3DA5B43E0BE6}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Debug" Guid="{B437349D-4EC3-4884-830B-FBF097252A4E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.ValueTuple.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" Guid="{FB74E738-0CBB-4B11-99C0-C203CA593D19}" Win64="yes">
@@ -58,24 +40,6 @@
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
-        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" Guid="{6EB39952-D10F-4626-A854-DFB4D37B555E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Buffers.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" Guid="{638C6AFF-1BC7-455D-AAB9-8C712AE2493C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Memory.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Release" Guid="{2F4D3E0E-A6F0-477B-A044-439FA83962C2}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Numerics.Vectors.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" Guid="{08418D5F-E4EA-4995-8542-F4EF1254C14E}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Release" Guid="{2F8B3496-4BF0-404C-B46D-2D260B04E9A5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.ValueTuple.dll" />
-            </Component>
-        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" Guid="{A3B6D2D5-50E2-46A8-A51D-85DF2412E8CE}" Win64="yes">
@@ -117,35 +81,25 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsAppSystem">
             <?if $(var.Configuration) = Debug ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" />
             <?elseif $(var.Configuration) = Release ?>
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" />
             <?endif?>

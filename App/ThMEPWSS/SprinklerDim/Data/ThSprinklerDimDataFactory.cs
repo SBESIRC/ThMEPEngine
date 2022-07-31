@@ -24,7 +24,7 @@ using ThMEPWSS.Sprinkler.Data;
 using ThMEPWSS.Sprinkler.Service;
 using ThMEPWSS.Engine;
 
-namespace ThMEPWSS.ThSprinklerDim.Data
+namespace ThMEPWSS.SprinklerDim.Data
 {
     public class ThSprinklerDimDataFactory
     {

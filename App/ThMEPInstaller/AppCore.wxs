@@ -3,45 +3,6 @@
   <?include Variable.wxi ?>
   <Fragment>
     <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-        <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" Guid="{652C0C81-7F6E-48E1-9E86-D5418B66270C}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThDotNetARX.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Debug" Guid="{86580C3C-F423-4BF1-A04D-DD700AD5BA06}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\CADExtension.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Debug" Guid="{53FD95A6-283E-4B1F-8016-F9284D166BF3}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThCADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThCADExtension.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Debug" Guid="{82BA6CA4-8E6B-4B30-BE2D-38DBBE44A365}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThCADCore.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Debug" Guid="{9E3C992C-CD1C-4EA4-A507-672089ECA84C}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPEngineCore.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Debug" Guid="{428747DA-1443-437A-BB30-87758C98697C}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPCui_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPCui.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" Guid="{4B788EAB-B95F-44CA-B5CC-522C4472423C}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPAnalytics.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" Guid="{5E66590A-F205-44AE-95C8-BB6B9044C888}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPIdentity.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Debug" Guid="{CD1D09A6-2310-4C3D-814A-FB1FDA8A2A64}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPUi_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Mep.UI.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPTCH_Debug" Guid="{DCAA8796-547C-4491-9590-C815EAC259DE}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPTCH_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPTCH.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIFC_Debug" Guid="{CD6C3A56-7784-4C09-8852-96BB0EE4B9FC}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIFC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPIFC.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIO_Debug" Guid="{47939618-D0C1-464B-BED4-116DCD68B460}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIO_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPIO.dll" />
-        </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" Guid="{5C985F88-0E14-4928-842D-99EC072F6BDE}" Win64="yes">
@@ -121,45 +82,6 @@
         </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-        <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" Guid="{7CE2FEBF-8952-44D2-AF6D-DED21C9BE21B}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThDotNetARX.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Release" Guid="{05BB74E9-471A-48F9-B62C-3E043891B800}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\CADExtension.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Release" Guid="{417EF65F-ABD4-405D-92DF-7C0909A61AC9}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThCADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThCADExtension.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Release" Guid="{622B0795-71EF-4695-A8C3-0027E0EF6F88}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThCADCore.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" Guid="{7725BE77-D2CE-42B5-A99D-1B8E4FE102C7}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPEngineCore.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" Guid="{428747DA-1443-437A-BB30-87758C98697C}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPCui.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" Guid="{204C6325-3BAE-4A52-9147-6B9EB2D61BD9}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPAnalytics.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" Guid="{86DE8D9F-01D2-4E74-966F-06EF4113C3FC}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPIdentity.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Release" Guid="{C6A91313-E65C-4028-909D-66D440852AEE}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPUi_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Mep.UI.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPTCH_Release" Guid="{D1137177-60EF-4E2D-9EB9-CB32812CF2C3}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPTCH_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPTCH.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIFC_Release" Guid="{6CF909B9-0268-4824-B30C-E61E50BDFD42}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIFC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPIFC.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIO_Release" Guid="{25BB3670-1427-4743-A0E0-3B4D54EE1D6B}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIO_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPIO.dll" />
-        </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Release="bin\Release-NET45" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" Guid="{8C8E9A40-6823-4C76-802F-CDD0136A1123}" Win64="yes">
@@ -243,13 +165,6 @@
   <Fragment>
     <ComponentGroup Id="ProductComponentsAppCoreWin64">
       <?if $(var.Configuration) = Debug ?>
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CADExtension_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThCADExtension_Debug" />
@@ -264,29 +179,17 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPUi_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPTCH_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIFC_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIO_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIO_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIO_Debug" />
         <?elseif $(var.Configuration) = Release ?>
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CADExtension_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThCADExtension_Release" />
@@ -301,19 +204,14 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPUi_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPTCH_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIFC_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIO_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIO_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIO_Release" />
         <?endif?>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?include Variable.wxi ?>
+  <Fragment>
+    <?if $(var.Configuration) = Debug ?>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+      <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Debug" Guid="{5322594A-7496-46B7-A6CC-9A509AF94C7A}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Debug" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary20X64.arx" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Debug" Guid="{43815734-106C-43CC-A591-74050AA8884C}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Debug" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary.cfg" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+      <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Debug" Guid="{E0BA2BFD-547C-4AF2-BC90-D418150F6F0C}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Debug" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary22X64.arx" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Debug" Guid="{8A820678-7180-42A5-88E9-DB2F71C646AE}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Debug" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary.cfg" />
+      </Component>
+    </DirectoryRef>
+    <?elseif $(var.Configuration) = Release ?>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+      <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Release" Guid="{5CC8B80F-6755-45A0-82C6-771A7FC3CF19}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Release" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary20X64.arx" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Release" Guid="{74EA1133-22A3-4205-AED6-8964A5160515}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Release" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary.cfg" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+      <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Release" Guid="{6898FCD4-C1DD-46CF-8A58-1B2134324F61}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Release" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary22X64.arx" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Release" Guid="{0F9FC122-D777-4593-BD44-A33114FC79A0}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Release" KeyPath="yes" Source="$(var.SuperBoundaryPath)\SuperBoundary.cfg" />
+      </Component>
+    </DirectoryRef>
+    <?endif?>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponentsAppSuperBoundary">
+      <?if $(var.Configuration) = Debug ?>
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Debug" />
+      <?elseif $(var.Configuration) = Release ?>
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_ARX_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SuperBoundary_CFG_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_ARX_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SuperBoundary_CFG_Release" />
+      <?endif?>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

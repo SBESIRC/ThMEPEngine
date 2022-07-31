@@ -367,7 +367,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             if (_IsEmptyLoad)
                 return null;
-            return new Conductor(_conductorConfig, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2);
+            return new Conductor(_conductorConfig, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.LoadTypeCat_3, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2);
         }
 
         private Conductor CreatConductor(string config)

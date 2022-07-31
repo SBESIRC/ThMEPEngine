@@ -327,7 +327,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + Vector3d.YAxis.MultiplyBy(10);
             upText.Position = upTextPt;
 
-            addTexts.Add(new CreateDBTextElement(floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+            addTexts.Add(new CreateDBTextElement(floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle,"", DrainSysAGCommon.NOTCOPYTAG));
             return addLines;
         }
         RoofPointInfo GetRoofPointInfo(Point3d centerPoint) 

@@ -31,11 +31,12 @@ namespace ThMEPHVAC.Model
         {
             var innerWidth = Math.Min(innWidth, outtWidth);
             var outterWidth = Math.Max(innWidth, outtWidth);
+            var yOffset = 50 + outterWidth * 0.7;
             //创建大端的端线
             Line mainBigEndLine = new Line()
             {
-                StartPoint = new Point3d(-0.5 * inWidth, -50 - outterWidth, 0),
-                EndPoint = new Point3d(0.5 * inWidth, -50 - outterWidth, 0),
+                StartPoint = new Point3d(-0.5 * inWidth, -yOffset, 0),
+                EndPoint = new Point3d(0.5 * inWidth, -yOffset, 0),
             };
 
             //创建主路小端的端线
@@ -64,11 +65,12 @@ namespace ThMEPHVAC.Model
                 EndPoint = smallInnerArc.EndPoint,
             };
 
+            yOffset = outterWidth * 0.7 - outterWidth / 2 + inWidth / 2 + 50;
             //创建侧路大端的端线
             Line sideOutterEndLine = new Line()
             {
-                StartPoint = new Point3d(-0.5 * (inWidth + outterWidth) - 50, -0.5 * outterWidth, 0),
-                EndPoint = new Point3d(-0.5 * (inWidth + outterWidth) - 50, 0.5 * outterWidth, 0),
+                StartPoint = new Point3d(-yOffset, -0.5 * outterWidth, 0),
+                EndPoint = new Point3d(-yOffset, 0.5 * outterWidth, 0),
             };
 
             //创建侧路大端50mm直管段
@@ -108,11 +110,12 @@ namespace ThMEPHVAC.Model
                 mainSmallToSideBigArc.EndPoint = bigOutterArc.StartPoint;
             }
 
+            yOffset = innerWidth * 0.7 - innerWidth / 2 + inWidth / 2 + 50;
             //创建侧路小端的端线
             Line sideInnerEndLine = new Line()
             {
-                StartPoint = new Point3d(0.5 * (inWidth + innerWidth) + 50, -0.5 * innerWidth, 0),
-                EndPoint = new Point3d(0.5 * (inWidth + innerWidth) + 50, 0.5 * innerWidth, 0),
+                StartPoint = new Point3d(yOffset, -0.5 * innerWidth, 0),
+                EndPoint = new Point3d(yOffset, 0.5 * innerWidth, 0),
             };
 
             //创建侧路小端50mm直管段
@@ -195,7 +198,7 @@ namespace ThMEPHVAC.Model
         private static DBObjectCollection CreateVTeeEndline(double inW, double branchW, double otherW)
         {
             //右向弯管
-            double xOft = (inW + branchW) * 0.5 + 50;
+            double xOft = branchW * 0.7 - branchW / 2 + inW / 2 + 50 ;//(inW + branchW) * 0.5 + 50;
             double yOft = 0.5 * branchW;
             double ext = 45;
             var branchEndLine = new Line()
@@ -203,7 +206,7 @@ namespace ThMEPHVAC.Model
                 StartPoint = new Point3d(xOft, yOft + ext, 0),
                 EndPoint = new Point3d(xOft, -yOft - ext, 0),
             };
-            xOft = -(inW + otherW) * 0.5 - 50;
+            xOft = -(otherW * 0.7 - otherW / 2 + 50 + inW / 2);// - (inW + otherW) * 0.5 - 50;
             yOft = 0.5 * otherW;
             //左向弯管
             var mainSmallEndLine = new Line()
@@ -213,7 +216,7 @@ namespace ThMEPHVAC.Model
             };
             xOft = 0.5 * inW;
             double maxBranch = Math.Max(branchW, otherW);
-            yOft = -maxBranch - 50;
+            yOft = -maxBranch * 0.7 - 50;
             //输入
             var mainBigEndLine = new Line()
             {
@@ -231,7 +234,7 @@ namespace ThMEPHVAC.Model
         private static DBObjectCollection CreateRTeeEndline(double inW, double branchW, double otherW)
         {
             //创建支路端线
-            double xOft = (inW + branchW) * 0.5 + 50;
+            double xOft = branchW * 0.7 - branchW / 2 + inW / 2 + 50; // (inW + branchW) * 0.5 + 50;
             double yOft = 0.5 * branchW;
             double ext = 45;
             Line branchEndLine = new Line()
@@ -240,7 +243,7 @@ namespace ThMEPHVAC.Model
                 EndPoint = new Point3d(xOft, -yOft - ext, 0),
             };
             xOft = 0.5 * otherW;
-            yOft = 0.5 * branchW + 100;
+            yOft = branchW * 0.5 + 100;// 0.5 * branchW + 100;
             //创建主路小端端线
             Line mainSmallEndLine = new Line()
             {
@@ -248,7 +251,7 @@ namespace ThMEPHVAC.Model
                 EndPoint = new Point3d(-xOft - ext, yOft, 0),
             };
             xOft = 0.5 * inW;
-            yOft = -branchW - 50;
+            yOft = -(branchW * 0.7 + 50);// - branchW - 50;
             //创建主路大端端线
             Line mainBigEndLine = new Line()
             {

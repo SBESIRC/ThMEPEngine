@@ -60,6 +60,10 @@ namespace TianHua.AutoCAD.ThCui
             ////注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged += SystemVariableChangedHandler;
 
+            // Load assemblies from the specified path
+            // https://docs.microsoft.com/en-us/dotnet/framework/deployment/best-practices-for-assembly-loading
+            ThCuiAssemblyService.SubscribeAssemblyResolve();
+
             // Redirecting Assembly Loads at Runtime
             // https://blog.slaks.net/2013-12-25/redirecting-assembly-loads-at-runtime/
             RedirectAssemblies();

@@ -11,14 +11,15 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 
 using ThMEPWSS.Common;
-using ThMEPWSS.ThSprinklerDim.Data;
-using ThMEPWSS.ThSprinklerDim.Engine;
+using ThMEPWSS.SprinklerDim.Data;
+using ThMEPWSS.SprinklerDim.Engine;
 
-namespace ThMEPWSS.ThSprinklerDim.Cmd
+namespace ThMEPWSS.SprinklerDim.Cmd
 {
 
     public partial class ThSprinklerDimCmdEntrance
     {
+
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThSprinklerDimData", CommandFlags.Modal)]
         public void ThSprinklerDimData()
@@ -72,7 +73,5 @@ namespace ThMEPWSS.ThSprinklerDim.Cmd
                 cmd.Execute();
             }
         }
-
-
     }
 }

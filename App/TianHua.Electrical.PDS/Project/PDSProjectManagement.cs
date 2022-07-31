@@ -1,21 +1,21 @@
 ﻿using System;
-using QuikGraph;
 using System.IO;
 using System.Linq;
+using System.IO.Compression;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
+using QuikGraph;
 using QuikGraph.Algorithms;
 using QuikGraph.Serialization;
 using System.Collections.Generic;
-using ICSharpCode.SharpZipLib.Zip;
 using System.Runtime.Serialization.Formatters.Binary;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
+using TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet;
 using DwgGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode, TianHua.Electrical.PDS.Model.ThPDSCircuitGraphEdge<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode>>;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
-using TianHua.Electrical.PDS.Project.Module.LowVoltageCabinet;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -112,7 +112,7 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
-        private static Dictionary<ThPDSCircuitGraphNode,ThPDSProjectGraphNode> CreatCircuitVerticesMap(IEnumerable<ThPDSCircuitGraphNode> vertices)
+        private static Dictionary<ThPDSCircuitGraphNode, ThPDSProjectGraphNode> CreatCircuitVerticesMap(IEnumerable<ThPDSCircuitGraphNode> vertices)
         {
             return vertices.ToDictionary(key => key, value => CreatProjectNode(value));
         }
@@ -177,7 +177,7 @@ namespace TianHua.Electrical.PDS.Project
                 newNode.Details.LoadCalculationInfo.HighPower = load.InstalledCapacity.HighPower;
                 newNode.Details.LoadCalculationInfo.IsDualPower = load.InstalledCapacity.IsDualPower;
             }
-            if(load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter && newNode.Details.LoadCalculationInfo.HighPower == 0)
+            if (load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter && newNode.Details.LoadCalculationInfo.HighPower == 0)
             {
                 newNode.Details.LoadCalculationInfo.HighPower = _project.projectGlobalConfiguration.FireproofShutterPower;
             }
@@ -198,10 +198,7 @@ namespace TianHua.Electrical.PDS.Project
                 var GlobalConfigurationFile = ExportGlobalConfiguration(filePath);
                 ConfigFiles[0] = GraphFile;
                 ConfigFiles[1] = GlobalConfigurationFile;
-                using (ZipOutputStream outStream = new ZipOutputStream(File.Create(path)))
-                {
-                    Zip(ConfigFiles, outStream, "PDSProjectKey");
-                }
+                Zip(ConfigFiles, path);
             }
             catch (Exception ex)
             {
@@ -211,7 +208,7 @@ namespace TianHua.Electrical.PDS.Project
 
         public static void ImportProject(string filePath)
         {
-            var files = UnZip(filePath, "PDSProjectKey");
+            var files = UnZip(filePath);
             var GraphFileBuffer = files.First(o => o.Key.Equals("Graph.Config")).Value;
             var GlobalConfigurationFileBuffer = files.First(o => o.Key.Equals("GlobalConfiguration.Config")).Value;
             GraphFileBuffer.Seek(0, SeekOrigin.Begin);
@@ -276,64 +273,45 @@ namespace TianHua.Electrical.PDS.Project
             return path;
         }
 
-        public static void Zip(string[] files, ZipOutputStream outStream, string pwd)
+        public static void Zip(string[] files, string path)
         {
-            try
+            using (FileStream zipFileToOpen = new FileStream(path, FileMode.Create))
+            using (ZipArchive archive = new ZipArchive(zipFileToOpen, ZipArchiveMode.Create))
             {
-                for (int i = 0; i < files.Length; i++)
+                foreach (string file in files)
                 {
-                    if (!File.Exists(files[i]))
+                    string fileName = Path.GetFileName(file);
+                    ZipArchiveEntry entry = archive.CreateEntry(fileName);
+                    using (Stream stream = entry.Open())
                     {
-                        throw new Exception("文件不存在");
+                        byte[] bytes = File.ReadAllBytes(file);
+                        stream.Write(bytes, 0, bytes.Length);
                     }
-                    using (FileStream fs = File.OpenRead(files[i]))
-                    {
-                        byte[] buffer = new byte[fs.Length];
-                        fs.Read(buffer, 0, buffer.Length);
-                        if (!string.IsNullOrWhiteSpace(pwd))
-                        {
-                            outStream.Password = pwd;
-                        }
-                        ZipEntry ZipEntry = new ZipEntry(Path.GetFileName(files[i]));
-                        outStream.PutNextEntry(ZipEntry);
-                        outStream.Write(buffer, 0, buffer.Length);
-                    }
-                    File.Delete(files[i]);
+                    File.Delete(file);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw;
             }
         }
 
-        public static Dictionary<string, MemoryStream> UnZip(string zipFile, string pwd)
+        public static Dictionary<string, MemoryStream> UnZip(string zipFile)
         {
             Dictionary<string, MemoryStream> result = new Dictionary<string, MemoryStream>();
-            try
+            using (FileStream zipFileToOpen = new FileStream(zipFile, FileMode.Open))
+            using (ZipArchive archive = new ZipArchive(zipFileToOpen, ZipArchiveMode.Read))
             {
-                using (ZipInputStream zipInputStream = new ZipInputStream(File.OpenRead(zipFile)))
+                foreach (ZipArchiveEntry theEntry in archive.Entries)
                 {
-                    if (!string.IsNullOrWhiteSpace(pwd))
+                    using (Stream stream = theEntry.Open())
                     {
-                        zipInputStream.Password = pwd;
-                    }
-                    ZipEntry theEntry;
-                    while ((theEntry = zipInputStream.GetNextEntry()) != null)
-                    {
-                        byte[] data = new byte[1024 * 1024];
-                        int dataLength = 0;
-                        MemoryStream stream = new MemoryStream();
-                        while ((dataLength = zipInputStream.Read(data, 0, data.Length)) > 0)
+                        MemoryStream memoryStream = new MemoryStream();
+                        int b = -1;
+                        while ((b = stream.ReadByte()) != -1)
                         {
-                            stream.Write(data, 0, dataLength);
+                            memoryStream.WriteByte((byte)b);
                         }
-                        result.Add(theEntry.Name, stream);
+                        //memoryStream.Close();
+                        result.Add(theEntry.Name, memoryStream);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
             }
             return result;
         }

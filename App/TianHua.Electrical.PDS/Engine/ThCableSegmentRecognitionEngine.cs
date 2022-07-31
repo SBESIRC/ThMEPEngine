@@ -76,7 +76,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
             entityInfos.ForEach(e =>
             {
-                if(lines.Contains(e.Entity))
+                if (lines.Contains(e.Entity))
                 {
                     Results.Add(e);
                 }

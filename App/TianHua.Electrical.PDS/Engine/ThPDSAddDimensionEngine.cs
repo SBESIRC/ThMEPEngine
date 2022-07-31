@@ -178,9 +178,10 @@ namespace TianHua.Electrical.PDS.Engine
                     + node.Details.LoadCalculationInfo.HighPower.ToString() + "kW";
 
                 // 主备关系
-                var primaryAndSpareAvail = node.Load.PrimaryAvail == 0
-                    ? "" : (NumberToChinese(node.Load.PrimaryAvail) + "用" +
-                    (node.Load.SpareAvail == 0 ? "" : NumberToChinese(node.Load.PrimaryAvail) + "备"));
+                var primaryAndSpareAvail = "";
+                //var primaryAndSpareAvail = node.Load.PrimaryAvail == 0
+                //    ? "" : (NumberToChinese(node.Load.PrimaryAvail) + "用" +
+                //    (node.Load.SpareAvail == 0 ? "" : NumberToChinese(node.Load.PrimaryAvail) + "备"));
 
                 var attributes = new Dictionary<string, string>
                 {
@@ -195,26 +196,27 @@ namespace TianHua.Electrical.PDS.Engine
                 var match = ThPDSBlockNameMapService.Match(loadType);
                 if (match.AttNameValues != null)
                 {
-                    var blockId = insertEngine.Insert(activeDb, configDb, match.BlockName, insertInfo.InsertPoint, insertInfo.Scale, match.AttNameValues);
+                    var blockId = insertEngine.Insert(activeDb, configDb, match.LayerName, match.BlockName, insertInfo.InsertPoint, insertInfo.Scale, match.AttNameValues);
                     ExtendAssign(activeDb, blockId, location);
                 }
                 else
                 {
-                    var blockId = insertEngine.Insert(activeDb, configDb, match.BlockName, insertInfo.InsertPoint, insertInfo.Scale);
+                    var blockId = insertEngine.Insert(activeDb, configDb, match.LayerName, match.BlockName, insertInfo.InsertPoint, insertInfo.Scale);
                     ExtendAssign(activeDb, blockId, location);
                 }
 
+                var dimensionScale = new Scale3d(insertInfo.Scale.X / 100.0);
                 if (dimensionVector.DotProduct(wcsVector) >= 0)
                 {
                     var dimension = insertEngine.InsertCircuitDimension(activeDb, configDb, ThPDSCommon.LOAD_DIMENSION_R,
-                        insertInfo.InsertPoint + match.LabelOffset, insertInfo.Scale);
-                    CircuitDimensionAssign(dimension, insertInfo.SecondPoint, insertInfo.Scale, attributes);
+                        insertInfo.InsertPoint + match.LabelOffset, dimensionScale);
+                    CircuitDimensionAssign(dimension, insertInfo.SecondPoint, dimensionScale, attributes);
                 }
                 else
                 {
                     var dimension = insertEngine.InsertCircuitDimension(activeDb, configDb, ThPDSCommon.LOAD_DIMENSION_L,
-                        insertInfo.InsertPoint + match.LabelOffset, insertInfo.Scale);
-                    CircuitDimensionAssign(dimension, insertInfo.SecondPoint, insertInfo.Scale, attributes);
+                        insertInfo.InsertPoint + match.LabelOffset, dimensionScale);
+                    CircuitDimensionAssign(dimension, insertInfo.SecondPoint, dimensionScale, attributes);
                 }
             }
         }

@@ -3,18 +3,6 @@
   <?include Variable.wxi ?>
   <Fragment>
     <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Debug" Guid="{57360B88-252E-48A6-B8DD-CDA20C9AD9F4}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPWSS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPWSS.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Debug" Guid="{A4BC3EC2-913E-45F5-BFED-327E91097CF1}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Plumbing.UI.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_WPF_UI_Debug" Guid="{4A42725B-D1DC-436C-B3AD-3C5EEEBC0353}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Plumbing_WPF_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Plumbing.WPF.UI.dll" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Debug" Guid="{87E569FB-FEB3-474A-AF80-A4852AA31D53}" Win64="yes">
@@ -24,7 +12,7 @@
         <File Id="FILE_Autoloader_Contents_App_Win64_R20_Plumbing_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Plumbing.UI.dll" />
       </Component>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_WPF_UI_Debug" Guid="{8D1966F1-B4B3-4E3F-875D-464E55E4C34F}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Plumbing_WPF_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Plumbing.WPF.UI.dll" />
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Plumbing_WPF_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Plumbing.WPF.UI.dll" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -36,22 +24,10 @@
         <File Id="FILE_Autoloader_Contents_App_Win64_R22_Plumbing_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Plumbing.UI.dll" />
       </Component>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Plumbing_WPF_UI_Debug" Guid="{923160C2-10A1-4F87-8AC8-514ECB3FB976}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Plumbing_WPF_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Plumbing.WPF.UI.dll" />
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Plumbing_WPF_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Plumbing.WPF.UI.dll" />
       </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Release" Guid="{A6F4C4E5-EBD6-4748-A58E-CF9083DA2A25}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPWSS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPWSS.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Release" Guid="{14B20EDB-A71D-4926-AC5E-723E9ACE23BB}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Plumbing.UI.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_WPF_UI_Release" Guid="{3102C161-7A23-4D78-8F8E-A3306F396D5C}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Plumbing_WPF_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Plumbing.WPF.UI.dll" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Release="bin\Release-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Release" Guid="{0DFD3BDA-2C55-4B30-BA61-5FF9790060D1}" Win64="yes">
@@ -81,9 +57,6 @@
   <Fragment>
     <ComponentGroup Id="ProductComponentsWSSWin64">
       <?if $(var.Configuration) = Debug ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_WPF_UI_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_UI_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_WPF_UI_Debug" />
@@ -91,9 +64,6 @@
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Plumbing_UI_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Plumbing_WPF_UI_Debug" />
       <?elseif $(var.Configuration) = Release ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_WPF_UI_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_UI_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_WPF_UI_Release" />

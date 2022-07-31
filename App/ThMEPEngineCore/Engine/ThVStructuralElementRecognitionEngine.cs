@@ -19,6 +19,16 @@ namespace ThMEPEngineCore.Engine
             extractor.Extract(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThVStructuralElementRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -81,6 +91,16 @@ namespace ThMEPEngineCore.Engine
             elements.AddRange(walls.Cast<Entity>().Select(o => ThIfcWall.Create(o) as ThIfcBuildingElement));
             elements.AddRange(columns.Cast<Curve>().Select(o => ThIfcColumn.Create(o) as ThIfcBuildingElement));
             return elements;
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

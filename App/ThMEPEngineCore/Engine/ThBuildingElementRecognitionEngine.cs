@@ -27,8 +27,12 @@ namespace ThMEPEngineCore.Engine
         public void Dispose()
         {
         }
+
         public abstract void Recognize(List<ThRawIfcBuildingElementData> objs, Point3dCollection polygon);
         public abstract void Recognize(Database database, Point3dCollection polygon);
+        public abstract void RecognizeEditor(Point3dCollection polygon);
+        public abstract void RecognizeMS(Database database, Point3dCollection polygon);
+
         public IEnumerable<ThIfcBuildingElement> FilterByOutline(DBObjectCollection objs)
         {
             return Elements.Where(o => objs.Contains(o.Outline));

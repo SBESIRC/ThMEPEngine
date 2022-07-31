@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using System.Diagnostics;
+using Linq2Acad;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -75,7 +77,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (isOmit) continue;
                 tempPath.Add(p);
                 visited.Add(p);
-
+#if DEBUG
+                using (AcadDatabase currentDb = AcadDatabase.Active())
+                {
+                    currentDb.CurrentSpace.Add(new Line(p._pt,cur._pt));
+                }
+#endif
                 //递归搜索
                 var flag = dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
                 if (flag) return true;

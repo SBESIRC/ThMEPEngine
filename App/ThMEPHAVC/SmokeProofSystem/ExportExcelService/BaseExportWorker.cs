@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,15 +16,17 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
         {
             if (model is FireElevatorFrontRoomViewModel fm)
             {
+                var removeFloor = new List<FloorInfo>();
                 foreach (var floor in fm.ListTabControl)
                 {
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 return new FireFrontExportWorker();
             }
@@ -31,23 +34,27 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             {
                 foreach (var floor in fn.FrontRoomTabControl)
                 {
+                    var removeFloor = new List<FloorInfo>();
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 foreach (var floor in fn.StairRoomTabControl)
                 {
+                    var removeFloor = new List<FloorInfo>();
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 return new SeparateOrSharedNaturalExportWorker();
             }
@@ -55,13 +62,15 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             {
                 foreach (var floor in ft.FrontRoomTabControl)
                 {
+                    var removeFloor = new List<FloorInfo>();
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 return new SeparateOrSharedWindExportWorker();
             }
@@ -69,13 +78,15 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             {
                 foreach (var floor in sn.FrontRoomTabControl)
                 {
+                    var removeFloor = new List<FloorInfo>();
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth * d.DoorSpace == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 return new StaircaseNoWindExportWorker();
             }
@@ -83,13 +94,15 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             {
                 foreach (var floor in sa.ListTabControl)
                 {
+                    var removeFloor = new List<FloorInfo>();
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth * d.DoorSpace == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 return new StaircaseWindExportWorker();
             }
@@ -101,18 +114,21 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             {
                 foreach (var floor in rf.ListTabControl)
                 {
+                    var removeFloor = new List<FloorInfo>();
                     foreach (var d in floor.FloorInfoItems)
                     {
                         if (d.DoorNum * d.DoorHeight * d.DoorWidth == 0)
                         {
-                            floor.FloorInfoItems.Remove(d);
+                            removeFloor.Add(d);
                         }
                     }
+                    RemoveFloorInfo(floor.FloorInfoItems, removeFloor);
                 }
                 return new EvacuationFrontExportWorker();
             }
             return null;
         }
+
         public string GetLoadRange(string load)
         {
             switch (load)
@@ -155,6 +171,14 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService
             return string.Empty;
         }
 
-        public abstract void ExportToExcel(BaseSmokeProofViewModel baseModel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator excelfile);
+        public abstract void ExportToExcel(BaseSmokeProofViewModel baseModel, string systemName, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator excelfile);
+
+        private static void RemoveFloorInfo(ObservableCollection<FloorInfo> floors, List<FloorInfo> removeFloors)
+        {
+            foreach (var rFloor in removeFloors)
+            {
+                floors.Remove(rFloor);
+            }
+        }
     }
 }

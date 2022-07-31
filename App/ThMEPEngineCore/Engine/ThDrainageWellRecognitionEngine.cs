@@ -27,6 +27,16 @@ namespace ThMEPEngineCore.Engine
             extractor.ExtractFromMS(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ThDrainageWellRecognitionEngine : ThBuildingElementRecognitionEngine
@@ -61,7 +71,17 @@ namespace ThMEPEngineCore.Engine
             }
             transformer.Reset(objs);
             objs.Cast<Entity>().ForEach(o => Geos.Add(o));
-        }        
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ThDrainageWellBlockExtractionEngine : ThDistributionElementExtractionEngine

@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
@@ -18,18 +19,50 @@ namespace ThMEPTCH.Model
     [ProtoInclude(109, typeof(ThTCHOpening))]
     public class ThTCHElement
     {
-        /*这里预留10个序列数据，外部序列数字冲11开始*/
+        /*这里预留20个序列数据，外部序列数字从21开始*/
         [ProtoMember(1)]
         public string Name { get; set; }
-        public string Spec { get; set; }
         public string Useage { get; set; }
         [ProtoMember(2)]
         public string Uuid { get; set; }
+        #region 几何信息
         [ProtoMember(3)]
         public Entity Outline { get; set; }
         [ProtoMember(4)]
+        public Point3d Origin { get; set; }
+        //X轴方向和宽度方向一致
+        [ProtoMember(5)]
+        public Vector3d XVector { get; set; }
+        /// <summary>
+        /// 宽度(厚度)（Y轴方向长度）
+        /// </summary>
+        [ProtoMember(6)]
+        public double Width { get; set; }
+        /// <summary>
+        /// 长度(X轴方向)
+        /// </summary>
+        [ProtoMember(7)]
+        public double Length { get; set; }
+        /// <summary>
+        /// 拉伸方向
+        /// </summary>
+        [ProtoMember(8)]
+        public Vector3d ExtrudedDirection { get; set; }
+        /// <summary>
+        /// 拉伸方向长度
+        /// </summary>
+        [ProtoMember(9)]
         public double Height { get; set; }
-        public Dictionary<string, object> Properties { get; }
+        /// <summary>
+        /// 拉伸方向偏移值
+        /// </summary>
+        [ProtoMember(10)]
+        public double ZOffSet { get; set; }
+        #endregion
+        #region 传object数据有问题，后面需要处理
+        public Dictionary<string, object> Properties { get; set; }
+        #endregion
+
         public ThTCHElement()
         {
             Uuid = Guid.NewGuid().ToString();

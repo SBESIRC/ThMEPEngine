@@ -44,5 +44,7 @@ namespace ThMEPEngineCore.Engine
         }
 
         public abstract void Extract(Database database);
+        public abstract void ExtractFromMS(Database database);
+        public abstract void ExtractFromEditor(Point3dCollection frame);
     }
 }

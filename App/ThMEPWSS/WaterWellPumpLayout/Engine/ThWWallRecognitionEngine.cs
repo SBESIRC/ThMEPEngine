@@ -22,6 +22,16 @@ namespace ThMEPWSS.WaterWellPumpLayout.Engine
             extractor.Extract(database);
             Results.AddRange(visitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
     public class ThWWallRecognitionEngine : ThBuildingElementRecognitionEngine
     {
@@ -46,6 +56,16 @@ namespace ThMEPWSS.WaterWellPumpLayout.Engine
                 geometries = spatialIndex.SelectCrossingPolygon(polygon);
             }
             Results = geometries.Cast<Curve>().ToList(); 
-        }     
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

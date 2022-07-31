@@ -11,15 +11,8 @@ namespace ThMEPTCH.Model
         /// <summary>
         /// 降板信息
         /// </summary>
-        [ProtoMember(11)]
+        [ProtoMember(21)]
         public List<ThTCHSlabDescendingData> Descendings { get; set; }
-
-        /// <summary>
-        /// 拉伸方向
-        /// </summary>
-        [ProtoMember(12)]
-        public Vector3d ExtrudedDirection { get; private set; }
-
         private ThTCHSlab()
         {
 

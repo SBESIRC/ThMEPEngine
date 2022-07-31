@@ -115,7 +115,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             var connectVreticals = new List<Point3dEx>();
             foreach (var ver in sprayIn.Verticals)
             {
-                var rect = ver._pt.GetRect(100);
+                if (ver._pt.DistanceTo(new Point3d(1602561.7, 390672,0)) < 10)
+                    ;
+                var rect = ver._pt.GetRect(120);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
                 var flag = sprayIn.AddNewPtDic(dbObjs, ver, ref lines);
 

@@ -201,13 +201,13 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
-                if (airVolume >= 26000) { ceiling = 8.9; floor = 5; }
-                else if (airVolume >= 12000) { ceiling = 8.9; floor = 4.5; }
-                else if (airVolume >= 8000) { ceiling = 7; floor = 4; }
-                else if (airVolume >= 4000) { ceiling = 5.5; floor = 3; }
-                else if (airVolume >= 3000) { ceiling = 5.5; floor = 3; }
-                else if (airVolume >= 2800) { ceiling = 4.5; floor = 2.5; }
-                else { ceiling = 4; floor = 2; }//throw new NotImplementedException();
+                if (airVolume >= 26000) { ceiling = 8.9; floor = 7; }
+                else if (airVolume >= 12000) { ceiling = 8.9; floor = 5; }
+                else if (airVolume >= 8000) { ceiling = 7.5; floor = 4.5; }
+                else if (airVolume >= 4000) { ceiling = 6.5; floor = 3.8; }
+                else if (airVolume >= 3000) { ceiling = 6; floor = 3.5; }
+                else if (airVolume >= 2800) { ceiling = 5.5; floor = 3.5; }
+                else { ceiling = 4.5; floor = 3.5; }//throw new NotImplementedException();
             }
         }
         private void Round2float(ref double f)

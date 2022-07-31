@@ -8,39 +8,33 @@ namespace ThMEPTCH.Model
     [ProtoContract]
     public class ThTCHDoor : ThTCHElement, ICloneable
     {
-        [ProtoMember(11)]
-        public Point3d CenterPoint { get; set; }
-        [ProtoMember(12)]
-        public double Width { get; set; }
-        [ProtoMember(13)]
-        public double Thickness { get; set; }
-        [ProtoMember(14)]
-        public Vector3d ExtrudedDirection { get; }
-        //X轴方向和宽度方向一致
-        [ProtoMember(15)]
-        public Vector3d XVector { get; set; }
-        private ThTCHDoor()
-        {
-
-        }
+        private ThTCHDoor(){ }
         private double Angle { get; set; }
-        public ThTCHDoor(Point3d centerPoint,double width,double height,double thickness,double angle) 
+        /// <summary>
+        /// 矩形门的构造
+        /// </summary>
+        /// <param name="centerPoint">轮廓底部中心点</param>
+        /// <param name="length">长度（门宽）</param>
+        /// <param name="height">高度（门高）</param>
+        /// <param name="width">宽度（门厚）</param>
+        /// <param name="angle">旋转角度（计算X轴方向）</param>
+        public ThTCHDoor(Point3d centerPoint,double length,double height,double width,double angle) 
         {
             ExtrudedDirection = Vector3d.ZAxis;
-            CenterPoint = centerPoint;
+            Origin = centerPoint;
             XVector = Vector3d.XAxis.RotateBy(angle, Vector3d.ZAxis);
-            Width = width;
+            Length = length;
             Height = height;
-            Thickness = thickness;
+            Width = width;
             Angle = angle;
         }
-
         public object Clone()
         {
             if (this == null)
                 return null;
-            var door = new ThTCHDoor(this.CenterPoint, this.Width, this.Height, this.Thickness, this.Angle);
+            var door = new ThTCHDoor(this.Origin, this.Length, this.Height, this.Width, this.Angle);
             door.XVector = this.XVector;
+            door.Uuid = this.Uuid;
             if (this.Outline != null) 
             {
                 door.Outline = this.Outline.Clone() as Entity;

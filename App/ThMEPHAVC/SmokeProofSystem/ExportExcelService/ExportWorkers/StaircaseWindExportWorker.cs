@@ -10,27 +10,26 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService.ExportWorkers
 {
     class StaircaseWindExportWorker : BaseExportWorker
     {
-        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
+        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, string systemName, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
         {
             StaircaseWindViewModel StaircaseNoAir = baseModel as StaircaseWindViewModel;
-            setsheet.Cells["D2"].Value = "";
-            setsheet.Cells["D3"].Value = "";
-            setsheet.Cells["D4"].Value = Math.Max(StaircaseNoAir.FinalValue, (StaircaseNoAir.OpenDorrAirSupply + StaircaseNoAir.VentilationLeakage)).ToString();
-            setsheet.Cells["D5"].Value = (StaircaseNoAir.OpenDorrAirSupply + StaircaseNoAir.VentilationLeakage).ToString();
-            setsheet.Cells["D6"].Value = StaircaseNoAir.OpenDorrAirSupply.ToString();
-            setsheet.Cells["D7"].Value = StaircaseNoAir.VentilationLeakage.ToString();
-            setsheet.Cells["D9"].Value = StaircaseNoAir.OverAk.ToString();
-            setsheet.Cells["D10"].Value = "1";
-            setsheet.Cells["D11"].Value = StaircaseNoAir.StairN1.ToString();
-            setsheet.Cells["D12"].Value = Math.Round(StaircaseNoAir.LeakArea, 2).ToString();
-            setsheet.Cells["D13"].Value = "12";
-            setsheet.Cells["D14"].Value = Math.Round(StaircaseNoAir.N2, 2).ToString();
-            setsheet.Cells["D15"].Value = StaircaseNoAir.FinalValue.ToString();
-            setsheet.Cells["D16"].Value = StaircaseNoAir.FloorNum.ToString();
-            setsheet.Cells["D17"].Value = GetLoadRange(StaircaseNoAir.FloorType.ToString());
-            setsheet.Cells["D18"].Value = GetStairLocation(StaircaseNoAir.StairPosition.ToString());
-            setsheet.Cells["D19"].Value = GetStairSpaceState(StaircaseNoAir.BusinessType.ToString());
-            int rowNo = 20;
+            setsheet.Cells["D2"].Value = systemName;
+            setsheet.Cells["D3"].Value = Math.Max(StaircaseNoAir.FinalValue, StaircaseNoAir.OpenDorrAirSupply + StaircaseNoAir.VentilationLeakage).ToString();
+            setsheet.Cells["D4"].Value = (StaircaseNoAir.OpenDorrAirSupply + StaircaseNoAir.VentilationLeakage).ToString();
+            setsheet.Cells["D5"].Value = StaircaseNoAir.OpenDorrAirSupply.ToString();
+            setsheet.Cells["D6"].Value = StaircaseNoAir.VentilationLeakage.ToString();
+            setsheet.Cells["D8"].Value = StaircaseNoAir.OverAk.ToString();
+            setsheet.Cells["D9"].Value = "1";
+            setsheet.Cells["D10"].Value = StaircaseNoAir.StairN1.ToString();
+            setsheet.Cells["D11"].Value = Math.Round(StaircaseNoAir.LeakArea, 2).ToString();
+            setsheet.Cells["D12"].Value = "12";
+            setsheet.Cells["D13"].Value = Math.Round(StaircaseNoAir.N2, 2).ToString();
+            setsheet.Cells["D14"].Value = StaircaseNoAir.FinalValue.ToString();
+            setsheet.Cells["D15"].Value = StaircaseNoAir.FloorNum.ToString();
+            setsheet.Cells["D16"].Value = GetLoadRange(StaircaseNoAir.FloorType.ToString());
+            setsheet.Cells["D17"].Value = GetStairLocation(StaircaseNoAir.StairPosition.ToString());
+            setsheet.Cells["D18"].Value = GetStairSpaceState(StaircaseNoAir.BusinessType.ToString());
+            int rowNo = 19;
             int rangerows = 5;
             for (int i = 1; i <= StaircaseNoAir.ListTabControl.Sum(f => f.FloorInfoItems.Count); i++)
             {

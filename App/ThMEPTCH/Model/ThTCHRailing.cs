@@ -10,11 +10,5 @@ namespace ThMEPTCH.Model
     [ProtoContract]
     public class ThTCHRailing : ThTCHElement
     {
-        [ProtoMember(11)]
-        public double Depth { get; set; }
-        [ProtoMember(12)]
-        public double Thickness { get; set; }
-        [ProtoMember(13)]
-        public Vector3d ExtrudedDirection { get; set; }
     }
 }

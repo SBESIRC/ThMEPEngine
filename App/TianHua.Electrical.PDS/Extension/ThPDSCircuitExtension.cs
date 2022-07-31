@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using TianHua.Electrical.PDS.Project.Module;
+﻿using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.Extension
 {

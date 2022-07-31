@@ -177,12 +177,13 @@ namespace ThMEPEngineCore.CAD
             }
             else if (geos is BlockReference block)
             {
-                if (ValidVector(block.Normal))
-                {
-                    block.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
-                    block.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
-                    return;
-                }
+                // 由于精度原因，非严格右手系的图元也会进行TransformBy，导致图元异常，故暂不处理
+                //if (ValidVector(block.Normal))
+                //{
+                //    block.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                //    block.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                //    return;
+                //}
             }
             else if (geos is DBPoint point)
             {

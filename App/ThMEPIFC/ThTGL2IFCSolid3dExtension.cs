@@ -42,8 +42,8 @@ namespace ThMEPIFC
             var moveVector = floorOrigin.GetAsVector();
             if (null == door.Outline)
             {
-                var centerPoint = door.CenterPoint;
-                var polyline = CenterPointToPolyline(centerPoint, door.XVector, door.ExtrudedDirection, door.Width, door.Thickness);
+                var centerPoint = door.Origin;
+                var polyline = CenterPointToPolyline(centerPoint, door.XVector, door.ExtrudedDirection, door.Length, door.Width);
                 moveVector += Vector3d.ZAxis.MultiplyBy(centerPoint.Z);
                 outLine = polyline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
             }
@@ -59,8 +59,8 @@ namespace ThMEPIFC
             var moveVector = floorOrigin.GetAsVector();
             if (null == window.Outline)
             {
-                var centerPoint = window.CenterPoint;
-                var polyline = CenterPointToPolyline(centerPoint, window.XVector, window.ExtrudedDirection, window.Width, window.Thickness);
+                var centerPoint = window.Origin;
+                var polyline = CenterPointToPolyline(centerPoint, window.XVector, window.ExtrudedDirection, window.Length, window.Width);
                 moveVector += Vector3d.ZAxis.MultiplyBy(centerPoint.Z);
                 outLine = polyline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
             }
@@ -77,9 +77,9 @@ namespace ThMEPIFC
             {
                 var moveVector = floorOrigin.GetAsVector();
                 moveVector += Vector3d.ZAxis.MultiplyBy(centerline.Elevation);
-                var outlines = centerline.BufferFlatPL(railing.Thickness / 2.0)[0] as Polyline;
+                var outlines = centerline.BufferFlatPL(railing.Width / 2.0)[0] as Polyline;
                 var polyline = outlines.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
-                var solid = CreateExtrudedSolid(polyline, railing.Depth, 0.0);
+                var solid = CreateExtrudedSolid(polyline, railing.Height, 0.0);
                 return solid;
             }
             return null;
@@ -136,8 +136,8 @@ namespace ThMEPIFC
             var moveVector = floorOrigin.GetAsVector();
             if (null == opening.Outline)
             {
-                var centerPoint = opening.CenterPoint;
-                var polyline = CenterPointToPolyline(centerPoint,opening.XVector,opening.ExtrudedDirection,opening.Width,opening.Thickness);
+                var centerPoint = opening.Origin;
+                var polyline = CenterPointToPolyline(centerPoint,opening.XVector,opening.ExtrudedDirection,opening.Length,opening.Width);
                 moveVector += Vector3d.ZAxis.MultiplyBy(centerPoint.Z);
                 outLine = polyline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
             }

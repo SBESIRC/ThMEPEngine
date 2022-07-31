@@ -8,7 +8,7 @@ namespace ThMEPWSS.SprinklerConnect.Model
 {
     public class ThSprinklerEdgeNode
     {
-        public int EdgeIndex { get; private set; }
+        public int EdgeIndex { get; set; }
         public ThSprinklerEdgeNode Next { get; set; }
         public ThSprinklerEdgeNode(int edgeIndex)
         {
@@ -61,11 +61,11 @@ namespace ThMEPWSS.SprinklerConnect.Model
                 else
                 {
                     var p = tmp.FirstEdge;
-                    while (p.Next != null && p.Next.EdgeIndex != toVertexIdx)
+                    while (p.Next != null && p.EdgeIndex != toVertexIdx)
                     {
                         p = p.Next;
                     }
-                    if (p.Next == null)
+                    if (p.Next == null && p.EdgeIndex != toVertexIdx)
                     {
                         p.Next = toAdd;
                     }
@@ -73,6 +73,76 @@ namespace ThMEPWSS.SprinklerConnect.Model
                 }
             }
         }
+
+        public void DeleteEdge(int fromVertex, int toVertex)
+        {
+            var fromVertexIdx = SearchNodeIndex(fromVertex);
+            var toVertexIdx = SearchNodeIndex(toVertex);
+
+            if (fromVertexIdx != -1)
+            {
+                ThSprinklerEdgeNode tmp = SprinklerVertexNodeList[fromVertexIdx].FirstEdge;
+
+                if(tmp != null)
+                {
+                    if(tmp.EdgeIndex == toVertexIdx)
+                    {
+                        SprinklerVertexNodeList[fromVertexIdx].FirstEdge = tmp.Next;
+                    }
+                    else
+                    {
+                        while (tmp.Next != null && tmp.Next.EdgeIndex != toVertexIdx)
+                        {
+                            tmp = tmp.Next;
+                        }
+
+                        if (tmp.Next != null && tmp.Next.EdgeIndex == toVertexIdx)
+                        {
+                            tmp.Next = tmp.Next.Next;
+                        }
+                    }
+
+                    
+                }
+
+            }
+        }
+
+        public List<int> GetEdgeList(int ptIndex)
+        {
+            int idx = SearchNodeIndex(ptIndex);
+
+            var edges = new List<int>();
+            var curEdge = SprinklerVertexNodeList[idx].FirstEdge;
+            while (curEdge != null)
+            {
+                edges.Add(curEdge.EdgeIndex);
+                curEdge = curEdge.Next;
+            }
+
+            return edges;
+        }
+
+        public bool IsEdgeDuplicated()
+        {
+            foreach (ThSprinklerVertexNode vertex in SprinklerVertexNodeList)
+            {
+                var edges = new List<int>();
+                var curEdge = vertex.FirstEdge;
+                while (curEdge != null)
+                {
+                    if (edges.Contains(curEdge.EdgeIndex))
+                        return true;
+                    else
+                        edges.Add(curEdge.EdgeIndex);
+
+                    curEdge = curEdge.Next;
+                }
+
+            }
+            return false;
+        }
+
 
         /// <summary>
         /// 根据pt index找 图node index

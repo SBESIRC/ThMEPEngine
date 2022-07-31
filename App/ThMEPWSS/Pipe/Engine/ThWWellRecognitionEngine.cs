@@ -26,6 +26,16 @@ namespace ThMEPWSS.Pipe.Engine
                 }).ToList();
             }
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
     public class ThWWellRecognitionEngine : ThBuildingElementRecognitionEngine
     {
@@ -58,6 +68,16 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 Elements.Add(ThWWell.Create(o));
             });
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -3,15 +3,6 @@
   <?include Variable.wxi ?>
   <Fragment>
     <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" Guid="{8ED7E0B1-FF1F-4BF4-8182-3EFFB50CA355}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\AcsCommon.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" Guid="{14C123A3-2987-44E9-A0FD-503E10EE2E30}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\AcsConnector.exe" />
-      </Component>
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" Guid="{4E728861-D720-43FF-936C-AF805E4FBBA0}" Win64="yes">
@@ -31,15 +22,6 @@
       </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" Guid="{5DF85E05-8D48-4087-9D28-95822B274C14}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\AcsCommon.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" Guid="{F1D09BBF-8A74-4219-8433-A2EEC97BCC4B}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\AcsConnector.exe" />
-      </Component>			
-    </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Release="bin\Release-NET45" ?>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" Guid="{48F5F415-641E-4571-B17B-DCE3DCC98672}" Win64="yes">
@@ -63,15 +45,11 @@
   <Fragment>
     <ComponentGroup Id="ProductComponentsAcsConnector">
       <?if $(var.Configuration) = Debug ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" />
       <?elseif $(var.Configuration) = Release ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" />

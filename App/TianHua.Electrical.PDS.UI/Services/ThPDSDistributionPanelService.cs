@@ -2168,7 +2168,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
                                                 if (!node.Equals(vertice))
-                                                    tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
+                                                {
+                                                    var text = node.LoadIdString();
+                                                    if (text == node.Load.ID.Description)
+                                                    {
+                                                        text += node.Load.LoadUID.Substring(node.Load.LoadUID.Length - 4);
+                                                    }
+                                                    tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = text, Tag = node });
+                                                }
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
@@ -3158,7 +3165,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
-                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { NodeUID = edge.Circuit.CircuitUID, Name = edge.Circuit.ID.CircuitID, });
+                                    var text = edge.Circuit.ID.CircuitID;
+                                    if (string.IsNullOrWhiteSpace(text))
+                                    {
+                                        text = edge.Target.Load.ID.Description;
+                                    }
+                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { NodeUID = edge.Circuit.CircuitUID, Name = text, });
                                 }
                                 var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;
@@ -3940,8 +3952,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 else
                 {
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("Type", true);
-                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", true);
-                    ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", true);
+
+                    switch (conductor.Type)
+                    {
+                        case ConductorType.配套防水电缆:
+                        case ConductorType.配套防水耐火电缆:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", false);
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", false);
+                            }
+                            break;
+                        default:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorMaterial", true);
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("OuterSheathMaterial", true);
+                            }
+                            break;
+                    }
                 }
 
                 if (conductor.ComponentType == ComponentType.Conductor)

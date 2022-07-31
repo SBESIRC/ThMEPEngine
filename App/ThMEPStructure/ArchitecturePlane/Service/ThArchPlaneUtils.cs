@@ -109,11 +109,7 @@ namespace ThMEPStructure.ArchitecturePlane.Service
                 }
             }
             return null;
-        }
-        public static void AddRange(this ObjectIdCollection first, ObjectIdCollection second)
-        {
-            second.OfType<ObjectId>().ForEach(o => first.Add(o));
-        }
+        }      
         /// <summary>
         /// 检查AxB的规格,eg: 100x100
         /// </summary>

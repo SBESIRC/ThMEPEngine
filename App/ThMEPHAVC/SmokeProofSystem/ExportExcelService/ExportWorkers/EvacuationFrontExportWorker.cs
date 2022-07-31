@@ -10,15 +10,14 @@ namespace ThMEPHVAC.SmokeProofSystem.ExportExcelService.ExportWorkers
 {
     class EvacuationFrontExportWorker : BaseExportWorker
     {
-        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
+        public override void ExportToExcel(BaseSmokeProofViewModel baseModel, string systemName, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, ExcelRangeCopyOperator copyoperator)
         {
             EvacuationFrontViewModel refugeFontRoomModel = baseModel as EvacuationFrontViewModel;
-            setsheet.Cells["D2"].Value = "";
-            setsheet.Cells["D3"].Value = "";
-            setsheet.Cells["D4"].Value = refugeFontRoomModel.OpenDorrAirSupply.ToString();
-            setsheet.Cells["D5"].Value = refugeFontRoomModel.OverAk.ToString();
-            setsheet.Cells["D6"].Value = "1";
-            int rowNo = 7;
+            setsheet.Cells["D2"].Value = systemName;
+            setsheet.Cells["D3"].Value = refugeFontRoomModel.OpenDorrAirSupply.ToString();
+            setsheet.Cells["D4"].Value = refugeFontRoomModel.OverAk.ToString();
+            setsheet.Cells["D5"].Value = "1";
+            int rowNo = 6;
             for (int i = 1; i <= refugeFontRoomModel.ListTabControl.Sum(f => f.FloorInfoItems.Count); i++)
             {
                 setsheet.CopyRangeToNext(7, 1, 9, 4, 3 * i);

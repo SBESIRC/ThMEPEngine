@@ -5,6 +5,8 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using System.Collections.Generic;
 
 namespace ThMEPStructure.StructPlane.Service
 {
@@ -18,23 +20,35 @@ namespace ThMEPStructure.StructPlane.Service
                 return results;
             }
             var spatialIndex = new ThCADCoreNTSSpatialIndex(texts);
-            texts.OfType<Polyline>().ForEach(p =>
+            slabs.OfType<Polyline>().Where(p=>p.Area>1.0).ForEach(p =>
             {
-               var marks =  spatialIndex.SelectWindowPolygon(p);
-                if (marks.Count == 1)
+                if(IsRectangle(p))
                 {
-                    results.Add(CreateCornerLine(p));
+                    var marks = spatialIndex.SelectWindowPolygon(p);
+                    if (marks.Count == 1)
+                    {
+                        var corner = CreateCornerLine(p);
+                        if(corner.Length>1.0)
+                        {
+                            results.Add(corner);
+                        }
+                    }
                 }
             });
-            texts.OfType<MPolygon>().ForEach(m =>
-            {
-                var marks = spatialIndex.SelectWindowPolygon(m);
-                if (marks.Count == 1)
-                {
-                    results.Add(CreateCornerLine(m));
-                }
-            });
+            //slabs.OfType<MPolygon>().ForEach(m =>
+            //{
+            //    var marks = spatialIndex.SelectWindowPolygon(m);
+            //    if (marks.Count == 1)
+            //    {
+            //        results.Add(CreateCornerLine(m));
+            //    }
+            //});
             return results;
+        }
+
+        private bool IsRectangle(Polyline frame)
+        {
+            return frame.IsRectangle();
         }
 
         private Line CreateCornerLine(Polyline polygon)
@@ -58,7 +72,7 @@ namespace ThMEPStructure.StructPlane.Service
             for(int i=0;i< polyline.NumberOfVertices;i++)
             {
                 var pt = polyline.GetPoint3dAt(i);
-                if(!pts.Contains(pt))
+                if(!pts.IsContains(pt,1.0))
                 {
                     pts.Add(pt);
                 }
@@ -68,29 +82,50 @@ namespace ThMEPStructure.StructPlane.Service
 
         private Tuple<Point3d,Point3d> GetMaxLengthCorner(Point3dCollection pts)
         {
-            Point3d first = Point3d.Origin,second = Point3d.Origin;
-            for (int i=0;i< pts.Count-1;i++)
+            var tourismQuadrant = new List<Tuple<Point3d, Point3d>>(); // 一、三象限
+            var concerningQuadrant = new List<Tuple<Point3d, Point3d>>(); // 二、四象限
+            for (int i=0;i< pts.Count;i++)
             {
-                for (int j = i+1; j < pts.Count; j++)
+                for (int j = i+2; j < pts.Count-1; j++)
                 {
-                    if(pts[i].DistanceTo(pts[j])> first.DistanceTo(second))
+                    var dir = pts[i].GetVectorTo(pts[j]);
+                    if (dir.IsParallelToXAix(1.0) || dir.IsParallelToYAix(1.0))
                     {
-                        first = pts[i];
-                        second = pts[j];
+                        continue;
                     }
-                    else if(Math.Abs(pts[i].DistanceTo(pts[j]) - first.DistanceTo(second))<=1e-4)
+                    else if((dir.X>0.0 && dir.Y>0.0) || (dir.X < 0.0 && dir.Y< 0.0))
                     {
-                        var ang1 = first.GetVectorTo(second).GetAngleTo(Vector3d.XAxis);
-                        var ang2 = pts[i].GetVectorTo(pts[j]).GetAngleTo(Vector3d.XAxis);
-                        if(ang2< ang1)
+                        if (!IsExist(pts[i], pts[j], tourismQuadrant))
                         {
-                            first = pts[i];
-                            second = pts[j];
+                            tourismQuadrant.Add(Tuple.Create(pts[i], pts[j]));
+                        }
+                    }
+                    else if ((dir.X < 0.0 && dir.Y > 0.0) || (dir.X > 0.0 && dir.Y < 0.0))
+                    {
+                        if (!IsExist(pts[i], pts[j], concerningQuadrant))
+                        {
+                            concerningQuadrant.Add(Tuple.Create(pts[i], pts[j]));
                         }
                     }
                 }
             }
-            return Tuple.Create(first, second); 
+            // 优先从第一象限中筛选
+            if(tourismQuadrant.Count>0)
+            {
+                return tourismQuadrant.OrderByDescending(o => o.Item1.DistanceTo(o.Item2)).First();
+            }
+            else if(concerningQuadrant.Count>0)
+            {
+                return concerningQuadrant.OrderByDescending(o => o.Item1.DistanceTo(o.Item2)).First();
+            }
+            else
+            {
+                return Tuple.Create(Point3d.Origin, Point3d.Origin);
+            }
+        }
+        private bool IsExist(Point3d sp,Point3d ep,List<Tuple<Point3d, Point3d>> ptPairs)
+        {
+            return ptPairs.Where(o => ThGeometryTool.IsEqual(sp, ep, o.Item1, o.Item2)).Any();
         }
     }
 }

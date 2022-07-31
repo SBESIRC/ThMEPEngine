@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPWSS.ThSprinklerDim
+using Autodesk.AutoCAD.Geometry;
+
+namespace ThMEPWSS.SprinklerDim
 {
     public class ThSprinklerDimCommon
     {
-        
+        public static Tolerance Tol_ptToLine = new Tolerance(10, 10);
+
     }
 }

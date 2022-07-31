@@ -58,5 +58,14 @@ namespace TianHua.Structure.WPF.UI
             ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModalWindow(ui);
         }
+
+        [CommandMethod("TIANHUACAD", "THSMBT", CommandFlags.Modal)]
+        public void THSMBT()
+        {
+            using (var cmd = new ThStructurePlaneCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

@@ -37,6 +37,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public double MaxOffSetX { get; set; }//存放最远楼板线边界
 
         public Dictionary<Point3dEx, Point3dEx> LoopPtPairs { get; set; }//存放环路的起始终止点
+        public Dictionary<Point3dEx, double> AlarmValveStPtY { get; set; }//报警阀起点对应的Y
 
         public SpraySystem()
         {
@@ -65,6 +66,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             BlockExtents = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
             MaxOffSetX = 20000;
             LoopPtPairs = new Dictionary<Point3dEx, Point3dEx>();
+            AlarmValveStPtY = new Dictionary<Point3dEx, double>();
         }
     }
 }

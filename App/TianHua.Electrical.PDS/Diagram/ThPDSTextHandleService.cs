@@ -18,7 +18,7 @@ namespace TianHua.Electrical.PDS.Diagram
         public static void Handle(AcadDatabase activeDb, AcadDatabase configDb, List<Entity> tableObjs, Scale3d scale, DBText dbText, string textString,
             int switchLength, MeterLocation meterLocation, MeterLocation lastMeterLocation, ref Point3d basePoint)
         {
-            if (Handle(activeDb, tableObjs, dbText, textString, switchLength) 
+            if (Handle(activeDb, tableObjs, dbText, textString, switchLength)
                 && !meterLocation.Equals(MeterLocation.None) && meterLocation.Equals(lastMeterLocation))
             {
                 tableObjs.ForEach(t => t.TransformBy(RowMatrix));
@@ -26,7 +26,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 var insertEngine = new ThPDSBlockInsertEngine();
                 insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
                 basePoint = new Point3d(basePoint.X, basePoint.Y - 1000, 0);
-                
+
                 // 暂时忽略单位因子
                 // basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
             }

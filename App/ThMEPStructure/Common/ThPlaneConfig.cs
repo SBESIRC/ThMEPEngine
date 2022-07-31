@@ -7,7 +7,10 @@ using ThMEPEngineCore.IO.SVG;
 
 namespace ThMEPStructure.Common
 {
-    internal class ThPlaneConfig
+    /// <summary>
+    /// 用于成图的配置参数
+    /// </summary>
+    public class ThPlaneConfig
     {
         public PlaneJsonConfig JsonConfig { get; set; }
         /// <summary>

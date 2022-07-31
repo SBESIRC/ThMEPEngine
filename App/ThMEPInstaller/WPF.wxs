@@ -3,12 +3,6 @@
 	<?include Variable.wxi ?>
 	<Fragment>
 		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_Control_Library_Debug" Guid="{F1495078-E11D-447F-B552-792ED72CAB34}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_Control_Library_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThControlLibraryWPF.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
 			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_Control_Library_Debug" Guid="{CB6564B5-7580-4D9A-A1F7-CEE1AE6A3B85}" Win64="yes">
@@ -22,12 +16,6 @@
 			</Component>
 		</DirectoryRef>
 		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_Control_Library_Release" Guid="{2294CA1A-801C-44F0-802B-15E9D2D1A79E}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_Control_Library_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThControlLibraryWPF.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
 			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_Control_Library_Release" Guid="{D4868A8D-4782-4A8E-97CD-081EF741F9ED}" Win64="yes">
@@ -45,11 +33,9 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponentsWPF">
 			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Control_Library_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Control_Library_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Control_Library_Debug" />
 			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Control_Library_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Control_Library_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Control_Library_Release" />
 			<?endif?>

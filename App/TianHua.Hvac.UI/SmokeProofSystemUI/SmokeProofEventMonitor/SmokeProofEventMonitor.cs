@@ -44,7 +44,7 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofEventMonitor
                     using (AcadDatabase acadDatabase = AcadDatabase.Use(_selectedEntId.Database))
                     {
                         GetXRecordData(_selectedEntId);
-                        _customCmd = "THSMKPS";
+                        _customCmd = "THFYJS";
                     }
 
                     //Find mapped custom command name
@@ -88,7 +88,8 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofEventMonitor
 
             var model = JsonHelper.DeserializeJsonToObject<SmokeCalculateMappingModel>(mainVal);
             ThMEPHVACStaticService.Instance.smokeCalculateMappingModel = model;
-
+            ThMEPHVACStaticService.Instance.smokeCalculateMappingModel.SystemName = obj.GetAttributesInBlockReference().Where(x => x.Key == "系统编号").First().Value;
+            ThMEPHVACStaticService.Instance.BlockId = obj;
             switch (ThMEPHVACStaticService.Instance.smokeCalculateMappingModel.ScenarioTitle)
             {
                 case "消防电梯前室":

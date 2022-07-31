@@ -51,7 +51,7 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
             //聚焦到CAD
             SetFocusToDwgView();
 
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THPSSYS");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THPSLY");
         }
 
         private void btnParamSet_Click(object sender, RoutedEventArgs e)

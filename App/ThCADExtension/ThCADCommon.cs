@@ -220,6 +220,12 @@ namespace ThCADExtension
             return Path.Combine(ContentsPath(), "Plotters", "Plot Styles");
         }
 
+        // Common 路径
+        public static string Win64CommonPath()
+        {
+            return Path.Combine(ContentsPath(), "Win64", "Common");
+        }
+
         // Contents 路径
         private static string ContentsPath()
         {

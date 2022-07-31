@@ -302,6 +302,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         消防控制信号软线 = 8,
         [Description("非消防控制信号软线")]
         非消防控制信号软线 = 9,
+        [Description("配套防水电缆")]
+        配套防水电缆 = 10,
+        [Description("配套防水耐火电缆")]
+        配套防水耐火电缆 = 11,
     }
 
     /// <summary>

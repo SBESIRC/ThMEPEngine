@@ -268,5 +268,10 @@ namespace TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofUserControl
                 }
             }
         }
+
+        private void CheckValueUserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -21,7 +21,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
                 int fireAreaIndex = 0;
-                var fireStpt = spraySystem.BranchPtDic[pt];//图纸绘制起始点;
+                var fireStpt = new Point3d(spraySystem.BranchPtDic[pt].X, spraySystem.AlarmValveStPtY[pt], 0);//spraySystem.BranchPtDic[pt];//图纸绘制起始点;
+                
                 if (sprayIn.TermPtDic.ContainsKey(pt))
                 {
                     var str = sprayIn.TermPtDic[pt].PipeNumber;
@@ -37,8 +38,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     return;
                 }
-                var stPt = spraySystem.BranchPtDic[pt];//图纸绘制起始点
-                var stPt4 = spraySystem.BranchPtDic[pt];//图纸绘制支路4起始点
+                var stPt = new Point3d(spraySystem.BranchPtDic[pt].X, spraySystem.AlarmValveStPtY[pt], 0);//图纸绘制起始点
+                var stPt4 = new Point3d(spraySystem.BranchPtDic[pt].X, spraySystem.AlarmValveStPtY[pt], 0); ;//图纸绘制支路4起始点
 
                 var tpts = spraySystem.BranchDic[pt];
 
@@ -162,67 +163,101 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             bool textRecord = false; //记录是否标记排气阀
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
+                if (!Tool.CheckValid(pt, spraySystem))
+                {
+                    return;
+                }
                 BranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
+
             }
         }
-
-        
         public static void BranchPtDraw(Point3dEx pt, ref bool textRecord, ref Point3d lastFirePt, ref int branchWithFireNums, ref int throughIndex, ref int index,
-            SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
+    SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
         {
-            if(!Tool.CheckValid(pt,spraySystem))
+            if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))//环路上的点
             {
-                return;
+                NoAlarmBranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
+
             }
-
-            double fireNums = 0;//该点所在报警阀间防火分区总数（无防火分区的报警阀为 1，环管上的点为 0）
-
-            if (spraySystem.SubLoopFireAreasDic.ContainsKey(pt))
+            else//报警阀上的点
             {
-                fireNums = spraySystem.SubLoopFireAreasDic[pt][0];
+                AlarmBranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
             }
-            
+        }
+        public static void NoAlarmBranchPtDraw(Point3dEx pt, ref bool textRecord, ref Point3d lastFirePt, ref int branchWithFireNums, ref int throughIndex, ref int index,
+    SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
+        {
             var stPt = spraySystem.BranchPtDic[pt];//图纸绘制起始点
             var stPt4 = spraySystem.BranchPtDic[pt];//图纸绘制支路4起始点
 
             var tpts = spraySystem.BranchDic[pt];
             tpts.Reverse();
             var hasAutoValve = Tool.HasAutoValve(pt, tpts, spraySystem, sprayIn);
-            var needNewDrawings = Tool.NeedNewDrawing(tpts, sprayIn);//同时存在采用新的画法
 
             if (hasAutoValve)
             {
                 Tool.DrawAutoValve(stPt, ref textRecord, sprayOut);
             }
 
-            bool signelBranch = true;//第一个 type 4 标志
+            var signelBranch = true;
+            foreach (var tpt in tpts)// tpt 支路端点
+            {
+                if (!sprayIn.TermPtDic.ContainsKey(tpt)) continue;
 
-            int type4Nums = 0;//类型为4的数目
-            bool hasType1 = false;
+                var DN = Tool.GetDN(tpt, sprayIn);
+                var termPt = sprayIn.TermPtDic[tpt];
+                if (termPt.Type == 3)//水泵接合器
+                {
+                    Type3.Get(stPt, termPt, DN, sprayOut);
+                    sprayOut.SupportLines.Add(new Line(stPt, tpt._pt));
+                }
+                if (termPt.Type == 4 || termPt.Type == 5)
+                {
+                    var pipeNumber = termPt.PipeNumber;
+                    Type4NeedEvade(ref stPt4, ref signelBranch, tpt, pipeNumber, DN, sprayOut, spraySystem);
+                }
+            }
+        }
+
+        public static void AlarmBranchPtDraw(Point3dEx pt, ref bool textRecord, ref Point3d lastFirePt, ref int branchWithFireNums, ref int throughIndex, ref int index,
+            SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
+        {
+            double fireNums = 0;//该点所在报警阀间防火分区总数（无防火分区的报警阀为 1，环管上的点为 0）
+
+            if (spraySystem.SubLoopFireAreasDic.ContainsKey(pt))
+            {
+                fireNums = spraySystem.SubLoopFireAreasDic[pt][0];
+            }
+            var stPt = spraySystem.BranchPtDic[pt];//图纸绘制起始点
+            var stPt4 = spraySystem.BranchPtDic[pt];//图纸绘制支路4起始点
+
+            var tpts = spraySystem.BranchDic[pt];
+            tpts.Reverse();
+            var hasAutoValve = Tool.HasAutoValve(pt, tpts, spraySystem, sprayIn);
+
+            if (hasAutoValve)
+            {
+                Tool.DrawAutoValve(stPt, ref textRecord, sprayOut);
+            }
+
+            var fireStpt = spraySystem.FireAreaStPtDic[pt];//拿起点
+
+            if (lastFirePt.DistanceTo(fireStpt) > 10)//起始点变了，说明支环变了
+            {
+                branchWithFireNums = 0;
+                throughIndex = 0;
+                index = 0;
+            }
+
             foreach (var tpt in tpts)// tpt 支路端点
             {
                 if (!sprayIn.TermPtDic.ContainsKey(tpt)) continue;
                 
                 var DN = Tool.GetDN(tpt, sprayIn);
                 var termPt = sprayIn.TermPtDic[tpt];
-
+                var firePt = fireStpt.OffsetX((fireNums - branchWithFireNums - 1) * 5500);
                 if (termPt.Type == 1)//防火分区
-                {
-                    hasType1 = true;
-                    type4Nums = 0;
-                    if (!spraySystem.FireAreaStPtDic.ContainsKey(pt)) continue;
-                    
-                    var fireStpt = spraySystem.FireAreaStPtDic[pt];
-
-                    if (lastFirePt.DistanceTo(fireStpt) > 10)//起始点变了，说明支环变了
-                    {
-                        branchWithFireNums = 0;
-                        throughIndex = 0;
-                        index = 0;
-                    }
-
-
-                    var firePt = fireStpt.OffsetX((fireNums - branchWithFireNums - 1) * 5500);
+                {                    
                     bool hasFlow = false;
                     string flowType = "";
                     if (spraySystem.FlowDIc.ContainsKey(tpt))
@@ -234,7 +269,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     sprayOut.FireDistricts.Add(fireDistrict);
                     sprayOut.PipeLine.Add(new Line(stPt, new Point3d(firePt.X, stPt.Y, 0)));
                     sprayOut.PipeLine.Add(new Line(firePt, new Point3d(firePt.X, stPt.Y, 0)));
-                    branchWithFireNums++;
                     lastFirePt = new Point3d(fireStpt.X, fireStpt.Y, 0);
                     if (firePt.X > spraySystem.MaxOffSetX)
                     {
@@ -249,7 +283,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     {
                         continue;
                     }
-                    var fireStpt = spraySystem.FireAreaStPtDic[pt];
                     if (!spraySystem.BranchThroughDic.ContainsKey(tpt))
                     {
                         continue;
@@ -261,7 +294,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             continue;
                         }
                         var termPt1 = sprayIn.TermPtDic[cpt];
-                        var firePt = fireStpt.OffsetXY(-throughIndex * 5500 - sprayIn.PipeGap, -sprayIn.FloorHeight);
+                        //var firePt = fireStpt.OffsetXY(-throughIndex * 5500 - sprayIn.PipeGap, -sprayIn.FloorHeight);
                         var pt1 = new Point3d(fireStpt.X - 500 * (index + 1), stPt.Y, 0);
                         var pt2 = new Point3d(pt1.X, firePt.Y + 600 * (index + 1), 0);
                         var pt3 = new Point3d(firePt.X, pt2.Y, 0);
@@ -291,104 +324,42 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
                 if (termPt.Type == 4 || termPt.Type == 5)
                 {
-                    if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))
-                    {
-                        var pipeNumber = termPt.PipeNumber;
-                        Type4NeedEvade(ref stPt4, ref signelBranch, tpt, pipeNumber, DN, sprayOut, spraySystem);
-                        continue;
-                    }
-
-                    var fireStpt = spraySystem.FireAreaStPtDic[pt];
-
-
-
                     double length = Tool.GetLength(termPt.PipeNumber) + 100;
                     if (termPt.PipeNumber.Equals(""))
                     {
                         length = Tool.GetLength("DNXXX") + 100;
                     }
-                    if (needNewDrawings)
+                    
+                    lastFirePt = new Point3d(fireStpt.X, fireStpt.Y, 0);
+
+                    var pt1 = new Point3d(firePt.X, stPt.Y, 0);
+                    var pt2 = pt1.OffsetY(-600);
+                    var pt3 = pt2.OffsetX(1200);
+                    var pt4 = pt3.OffsetY(-1200);
+                    var pt5 = pt4.OffsetX(-length);
+                    sprayOut.PipeLine.Add(new Line(stPt, pt1));
+                    sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                    sprayOut.PipeLine.Add(new Line(pt2, pt3));
+                    sprayOut.NoteLine.Add(new Line(pt3, pt4));
+                    sprayOut.NoteLine.Add(new Line(pt4, pt5));
+                    sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, 0));
+                    var text = new Text(termPt.PipeNumber, pt5);
+                    sprayOut.Texts.Add(text);
+
+                    if (pt3.X > spraySystem.MaxOffSetX)
                     {
-                        //if (lastFirePt.DistanceTo(new Point3d()) > 10)//前一个点不为空
-                        {
-                            if (lastFirePt.DistanceTo(fireStpt) > 10)//起始点变了，说明支环变了
-                            {
-                                branchWithFireNums = 0;
-                                throughIndex = 0;
-                                index = 0;
-                            }
-                        }
-                        lastFirePt = new Point3d(fireStpt.X, fireStpt.Y, 0);
-
-                        var firePt = fireStpt.OffsetX((fireNums - branchWithFireNums - 1) * 5500);
-
-                        //var firePt = fireStpt.OffsetX((fireNums - branchWithFireNums - 1) * 5500);
-                        var pt1 = new Point3d(firePt.X - type4Nums * (length + 500) - 1000 + 5000, stPt.Y, 0);
-                        var pt2 = pt1.OffsetY(-600);
-                        var pt3 = pt2.OffsetX(1200);
-                        var pt4 = pt3.OffsetY(-1200);
-                        var pt5 = pt4.OffsetX(-length);
-                        sprayOut.PipeLine.Add(new Line(stPt, pt1));
-                        sprayOut.PipeLine.Add(new Line(pt1, pt2));
-                        sprayOut.PipeLine.Add(new Line(pt2, pt3));
-                        sprayOut.NoteLine.Add(new Line(pt3, pt4));
-                        sprayOut.NoteLine.Add(new Line(pt4, pt5));
-                        sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, 0));
-                        var text = new Text(termPt.PipeNumber, pt5);
-                        sprayOut.Texts.Add(text);
-
-                        sprayOut.SupportLines.Add(new Line(pt3, tpt._pt));
-
+                        spraySystem.MaxOffSetX = pt3.X;
                     }
-                    else
-                    {
-                        var firePt = fireStpt.OffsetX((fireNums - branchWithFireNums - 1) * 5500);
-                        if (lastFirePt.DistanceTo(fireStpt) > 10)//起始点变了，说明支环变了
-                        {
-                            branchWithFireNums = 0;
-                            throughIndex = 0;
-                            index = 0;
-                        }
-                        lastFirePt = new Point3d(fireStpt.X, fireStpt.Y, 0);
-                        var pipeNumber = termPt.PipeNumber;
-                        var pt1 = new Point3d(firePt.X + type4Nums * (length + 500) + 1000, stPt.Y, 0);
-                        var pt2 = new Point3d(pt1.X, sprayOut.PipeInsertPoint.Y + 400, 0);
-                        var pt3 = pt2.OffsetY(1300);
-                        var pt4 = Tool.GetEvadeStep(length, pt3, pipeNumber, spraySystem);
-                        var pt5 = pt4.OffsetX(-length);
-                        if (signelBranch)
-                        {
-                            sprayOut.PipeLine.Add(new Line(stPt4, pt1));
 
-                        }
-                        sprayOut.PipeLine.Add(new Line(pt1, pt2));
-                        if (spraySystem.ValveDic.Contains(tpt))
-                        {
-                            sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetY(50)));
-                            sprayOut.PipeLine.Add(new Line(pt2.OffsetY(350), pt3));
-                            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt2.OffsetY(50), Math.PI / 2));
-                        }
-                        else
-                        {
-                            sprayOut.PipeLine.Add(new Line(pt2, pt3));
-                        }
 
-                        sprayOut.NoteLine.Add(new Line(pt3, pt4));
-                        sprayOut.NoteLine.Add(new Line(pt4, pt5));
-                        sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
-                        var text = new Text(termPt.PipeNumber.Split('喷')[0], pt5);
-                        var dn = new Text(DN, pt5.OffsetXY(50, -400));
-                        sprayOut.Texts.Add(text);
-                        sprayOut.Texts.Add(dn);
-                        stPt4 = stPt4.OffsetX(600);
-                        signelBranch = false;
+                    sprayOut.SupportLines.Add(new Line(pt3, tpt._pt));
 
-                        sprayOut.SupportLines.Add(new Line(pt3, tpt._pt));
-                    }
-                    type4Nums++;
+                    
                 }
+
+                branchWithFireNums++;//无论怎样，每遍历一个支路起点，消火栓num+1
+
             }
-            if (!hasType1) branchWithFireNums++;
         }
 
         public static void Type4NeedEvade(ref Point3d stPt4, ref bool signelBranch, Point3dEx tpt, string pipeNumber,

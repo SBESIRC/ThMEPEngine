@@ -44,12 +44,13 @@ namespace TianHua.Electrical.PDS.UI
                 // 初始化全局界面
                 _PDSUI = new ElecSandboxUI();
                 _PDSUI.LoadProject();
-            }
-
-            if (_PDSUI != null)
-            {
                 // 显示窗口
                 AcadApp.ShowModelessWindow(_PDSUI);
+            }
+            else
+            {
+                _PDSUI.WindowState = System.Windows.WindowState.Normal;
+                _PDSUI.Show();
             }
         }
 

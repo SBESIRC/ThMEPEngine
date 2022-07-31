@@ -3,7 +3,7 @@
 namespace ThMEPStructure.Common
 {
     [Serializable]
-    internal class PlaneJsonConfig
+    public class PlaneJsonConfig
     {
         public ObjConfig ObjConfig { get; set; }
         public BoxConfig BoxConfig { get; set; }
@@ -26,14 +26,14 @@ namespace ThMEPStructure.Common
         }
     }
     [Serializable]
-    internal class ObjConfig
+    public class ObjConfig
     {
         public string path { get; set; }
         public string current_floor { get; set; }
         public string high_floor { get; set; }
     }
     [Serializable]
-    internal class BoxConfig
+    public class BoxConfig
     {
         public string x_min {get;set;}
         public string x_max { get; set; }
@@ -44,30 +44,30 @@ namespace ThMEPStructure.Common
         public string angle { get; set; }
     }
     [Serializable]
-    internal class GlConfig
+    public class GlConfig
     {
         public int gl_size { get; set; }
         public bool use_cuda { get; set; }       
     }
     [Serializable]
-    internal class ClipConfig
+    public class ClipConfig
     {
         //
     }
     [Serializable]
-    internal class MergeConfig
+    public class MergeConfig
     {
         public bool apporx_merge_mode { get; set; }
         public string merge_mode { get; set; }
     }
     [Serializable]
-    internal class SvgConfig
+    public class SvgConfig
     {
         public string image_size { get; set; }
         public string save_path { get; set; }
     }
     [Serializable]
-    internal class GlobalConfig
+    public class GlobalConfig
     {
         public string image_type { get; set; }
         public int? cut_position { get; set; }
@@ -77,13 +77,13 @@ namespace ThMEPStructure.Common
         public int scale_size { get; set; }
     }
     [Serializable]
-    internal class DebugConfig
+    public class DebugConfig
     {
         public bool print_time { get; set; } = true;
         public string log_path { get; set; }
     }
     [Serializable]
-    internal class Direction
+    public class Direction
     {
         public int x { get; set; }
         public int y { get; set; }

@@ -86,7 +86,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         {
             return layer.Contains("W-FRPT-HYDT-DIMS")
                 || layer.Contains("W-FRPT-SPRL-DIMS")
-                || layer.Contains("W-NOTE");
+                || layer.Contains("W-NOTE")
+                || layer.Contains("W-WSUP-NOTE");
         }
 
         private void ExplodeTCHNote(Entity entity)

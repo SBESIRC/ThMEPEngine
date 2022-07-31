@@ -43,6 +43,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     sprayOut.PipeInsertPoint = insertPt.OffsetXY(1000, height - 800);
                     sprayOut.CurrentFloor = fNumber;
                 }
+                foreach(var pt in sprayIn.AlarmValveStPts)
+                {
+                    if (floors[fNumber].Contains(pt._pt))
+                    {
+                        spraySystem.AlarmValveStPtY.Add(pt, insertPt.Y+6200);
+                    }
+                }
                 //sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
                 string text = fNumber + "F(建筑)";
                 sprayOut.Texts.Add(new Block.Text(text, insertPt.OffsetY(200), "W-NOTE"));

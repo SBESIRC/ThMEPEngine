@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension;
@@ -24,19 +25,21 @@ using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 
 namespace ThMEPWSS.Command
 {
-    public class ThFirstFloorDrainageCmd : IAcadCommand, IDisposable
+    public class ThFirstFloorDrainageCmd : ThMEPBaseCommand, IDisposable
     {
         Dictionary<string, List<string>> config;
         ParamSettingViewModel paramSetting = null;
         FirstFloorPlaneViewModel firstFloorPlane = null;
         public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic, ParamSettingViewModel _paramSetting, FirstFloorPlaneViewModel _firstFloorPlane)
         {
+            CommandName = "THPSLY";
+            ActionName = "生成";
             config = dic;
             paramSetting = _paramSetting;
             firstFloorPlane = _firstFloorPlane;
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acad = AcadDatabase.Active())
             {

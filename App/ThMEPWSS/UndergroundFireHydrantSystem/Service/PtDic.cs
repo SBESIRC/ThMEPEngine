@@ -227,7 +227,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     continue;
                 }
-                    if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
+                if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
                 {
                     if(!fireHydrantSysIn.TermPointDic.ContainsKey(pt))//且没有标记
                     {
@@ -237,18 +237,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             termPoint.SetPipeNumber(textSpatialIndex);
                         }
-                        if(termPoint.PipeNumber.Contains("水泵接合器"))
-                        {
-                            termPoint.Type = 4;
-                        }
-                        else
-                        {
-                            termPoint.Type = 6;
-                        }
-                        if (termPoint.PipeNumber != "")
-                        {
-                            fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
-                        }
+                        termPoint.Type=3;
+
+
+
+                        fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
+                        
                     }
                 }
             }
@@ -269,7 +263,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 termPoint.SetPipeNumber(textSpatialIndex);
             }
-            termPoint.SetType(verticalHasHydrant);
+            termPoint.SetType(verticalHasHydrant,true);
             fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
             if (termPoint.StartLine is null)
             {
@@ -302,7 +296,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return;
             }
 
-            termPoint.SetType(verticalHasHydrant);
+            termPoint.SetType(verticalHasHydrant, true);
             if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
             {
                 fireHydrantSysIn.TermPointDic.Remove(tpt);
@@ -795,7 +789,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             var adjs = fireHydrantSysIn.PtDic[curPt];
                             if (adjs.Count == 1)
                             {
-                                if(fireHydrantSysIn.TermPointDic.ContainsKey(curPt))
+                                //if(fireHydrantSysIn.TermPointDic.ContainsKey(curPt))
                                 {
                                     termPts.Add(curPt);
                                 }
@@ -820,9 +814,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             if (branchDic.ContainsKey(pt))
                             {
-                                continue;
+                                branchDic[pt]=termPts;
                             }
-                            branchDic.Add(pt, termPts);
+                            else
+                            {
+                                branchDic.Add(pt, termPts);
+                            }
                             if (valvePts.Count != 0)
                             {
                                 ValveDic.Add(pt, valvePts);

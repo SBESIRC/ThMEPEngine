@@ -378,6 +378,9 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 results.ForEach(o => o.TransformBy(transform));
             }
+
+            // 刷新表格中的公式计算值
+            Active.Editor.Regen();
         }
 
         private static void DrawCircuit(List<ThPDSProjectGraphEdge> edges, AcadDatabase activeDb, AcadDatabase configDb,
@@ -420,7 +423,7 @@ namespace TianHua.Electrical.PDS.Service
                 var insertEngine = new ThPDSBlockInsertEngine();
                 var assignment = new ThPDSDiagramAssignment();
                 var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
-                var circuitEntities = assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge,  scale, ref meterLocation,ref basePoint);
+                var circuitEntities = assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, ref meterLocation, ref basePoint);
                 tableObjs.AddRange(circuitEntities);
                 basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
             }

@@ -420,6 +420,9 @@ namespace ThMEPArchitecture.MultiProcess
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
             var layer = "最终分区线";
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
+            var finalLstrs = finalSegLines.ToLineStrings();
+            InterParameter.Ramps.Where(r => finalLstrs.Any(lstr => !lstr.Intersects(r.Area))).
+                ForEach(p => finalSegLines.Add(p.GetLine()));
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 if (!acad.Layers.Contains(layer))

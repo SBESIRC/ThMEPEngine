@@ -55,6 +55,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var u2wMat = Active.Editor.UCS2WCS();
             using (var acadDatabase = AcadDatabase.Active())
             {
+                DbHelper.EnsureLayerOn("W-FRPT-HYDT-PIPE");
+
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 foreach (var line in LoopLine)
                 {
@@ -85,6 +87,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     line.LayerId = DbHelper.GetLayerId("W-NOTE");
                     line.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
+                DbHelper.EnsureLayerOn("W-FRPT-HYDT-EQPM");
 
                 foreach (var pipeInt in PipeInterrupted.Keys)
                 {
@@ -114,6 +117,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     var blk = acadDatabase.Element<BlockReference>(objID);
                     blk.TransformBy(u2wMat);
                 }
+                DbHelper.EnsureLayerOn("W-BUSH");
+
                 foreach (var valve in Casing)
                 {
                     string valveName = "套管系统";
@@ -124,9 +129,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     blk.TransformBy(u2wMat);
                 }
 
-                
                 foreach (var fh in FireHydrant)
                 {
+                    
                     var HydrantWithReel = false;
                     if (VerticalHasReelHydrant.Contains(fh))
                     {

@@ -103,6 +103,7 @@ namespace ThMEPWSS.Command
             var mainPathList = MainLoop.Get(fireHydrantSysIn);//主环提取
             if (mainPathList.Count == 0)
             {
+                Active.Editor.WriteMessage("没找到主环");
                 return null;
             }
 

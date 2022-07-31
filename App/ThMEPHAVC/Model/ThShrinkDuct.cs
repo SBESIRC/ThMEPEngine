@@ -45,7 +45,7 @@ namespace ThMEPHVAC.Model
             var srtPl = ThMEPHVACService.CreateDetector(p);
             var crossLines = index.SelectCrossingPolygon(srtPl);
             if (connectorPSet.Add(p) && crossLines.Count > 1)
-                CreateConnector(p, crossLines, dic);
+                CreateConnector(p, crossLines, dic);    //创建连接件
             crossLines.Remove(currLine);
             switch (crossLines.Count)
             {
@@ -110,6 +110,13 @@ namespace ThMEPHVAC.Model
             UpdateMainLineShrink(otherLine2, shrinkLen, isStart);
             UpdateEndLineShrink(otherLine2, shrinkLen, isStart);
         }
+
+        /// <summary>
+        /// 创建连接件（弯头、三通、四通等）
+        /// </summary>
+        /// <param name="centerP"></param>
+        /// <param name="lines"></param>
+        /// <param name="dic"></param>
         private void CreateConnector(Point3d centerP, DBObjectCollection lines, Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
             var portWidths = new Dictionary<Point3d, string>();
