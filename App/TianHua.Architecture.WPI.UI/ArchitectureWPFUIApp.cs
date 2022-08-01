@@ -18,11 +18,25 @@ namespace TianHua.Architecture.WPI.UI
         /// <summary>
         /// 地下车库车位排布, 天华地下车位(THZDCWBZ)
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THZDCWBZ", CommandFlags.Modal)]
+        /// 
+        [CommandMethod("TIANHUACAD", "THZDCWBZ", "CWBZ_CmdId", CommandFlags.Modal)]
         public void ThCreateParkingStallsWithUI()
         {
             var w = new UiParkingStallArrangement();
             AcadApp.ShowModelessWindow(w);
         }
+        [CommandMethod("TIANHUACAD", "CWBZ", CommandFlags.Modal)]
+        public void ThCreateParkingStallsWithUI1()
+        {
+            var w = new UiParkingStallArrangement();
+            AcadApp.ShowModelessWindow(w);
+        }
+        //[CommandMethod("TIANHUACAD", "排车位", CommandFlags.Modal)]
+        //public void ThCreateParkingStallsWithUI2()
+        //{
+        //    var w = new UiParkingStallArrangement();
+        //    AcadApp.ShowModelessWindow(w);
+        //}
+
     }
 }

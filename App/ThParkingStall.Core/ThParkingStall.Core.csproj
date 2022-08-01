@@ -86,6 +86,24 @@
     <Compile Include="MPartitionLayout\Utilities\MDebugTools.cs" />
     <Compile Include="MPartitionLayout\Utilities\MGeoUtilities.cs" />
     <Compile Include="MPartitionLayout\Utilities\MNTSExtensions.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblAdjacentLanes.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblBusiness.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblDefine.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblInsertionBuildLanes.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblLanesProcessingEntry.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblModuleLanes.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblCarsGeneration.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblAidBusiness.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPerpModules.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPreProcess.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
+    <Compile Include="OInterProcess\OInterParameter.cs" />
+    <Compile Include="OInterProcess\ORamp.cs" />
+    <Compile Include="OInterProcess\OSubArea.cs" />
+    <Compile Include="OInterProcess\SegLine.cs" />
+    <Compile Include="OTools\LineSegmentEx.cs" />
+    <Compile Include="OTools\PointEx.cs" />
+    <Compile Include="OTools\SegLineEx.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\ListEx.cs" />
@@ -121,6 +139,10 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ObliqueMPartitionLayout\Model\" />
+    <Folder Include="ObliqueMPartitionLayout\Ulilities\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

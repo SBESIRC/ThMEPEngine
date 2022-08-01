@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.6)" SizeToContent="Manual" Height="680"
+              Title="车位自动排布(2.7)" SizeToContent="Manual" Height="680"
               Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -21,6 +21,7 @@
                 <StackPanel Orientation="Horizontal">
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
                     <!--<CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiProcess}">多核心加速(beta)</CheckBox>-->
+                    <Button Name="oRun" Margin="100,0,0,0" Width="180" Height="25" FontSize="16" FontWeight="Bold" Click="oRun_Click">斜交无迭代速排（测试）</Button>
                 </StackPanel >
                 <StackPanel Orientation="Vertical">
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
