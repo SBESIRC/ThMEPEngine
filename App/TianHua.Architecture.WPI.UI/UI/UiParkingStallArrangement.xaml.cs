@@ -123,7 +123,7 @@ namespace TianHua.Architecture.WPI.UI.UI
 
         private void oRun_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new CreateAllSeglinesCmd(_ViewModel))
+            using (var cmd = new ThOArrangementCmd(_ViewModel))
             {
                 cmd.Execute();
             }

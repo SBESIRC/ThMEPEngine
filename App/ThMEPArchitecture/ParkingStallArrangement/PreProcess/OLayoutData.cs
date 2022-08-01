@@ -271,6 +271,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
             //5.2过滤有效车道为null的线
             SegLines = SegLines.Where(l => l.VaildLane != null).ToList();
+            showVaildLanes();
             //5.5获取最大全连接组,存在其他组标记 + 报错
             //警告存在无效连接，将抛弃部分分割线
             var groups = SegLines.GroupSegLines().OrderBy(g =>g.Count).ToList();
@@ -291,7 +292,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             isVaild =  FilteringSegLines(SegLines) && isVaild;
             //SegLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
             //SegLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
-            showVaildLanes();
+            //showVaildLanes();
             // 暂未包含车道自动调整逻辑，自动调整要放到迭代求最大最小值时做
             return true;
         }
@@ -367,7 +368,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private void showVaildLanes()
         {
             var layer = "分区线等价车道";
-            var vaildLanes = SegLines.Where(l => l.VaildLane != null).Select(l =>l.VaildLane).ToList();
+            //var vaildLanes = SegLines.Where(l => l.VaildLane != null).Select(l =>l.VaildLane).ToList();
+            var vaildLanes = SegLines.Where(l => l.Splitter != null).Select(l => l.Splitter).ToList();
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 if (!acad.Layers.Contains(layer))

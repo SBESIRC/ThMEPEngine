@@ -29,6 +29,7 @@
     <Compile Include="CreateAllSeglinesCmd.cs" />
     <Compile Include="MultiProcess\MPCommand.cs" />
     <Compile Include="MultiProcess\Converter.cs" />
+    <Compile Include="MultiProcess\OCommand.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\AutoSegGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GAData.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\InterParameterEx.cs" />
