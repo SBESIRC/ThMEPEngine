@@ -42,7 +42,7 @@
                              IsChecked="{Binding Model.StoreySelectOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                     Converter={StaticResource storeySelectConverter},ConverterParameter=0}" Checked="rbSingleStorey_Checked"/>
                 <ComboBox Name="cbStoreies" Width="120" Height="20"
-                          ItemsSource="{Binding Model.Storeies,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding Storeies,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                              Text="{Binding Model.Storey,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
             </StackPanel>
         </GroupBox>
@@ -59,7 +59,7 @@
             <StackPanel Orientation="Horizontal">
                 <Label Content="绘图比例："/>
                 <ComboBox Name="cbDrawingScale" Width="60" Height="20"
-                          ItemsSource="{Binding Model.DrawingScales,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding DrawingScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Text="{Binding Model.DrawingScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
             </StackPanel>
         </StackPanel>
