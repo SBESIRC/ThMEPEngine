@@ -468,7 +468,6 @@
     <Compile Include="WaterSupplyPipeSystem\Data\SysIn.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\SysOut.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\SysProcess.cs" />
-    <Compile Include="WaterSupplyPipeSystem\Data\SysTank.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case1.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseAll.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseChoose.cs" />

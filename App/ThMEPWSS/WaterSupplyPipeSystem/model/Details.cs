@@ -1,8 +1,10 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.WaterSupplyPipeSystem.Data;
 using ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase;
 
@@ -48,9 +50,22 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 BranchPipe[i].GetWaterMeterSite()[j], GetScalce(0.7), 0);
                 if(prValveStyle)
                 {
-                    //绘制减压阀
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.PressureReducingValve,
-                    BranchPipe[i].PRValveSite[j], GetScalce(0.7), 0);
+                    if (!NoPRValve.Contains(i + 1))//有减压阀层
+                    {
+                        //绘制减压阀
+                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.PressureReducingValve,
+                        BranchPipe[i].PRValveSite[j], GetScalce(0.7), 0);
+                    }
+                    else//无减压阀层
+                    {
+                        //绘制直线
+                        var l = new Line(BranchPipe[i].PRValveSite[j], BranchPipe[i].PRValveSite[j].OffsetX(210));
+                        l.Layer = "W-WSUP-COOL-PIPE";
+                        acadDatabase.CurrentSpace.Add(l);
+                    }
+                    ////绘制减压阀
+                    //acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.PressureReducingValve,
+                    //BranchPipe[i].PRValveSite[j], GetScalce(0.7), 0);
                 }
                 //绘制水管中断
                 if (j < floorCleanToolList[i][areaIndex].GetHouseholdNums())
