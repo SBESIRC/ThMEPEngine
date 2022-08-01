@@ -101,7 +101,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
                 for (int j = 0; j < net.PtsGraph.Count; j++)
                 {
                     List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
-                    var lines = net.PtsGraph[j].Print(net.Pts);
+                    var lines = net.PtsGraph[j].Print(pts);
                     DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-{0}-{1}", i, j, printTag), i % 7);
                 }
             }

@@ -19,14 +19,14 @@ namespace ThMEPWSS.SprinklerDim.Service
             foreach (ThSprinklerNetGroup group in transNetList)
             {
                 // 合并边缘
-                group.XDimension.AddRange(MergeEdgeDimensions(group.Pts, group.XCollineationGroup, out var XDim, step, true));
-                group.YDimension.AddRange(MergeEdgeDimensions(group.Pts, group.YCollineationGroup, out var YDim, step, false));
+                group.XDimension.AddRange(MergeEdgeDimensions(group.Pts, group.YCollineationGroup, out var XDim, step, true));
+                group.YDimension.AddRange(MergeEdgeDimensions(group.Pts, group.XCollineationGroup, out var YDim, step, false));
 
                 // 补充标注
                 for(int i = 0; i < group.PtsGraph.Count; i++)
                 {
-                    group.XDimension.AddRange(AddDimensions(group.XCollineationGroup[i], group.YCollineationGroup[i], XDim[i]));
-                    group.YDimension.AddRange(AddDimensions(group.YCollineationGroup[i], group.XCollineationGroup[i], YDim[i]));
+                    group.XDimension.AddRange(AddDimensions(group.YCollineationGroup[i], group.XCollineationGroup[i], XDim[i]));
+                    group.YDimension.AddRange(AddDimensions(group.XCollineationGroup[i], group.YCollineationGroup[i], YDim[i]));
                 }
                 
             }
@@ -35,7 +35,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             for (int i = 0; i < transNetList.Count; i++)
             {
                 List<Line> dimensions = Print(transNetList[i]);
-                DrawUtils.ShowGeometry(dimensions, string.Format("Dimension-{0}-{1}", printTag, i), i % 7);
+                DrawUtils.ShowGeometry(dimensions, string.Format("Dimension-{0}-{1}", printTag, i), 1, 50);
             }
 
         }
@@ -44,7 +44,11 @@ namespace ThMEPWSS.SprinklerDim.Service
         private static List<List<int>> MergeEdgeDimensions(List<Point3d> pts, List<List<List<int>>> group, out List<List<int>> dims, double step, bool isXAxis)
         {
             List<List<int>> mergedDim = new List<List<int>>();
-            dims = new List<List<int>>(group.Count);
+            dims = new List<List<int>>();
+            for(int i = 0; i < group.Count; i++)
+            {
+                dims.Add(new List<int>());
+            }
             bool[] isMerged = Enumerable.Repeat(false, group.Count).ToArray();
             for (int i = 0; i < group.Count; i++)
             {
@@ -99,7 +103,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             List<int> mergedDim = new List<int>();
             mergedDim.AddRange(currentDim);
-            for (int i = 0; i < currentDim.Count; i++)
+            for (int i = 0; i < group.Count; i++)
             {
                 if (!isMerged[i])
                 {
@@ -209,7 +213,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         private static List<Line> Print(ThSprinklerNetGroup group)
         {
             List<Point3d> transPts = group.Pts;
-            List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(transPts, group.Transformer);
+            List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(transPts, group.Transformer.Inverse());
             List<Line> lines = new List<Line>();
 
             foreach(List<int> dim in group.XDimension)
