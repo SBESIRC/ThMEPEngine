@@ -54,19 +54,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public void Calculate(int index, bool turn_left)
         {
             AdjustLastEquispacedSegment(index, turn_left);
-            //if (index == 3)
+            //if (index == 2)
             //{
             //    for (int i = 0; i < equispaced_segments[index].Count; ++i)
             //        PassageShowUtils.ShowEntity(equispaced_segments[index][i], index);
             //}
             var buffer_polygon = GetBufferPolygon(index, turn_left);
             var polygon_points = GetBufferPolyline(index, buffer_polygon, turn_left);
-            //if (index == 3)
-            //{
-            //    PassageShowUtils.ShowEntity(buffer_polygon);
-            //    if (polygon_points != null)
-            //        PassageShowUtils.ShowPoints(polygon_points);
-            //}
+            if (index == 2)
+            {
+                PassageShowUtils.ShowEntity(buffer_polygon);
+                if (polygon_points != null)
+                    PassageShowUtils.ShowPoints(polygon_points);
+            }
             ConvertToIntersectWay(index, polygon_points, turn_left);
             GetIntersectWayBuffer(index);
             if (buffer_polygon != null)
@@ -288,7 +288,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (target_points.Count >= 5)
             {
                 var dp = target_points[1] - target_points[2];
-                if (dp.Length + pipe_inputs[index].in_buffer < buffer / 4 || dp.Length < pipe_inputs[index].in_buffer) 
+                if (dp.Length + pipe_inputs[index].in_buffer < buffer / 4 || dp.Length < pipe_inputs[index].in_buffer)
                 {
                     target_points[3] += dp;
                     target_points.RemoveAt(1);
@@ -299,7 +299,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 var c = target_points.Count;
                 var dp = target_points[c - 2] - target_points[c - 3];
-                if (dp.Length + pipe_inputs[index].out_buffer < buffer / 4 || dp.Length < pipe_inputs[index].out_buffer || dp.Length <= buffer / 3) 
+                if (dp.Length + pipe_inputs[index].out_buffer < buffer / 4 || dp.Length < pipe_inputs[index].out_buffer || dp.Length <= buffer / 3)
                 {
                     target_points[c - 4] += dp;
                     target_points.RemoveAt(c - 2);

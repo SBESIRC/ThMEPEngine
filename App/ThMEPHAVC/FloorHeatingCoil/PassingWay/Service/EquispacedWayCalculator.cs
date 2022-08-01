@@ -169,9 +169,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             var out_axis= dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
                             if (Math.Abs(axis - out_axis) > 10 && pipe_inputs[index].is_out_free == false)
                             {
-                                if (pipe_segments[index][i].pw < pipe_inputs[index].out_buffer)
+                                if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer) 
                                     pipe_segments[index].Add(new PipeSegment(pipe_inputs[index].end_dir, pipe_inputs[index].out_buffer));
-                                else if (i > 0) 
+                                else
                                     axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
                             }
 
@@ -187,14 +187,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     idxs.Add(i);
                     buffers.Add(pipe_segments[index][i].pw);
                 }
-            }
-            if (lines.Count == 1)
-            {
-                var dir = pipe_inputs[index].end_dir;
-                var axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
-                lines.Add(BuildLine(dir, axis));
-                idxs.Add(-1);
-                buffers.Add(pipe_inputs[index].out_buffer);
             }
             var last_point = lines.Last().GetClosestPointTo(pipe_inputs[index].pout, false);
             var last_lines = lines.Last().ToNTSLineString().Intersection(region.ToNTSPolygon()).ToDbCollection().Cast<Polyline>().ToList();
@@ -227,10 +219,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 i = r - 1;
             }
             ret.Add(PassageWayUtils.BuildPolyline(lines.Last()));
-            //foreach(var poly in ret)
-            //{th
-            //    PassageShowUtils.ShowEntity(poly,index%7+1);
-            //}
             return ret;
         }
         Line BuildLine(int dir,double axis)

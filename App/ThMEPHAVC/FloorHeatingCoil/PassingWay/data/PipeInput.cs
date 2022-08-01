@@ -44,7 +44,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // buffer
             this.in_buffer = pin_data.HalfPipeWidth;
             // freedom
-            this.is_in_free = pin_data.Freedom == 1;
+            this.is_in_free = pin_data.Freedom != 0;
         }
         public PipeInput(DrawPipeData pin_data, DrawPipeData pout_data)
         {
@@ -58,8 +58,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.in_buffer = pin_data.HalfPipeWidth;
             this.out_buffer = pout_data.HalfPipeWidth;
             // freedom
-            this.is_in_free = pin_data.Freedom == 1;
-            this.is_out_free = pout_data.Freedom == 1;
+            this.is_in_free = pin_data.Freedom != 0;
+            this.is_out_free = pout_data.Freedom != 0;
         }
     }
 }
