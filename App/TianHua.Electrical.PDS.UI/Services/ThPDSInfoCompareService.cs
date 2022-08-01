@@ -249,6 +249,10 @@ namespace TianHua.Electrical.PDS.UI.Services
             {
                 data.Description = vm.Description;
             }
+            else
+            {
+                data.Description = data.Type.GetDescription();
+            }
             data.Sync();
             return data;
         }

@@ -1487,7 +1487,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 Description = "防火卷帘",
                 NodeType = PDSNodeType.Load,
                 LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad,
-                LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireResistantShutter,
+                LoadTypeCat_2 = ThPDSLoadTypeCat_2.RollerShutter,
                 LoadTypeCat_3 = ThPDSLoadTypeCat_3.None,
                 FireLoad = true,
                 Phase = "三相",

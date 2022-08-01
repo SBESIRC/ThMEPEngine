@@ -116,7 +116,7 @@ namespace TianHua.Electrical.PDS.Model
         /// 防火卷帘
         /// </summary>
         [Description("防火卷帘")]
-        FireResistantShutter,
+        RollerShutter,
 
         /// <summary>
         /// 电动门

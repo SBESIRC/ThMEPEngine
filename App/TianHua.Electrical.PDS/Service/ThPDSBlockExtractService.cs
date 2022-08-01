@@ -86,6 +86,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var block = acad.Element<BlockReference>(blockData.ObjId, true).Clone() as BlockReference;
                         if (blockData.EffectiveName.IndexOf(ThPDSCommon.LOAD_LABELS) == 0
+                            || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_LABELS_AI)
                             || blockData.EffectiveName.Contains(ThPDSCommon.PUMP_LABELS)
                             || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_DETAILS))
                         {

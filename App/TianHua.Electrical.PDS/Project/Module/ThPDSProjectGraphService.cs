@@ -706,7 +706,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     {
                         node.Type = PDSNodeType.Load;
                         node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
-                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireResistantShutter;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.RollerShutter;
                         node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
                         break;
                     }
@@ -820,7 +820,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             node.Details.LoadCalculationInfo.LowPower = data.LowPower;
             if(data.HighPower < 0)
             {
-                if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter)
+                if (node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.RollerShutter)
                 {
                     node.Details.LoadCalculationInfo.HighPower = PDSProject.Instance.projectGlobalConfiguration.FireproofShutterPower;
                 }

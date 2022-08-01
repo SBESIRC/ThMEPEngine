@@ -165,7 +165,7 @@ namespace TianHua.Electrical.PDS.Project
             if (node.Loads.Count > 1)
             {
                 //多负载必定单功率
-                newNode.Load.InstalledCapacity.HighPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.HighPower);
+                newNode.Load.InstalledCapacity.HighPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : LoadGlobalConfigPower(o));
                 newNode.Details.LoadCalculationInfo.HighPower = newNode.Load.InstalledCapacity.HighPower;
                 newNode.Load.InstalledCapacity.IsDualPower = false;
                 newNode.Details.LoadCalculationInfo.IsDualPower = false;
@@ -174,12 +174,8 @@ namespace TianHua.Electrical.PDS.Project
             {
                 newNode.Load.InstalledCapacity = load.InstalledCapacity;
                 newNode.Details.LoadCalculationInfo.LowPower = load.InstalledCapacity.LowPower;
-                newNode.Details.LoadCalculationInfo.HighPower = load.InstalledCapacity.HighPower;
+                newNode.Details.LoadCalculationInfo.HighPower = LoadGlobalConfigPower(load);
                 newNode.Details.LoadCalculationInfo.IsDualPower = load.InstalledCapacity.IsDualPower;
-            }
-            if (load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireResistantShutter && newNode.Details.LoadCalculationInfo.HighPower == 0)
-            {
-                newNode.Details.LoadCalculationInfo.HighPower = _project.projectGlobalConfiguration.FireproofShutterPower;
             }
             newNode.Details.LoadCalculationInfo.LowDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.HighDemandFactor = load.DemandFactor;
@@ -247,6 +243,17 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
+        private static double LoadGlobalConfigPower(ThPDSLoad load)
+        {
+            if (load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.RollerShutter && load.InstalledCapacity.HighPower == 0)
+            {
+                return _project.projectGlobalConfiguration.FireproofShutterPower;
+            }
+            else
+            {
+                return load.InstalledCapacity.HighPower;
+            }
+        }
         private static string ExportGraph(string filePath, string fileName = "Graph.Config")
         {
             var path = Path.Combine(filePath, fileName);
