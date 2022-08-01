@@ -158,6 +158,7 @@
     <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunSecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
+    <Compile Include="Reinforcement\Service\ThIniTool.cs" />
     <Compile Include="Reinforcement\Service\ThRegistryTool.cs" />
     <Compile Include="Reinforcement\Service\ThReinforceEnhanceService.cs" />
     <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
