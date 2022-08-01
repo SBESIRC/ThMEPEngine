@@ -97,15 +97,5 @@ namespace TianHua.Electrical.PDS.Engine
             lines.OfType<Line>().Where(e => e.Length > 1.0)
                 .ForEach(e => Results.Add(new ThPDSEntityInfo(e, polyInfo)));
         }
-
-        /// <summary>
-        /// 若视觉闭合则返回true
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        private bool IsClosed(Polyline polyline)
-        {
-            return polyline.Closed || polyline.StartPoint.DistanceTo(polyline.EndPoint) < 10.0;
-        }
     }
 }

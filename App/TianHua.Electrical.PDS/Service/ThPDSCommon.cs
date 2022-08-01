@@ -71,6 +71,7 @@ namespace TianHua.Electrical.PDS.Service
 
         public const string MOTOR_AND_LOAD_LABELS = "电动机及负载标注";
         public const string LOAD_LABELS = "负载标注";
+        public const string LOAD_LABELS_AI = "AI-负载标注";
         public const string LOAD_DETAILS = "E-电力平面-负荷明细";
         public const string PUMP_LABELS = "水泵标注";
         public const string LIGHTING_LOAD = "E-BL001";
