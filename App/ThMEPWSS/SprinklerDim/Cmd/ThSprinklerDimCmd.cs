@@ -83,19 +83,22 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 //处理数据
                 var dataProcess = new ThSprinklerDimDataProcessService()
                 {
+                    InputExtractors = dataFactory.Extractors,
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
 
                 };
 
                 // dataQuery.Transform(transformer);
-                dataProcess.RemoveDuplicateSprinklerPt();
-                dataProcess.CreateTchPipe();
-                dataProcess.ProjectOntoXYPlane();
+                //dataProcess.ProcessArchitechData();
+                //dataProcess.RemoveDuplicateSprinklerPt();
+                //dataProcess.CreateTchPipe();
+                //dataProcess.ProjectOntoXYPlane();
+                dataProcess.ProcessData();
                 dataProcess.Print();
 
                 double step = 0;
-                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out step);
+                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, dataProcess.TchPipe, printTag, out step);
                 ThSprinklerDimPosition.DrawDimLines(netList, printTag, step);
 
                 // 区域标注喷淋点

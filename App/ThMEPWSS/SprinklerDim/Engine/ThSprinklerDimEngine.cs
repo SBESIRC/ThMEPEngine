@@ -48,13 +48,12 @@ namespace ThMEPWSS.SprinklerDim.Engine
             DrawUtils.ShowGeometry(allLine, string.Format("l0-{0}-ptDTOrtho", printTag), 241, 30);
 
             ThSprinklerNetworkService.AddOrthoDTIfNoLine(ref ptDtDict, ptDtOriDict);
-            var allLine2 = ptDtDict.SelectMany(x => x.Value).Distinct().ToList();
-            DrawUtils.ShowGeometry(allLine2, string.Format("l0-{0}-ptDTOrthoAdd", printTag), 141, 30);
+            var allLineAddOrthodox = ptDtDict.SelectMany(x => x.Value).Distinct().ToList();
+            DrawUtils.ShowGeometry(allLineAddOrthodox, string.Format("l0-{0}-ptDTOrthoAdd", printTag), 141, 30);
 
-            DTTol = ThSprinklerNetworkService.GetDTLength(allLine2);
+            DTTol = ThSprinklerNetworkService.GetDTLength(allLineAddOrthodox);
             DrawUtils.ShowGeometry(sprinkPts[0], String.Format("dtLeng:{0}", DTTol), String.Format("l0-{0}-dtLen", printTag), hight: 200);
 
-            //DTTol = 2500;
             ThSprinklerNetworkService.AddSinglePTToGroup(ref ptDtDict, ptAngleDict, DTTol * 1.5);
             var allLineFinal = ptDtDict.SelectMany(x => x.Value).ToList();
             ThSprinklerNetworkService.RemoveDuplicate(ref allLineFinal);

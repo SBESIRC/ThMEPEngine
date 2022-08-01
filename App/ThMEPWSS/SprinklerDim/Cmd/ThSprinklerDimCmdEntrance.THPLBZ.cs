@@ -50,14 +50,14 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 //处理数据
                 var dataProcess = new ThSprinklerDimDataProcessService()
                 {
+                    InputExtractors = dataFactory.Extractors,
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
 
                 };
 
                 // dataQuery.Transform(transformer);
-                dataProcess.CreateTchPipe();
-                dataProcess.ProjectOntoXYPlane();
+                dataProcess.ProcessData();
                 dataProcess.Print();
 
             }

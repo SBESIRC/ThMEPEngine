@@ -37,6 +37,11 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dict;
         }
 
+        /// <summary>
+        /// 生成德劳内三角（DT）
+        /// </summary>
+        /// <param name="sprinkPts"></param>
+        /// <returns></returns>
         public static List<Line> GetDTSeg(List<Point3d> sprinkPts)
         {
             var points = sprinkPts.ToCollection();
@@ -89,6 +94,11 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dtOrthogonalSeg;
         }
 
+        /// <summary>
+        /// 过滤太长的DTSeg
+        /// </summary>
+        /// <param name="dtOdtSeg"></param>
+        /// <param name="DTTol"></param>
         public static void FilterTooLongSeg(ref List<Line> dtOdtSeg, double DTTol)
         {
             dtOdtSeg = dtOdtSeg.Where(x => x.Length <= DTTol).ToList();
@@ -96,26 +106,41 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         /// <summary>
         /// 找DT数量最多长度前3名平均数。用于后面作为tolerance
+        /// 最小返回2000
         /// </summary>
         /// <param name="dtOrthogonalSeg">正交的DT线段</param>
         /// <returns></returns>
         public static double GetDTLength(List<Line> dtOrthogonalSeg)
         {
-            var length = 2500.0;
+            var length = 2000.0;
 
-            var lengthGroup = dtOrthogonalSeg.GroupBy(x => x.Length).ToDictionary(g => g.Key, g => g.ToList()).OrderByDescending(x => x.Value.Count).ToList();
+            //var lengthGroup = dtOrthogonalSeg.GroupBy(x => x.Length).ToDictionary(g => g.Key, g => g.ToList()).OrderByDescending(x => x.Value.Count).ToList();
 
-            var averageC = 0;
-            var lengthTemp = 0.0;
+            //var averageC = 0;
+            //var lengthTemp = 0.0;
 
-            for (int i = 0; i < 3 && i < lengthGroup.Count(); i++)
+            //var list = dtOrthogonalSeg.Select(x => x.Length).ToList();
+
+            //for (int i = 0; i < 3 && i < lengthGroup.Count(); i++)
+            //{
+            //    lengthTemp += lengthGroup[i].Key;
+            //    averageC++;
+            //}
+
+            var group = dtOrthogonalSeg.GroupBy(x => Math.Round(x.Length / 100, MidpointRounding.AwayFromZero));
+            var dict = group.OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Select(x => x.Length).ToList());
+
+            var list = new List<double>();
+            for (int i = 0; i < 3; i++)
             {
-                lengthTemp += lengthGroup[i].Key;
-                averageC++;
+                list.AddRange(dict.ElementAt(i).Value);
             }
-            if (lengthTemp > 0)
+
+            var ave = list.Average();
+
+            if (ave > 2000)
             {
-                length = lengthTemp / averageC;
+                length = ave;
             }
 
             return length;
@@ -611,6 +636,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             return filterDTOrth;
         }
 
+        /// <summary>
+        /// 筛选DT：和连接点同方向的DT线
+        /// </summary>
+        /// <param name="ptDtOriDict"></param>
+        /// <param name="ptAngleDict"></param>
+        /// <returns></returns>
         public static Dictionary<Point3d, List<Line>> FilterDTOrthogonalToPipeAngle(Dictionary<Point3d, List<Line>> ptDtOriDict, Dictionary<Point3d, double> ptAngleDict)
         {
             var angleTol = 1;
@@ -657,6 +688,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             return otherPt;
         }
 
+        /// <summary>
+        /// 喷淋点和DT线连接关系Dict
+        /// </summary>
+        /// <param name="sprinkPts"></param>
+        /// <param name="dtSeg"></param>
+        /// <returns></returns>
         public static Dictionary<Point3d, List<Line>> GetConnectPtDict(List<Point3d> sprinkPts, List<Line> dtSeg)
         {
             var ptDtDict = new Dictionary<Point3d, List<Line>>();
@@ -675,6 +712,11 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
+        /// <summary>
+        /// 找喷淋点垂直线个数为0的点，找正交
+        /// </summary>
+        /// <param name="ptDtDict"></param>
+        /// <param name="ptDtOriDict"></param>
         public static void AddOrthoDTIfNoLine(ref Dictionary<Point3d, List<Line>> ptDtDict, Dictionary<Point3d, List<Line>> ptDtOriDict)
         {
             var angleTol = 1.0;
@@ -752,7 +794,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         /// <summary>
         /// 找符合方向的原本不在dt里面的线
-        /// 点找容差范围内的点，形成的线在容差范围内，加入组
+        /// 点找容差范围内的点，形成的线在容差范围内，加入
         /// </summary>
         /// <param name="dtSeg"></param>
         /// <param name="groupList"></param>
@@ -772,7 +814,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 //{
                 //    var a = 1;
                 //}
-                
+
                 if (addNew.ContainsKey(pt) == false)
                 {
                     addNew.Add(pt, new List<Line>());
@@ -791,9 +833,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                     {
                         continue;
                     }
-                    //增加个新逻辑：检查同方向角度
-
-                    //这里有bug
+                   
+                    //这里其实还是有bug，增加个新逻辑：检查同方向角度。后面的继续分组能找回来所以不作处理了
                     int idxCheckOverlap = 0;
                     for (; idxCheckOverlap < allLine.Count; idxCheckOverlap++)
                     {
