@@ -271,7 +271,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
             //5.2过滤有效车道为null的线
             SegLines = SegLines.Where(l => l.VaildLane != null).ToList();
-            showVaildLanes();
+            //showVaildLanes();
             //5.5获取最大全连接组,存在其他组标记 + 报错
             //警告存在无效连接，将抛弃部分分割线
             var groups = SegLines.GroupSegLines().OrderBy(g =>g.Count).ToList();

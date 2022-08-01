@@ -24,7 +24,9 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PostProcess;
 using ThMEPEngineCore;
 using ThParkingStall.Core.InterProcess;
-
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -166,7 +168,7 @@ namespace ThMEPArchitecture.MultiProcess
             foreach(var subArea in subAreas)
             {
                 MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
-                //subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
             }
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
