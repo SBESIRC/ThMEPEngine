@@ -66,10 +66,10 @@ namespace TianHua.Electrical.PDS.Project
                 e.ComponentSelection();
             });
             edges.BalancedPhaseSequence();
-            node.Details.LoadCalculationInfo.HighPower = Math.Max(node.Load.InstalledCapacity.HighPower, node.CalculateHighPower());
+            node.Details.LoadCalculationInfo.HighPower = Math.Max(node.Details.LoadCalculationInfo.HighPower, node.CalculateHighPower());
             if (node.Details.LoadCalculationInfo.IsDualPower)
             {
-                node.Details.LoadCalculationInfo.LowPower = Math.Max(node.Load.InstalledCapacity.LowPower, node.CalculateLowPower());
+                node.Details.LoadCalculationInfo.LowPower = Math.Max(node.Details.LoadCalculationInfo.LowPower, node.CalculateLowPower());
             }
             node.ComponentSelection(edges, SuperiorNodeIsVirtualLoad);
             edges.CalculateSecondaryCircuit();

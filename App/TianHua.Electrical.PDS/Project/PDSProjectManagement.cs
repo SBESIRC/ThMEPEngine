@@ -249,6 +249,31 @@ namespace TianHua.Electrical.PDS.Project
             {
                 return _project.projectGlobalConfiguration.FireproofShutterPower;
             }
+            else if (load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger && load.InstalledCapacity.HighPower == 0)
+            {
+                var N = 0;
+                switch (load.ID.BlockName)
+                {
+                    case "E-BDB111":
+                    case "＄equip_U＄00000102":
+                    case "＄equip_U＄00000109":
+                        N = 1;
+                        break;
+                    case "E-BDB112":
+                    case "＄equip_U＄00000103":
+                        N = 2;
+                        break;
+                    case "E-BDB114":
+                    case "＄equip_U＄00000104":
+                        N = 4;
+                        break;
+                }
+                return N * _project.projectGlobalConfiguration.ACChargerPower;
+            }
+            else if (load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger && load.InstalledCapacity.HighPower == 0)
+            {
+                return _project.projectGlobalConfiguration.DCChargerPower;
+            }
             else
             {
                 return load.InstalledCapacity.HighPower;
