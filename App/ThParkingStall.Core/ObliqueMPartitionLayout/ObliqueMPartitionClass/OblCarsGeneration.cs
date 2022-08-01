@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
-namespace ThParkingStall.Core.MPartitionLayout
+namespace ThParkingStall.Core.ObliqueMPartitionLayout
 {
-    public partial class MParkingPartitionPro
+    public partial class ObliqueMPartition
     {
         public void GenerateCarsAndPillarsForEachLane(LineSegment line, Vector2D vec, double length_divided, double length_offset,
     ref LineSegment line_align_backback_rest,
@@ -19,6 +21,7 @@ bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_
 bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_collision = false)
         {
             int inipillar_count = Pillars.Count;
+            #region 允许柱子穿墙及背靠背对齐对车道线的起始位置调整
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
             {
@@ -79,7 +82,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             {
                                 var p = crosscars[i].Coordinates.OrderBy(t => t.Distance(line.P0)).First();
                                 var ponline_ex = line.ClosestPoint(p, true);
-                                if (line.ClosestPoint(ponline_ex, false).Distance(ponline_ex) > 0) continue;
+                                if (line.ClosestPoint(ponline_ex, false).Distance(ponline_ex) > 1) continue;
                                 var dis = ponline_ex.Distance(line.P0) % (DisVertCarWidth * CountPillarDist + DisPillarLength);
                                 line_align_backback_rest = new LineSegment(line.P0, line.P0.Translation(Vector(line).Normalize() * (dis - DisPillarLength)));
                                 line_align_backback_rest = line_align_backback_rest.Translation(-vec.Normalize() * DisLaneWidth / 2);
@@ -91,13 +94,13 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     }
                 }
             }
-            //长度划分
+            #endregion
+
             var segobjs = new List<LineSegment>();
             LineSegment[] segs;
             if (GeneratePillars)
             {
                 var dividecount = Math.Abs(length_divided - DisVertCarWidth) < 1 ? CountPillarDist : 1;
-                //DivideCurveByDifferentLength(line, ref segobjs, DisPillarLength, 1, length_divided, dividecount);
                 DivideCurveByKindsOfLength(line, ref segobjs, DisPillarLength, 1, DisHalfCarToPillar, 1,
                     length_divided, dividecount, DisHalfCarToPillar, 1);
             }
@@ -110,12 +113,15 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
             int segscount = segs.Count();
             int c = 0;
             if (segscount == 0) line_align_backback_rest = new LineSegment();
+
             foreach (var seg in segs)
             {
                 c++;
                 bool found_backback = false;
                 var s = new LineSegment(seg);
                 s = s.Translation(vec.Normalize() * (length_offset));
+                
+                #region 与障碍物进行相交判断-包含背靠背缩进的判断即车位调整
                 var car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
                 var carsc = car.Clone();
                 carsc = carsc.Scale(ScareFactorForCollisionCheck);
@@ -127,7 +133,6 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
                 else
                 {
-                    //cond = cond && CarSpatialIndex.SelectCrossingGeometry(carsc).Count == 0;
                     var crossedcarsc = CarSpatialIndex.SelectCrossingGeometry(carsc).Cast<Polygon>().ToList();
                     if (crossedcarsc.Count == 0) cond = true;
                     else
@@ -139,7 +144,13 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                 var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
                                 if (g is Polygon && g.Area > 0)
                                 {
-                                    var segs_g_short = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e, seg)).First();
+                                    var segs_g_shorts = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e, seg));
+                                    if (!segs_g_shorts.Any())
+                                    {
+                                        cond = false;
+                                        break;
+                                    }
+                                    var segs_g_short = segs_g_shorts.First();
                                     if (Math.Round(segs_g_short.Length) > (DisVertCarLength - DisVertCarLengthBackBack) * 2)
                                     {
                                         cond = false;
@@ -154,16 +165,20 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                         cond = false;
                                         break;
                                     }
-                                    if (Cars[exist_index].CarLayoutMode == 0 && cond_area)
+                                    if (Cars[exist_index].CarLayoutMode != 1 && cond_area)
                                     {
                                         found_backback = true;
                                         var car_exist_iniedge = crossed_back_car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(sg => sg.MidPoint.Distance(Cars[exist_index].Point)).First();
                                         var car_exist_transform = PolyFromLines(car_exist_iniedge, car_exist_iniedge.Translation(Cars[exist_index].Vector.Normalize() * DisVertCarLengthBackBack));
-                                        Cars[exist_index].Polyline = car_exist_transform;
-                                        Cars[exist_index].CarLayoutMode = 2;
-                                        var carspots_index = CarSpots.IndexOf(crossed_back_car);
-                                        CarSpots[carspots_index] = car_exist_transform;
-                                        CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
+                                        //当面前的车位已经是5100时 当前车位信息不需要更新
+                                        if (Math.Abs(car_exist_transform.Area - crossed_back_car.Area) > 1 || Cars[exist_index].CarLayoutMode != 2)
+                                        {
+                                            Cars[exist_index].Polyline = car_exist_transform;
+                                            Cars[exist_index].CarLayoutMode = 2;
+                                            var carspots_index = CarSpots.IndexOf(crossed_back_car);
+                                            CarSpots[carspots_index] = car_exist_transform;
+                                            CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
+                                        }
 
                                         s = new LineSegment(seg);
                                         s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
@@ -178,6 +193,9 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                         else cond = false;
                     }
                 }
+                #endregion
+
+                #region 碰撞检查
                 if (check_adj_collision)
                 {
                     if (Math.Abs(car.Area - DisVertCarLength * DisVertCarWidth) < 1 || Math.Abs(car.Area - DisVertCarLengthBackBack * DisVertCarWidth) < 1)
@@ -206,6 +224,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
                 if (judge_in_obstacles)
                     if (ObstaclesSpatialIndex.SelectCrossingGeometry(carsc).Count > 0) cond = false;
+                #endregion
                 if (cond)
                 {
                     if (add_to_car_spacialindex)
@@ -223,9 +242,9 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             Pillars.RemoveAt(Pillars.Count - 1);
                         }
                     }
-                    //如果是生成该车道上的第一个车位，判断是否需要在前方生成柱子，如果需要则生成
                     if (precar.Area == 0)
                     {
+                        #region 对生成的为车道线第一个车位时，是否需要生成首柱子的场景处理
                         if (gfirstpillar && GeneratePillars)
                         {
                             var ed = seg;
@@ -261,6 +280,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             }
                         }
                         precar = car;
+                        #endregion
                     }
                     else
                     {
@@ -299,7 +319,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                         else { }
                         precar = car;
                     }
-                    //判断是否需要生成最后一个柱子
+                    #region 对是否需要生成最后一颗柱子的场景处理
                     if (glastpillar && c == segscount && GeneratePillars)
                     {
                         var ed = seg;
@@ -333,9 +353,11 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             vec = -vec;
                         }
                     }
+                    #endregion
                 }
             }
-            //判断是否需要生成中柱
+
+            #region 对生成中柱的场景处理
             if (generate_middle_pillar)
             {
                 var middle_pillars = new List<Polygon>();
@@ -356,6 +378,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
                 Pillars.AddRange(middle_pillars);
             }
+            #endregion
         }
     }
 }

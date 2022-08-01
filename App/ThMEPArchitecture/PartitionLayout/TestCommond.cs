@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,15 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
+using ThParkingStall.Core.MPartitionLayout;
+using ThParkingStall.Core.ObliqueMPartitionLayout;
+using ThMEPArchitecture.MultiProcess;
+using Converter = ThMEPArchitecture.MultiProcess.Converter;
+using ThMEPArchitecture.ViewModel;
+using ThParkingStall.Core.OInterProcess;
+using System.IO;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -22,40 +32,36 @@ namespace ThMEPArchitecture.PartitionLayout
         [CommandMethod("TIANHUACAD", "ThParkPartitionTest", CommandFlags.Modal)]
         public void ThParkPartitionTest()
         {
-            PolylineToHatch();
-            //TestExtractHatch();
-            //Execute();
+            Execute();
         }
-
-        private void PolylineToHatch()
+        [CommandMethod("TIANHUACAD", "ThOParkPartitionTest", CommandFlags.Modal)]
+        public void ThOParkPartitionTest()
         {
-            using (AcadDatabase adb = AcadDatabase.Active())
+            try
             {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
+                if (true)
                 {
-                    return;
+                    ParameterViewModel = new ParkingStallArrangementViewModel();
+                    ParameterStock.Set(ParameterViewModel);
+                    ObliqueExecute();
                 }
-                var objs = result.Value
-                   .GetObjectIds()
-                   .Select(o => adb.Element<Entity>(o))
-                   .Where(o => o is Polyline)
-                   .ToList();
-                foreach (var obj in objs)
+                else
                 {
-                    var ids = new ObjectIdCollection();
-                    ids.Add(obj.Id);
-                    Hatch hatch = new Hatch();
-                    hatch.PatternScale = 1;
-                    hatch.CreateHatch(HatchPatternType.PreDefined, "SOLID", true);
-                    hatch.AppendLoop(HatchLoopTypes.Outermost, ids);
-                    hatch.EvaluateHatch(true);
+                    _ObliqueExecute();
                 }
             }
+            catch (System.Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
         }
-
-        private void TestExtractHatch()
+        public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
+        private void _ObliqueExecute()
         {
+            var walls = new List<Polyline>();
+            var iniLanes = new List<Line>();
+            var obstacles = new List<Polyline>();
+            var buildingBox = new List<Polyline>();
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 var result = Active.Editor.GetSelection();
@@ -66,29 +72,81 @@ namespace ThMEPArchitecture.PartitionLayout
                 var objs = result.Value
                    .GetObjectIds()
                    .Select(o => adb.Element<Entity>(o))
-                   .Where(o => o is Hatch)
-                   .Select(o => o.Clone() as Hatch)
+                   .Where(o => o is Line || o is Polyline)
+                   .Select(o => o.Clone() as Entity)
                    .ToList();
-                var edges = new List<Polyline>();
-                foreach (Hatch obj in objs)
+                foreach (var o in objs)
                 {
-                    var pl = (Polyline)obj.Boundaries()[0];
-                    var plrec = pl.GeometricExtents;
-                    var rec = obj.GeometricExtents;
-                    if (plrec.GetCenter().DistanceTo(rec.GetCenter()) > 1)
+                    if (o.Layer == "inilanes") iniLanes.Add((Line)o);
+                    else if (o.Layer == "walls")
                     {
-                        pl.TransformBy(Matrix3d.Mirroring(new Line3d(new Point3d(0, 0, 0), new Point3d(0, 1, 0))));
-                        plrec = pl.GeometricExtents;
-                        var vec = new Vector3d(rec.MinPoint.X - plrec.MinPoint.X, rec.MinPoint.Y - plrec.MinPoint.Y, 0);
-                        pl.TransformBy(Matrix3d.Displacement(vec));
+                        if (o is Polyline) walls.Add((Polyline)o);
+                        else if (o is Line) walls.Add(GeoUtilities.CreatePolyFromLine((Line)o));
                     }
-                    edges.Add(pl);
+                    else if (o.Layer == "obstacles")
+                    {
+                        if (o is Polyline) obstacles.Add((Polyline)o);
+                    }
                 }
-                edges.ForEach(e => e.ColorIndex = ((int)ColorIndex.Red));
-                edges.AddToCurrentSpace();
+            }
+            var boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
+            boundary.Closed = true;
+
+            var polygon_bound = new Polygon(new LinearRing(boundary.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray()));
+            ObliqueMPartition mParkingPartitionPro = new ObliqueMPartition(
+                walls.Select(e => new LineString(e.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray())).ToList(),
+                iniLanes.Select(e => new LineSegment(new Coordinate(e.StartPoint.X, e.StartPoint.Y), new Coordinate(e.EndPoint.X, e.EndPoint.Y))).ToList(),
+                obstacles.Select(e => new Polygon(new LinearRing(e.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray()))).ToList(),
+                polygon_bound);
+            mParkingPartitionPro.OutputLanes = new List<LineSegment>();
+            mParkingPartitionPro.OutBoundary = polygon_bound;
+            mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
+            //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
+            mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
+            mParkingPartitionPro.Process(true);
+            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
+            mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+        }
+        private void ObliqueExecute()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var block = InputData.SelectBlock(acdb);//提取地库对象
+                var layoutData = new LayoutData();
+                layoutData.TryInit(block,true);
+                var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel, false);
+                OInterParameter.Init(dataWraper);
+                var oSubAreas = OInterParameter.GetSubAreas();
+
+                foreach(var oSubArea in oSubAreas)
+                {
+                    try
+                    {
+                        ObliqueMPartition mParkingPartitionPro = new ObliqueMPartition(oSubArea.Walls, oSubArea.VaildLanes, oSubArea.Buildings, oSubArea.Area);
+                        mParkingPartitionPro.OutputLanes = new List<LineSegment>();
+                        mParkingPartitionPro.OutBoundary = oSubArea.Area;
+                        mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
+                        mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
+#if DEBUG
+                        var s = MDebugTools.AnalysisPolygon(mParkingPartitionPro.Boundary);
+                        string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                        FileStream fs = new FileStream(dir + "\\bound.txt", FileMode.Create, FileAccess.Write);
+                        StreamWriter sw = new StreamWriter(fs);
+                        sw.WriteLine(s);
+                        sw.Close();
+                        fs.Close();
+#endif
+                        mParkingPartitionPro.Process(true);
+                        MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
+                        mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Active.Editor.WriteMessage(ex.Message);
+                    }
+                }
             }
         }
-
         private void Execute()
         {
             var walls = new List<Polyline>();
@@ -120,19 +178,25 @@ namespace ThMEPArchitecture.PartitionLayout
                     {
                         if (o is Polyline) obstacles.Add((Polyline)o);
                     }
-                    else if (o.Layer == "buildingBoxes")
-                    {
-                        if (o is Polyline) buildingBox.Add((Polyline)o);
-                    }
                 }
             }
             var boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
-            Extents3d ext = new Extents3d();
-            obstacles.ForEach(o => ext.AddExtents(o.GeometricExtents));
-            var Cutters = new DBObjectCollection();
-            obstacles.ForEach(e => Cutters.Add(e));
-            //Cutters.Add(boundary);
-            var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+            boundary.Closed = true;
+
+            var polygon_bound = new Polygon(new LinearRing(boundary.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray()));
+            MParkingPartitionPro mParkingPartitionPro = new MParkingPartitionPro(
+                walls.Select(e => new LineString(e.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray())).ToList(),
+                iniLanes.Select(e => new LineSegment(new Coordinate(e.StartPoint.X, e.StartPoint.Y), new Coordinate(e.EndPoint.X, e.EndPoint.Y))).ToList(),
+                obstacles.Select(e => new Polygon(new LinearRing(e.Vertices().Cast<Point3d>().Select(p => new Coordinate(p.X, p.Y)).ToArray()))).ToList(),
+                polygon_bound);
+            mParkingPartitionPro.OutputLanes=new List<LineSegment>();
+            mParkingPartitionPro.OutBoundary = polygon_bound;
+            mParkingPartitionPro.BuildingBoxes = new List<Polygon>();
+            //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
+            mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(mParkingPartitionPro.Obstacles);
+            mParkingPartitionPro.Process(true);
+            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro);
+            mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
         }
     }
 }

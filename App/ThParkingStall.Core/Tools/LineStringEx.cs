@@ -81,7 +81,7 @@ namespace ThParkingStall.Core.Tools
         public static bool PartInCommon(this LineString lstr1, Geometry geo)
         {
             if (lstr1 == null || geo == null) return false;
-            var intSection = lstr1.Intersection(geo);
+            var intSection = OverlayNGRobust.Overlay(lstr1, geo, SpatialFunction.Intersection);
             if (intSection.Length > 0) return true;
             else return false;
         }
@@ -97,10 +97,10 @@ namespace ThParkingStall.Core.Tools
             var VaildParts = new List<LineSegment>();
             foreach(var lstr in lstrs)
             {
-                var intSection = lstr.Intersection(area.Shell);
+                var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
                 if (intSection.Length > 0)
                 {
-                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                    var pts = intSection.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
                     VaildParts.Add(new LineSegment(pts.First(), pts.Last()));
                 }
             }
@@ -112,7 +112,7 @@ namespace ThParkingStall.Core.Tools
             var VaildParts = new List<LineString>();
             foreach (var lstr in lstrs)
             {
-                var intSection = lstr.Intersection(area.Shell);
+                var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
                 if (intSection.Length > 0)
                 {
                     var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);

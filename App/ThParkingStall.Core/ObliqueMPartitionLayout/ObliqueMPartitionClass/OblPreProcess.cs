@@ -2,23 +2,23 @@
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
-namespace ThParkingStall.Core.MPartitionLayout
+namespace ThParkingStall.Core.ObliqueMPartitionLayout
 {
-    public partial class MParkingPartitionPro
+    public partial class ObliqueMPartition
     {
-        /// <summary>
-        /// 数据预处理
-        /// 1. 如果车道线穿过建筑物了（靠近边界的情况），分割该车道线取第一段
-        /// 2. 如果区域内含有坡道，从出入点到边界生成一条车道线
-        /// </summary>
         public void PreProcess()
+        {
+            ConvertRampDatas();
+        }
+        private void GetValidPartOfLaneJudgeByObstacles()
         {
             var iniLanes = IniLanes.Select(e => e.Line).ToList();
             for (int i = 0; i < IniLanes.Count; i++)
@@ -34,6 +34,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 foreach (var obj in Obstacles)
                 {
                     points.AddRange(obj.Coordinates);
+                    //points.AddRange(obj.IntersectPoint(pl));
                 }
                 points = points.Where(e => pl.Contains(e) || pl.ClosestPoint(e).Distance(e) < 0.001)
                     .Select(e => line.ClosestPoint(e)).ToList();
@@ -60,6 +61,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                     i--;
                 }
             }
+        }
+        private void ConvertRampDatas()
+        {
             if (RampList.Count > 0)
             {
                 var ramp = RampList[0];
@@ -93,51 +97,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     }
                 }
             }
-
-            ProcessLanes(ref IniLanes, true);
-            for (int i = 0; i < Walls.Count; i++)
-            {
-                for (int j = 0; j < Walls[i].Coordinates.Count() - 1; j++)
-                {
-                    var line = new LineSegment(Walls[i].Coordinates[j], Walls[i].Coordinates[j + 1]);
-                    var anglex = Math.Abs(Vector(line).AngleTo(new Vector2D(1, 0)));
-                    var angley = Math.Abs(Vector(line).AngleTo(new Vector2D(0, 1)));
-                    anglex = Math.Min(anglex, Math.PI - anglex);
-                    angley = Math.Min(angley, Math.PI - angley);
-                    if (anglex == 0 || angley == 0) continue;
-                    if (Math.Min(angley, anglex) > Math.PI / 18) continue;
-                    var egdes = new Polygon(new LinearRing(line.ToLineString().Envelope.Coordinates)).GetEdges().OrderByDescending(e => e.Length).Take(2).ToList();
-                    var edge = egdes[0];
-                    edge = edge.Scale(ScareFactorForCollisionCheck);
-                    if (edge.IntersectPoint(Boundary).Count() > 0 || !Boundary.Contains(edge.P0) || !Boundary.Contains(edge.P1))
-                        edge = egdes[1];
-                    else edge = egdes[0];
-                    if (edge.P0.Distance(Walls[i].Coordinates[j]) < edge.P1.Distance(Walls[i].Coordinates[j]))
-                    {
-                        Walls[i].Coordinates[j] = edge.P0;
-                        Walls[i].Coordinates[j + 1] = edge.P1;
-                    }
-                    else
-                    {
-                        Walls[i].Coordinates[j] = edge.P1;
-                        Walls[i].Coordinates[j + 1] = edge.P0;
-                    }
-                }
-            }
-            for (int i = 0; i < IniLanes.Count; i++)
-            {
-                var lane = IniLanes[i].Line;
-                var splits = SplitLine(lane, Walls);
-                if (splits.Count() >= 1)
-                {
-                    IniLanes[i].Line = splits.OrderByDescending(e => e.Length).First();
-                }
-            }
-            try
-            {
-                Boundary = new Polygon(new LinearRing(JoinCurves(Walls, IniLanes.Select(e => e.Line).ToList()).OrderByDescending(e => e.Length).First().Coordinates));
-            }
-            catch (Exception ex) { }
         }
+
     }
 }

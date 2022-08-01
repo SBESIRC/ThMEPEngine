@@ -523,7 +523,14 @@ namespace ThParkingStall.Core.MPartitionLayout
             var ntsPt = new Point(pt.X, pt.Y);
             var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
             if (selectedBoxes.Count == 0) return false;
-            if (true_on_edge) return true;
+            if (true_on_edge)
+            { 
+            foreach (var crossed in selectedBoxes)
+                {
+                    if (crossed.ClosestPoint(pt).Distance(pt) < 1) return true;
+                }
+                    return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
+            }
             else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
         }
         public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false)
@@ -534,12 +541,32 @@ namespace ThParkingStall.Core.MPartitionLayout
             var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
             polygonStrTree = null;
             if (selectedBoxes.Count == 0) return false;
-            if (true_on_edge) return true;
+            if (true_on_edge)
+            {
+                foreach(var bx in selectedBoxes)
+                {
+                    if(bx.ClosestPoint(pt).Distance(pt)<1)return true;
+                }
+                return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
+            }
             else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
         }
         public static double ClosestPointInVertLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
         {
             var ls = lines.Where(e => IsPerpLine(line, e));
+            if (!returninfinity)
+                if (ls.Count() == 0) return -1;
+            var res = double.PositiveInfinity;
+            foreach (var l in ls)
+            {
+                var dis = l.ClosestPoint(pt).Distance(pt);
+                if (res > dis) res = dis;
+            }
+            return res;
+        }
+        public static double ClosestPointInLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
+        {
+            var ls = lines;
             if (!returninfinity)
                 if (ls.Count() == 0) return -1;
             var res = double.PositiveInfinity;

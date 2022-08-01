@@ -99,7 +99,7 @@ namespace ThMEPArchitecture.MultiProcess
             dataWraper.LowerUpperBound = dataWraper.SegLines.GetLowerUpperBound(dataWraper);
 
         }
-        private static void UpdateVMParameter(this DataWraper datawraper, ParkingStallArrangementViewModel vm)
+        public static void UpdateVMParameter(this DataWraper datawraper, ParkingStallArrangementViewModel vm)
         {
             //平行车位尺寸,长度
             datawraper.ParallelSpotLength = vm.ParallelSpotLength; //mm

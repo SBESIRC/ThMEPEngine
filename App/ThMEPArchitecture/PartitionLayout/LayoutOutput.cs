@@ -454,6 +454,12 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.YAxis)) angle = Math.PI;
                     else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
+                    else
+                    {
+                        angle = Vector3d.YAxis.GetAngleTo(vec);
+                        if (vec.X > 0) 
+                            angle = - angle;
+                    }
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                     DisplayParkingStall.Add(br);
@@ -469,6 +475,12 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.YAxis)) angle = Math.PI;
                     else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
+                    else
+                    {
+                        angle = Vector3d.YAxis.GetAngleTo(vec);
+                        if (vec.X > 0) 
+                            angle = - angle;
+                    }
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, PCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                     DisplayParkingStall.Add(br);
@@ -484,6 +496,12 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (vec.Equals(-Vector3d.YAxis)) angle = Math.PI;
                     else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
                     else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
+                    else
+                    {
+                        angle = Vector3d.YAxis.GetAngleTo(vec);
+                        if (vec.X > 0) 
+                            angle = - angle;
+                    }
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAMEDOUBLEBACK, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                     DisplayParkingStall.Add(br);

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Polygonize;
+using NetTopologySuite.Triangulate;
+using NetTopologySuite.Operation.Buffer;
 
 namespace ThParkingStall.Core.Tools
 {
@@ -27,13 +29,13 @@ namespace ThParkingStall.Core.Tools
         {
             return GetBound(polygons.Cast<Geometry>().ToList(), UpperBound, Verticle);
         }
-        public static double GetBound(this List<Geometry> geos,bool UpperBound,bool Verticle)
+        public static double GetBound(this List<Geometry> geos, bool UpperBound, bool Verticle)
         {
             var coors = new List<Coordinate>();
             geos.ForEach(geo => coors.AddRange(geo.Coordinates));
             if (Verticle)
             {
-                if(UpperBound) return coors.Max(coor => coor.Y);
+                if (UpperBound) return coors.Max(coor => coor.Y);
                 else return coors.Min(coor => coor.Y);
             }
             else
@@ -43,12 +45,13 @@ namespace ThParkingStall.Core.Tools
             }
         }
         //removeHoles Only active when T is polygon 
-        public static List<T> Get<T>(this Geometry geometry,bool removeHoles = true)
+        public static List<T> Get<T>(this Geometry geometry, bool removeHoles = true)
         {
             var objs = new List<T>();
+            if (typeof(T) == null) return objs;
             var typeToGet = typeof(T);
             var geoType = typeof(Geometry);
-            if (!(typeToGet.IsSubclassOf(geoType)|| typeToGet == geoType)) throw new NotSupportedException();
+            if (!(typeToGet.IsSubclassOf(geoType) || typeToGet == geoType)) throw new NotSupportedException();
             if (geometry.IsEmpty)
             {
                 return objs;
@@ -70,6 +73,19 @@ namespace ThParkingStall.Core.Tools
             {
                 foreach (var geo in geometries.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
             }
+            else if (geometry is MultiPoint points)
+            {
+                foreach (var geo in points.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            return objs;
+        }
+
+        public static List<Geometry> ToBasic(this Geometry geometry, bool removeHoles = true)
+        {
+            var objs = new List<Geometry>();
+            objs.AddRange(geometry.Get<Polygon>(removeHoles));
+            objs.AddRange(geometry.Get<LineString>(removeHoles));
+            objs.AddRange(geometry.Get<Point>(removeHoles));
             return objs;
         }
     }
