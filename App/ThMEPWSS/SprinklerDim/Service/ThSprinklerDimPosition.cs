@@ -100,11 +100,10 @@ namespace ThMEPWSS.SprinklerDim.Service
         //边界标注合并函数
         //输入参数：各组的边界点的列表bd，步长step
         //输出参数：合并后的点的列表BoundaryDimPosition，与能合并的组的编号
-        public static List<DimLinesGroup> BoundaryMerge(List<Dictionary<long, List<Point3d>>> bd, double step, bool IsxAxis, out List<long> AllreadyDim)
+        public static List<DimLinesGroup> BoundaryMerge(List<Dictionary<long, List<Point3d>>> bd, double step, bool IsxAxis)
         {
             //处理可以合并的边界标注
             List<DimLinesGroup> BoundaryDimPosition = new();
-            List<long> AllreadyDims = new();
             for (int i = 0; i < bd.Count-1; i++) 
             {
                 DimLinesGroup t = new();
@@ -130,17 +129,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                             break;
                         }
                     }
-                    if (t.Pts.Count != bd[i][key].Count)
-                    {
-                        BoundaryDimPosition.Add(t);
-                        for (int k = 0; k < t.Pts.Count; k++)
-                        {
-                            if (!AllreadyDims.Contains(GetValue(t.Pts[k], !IsxAxis))) AllreadyDims.Add(GetValue(t.Pts[k], !IsxAxis));
-                        }
-                    }
                 }
             }
-            AllreadyDim = AllreadyDims;
             return BoundaryDimPosition;
         }
 
@@ -230,10 +220,19 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<DimLinesGroup> DimPoints = new();
             List<List<ThSprinklerDimGroup>> Groups = new();
 
-            for (int j = 0; j < netList.Count; j++)
+            List<List<Point3d>> ss = new();
+            foreach(ThSprinklerNetGroup net in netList)
+            {
+                for(int i = 0; i < net.PtsGraph.Count; i++)
+                {
+                    ss.Add(net.GetGraphPts(i));
+                }
+            }
+
+            for (int j = 0; j < ss.Count; j++)
             {
                 List<ThSprinklerDimGroup> iGroups = new();
-                List<Point3d> point3Ds = netList[j].Pts;
+                List<Point3d> point3Ds = ss[j];
 
                 //提取所有的要标注方向落在另一方向的值
                 List<long> all = new();
@@ -242,7 +241,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                     if (!all.Contains(GetValue(pt, IsxAxis))) all.Add(GetValue(pt, IsxAxis));
                 }
                 Dictionary<long, List<Point3d>> count = new();
-                foreach(long value in all)
+                foreach (long value in all)
                 {
                     List<Point3d> t = new();
                     for (int i = 0; i < point3Ds.Count; i++)
@@ -276,7 +275,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (long value in R_all)
                 {
                     List<Point3d> ts = R_count[value];
-                    while (true) 
+                    while (true)
                     {
                         ThSprinklerDimGroup group = new();
                         group.STol = 2.0 * step;
@@ -294,8 +293,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 bd.Add(bdcount);
             }
 
-            List<long> allreadydim = new();
-            DimPoints = DimPoints.Concat(BoundaryMerge(bd, step, IsxAxis, out allreadydim)).ToList();
+            DimPoints = DimPoints.Concat(BoundaryMerge(bd, step, IsxAxis)).ToList();             //边缘标注合并
 
             List<int> ints = new();
             foreach(DimLinesGroup a in DimPoints)
@@ -303,21 +301,21 @@ namespace ThMEPWSS.SprinklerDim.Service
                 ints = ints.Concat(a.tag).ToList();
             }
 
-            for (int j = 0; j < netList.Count; j++)
+            for (int j = 0; j < ss.Count; j++)
             {
                 if (ints.Contains(j)) continue;
-                DimLinesGroup t = GetProperFirstLine(netList[j].Pts, IsxAxis);
+                DimLinesGroup t = GetProperFirstLine(ss[j], IsxAxis);
                 t.tag.Add(j);
                 DimPoints.Add(t);
             }
 
             bool isdone = false;
-            while (!isdone) 
+            while (!isdone)
             {
                 //标明已经标注的组
-                for (int i = 0; i < Groups.Count; i++) 
+                for (int i = 0; i < Groups.Count; i++)
                 {
-                    foreach (ThSprinklerDimGroup group in Groups[i]) 
+                    foreach (ThSprinklerDimGroup group in Groups[i])
                     {
                         if (group.IsDim == true) continue;
                         for (int m = 0; m < DimPoints.Count; m++)
@@ -334,7 +332,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                                 group.IsDim = true;                             //已经有标注的(满足共线误差）
                                 break;
                             }
-                            else if (UnStol && !IsDimed && DimPoints[m].tag.Contains(i))                        //在Stol距离之内但是没有标注的（在标注线上增加点位）
+                            else if (UnStol && !IsDimed && DimPoints[m].tag.Contains(i))                          //在Stol距离之内但是没有标注的（在标注线上增加点位）
                             {
                                 DimPoints[m].Pts.Add(group.GetProj(DimPoints[m].Pts));
                                 group.IsDim = true;
@@ -343,7 +341,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                         }
                     }
                 }
-                for (int k = 0; k < Groups.Count; k++) 
+                for (int k = 0; k < Groups.Count; k++)
                 {
                     //更新未标注的组，重复找第一条标注的过程，直到所有的组都已经标注完
                     List<ThSprinklerDimGroup> LoopGroups = new();
@@ -391,18 +389,6 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
                 DrawUtils.ShowGeometry(DimLines, "huang_test_" + printag, 1, 50);
             }
-            //for (int i = 0; i < DimPosition.Count; i++)
-            //{
-            //    List<Line> DimLines = new();
-            //    if (DimPosition[i].Count == 1) continue;
-            //    for (int j = 0; j < DimPosition[i].Count - 1; j++)
-            //    {
-            //        DimLines.Add(new Line(DimPosition[i][j], DimPosition[i][j + 1]));
-            //    }
-            //    DimLinesFm.Add(DimLines);
-            //    DrawUtils.ShowGeometry(DimLines, "h_" + printag);
-            //}
-
         }
     }
 }

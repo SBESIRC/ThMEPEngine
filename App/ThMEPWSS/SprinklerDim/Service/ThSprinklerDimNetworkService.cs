@@ -144,6 +144,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
             }
 
+            collineationList.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x[0]], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y[0]], isXAxis)));
             return collineationList;
 
         }
@@ -184,6 +185,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 nodeIndexs = tmp;
             }
 
+            collineation.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
             return collineation;
         }
 
