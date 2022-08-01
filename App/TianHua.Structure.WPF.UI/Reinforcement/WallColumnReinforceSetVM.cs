@@ -23,10 +23,15 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public void Set()
         {
             Model.Set();
+            WriteToTSSD();
         }
         public void Reset()
         {
             Model.Reset();
-        }       
+        }   
+        private void WriteToTSSD()
+        {
+            ThWallColumnReinforceConfig.Instance.WriteToTSSD();
+        }
     }
 }

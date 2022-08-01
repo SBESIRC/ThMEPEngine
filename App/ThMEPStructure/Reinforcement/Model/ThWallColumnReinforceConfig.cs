@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ThMEPStructure.Reinforcement.TSSD;
 
 namespace ThMEPStructure.Reinforcement.Model
 {
@@ -106,6 +107,11 @@ namespace ThMEPStructure.Reinforcement.Model
         public void Reset()
         {
             Init();
+        }
+        public void WriteToTSSD()
+        {
+            var writer = new TSSDWallColumnConfigWriter();
+            writer.WriteToIni(this);
         }
     }
     public class ThEdgeComponentDrawConfig
