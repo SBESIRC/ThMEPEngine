@@ -156,6 +156,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                         var rect = rst[0] as Polyline;
                         tpt.Type = 1;
+                        tpt.SetLines(sprayIn);
+                        tpt.SetPipeNumber(textSpatialIndex);
                     }
                     else
                     {
