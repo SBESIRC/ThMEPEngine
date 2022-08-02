@@ -61,12 +61,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
             //}
             var buffer_polygon = GetBufferPolygon(index, turn_left);
             var polygon_points = GetBufferPolyline(index, buffer_polygon, turn_left);
-            if (index == 2)
-            {
-                PassageShowUtils.ShowEntity(buffer_polygon);
-                if (polygon_points != null)
-                    PassageShowUtils.ShowPoints(polygon_points);
-            }
+            //if (index == 2)
+            //{
+            //    if(buffer_polygon!=null)
+            //        PassageShowUtils.ShowEntity(buffer_polygon);
+            //    if (polygon_points != null)
+            //        PassageShowUtils.ShowPoints(polygon_points);
+            //}
             ConvertToIntersectWay(index, polygon_points, turn_left);
             GetIntersectWayBuffer(index);
             if (buffer_polygon != null)
@@ -115,6 +116,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     //points = SmoothUtils.SmoothPoints(points);
                     last_way = PassageWayUtils.BuildPolyline(points);
                 }
+                //if(index==1)
+                //{
+                //    PassageShowUtils.ShowEntity(PassageWayUtils.HVBuffer(last_way, buffer));
+                //}
                 var diff = intersect_region.Difference(PassageWayUtils.HVBuffer(last_way, buffer)).Cast<Polyline>().ToList();
                 if (diff.Count > 0)
                     intersect_region = diff.First();
@@ -307,7 +312,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
             }
             //PassageShowUtils.ShowEntity(PassageWayUtils.BuildPolyline(target_points), index % 7 + 1);
-            //target_points = SmoothUtils.SmoothPoints(target_points);
+            target_points = SmoothUtils.SmoothPoints(target_points);
             shortest_way[index].poly = target_points;
         }
         void GetIntersectWayBuffer(int index)
@@ -441,7 +446,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             Polyline last_pipe = null;
             if (turn_left && index > 0 || !turn_left && index < pipe_inputs.Count - 1)
-                last_pipe = shortest_way[turn_left ? index - 1 : index + 1].Buffer();
+            {
+                last_pipe = shortest_way[turn_left ? index - 1 : index + 1].Buffer(4);
+                last_pipe = PassageWayUtils.Buffer(last_pipe, -10).First();
+            }
             if (last_pipe == null) return;
             // adjust equispcaced segment last
             var last_point = equispaced_segments[index].Last().GetClosestPointTo(pipe_inputs[index].pout, false);

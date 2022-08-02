@@ -188,6 +188,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     buffers.Add(pipe_segments[index][i].pw);
                 }
             }
+            if (lines.Count == 1)
+            {
+                var dir = pipe_inputs[index].end_dir;
+                var axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
+                lines.Add(BuildLine(dir, axis));
+                idxs.Add(-1);
+                buffers.Add(pipe_inputs[index].out_buffer);
+            }
             var last_point = lines.Last().GetClosestPointTo(pipe_inputs[index].pout, false);
             var last_lines = lines.Last().ToNTSLineString().Intersection(region.ToNTSPolygon()).ToDbCollection().Cast<Polyline>().ToList();
             if (last_lines.Count > 0)
