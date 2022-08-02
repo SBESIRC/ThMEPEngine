@@ -181,6 +181,7 @@ namespace TianHua.Electrical.PDS.Project
             newNode.Details.LoadCalculationInfo.HighDemandFactor = load.DemandFactor;
             newNode.Details.LoadCalculationInfo.PowerFactor = load.PowerFactor;
             newNode.Details.LoadCalculationInfo.LoadCalculationGrade = load.Phase == ThPDSPhase.三相 ? LoadCalculationGrade.一级 : LoadCalculationGrade.三级;
+            newNode.Details.LoadCalculationInfo.PhaseSequence = load.Phase == ThPDSPhase.三相 ? Module.Circuit.PhaseSequence.L123 : Module.Circuit.PhaseSequence.L1;
             return newNode;
         }
 
