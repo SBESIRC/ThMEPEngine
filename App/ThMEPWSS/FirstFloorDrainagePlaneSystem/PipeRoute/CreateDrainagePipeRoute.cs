@@ -184,7 +184,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             foreach (var pipe in outPipes)
             {
                 var allLines = sewageLines;
-                if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
+                if (pipe.PipeType == VerticalPipeType.RainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe || pipe.PipeType == VerticalPipeType.RainwaterInlet13Pipe)
                 {
                     allLines = rainLines;
                 }
@@ -212,6 +212,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     else
                     {
                         route.originCircle = pipe.PipeCircle;
+                    }
+                    if (pipe.PipeType == VerticalPipeType.RainwaterInlet13Pipe)
+                    {
+                        route.block = pipe.Block;
                     }
                     route.connecLine = closetLine.Key;
                     resRoutes.Add(route);

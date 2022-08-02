@@ -101,11 +101,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="parentRoute"></param>
         private void HandleLstTreeChamfer(RouteList routeLst, RouteList parentRoute)
         {
-            if (parentRoute != null)
+            if (routeLst.route.verticalPipeType != VerticalPipeType.RainwaterInlet13Pipe)
             {
-                routeLst.route.route = ConnectChamfer(routeLst.route.route, parentRoute.route.route, parentRoute.oringinRoutePoly);
+                if (parentRoute != null)
+                {
+                    routeLst.route.route = ConnectChamfer(routeLst.route.route, parentRoute.route.route, parentRoute.oringinRoutePoly);
+                }
+                routeLst.route.route = HandleChamfer(routeLst.route.route);
             }
-            routeLst.route.route = HandleChamfer(routeLst.route.route);
 
             foreach (var cRoute in routeLst.Childs)
             {

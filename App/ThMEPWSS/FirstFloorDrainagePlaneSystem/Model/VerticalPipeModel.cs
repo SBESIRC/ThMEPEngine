@@ -25,6 +25,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
             PipeType = verticalPipe;
         }
 
+        public VerticalPipeModel(Point3d point, BlockReference block, VerticalPipeType verticalPipe)
+        {
+            Position = point;
+            Block = block;
+            PipeType = verticalPipe;
+        }
+
         /// <summary>
         /// 基点
         /// </summary>
@@ -34,6 +41,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         /// 立管（天华图块、天正图块中的圆或者画的圆）
         /// </summary>
         public Circle PipeCircle { get; set; }
+
+        /// <summary>
+        /// 块
+        /// </summary>
+        public BlockReference Block { get; set; }
 
         /// <summary>
         /// 连接引线
@@ -91,12 +103,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         /// 雨水立管
         /// </summary>
         [Description("雨水立管")]
-        rainPipe,
+        RainPipe,
 
         /// <summary>
         /// 洞口立管（仅作为洞口躲避）
         /// </summary>
         [Description("洞口立管")]
-        holePipe,
+        HolePipe,
+
+        /// <summary>
+        /// 把十三号雨水口当作立管处理
+        /// </summary>
+        [Description("十三号雨水口立管")]
+        RainwaterInlet13Pipe,
     }
 }

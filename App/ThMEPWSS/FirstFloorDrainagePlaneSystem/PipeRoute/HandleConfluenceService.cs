@@ -51,7 +51,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 List<VerticalPipeModel> otherWastePolys = new List<VerticalPipeModel>();                            //其他废水支管
                 List<VerticalPipeModel> otherSewagePolys = new List<VerticalPipeModel>();                           //其他污水支管
                 List<VerticalPipeModel> otherVerPipes = new List<VerticalPipeModel>();                              //其他立管
-                List<VerticalPipeModel> holeVerPipes = roomPipeDic.Where(x => x.Key.PipeType == VerticalPipeType.holePipe).Select(x => x.Key).ToList();  //洞口立管
+                List<VerticalPipeModel> holeVerPipes = roomPipeDic.Where(x => x.Key.PipeType == VerticalPipeType.HolePipe).Select(x => x.Key).ToList();  //洞口立管
 
                 roomPipeDic = roomPipeDic.Where(x => !holeVerPipes.Any(y => y == x.Key)).ToDictionary(x => x.Key, y => y.Value);
                 if (roomEquipementPipes.Count > 0)
@@ -89,7 +89,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 verticalPipes = verticalPipes.Except(roomPipeDic.Select(x => x.Key)).ToList();
             }
 
-            otherOutPoly = verticalPipes.Where(x => x.PipeType != VerticalPipeType.holePipe).ToList();
+            otherOutPoly = verticalPipes.Where(x => x.PipeType != VerticalPipeType.HolePipe).ToList();
         }
 
         /// <summary>

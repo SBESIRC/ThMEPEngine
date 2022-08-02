@@ -25,6 +25,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
 
         public Circle originCircle { get; set; }
 
+        public BlockReference block { get; set; }
+
         public Polyline route { get; set; }
 
         public VerticalPipeType verticalPipeType { get; set; }

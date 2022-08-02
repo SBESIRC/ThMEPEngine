@@ -503,5 +503,52 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             }
             return retAxisCurves;
         }
+
+        /// <summary>
+        /// 读取13号雨水口（读13号雨水口就不读冷凝水管了）
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="acadDatabase"></param>
+        /// <param name="pipes"></param>
+        /// <param name="originTransformer"></param>
+        /// <returns></returns>
+        public static List<VerticalPipeModel> CalRainwaterInlet13(this Polyline polyline, AcadDatabase acadDatabase, List<VerticalPipeModel> pipes, ThMEPOriginTransformer originTransformer)
+        {
+            pipes.ForEach(x =>
+            {
+                if (x.PipeType == VerticalPipeType.CondensatePipe)
+                {
+                    x.PipeType = VerticalPipeType.HolePipe;
+                }
+            });
+            List<BlockReference> pipeLst = new List<BlockReference>();
+            var dxfNames = new string[]
+            {
+                 RXClass.GetClass(typeof(BlockReference)).DxfName,
+            };
+            var blockNames = new string[] { ThWSSCommon.RainwaterInletBlockName };
+            var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                                                 o.Dxf((int)DxfCode.BlockName) == string.Join(",", blockNames));
+            var result = Active.Editor.SelectAll(filterlist);
+            if (result.Status == PromptStatus.OK)
+            {
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var block = acadDatabase.Element<BlockReference>(obj);
+                    var copy = (BlockReference)block.Clone();
+                    originTransformer.Transform(copy);
+                    if (polyline.Contains(copy.Position))
+                    {
+                        var angle = copy.Rotation;
+                        var vec = -Vector3d.YAxis.RotateBy(angle, Vector3d.ZAxis);
+                        var pt = copy.Position + vec * 100 * copy.ScaleFactors.Y;
+                        VerticalPipeModel pipeModel = new VerticalPipeModel(pt, copy, VerticalPipeType.RainwaterInlet13Pipe);
+                        pipes.Add(pipeModel);
+                    }
+                }
+            }
+
+            return pipes;
+        }
     }
 }

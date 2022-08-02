@@ -184,7 +184,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 InsertBlockService.scaleNum = scale;
                 string layer = "";
                 string blockName = "";
-                if (pt.Key == VerticalPipeType.CondensatePipe || pt.Key == VerticalPipeType.rainPipe)
+                if (pt.Key == VerticalPipeType.CondensatePipe || pt.Key == VerticalPipeType.RainPipe || pt.Key == VerticalPipeType.RainwaterInlet13Pipe)
                 {
                     layer = ThWSSCommon.OutdoorRainWellLayerName;
                     blockName = ThWSSCommon.OutdoorRainWellBlockName;

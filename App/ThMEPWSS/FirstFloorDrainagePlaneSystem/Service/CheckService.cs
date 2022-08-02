@@ -69,11 +69,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             {
                 return true;
             }
-            else if (type != VerticalPipeType.CondensatePipe && type != VerticalPipeType.rainPipe && otherType != VerticalPipeType.CondensatePipe && otherType != VerticalPipeType.rainPipe)
+            else if (type != VerticalPipeType.CondensatePipe && type != VerticalPipeType.RainPipe && otherType != VerticalPipeType.CondensatePipe && otherType != VerticalPipeType.RainPipe)
             {
                 return true;
             }
-            else if ((type == VerticalPipeType.CondensatePipe || type == VerticalPipeType.rainPipe) && (otherType == VerticalPipeType.CondensatePipe || otherType == VerticalPipeType.rainPipe))
+            else if ((type == VerticalPipeType.CondensatePipe || type == VerticalPipeType.RainPipe || type == VerticalPipeType.RainwaterInlet13Pipe) && 
+                (otherType == VerticalPipeType.CondensatePipe || otherType == VerticalPipeType.RainPipe || otherType == VerticalPipeType.RainwaterInlet13Pipe))
             {
                 return true;
             }
