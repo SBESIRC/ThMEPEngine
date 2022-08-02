@@ -33,8 +33,8 @@ namespace ThParkingStall.Core.OTools
                     seglineIndex.Add((null, null));//不与其他线相交，移除
                     continue;
                 }
-                var shellIntSecs = segLine.ToLineString().Intersection(wallLine).Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
-                if(shellIntSecs.Count() > 0 && !shellIntSecs.First().PositiveTo(coors.First()))
+                var shellIntSecs = segLine.ToLineString().Intersection(wallLine).Coordinates.PositiveOrder();
+                if (shellIntSecs.Count() > 0 && !shellIntSecs.First().PositiveTo(coors.First()))
                 {
                     //无操作，负向连到边界
                     item1 = new List<int>();
@@ -78,7 +78,7 @@ namespace ThParkingStall.Core.OTools
                 var intSecPt = segLine.Intersection(seglines[i]);
                 if (intSecPt != null) coors.Add(intSecPt);
             }
-            var ordered = coors.OrderBy(c => c.X).ThenBy(c => c.Y);
+            var ordered = coors.PositiveOrder();
             return ordered.ToList();
         }
 
@@ -96,7 +96,7 @@ namespace ThParkingStall.Core.OTools
             }
             var intSecPts = segLine.GetBaseLine(shell).OExtend(1).ToLineString().Intersection(shell.Shell).Coordinates;
             coors.AddRange(intSecPts);
-            var ordered = coors.OrderBy(c => c.X).ThenBy(c => c.Y);
+            var ordered = coors.PositiveOrder();
             if (ordered.Count() == 0) return ordered.ToList();
             if (ordered.Last().Distance(ordered.First())< ExtendTol) return new List<Coordinate> {  ordered.Last() };
             return ordered.ToList();
@@ -112,7 +112,7 @@ namespace ThParkingStall.Core.OTools
             if(IncludeInner)baseIntSection = segLine.Intersection(Geo).Get<LineString>().OrderBy(lstr => lstr.Length);
             else baseIntSection = segLine.Difference(Geo).Get<LineString>().OrderBy(lstr => lstr.Length);
             if (baseIntSection.Count() == 0) return null;//线在边界外，无基线
-            var orderedBase = baseIntSection.Last().Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
+            var orderedBase = baseIntSection.Last().Coordinates.PositiveOrder();
             return new LineSegment(orderedBase.First(), orderedBase.Last());
         }
         public static LineSegment GetBaseLine(this LineSegment segLine, Geometry Geo, bool IncludeInner = true)
@@ -134,7 +134,7 @@ namespace ThParkingStall.Core.OTools
             Coordinate spt = null;
             Coordinate ept = null;
             var segLine = seglines[idx];
-            IOrderedEnumerable<Coordinate> pts;
+            List<Coordinate> pts;
             var boundPts = new List<Coordinate>();
             if (SeglineIndex[idx].Item1.Count == 0 || SeglineIndex[idx].Item2.Count == 0)//需要连到边界
             {
@@ -143,12 +143,12 @@ namespace ThParkingStall.Core.OTools
                 var extended = baseLine.OExtend(MaxDistance).ToLineString();//无限延长+相交
                 var basePt = new Point(baseLine.MidPoint);//基线中点
                 var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
-                boundPts = intersection.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y).ToList();
+                boundPts = intersection.Coordinates.PositiveOrder();
             }
             if (SeglineIndex[idx].Item1.Count > 0)//需连到其他分割线
             {
                 pts = seglines.Slice(SeglineIndex[idx].Item1).Select(l => l.LineIntersection(segLine)).
-                    Where(c =>c!= null).OrderBy(c => c.X).ThenBy(c => c.Y);
+                    Where(c =>c!= null).PositiveOrder();
                 spt = pts.First();
             }
             else//需连到边界
@@ -158,7 +158,7 @@ namespace ThParkingStall.Core.OTools
             if (SeglineIndex[idx].Item2.Count > 0)
             {
                 pts = seglines.Slice(SeglineIndex[idx].Item2).Select(l => l.LineIntersection(segLine)).
-                    Where(c => c != null).OrderBy(c => c.X).ThenBy(c => c.Y);
+                    Where(c => c != null).PositiveOrder();
                 ept = pts.Last();
             }
             else
@@ -357,7 +357,7 @@ namespace ThParkingStall.Core.OTools
                 coors.Add(l.P0);
                 coors.Add(l.P1);
             }
-            var ordered = coors.OrderBy(c => c.X).ThenBy(c => c.Y);
+            var ordered = coors.PositiveOrder();
             return new LineSegment(coors.First(),coors.Last());
         }
         #endregion

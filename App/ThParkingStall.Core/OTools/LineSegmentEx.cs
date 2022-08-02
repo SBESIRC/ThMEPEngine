@@ -24,18 +24,25 @@ namespace ThParkingStall.Core.OTools
         //正向化 保证P1 X坐标大于等于P0 X,相等则 P1 Y坐标大于等于X
         public static LineSegment Positivize(this LineSegment lineSegment)
         {
-            if(lineSegment.P1.X > lineSegment.P0.X) return lineSegment;
-            else if(lineSegment.P1.X < lineSegment.P0.X) return new LineSegment(lineSegment.P1, lineSegment.P0);
-            else if(lineSegment.P1.Y > lineSegment.P0.Y) return lineSegment;
-            else return new LineSegment(lineSegment.P1, lineSegment.P0);
+            var P0 = lineSegment.P0;
+            var P1 = lineSegment.P1;
+            if (Math.Abs(P1.X - P0.X) < PointEx.PositiveTol)//x相等
+            {
+                if (P1.Y > P0.Y) return lineSegment;
+                else return new LineSegment(P1,P0);
+            }
+            //x不相等
+            if (P1.X > P0.X) return lineSegment;
+            else return new LineSegment(P1, P0);
+
         }
-        public static bool IsPositive(this LineSegment lineSegment)
-        {
-            if (lineSegment.P1.X > lineSegment.P0.X) return true;
-            else if (lineSegment.P1.X < lineSegment.P0.X) return false;
-            else if (lineSegment.P1.Y > lineSegment.P0.Y) return true;
-            else return false;
-        }
+        //public static bool IsPositive(this LineSegment lineSegment)
+        //{
+        //    if (lineSegment.P1.X > lineSegment.P0.X) return true;
+        //    else if (lineSegment.P1.X < lineSegment.P0.X) return false;
+        //    else if (lineSegment.P1.Y > lineSegment.P0.Y) return true;
+        //    else return false;
+        //}
         public static LineSegment Translate(this LineSegment lineSegment, Vector2D vector)
         {
             return new LineSegment(vector.Translate(lineSegment.P0), vector.Translate(lineSegment.P1));
