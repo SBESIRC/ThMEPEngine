@@ -32,6 +32,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             // adjust region
             this.region = SmoothUtils.SmoothPolygonByRoundXY(region);
+            for (int i = 0; i < pipe_in_list.Count; ++i)
+                pipe_in_list[i].CenterPoint = this.region.GetClosestPointTo(pipe_in_list[i].CenterPoint, false);
+            for (int i = 0; i < pipe_out_list.Count; ++i)
+                pipe_out_list[i].CenterPoint = this.region.GetClosestPointTo(pipe_out_list[i].CenterPoint, false);
             // check if main pipe has output
             main_has_output = pipe_in_list.Count == pipe_out_list.Count;
             if (!main_has_output)

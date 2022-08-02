@@ -48,6 +48,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             for (int i = 0; i < points.Count; ++i)
                 points[i] = new Point3d((int)points[i].X, (int)points[i].Y, 0);
+            for(int i = 0; i < points.Count; ++i)
+            {
+                var next = (i + 1) % points.Count;
+                var dx = points[next].X - points[i].X;
+                var dy = points[next].Y - points[i].Y;
+                if (dx != 0 && dy != 0)
+                {
+                    if (Math.Abs(dx) < Math.Abs(dy))
+                        points[next] = new Point3d(points[i].X, points[next].Y, 0);
+                    else
+                        points[next] = new Point3d(points[next].X, points[i].Y, 0);
+                }
+            }
         }
 
         public static Polyline SmoothPolygonByRoundXY(Polyline polygon)

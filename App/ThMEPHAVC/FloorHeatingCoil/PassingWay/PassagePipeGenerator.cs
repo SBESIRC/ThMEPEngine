@@ -50,7 +50,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         public void CalculatePipeline()
         {
-            //for(int i=0;i<pipe_inputs.Count;++i)
+            //for (int i = 0; i < pipe_inputs.Count; ++i)
             //{
             //    if (pipe_inputs[i].is_out_free == true)
             //        PassageShowUtils.ShowPoint(pipe_inputs[i].pout);
