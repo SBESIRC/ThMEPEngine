@@ -515,30 +515,32 @@ namespace DotNetARX
         /// <param name="value">动态属性的值</param>
         public static void SetDynBlockValue(this ObjectId blockId, string propName, object value)
         {
-            var props = blockId.GetDynProperties();//获得动态块的所有动态属性
-            //遍历动态属性
-            foreach (DynamicBlockReferenceProperty prop in props)
+            // https://adndevblog.typepad.com/autocad/2012/08/how-to-access-and-modify-a-dynamicblockreference-property-in-arx-and-net.html
+            if (blockId.GetObject(OpenMode.ForWrite) is BlockReference br)
             {
-                //如果动态属性的名称与输入的名称相同且为可读
-                if (prop.ReadOnly == false && prop.PropertyName == propName)
+                foreach (DynamicBlockReferenceProperty prop in br.DynamicBlockReferencePropertyCollection)
                 {
-                    //判断动态属性的类型并通过类型转化设置正确的动态属性值
-                    switch (prop.PropertyTypeCode)
+                    //如果动态属性的名称与输入的名称相同且为可读
+                    if (prop.ReadOnly == false && prop.PropertyName == propName)
                     {
-                        case (short)DynBlockPropTypeCode.Short://短整型
-                            prop.Value = Convert.ToInt16(value);
-                            break;
-                        case (short)DynBlockPropTypeCode.Long://长整型
-                            prop.Value = Convert.ToInt64(value);
-                            break;
-                        case (short)DynBlockPropTypeCode.Real://实型
-                            prop.Value = Convert.ToDouble(value);
-                            break;
-                        default://其它
-                            prop.Value = value;
-                            break;
+                        //判断动态属性的类型并通过类型转化设置正确的动态属性值
+                        switch (prop.PropertyTypeCode)
+                        {
+                            case (short)DynBlockPropTypeCode.Short://短整型
+                                prop.Value = Convert.ToInt16(value);
+                                break;
+                            case (short)DynBlockPropTypeCode.Long://长整型
+                                prop.Value = Convert.ToInt64(value);
+                                break;
+                            case (short)DynBlockPropTypeCode.Real://实型
+                                prop.Value = Convert.ToDouble(value);
+                                break;
+                            default://其它
+                                prop.Value = value;
+                                break;
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
