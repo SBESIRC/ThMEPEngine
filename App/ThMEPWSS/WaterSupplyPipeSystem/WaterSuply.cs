@@ -545,24 +545,14 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             var eptX = spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("宽度"));
             var eptY = spt.Y - Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("高度"));
             var LineXList = new List<double>();
-            for (int i = 0; i < sobj.ObjectId.GetDynProperties().Count; i++)
+            foreach (var obj in sobj.ObjectId.GetDynProperties())
             {
-                if (sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains("分割") &&
-                    sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains(" X"))
+                var blkProperty = obj as DynamicBlockReferenceProperty;
+                if (blkProperty.PropertyName.Contains("分割") && blkProperty.PropertyName.Contains("X"))
                 {
-                    var index = int.Parse(sobj.ObjectId.GetDynProperties()[i].PropertyName[2].ToString());
-                    var SplitX = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X"));
-                    if (SplitX < 0)
-                    {
-                        continue;
-                    }
-                    if (SplitX > eptX - spt.X)
-                    {
-                        continue;
-                    }
-
-                    LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
-
+                    var SplitX = (double)blkProperty.Value;
+                    if (SplitX < 0 || SplitX > eptX - spt.X) continue;
+                    LineXList.Add(spt.X + SplitX);
                 }
             }
 
