@@ -83,13 +83,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 NowPolylineIndex = i;
                 Polyline newPl = PolylineProcessService.ClearPolylineUnclosed(OriginalPolyList[i]);
+                newPl = ClearBendsLongFirst(newPl, Boundary, ClearDis*0.5, 0);
+                DrawUtils.ShowGeometry(newPl, "l3ClearBends", 3, lineWeightNum: 30);
                 Skeleton.AddRange(GetMergedPolyline(newPl));
 
             }
+            //CheckConnectorOK
             Skeleton.AddRange(Connector);
             Skeleton.AddRange(ExcessPoly);
         }
-
 
         public void ToDirLineList()
         {
@@ -320,6 +322,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                     bool ok1 = newBoundary.Contains(new Line(newPt1, pt2)) && newBoundary.Contains(new Line(newPt1, pt0));
                     bool ok2 = newBoundary.Contains(new Line(newPt2, pt1)) && newBoundary.Contains(new Line(newPt2, pt3));
+                    
                     if (i + 3 == num - 1) ok2 = false;
                     if (i == 0) ok1 = false;
 
@@ -429,7 +432,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
                 else
                 {
-                    
                     continue;
                 }
                 List<Line> foundLineList = LineIndex.SelectCrossingPolygon(flatPl).OfType<Line>().ToList();
@@ -480,7 +482,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         }
                     }
                 }
-
+                 
+                //如果是最外层的Polyline，则新增连接
                 if (NowPolylineIndex == 0)
                 {
                     for (int a = 0; a < changeLine.Count; a++)

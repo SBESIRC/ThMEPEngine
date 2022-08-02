@@ -83,6 +83,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public double PipeSpaceing = 50;              //集水器管间距
         static public double KeyRoomShortSide = 2000;        //什么样的房间被认定为单独只出一根管道
 
+        //用户输入模式
+        static public bool IndependentRoomConstraint = false;
+        static public bool PublicRegionConstraint = false;
+        static public bool AuxiliaryRoomConstraint = false;
+
         //
         static public double SuggestDistancePass = 600;
 

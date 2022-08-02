@@ -48,9 +48,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 dataPreprocess.Pipeline();
 
                 //分配
-                
-                //DistributionService distributionService = new DistributionService();
-                //distributionService.Pipeline();
+
+                //if (!Parameter.PublicRegionConstraint &&
+                //    !Parameter.AuxiliaryRoomConstraint &&
+                //    !Parameter.IndependentRoomConstraint)
+                //{
+                //    DistributionService distributionService = new DistributionService();
+                //    distributionService.Pipeline();
+                //}
+                //else { }
 
                 //DistributionService2 distributionService2 = new DistributionService2();
                 //distributionService2.Pipeline();

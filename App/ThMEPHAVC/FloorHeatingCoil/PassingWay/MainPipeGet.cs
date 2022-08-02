@@ -91,7 +91,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             buffer_tree = GetBufferTree(MainRegion);
             GetSkeleton(buffer_tree);
             
-            AdjustPolyline adjustPolyline = new AdjustPolyline(Skeleton, Connector, clonedMainRegion, Buffer - 100);
+            AdjustPolyline adjustPolyline = new AdjustPolyline(Skeleton, Connector, clonedMainRegion, Buffer * 0.85);
             adjustPolyline.Pipeline3();
             Skeleton = adjustPolyline.Skeleton;
 
@@ -262,7 +262,27 @@ namespace ThMEPHVAC.FloorHeatingCoil
             BufferTreeNode node = new BufferTreeNode(poly);
             DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
             var next_buffer = PassageWayUtils.Buffer(poly, -Buffer);
-            if (next_buffer.Count == 0) return node;
+            //if (next_buffer.Count == 0) return node;
+            var next_small_buffer = PassageWayUtils.Buffer(poly, -(Buffer * 0.80));
+            double lengthBig = 0;
+            double lengthSmall = 0;
+            int numBig = 0;
+            int numSmall = 0;
+            next_buffer.ForEach(x => lengthBig += x.Length);
+            next_buffer.ForEach(x => numBig += x.NumberOfVertices);
+            next_small_buffer.ForEach(x => lengthSmall += x.Length);
+            next_small_buffer.ForEach(x => numSmall += x.NumberOfVertices);
+
+            if ((next_buffer.Count == 0 && next_small_buffer.Count > 0) ||
+                (numSmall > numBig && lengthSmall > lengthBig + 500)) 
+            {
+                next_buffer = next_small_buffer;
+            }
+
+
+            if(next_buffer.Count == 0)  return node;
+       
+
             node.childs = new List<BufferTreeNode>();
             foreach (Polyline child_poly in next_buffer)
             {
@@ -304,7 +324,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 {
                     Skeleton.Add(MainPipeRoad);
                     IfFind = false;
-                    SkeletonType.Add(-1);
+                    //SkeletonType.Add(-1);
                     return;
                 }
                 else if(pin.DistanceTo(point) > pin.DistanceTo(closePoint) + Buffer) 
@@ -313,7 +333,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
 
                 int index = PassageWayUtils.GetPointIndex(point, coords);
-                if (index != -1)
+                int indexFlag = index;
+                if (index != -1) //在端点上
                 {
                     var pre = (index + coords.Count - 1) % coords.Count;
                     var next = (index + 1) % coords.Count;
@@ -355,28 +376,30 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     {
                         PassageWayUtils.RearrangePoints(ref coords, next);
                     }
-
                 }
                 // cut last segment
                 var p0 = coords.First();
                 var p1 = coords.Last();
-                if (p1.DistanceTo(p0) > Buffer + 100)
-                    coords.Add(p0 - (p1 - p0).GetNormal() * -Buffer);
-
-                if (p1.DistanceTo(p0) < Buffer - 100) 
-                    coords.RemoveAt(coords.Count - 1);
-
-                while (true)
+                if (indexFlag != -1)
                 {
-                    if (coords.Count <= 2) break;
-                    var newP1 = coords.Last();
-                    Vector3d disVec = p0 - newP1;
-                    if (disVec.Length < Buffer - 100)
-                    {
-                        coords.RemoveAt(coords.Count - 1);
-                    }
-                    else break;
+                    if (p1.DistanceTo(p0) > Buffer + 100)
+                        coords.Add(p0 - (p1 - p0).GetNormal() * -Buffer);
                 }
+                //删除小点
+                //if (p1.DistanceTo(p0) < Buffer - 100)
+                //    coords.RemoveAt(coords.Count - 1);
+
+                //while (true)
+                //{
+                //    if (coords.Count <= 2) break;
+                //    var newP1 = coords.Last();
+                //    Vector3d disVec = p0 - newP1;
+                //    if (disVec.Length < Buffer - 100)
+                //    {
+                //        coords.RemoveAt(coords.Count - 1);
+                //    }
+                //    else break;
+                //}
                 // add first segment
                 if (point.DistanceTo(coords[0]) > 1)
                 {
@@ -411,6 +434,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                 if (!IsCCW) node.shell.ReverseCurve();
                 int index = PassageWayUtils.GetPointIndex(point, coords);
+                int indexFlag = index;
                 if (index == -1)
                 {
                     index = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
@@ -446,23 +470,25 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 // cut last segment
                 var p0 = coords.First();
                 var p1 = coords.Last();
-                if (p1.DistanceTo(p0) > Buffer + 100)
-                    coords.Add(p0 - (p1 - p0).GetNormal() * -Buffer);
-
-                if (p1.DistanceTo(p0) < Buffer - 100)
-                    coords.RemoveAt(coords.Count - 1);
-
-                while (true)
+                if (indexFlag != -1)
                 {
-                    if (coords.Count <= 2) break;
-                    var newP1 = coords.Last();
-                    Vector3d disVec = p0 - newP1;
-                    if (disVec.Length < Buffer - 100)
-                    {
-                        coords.RemoveAt(coords.Count - 1);
-                    }
-                    else break;
+                    if (p1.DistanceTo(p0) > Buffer + 100)
+                        coords.Add(p0 - (p1 - p0).GetNormal() * -Buffer);
                 }
+                //if (p1.DistanceTo(p0) < Buffer - 100)
+                //    coords.RemoveAt(coords.Count - 1);
+
+                //while (true)
+                //{
+                //    if (coords.Count <= 2) break;
+                //    var newP1 = coords.Last();
+                //    Vector3d disVec = p0 - newP1;
+                //    if (disVec.Length < Buffer - 100)
+                //    {
+                //        coords.RemoveAt(coords.Count - 1);
+                //    }
+                //    else break;
+                //}
 
 
                 // add first segment
@@ -518,11 +544,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             polyStart.AddVertexAt(polyStart.NumberOfVertices, start.ToPoint2D(), 0, 0, 0);
 
-            int indexEnd = PassageWayUtils.GetSegIndex2(end, coords);
-            polyEnd.AddVertexAt(polyEnd.NumberOfVertices, end.ToPoint2D(), 0, 0, 0);
-            for (int i = indexEnd+1; i <= coords.Count -1; i++)
+            if (MainHasOutput)
             {
-                polyEnd.AddVertexAt(polyEnd.NumberOfVertices, coords[i].ToPoint2D(), 0, 0, 0);
+                int indexEnd = PassageWayUtils.GetSegIndex2(end, coords);
+                polyEnd.AddVertexAt(polyEnd.NumberOfVertices, end.ToPoint2D(), 0, 0, 0);
+                for (int i = indexEnd + 1; i <= coords.Count - 1; i++)
+                {
+                    polyEnd.AddVertexAt(polyEnd.NumberOfVertices, coords[i].ToPoint2D(), 0, 0, 0);
+                }
             }
 
             DrawUtils.ShowGeometry(polyStart, "l2PolyStart", 2, lineWeightNum: 30);
@@ -605,11 +634,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (coords.Count < 3) return newList;
             if ((newList[newList.Count - 1] - newList[newList.Count - 2]).Length < Buffer - 100)
                 newList.RemoveAt(newList.Count - 1);
-            else if (newList.Count >= 4 && (newList[newList.Count - 2] - newList[newList.Count - 3]).Length < Buffer - 100) 
-            {
-                newList.RemoveAt(newList.Count - 1);
-                newList.RemoveAt(newList.Count - 1);
-            }
+            //else if (newList.Count >= 4 && (newList[newList.Count - 2] - newList[newList.Count - 3]).Length < Buffer - 100) 
+            //{
+            //    newList.RemoveAt(newList.Count - 1);
+            //    newList.RemoveAt(newList.Count - 1);
+            //}
 
             return newList;
         }

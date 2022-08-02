@@ -92,7 +92,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //双侧延伸
         public static Polyline CreateRectangle3(Point3d pt0, Point3d pt1, double length, double length2)
         {
-            //右侧length，左侧length2
+            //左侧length，右侧length2
             Vector3d dir = pt1 - pt0;
             Vector3d clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
 
