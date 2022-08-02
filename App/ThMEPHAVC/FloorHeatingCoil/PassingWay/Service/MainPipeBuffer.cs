@@ -48,9 +48,20 @@ namespace ThMEPHVAC.FloorHeatingCoil
             output = new PipeOutput();
             output.shape = BaseMergeHoleAndShell(hole, shell, buffer);
         }
+        public MainPipeBuffer(MPolygon mPolygon, double buffer)
+        {
+            this.buffer = buffer;
+            this.raw_buffer = mPolygon;
+            output = new PipeOutput();
+            ConnectHoles();
+        }
         public void Calculate()
         {
+            //foreach (var skeleton in raw_skeletons)
+            //    PassageShowUtils.ShowEntity(skeleton, 1);
             MergeSkeleton();
+            //foreach (var skeleton in output.skeleton)
+            //    PassageShowUtils.ShowEntity(skeleton, 0);
             BufferMainWay();
             ConnectHoles();
         }
@@ -59,8 +70,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             skeletons = new List<List<Point3d>>();
             foreach (var poly in raw_skeletons)
                 skeletons.Add(SmoothUtils.SmoothPoints(poly.GetPoints().ToList()));
-            if (!main_has_output && skeletons.Count > 1)
-                skeletons.RemoveAt(1);
 
             while (true)
             {
@@ -131,7 +140,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             //PassageShowUtils.ShowEntity(shell,0);
             if (nts_polygon.Holes.Count() == 0)
             {
-
                 var points = PreProcess(shell, true);
                 shell = PassageWayUtils.BuildPolyline(points);
                 output.shape = shell;
@@ -146,7 +154,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
             foreach (var hole in holes)
             {
-                shell=BaseMergeHoleAndShell(hole, shell, buffer);
+                shell = BaseMergeHoleAndShell(hole, shell, buffer / 2);
             }
             output.shape = shell;
         }
@@ -198,13 +206,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
             return shell_points;
         }
 
-        Polyline BaseMergeHoleAndShell(Polyline hole, Polyline shell, double buffer)
+        Polyline BaseMergeHoleAndShell(Polyline hole, Polyline shell, double half_buffer)
         {
             var env = hole.ToNTSPolygon().EnvelopeInternal;
-            if (env.Width < buffer || env.Height < buffer) return shell.Clone() as Polyline;
+            if (env.Width < half_buffer || env.Height < half_buffer) return shell.Clone() as Polyline;
             var shell_points = PreProcess(shell, true);
             var hole_points = PreProcess(hole, false);
-            // 优先选择长为300的边
+            // 优先选择长为half_buffer的边
             for (int j = 0; j < hole_points.Count; ++j)
             {
                 var next = (j + 1) % hole_points.Count;
@@ -213,9 +221,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var next_dir = PassageWayUtils.GetDirBetweenTwoPoint(hole_points[next], hole_points[nnext]);
                 var dp = hole_points[next] - hole_points[j];
                 // 找到洞的出口
-                if (dp.Length <= 300 + 10 && dp.Length >= 300 - 10)
+                if (dp.Length <= half_buffer + 10 && dp.Length >= half_buffer - 10)
                 {
-                    var ret = CheckPointPair(hole_points[j], hole_points[next], shell, 300);
+                    var ret = CheckPointPair(hole_points[j], hole_points[next], shell, half_buffer);
                     // 两个点都在内层
                     if (ret.Count == 0) continue;
                     // 两个点可以与外层直接连接
@@ -229,11 +237,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     {
                         // 找前一段线
                         var pre = (j - 1 + hole_points.Count) % hole_points.Count;
-                        if (hole_points[pre].DistanceTo(hole_points[j]) >= 300)
+                        if (hole_points[pre].DistanceTo(hole_points[j]) >= half_buffer)
                         {
                             var pre_dir = PassageWayUtils.GetDirBetweenTwoPoint(hole_points[pre], hole_points[j]);
-                            var point_pre = hole_points[j] - Vector3d.XAxis.RotateBy(Math.PI / 2 * pre_dir, Vector3d.ZAxis) * 300;
-                            ret = CheckPointPair(point_pre, hole_points[j], shell, 300);
+                            var point_pre = hole_points[j] - Vector3d.XAxis.RotateBy(Math.PI / 2 * pre_dir, Vector3d.ZAxis) * half_buffer;
+                            ret = CheckPointPair(point_pre, hole_points[j], shell, half_buffer);
                             // 两个点可以与外层直接连接
                             if (ret.Count == 2)
                             {
@@ -242,10 +250,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             }
                         }
                         // 找后一段线
-                        if (hole_points[nnext].DistanceTo(hole_points[next]) >= 300)
+                        if (hole_points[nnext].DistanceTo(hole_points[next]) >= half_buffer)
                         {
-                            var point_next = hole_points[next] + Vector3d.XAxis.RotateBy(Math.PI / 2 * next_dir, Vector3d.ZAxis) * 300;
-                            ret = CheckPointPair(hole_points[next], point_next, shell, 300);
+                            var point_next = hole_points[next] + Vector3d.XAxis.RotateBy(Math.PI / 2 * next_dir, Vector3d.ZAxis) * half_buffer;
+                            ret = CheckPointPair(hole_points[next], point_next, shell, half_buffer);
                             // 两个点可以与外层直接连接
                             if (ret.Count == 2)
                             {
@@ -265,7 +273,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var dis = hole_points[next].DistanceTo(hole_points[j]);
                 if (dis >= 200 && dis < min_length)
                 {
-                    var ret = CheckPointPair(hole_points[j], hole_points[next], shell, buffer);
+                    var ret = CheckPointPair(hole_points[j], hole_points[next], shell, half_buffer);
                     if (ret.Count == 2)
                     {
                         min_length = hole_points[next].DistanceTo(hole_points[j]);
@@ -276,16 +284,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (cur == -1) return shell.Clone() as Polyline;
             var pcur = hole_points[cur];
             var pnext = hole_points[(cur + 1) % hole_points.Count];
-            if (min_length < buffer)
+            if (min_length < half_buffer)
             {
-                var ret = CheckPointPair(pcur, pnext, shell, buffer);
+                var ret = CheckPointPair(pcur, pnext, shell, half_buffer);
                 shell_points = MergeHoleAndShell(shell_points, hole_points, pcur, pnext, ret[0], ret[1]);
                 return PassageWayUtils.BuildPolyline(shell_points);
             }
             else
             {
-                pnext = pcur + (pnext - pcur).GetNormal() * buffer;
-                var ret = CheckPointPair(pcur, pnext, shell, buffer);
+                pnext = pcur + (pnext - pcur).GetNormal() * half_buffer;
+                var ret = CheckPointPair(pcur, pnext, shell, half_buffer);
                 if (ret.Count == 2)
                 {
                     shell_points = MergeHoleAndShell(shell_points, hole_points, pcur, pnext, ret[0], ret[1]);
@@ -293,8 +301,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
                 else
                 {
-                    pcur = pnext + (pcur - pnext).GetNormal() * buffer;
-                    ret = CheckPointPair(pcur, pnext, shell, buffer);
+                    pcur = pnext + (pcur - pnext).GetNormal() * half_buffer;
+                    ret = CheckPointPair(pcur, pnext, shell, half_buffer);
                     if (ret.Count == 2)
                     {
                         shell_points = MergeHoleAndShell(shell_points, hole_points, pcur, pnext, ret[0], ret[1]);

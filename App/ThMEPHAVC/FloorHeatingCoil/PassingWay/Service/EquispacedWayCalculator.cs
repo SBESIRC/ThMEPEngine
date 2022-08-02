@@ -169,9 +169,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             var out_axis= dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
                             if (Math.Abs(axis - out_axis) > 10 && pipe_inputs[index].is_out_free == false)
                             {
-                                if (pipe_segments[index][i].pw < pipe_inputs[index].out_buffer)
+                                if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer) 
                                     pipe_segments[index].Add(new PipeSegment(pipe_inputs[index].end_dir, pipe_inputs[index].out_buffer));
-                                else if (i > 0) 
+                                else
                                     axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
                             }
 
@@ -227,10 +227,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 i = r - 1;
             }
             ret.Add(PassageWayUtils.BuildPolyline(lines.Last()));
-            //foreach(var poly in ret)
-            //{th
-            //    PassageShowUtils.ShowEntity(poly,index%7+1);
-            //}
             return ret;
         }
         Line BuildLine(int dir,double axis)
