@@ -379,7 +379,7 @@ namespace ThMEPIFC.Ifc2x3
                 var hole = model.Instances.New<IfcOpeningElement>();
                 hole.Name = "hole";
                 if (!string.IsNullOrEmpty(door.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(door.Uuid+"hole");
+                    hole.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(door.Uuid+"hole");
                 //todo: describe hole's geometry
 
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
@@ -517,7 +517,7 @@ namespace ThMEPIFC.Ifc2x3
                 var hole = model.Instances.New<IfcOpeningElement>();
                 hole.Name = "hole";
                 if (!string.IsNullOrEmpty(window.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(window.Uuid + "hole");
+                    hole.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(window.Uuid + "hole");
                 //todo: describe hole's geometry
 
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
