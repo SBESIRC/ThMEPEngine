@@ -40,11 +40,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             GetDrawnPipe();
 
-            //GetConnector();
+            GetConnector();
 
-            //DrawWholePipe();
+            DrawWholePipe();
 
-            //SaveResults();
+            SaveResults();
         }
 
         public void DataInit()
@@ -60,7 +60,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (i == 4)
+                if (i == 1)
                 {
                     int stop = 0;
                 }
@@ -294,7 +294,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //绘制
                     ////PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pins, pouts, pins_buffer, pouts_buffer, main_index);
 
-                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 600 , Parameter.SuggestDistanceWall);
+                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 400 , Parameter.SuggestDistanceWall);
                     passagePipeGenerator.CalculatePipeline();
                     List<PipeOutput> nowOutputList = passagePipeGenerator.outputs; 
                     nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l1passingPipe", x.pipe_id%7 + 1, 30));
@@ -358,7 +358,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     int upRegionId = DoorList[doorId].UpstreamRegion.RegionId;
                     int downRegionId = DoorList[doorId].DownstreamRegion.RegionId;
 
-                    if (j == 0) continue;
+                    if (doorId == 2) 
+                    {
+                        int stop = 0;
+                    }
+
+                    if (doorId == 0) continue;
                     List<Point3d> ppList = DoorPipeToPointMap[new Tuple<int, int>(doorId, i)].PointList;
                     double internalDistanceHalf = (ppList[0] - ppList[2]).Length / 2;
                     Point3d centerLeft = ppList[0] + (ppList[2] - ppList[0]) / 2;
@@ -369,7 +374,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     double upBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[0], ppList[1], upPl);
                     double downBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[2], ppList[3], downPl);
-                    Polyline pl = PolylineProcessService.CreateRectangle3(centerLeft, centerRight, downBufferLength, upBufferLength);
+                    Polyline pl = PolylineProcessService.CreateRectangle3(centerLeft, centerRight,upBufferLength, downBufferLength);
 
                     DrawUtils.ShowGeometry(pl, "l3ChaTou", 200, 30);
                     PipePolyListMap[i][upRegionId].Add(pl);

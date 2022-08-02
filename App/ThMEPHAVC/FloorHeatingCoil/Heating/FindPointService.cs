@@ -952,10 +952,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Point3d pt4 = downStart + tmpX * dir;
 
                 List<Point3d> point3Ds = new List<Point3d>();
-                point3Ds.Add(pt1);
-                point3Ds.Add(pt2);
-                point3Ds.Add(pt3);
-                point3Ds.Add(pt4);
+                if (mode == 0)
+                {
+                    point3Ds.Add(pt1);
+                    point3Ds.Add(pt2);
+                    point3Ds.Add(pt3);
+                    point3Ds.Add(pt4);
+                }
+                else if (mode == 1) 
+                {
+                    point3Ds.Add(pt2);
+                    point3Ds.Add(pt1);
+                    point3Ds.Add(pt4);
+                    point3Ds.Add(pt3);
+                }
 
                 PipePoint pipePoint = new PipePoint(nowDoor, SinglePipeList[pipeId], freedom, point3Ds);
                 if (DoorPipeToPointMap.ContainsKey(new Tuple<int, int>(nowDoor.DoorId, pipeId)))

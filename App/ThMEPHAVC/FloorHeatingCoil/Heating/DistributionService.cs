@@ -224,7 +224,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
 
         //将pipe2并入pipe1
-        bool AbleToMerge(int upDoorId, TmpPipe pipe1, TmpPipe pipe2, ref TmpPipe newPipe)
+        bool MergeTest(int upDoorId, TmpPipe pipe1, TmpPipe pipe2, ref TmpPipe newPipe)
         {
             //if (pipe1.Independent == 1 && pipe2.Independent == 1) return false;
 
@@ -310,9 +310,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             List<TmpPipe> tmpPipesCopy = new List<TmpPipe>(tmpPipes);
             tmpPipesCopy.Add(nowPipe);
             int cannotMerge = 0;
+            int thisRoundStop = 0;
+
+            //开始一个轮次
             while (true)
             {
                 if (cannotMerge == 1) break;
+                thisRoundStop = 0;
+
+                //剩余过道未被合并
                 if (nowRegionDistributed == 0)
                 {
                     List<int> indexList = new List<int>();
@@ -326,6 +332,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     for (int i = 0; i < tmpPipesCopy.Count; i++)
                     {
+                        if (thisRoundStop == 1) break;
+
                         int pipeToMergeId = indexList[i];
                         //Merge成功一次就跳出
                         //如果发现已经无法Merge，则跳出
@@ -337,21 +345,25 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         //如果需要Merge的是过道剩余
                         if (pipeToMergeId == nowPipeId)
                         {
-                            int id = indexList[i + 1];
-                            TmpPipe newPipe = new TmpPipe(0);
-                            if (AbleToMerge(regionId, tmpPipesCopy[id], tmpPipesCopy[pipeToMergeId], ref newPipe))
+                            //遍历每一个过道，检查哪一个能合并
+                            for (int a = i + 1; a < indexList.Count; a++)
                             {
-                                tmpPipesCopy.Insert(id, newPipe);
-                                tmpPipesCopy.RemoveAt(id + 1);
-                                tmpPipesCopy.RemoveAt(tmpPipesCopy.Count - 1);
-                                nowRegionDistributed = 1;
-                                //tmpPipes = tmpPipesCopy;
-                                break;
+                                int id = indexList[a];
+                                TmpPipe newPipe = new TmpPipe(0);
+                                if (MergeTest(regionId, tmpPipesCopy[id], tmpPipesCopy[pipeToMergeId], ref newPipe))
+                                {
+                                    tmpPipesCopy.Insert(id, newPipe);
+                                    tmpPipesCopy.RemoveAt(id + 1);
+                                    tmpPipesCopy.RemoveAt(tmpPipesCopy.Count - 1);
+                                    nowRegionDistributed = 1;
+                                    //tmpPipes = tmpPipesCopy;
+                                    thisRoundStop = 1;
+                                    break;
+                                }
+                                else continue;
                             }
-                            else
-                            {
-                                continue;
-                            }
+                            //判断是否成功合并
+                            //if (nowRegionDistributed == 1) break;
                         }
                         else //如果需要Merge的不是过道剩余
                         {
@@ -369,46 +381,49 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                 AdjacentIdList.Add(pipeToMergeId + 1);
                             }
 
-                            int optId = AdjacentIdList.OrderBy(x => tmpPipesCopy[x].DownstreamLength).ToList().First();
+                            List<int> optList = AdjacentIdList.OrderBy(x => tmpPipesCopy[x].DownstreamLength).ToList();
+                            int optId = optList.First();
 
                             //如果选中的是过道剩余
-                            if (optId == tmpPipesCopy.Count - 1)
+                            for (int a = 0; a < optList.Count; a++)
                             {
-                                TmpPipe newPipe = new TmpPipe(0);
-                                if (AbleToMerge(regionId, tmpPipesCopy[pipeToMergeId], tmpPipesCopy[optId], ref newPipe))
+                                optId = optList[a];
+                                if (optId == tmpPipesCopy.Count - 1)
                                 {
-                                    tmpPipesCopy.Insert(pipeToMergeId, newPipe);
-                                    tmpPipesCopy.RemoveAt(pipeToMergeId + 1);
-                                    tmpPipesCopy.RemoveAt(tmpPipesCopy.Count - 1);
-                                    nowRegionDistributed = 1;
-                                    tmpPipes = tmpPipesCopy;
-                                    break;
+                                    TmpPipe newPipe = new TmpPipe(0);
+                                    if (MergeTest(regionId, tmpPipesCopy[pipeToMergeId], tmpPipesCopy[optId], ref newPipe))
+                                    {
+                                        tmpPipesCopy.Insert(pipeToMergeId, newPipe);
+                                        tmpPipesCopy.RemoveAt(pipeToMergeId + 1);
+                                        tmpPipesCopy.RemoveAt(tmpPipesCopy.Count - 1);
+                                        nowRegionDistributed = 1;
+                                        tmpPipes = tmpPipesCopy;
+                                        thisRoundStop = 1;
+                                        break;
+                                    }
+                                    else continue;
                                 }
                                 else
                                 {
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                TmpPipe newPipe = new TmpPipe(0);
-                                if (AbleToMerge(regionId, tmpPipesCopy[pipeToMergeId], tmpPipesCopy[optId], ref newPipe))
-                                {
-                                    int start = Math.Min(pipeToMergeId, optId);
-                                    tmpPipesCopy.Insert(start, newPipe);
-                                    tmpPipesCopy.RemoveAt(start + 1);
-                                    tmpPipesCopy.RemoveAt(start + 1);
-                                    //此处删除过道节点。
-                                    //tmpPipesCopy.RemoveAt(tmpPipesCopy.Count - 1);
-                                    //tmpPipes = tmpPipesCopy;
-                                    break;
-                                }
-                                else
-                                {
-                                    continue;
+                                    TmpPipe newPipe = new TmpPipe(0);
+                                    if (MergeTest(regionId, tmpPipesCopy[pipeToMergeId], tmpPipesCopy[optId], ref newPipe))
+                                    {
+                                        int start = Math.Min(pipeToMergeId, optId);
+                                        tmpPipesCopy.Insert(start, newPipe);
+                                        tmpPipesCopy.RemoveAt(start + 1);
+                                        tmpPipesCopy.RemoveAt(start + 1);
+                                        //此处删除过道节点。
+                                        //tmpPipesCopy.RemoveAt(tmpPipesCopy.Count - 1);
+                                        //tmpPipes = tmpPipesCopy;
+                                        thisRoundStop = 1;
+                                        break;
+                                    }
+                                    else continue;
                                 }
                             }
                         }
+                        //一次都没合并，则跳出
+                        if (i == tmpPipesCopy.Count - 1) cannotMerge = 1;
                     }
                 }
                 else      //如果过道剩余已经被合并
@@ -422,6 +437,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     for (int i = 0; i < tmpPipesCopy.Count; i++)
                     {
+                        //单次合并结束
+                        if (thisRoundStop == 1) break;
+
                         int pipeToMergeId = indexList[i];
                         if (tmpPipesCopy[pipeToMergeId].DownstreamLength > mergeThreshold || tmpPipesCopy.Count < 2)
                         {
@@ -440,25 +458,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         {
                             AdjacentIdList.Add(pipeToMergeId + 1);
                         }
-                        int optId = AdjacentIdList.OrderBy(x => tmpPipesCopy[x].DownstreamLength).ToList().First();
 
-                        //
-                        TmpPipe newPipe = new TmpPipe(0);
-                        if (AbleToMerge(regionId, tmpPipesCopy[pipeToMergeId], tmpPipesCopy[optId], ref newPipe))
+                        List<int> optList = AdjacentIdList.OrderBy(x => tmpPipesCopy[x].DownstreamLength).ToList();
+                        int optId = optList.First();
+
+                        for (int a = 0; a < optList.Count; a++)
                         {
-                            int start = Math.Min(pipeToMergeId, optId);
-                            tmpPipesCopy.Insert(start, newPipe);
-                            tmpPipesCopy.RemoveAt(start + 1);
-                            tmpPipesCopy.RemoveAt(start + 1);
-                            //tmpPipes = tmpPipesCopy;
-                            break;
+                            optId = optList[a];
+
+                            TmpPipe newPipe = new TmpPipe(0);
+                            if (MergeTest(regionId, tmpPipesCopy[pipeToMergeId], tmpPipesCopy[optId], ref newPipe))
+                            {
+                                int start = Math.Min(pipeToMergeId, optId);
+                                tmpPipesCopy.Insert(start, newPipe);
+                                tmpPipesCopy.RemoveAt(start + 1);
+                                tmpPipesCopy.RemoveAt(start + 1);
+                                thisRoundStop = 1;
+                                //tmpPipes = tmpPipesCopy;
+                                break;
+                            }
                         }
-                        else
-                        {
-                            continue;
-                        }
+
+                        if (i == tmpPipesCopy.Count - 1) cannotMerge = 1;
                     }
-
                 }
             }
 
