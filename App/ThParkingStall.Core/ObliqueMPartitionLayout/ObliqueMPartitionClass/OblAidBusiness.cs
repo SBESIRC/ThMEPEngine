@@ -40,7 +40,17 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 if (intersects.Count() > 0)
                     res.P0 = intersects.First();
                 else
-                    res.P0 = start;
+                {
+                    var lninsectpointss = new List<Coordinate>();
+                    foreach (var l in IniLanes.Select(ln => ln.Line))
+                    {
+                        lninsectpointss.AddRange(res.IntersectPoint(l));
+                    }
+                    if (lninsectpointss.Count() > 0)
+                        res.P0 = lninsectpointss.OrderBy(p => p.Distance(start)).First();
+                    else 
+                        res.P0 = start;
+                }
                 //偏移直线超出了边界2750的case
                 if (case_out2750)
                 {
@@ -59,7 +69,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     var intersects = res.IntersectPoint(Boundary);
                     if (intersects.Count() > 0)
                     {
-                        var p_bound= intersects.OrderBy(P => P.Distance(start)).First();
+                        var p_bound= intersects.OrderByDescending(P => P.Distance(res.P1)).First();
                         res.P0 = p_bound;
                         //var extend_seg = new LineSegment(start, p_bound);
                         //extend_seg = extend_seg.Translation(-vector);
@@ -93,7 +103,17 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 if (intersects.Count() > 0)
                     res.P1 = intersects.First();
                 else
-                    res.P1=end;
+                {
+                    var lninsectpointss = new List<Coordinate>();
+                    foreach (var l in IniLanes.Select(ln => ln.Line))
+                    {
+                        lninsectpointss.AddRange(res.IntersectPoint(l));
+                    }
+                    if (lninsectpointss.Count() > 0)
+                        res.P1 = lninsectpointss.OrderBy(p => p.Distance(end)).First();
+                    else
+                        res.P1 = end;
+                }
                 //偏移直线超出了边界2750的case
                 if (case_out2750)
                 {
@@ -112,7 +132,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     var intersects = res.IntersectPoint(Boundary);
                     if (intersects.Count() > 0)
                     {
-                        var p_bound = intersects.OrderBy(P => P.Distance(end)).First();
+                        var p_bound = intersects.OrderByDescending(P => P.Distance(res.P0)).First();
                         res.P1 = p_bound;
                         //var extend_seg = new LineSegment(end, p_bound);
                         //extend_seg = extend_seg.Translation(-vector);
@@ -144,25 +164,51 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (dis < tol) return true;
             else return false;
         }
-        public static void SortLaneByDirection(List<Lane> lanes, int mode)
+        public static void SortLaneByDirection(List<Lane> lanes, int mode, Vector2D parentDir)
         {
-            var comparer = new LaneComparer(mode, DisCarAndHalfLaneBackBack);
+            var comparer = new LaneComparer(mode, DisCarAndHalfLaneBackBack, parentDir);
             lanes.Sort(comparer);
         }
         private class LaneComparer : IComparer<Lane>
         {
-            public LaneComparer(int mode, double filterLength)
+            public LaneComparer(int mode, double filterLength, Vector2D parentDir)
             {
                 Mode = mode;
                 FilterLength = filterLength;
+                ParentDir = parentDir;
             }
             private int Mode;
             private double FilterLength;
+            private Vector2D ParentDir;
             public int Compare(Lane a, Lane b)
             {
-                if (Mode == 0)
+                if (Mode == ((int)LayoutDirection.LENGTH))
                 {
                     return CompareLength(a.Line, b.Line);
+                }
+                else if (Mode == ((int)LayoutDirection.FOLLOWPREVIOUS))
+                {
+                    if (ParentDir == Vector2D.Zero)
+                    {
+                        return CompareLength(a.Line, b.Line);
+                    }
+                    else
+                    {
+                        var vec_a = Vector(a.Line);
+                        var vec_b = Vector(b.Line);
+                        if (IsPerpVector(vec_a, ParentDir) && !IsPerpVector(vec_b, ParentDir))
+                        {
+                            return -1;
+                        }
+                        else if (!IsPerpVector(vec_a, ParentDir) && IsPerpVector(vec_b, ParentDir))
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            return CompareLength(a.Line, b.Line);
+                        }
+                    }
                 }
                 else return 0;
             }

@@ -22,7 +22,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 count++;
                 if (count > 20) break;
 
-                SortLaneByDirection(IniLanes, LayoutMode);
+                SortLaneByDirection(IniLanes, LayoutMode,ParentDir);
                 GenerateLaneParas paras_integral_modules = new GenerateLaneParas();
                 GenerateLaneParas paras_adj_lanes = new GenerateLaneParas();
                 GenerateLaneParas paras_between_two_builds = new GenerateLaneParas();
@@ -65,6 +65,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (paras.SetGEndAdjLane != -1) IniLanes[paras.SetGEndAdjLane].GEndAdjLine = true;
             if (paras.LanesToAdd.Count > 0)
             {
+                ParentDir = Vector(paras.LanesToAdd[0].Line).GetPerpendicularVector();
                 IniLanes.AddRange(paras.LanesToAdd);
                 foreach (var lane in paras.LanesToAdd)
                 {

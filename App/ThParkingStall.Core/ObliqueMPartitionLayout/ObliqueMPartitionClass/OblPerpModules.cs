@@ -319,7 +319,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
 
         private void GeneratePerpModuleBoxes(List<Lane> lanes)
         {
-            SortLaneByDirection(lanes, LayoutMode);
+            SortLaneByDirection(lanes, LayoutMode,Vector2D.Zero);
             foreach (var lane in lanes)
             {
                 var line = new LineSegment(lane.Line);

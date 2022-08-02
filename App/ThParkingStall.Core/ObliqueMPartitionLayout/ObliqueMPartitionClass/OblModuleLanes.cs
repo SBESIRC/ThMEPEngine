@@ -28,8 +28,21 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 para_lanes_add.AddRange(_paras.LanesToAdd.Select(e => e.Line));
                 switch (LayoutMode)
                 {
-                    case 0:
+                    case ((int)LayoutDirection.LENGTH):
                         {
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
+                    case ((int)LayoutDirection.FOLLOWPREVIOUS):
+                        {
+                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && IsPerpVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)))
+                            {
+                                length *= LayoutScareFactor_ParentDir;
+                            }
                             if (length > max_length)
                             {
                                 max_length = length;

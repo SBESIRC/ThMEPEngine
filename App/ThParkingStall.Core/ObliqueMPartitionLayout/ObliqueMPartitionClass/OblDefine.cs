@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,6 +106,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public List<Polygon> BuildingBoxes = new List<Polygon>();
         public List<Ramp> RampList = new List<Ramp>();
         public List<Polygon> IniPillar = new List<Polygon>();
+        /// <summary>
+        /// 在判断生成车道的优先级时记载上一条生成车道的方向，法向，用于提高相同车道方向生成的优先级
+        /// </summary>
+        private Vector2D ParentDir = Vector2D.Zero;
 
         public bool AccurateCalculate = true;
         public static double DifferenceFromBackBack = 200;
@@ -146,18 +151,26 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();
         public List<LineSegment> OutUnsuredLanes = new List<LineSegment>();
         public static bool DisplayFinal = false;
-        public static int LayoutMode = ((int)LayoutDirection.LENGTH);
+        public static int LayoutMode = ((int)LayoutDirection.FOLLOWPREVIOUS);
         public static double LayoutScareFactor_Intergral = 0.7;
         public static double LayoutScareFactor_Adjacent = 0.7;
         public static double LayoutScareFactor_betweenBuilds = 0.7;
         public static double LayoutScareFactor_SingleVert = 0.7;
+        /// <summary>
+        /// 如果生成车道线与上一根方向一致，则乘以比例权重系数
+        /// </summary>
+        public static double LayoutScareFactor_ParentDir = 3;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
         public enum LayoutDirection : int
         {
             LENGTH = 0,
             HORIZONTAL = 1,
-            VERTICAL = 2
+            VERTICAL = 2,
+            /// <summary>
+            /// 与生成的车道线方向一致
+            /// </summary>
+            FOLLOWPREVIOUS = 3
         }
         public int Process(bool accurate)
         {
