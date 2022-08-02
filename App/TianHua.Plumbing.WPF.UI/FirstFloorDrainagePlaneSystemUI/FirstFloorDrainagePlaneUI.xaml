@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     Title="一层排水平面图" SizeToContent="Manual" 
-                    Height="480" Width="180" MaxWidth="180" MaxHeight="480"
+                    Height="460" Width="180" MaxWidth="180" MaxHeight="460"
              mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
@@ -45,6 +45,5 @@
             <cus:InputTextBox Width ="160" TextBoxInputType="InputDouble"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding DrivepipeLevel, Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
             <Label  Content="m"/>
         </StackPanel>
-        <cus:ImageButton Grid.Row="13" Content="生成套管标注" x:Name="btnPipeTag" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnParamSet_Click"></cus:ImageButton>
     </Grid>
 </cus:ThCustomWindow>

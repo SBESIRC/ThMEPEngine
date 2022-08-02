@@ -87,7 +87,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
         private bool IsLayer(string layer)
         {
-            if(layer.ToUpper() == "W-FRPT-HYDT-EQPM" || layer.ToUpper() == "W-FRPT-HYDT" || layer.ToUpper() == "W-FRPT-EXTG")
+            //if(layer.ToUpper() == "W-FRPT-HYDT-EQPM" || layer.ToUpper() == "W-FRPT-HYDT" || layer.ToUpper() == "W-FRPT-EXTG")
+            //{
+            //    return true;
+            //}
+            if (layer.ToUpper().Contains("HYDT"))
             {
                 return true;
             }

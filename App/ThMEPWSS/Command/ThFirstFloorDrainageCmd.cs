@@ -49,7 +49,7 @@ namespace ThMEPWSS.Command
                     return;
                 }
                 var pt = frameDic.First().Key.StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(new Autodesk.AutoCAD.Geometry.Point3d(0,0,0));
                 foreach (var dic in frameDic)
                 {
                     var frame = dic.Key.Clone() as Polyline;
@@ -60,6 +60,10 @@ namespace ThMEPWSS.Command
                     {
                         var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
                         verticalPipe.AddRange(drainingEquipment);
+                    }
+                    if (paramSetting.IndirectDrainageSetting == DrainageSettingEnum.RainwaterInlet13)
+                    {
+                        verticalPipe = dic.Key.CalRainwaterInlet13(acad, verticalPipe, originTransformer);
                     }
                     verticalPipe = FilterNeedRoutePipes(verticalPipe);
                     var thRooms = CalStructrueService.GetRoomInfo(acad, originTransformer);
@@ -196,12 +200,11 @@ namespace ThMEPWSS.Command
             var dbObjs = allWalls.ToCollection().UnionPolygons(false).Cast<Entity>().ToList();
             return StructGeoService.GetWallPolylines(dbObjs);
         }
-
+        
         /// <summary>
-        /// 回退transform，打印图纸到世界坐标系
+        /// 过滤立管
         /// </summary>
-        /// <param name="routes"></param>
-        /// <param name="originTransformer"></param>
+        /// <param name="pipes"></param>
         /// <returns></returns>
         private List<VerticalPipeModel> FilterNeedRoutePipes(List<VerticalPipeModel> pipes)
         {
@@ -216,7 +219,7 @@ namespace ThMEPWSS.Command
                     }
                     else
                     {
-                        pipe.PipeType = VerticalPipeType.holePipe;
+                        pipe.PipeType = VerticalPipeType.HolePipe;
                         verPipes.Add(pipe);
                     }
                 }
@@ -228,11 +231,11 @@ namespace ThMEPWSS.Command
                     }
                     else
                     {
-                        pipe.PipeType = VerticalPipeType.holePipe;
+                        pipe.PipeType = VerticalPipeType.HolePipe;
                         verPipes.Add(pipe);
                     }
                 }
-                else if (pipe.PipeType == VerticalPipeType.rainPipe)
+                else if (pipe.PipeType == VerticalPipeType.RainPipe)
                 {
                     if (paramSetting.RainWaterChecked.Value)
                     {
@@ -240,13 +243,17 @@ namespace ThMEPWSS.Command
                     }
                     else
                     {
-                        pipe.PipeType = VerticalPipeType.holePipe;
+                        pipe.PipeType = VerticalPipeType.HolePipe;
                         verPipes.Add(pipe);
                     }
                 }
+                else if (pipe.PipeType == VerticalPipeType.RainwaterInlet13Pipe)
+                {
+                    verPipes.Add(pipe);
+                }
                 else
                 {
-                    pipe.PipeType = VerticalPipeType.holePipe;
+                    pipe.PipeType = VerticalPipeType.HolePipe;
                     verPipes.Add(pipe);
                 }
             }

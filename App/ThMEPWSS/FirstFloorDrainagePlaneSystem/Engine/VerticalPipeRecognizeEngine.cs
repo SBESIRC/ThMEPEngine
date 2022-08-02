@@ -21,10 +21,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
         {
             { new List<string>(){ "*WLx-x" },  VerticalPipeType.SewagePipe},
             { new List<string>(){ "*FLx-x" },  VerticalPipeType.WasteWaterPipe},
-            { new List<string>(){ "YxLx-x" },  VerticalPipeType.rainPipe},
+            { new List<string>(){ "YxLx-x" },  VerticalPipeType.RainPipe},
             { new List<string>(){ "PLx-x" },  VerticalPipeType.ConfluencePipe},
             { new List<string>(){ "*NLx-x", "FLx-0" },  VerticalPipeType.CondensatePipe},
-            { new List<string>(){ "TLx-x" },  VerticalPipeType.holePipe},
+            { new List<string>(){ "TLx-x" },  VerticalPipeType.HolePipe},
         };
 
         /// <summary>

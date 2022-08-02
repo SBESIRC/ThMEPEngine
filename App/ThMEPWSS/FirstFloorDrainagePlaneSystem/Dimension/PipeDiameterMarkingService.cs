@@ -106,7 +106,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                     layerName = ThWSSCommon.DraiDimsLayerName;
                     break;
                 case VerticalPipeType.CondensatePipe:
-                case VerticalPipeType.rainPipe:
+                case VerticalPipeType.RainwaterInlet13Pipe:
+                case VerticalPipeType.RainPipe:
                     attriName = "De110";
                     layerName = ThWSSCommon.RainDimsLayerName;
                     break;

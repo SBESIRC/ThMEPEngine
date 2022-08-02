@@ -58,7 +58,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             {
                 var outFrameLines = dic.Key.GetAllLineByPolyline().OrderByDescending(x => x.Length).ToList();
                 var closetLine = outFrameLines.First();
-                var connectPipes = OrderPipeConnect(closetLine, mainPipes);
+                var connectPipes = OrderPipeConnect(closetLine, dic.Value);
                 var holesPipes = new List<VerticalPipeModel>(connectPipes);
                 holesPipes.AddRange(otherPipes);
                 var frameConnectLines = new Dictionary<VerticalPipeModel, Polyline>();
@@ -116,7 +116,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             foreach (var pipeLine in frameConnectLines)
             {
                 var closetLine = swageClosetLine;
-                if (pipeLine.Key.PipeType == VerticalPipeType.rainPipe || pipeLine.Key.PipeType == VerticalPipeType.CondensatePipe)
+                if (pipeLine.Key.PipeType == VerticalPipeType.RainPipe || pipeLine.Key.PipeType == VerticalPipeType.CondensatePipe)
                 {
                     closetLine = rainClosetLine;
                 }
@@ -276,7 +276,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 resPipes.Add(outFrame.First(), pipes);
                 return resPipes;
             }
-            var outFrameDic = outFrame.ToDictionary(x => x.GetAllLineByPolyline().OrderBy(z => z.Length).First(), y => y);
+            var outFrameDic = outFrame.ToDictionary(x => x.GetAllLineByPolyline().OrderByDescending(z => z.Length).First(), y => y);
             var outFrameLines = outFrameDic.Select(x => x.Key).ToList();
             foreach (var pipe in pipes)
             {
@@ -365,7 +365,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         {
             swageClosetLine = null;
             rainClosetLine = null;
-            var rainConnectLines = frameConnectLines.Where(x => x.Key.PipeType == VerticalPipeType.rainPipe || x.Key.PipeType == VerticalPipeType.CondensatePipe).ToDictionary(x => x.Key, y => y.Value);
+            var rainConnectLines = frameConnectLines.Where(x => x.Key.PipeType == VerticalPipeType.RainPipe || x.Key.PipeType == VerticalPipeType.CondensatePipe).ToDictionary(x => x.Key, y => y.Value);
             var swageConnectLines = frameConnectLines.Except(rainConnectLines).ToDictionary(x => x.Key, y => y.Value);
             if (rainConnectLines.Count > 0 && rainLines.Count > 0)
             {
