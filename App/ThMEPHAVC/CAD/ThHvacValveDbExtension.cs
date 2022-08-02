@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using DotNetARX;
 using Linq2Acad;
-using DotNetARX;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -62,78 +60,27 @@ namespace ThMEPHVAC.CAD
 
         public static void SetValveModel(this ObjectId obj, string model)
         {
-            var dynamicProperties = obj.GetDynProperties();
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY, model);
-            }
-            else
-            {
-                return;
-            }
+            obj.SetDynBlockValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY, model);
         }
 
         public static void SetValveWidth(this ObjectId obj, double width, string widthproperty)
         {
-            var dynamicProperties = obj.GetDynProperties();
-            if (dynamicProperties.Contains(widthproperty))
-            {
-                dynamicProperties.SetValue(widthproperty, width);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            obj.SetDynBlockValue(widthproperty, width);
         }
 
         public static void SetValveHeight(this ObjectId obj, double height, string lengthproperty)
         {
-            var dynamicProperties = obj.GetDynProperties();
-            if (dynamicProperties.Contains(lengthproperty))
-            {
-                dynamicProperties.SetValue(lengthproperty, height);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            obj.SetDynBlockValue(lengthproperty, height);
         }
 
         public static void SetValveTextHeight(this ObjectId obj, double height, string textheightproperty)
         {
-            var dynamicProperties = obj.GetDynProperties();
-            if (dynamicProperties.Contains(textheightproperty))
-            {
-                dynamicProperties.SetValue(textheightproperty, height);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            obj.SetDynBlockValue(textheightproperty, height);
         }
 
         public static void SetValveTextRotate(this ObjectId obj, double angle, string textrotateproperty)
         {
-            var dynamicProperties = obj.GetDynProperties();
-            if (dynamicProperties.Contains(textrotateproperty))
-            {
-                dynamicProperties.SetValue(textrotateproperty, angle);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            obj.SetDynBlockValue(textrotateproperty, angle);
         }
-
-
-        public static Point3d GetValveBasePoint(this ObjectId obj) 
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var blockRef = acadDatabase.Element<BlockReference>(obj);
-                return new Point3d(blockRef.Position.X, blockRef.Position.Y, 0);
-            }
-        }
-
     }
 }
