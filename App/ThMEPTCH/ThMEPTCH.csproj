@@ -69,6 +69,10 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="CAD\THDBColumnExtractionVisitor.cs" />
+    <Compile Include="CAD\ThDBStructureElementExtractionEngine.cs" />
+    <Compile Include="CAD\ThDBStructureElementBuilding.cs" />
+    <Compile Include="CAD\THDBWallExtractionVisitor.cs" />
     <Compile Include="CAD\ThTCHBuildingElementExtractionEngine.cs" />
     <Compile Include="CAD\ThTCHArchWallExtractionVisitor.cs" />
     <Compile Include="CAD\ThTCHDbExtension.cs" />
@@ -113,6 +117,11 @@
     <Compile Include="TCHArchDataConvert\THArchEntity\THArchEntityBase.cs" />
     <Compile Include="TCHArchDataConvert\THArchEntity\WallEntity.cs" />
     <Compile Include="TCHArchDataConvert\THArchEntity\WindowEntity.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureBeam.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureColumn.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureEntity.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlab.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureWall.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />

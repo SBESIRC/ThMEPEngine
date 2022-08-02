@@ -15,6 +15,7 @@ using ThMEPTCH.Model;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
+using ThMEPTCH.TCHArchDataConvert.THStructureEntity;
 
 namespace ThMEPTCH.Services
 {
@@ -44,6 +45,17 @@ namespace ThMEPTCH.Services
                 return engine.Results.Select(o => o.Data as TArchEntity).ToList();
             }
         }
+        
+        public List<THStructureEntity> GetDBEntities()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var building = new ThDBStructureElementBuilding();
+                building.BuildingFromMS(acdb.Database);
+                return new List<THStructureEntity>();
+                //return engine.Elements.Results.Select(o => o.Data as THStructureEntity).ToList();
+            }
+        }
 
         public ThTCHProject DWGToProject(bool isMemoryStory,bool railingToRegion)
         {
@@ -63,6 +75,7 @@ namespace ThMEPTCH.Services
             thBuilding.Uuid = prjId + "Building";
             var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = null != archDBData? archDBData.AllTArchEntitys(): GetArchEntities();
+            var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBEntities();
             InitFloorDBEntity(allEntitys);
             var entityConvert = new TCHDBEntityConvert(prjId);
             foreach (var floor in floorOrigin)
@@ -75,6 +88,11 @@ namespace ThMEPTCH.Services
                 var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntiy).Cast<TArchWindow>().ToList();
                 var walls = entityConvert.WallDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
                 floor.FloorEntitys.AddRange(walls);
+
+                {
+
+                }
+
                 var allSlabs = new List<ThTCHSlab>();
                 var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailing>();
                 var railingColls = new DBObjectCollection();
