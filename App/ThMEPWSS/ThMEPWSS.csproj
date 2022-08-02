@@ -237,8 +237,9 @@
     <Compile Include="SprinklerDim\Service\ThCoordinateService.cs" />
     <Compile Include="SprinklerDim\Service\ThCreateGroupService.cs" />
     <Compile Include="SprinklerDim\Service\ThOptimizeGroupService.cs" />
-    <Compile Include="SprinklerDim\Service\ThSprinklerDimNetworkService.cs" />
-    <Compile Include="SprinklerDim\Service\ThSprinklerDimPosition.cs" />
+    <Compile Include="SprinklerDim\Service\ThRoomWallConflictService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerDimensionService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerNetGroupListService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetGraphService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetworkService.cs" />

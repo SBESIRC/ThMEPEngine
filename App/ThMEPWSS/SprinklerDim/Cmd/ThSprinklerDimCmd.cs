@@ -48,7 +48,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         public override void SubExecute()
         {
             SprinklerDimExecute();
-        }
+        }  
         public void Dispose()
         {
         }
@@ -97,11 +97,15 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 dataProcess.ProcessData();
                 dataProcess.Print();
 
-                double step = 0;
-                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt, dataProcess.TchPipe, printTag, out step);
-                ThSprinklerDimPosition.DrawDimLines(netList, printTag, step);
+                // 给喷淋点分区
+                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
+                netList = ThRoomWallConflictService.ReGroupByRoom(netList, dataProcess.Room);
+                var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
 
                 // 区域标注喷淋点
+                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag);
+
+                
 
             }
         }

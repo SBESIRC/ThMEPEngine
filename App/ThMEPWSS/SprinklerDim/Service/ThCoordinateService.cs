@@ -22,10 +22,11 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static Matrix3d GetCoordinateTransformer(Point3d fromOrigin, Point3d toOrigin, Double angle)
         {
-            while(angle > (Math.PI / 2))
+            while(angle > Math.Abs(angle - Math.PI / 2))
             {
                 angle = angle - Math.PI / 2;
             }
+
             var matrix = Matrix3d.Displacement(toOrigin - fromOrigin) * Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
             return matrix.Inverse();
 
@@ -41,14 +42,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
 
             return transPts;
-        }
-
-        public static long GetValue(Point3d pt, bool isXAxis)
-        {
-            if (isXAxis)
-                return (long)Math.Round(pt.X / 45);
-            else
-                return (long)Math.Round(pt.Y / 45);
         }
 
 

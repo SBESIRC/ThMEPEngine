@@ -37,7 +37,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public List<Line> TchPipe { get; private set; } = new List<Line>();
         public List<Polyline> Column { get; set; } = new List<Polyline>();
         private List<Polyline> Wall { get; set; } = new List<Polyline>(); //mpolygon //polyline
-        private List<Polyline> Room { get; set; } = new List<Polyline>(); //mpolygon //polyline
+        public List<Polyline> Room { get; set; } = new List<Polyline>(); //mpolygon //polyline
 
         public void ProcessData()
         {

@@ -18,11 +18,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
         public static List<ThSprinklerNetGroup> GetSprinklerPtNetwork(List<Point3d> sprinkPts, List<Line> pipeLine, string printTag, out double dtSeg)
         {
             var netList = GetSprinklerPtOriginalNet(sprinkPts, pipeLine, out dtSeg, printTag);
-
-            var opNetList = GetSprinklerPtOptimizedNet(netList, dtSeg, printTag);
-            return opNetList;
-
-            //// test
+            return netList;
         }
 
 
@@ -67,46 +63,6 @@ namespace ThMEPWSS.SprinklerDim.Engine
             var netList = ThCreateGroupService.CreateSegGroup(allLineFinal, printTag);
 
             return netList;
-        }
-
-
-        private static List<ThSprinklerNetGroup> GetSprinklerPtOptimizedNet(List<ThSprinklerNetGroup> netList, double DTTol, string printTag)
-        {
-            List<ThSprinklerNetGroup> transNetList = ThSprinklerDimNetworkService.ChangeToOrthogonalCoordinates(netList);
-            ThSprinklerDimNetworkService.CorrectGraphConnection(ref transNetList, 45.0);
-            ThSprinklerDimNetworkService.GenerateCollineationGroup(ref transNetList);
-
-            List<ThSprinklerNetGroup> opNetList = new List<ThSprinklerNetGroup>();
-            foreach (ThSprinklerNetGroup netGroup in transNetList)
-            {
-                var pts = netGroup.Pts;
-
-                List<Line> remainingLines = new List<Line>();
-                for (int i = 0; i < netGroup.PtsGraph.Count; i++)
-                {
-                    ThSprinklerGraph graph = netGroup.PtsGraph[i];
-                    ThOptimizeGroupService.CutoffLines(pts, ref graph, netGroup.XCollineationGroup[i], true);
-                    ThOptimizeGroupService.CutoffLines(pts, ref graph, netGroup.YCollineationGroup[i], false);
-                    remainingLines.AddRange(graph.Print(pts));
-                }
-                ThSprinklerNetGroup newNetGroup = ThSprinklerNetGraphService.CreateNetwork(netGroup.Angle, remainingLines);
-                newNetGroup.Transformer = netGroup.Transformer;
-                opNetList.Add(newNetGroup);
-            }
-
-            for (int i = 0; i < opNetList.Count; i++)
-            {
-                var net = opNetList[i];
-                for (int j = 0; j < net.PtsGraph.Count; j++)
-                {
-                    List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
-                    var lines = net.PtsGraph[j].Print(pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-{0}-{1}", i, j, printTag), i % 7);
-                }
-            }
-
-            ThSprinklerDimNetworkService.GenerateCollineationGroup(ref opNetList);
-            return opNetList;
         }
 
 
