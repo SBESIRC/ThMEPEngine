@@ -18,17 +18,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public int start_dir = -1;
         public int end_dir = -1;
 
-        public int passage_index { get; set; } = -1;      //当前过道区域索引
-        public int pipe_id = -1;                          //套房索引
-        public int door_id = -1;                          //出口门的索引
+        public int passage_index { get; set; } = -1;      // 当前过道区域索引
+        public int pipe_id = -1;                          // 套房管道索引
+        public int door_id = -1;                          // 出口门的索引
 
-        public int end_offset = -1;                       //出口偏移条数
+        public int end_offset = -1;                       // 出口偏移条数
 
-        public bool in_near_wall = false;
-        public bool out_near_wall = false;
+        public bool in_near_wall = false;                 // 入口是否靠墙
+        public bool out_near_wall = false;                // 出口是否靠墙
 
-        public bool is_in_free = false;
-        public bool is_out_free = false;
+        public bool is_in_free = false;                   // 入口是否自由移动（未使用）
+        public bool is_out_free = false;                  // 出口是否自由移动
         PipeInput() { }
         public PipeInput(Point3d pin,double in_buffer)
         {

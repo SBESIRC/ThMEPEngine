@@ -10,13 +10,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
 {
     public class PassageDataPreprocessor
     {
-        // input
+        // 输入数据
         public Polyline region;
         public double buffer { get; set; } = 500;
         public double room_buffer { get; set; } = 200;
         public List<PipeInput> pipe_inputs { get; set; } = new List<PipeInput>();
         public int main_index { get; set; } = -1;
-        public int mode { get; set; } = 0;         // 0:normal generate/1:simple generate
+        public int mode { get; set; } = 0;         // 0:正常模式/1:集水器模式
 
         public bool main_has_output { get; set; } = true;
         public PipeInput main_pipe_input { get; set; } = null;
@@ -30,13 +30,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
             double room_buffer = 100, 
             int mode = 0)
         {
-            // adjust region
+            // 房间框线修整
             this.region = SmoothUtils.SmoothPolygonByRoundXY(region);
             for (int i = 0; i < pipe_in_list.Count; ++i)
                 pipe_in_list[i].CenterPoint = this.region.GetClosestPointTo(pipe_in_list[i].CenterPoint, false);
             for (int i = 0; i < pipe_out_list.Count; ++i)
                 pipe_out_list[i].CenterPoint = this.region.GetClosestPointTo(pipe_out_list[i].CenterPoint, false);
-            // check if main pipe has output
+            // 检查主导管线是否有出口
             main_has_output = pipe_in_list.Count == pipe_out_list.Count;
             if (!main_has_output)
             {
@@ -44,15 +44,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 pipe_in_list.RemoveAt(main_index);
                 main_index--;
             }
-            // build pipe input
+            // 初始化输入数据
             for (int i = 0; i < pipe_in_list.Count; ++i)
             {
                 pipe_inputs.Add(new PipeInput(pipe_in_list[i], pipe_out_list[i]));
                 pipe_inputs[i].passage_index = i;
             }
-            // calculate IO direction
+            // 计算出入口方向
             CalculateIODirection();
-            // calculate command buffer
+            // 计算推荐间距
             int count = 0;
             double max_pw = -1;
             for (int i = 0; i < pipe_inputs.Count; ++i)
@@ -64,17 +64,20 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
             }
             this.buffer = count == 0 ? buffer : 4 * max_pw;
+            // 设置距墙间距
             this.room_buffer = room_buffer;
+            // 设置主导管线索引
             this.main_index = main_index;
+            // 设置布置模式
             this.mode = CheckMode(mode);
         }
         void CalculateIODirection()
         {
-            // get room points
+            // 初始化房间边界点
             var points = PassageWayUtils.GetPolyPoints(this.region);
             for (int i = 0; i < pipe_inputs.Count; ++i)
             {
-                // calculate start direction
+                // 计算入口方向
                 var pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_inputs[i].pin, points);
                 var next = (pre + 1) % points.Count;
                 if (Math.Abs(pipe_inputs[i].pin.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].in_buffer) < 1 ||
@@ -82,7 +85,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     pipe_inputs[i].in_near_wall = true;
                 var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
                 pipe_inputs[i].start_dir = (dir + 3) % 4;
-                // calculate end direction
+                // 计算出口方向
                 pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_inputs[i].pout, points);
                 next = (pre + 1) % points.Count;
                 if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) < 1 ||
@@ -90,13 +93,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     pipe_inputs[i].out_near_wall = true;
                 dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
                 pipe_inputs[i].end_dir = (dir + 1) % 4;
-                // set end index on room boundary
+                // 设置出口所在房间边的索引
                 pipe_inputs[i].end_offset = pre;
-                // show result
+                // 打印输入数据
                 PassageShowUtils.PrintMassage(i.ToString() + ":" + pipe_inputs[i].start_dir.ToString() + pipe_inputs[i].end_dir.ToString() +
                                  "-" + (pipe_inputs[i].in_near_wall ? "T" : "F") + (pipe_inputs[i].out_near_wall ? "T" : "F") +
                                  "-" + pipe_inputs[i].is_out_free);
             }
+            // 计算没有出口的主导管线方向
             if (!main_has_output)
             {
                 var pre = PassageWayUtils.GetSegIndexOnPolygon(main_pipe_input.pin, points);
@@ -111,17 +115,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         int CheckMode(int mode)
         {
+            // 用户指定按照集水器模式布置
             if (mode == 1) 
                 return 1;
-
+            // 如果房间不是矩形，那么按照正常模式布置
             var points = SmoothUtils.SmoothPoints(PassageWayUtils.GetPolyPoints(region));
             if (points.Count > 4) 
                 return mode;
 
-            // pipes' out are not same
+            // 如果管线出口不在同一边，那么按照正常模式布置
             if (pipe_inputs[0].end_offset != pipe_inputs.Last().end_offset) 
                 return mode;
 
+            // 判断最后一条边是否是均匀布置
             var pre = pipe_inputs.First().end_offset;
             var next = (pre + 1) % points.Count;
             var dis = points[pre].DistanceTo(points[next]);
@@ -133,7 +139,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     mode = 1;
                 }
             }
-            //PassageShowUtils.ShowText(region.GetCentroidPoint(), "Mode:" + mode.ToString());
             return mode;
         }
     }

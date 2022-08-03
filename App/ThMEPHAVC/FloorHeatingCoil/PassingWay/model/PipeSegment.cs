@@ -8,17 +8,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
 {
     public class PipeSegment
     {
-        // for group dirs
-        public int dir;                 // right,up,left,down
-        public double start, end;       // end range
+        // 计算方向分组所需信息
+        public int dir;                 // 1~4:右上左下
+        public double start, end;       // 末段坐标范围
         public double min, max;
-        // for calculate shortest way
-        public bool side = true;        // true：turn left / false:turn right
-        public bool close_to = true;    // true:close to last end / false:close to last start
-        public double offset;           // offset buffer layer
-        public double pw;               // pipe_width
-        // for intersect with buffer
-        public bool equispaced;         // true:evenly distribute / false:fixed distance to room boundary
+        // 计算均匀分布路径所需信息
+        public bool side = true;        // T:下一段左转/F:下一段右转
+        public bool close_to = true;    // T:端点靠近末端范围终点/F:端点靠近末端范围起点
+        public double offset;           // 偏移条数
+        public double pw;               // 该段管道宽度
+        // 计算导向路径所需信息
+        public bool equispaced;         // T:均匀间距分布/F:推荐间距分布
         public PipeSegment() { }
         public PipeSegment(int dir,double pw)
         {

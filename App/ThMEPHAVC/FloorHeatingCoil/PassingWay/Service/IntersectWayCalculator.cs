@@ -147,7 +147,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             var points = PassageWayUtils.GetPolyPoints(buffer_polygon, true);
             // add first point
             var inter = IntersectUtils.PolylineIntersectionPolyline(equispaced_segments[index][0], buffer_polygon);
-            //if (inter == null || inter.Count == 0) return null;
             if (inter.Count == 0)
             {
                 if (equispaced_segments[index][0].NumberOfVertices > 2) return null;
@@ -223,7 +222,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     var move_index = (line.StartPoint.DistanceTo(last_point) < line.EndPoint.DistanceTo(last_point)) ? 0 : 1;
                     equispaced_segments[index].Last().SetPointAt(move_index, last_point.ToPoint2D());
                 }
-                //last_point = equispaced_segments[index].Last().GetClosestPointTo(last_point, true);
                 polygon_points.Add(last_point);
             }
 
@@ -349,6 +347,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             target_points.Add(polygon_points.Last());
             target_points.Add(GetLastPoint(index));
             target_points = SmoothUtils.SmoothPoints(target_points);
+            // smooth second seg
             if (target_points.Count >= 5)
             {
                 var dp = target_points[1] - target_points[2];
@@ -359,6 +358,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     target_points.RemoveAt(1);
                 }
             }
+            // smooth second last seg
             if (target_points.Count >= 5)
             {
                 var c = target_points.Count;

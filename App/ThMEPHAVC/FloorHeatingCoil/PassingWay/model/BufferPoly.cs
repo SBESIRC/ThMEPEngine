@@ -36,6 +36,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
             buff.Clear();
             buff = null;
         }
+        /// <summary>
+        /// 带有宽度信息的多段线外扩，外扩之后只保留外壳
+        /// </summary>
+        /// <param name="multiple">外扩倍数</param>
+        /// <returns>外扩后的多段线轮廓</returns>
         public Polyline Buffer(int multiple = 1)
         {
             var list_buffer = new List<Polyline>();
@@ -56,6 +61,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 polyline.Dispose();
             return ret;
         }
+        /// <summary>
+        /// 带有宽度信息的多段线外扩，外扩之后保留外壳和洞
+        /// </summary>
+        /// <param name="multiple">外扩倍数</param>
+        /// <returns>外扩后的多段线轮廓</returns>
         public MPolygon BufferWithHole(int multiple = 1)
         {
             var list_buffer = new List<Polyline>();
