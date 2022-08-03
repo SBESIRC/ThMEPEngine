@@ -5,13 +5,15 @@ using System.Collections.ObjectModel;
 using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPStructure.Reinforcement.Command;
-using ThMEPStructure.Reinforcement.Model;
-using ThMEPStructure.Reinforcement.Service;
 using Dreambuild.AutoCAD;
-using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
+using ThMEPEngineCore;
+using ThMEPStructure.Reinforcement.TSSD;
+using ThMEPStructure.Reinforcement.Model;
+using ThMEPStructure.Reinforcement.Command;
+using ThMEPStructure.Reinforcement.Service;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
 {
@@ -27,6 +29,9 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         private static List<DBObjectCollection> ComponentBoundaries { get; set; }
         private List<List<EdgeComponentExtractInfo>> GroupResults { get; set; }
         public bool IsNeedMerge { get; private set; } = false;
+        // 收集非标的构件，用于把非标的构件打印到图纸上，目前和UI的展现是没关系的
+        private List<EdgeComponentExtractInfo> noneStandardEdgeComponents;
+
         public EdgeComponentDrawVM()
         {
             DrawModel = new EdgeComponentDrawModel();
@@ -35,15 +40,16 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             LeaderTypes = new ObservableCollection<string>(ThEdgeComponentDrawConfig.Instance.LeaderTypes);
             MarkPositions = new ObservableCollection<string>(ThEdgeComponentDrawConfig.Instance.MarkPositions);
             EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
-            if(ComponentBoundaries==null)
+            if (ComponentBoundaries == null)
             {
                 ComponentBoundaries = new List<DBObjectCollection>();
-            }  
+            }
             else
             {
                 RemoveComponentFrames();
             }
             GroupResults = new List<List<EdgeComponentExtractInfo>>();
+            noneStandardEdgeComponents = new List<EdgeComponentExtractInfo>();            
         }
         public void Select()
         {
@@ -55,10 +61,11 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 cmd.WallColumnLayers = Split(DrawModel.WallColumnLayer, LayerLinkCharater);
 
                 cmd.Execute();
-                if(cmd.IsSuccess)
+                if (cmd.IsSuccess)
                 {
                     Clear();
-                    if(cmd.ExtractInfos.Count>0)
+                    noneStandardEdgeComponents = new List<EdgeComponentExtractInfo>();
+                    if (cmd.ExtractInfos.Count > 0)
                     {
                         IsNeedMerge = true;
                     }
@@ -70,6 +77,10 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                     RemoveComponentFrames();
                     ComponentBoundaries.Add(obbs);
                     ShowComponentFrames();
+
+                    // 收集非标的构件
+                    // EdgeComponents中包括非标的构件，是用于在UI上呈现的，归并后就只剩标准件了
+                    EdgeComponents.Where(o => !o.IsStandard).ForEach(o => noneStandardEdgeComponents.Add(o));
                 }
             };
         }
@@ -104,7 +115,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             {
                 int index = 1;
                 var items = group.ToList();
-                for(int i=0;i< items.Count;i++)
+                for (int i = 0; i < items.Count; i++)
                 {
                     items[i].Number = group.Key + index;
                     index++;
@@ -112,7 +123,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 }
             }
             // 把编号再赋值给同组的其它成员
-            foreach(var info in EdgeComponents)
+            foreach (var info in EdgeComponents)
             {
                 GroupResults.ForEach(g =>
                 {
@@ -128,17 +139,81 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         }
         public void Draw()
         {
-            using (var cmd = new ThReinforceDrawCmd())
+            using (var docLock = Active.Document.LockDocument())
             {
-                RemoveComponentFrames();
-                cmd.ExtractInfos = EdgeComponents.ToList();
-                cmd.ExtractInfoGroups = GroupResults;
-                DrawModel.SetConfig(); // 把参数传递配置中
-                cmd.Execute();
-                // 做完绘制后，关闭此选项
-                IsNeedMerge = false;
+                int gbzLastCodeIndex = 0;
+                int ybzLastCodeIndex = 0;
+                // 绘制标准构件
+                using (var cmd = new ThReinforceDrawCmd())
+                {
+                    RemoveComponentFrames();
+                    cmd.ExtractInfos = EdgeComponents.ToList();
+                    cmd.ExtractInfoGroups = GroupResults;
+                    DrawModel.SetConfig(); // 把参数传递配置中
+                    cmd.Execute();
+                    // 做完绘制后，关闭此选项
+                    IsNeedMerge = false;
+
+                    gbzLastCodeIndex = cmd.GBZLastCodeIndex;
+                    ybzLastCodeIndex = cmd.YBZLastCodeIndex;
+                }
+
+                // 打印非标构件
+                PrintNonStandardEdgeComponentToCad(noneStandardEdgeComponents);
+
+                // 写入到TSSD
+                string nonStandardEdgeComponentLayer = ThImportTemplateStyleService.NonStandardEdgeComponentLayer;
+                var tssdConfig = Create(ThEdgeComponentDrawConfig.Instance, gbzLastCodeIndex + 1,
+                    ybzLastCodeIndex + 1, nonStandardEdgeComponentLayer);
+                WriteToTSSD(tssdConfig);
             }
         }
+
+        private TSSDEdgeComponentConfig Create(ThEdgeComponentDrawConfig config,int gbzStartNumber,int ybzStartNumber,string wallColumnLayer)
+        {
+            return new TSSDEdgeComponentConfig()
+            {
+                CalculationSoftware = config.DwgSource, //YJK
+                WallColumnLayer = wallColumnLayer,
+                SortWay = config.SortWay,
+                LeaderType = config.LeaderType,
+                MergeSize = config.Size.ToString(),
+                MarkPosition = config.MarkPosition,
+                MergeStirrupRatio = config.StirrupRatio.ToString(),
+                MergeReinforceRatio = config.ReinforceRatio.ToString(),
+                MergeConsiderWall = config.IsConsiderWall,
+                ConstructPrefixStartNumber = gbzStartNumber.ToString(),
+                ConstraintPrefixStartNumber = ybzStartNumber.ToString(),
+            };
+        }
+
+        private void WriteToTSSD(TSSDEdgeComponentConfig config)
+        {
+            using (var writer = new TSSDEdgeComponentConfigWriter())
+            {
+                writer.WriteToIni(config);
+            }
+        }
+
+        private void PrintNonStandardEdgeComponentToCad(List<EdgeComponentExtractInfo> infos)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var nonStandardLayer = ThImportTemplateStyleService.NonStandardEdgeComponentLayer;
+                acadDb.Database.CreateAILayer(nonStandardLayer, 255);
+                infos.Where(o => o.EdgeComponent != null)
+                    .ForEach(o =>
+                    {
+                        var clone = o.EdgeComponent.Clone() as Polyline;
+                        acadDb.ModelSpace.Add(clone);
+                        clone.Layer = nonStandardLayer;
+                        clone.ColorIndex = (int)ColorIndex.BYLAYER;
+                        clone.LineWeight = LineWeight.ByLayer;
+                        clone.Linetype = "Bylayer";
+                    });
+            }
+        }
+
         public void SetWallColumnLayer()
         {
             var layer = SelectEntityLayer();

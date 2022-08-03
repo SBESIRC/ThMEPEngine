@@ -158,6 +158,8 @@
     <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunSecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
+    <Compile Include="Reinforcement\Service\ThIniTool.cs" />
+    <Compile Include="Reinforcement\Service\ThRegistryTool.cs" />
     <Compile Include="Reinforcement\Service\ThReinforceEnhanceService.cs" />
     <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
     <Compile Include="Reinforcement\Service\ThSteelDataManager.cs" />
@@ -169,6 +171,10 @@
     <Compile Include="Reinforcement\Service\ThReinforcementUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Printer\PrintConfig.cs" />
+    <Compile Include="Reinforcement\TSSD\TSSDEdgeComponentConfig.cs" />
+    <Compile Include="Reinforcement\TSSD\TSSDEdgeComponentConfigWriter.cs" />
+    <Compile Include="Reinforcement\TSSD\TSSDWallColumnConfig.cs" />
+    <Compile Include="Reinforcement\TSSD\TSSDWallColumnConfigWriter.cs" />
     <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamTextBlkConverter.cs" />
