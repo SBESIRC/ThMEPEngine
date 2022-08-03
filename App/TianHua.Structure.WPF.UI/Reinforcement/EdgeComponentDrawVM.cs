@@ -31,7 +31,6 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public bool IsNeedMerge { get; private set; } = false;
         // 收集非标的构件，用于把非标的构件打印到图纸上，目前和UI的展现是没关系的
         private List<EdgeComponentExtractInfo> noneStandardEdgeComponents;
-
         public EdgeComponentDrawVM()
         {
             DrawModel = new EdgeComponentDrawModel();
@@ -55,6 +54,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             using (var cmd = new ThYjkReinforceExtractCmd())
             {
+                SetFocusToDwgView();
                 // 传入参数
                 cmd.WallLayers = Split(DrawModel.WallLayer, LayerLinkCharater);
                 cmd.TextLayers = Split(DrawModel.TextLayer, LayerLinkCharater);
@@ -141,6 +141,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             using (var docLock = Active.Document.LockDocument())
             {
+                SetFocusToDwgView();
                 int gbzLastCodeIndex = 0;
                 int ybzLastCodeIndex = 0;
                 // 绘制标准构件
@@ -157,7 +158,6 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                     gbzLastCodeIndex = cmd.GBZLastCodeIndex;
                     ybzLastCodeIndex = cmd.YBZLastCodeIndex;
                 }
-
                 // 打印非标构件
                 PrintNonStandardEdgeComponentToCad(noneStandardEdgeComponents);
 
@@ -167,7 +167,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                     ybzLastCodeIndex + 1, nonStandardEdgeComponentLayer);
                 WriteToTSSD(tssdConfig);
             }
-        }
+        }        
 
         private TSSDEdgeComponentConfig Create(ThEdgeComponentDrawConfig config,int gbzStartNumber,int ybzStartNumber,string wallColumnLayer)
         {
