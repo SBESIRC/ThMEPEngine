@@ -24,42 +24,67 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 
         }
 
+        //private static void TransPtNormalZ(List<ThDrainageTreeNode> rootList)
+        //{
+        //    //rootlist已经根据冷热排序
+        //    rootList = rootList.OrderByDescending(x => x.IsCool).ToList();
+        //    var rootListDict = rootList.ToDictionary(x => x, x => x.GetDescendant());
+
+        //    var allNode = new List<ThDrainageTreeNode>();
+        //    allNode.AddRange(rootList);
+        //    allNode.AddRange(rootListDict.SelectMany(x => x.Value));
+
+        //    var minZ = allNode.Select(x => x.Pt.Z).OrderBy(x => x).First();
+        //    minZ = Math.Round(minZ / 1000, MidpointRounding.AwayFromZero);
+
+        //    //change cool first
+        //    foreach (var root in rootList)
+        //    {
+        //        if (root.IsCool == true)
+        //        {
+        //            var zBase = FindZBaseValue(root, minZ);
+        //            root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, zBase);
+        //        }
+        //        if (root.IsCool == false)
+        //        {
+        //            var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal && o.Terminal != null).Any());
+        //            if (pairCool.Count() > 0)
+        //            {
+        //                var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
+        //            }
+        //            else
+        //            {
+        //                var zBase = FindZBaseValue(root, minZ);
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, zBase);
+        //            }
+        //        }
+        //        ThTransformTopToADService.TransPtNormalZ(root);
+        //    }
+        //}
+
         private static void TransPtNormalZ(List<ThDrainageTreeNode> rootList)
         {
-            //rootlist已经根据冷热排序
-            rootList = rootList.OrderByDescending(x => x.IsCool).ToList();
-            var rootListDict = rootList.ToDictionary(x => x, x => x.GetDescendant());
-
             var allNode = new List<ThDrainageTreeNode>();
             allNode.AddRange(rootList);
-            allNode.AddRange(rootListDict.SelectMany(x => x.Value));
-
-            var minZ = allNode.Select(x => x.Pt.Z).OrderBy(x => x).First();
-            minZ = Math.Round(minZ / 1000, MidpointRounding.AwayFromZero);
-
-            //change cool first
-            foreach (var root in rootList)
+            allNode.AddRange(rootList.SelectMany(x => x.GetDescendant()));
+          
+            foreach (var node in allNode)
             {
-                if (root.IsCool == true)
+                var nodeZ = Math.Round(node.Pt.Z / 1000, MidpointRounding.AwayFromZero);
+                if (nodeZ == 3)
                 {
-                    var zBase = FindZBaseValue(root, minZ);
-                    root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, zBase);
+                    node.TransPt = new Point3d(node.TransPt.X, node.TransPt.Y, 2000);
                 }
-                if (root.IsCool == false)
+                else if (nodeZ == 1)//这里还是要统一否则会有1020这种数值
                 {
-                    var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal && o.Terminal !=null).Any());
-                    if (pairCool.Count() > 0)
-                    {
-                        var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
-                    }
-                    else
-                    {
-                        var zBase = FindZBaseValue(root, minZ);
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, zBase);
-                    }
+                    node.TransPt = new Point3d(node.TransPt.X, node.TransPt.Y, 1000);
                 }
-                ThTransformTopToADService.TransPtNormalZ(root);
+                else if (nodeZ == 0)
+                {
+                    node.TransPt = new Point3d(node.TransPt.X, node.TransPt.Y, 0);
+                }
+
             }
         }
 
@@ -92,7 +117,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             var allNode = rootList.SelectMany(x => x.GetDescendant()).ToList();
             //rootList.ForEach(x => allNode.Add(x));
             allNode.AddRange(rootList);
-            
+
 
             foreach (var node in allNode)
             {

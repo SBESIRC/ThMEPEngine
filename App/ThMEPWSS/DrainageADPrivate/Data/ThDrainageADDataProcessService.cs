@@ -118,12 +118,12 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 //这里不考虑是不是天正管了。一律当圆圈处理
                 //if (pipe.Data is BlockReference || pipe.Data is Circle)
                 //{
-                    var nearPipe = FindClosePipe(allpipe, pt);
-                    var vpipeLine = CreateBlkCVPipe(nearPipe, pt);
-                    if (vpipeLine != null)
-                    {
-                        VerticalPipe.Add(vpipeLine);
-                    }
+                var nearPipe = FindClosePipe(allpipe, pt);
+                var vpipeLine = CreateBlkCVPipe(nearPipe, pt);
+                if (vpipeLine != null)
+                {
+                    VerticalPipe.Add(vpipeLine);
+                }
                 //}
                 //else if (pipe.Data is Entity entity)
                 //{
@@ -179,6 +179,63 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             return nearSameDirPipe;
         }
 
+        //private static Line CreateBlkCVPipe(List<Point3d> nearPoint, Point3d pt)
+        //{
+        //    Line vpipeLine = null;
+        //    var nearZPt = new Point3d();
+        //    var projPt = new Point3d(pt.X, pt.Y, 0);
+
+        //    if (nearPoint.Count >= 2)
+        //    {
+        //        var zDict = nearPoint.Select(x => new KeyValuePair<double, double>(x.Z, Math.Round(x.Z / 1000, MidpointRounding.AwayFromZero))).ToList();
+        //        var zdictGroup = zDict.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.Select(v => v.Key).ToList());
+        //        zdictGroup = zdictGroup.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+        //        if (zdictGroup.Count() >= 2)
+        //        {
+        //            //立管附近点在不同平面
+        //            //立管附近点里面找最大z和最小z
+        //            //如果有0 1000 3000 三层则无法处理 直接找最大最小
+        //            var zMax = zdictGroup.First().Value.Max();
+        //            var zMin = zdictGroup.Last().Value.Min();
+
+        //            var spt = new Point3d(pt.X, pt.Y, zMax);
+        //            var ept = new Point3d(pt.X, pt.Y, zMin);
+        //            vpipeLine = new Line(spt, ept);
+        //        }
+        //        else if (zdictGroup.Count() == 1)
+        //        {
+        //            //立管附近点都在一个平面，找最近的点z当一个点处理，即立管只有一段连平面管线另一端为末端或起点
+        //            nearZPt = nearPoint.OrderBy(x => new Point3d(x.X, x.Y, 0).DistanceTo(projPt)).First();
+        //        }
+        //    }
+        //    else if (nearPoint.Count == 1)
+        //    {
+        //        nearZPt = nearPoint.First();
+        //    }
+
+        //    if (vpipeLine == null && nearZPt != Point3d.Origin)
+        //    {
+        //        var roundZ = Math.Round(nearZPt.Z / 1000, MidpointRounding.AwayFromZero);
+        //        if (roundZ == 0) //
+        //        {
+        //            //0平面
+        //            var spt = new Point3d(pt.X, pt.Y, nearZPt.Z + 1000);
+        //            var ept = new Point3d(pt.X, pt.Y, nearZPt.Z);
+        //            vpipeLine = new Line(spt, ept);
+        //        }
+        //        else if (roundZ == 3)
+        //        {
+        //            //3000平面
+        //            var spt = new Point3d(pt.X, pt.Y, nearZPt.Z);
+        //            var ept = new Point3d(pt.X, pt.Y, nearZPt.Z - 1000);
+        //            vpipeLine = new Line(spt, ept);
+        //        }
+        //    }
+
+        //    return vpipeLine;
+
+        //}
+
         private static Line CreateBlkCVPipe(List<Point3d> nearPoint, Point3d pt)
         {
             Line vpipeLine = null;
@@ -187,26 +244,34 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
             if (nearPoint.Count >= 2)
             {
-                var zDict = nearPoint.Select(x => new KeyValuePair<double, double>(x.Z, Math.Round(x.Z / 1000, MidpointRounding.AwayFromZero))).ToList();
-                var zdictGroup = zDict.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.Select(v => v.Key).ToList());
-                zdictGroup = zdictGroup.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-                if (zdictGroup.Count() >= 2)
-                {
-                    //立管附近点在不同平面
-                    //立管附近点里面找最大z和最小z
-                    //如果有0 1000 3000 三层则无法处理 直接找最大最小
-                    var zMax = zdictGroup.First().Value.Max();
-                    var zMin = zdictGroup.Last().Value.Min();
+                //var zDict = nearPoint.Select(x => new KeyValuePair<double, double>(x.Z, Math.Round(x.Z / 1000, MidpointRounding.AwayFromZero))).ToList();
+                //var zdictGroup = zDict.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.Select(v => v.Key).ToList());
+                //zdictGroup = zdictGroup.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                //if (zdictGroup.Count() >= 2)
+                //{
+                //    立管附近点在不同平面
+                //    立管附近点里面找最大z和最小z
+                //    如果有0 1000 3000 三层则无法处理 直接找最大最小
+                //    var zMax = zdictGroup.First().Value.Max();
+                //    var zMin = zdictGroup.Last().Value.Min();
 
-                    var spt = new Point3d(pt.X, pt.Y, zMax);
-                    var ept = new Point3d(pt.X, pt.Y, zMin);
-                    vpipeLine = new Line(spt, ept);
-                }
-                else if (zdictGroup.Count() == 1)
-                {
-                    //立管附近点都在一个平面，找最近的点z当一个点处理，即立管只有一段连平面管线另一端为末端或起点
-                    nearZPt = nearPoint.OrderBy(x => new Point3d(x.X, x.Y, 0).DistanceTo(projPt)).First();
-                }
+                //    var spt = new Point3d(pt.X, pt.Y, zMax);
+                //    var ept = new Point3d(pt.X, pt.Y, zMin);
+                //    vpipeLine = new Line(spt, ept);
+                //}
+                //else if (zdictGroup.Count() == 1)
+                //{
+                //    立管附近点都在一个平面，找最近的点z当一个点处理，即立管只有一段连平面管线另一端为末端或起点
+                //    nearZPt = nearPoint.OrderBy(x => new Point3d(x.X, x.Y, 0).DistanceTo(projPt)).First();
+                //}
+
+                //真实高差，生成轴侧刷Z值时再根据水平面去决定z值
+                var zMax = nearPoint.Max(x => x.Z);
+                var zMin = nearPoint.Min(x => x.Z);
+
+                var spt = new Point3d(pt.X, pt.Y, zMax);
+                var ept = new Point3d(pt.X, pt.Y, zMin);
+                vpipeLine = new Line(spt, ept);
             }
             else if (nearPoint.Count == 1)
             {
@@ -227,7 +292,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 {
                     //3000平面
                     var spt = new Point3d(pt.X, pt.Y, nearZPt.Z);
-                    var ept = new Point3d(pt.X, pt.Y, nearZPt.Z - 1000);
+                    var ept = new Point3d(pt.X, pt.Y, nearZPt.Z - 2000);//都当成末端去处理,统一末端都是1000左右，高位下2000，低位上1000
                     vpipeLine = new Line(spt, ept);
                 }
             }
@@ -235,7 +300,6 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             return vpipeLine;
 
         }
-
 
 
 
