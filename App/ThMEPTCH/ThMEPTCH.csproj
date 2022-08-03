@@ -83,6 +83,7 @@
     <Compile Include="Model\SurrogateModel\PolylineSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Vector3DSurrogate.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
+    <Compile Include="Model\ThTCHCableTray.cs" />
     <Compile Include="Model\ThTCHElement.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
     <Compile Include="Model\ThTCHSlabDescendingData.cs" />
@@ -94,6 +95,8 @@
     <Compile Include="Model\ThTCHProject.cs" />
     <Compile Include="Model\ThTCHSite.cs" />
     <Compile Include="Model\ThTCHSprinkler.cs" />
+    <Compile Include="Model\ThTCHTelecInterface.cs" />
+    <Compile Include="Model\ThTCHTelecObject.cs" />
     <Compile Include="Model\ThTCHVerticalPipe.cs" />
     <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Model\ThTCHWindow.cs" />
@@ -113,10 +116,14 @@
     <Compile Include="TCHArchDataConvert\THArchEntity\THArchEntityBase.cs" />
     <Compile Include="TCHArchDataConvert\THArchEntity\WallEntity.cs" />
     <Compile Include="TCHArchDataConvert\THArchEntity\WindowEntity.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawCableTrayService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawVerticalPipeService.cs" />
+    <Compile Include="TCHTables\TCHTelecCableTray.cs" />
+    <Compile Include="TCHTables\TCHTelecInterface.cs" />
+    <Compile Include="TCHTables\TCHTelecObject.cs" />
     <Compile Include="TCHTables\TCHTgPoint.cs" />
     <Compile Include="TCHTables\TCHTgPublicList.cs" />
     <Compile Include="TCHTables\TCHTgSymbMultiLeader.cs" />

@@ -1,7 +1,9 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
-using ThMEPTCH.CAD;
+using ThMEPTCH.Model;
+using ThMEPTCH.TCHDrawServices;
 
 namespace ThMEPTCH
 {
@@ -26,6 +28,46 @@ namespace ThMEPTCH
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+        }
+
+        [CommandMethod("TIANHUACAD", "THTZQJ", CommandFlags.Modal)]
+        public void THTZQJ()
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var acad = AcadDatabase.Active())
+            {
+                var service = new TCHDrawCableTrayService();
+                var telecObject = new ThTCHTelecObject
+                {
+                    Type = TelecObjectType.CableTray,
+                };
+                var startInterface = new ThTCHTelecInterface
+                {
+                    Position = new Point3d(0, 0, 0),
+                    Breadth = 300,
+                    Normal = new Vector3d(0, 0, 1),
+                    Direction = new Vector3d(1, 0, 0),
+                };
+                var endInterface = new ThTCHTelecInterface
+                {
+                    Position = new Point3d(3000, 0, 0),
+                    Breadth = 300,
+                    Normal = new Vector3d(0, 0, 1),
+                    Direction = new Vector3d(1, 0, 0),
+                };
+                var cableTray = new ThTCHCableTray
+                {
+                    ObjectId = telecObject,
+                    Type = "C-01-10-3",
+                    Style = CableTrayStyle.Trough,
+                    CableTraySystem = CableTraySystem.CableTray,
+                    Height = 100,
+                    StartInterfaceId = startInterface,
+                    EndInterfaceId = endInterface,
+                };
+                service.CableTrays.Add(cableTray);
+                service.DrawExecute(true, false);
+            }
         }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Runtime;
-using DotNetARX;
 using System.Collections.Generic;
 using System.IO;
 using ThCADExtension;
@@ -29,7 +26,7 @@ namespace ThMEPTCH.TCHDrawServices
                 return;
             if (!File.Exists(TCHTemplateDBPath))
                 return;
-            if (File.Exists(TCHDBPath)) 
+            if (File.Exists(TCHDBPath))
             {
                 if (isDelHisDB)
                     File.Delete(TCHDBPath);
@@ -38,34 +35,34 @@ namespace ThMEPTCH.TCHDrawServices
                 File.Copy(TCHTemplateDBPath, TCHDBPath);
             DBHelper = new THMEPSQLiteServices(TCHDBPath);
         }
-        public virtual void DrawExecute(bool sendImpTCHCmd =true,bool delHisDB =true)
+        public virtual void DrawExecute(bool sendImpTCHCmd = true, bool delHisDB = true)
         {
             InitTCHDatabase(delHisDB);
             ClearDBTableHistoricalData();
             WriteModelToTCHDatabase();
             CloseDBConnect();
-            if (sendImpTCHCmd) 
+            if (sendImpTCHCmd)
             {
                 DrawTCHDatabaseToCAD();
                 DeleteDBFile();
             }
         }
-        protected virtual void ClearDBTableHistoricalData() 
+        protected virtual void ClearDBTableHistoricalData()
         {
             if (null == ClearDataTables || ClearDataTables.Count < 1)
                 return;
-            foreach (var item in ClearDataTables) 
+            foreach (var item in ClearDataTables)
             {
                 if (string.IsNullOrEmpty(item))
                     continue;
                 DBHelper.ClearTable(item);
             }
         }
-        protected void WriteModelToTCH(object tchTableModel,string tableName,ref ulong dataId) 
+        protected void WriteModelToTCH(object tchTableModel, string tableName, ref ulong dataId)
         {
             var pointSqlStr = ThSQLHelper.TabelModelToSqlString(tableName, tchTableModel);
             DBHelper.ExecuteNonQuery(pointSqlStr);
-            dataId = dataId + 1;
+            dataId += 1;
         }
         protected void CloseDBConnect(bool delHelper = false)
         {
