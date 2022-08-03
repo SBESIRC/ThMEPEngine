@@ -451,12 +451,13 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(obj);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER, portWidth);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT, portHeight);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE, portRange);
+                var properties = data.CustomProperties;
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER, portWidth);
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT, portHeight);
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE, portRange);
                 var block = acadDatabase.Element<BlockReference>(obj);
                 foreach (ObjectId attId in block.AttributeCollection)
                 {
@@ -476,11 +477,12 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(obj);
+                var properties = data.CustomProperties;
                 foreach (var item in propertyValues)
                 {
-                    if (data.CustomProperties.Contains(item.Key))
+                    if (properties.Contains(item.Key))
                     {
-                        data.CustomProperties.SetValue(item.Key, item.Value);
+                        properties.SetValue(item.Key, item.Value);
                     }
                 }
             }
@@ -499,10 +501,11 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(obj);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_LENGTH))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_LENGTH, pipeWidth);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_WIDTH))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_WIDTH, pipeHeight);
+                var properties = data.CustomProperties;
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_LENGTH))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_LENGTH, pipeWidth);
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_WIDTH))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_VERTICAL_PIPE_WIDTH, pipeHeight);
             }
         }
         public static void SetBrokenLineDynBlockProperity(ObjectId obj, double pipeWidth)
@@ -510,8 +513,9 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(obj);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_BROKEN_LEN))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_BROKEN_LEN, pipeWidth);
+                var properties = data.CustomProperties;
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_BROKEN_LEN))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_BROKEN_LEN, pipeWidth);
             }
         }
         public static void SetFlipDown45DynBlockProperity(ObjectId obj, double width, double height)
@@ -519,10 +523,11 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(obj);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_WIDTH))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_WIDTH, width);
-                if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_HEIGHT))
-                    data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_HEIGHT, height);
+                var properties = data.CustomProperties;
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_WIDTH))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_WIDTH, width);
+                if (properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_HEIGHT))
+                    properties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_FLIP_DOWN_45_HEIGHT, height);
             }
         }
 
