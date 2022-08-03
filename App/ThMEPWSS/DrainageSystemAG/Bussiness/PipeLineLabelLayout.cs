@@ -244,13 +244,23 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (layoutDir.outDirection.X < 0)
                     textStartPoint = textStartPoint + layoutDir.outDirection.MultiplyBy(textWidth);
                 var textPLine = TextOutPolyLine(textStartPoint, Vector3d.XAxis, textWidth, Vector3d.YAxis, textHeight);
-                _obstacleEntities.AddObstacleEntity(textPLine,true);
+                _obstacleEntities.AddObstacleEntity(textPLine, true);
                 int plCount = 0;
                 for (int i = 0; i < thisLinePipes.Count; i++)
                 {
                     var pipe = thisLinePipes[i];
+                    var pipeNames = new string[] { "FL", "PL", "TL", "FCL", "FYL", "WL" };
                     string txtLineLayer = ThWSSCommon.Layout_PipeRainTextLayerName;
-                    if (pipe.UpText.ToUpper().Contains("FL") || pipe.UpText.ToUpper().Contains("PL") || pipe.UpText.ToUpper().Contains("TL"))
+                    var matched_pipeName = false;
+                    foreach (var name in pipeNames)
+                    {
+                        if (pipe.UpText.ToUpper().Contains(name))
+                        {
+                            matched_pipeName = true;
+                            break;
+                        }
+                    }
+                    if (matched_pipeName)
                     {
                         plCount += 1;
                         txtLineLayer = ThWSSCommon.Layout_PipeWastDrainTextLayerName;
