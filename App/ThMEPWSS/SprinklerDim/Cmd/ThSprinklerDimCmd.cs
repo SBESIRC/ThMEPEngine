@@ -86,7 +86,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                     InputExtractors = dataFactory.Extractors,
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
-
+                    AxisCurvesData  = dataFactory.AxisCurves,
                 };
 
                 // dataQuery.Transform(transformer);

@@ -70,6 +70,22 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dtLines;
         }
 
+        public static List<Line> PolylineToLine(Polyline pl)
+        {
+            var returnL = new List<Line>();
+            var nCount = pl.NumberOfVertices;
+            if (pl.Closed == true)
+            {
+                nCount = nCount + 1;
+            }
+            for (int i = 0; i < nCount; i++)
+            {
+                returnL.Add(new Line(pl.GetPoint3dAt(i % pl.NumberOfVertices), pl.GetPoint3dAt((i + 1) / pl.NumberOfVertices)));
+            }
+
+            return returnL;
+        }
+
         public static bool IsParallelAngle(double angleA, double angleB, double tol)
         {
             var bReturn = false;

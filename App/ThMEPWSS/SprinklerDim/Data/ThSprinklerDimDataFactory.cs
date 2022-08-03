@@ -35,11 +35,13 @@ namespace ThMEPWSS.SprinklerDim.Data
         public List<Point3d> SprinklerPtData { get; set; }
         public List<ThIfcFlowSegment> TchPipeData { get; set; }
         public List<ThExtractorBase> Extractors { get; set; }
+        public List<Curve> AxisCurves { get; set; }
 
         public ThSprinklerDimDataFactory()
         {
             SprinklerPtData = new List<Point3d>();
             TchPipeData = new List<ThIfcFlowSegment>();
+            AxisCurves = new List<Curve>();
         }
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public void GetElements(Database database, Point3dCollection framePts)
         {
             ExtractBasicArchitechObject(database, framePts);
+            GetAllAxisCurves(database, framePts);
             GetSprinklerPtData(database, framePts);
             GetTCHPipeData(database, framePts);
         }
@@ -135,6 +138,23 @@ namespace ThMEPWSS.SprinklerDim.Data
             };
             TCHPipeRecognize.RecognizeMS(database, framePts);
             TchPipeData.AddRange(TCHPipeRecognize.Elements.OfType<ThIfcFlowSegment>().ToList());
+        }
+
+        private void GetAllAxisCurves(Database database, Point3dCollection framePts)
+        {
+            var axisEngine = new ThAXISLineRecognitionEngine();
+            axisEngine.Recognize(database, framePts);
+            foreach (var item in axisEngine.Elements)
+            {
+                if (item == null || item.Outline == null)
+                    continue;
+                if (item.Outline is Curve curve)
+                {
+                    var copy = (Curve)curve.Clone();
+                    AxisCurves.Add(copy);
+                }
+            }
+
         }
 
     }
