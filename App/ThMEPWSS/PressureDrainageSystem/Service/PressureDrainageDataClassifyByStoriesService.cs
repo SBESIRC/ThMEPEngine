@@ -156,6 +156,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 objConcaveHull = concaveBuilder.Build();
                 Modeldatas.Boundaries = new List<Polyline>();
                 Modeldatas.Boundaries.AddRange(objConcaveHull.Cast<Polyline>().ToList());
+                //删除在边界附近的可疑线段，不认为是内墙
+                if (Modeldatas.Boundaries.Count > 0)
+                {
+                    var bound = Modeldatas.Boundaries.OrderByDescending(e => e.Area).First().BufferPL(5000).Cast<Polyline>().OrderBy(e => e.Area).First();
+                    for (int i = 0; i < Modeldatas.WallLines.Count; i++)
+                    {
+                        var pl = Modeldatas.WallLines[i];
+                        if (pl.Intersects(bound) || !bound.Contains(pl.GetMidpoint()))
+                        {
+                            Modeldatas.WallLines.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
                 //objConcaveHull.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objWalls.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objColumns.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
