@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Forms;
 using System.ComponentModel;
@@ -109,6 +110,7 @@ namespace TianHua.Electrical.PDS.UI.UI
         }
         private void btnOpenHelp_Click(object sender, RoutedEventArgs e)
         {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/a8f09d07113b4239bde5a4d465277860.html?m=1&view=1");
         }
         private void btnSaveProject_Click(object sender, ExecutedRoutedEventArgs e)
         {
