@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using ThMEPStructure.Reinforcement.TSSD;
 using ThMEPStructure.Reinforcement.Model;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
@@ -20,18 +21,40 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             AntiSeismicGrades = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.AntiSeismicGrades);            
             ConcreteStrengthGrades = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrades); 
         }
+
         public void Set()
         {
             Model.Set();
-            WriteToTSSD();
+            WriteToTSSD(ThWallColumnReinforceConfig.Instance);
         }
+
         public void Reset()
         {
             Model.Reset();
         }   
-        private void WriteToTSSD()
+
+        private void WriteToTSSD(ThWallColumnReinforceConfig config)
         {
-            ThWallColumnReinforceConfig.Instance.WriteToTSSD();
+            using (var writer = new TSSDWallColumnConfigWriter())
+            {
+                var tssdConfig = Convert(config);
+                writer.WriteToIni(tssdConfig);
+            }
+        }
+
+        private TSSDWallColumnConfig Convert(ThWallColumnReinforceConfig config)
+        {
+           return new TSSDWallColumnConfig()
+            {
+                ConcreteStrengthGrade = config.ConcreteStrengthGrade,
+                AntiSeismicGrade = config.AntiSeismicGrade,
+                WallLocation = config.WallLocation,
+                DrawScale = config.DrawScale,
+                Elevation = config.Elevation,
+                PointReinforceLineWeight = config.PointReinforceLineWeight.ToString(),
+                StirrupLineWeight = config.StirrupLineWeight.ToString(),
+                ProtectThick = config.C.ToString(),
+            };
         }
     }
 }

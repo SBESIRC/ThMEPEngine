@@ -1,10 +1,10 @@
-﻿using System.IO;
-using ThMEPStructure.Reinforcement.Model;
+﻿using System;
+using System.IO;
 using ThMEPStructure.Reinforcement.Service;
 
 namespace ThMEPStructure.Reinforcement.TSSD
 {
-    public class TSSDWallColumnConfigWriter
+    public class TSSDWallColumnConfigWriter:IDisposable
     {
         private TSSDEdition edition;
         private string section = "墙一-墙柱设置";
@@ -21,7 +21,11 @@ namespace ThMEPStructure.Reinforcement.TSSD
         {
             this.edition = edition;
         }
-        public void WriteToIni(ThWallColumnReinforceConfig config)
+        public void Dispose()
+        {
+            //
+        }
+        public void WriteToIni(TSSDWallColumnConfig config)
         {
             //参数来源于 ThWallColumnReinforceConfig
             var tssdPath = GetTSSDPath();
@@ -38,7 +42,7 @@ namespace ThMEPStructure.Reinforcement.TSSD
             Write(config, tssdIniPath);
         }
 
-        private void Write(ThWallColumnReinforceConfig config,string filePath)
+        private void Write(TSSDWallColumnConfig config,string filePath)
         {
             // 砼强度等级
             var concreteGradeIndex = GetConcreteGradeIndex(config.ConcreteStrengthGrade);
@@ -53,7 +57,7 @@ namespace ThMEPStructure.Reinforcement.TSSD
             ThIniTool.WriteIni(this.section, wallLocationKey, wallLocationIndex, filePath);
 
             // 保护层厚度
-            ThIniTool.WriteIni(this.section, protectThickKey, config.C.ToString(), filePath);
+            ThIniTool.WriteIni(this.section, protectThickKey, config.ProtectThick, filePath);
 
             // 绘图比例
             var drawingScale = GetDrawingScaleValue(config.DrawScale);
@@ -63,10 +67,10 @@ namespace ThMEPStructure.Reinforcement.TSSD
             ThIniTool.WriteIni(this.section, wallColumnElevationKey, config.Elevation,filePath);
 
             // 点筋线宽
-            ThIniTool.WriteIni(this.section, pointReinforceLineWeightKey, config.PointReinforceLineWeight.ToString(), filePath);
+            ThIniTool.WriteIni(this.section, pointReinforceLineWeightKey, config.PointReinforceLineWeight, filePath);
 
             // 箍筋线宽
-            ThIniTool.WriteIni(this.section, stirrupLineWeightKey, config.StirrupLineWeight.ToString(), filePath);
+            ThIniTool.WriteIni(this.section, stirrupLineWeightKey, config.StirrupLineWeight, filePath);
         }
 
         private string GetAntiSeismicGradeIndex(string antiSeismicGrade)
@@ -91,6 +95,11 @@ namespace ThMEPStructure.Reinforcement.TSSD
             }
         }
 
+        private string GetAntiSeismicGradeMark()
+        {
+            return " //0-特1级，1-一级，2-二级，3-三级，4-四级，5-非抗震";
+        }
+
         private string GetWallLocationIndex(string wallLocation)
         {
             //0-底部加强区，1-一般部位
@@ -99,10 +108,15 @@ namespace ThMEPStructure.Reinforcement.TSSD
                 case "底部加强区":
                     return "0";
                 case "其它部位":
+                case "一般部位":
                     return "1";               
                 default:
                     return "";
             }
+        }
+        private string GetWallLocationMark()
+        {
+            return " //0-底部加强区，1-一般部位";
         }
 
         private string GetConcreteGradeIndex(string concreteGrade)
@@ -140,6 +154,11 @@ namespace ThMEPStructure.Reinforcement.TSSD
                 default:
                     return "";
             }
+        }
+
+        private string GetConcreteGradeMark()
+        {
+            return " // C15->0,C20->1,C25->2,C30->3,C35->4,C40->5,C45->6,C50->7,C55->8,C60->9,C65->10,C70->11,C75->12,C80->13";
         }
 
         private string GetDrawingScaleValue(string drawScale)

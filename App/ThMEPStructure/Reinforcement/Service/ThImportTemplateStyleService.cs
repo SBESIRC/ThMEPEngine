@@ -8,6 +8,8 @@ namespace ThMEPStructure.Reinforcement.Service
     public static class ThImportTemplateStyleService
     {
         public static string ThStyle3TextStyle = "TH-STYLE3";
+        public static string StandardEdgeComponentLayer = "COLU_DE_TH";
+        public static string NonStandardEdgeComponentLayer = "AI-边构";
         public static void Import(this Database database)
         {
             using (var acadDb = AcadDatabase.Use(database))

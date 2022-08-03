@@ -18,19 +18,27 @@ using ThMEPStructure.Reinforcement.Draw;
 
 namespace ThMEPStructure.Reinforcement.Command
 {
+    /// <summary>
+    /// 绘制标准墙柱边缘构件
+    /// </summary>
     public class ThReinforceDrawCmd : ThMEPBaseCommand, IDisposable
     {
-        #region ---------- Input -----------
+        #region ---------- Input -----------       
         public List<EdgeComponentExtractInfo> ExtractInfos { get; set; }
         public List<List<EdgeComponentExtractInfo>> ExtractInfoGroups { get; set; }
         #endregion
+        #region ---------- Output ----------
+        public int GBZLastCodeIndex { get; private set; }
+        public int YBZLastCodeIndex { get; private set; }
+        #endregion
+        private string edgeComponentLayer = "";
         private readonly string MarkLineLayer = "Num";
         private readonly string MarkTextLayer = "Num";
-        private readonly string EdgeComponentLayer = "边构";
         public ThReinforceDrawCmd()
         {
             ActionName = "生成柱表";
             CommandName = "THQZPJ";
+            edgeComponentLayer = ThImportTemplateStyleService.StandardEdgeComponentLayer;
         }
 
         public void Dispose()
@@ -53,7 +61,7 @@ namespace ThMEPStructure.Reinforcement.Command
         private void Draw(Point3d basePt)
         {
             using (var acadDb = AcadDatabase.Active())
-            {
+            {                
                 // 得到的是标准的构件
                 var edgeComponents = GetEdgeComponents();
                 // 绘制配筋表
@@ -112,7 +120,7 @@ namespace ThMEPStructure.Reinforcement.Command
             {
                 acadDb.Database.CreateAILayer(MarkLineLayer,7);
                 acadDb.Database.CreateAILayer(MarkTextLayer, 7);
-                acadDb.Database.CreateAILayer(EdgeComponentLayer, 25);
+                acadDb.Database.CreateAILayer(edgeComponentLayer, 25);
                 var results = new DBObjectCollection();
                 infos.Where(o => o.IsStandard)
                     .Where(o => !string.IsNullOrEmpty(o.Number))
@@ -121,7 +129,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     {
                         results = results.Union(Mark(o.Number, o.EdgeComponent));
                         var clone = o.EdgeComponent.Clone() as Polyline;
-                        clone.Layer = EdgeComponentLayer;
+                        clone.Layer = edgeComponentLayer;
                         clone.ColorIndex = (int)ColorIndex.BYLAYER;
                         clone.LineWeight = LineWeight.ByLayer;
                         clone.Linetype = "Bylayer";
@@ -144,7 +152,7 @@ namespace ThMEPStructure.Reinforcement.Command
                                 }
                                 results = results.Union(Mark(group[i].Number, group[i].EdgeComponent));
                                 var clone = group[i].EdgeComponent.Clone() as Polyline;
-                                clone.Layer = EdgeComponentLayer;
+                                clone.Layer = edgeComponentLayer;
                                 clone.ColorIndex = (int)ColorIndex.BYLAYER;
                                 clone.LineWeight = LineWeight.ByLayer;
                                 clone.Linetype = "Bylayer";
@@ -294,7 +302,9 @@ namespace ThMEPStructure.Reinforcement.Command
         private List<Tuple<EdgeComponentExtractInfo,ThEdgeComponent>> GetEdgeComponents()
         {
             using (var query = new ThBuiltinWallColumnTableQueryService())
-            {
+            {                
+                GBZLastCodeIndex = 0;
+                YBZLastCodeIndex = 0;
                 var results = new List<Tuple<EdgeComponentExtractInfo, ThEdgeComponent>>();
                 ExtractInfos.Where(o => o.IsStandard).ForEach(o =>
                 {
@@ -320,6 +330,7 @@ namespace ThMEPStructure.Reinforcement.Command
                             }
                             if(edgeComponent!=null)
                             {
+                                YBZLastCodeIndex++;
                                 SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
                                 results.Add(Tuple.Create(o,edgeComponent));
                             }                            
@@ -342,6 +353,7 @@ namespace ThMEPStructure.Reinforcement.Command
                             }
                             if (edgeComponent != null)
                             {
+                                GBZLastCodeIndex++;
                                 SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
                                 results.Add(Tuple.Create(o, edgeComponent));
                             }                            
