@@ -10888,6 +10888,7 @@ cb: tolReturnValueRangeTo =>
         public const string THESAURUSDAYDREAM = "600";
         public const int THESAURUSDEALER = 459;
         public const int THESAURUSPALACE = 6000;
+        public const string THESAURUSPONDER = "W-RAIN-OUT-PIPE";
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -12216,6 +12217,33 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               foreach (var DEFAULT_FIRE_VALVE_WIDTH in MaxBalconyToBalconyDistance.Runs)
               {
                 DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+              }
+            }
+            {
+              var eMax = MaxBalconyToBalconyDistance.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
+              if (MaxBalconyToBalconyDistance.Runs[eMax].CPSCount > THESAURUSSTAMPEDE)
+              {
+                var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[eMax + THESAURUSHOUSING];
+                if (DEFAULT_FIRE_VALVE_WIDTH is not null)
+                {
+                  DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
+                }
+              }
+            }
+            if (IsDraiType(MaxBalconyToBalconyDistance.PipeType))
+            {
+              var eMax = MaxBalconyToBalconyDistance.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
+              for (int MAX_ANGEL_TOLLERANCE = eMax; MAX_ANGEL_TOLLERANCE >= THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE--)
+              {
+                MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].Exists = THESAURUSOBSTINACY;
+              }
+            }
+            {
+              var eMax = MaxBalconyToBalconyDistance.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
+              var eMin = MaxBalconyToBalconyDistance.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Min();
+              for (int MAX_ANGEL_TOLLERANCE = eMin; MAX_ANGEL_TOLLERANCE <= eMax; MAX_ANGEL_TOLLERANCE++)
+              {
+                MaxBalconyToBalconyDistance.Runs[MAX_ANGEL_TOLLERANCE].Exists = THESAURUSOBSTINACY;
               }
             }
             if (vm.Params.ShouldSetCheckPortAtUpperFloor)
@@ -13857,6 +13885,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           var maxToiletToFloordrainDistance2 = maxToiletToCondensepipeDistance.GetRXClass().DxfName.ToUpper();
           var TOILET_BUFFER_DISTANCE = maxToiletToCondensepipeDistance.Layer;
           TOILET_BUFFER_DISTANCE = GetEffectiveLayer(TOILET_BUFFER_DISTANCE);
+          static bool isWLineLayer(string layer) => layer is THESAURUSPONDER or INSTRUMENTALITY;
           static bool isDLineLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && !layer.Contains(THESAURUSDEVIANT);
           static bool isVentLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && layer.Contains(THESAURUSDEVIANT);
           if (!maxToiletToFloordrainDistance2.StartsWith(QUOTATIONCHROMIC))
@@ -13946,7 +13975,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               }
             }
           }
-          if (TOILET_BUFFER_DISTANCE is INSTRUMENTALITY)
+          if (isWLineLayer(TOILET_BUFFER_DISTANCE))
           {
             if (maxToiletToCondensepipeDistance is Line TolUniformSideLenth && TolUniformSideLenth.Length > THESAURUSSTAMPEDE)
             {
