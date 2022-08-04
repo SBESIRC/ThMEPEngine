@@ -318,5 +318,10 @@ namespace ThMEPLighting.UI.UI
             if(isRegen)//图层解冻后，有些还是看不到
                 CommandHandlerBase.ExecuteFromCommandLine(false, "REGEN");
         }
+
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/902bbe26017242b58b255051f7bbbd79.html?m=1&view=1");
+        }
     }
 }

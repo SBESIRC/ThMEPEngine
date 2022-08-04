@@ -87,7 +87,6 @@
                              BorderBrush="{DynamicResource TextColor}"
                              TextMargin="0,0,5,0" NormalImage="../Images/导出风机材料表.png" ImageStretch="Fill" ImageMargin="5,0,3,0"
                              ImageHeight="16" ImageWidth="16" Name="btnExportExcel" Click="btnExportExcel_Click">
-
             </cus:ImageButton>
             <cus:ImageButton ImageTextLocation="ImageInTextLeft" Content="导出风机计算书" Height="25" Margin="5,0,0,0"
                              Foreground="{DynamicResource TextColor}"
@@ -95,8 +94,11 @@
                              TextMargin="0,0,5,0" NormalImage="../Images/导出风机计算表.png" ImageStretch="Fill" ImageMargin="5,0,3,0"
                              ImageHeight="16" ImageWidth="16" Name="btnExportFile"
                              Click="btnExportFile_Click">
-
             </cus:ImageButton>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right"> 
+            <cus:ImageButton Margin="5,0,0,0" Content="视频教程" Height="25" Width="80"
+                             Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

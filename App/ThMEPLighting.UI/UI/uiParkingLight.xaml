@@ -163,8 +163,10 @@
             </Grid>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Center">
-            <cus:ImageButton ImageTextLocation="TextOnly" Name="btnLayoutLight" Content="灯具布置" TextMargin="10,0,10,0" Height="25" Click="btnLayoutLight_Click"></cus:ImageButton>
-            <cus:ImageButton ImageTextLocation="TextOnly" Name="btnConnectLine" Content="自动连线" TextMargin="10,0,10,0" Height="25" Margin="10,0,0,0" Click="btnConnectLine_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly"  Content="视频教程" TextMargin="3,0,3,0" Margin="0,0,0,0" Height="25" Click="ImageButton_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly" Name="btnLayoutLight" Content="灯具布置" TextMargin="3,0,3,0" Margin="5,0,0,0" Height="25" Click="btnLayoutLight_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly" Name="btnConnectLine" Content="自动连线" TextMargin="3,0,3,0" Height="25" Margin="5,0,0,0" Click="btnConnectLine_Click"></cus:ImageButton>
+            
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>
