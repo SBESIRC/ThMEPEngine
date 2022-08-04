@@ -185,7 +185,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public static int GetSegIndex2(Point3d p, List<Point3d> points)
         {
             for (int j = 0; j < points.Count-1; j++)
-                if (PointOnSegment(p, points[j], points[(j + 1) % points.Count]) || p.Equals(points[j+1]))
+                if (PointOnSegment(p, points[j], points[(j + 1) % points.Count]) || p.DistanceTo(points[j+1]) < 2)
                     return j;
             return -1;
         }

@@ -99,13 +99,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 run0.Pipeline();
                 /////////////
 
-
-
-
-
-
-
-
             }
         }
     }
