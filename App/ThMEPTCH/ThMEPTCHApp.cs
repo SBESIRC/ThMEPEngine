@@ -55,15 +55,20 @@ namespace ThMEPTCH
                     Normal = new Vector3d(0, 0, 1),
                     Direction = new Vector3d(1, 0, 0),
                 };
+                var clapboard = new ThTCHTelecClapboard
+                {
+                    HaveClapboard = false,
+                };
                 var cableTray = new ThTCHCableTray
                 {
                     ObjectId = telecObject,
                     Type = "C-01-10-3",
                     Style = CableTrayStyle.Trough,
-                    CableTraySystem = CableTraySystem.CableTray,
+                    CableTraySystem = CableTraySystem.CABLETRAY,
                     Height = 100,
-                    StartInterfaceId = startInterface,
-                    EndInterfaceId = endInterface,
+                    Clapboard = clapboard,
+                    StartInterface = startInterface,
+                    EndInterface = endInterface,
                 };
                 service.CableTrays.Add(cableTray);
                 service.DrawExecute(true, false);

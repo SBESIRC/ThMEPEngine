@@ -37,17 +37,17 @@ namespace ThMEPTCH.Model
         /// <summary>
         /// 隔板Id
         /// </summary>
-        public ulong ClapboardId { get; set; }
+        public ThTCHTelecClapboard Clapboard { get; set; }
 
         /// <summary>
         /// 起点接口Id
         /// </summary>
-        public ThTCHTelecInterface StartInterfaceId { get; set; }
+        public ThTCHTelecInterface StartInterface { get; set; }
 
         /// <summary>
         /// 终点接口Id
         /// </summary>
-        public ThTCHTelecInterface EndInterfaceId { get; set; }
+        public ThTCHTelecInterface EndInterface { get; set; }
     }
 
     public enum CableTrayStyle
@@ -64,31 +64,31 @@ namespace ThMEPTCH.Model
 
     public enum CableTraySystem
     {
-        [Description("电力")]
-        CableTray = 0,
+        [Description("低压非消防")]
+        CABLETRAY = 0,
 
-        [Description("控制")]
-        CableTray_Control = 1,
+        [Description("弱电")]
+        CABLETRAY_WEAK = 1,
 
-        [Description("消防")]
-        CableTray_Fire = 2,
+        [Description("低压消防")]
+        CABLETRAY_FIRE = 2,
 
-        [Description("其他")]
-        CableTray_Other = 3,
+        [Description("高压电力")]
+        CABLETRAY_OTHER = 3,
 
         [Description("照明")]
-        CableTray_Light = 4,
+        CABLETRAY_LIGH = 4,
 
-        [Description("安防")]
-        CableTray_PDS = 5,
+        [Description("弱电消防")]
+        CABLETRAY_SECU = 5,
 
-        [Description("广播")]
-        CableTray_SECU = 6,
+        [Description("夜景照明")]
+        CABLETRAY_RADIO = 6,
 
-        [Description("有线电视")]
-        CableTray_CATV = 7,
+        [Description("UPS电源")]
+        CABLETRAY_CATV = 7,
 
         [Description("综合布线")]
-        CableTray_Radio = 8,
+        CABLETRAY_PDS = 8,
     }
 }

@@ -4,8 +4,6 @@ using System.Linq;
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.Geometry;
-
-using ThCADExtension;
 using ThMEPTCH.Model;
 using ThMEPTCH.TCHTables;
 
@@ -25,7 +23,7 @@ namespace ThMEPTCH.TCHDrawServices
             ClearDataTables.Add("TelecCabletry");
         }
 
-        protected override string CmdName => "TImportTg20Hvac";
+        protected override string CmdName => "TH2T20";
 
         protected override void WriteModelToTCHDatabase()
         {
@@ -36,19 +34,23 @@ namespace ThMEPTCH.TCHDrawServices
             ulong objectId = 1000000;
             ulong startInterfaceId = 1000000;
             ulong endInterfaceId = 1000001;
+            ulong clapboardId = 1000000;
             foreach (var cableTray in CableTrays)
             {
                 var telecObject = CreateTelecObject(cableTray.ObjectId, objectId);
                 WriteModelToTCH(telecObject, ThMEPTCHCommon.TCHTableName_TelecObject, ref objectId);
 
-                var startInterface = CreateTelecInterface(cableTray.StartInterfaceId, startInterfaceId);
+                var startInterface = CreateTelecInterface(cableTray.StartInterface, startInterfaceId);
                 WriteModelToTCH(startInterface, ThMEPTCHCommon.TCHTableName_TelecInterface, ref startInterfaceId);
                 startInterfaceId++;
-                var endInterface = CreateTelecInterface(cableTray.EndInterfaceId, endInterfaceId);
+                var endInterface = CreateTelecInterface(cableTray.EndInterface, endInterfaceId);
                 WriteModelToTCH(endInterface, ThMEPTCHCommon.TCHTableName_TelecInterface, ref endInterfaceId);
                 endInterfaceId++;
 
-                var telecCableTray = CreateTelecCableTray(cableTray, telecObject.ObjectId, startInterface.InterfaceId, endInterface.InterfaceId);
+                var clapboard = CreateTelecInterface(cableTray.Clapboard, clapboardId);
+                WriteModelToTCH(clapboard, ThMEPTCHCommon.TCHTableName_TelecClapboard, ref clapboardId);
+
+                var telecCableTray = CreateTelecCableTray(cableTray, telecObject.ObjectId, clapboard.ClapboardId, startInterface.InterfaceId, endInterface.InterfaceId);
                 WriteModelToTCH(telecCableTray, ThMEPTCHCommon.TCHTableName_TelecCabletry, ref objectId);
                 objectId--;
             }
@@ -75,17 +77,26 @@ namespace ThMEPTCH.TCHDrawServices
             };
         }
 
-        private TCHTelecCableTray CreateTelecCableTray(ThTCHCableTray cableTray, ulong objectId, ulong startInterfaceId, ulong endInterfaceId)
+        private TCHTelecClapboard CreateTelecInterface(ThTCHTelecClapboard clapboard, ulong id)
+        {
+            return new TCHTelecClapboard
+            {
+                ClapboardId = id,
+                HaveClapboard = Convert.ToInt32(clapboard.HaveClapboard),
+            };
+        }
+
+        private TCHTelecCableTray CreateTelecCableTray(ThTCHCableTray cableTray, ulong objectId, ulong clapboardId, ulong startInterfaceId, ulong endInterfaceId)
         {
             return new TCHTelecCableTray
             {
                 ObjectId = objectId,
                 Type = cableTray.Type,
                 Style = Convert.ToInt32(cableTray.Style),
-                CabletraySystem = cableTray.CableTraySystem.GetDescription(),
+                CabletraySystem = cableTray.CableTraySystem.ToString(),
                 Height = cableTray.Height,
                 Cover = Convert.ToInt32(cableTray.Cover),
-                ClapboardId = null,
+                ClapboardId = clapboardId,
                 StartInterfaceId = startInterfaceId,
                 EndInterfaceId = endInterfaceId,
             };

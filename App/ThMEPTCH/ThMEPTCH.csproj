@@ -95,6 +95,7 @@
     <Compile Include="Model\ThTCHProject.cs" />
     <Compile Include="Model\ThTCHSite.cs" />
     <Compile Include="Model\ThTCHSprinkler.cs" />
+    <Compile Include="Model\ThTCHTelecClapboard.cs" />
     <Compile Include="Model\ThTCHTelecInterface.cs" />
     <Compile Include="Model\ThTCHTelecObject.cs" />
     <Compile Include="Model\ThTCHVerticalPipe.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawVerticalPipeService.cs" />
     <Compile Include="TCHTables\TCHTelecCableTray.cs" />
+    <Compile Include="TCHTables\TCHTelecClapboard.cs" />
     <Compile Include="TCHTables\TCHTelecInterface.cs" />
     <Compile Include="TCHTables\TCHTelecObject.cs" />
     <Compile Include="TCHTables\TCHTgPoint.cs" />
