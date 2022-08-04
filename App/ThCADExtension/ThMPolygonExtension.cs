@@ -80,6 +80,23 @@ namespace ThCADExtension
             }
             return holes;
         }
+        /// <summary>
+        /// 获取MPolygon是否带洞
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <returns></returns>
+        public static bool HasHoles(this MPolygon mPolygon)
+        {
+            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
+            {
+                var loopDir = mPolygon.GetLoopDirection(i);
+                if (loopDir == LoopDirection.Interior)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static Polyline ToDbPolyline(this MPolygonLoop loop)
         {
             Polyline polyline = new Polyline()
