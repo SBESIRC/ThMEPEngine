@@ -169,6 +169,8 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 }
                 //提取墙点
                 AddCrossPts(graph, ref points);
+
+                points.Add(polyline.GetCentroidPoint());
             }
         }
 
