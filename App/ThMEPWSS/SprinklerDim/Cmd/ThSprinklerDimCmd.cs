@@ -109,7 +109,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
 
                 // 区域标注喷淋点
-                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag);
+                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mix);
 
                 
 
