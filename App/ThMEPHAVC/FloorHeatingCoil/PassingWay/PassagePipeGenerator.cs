@@ -56,6 +56,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 CalculateShortestWay();
                 CalculateIntersectWay();
                 CheckPoutMoved();
+                // 主导管线接口
                 CalculateMainShortestWay();
                 CalculateMainWay();
             }
