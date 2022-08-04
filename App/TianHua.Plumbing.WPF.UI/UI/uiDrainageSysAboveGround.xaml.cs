@@ -183,6 +183,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
             Active.Document.Window.Focus();
 #endif
         }
+
+        private void btn_Help_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/a0420d20d3ca402d89fdf88be1fb73b2.html";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
     class ShowListViewModel : NotifyPropertyChangedBase
     {
