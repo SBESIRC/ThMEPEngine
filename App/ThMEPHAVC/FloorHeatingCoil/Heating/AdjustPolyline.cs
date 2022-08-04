@@ -1,23 +1,15 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
+using GeometryExtensions;
 using Linq2Acad;
-using NetTopologySuite.Geometries;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using System.Diagnostics;
-using NetTopologySuite.Operation.Buffer;
 using ThMEPEngineCore.Diagnostics;
-using GeometryExtensions;
-using ThMEPHVAC.FloorHeatingCoil;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil
@@ -82,16 +74,22 @@ namespace ThMEPHVAC.FloorHeatingCoil
             for (int i = 0; i < OriginalPolyList.Count; i++)
             {
                 NowPolylineIndex = i;
+
                 Polyline newPl = PolylineProcessService.ClearPolylineUnclosed(OriginalPolyList[i]);
+
+                if (i == 0) CheckConnector(newPl);
                 //newPl = ClearBendsLongFirst(newPl, Boundary, ClearDis*0.5, 0);
                 //DrawUtils.ShowGeometry(newPl, "l3ClearBends", 3, lineWeightNum: 30);
-                Skeleton.AddRange(GetMergedPolyline(newPl));
+                List<Polyline> mergedPl = GetMergedPolyline(newPl);
+                Skeleton.AddRange(mergedPl);
+
+                
 
             }
 
             //CheckConnectorOK
             Skeleton.AddRange(Connector);
-            Skeleton.AddRange(ExcessPoly);
+            //Skeleton.AddRange(ExcessPoly);
             ExcessPoly.ForEach(x=> DrawUtils.ShowGeometry(x, "l3ExcessPoly", 3, lineWeightNum: 30));
         }
 
@@ -603,6 +601,32 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
              outPolylineList.ForEach(x => DrawUtils.ShowGeometry(x, "l3MergedPoly", 1, lineWeightNum: 30));
 ;            return outPolylineList;
+        }
+
+        public void CheckConnector(Polyline newPl) 
+        {
+
+            for (int k = 0; k < Connector.Count; k++)
+            {
+                Point3d firstPt = Connector[k].GetPoint3dAt(0);
+                Point3d endPt = Connector[k].GetPoint3dAt(Connector[k].NumberOfVertices - 1);
+                if (newPl.DistanceTo(firstPt, false) > 2 && newPl.DistanceTo(endPt, false) > 2)
+                {
+                    Point3d pt0 = newPl.GetClosestPointTo(firstPt, false);
+                    double l0 = pt0.DistanceTo(firstPt);
+                    Point3d pt1 = newPl.GetClosestPointTo(endPt, false);
+                    double l1 = pt1.DistanceTo(endPt);
+
+                    if (l0 < l1)
+                    {
+                        Connector[k].AddVertexAt(0, pt0.ToPoint2D(), 0, 0, 0);
+                    }
+                    else 
+                    {
+                        Connector[k].AddVertexAt(Connector[k].NumberOfVertices, pt1.ToPoint2D(), 0, 0, 0);
+                    }
+                }        
+            }
         }
 
         //

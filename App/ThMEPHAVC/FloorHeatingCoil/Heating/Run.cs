@@ -25,7 +25,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public Run(ThFloorHeatingDataProcessService dataQuery)
         {
-
             //全局变量设定
             ParameterSetting();
 
