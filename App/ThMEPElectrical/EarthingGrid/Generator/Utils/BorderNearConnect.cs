@@ -27,7 +27,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 outlinewithBorderPt.Value.ForEach(pt => allBorderPts.Add(pt));
             }
             //2、墙点和墙点连接
-            BorderConnectToNear(allBorderPts, columnPts, allOutlines, nonBuildingOutline, outlinewithBorderPts, ref nearBorderGraph, 11000, Math.PI / 6);
+            BorderConnectToNear(allBorderPts, columnPts, allOutlines, nonBuildingOutline, outlinewithBorderPts, ref nearBorderGraph, 13000, Math.PI / 6);
 
             //3、删除无用的墙墙连接，删除无用的近点-墙连接
             DeleteUselessConnects(allOutlines, ref nearBorderGraph);

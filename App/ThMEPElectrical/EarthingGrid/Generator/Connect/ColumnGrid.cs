@@ -70,9 +70,9 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var pts = new HashSet<Point3d>();
             columnPts.ForEach(pt => pts.Add(pt));
             outlinewithBorderPts.Values.ForEach(ptss => ptss.ForEach(pt => pts.Add(pt)));
-            GraphDealer.AddConnectUpToFour(ref graph, pts, 9000); //MaxBeamLength
             GraphDealer.DeleteConnectUpToFour(ref graph, ref nearBorderGraph);
             GraphDealer.SimplifyGraph(ref graph, columnPts.ToList());
+            GraphDealer.AddConnectUpToFour(ref graph, pts, 13000);
             GraphDealer.RemoveIntersectLines(ref graph);
         }
 
