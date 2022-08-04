@@ -41,14 +41,15 @@ namespace ThMEPHVAC
                 List<DrawPipeData> pipe_in = new List<DrawPipeData>();
                 pipe_in.Add(new DrawPipeData(circle.Center, circle.Radius, 0, 0));
                 // input room_buffer
-                double buffer = circle.Radius * 4;
+                double buffer = 500;
                 double room_buffer = 100;
                 // core process
                 RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipe_in, buffer,room_buffer);
                 roomPipeGenerator.CalculatePipeline();
                 // show result
                 var pipe = roomPipeGenerator.output;
-                acadDatabase.ModelSpace.Add(pipe.shape);
+                if(pipe.shape!=null)
+                    acadDatabase.ModelSpace.Add(pipe.shape);
                 foreach (var sk in pipe.skeleton)
                     acadDatabase.ModelSpace.Add(sk);
                 roomPipeGenerator.Dispose();

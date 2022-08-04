@@ -43,6 +43,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.buffer = buffer;
             this.pipe_width = buffer / 4;
             this.room_buffer = room_buffer;
+            output = new PipeOutput();
+            output.pipe_id = 0;
+            output.skeleton = new List<Polyline>();
         }
         public void CalculatePipeline()
         {
@@ -151,6 +154,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         BufferTreeNode GetBufferTree(Polyline poly, bool flag = true)
         {
+            var points = SmoothUtils.SmoothPolygon(PassageWayUtils.GetPolyPoints(poly));
+            points.Add(points.First());
+            poly = PassageWayUtils.BuildPolyline(points);
             BufferTreeNode node = new BufferTreeNode(poly);
             var next_buffer = PassageWayUtils.Buffer(poly, flag ? -room_buffer - pipe_width : -buffer);
             if (next_buffer.Count == 0) return node;
@@ -321,6 +327,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             node.SetShell(PassageWayUtils.BuildPolyline(coords));
             //PassageShowUtils.ShowEntity(node.shell);
             skeleton.Add(node.shell);
+            output.skeleton.Add(node.shell.Clone() as Polyline);
         }
         void GetSkeleton(BufferTreeNode node)
         {
@@ -343,14 +350,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void BufferSkeleton()
         {
-            // save skeleton result
-            output = new PipeOutput();
-            output.pipe_id = 0;
-            output.skeleton = new List<Polyline>();
-            foreach(var poly in skeleton)
-            {
-                output.skeleton.Add(poly.Clone() as Polyline);
-            }
             // buffer every line
             List<Polyline> pipes = new List<Polyline>();
             foreach(var poly in skeleton)
@@ -365,14 +364,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 pipes.AddRange(polylist);
             }
             pipes.AddRange(inner_shape);
-            foreach (var poly in skeleton)
-                PassageShowUtils.ShowEntity(poly, 3);
             // clear skeleton
             PassageWayUtils.ClearListPoly(skeleton);
             // deal with bad corner
             var pipe = pipes.ToArray().ToCollection().UnionPolygons().Cast<Polyline>().ToList();
-            foreach (var poly in pipe)
-                PassageShowUtils.ShowEntity(poly, 4);
             for (int i = 0; i < pipe.Count; ++i)
             {
                 var old_pts = pipe[i].GetPoints().ToList();

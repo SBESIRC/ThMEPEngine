@@ -111,7 +111,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     //// calculate pipeline
 
-                    RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist, Parameter.SuggestDistanceWall);
+                    RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist*2, Parameter.SuggestDistanceWall);
                     roomPipeGenerator.CalculatePipeline();
                     // show result
                     //var show = roomPipeGenerator.skeleton;

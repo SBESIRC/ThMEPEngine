@@ -53,7 +53,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var next = (i + 1) % points.Count;
                 var dx = points[next].X - points[i].X;
                 var dy = points[next].Y - points[i].Y;
-                if (dx != 0 && dy != 0)
+                if (dx != 0 && dy != 0 && Math.Min(Math.Abs(dx), Math.Abs(dy)) < 10) 
                 {
                     if (Math.Abs(dx) < Math.Abs(dy))
                         points[next] = new Point3d(points[i].X, points[next].Y, 0);
