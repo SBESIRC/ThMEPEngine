@@ -121,5 +121,10 @@ namespace TianHua.Hvac.UI.UI.FanConnect
                 ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeves.Remove(selectedValve);
             }
         }
+
+        private void btnHelpSPM_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_6ae06ebd6c8f42178b0023d6095de1f6.html");
+        }
     }
 }

@@ -190,6 +190,12 @@ namespace TianHua.Electrical.UI.FireAlarm
             FireAlarmSetting.Instance.LayoutItemList = FireAlarmSetting.Instance.LayoutItemList.OrderBy(x => x).ToList();
 
         }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/6273a9f6e8174f619c6adcd1fa91c440.html");
+        }
+
     }
 
     public class BeamConverter : IValueConverter

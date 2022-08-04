@@ -32,6 +32,13 @@
                              ImageTextLocation="TextOnly">
 
             </cus:ImageButton>
+            <cus:ImageButton IsTabStop="True" Focusable="True" 
+                             TabIndex="0" Content="视频教程" 
+                             x:Name="btnHelp" Height="24" 
+                             Margin="0,10,0,0" Click="btnHelp_Click"  
+                             ImageTextLocation="TextOnly">
+
+            </cus:ImageButton>
         </StackPanel>
     </Grid>
 

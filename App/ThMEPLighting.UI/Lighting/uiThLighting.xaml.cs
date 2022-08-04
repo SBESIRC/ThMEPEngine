@@ -208,5 +208,10 @@ namespace TianHua.Lighting.UI
             Hide();
             e.Cancel = true;            
         }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/7a52f241cc1b4fb6acdd7799c225e7b2.html");
+        }
     }
 }

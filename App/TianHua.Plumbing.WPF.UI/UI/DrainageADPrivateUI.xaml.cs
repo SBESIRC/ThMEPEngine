@@ -80,6 +80,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
 #endif
         }
 
-
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/7ef0f3f4a58648eba9ae384153dbd018.html");
+        }
     }
 }

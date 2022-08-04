@@ -221,6 +221,14 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
+            <StackPanel Margin  ="0 10 10 0" Grid.Row="0" Grid.Column="0"  Grid.ColumnSpan="1">
+                <cus:ImageButton IsTabStop="True" Focusable="True" 
+                             TabIndex="0" Content="视频教程" 
+                             x:Name="btnHelp" 
+                             ImageTextLocation="TextOnly"
+                             Click="btnHelp_Click">
+                </cus:ImageButton>
+            </StackPanel>
             <StackPanel Margin  ="0 10 0 0" Grid.Row="0" Grid.Column="1"  Grid.ColumnSpan="2">
                 <cus:ImageButton IsTabStop="True" Focusable="True" 
                              TabIndex="0" Content="布置" 
