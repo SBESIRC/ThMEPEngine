@@ -87,5 +87,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 viewModel.InitListDatasByArea(cachedArea, false);
             }
         }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", @"http://thlearning.thape.com.cn/kng/view/video/fcc5e6cb634e41a59db0a5e45e8d1a0c.html");
+        }
     }
 }
