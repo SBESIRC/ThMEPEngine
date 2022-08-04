@@ -1006,6 +1006,11 @@ namespace TianHua.Hvac.UI.UI
                 return;
             fanViewModel.CheckShowFanNumberIsRepeat();
         }
+
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_62b0056220bf4819afb1e651386f7a8c.html");
+        }
     }
 
 }

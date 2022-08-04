@@ -97,6 +97,8 @@
                              Click="btnExportFile_Click">
 
             </cus:ImageButton>
+            <cus:ImageButton Margin="5,0,0,0" Content="视频教程" Width="80" FontSize="14" Height="25"
+                             Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

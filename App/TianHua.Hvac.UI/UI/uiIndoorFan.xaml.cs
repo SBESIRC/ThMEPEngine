@@ -751,6 +751,9 @@ namespace TianHua.Hvac.UI.UI
             return coolWorking;
         }
 
-       
+        private void ImageButton_Click_1(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_2fc02c71ad1643cabdef012066ba762d.html");
+        }
     }
 }

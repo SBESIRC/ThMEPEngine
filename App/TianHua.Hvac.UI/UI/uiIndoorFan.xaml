@@ -87,6 +87,7 @@
                              ToolTip="将当前选中的模板的修改保存到原文件中"
                              IsEnabled="{Binding SaveButtonCanUse,Mode=OneWay,NotifyOnSourceUpdated=True}"
                              Name="btnSave" Click="btnSave_Click"></cus:ImageButton>
+            <cus:ImageButton Content="视频教程" Width="70" Margin="5,0,0,0" Height="22" TextMargin="10,0,10,0" Click="ImageButton_Click_1"></cus:ImageButton>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1">
             <Label Content="布置内容:" VerticalAlignment="Top" Width="65"/>

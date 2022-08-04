@@ -319,5 +319,10 @@ namespace TianHua.Electrical.UI
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THYGMQ");
         }
+
+        private void btnVideoHelper_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/a188022e73914f2e96473469151071da.html?m=1&view=1");
+        }
     }
 }
