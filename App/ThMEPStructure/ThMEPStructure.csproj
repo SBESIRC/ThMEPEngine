@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-  <ItemGroup>
+  <ItemGroup>    
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -119,6 +119,7 @@
     <Compile Include="GirderConnect\SecondaryBeamConnect\Service\ConnectSecondaryBeamService.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Service\GetPrimitivesService.cs" />
     <Compile Include="GirderConnect\Service\ImportService.cs" />
+    <Compile Include="Reinforcement\Command\ThTSSDWallColumnReinforceDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThReinforceDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThReinforceTableDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThReinforceTestData.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="Reinforcement\Data\YJK\ThYJKDataSetFactory.cs" />
     <Compile Include="Reinforcement\Service\ThAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThBuiltinWallColumnTableQueryService.cs" />
+    <Compile Include="Reinforcement\Service\ThCadOptionTool.cs" />
     <Compile Include="Reinforcement\Service\ThDataGroupService.cs" />
     <Compile Include="Reinforcement\Service\ThEdgeComponentMarkFindService.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
@@ -267,9 +269,15 @@
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
         </Reference>
+		<Reference Include="Autodesk.AutoCAD.Interop">
+          <HintPath>..\..\Externals\AutoCAD\2016\Autodesk.AutoCAD.Interop.dll</HintPath>
+        </Reference>
+		<Reference Include="Autodesk.AutoCAD.Interop.Common">
+          <HintPath>..\..\Externals\AutoCAD\2016\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
+        </Reference>
         <Reference Include="ManagedLibrary.v16">
           <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
-        </Reference>
+        </Reference>		
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
@@ -281,6 +289,12 @@
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+		<Reference Include="Autodesk.AutoCAD.Interop">
+          <HintPath>..\..\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.dll</HintPath>
+        </Reference>
+		<Reference Include="Autodesk.AutoCAD.Interop.Common">
+          <HintPath>..\..\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
         </Reference>
         <Reference Include="ManagedLibrary.v16">
           <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
