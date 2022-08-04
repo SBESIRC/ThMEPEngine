@@ -34,6 +34,7 @@
     <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
             <Grid>
@@ -75,6 +76,9 @@
                 </DataGrid>
             </Grid>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,5,10,5" HorizontalAlignment="Right">
+            <cus:ImageButton IsTabStop="True" TabIndex="1" Content="视频教程" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="VideoBtn_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

@@ -113,6 +113,18 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
             {
             }
         }
-        
+
+        private void VideoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/12b275c1c27a47cc895c55c1612801f6.html?m=1&view=1";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
 }

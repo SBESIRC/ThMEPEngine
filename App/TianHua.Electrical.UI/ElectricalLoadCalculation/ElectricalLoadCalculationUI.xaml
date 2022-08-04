@@ -107,7 +107,8 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,0" Focusable="False" Grid.ColumnSpan="2" Grid.RowSpan="2">
-                    <cus:ImageButton Name="CreatBtn" TabIndex="0" Content="生成/更新" Margin="0,0,0,0" Width="80" Height="25" Click="CreatBtn_Click"></cus:ImageButton>
+                    <cus:ImageButton TabIndex="0" Content="视频教程" Margin="0,0,0,0" Width="80" Height="25" Click="VideoBtn_Click"></cus:ImageButton>
+                    <cus:ImageButton Name="CreatBtn" TabIndex="0" Content="生成/更新" Margin="0,10,0,0" Width="80" Height="25" Click="CreatBtn_Click"></cus:ImageButton>
                 </StackPanel>
             </Grid>
         </StackPanel>

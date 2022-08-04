@@ -63,6 +63,7 @@
             <ComboBox x:Name="inGroup" Grid.Row="5" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3"/>
             
             <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,10" VerticalAlignment="Bottom">
+                <cus:ImageButton IsTabStop="True" TabIndex="1" Content="视频教程" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="VideoBtn_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="2" Content="导出配置表" x:Name="btnExportTable" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="btnExportTable_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="3" Content="导入配置表" x:Name="btnImportTabl1e" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnImportTabl1e_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="4" Content="一键布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnLayout_Click"></cus:ImageButton>
