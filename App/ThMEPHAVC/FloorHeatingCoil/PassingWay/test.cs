@@ -41,9 +41,10 @@ namespace ThMEPHVAC
                 List<DrawPipeData> pipe_in = new List<DrawPipeData>();
                 pipe_in.Add(new DrawPipeData(circle.Center, circle.Radius, 0, 0));
                 // input room_buffer
+                double buffer = circle.Radius * 4;
                 double room_buffer = 100;
                 // core process
-                RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipe_in, room_buffer);
+                RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipe_in, buffer,room_buffer);
                 roomPipeGenerator.CalculatePipeline();
                 // show result
                 var pipe = roomPipeGenerator.output;
