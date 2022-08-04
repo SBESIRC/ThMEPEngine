@@ -2,7 +2,7 @@
 using namespace System;
 using namespace System::Runtime::InteropServices;
 
-namespace CLI
+namespace ThBIMCLI
 {
     template <class T>
     public ref class ManagedObject

@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ThBIMCppCommon.h" />
     <ClInclude Include="ThBIMSUService.h" />
     <ClInclude Include="ThBIMCppExport.h" />
   </ItemGroup>

@@ -1,10 +1,16 @@
 #pragma once
+#include "ManagedObject.h"
+#include "../ThBIMSketchUp/ThBIMCppCommon.h"
 
 using namespace System;
 
-namespace ThBIMSketchUpNET {
-	public ref class Class1
+namespace ThBIMCLI {
+	public ref class ThBIMSUServiceMgd : public ManagedObject<ThBIM::ThBIMSUService>
 	{
-		// TODO: Add your methods for this class here.
+	public:
+		ThBIMSUServiceMgd() :ManagedObject(new ThBIM::ThBIMSUService())
+		{
+			//
+		}
 	};
 }
