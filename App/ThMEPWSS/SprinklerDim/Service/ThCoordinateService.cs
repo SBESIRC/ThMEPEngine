@@ -44,7 +44,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             return transPts;
         }
 
-
         public static double GetOriginalValue(Point3d pt, bool isXAxis)
         {
             if (isXAxis)

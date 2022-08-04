@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.SprinklerDim.Model;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -162,7 +164,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// </summary>
         /// <param name="transNetList"></param>
         /// <param name="step"></param>
-        public static void GenerateCollineation(ref List<ThSprinklerNetGroup> transNetList, double step)
+        public static void GenerateCollineation(ref List<ThSprinklerNetGroup> transNetList, double step, string printTag)
         {
 
             foreach (ThSprinklerNetGroup netGroup in transNetList)
@@ -175,19 +177,50 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (ThSprinklerGraph graph in netGroup.PtsGraph)
                 {
                     List<List<int>> xCollineationGroup = GetCollineationGroup(pts, graph, true);
-                    List<List<int>> xCollineation = GetCollineation(pts, xCollineationGroup, true, step);
+                    List<List<int>> xCollineation = GetCollineation(pts, netGroup.LinesCuttedOffByWall, xCollineationGroup, true, step);
                     netGroup.XCollineationGroup.Add(xCollineation);
 
                     List<List<int>> yCollineationGroup = GetCollineationGroup(pts, graph, false);
-                    List<List<int>> yCollineation = GetCollineation(pts, yCollineationGroup, false, step);
+                    List<List<int>> yCollineation = GetCollineation(pts, netGroup.LinesCuttedOffByWall, yCollineationGroup, false, step);
                     netGroup.YCollineationGroup.Add(yCollineation);
                 }
 
             }
 
+            // test
+            List<Line> allLines = new List<Line>();
+            foreach (ThSprinklerNetGroup netGroup in transNetList)
+            {
+                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
+
+                foreach(List<List<int>> collineation in netGroup.XCollineationGroup)
+                {
+                    foreach(List<int> line in collineation)
+                    {
+                        for (int i = 0; i < line.Count - 1; i++)
+                        {
+                            allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
+                        }
+                    }
+                }
+
+                foreach (List<List<int>> collineation in netGroup.YCollineationGroup)
+                {
+                    foreach (List<int> line in collineation)
+                    {
+                        for (int i = 0; i < line.Count - 1; i++)
+                        {
+                            allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
+                        }
+                    }
+                }
+
+            }
+            DrawUtils.ShowGeometry(allLines, string.Format("SSS-{0}-5Line", printTag), 4);
+
         }
 
-        private static List<List<int>> GetCollineation(List<Point3d> pts, List<List<int>> collineationGroup, bool isXAxis, double step, double tolerance=45.0)
+        private static List<List<int>> GetCollineation(List<Point3d> pts, HashSet<Tuple<int, int>> LinesCuttedOffByWall, List<List<int>> collineationGroup, bool isXAxis, double step, double tolerance=45.0)
         {
             List<List<int>> collineation = new List<List<int>>();
             bool[] isVisited = Enumerable.Repeat(false, collineationGroup.Count).ToArray();
@@ -225,7 +258,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                                         combinedGroup.AddRange(group1);
                                         combinedGroup.AddRange(group2);
 
-                                        if (IsOneLine(pts, combinedGroup, isXAxis, step))
+                                        if (IsOneLine(pts, LinesCuttedOffByWall, combinedGroup, isXAxis, step))
                                         {
                                             group1 = combinedGroup;
                                             isVisited[j] = true;
@@ -249,12 +282,15 @@ namespace ThMEPWSS.SprinklerDim.Service
             return collineation;
         }
 
-        private static bool IsOneLine(List<Point3d> pts, List<int> line, bool isXAxis, double step, double tolerance=45.0)
+        private static bool IsOneLine(List<Point3d> pts, HashSet<Tuple<int, int>> LinesCuttedOffByWall, List<int> line, bool isXAxis, double step, double tolerance=45.0)
         {
             line.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
 
             for (int i = 0; i < line.Count-1; i++)
             {
+                if(LinesCuttedOffByWall.Contains(new Tuple<int, int>(line[i], line[i + 1])) || LinesCuttedOffByWall.Contains(new Tuple<int, int>(line[i + 1], line[i])))
+                    return false;
+
                 double collineTol = ThChangeCoordinateService.GetOriginalValue(pts[line[i+1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[line[i]], isXAxis);
                 double connectTol = ThChangeCoordinateService.GetOriginalValue(pts[line[i+1]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[line[i]], !isXAxis);
 

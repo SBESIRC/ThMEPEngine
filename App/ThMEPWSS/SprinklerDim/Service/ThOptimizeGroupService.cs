@@ -22,8 +22,21 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             List<ThSprinklerNetGroup> transNetList = ThSprinklerNetGroupListService.ChangeToOrthogonalCoordinates(netList);
             ThSprinklerNetGroupListService.CorrectGraphConnection(ref transNetList, 45.0);
-            ThSprinklerNetGroupListService.GenerateCollineationGroup(ref transNetList);
 
+            // test
+            for (int i = 0; i < transNetList.Count; i++)
+            {
+                var net = transNetList[i];
+                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+                for (int j = 0; j < net.PtsGraph.Count; j++)
+                {
+                    var lines = net.PtsGraph[j].Print(pts);
+                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-245mm-{0}-{1}", i, j, printTag), i % 7);
+                }
+            }
+
+
+            ThSprinklerNetGroupListService.GenerateCollineationGroup(ref transNetList);
             List<ThSprinklerNetGroup> opNetList = new List<ThSprinklerNetGroup>();
             foreach (ThSprinklerNetGroup netGroup in transNetList)
             {
@@ -42,18 +55,18 @@ namespace ThMEPWSS.SprinklerDim.Service
                 opNetList.Add(newNetGroup);
             }
 
+            // test
             for (int i = 0; i < opNetList.Count; i++)
             {
                 var net = opNetList[i];
+                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
                 for (int j = 0; j < net.PtsGraph.Count; j++)
                 {
-                    List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
                     var lines = net.PtsGraph[j].Print(pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-{0}-{1}", i, j, printTag), i % 7);
+                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-3OpNet-{0}-{1}", i, j, printTag), i % 7);
                 }
             }
 
-            ThSprinklerNetGroupListService.GenerateCollineation(ref opNetList, step);
             return opNetList;
         }
 
