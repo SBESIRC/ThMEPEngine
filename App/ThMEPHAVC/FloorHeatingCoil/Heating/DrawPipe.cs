@@ -111,7 +111,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     //// calculate pipeline
 
-                    RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInList, Parameter.SuggestDistanceWall);
+                    RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist, Parameter.SuggestDistanceWall);
                     roomPipeGenerator.CalculatePipeline();
                     // show result
                     //var show = roomPipeGenerator.skeleton;
@@ -125,7 +125,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     var regionPolyMap = PipePolyListMap[newPipeId];
 
                     List<Polyline> newList = new List<Polyline>();
-                    newList.Add(roomPipeGenerator.skeleton[0]);
+                    newList.Add(output.shape);
                     regionPolyMap.Add(i, newList);
                 }
                 else
