@@ -277,6 +277,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             if (_maxRoofFloors == null || _maxRoofFloors.Count<1 || _minRoofFloors ==null || _minRoofFloors.Count<1)
                 return retRes;
             //找到大屋面上所有的污废立管（PL）和废水立管（FL）。根据基点在小屋面找相同位置的点位。若点位在任何一个空间框线内则将这根立管和编号复制到小屋面。
+            var filter_names = new string[] { "PL", "FL", "WL", "FYL", "FCL", "TL" };
             foreach (var mRoof in _maxRoofFloors) 
             {
                 //获取屋面的空间
@@ -287,7 +288,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     if (!cBlock.floorId.Equals(mRoof.floorUid))
                         continue;
-                    if (!cBlock.tag.ToUpper().Equals("PL") && !cBlock.tag.ToUpper().Equals("FL"))
+                    var matched_name = false;
+                    foreach (var name in filter_names)
+                    {
+                        if(cBlock.tag.ToUpper().Equals(name))
+                        {
+                            matched_name = true;
+                            break;
+                        }
+                    }
+                    if (!matched_name)
                         continue;
                     bool inRoom = false;
                     foreach (var room in thisAllRooms) 

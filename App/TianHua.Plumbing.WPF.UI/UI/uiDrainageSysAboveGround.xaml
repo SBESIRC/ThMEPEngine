@@ -37,6 +37,7 @@
         <Grid Grid.Row="2" Margin="0,5,0,0">
             <cus:ImageButton Content="布置立管" Width="60" HorizontalAlignment="Left" TextMargin="5" Name="btnLayoutPipe" Click="btnLayoutPipe_Click"></cus:ImageButton>
             <cus:ImageButton Content="应用" Width="40" Height="22" HorizontalAlignment="Right" Visibility="Collapsed"></cus:ImageButton>
+            <cus:ImageButton Content="视频教程" Width="60" HorizontalAlignment="Left" TextMargin="5" x:Name="btn_Help" Click="btn_Help_Click" Margin="80,0,0,0"/>
         </Grid>
     </Grid>
 </cus:ThCustomWindow>
