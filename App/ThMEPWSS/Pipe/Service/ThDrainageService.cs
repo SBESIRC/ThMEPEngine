@@ -10491,12 +10491,7 @@ cb: tolReturnValueRangeTo =>
         public const string UNPREMEDITATEDNESS = "Y2L";
         public const string THESAURUSFINICKY = "NL";
         public const string THESAURUSUNBEATABLE = "YL";
-        public const string THESAURUSANTIDOTE = @"^W\d?L";
-        public const string THESAURUSDISSOLVE = @"^F\d?L";
         public const string AUTOLITHOGRAPHIC = "-0";
-        public const string THESAURUSABUNDANT = @"^P\d?L";
-        public const string THESAURUSOPTIONAL = @"^T\d?L";
-        public const string DIASTEREOISOMER = @"^D\d?L";
         public const double HYDROELECTRICITY = 383875.8169;
         public const double THESAURUSMARRIAGE = 250561.9571;
         public const string SUCCESSLESSNESS = "P型存水弯";
@@ -10889,6 +10884,11 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSDEALER = 459;
         public const int THESAURUSPALACE = 6000;
         public const string THESAURUSPONDER = "W-RAIN-OUT-PIPE";
+        public const string THESAURUSDIFFERENTIAL = @"^W\w?L";
+        public const string THESAURUSADMINISTRATION = @"^F\w?L";
+        public const string THESAURUSIMPLICATE = @"^P\w?L";
+        public const string INTERRELATIONSHIP = @"^T\w?L";
+        public const string THESAURUSLIBERTINE = @"^D\w?L";
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -10938,7 +10938,7 @@ cb: tolReturnValueRangeTo =>
     public static bool IsWL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSANTIDOTE);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSDIFFERENTIAL);
     }
     public static bool IsDraiFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
@@ -10947,7 +10947,7 @@ cb: tolReturnValueRangeTo =>
     public static bool IsFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSDISSOLVE);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSADMINISTRATION);
     }
     public static bool IsFL0(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
@@ -10958,17 +10958,17 @@ cb: tolReturnValueRangeTo =>
     public static bool IsPL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSABUNDANT);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSIMPLICATE);
     }
     public static bool IsTL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSOPTIONAL);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, INTERRELATIONSHIP);
     }
     public static bool IsDL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, DIASTEREOISOMER);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSLIBERTINE);
     }
     public static bool IsDraiLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
