@@ -48,7 +48,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         // output
         public List<Polyline> Connector = new List<Polyline>();
         public List<Polyline> Skeleton = new List<Polyline>();
-        bool IsCCW = true;
+        bool IsCCW = false;
         bool IfFind = true;
 
 
@@ -144,7 +144,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 SkeletonType.Add(-1);
                 return new Polyline() ;
             }
-
 
             rest = main_region.Difference(rest);
             
@@ -258,12 +257,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             //if (!poly.IsCCW()) poly.ReverseCurve();
             PolylineProcessService.ClearPolyline(ref poly);
+            DrawUtils.ShowGeometry(poly, "l3OrBufferedPl", 5, lineWeightNum: 30);
+
+            //ClearSingleBuffer clearSingleBuffer = new ClearSingleBuffer(poly, poly, Buffer * 0.5);
+            //clearSingleBuffer.Pipeline();
+            //poly = clearSingleBuffer.ClearedPl;
 
             BufferTreeNode node = new BufferTreeNode(poly);
             DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
             var next_buffer = PassageWayUtils.Buffer(poly, -Buffer);
             //if (next_buffer.Count == 0) return node;
-            var next_small_buffer = PassageWayUtils.Buffer(poly, -(Buffer * 0.80));
+            var next_small_buffer = PassageWayUtils.Buffer(poly, -(Buffer * 0.86));
             double lengthBig = 0;
             double lengthSmall = 0;
             int numBig = 0;
@@ -295,6 +299,51 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             return node;
         }
+
+
+        BufferTreeNode GetClearedBufferTree(Polyline poly, bool flag = false)
+        {
+            //if (!poly.IsCCW()) poly.ReverseCurve();
+            PolylineProcessService.ClearPolyline(ref poly);
+            
+
+            BufferTreeNode node = new BufferTreeNode(poly);
+            DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
+            var next_buffer = PassageWayUtils.Buffer(poly, -Buffer);
+            //if (next_buffer.Count == 0) return node;
+            var next_small_buffer = PassageWayUtils.Buffer(poly, -(Buffer * 0.86));
+            double lengthBig = 0;
+            double lengthSmall = 0;
+            int numBig = 0;
+            int numSmall = 0;
+            next_buffer.ForEach(x => lengthBig += x.Length);
+            next_buffer.ForEach(x => numBig += x.NumberOfVertices);
+            next_small_buffer.ForEach(x => lengthSmall += x.Length);
+            next_small_buffer.ForEach(x => numSmall += x.NumberOfVertices);
+
+            if ((next_buffer.Count == 0 && next_small_buffer.Count > 0) ||
+                (numSmall > numBig && lengthSmall > lengthBig + 500))
+            {
+                next_buffer = next_small_buffer;
+            }
+
+
+            if (next_buffer.Count == 0) return node;
+
+
+            node.childs = new List<BufferTreeNode>();
+            foreach (Polyline child_poly in next_buffer)
+            {
+                if (child_poly.Area > 1000)
+                {
+                    var child = GetBufferTree(child_poly, false);
+                    child.parent = node;
+                    node.childs.Add(child);
+                }
+            }
+            return node;
+        }
+
 
         void GetSkeleton(BufferTreeNode node)
         {
@@ -341,11 +390,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     //if ((coords[pre] - coords[index]).CrossProduct(coords[next] - coords[index]).Z < 0)
                     //    index = next;
                     Vector3d dirPipeIn = point - pin;
-                    double scoreCW = dirPipeIn.GetNormal().DotProduct((coords[pre] - coords[index]).GetNormal());
-                    double scoreCCW = dirPipeIn.GetNormal().DotProduct((coords[next] - coords[index]).GetNormal());
-                    if (scoreCW > scoreCCW)
+                    double scoreCCW = dirPipeIn.GetNormal().DotProduct((coords[pre] - coords[index]).GetNormal());
+                    double scoreCW = dirPipeIn.GetNormal().DotProduct((coords[next] - coords[index]).GetNormal());
+                    if (scoreCCW > scoreCW)
                     {
-                        IsCCW = false;
+                        IsCCW = true;
                         coords.Reverse();
                         index = PassageWayUtils.GetPointIndex(point, coords);
                         PassageWayUtils.RearrangePoints(ref coords, index);
@@ -361,15 +410,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     var pre = (index + coords.Count - 1) % coords.Count;
                     var next = (index + 1) % coords.Count;
 
-                    double lengthCW = (coords[index] - point).Length;
-                    double lengthCCW = (coords[next] - point).Length;
+                    double lengthCCW = (coords[index] - point).Length;
+                    double lengthCW = (coords[next] - point).Length;
 
-                    if (lengthCW < lengthCCW)
+                    bool toCCW = false;
+                    if (Math.Min(lengthCW, lengthCCW) < Buffer / 2)
                     {
-                        node.shell.ReverseCurve();
-                        IsCCW = false;
+                        toCCW = lengthCCW < lengthCW;
+                    }
+                    else toCCW = lengthCCW > lengthCW;
+
+                    if (toCCW)
+                    {
+                        IsCCW = true;
                         coords = PassageWayUtils.GetPolyPoints(node.shell);
+                        coords.Reverse();
                         index = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
+                        next = (index + 1) % coords.Count; 
                         PassageWayUtils.RearrangePoints(ref coords, next);
                     }
                     else
@@ -410,6 +467,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             else
             {
+                bool isParentLast = false;
                 Point3d parentLast = node.parent.shell.GetPoint3dAt(node.parent.shell.NumberOfVertices - 1);
                 Point3d point = new Point3d();
                 Point3d pin = new Point3d();
@@ -424,6 +482,38 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     else
                     {
                         pin = parentLast;
+                        int tmpIndex = PassageWayUtils.GetPointIndex(point, coords);
+                        if (tmpIndex == -1) 
+                        {
+                            tmpIndex = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
+                            var pre = (tmpIndex + coords.Count - 1) % coords.Count;
+                            var next = (tmpIndex + 1) % coords.Count;
+
+                            double lengthCCW = (coords[tmpIndex] - point).Length;
+                            double lengthCW = (coords[next] - point).Length;
+                            if (Math.Min(lengthCW, lengthCCW) < 0.32 * Buffer) 
+                            {
+                                if (lengthCW < lengthCCW)
+                                {
+
+                                    Point3d newLast = pin + (coords[next] - point);
+                                    point = coords[next];
+                                    pin = newLast;
+                                    node.parent.shell.RemoveVertexAt(node.parent.shell.NumberOfVertices - 1);
+                                    node.parent.shell.AddVertexAt(node.parent.shell.NumberOfVertices, newLast.ToPoint2D(), 0, 0, 0);
+                                }
+                                else 
+                                {
+                                    Point3d newLast = pin + (coords[tmpIndex] - point);
+                                    point = coords[tmpIndex];
+                                    pin = newLast;
+                                    node.parent.shell.RemoveVertexAt(node.parent.shell.NumberOfVertices - 1);
+                                    node.parent.shell.AddVertexAt(node.parent.shell.NumberOfVertices, newLast.ToPoint2D(), 0, 0, 0);
+                                }
+
+                                DrawUtils.ShowGeometry(node.parent.shell, "l3AdjustNodeShell", 8, lineWeightNum: 30);
+                            }
+                        } 
                     }
                 }
                 else
@@ -453,9 +543,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     var pre = (index + coords.Count - 1) % coords.Count;
                     var next = (index + 1) % coords.Count;
                     Vector3d dirPipeIn = point - pin;
-                    double scoreCW = dirPipeIn.GetNormal().DotProduct((coords[pre] - coords[index]).GetNormal());
-                    double scoreCCW = dirPipeIn.GetNormal().DotProduct((coords[next] - coords[index]).GetNormal());
-                    if (scoreCW > scoreCCW)
+                    double scoreCCW = dirPipeIn.GetNormal().DotProduct((coords[pre] - coords[index]).GetNormal());
+                    double scoreCW = dirPipeIn.GetNormal().DotProduct((coords[next] - coords[index]).GetNormal());
+                    if (scoreCCW > scoreCW)
                     {
                         //IsCCW = false;
                         coords.Reverse();
@@ -522,6 +612,56 @@ namespace ThMEPHVAC.FloorHeatingCoil
             Point3d end = new Point3d();
 
             List<Point3d> intersectionPointList = IntersectUtils.PolylineIntersectionPolyline(MainPipeRoad,buffer_tree.shell);
+
+            //没有交到，分两种情况，没有buffer/buffer有偏移
+            if (intersectionPointList.Count == 0) 
+            {
+                List<Point3d> ptList = buffer_tree.shell.GetPoints().ToList();
+                int index = -1;
+                double minDis = 10000;
+
+                for (int i = 0; i < ptList.Count; i++) 
+                {
+                    double nowDis = MainPipeRoad.DistanceTo(ptList[i],false);
+                    if (nowDis < minDis) 
+                    {
+                        minDis = nowDis;
+                        index = i;
+                    }
+                }
+
+                if (index != -1 && buffer_tree.shell.Area > 5000) 
+                {
+                    
+                    List<int> changeIndex = new List<int>();
+                    changeIndex.Add(index);
+
+                    Point3d pre = ptList[(index - 1 + ptList.Count) % ptList.Count];
+                    Point3d next = ptList[(index + 1) % ptList.Count];
+                    if (Math.Abs(MainPipeRoad.DistanceTo(pre, false) - minDis) < 20)
+                    {
+                        changeIndex.Add((index - 1 + ptList.Count) % ptList.Count);
+                    }
+                    else if (Math.Abs(MainPipeRoad.DistanceTo(next, false) - minDis) < 20) 
+                    {
+                        changeIndex.Add((index + 1) % ptList.Count);
+                    }
+
+                    if (changeIndex.Count == 2) 
+                    {
+                        for (int i = 0; i < changeIndex.Count; i++)
+                        {
+                            Point3d oldPt = ptList[changeIndex[i]];
+                            Point3d newPt = MainPipeRoad.GetClosestPointTo(oldPt,false);
+                            buffer_tree.shell.RemoveVertexAt(changeIndex[i]);
+                            buffer_tree.shell.AddVertexAt(changeIndex[i], newPt.ToPoint2D(), 0, 0, 0);
+                        }
+                        var ptListTmp = buffer_tree.shell.GetPoints().ToList();
+
+                        intersectionPointList = IntersectUtils.PolylineIntersectionPolyline(MainPipeRoad, buffer_tree.shell);
+                    }
+                }
+            }
 
             if (intersectionPointList.Count == 0) return new Point3d(0, 0, 0);
 
@@ -646,6 +786,287 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public Polyline ClearUnclosedPl(Polyline pl)
         {
             return new Polyline();
+        }
+
+
+
+
+
+
+
+
+
+
+
+        public void Pipeline2()
+        {
+            MainRegion = GetMainPipeArea();
+            Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
+
+            if (!IfFind) return;
+            DrawUtils.ShowGeometry(MainRegion, "l2AdjustedRoom", 4, lineWeightNum: 30);
+            buffer_tree = GetBufferTree(MainRegion);
+            GetSkeleton(buffer_tree);
+
+            AdjustPolyline adjustPolyline = new AdjustPolyline(Skeleton, Connector, clonedMainRegion, Buffer * 0.85);
+            adjustPolyline.Pipeline3();
+            Skeleton = adjustPolyline.Skeleton;
+
+            DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
+        }
+
+        BufferTreeNode GetBufferTree2(Polyline poly, bool flag = false)
+        {
+            //if (!poly.IsCCW()) poly.ReverseCurve();
+            PolylineProcessService.ClearPolyline(ref poly);
+
+            BufferTreeNode node = new BufferTreeNode(poly);
+            DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
+
+            DealWithShellNew(node);
+
+            var next_buffer = PassageWayUtils.Buffer(poly, -Buffer);
+            //if (next_buffer.Count == 0) return node;
+            var next_small_buffer = PassageWayUtils.Buffer(poly, -(Buffer * 0.86));
+            double lengthBig = 0;
+            double lengthSmall = 0;
+            int numBig = 0;
+            int numSmall = 0;
+            next_buffer.ForEach(x => lengthBig += x.Length);
+            next_buffer.ForEach(x => numBig += x.NumberOfVertices);
+            next_small_buffer.ForEach(x => lengthSmall += x.Length);
+            next_small_buffer.ForEach(x => numSmall += x.NumberOfVertices);
+
+            if ((next_buffer.Count == 0 && next_small_buffer.Count > 0) ||
+                (numSmall > numBig && lengthSmall > lengthBig + 500))
+            {
+                next_buffer = next_small_buffer;
+            }
+
+            if (next_buffer.Count == 0) return node;
+
+            node.childs = new List<BufferTreeNode>();
+            foreach (Polyline child_poly in next_buffer)
+            {
+                if (child_poly.Area > 1000)
+                {
+                    var child = GetBufferTree(child_poly, false);
+                    child.parent = node;
+                    node.childs.Add(child);
+                }
+            }
+            return node;
+        }
+
+        void DealWithShellNew2(BufferTreeNode node)
+        {
+            //double buffer = TestData.SuggestPipeDis;
+            var coords = PassageWayUtils.GetPolyPoints(node.shell);
+
+            if (node.parent == null)
+            {
+                var pin = MainPipeIn;
+                Point3d closePoint = node.shell.GetClosePoint(pin);
+
+                Point3d point = GetInputPoint();
+                if (point.Equals(new Point3d(0, 0, 0)))
+                {
+                    Skeleton.Add(MainPipeRoad);
+                    IfFind = false;
+                    //SkeletonType.Add(-1);
+                    return;
+                }
+                else if (pin.DistanceTo(point) > pin.DistanceTo(closePoint) + Buffer)
+                {
+                    point = closePoint;
+                }
+
+                int index = PassageWayUtils.GetPointIndex(point, coords);
+                int indexFlag = index;
+                if (index != -1) //在端点上
+                {
+                    var pre = (index + coords.Count - 1) % coords.Count;
+                    var next = (index + 1) % coords.Count;
+                    //if ((coords[pre] - coords[index]).CrossProduct(coords[next] - coords[index]).Z < 0)
+                    //    index = next;
+                    Vector3d dirPipeIn = point - pin;
+                    double scoreCCW = dirPipeIn.GetNormal().DotProduct((coords[pre] - coords[index]).GetNormal());
+                    double scoreCW = dirPipeIn.GetNormal().DotProduct((coords[next] - coords[index]).GetNormal());
+                    if (scoreCCW > scoreCW)
+                    {
+                        IsCCW = true;
+                        coords.Reverse();
+                        index = PassageWayUtils.GetPointIndex(point, coords);
+                        PassageWayUtils.RearrangePoints(ref coords, index);
+                    }
+                    else
+                    {
+                        PassageWayUtils.RearrangePoints(ref coords, index);
+                    }
+                }
+                else //index == -1,说明不在端点上
+                {
+                    index = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
+                    var pre = (index + coords.Count - 1) % coords.Count;
+                    var next = (index + 1) % coords.Count;
+
+                    double lengthCCW = (coords[index] - point).Length;
+                    double lengthCW = (coords[next] - point).Length;
+
+                    bool toCCW = false;
+                    if (Math.Min(lengthCW, lengthCCW) < Buffer / 2)
+                    {
+                        toCCW = lengthCCW < lengthCW;
+                    }
+                    else toCCW = lengthCCW > lengthCW;
+
+                    if (toCCW)
+                    {
+                        IsCCW = true;
+                        coords = PassageWayUtils.GetPolyPoints(node.shell);
+                        coords.Reverse();
+                        index = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
+                        next = (index + 1) % coords.Count;
+                        PassageWayUtils.RearrangePoints(ref coords, next);
+                    }
+                    else
+                    {
+                        PassageWayUtils.RearrangePoints(ref coords, next);
+                    }
+                }
+                // cut last segment
+                var p0 = coords.First();
+                var p1 = coords.Last();
+                if (indexFlag != -1)
+                {
+                    if (p1.DistanceTo(p0) > Buffer + 100)
+                        coords.Add(p0 - (p1 - p0).GetNormal() * -Buffer);
+                }
+                //删除小点
+                //if (p1.DistanceTo(p0) < Buffer - 100)
+                //    coords.RemoveAt(coords.Count - 1);
+
+                //while (true)
+                //{
+                //    if (coords.Count <= 2) break;
+                //    var newP1 = coords.Last();
+                //    Vector3d disVec = p0 - newP1;
+                //    if (disVec.Length < Buffer - 100)
+                //    {
+                //        coords.RemoveAt(coords.Count - 1);
+                //    }
+                //    else break;
+                //}
+                // add first segment
+                if (point.DistanceTo(coords[0]) > 1)
+                {
+                    coords.Insert(0, point);
+                }
+
+                DrawUtils.ShowGeometry(point, "l2PIN", 30, lineWeightNum: 30, 200, "C");
+            }
+            else
+            {
+                Point3d parentLast = node.parent.shell.GetPoint3dAt(node.parent.shell.NumberOfVertices - 1);
+                Point3d point = new Point3d();
+                Point3d pin = new Point3d();
+                if (node.shell.GetClosePoint(parentLast).DistanceTo(parentLast) < 2 * Buffer)
+                {
+                    point = node.shell.GetClosePoint(parentLast);
+                    Point3d tmpPin = node.parent.shell.GetClosePoint(point);
+                    if (tmpPin.DistanceTo(point) < point.DistanceTo(parentLast) - 10)
+                    {
+                        pin = tmpPin;
+                    }
+                    else
+                    {
+                        pin = parentLast;
+                    }
+                }
+                else
+                {
+                    pin = GetClosedPointAtoB(node.parent.shell, node.shell);
+                    point = node.shell.GetClosePoint(pin);
+                }
+
+                if (!IsCCW) node.shell.ReverseCurve();
+                int index = PassageWayUtils.GetPointIndex(point, coords);
+                int indexFlag = index;
+                if (index == -1)
+                {
+                    index = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
+                    var pre = (index + coords.Count - 1) % coords.Count;
+                    var next = (index + 1) % coords.Count;
+
+                    double lengthCW = (coords[index] - point).Length;
+                    double lengthCCW = (coords[next] - point).Length;
+
+                    PassageWayUtils.RearrangePoints(ref coords, next);
+                }
+                else
+                {
+                    if (!node.shell.IsCCW()) node.shell.ReverseCurve();
+                    index = PassageWayUtils.GetPointIndex(point, coords);
+                    var pre = (index + coords.Count - 1) % coords.Count;
+                    var next = (index + 1) % coords.Count;
+                    Vector3d dirPipeIn = point - pin;
+                    double scoreCCW = dirPipeIn.GetNormal().DotProduct((coords[pre] - coords[index]).GetNormal());
+                    double scoreCW = dirPipeIn.GetNormal().DotProduct((coords[next] - coords[index]).GetNormal());
+                    if (scoreCCW > scoreCW)
+                    {
+                        //IsCCW = false;
+                        coords.Reverse();
+                        index = PassageWayUtils.GetPointIndex(point, coords);
+                        PassageWayUtils.RearrangePoints(ref coords, index);
+                    }
+                    else
+                    {
+                        PassageWayUtils.RearrangePoints(ref coords, index);
+                    }
+                }
+                // cut last segment
+                var p0 = coords.First();
+                var p1 = coords.Last();
+                if (indexFlag != -1)
+                {
+                    if (p1.DistanceTo(p0) > Buffer + 100)
+                        coords.Add(p0 - (p1 - p0).GetNormal() * -Buffer);
+                }
+                //if (p1.DistanceTo(p0) < Buffer - 100)
+                //    coords.RemoveAt(coords.Count - 1);
+
+                //while (true)
+                //{
+                //    if (coords.Count <= 2) break;
+                //    var newP1 = coords.Last();
+                //    Vector3d disVec = p0 - newP1;
+                //    if (disVec.Length < Buffer - 100)
+                //    {
+                //        coords.RemoveAt(coords.Count - 1);
+                //    }
+                //    else break;
+                //}
+
+
+                // add first segment
+                if (point.DistanceTo(coords[0]) < 1)
+                    //coords[0] = pin;
+                    coords.Insert(0, pin);
+                else
+                {
+                    coords.Insert(0, point);
+                    coords.Insert(0, pin);
+                }
+
+                DrawUtils.ShowGeometry(pin, "l2pin", 20, lineWeightNum: 30, 200, "C");
+            }
+            ///
+
+            coords = ClearUnclosedCoords(coords);
+            node.SetShell(PassageWayUtils.BuildPolyline(coords));
+            Skeleton.Add(node.shell);
+           
+            DrawUtils.ShowGeometry(node.shell, "l2NodeShell", 7, lineWeightNum: 30);
         }
     }
 }

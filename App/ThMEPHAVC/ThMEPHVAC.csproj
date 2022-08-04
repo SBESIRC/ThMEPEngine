@@ -95,6 +95,7 @@
     <Compile Include="FloorHeatingCoil\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThWaterSeparatorExtractor.cs" />
     <Compile Include="FloorHeatingCoil\Heating\AdjustPolyline.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\ClearSingleBuffer.cs" />
     <Compile Include="FloorHeatingCoil\Heating\DataPackage.cs" />
     <Compile Include="FloorHeatingCoil\Heating\DataPreprocess.cs" />
     <Compile Include="FloorHeatingCoil\Heating\DistributionService.cs" />

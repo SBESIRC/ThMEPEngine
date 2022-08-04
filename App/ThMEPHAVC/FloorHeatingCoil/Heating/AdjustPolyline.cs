@@ -1,23 +1,15 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
+using GeometryExtensions;
 using Linq2Acad;
-using NetTopologySuite.Geometries;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using System.Diagnostics;
-using NetTopologySuite.Operation.Buffer;
 using ThMEPEngineCore.Diagnostics;
-using GeometryExtensions;
-using ThMEPHVAC.FloorHeatingCoil;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil
@@ -82,15 +74,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
             for (int i = 0; i < OriginalPolyList.Count; i++)
             {
                 NowPolylineIndex = i;
+
                 Polyline newPl = PolylineProcessService.ClearPolylineUnclosed(OriginalPolyList[i]);
-                newPl = ClearBendsLongFirst(newPl, Boundary, ClearDis*0.5, 0);
-                DrawUtils.ShowGeometry(newPl, "l3ClearBends", 3, lineWeightNum: 30);
-                Skeleton.AddRange(GetMergedPolyline(newPl));
+
+                if (i == 0) CheckConnector(newPl);
+                //newPl = ClearBendsLongFirst(newPl, Boundary, ClearDis*0.5, 0);
+                //DrawUtils.ShowGeometry(newPl, "l3ClearBends", 3, lineWeightNum: 30);
+                List<Polyline> mergedPl = GetMergedPolyline(newPl);
+                Skeleton.AddRange(mergedPl);
+
+                
 
             }
+
             //CheckConnectorOK
             Skeleton.AddRange(Connector);
-            Skeleton.AddRange(ExcessPoly);
+            //Skeleton.AddRange(ExcessPoly);
+            ExcessPoly.ForEach(x=> DrawUtils.ShowGeometry(x, "l3ExcessPoly", 3, lineWeightNum: 30));
         }
 
         public void ToDirLineList()
@@ -368,6 +368,77 @@ namespace ThMEPHVAC.FloorHeatingCoil
             return newPl;
         }
 
+        public Polyline ClearBendsLongFirstClosed(Polyline originalPl, Polyline boundary, double dis)
+        {
+            Polyline newPl = originalPl.Clone() as Polyline;
+
+            double bufferDis = 5;
+            
+            Polyline newBoundary = boundary.Buffer(bufferDis).OfType<Polyline>().ToList().OrderByDescending(x => x.Area).First();
+            int num = newPl.NumberOfVertices;
+            for (int i = num - 4; i >= 0; i--)
+            {
+                if (i + 3 >= newPl.NumberOfVertices) continue;
+                //if (i == 0) continue;
+                Point3d pt0 = newPl.GetPoint3dAt(i);
+                Point3d pt1 = newPl.GetPoint3dAt(i + 1);
+                Point3d pt2 = newPl.GetPoint3dAt(i + 2);
+                Point3d pt3 = newPl.GetPoint3dAt(i + 3);
+
+                if ((pt2 - pt1).Length < dis)
+                {
+                    Point3d newPt1 = FindDiagonalPoint(pt0, pt1, pt2);
+                    Point3d newPt2 = FindDiagonalPoint(pt1, pt2, pt3);
+
+                    bool ok1 = newBoundary.Contains(new Line(newPt1, pt2)) && newBoundary.Contains(new Line(newPt1, pt0));
+                    bool ok2 = newBoundary.Contains(new Line(newPt2, pt1)) && newBoundary.Contains(new Line(newPt2, pt3));
+
+                    //if (i + 3 == num - 1) ok2 = false;
+                    //if (i == 0) ok1 = false;
+
+
+                    //if (i + 3 == newPl.NumberOfVertices) ok2 = false;
+                    //if (i == 0) ok1 = false;
+
+                    Vector3d vec0 = pt1 - pt0;
+                    Vector3d vec2 = pt3 - pt2;
+                    if ((ok1 && ok2 && vec0.Length > vec2.Length) || (ok2 && !ok1))
+                    {
+                        newPl.AddVertexAt(i + 1, newPt2.ToPoint2D(), 0, 0, 0);
+                        newPl.RemoveVertexAt(i + 2);
+                        newPl.RemoveVertexAt(i + 2);
+                        newPl.RemoveVertexAt(i + 2);
+
+                        if (vec2.Length > Parameter.IsLongSide / 2 && vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
+                        {
+                            Polyline excessPl = new Polyline();
+                            excessPl.AddVertexAt(0, newPt2.ToPoint2D(), 0, 0, 0);
+                            excessPl.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
+                            ExcessPoly.Add(excessPl);
+                        }
+                    }
+                    else if ((ok1 && ok2 && vec0.Length < vec2.Length) || (!ok2 && ok1))
+                    {
+                        newPl.AddVertexAt(i, newPt1.ToPoint2D(), 0, 0, 0);
+                        newPl.RemoveVertexAt(i + 1);
+                        newPl.RemoveVertexAt(i + 1);
+                        newPl.RemoveVertexAt(i + 1);
+
+                        if (vec0.Length > Parameter.IsLongSide / 2 && vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
+                        {
+                            Polyline excessPl = new Polyline();
+                            excessPl.AddVertexAt(0, newPt1.ToPoint2D(), 0, 0, 0);
+                            excessPl.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
+                            ExcessPoly.Add(excessPl);
+                        }
+                    }
+                }
+            }
+
+            return newPl;
+        }
+
+
         public Point3d FindDiagonalPoint(Point3d pt0, Point3d pt1, Point3d pt2)
         {
             Vector3d dir = pt1 - pt0;
@@ -394,6 +465,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             var LineIndex = new ThCADCoreNTSSpatialIndex(oldLineList.ToCollection());
 
             List<Point3d> newPtList = new List<Point3d>();
+            Point3d pin = points[0];
+             
             for (int i = 0; i < points.Count - 1;i++)
             {
                 if (i == points.Count - 2) 
@@ -451,6 +524,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                     if (flag0 && flag1) 
                     {
+                        //bool foundLineOk = (foundLine.StartPoint!= pin) && (foundLine.EndPoint != pin);
+                        //List<Point3d> ptList = linePl.GetPoints().ToList();
+                        //bool linePlOk = !ptList.Contains(pin);
                         if (foundLine.Length < linePl.Length)
                         {
                             changeLine.Add(foundLine);
@@ -465,9 +541,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                             newPtList.Add(newPt0);
                             newPtList.Add(newPt1);
-
                         }
-                        else 
+                        else
                         {
                             changeLine.Add(nowLine);
                             changeVec.Add(-vec);
@@ -482,7 +557,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         }
                     }
                 }
-                 
+
                 //如果是最外层的Polyline，则新增连接
                 if (NowPolylineIndex == 0)
                 {
@@ -508,11 +583,50 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         }
                     }
                 }
+                else
+                {
+                    for (int a = 0; a < changeLine.Count; a++)
+                    {
+                        Line foundLine = changeLine[a];
+                        Vector3d vec = changeVec[a];
 
+                        if (foundLine.DistanceTo(pin, false) < 5)
+                        {
+                            Point3d newPt = pin;
+                            newPtList.Insert(0, newPt);
+                        }
+                    }
+                }
             }
 
              outPolylineList.ForEach(x => DrawUtils.ShowGeometry(x, "l3MergedPoly", 1, lineWeightNum: 30));
 ;            return outPolylineList;
+        }
+
+        public void CheckConnector(Polyline newPl) 
+        {
+
+            for (int k = 0; k < Connector.Count; k++)
+            {
+                Point3d firstPt = Connector[k].GetPoint3dAt(0);
+                Point3d endPt = Connector[k].GetPoint3dAt(Connector[k].NumberOfVertices - 1);
+                if (newPl.DistanceTo(firstPt, false) > 2 && newPl.DistanceTo(endPt, false) > 2)
+                {
+                    Point3d pt0 = newPl.GetClosestPointTo(firstPt, false);
+                    double l0 = pt0.DistanceTo(firstPt);
+                    Point3d pt1 = newPl.GetClosestPointTo(endPt, false);
+                    double l1 = pt1.DistanceTo(endPt);
+
+                    if (l0 < l1)
+                    {
+                        Connector[k].AddVertexAt(0, pt0.ToPoint2D(), 0, 0, 0);
+                    }
+                    else 
+                    {
+                        Connector[k].AddVertexAt(Connector[k].NumberOfVertices, pt1.ToPoint2D(), 0, 0, 0);
+                    }
+                }        
+            }
         }
 
         //
