@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -142,6 +143,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
+        }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/26cdce3cf8124ccfa95dd5c47da53ca2.html";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
         }
     }
 }
