@@ -118,22 +118,28 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             for (int i = 0; i < roomList.Count; i++)
             {
-                for(int j = i+1; j<roomList.Count; j++)
+                for (int j = i+1; j<roomList.Count; j++)
                 {
+                    // DrawUtils.ShowGeometry(roomList[i], "SSS-1ROOM-" + i.ToString()+"-"+j.ToString());
+
                     DBObjectCollection dboc = new DBObjectCollection() { roomList[j] };
                     DBObjectCollection dbocd = roomList[i].DifferenceMP(dboc);
                     
                     if (dbocd.Count > 0)
                     {
-                        roomList[i] = dbocd.OfType<MPolygon>().OrderByDescending(x => x.Area).FirstOrDefault();
+                        if (dbocd.OfType<MPolygon>().Count() > 0)
+                        {
+                            roomList[i] = dbocd.OfType<MPolygon>().OrderByDescending(x => x.Area).FirstOrDefault();
+                        }
+                        else{
+                            roomList[i] = ThMPolygonTool.CreateMPolygon(dbocd.OfType<Polyline>().FirstOrDefault());
+                        }
                     }
                     else
                     {
                         roomList[i] = null;
                         break;
                     }
-
-                    // dbocd.OfType<MPolygon>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "AAA"));
 
                 }
             }
