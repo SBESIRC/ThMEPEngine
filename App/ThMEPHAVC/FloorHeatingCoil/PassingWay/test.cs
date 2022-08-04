@@ -33,15 +33,17 @@ namespace ThMEPHVAC
                 // select room
                 var room_result = Active.Editor.GetEntity("get room region");
                 if (room_result.Status != PromptStatus.OK) return;
-                Polyline room = acadDatabase.Element<Polyline>(room_result.ObjectId);
-                // select pipe in
+                Polyline room = acadDatabase.Element<Polyline>(room_result.ObjectId).Clone() as Polyline;
+                // input pipe in
                 var pipein_result = Active.Editor.GetEntity("get pipein point");
                 if (pipein_result.Status != PromptStatus.OK) return;
                 var circle = acadDatabase.Element<Circle>(pipein_result.ObjectId);
-                // init generator
-                PipeInput pipeInput = new PipeInput(circle.Center, circle.Radius);
-                RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipeInput, -200);
-                // calculate pipeline
+                List<DrawPipeData> pipe_in = new List<DrawPipeData>();
+                pipe_in.Add(new DrawPipeData(circle.Center, circle.Radius, 0, 0));
+                // input room_buffer
+                double room_buffer = 100;
+                // core process
+                RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipe_in, room_buffer);
                 roomPipeGenerator.CalculatePipeline();
                 // show result
                 var show = roomPipeGenerator.skeleton;
@@ -84,7 +86,6 @@ namespace ThMEPHVAC
                     //pouts_freedom.Add(free_result.Value);
                     pouts_freedom.Add(0);
                 }
-                //pouts_freedom[2] = 1;
                 // input pipe ins
                 List<DrawPipeData> pipe_in_list = new List<DrawPipeData>();
                 for (int i = 0; i < in_pipe_num; i++)
@@ -135,12 +136,9 @@ namespace ThMEPHVAC
                 var result = Active.Editor.GetEntity("select shell");
                 if (result.Status != PromptStatus.OK) return;
                 Polyline shell = acadDatabase.Element<Polyline>(result.ObjectId);
-                // input polygon
-                result = Active.Editor.GetEntity("select hole");
-                if (result.Status != PromptStatus.OK) return;
-                var hole = acadDatabase.Element<Polyline>(result.ObjectId);
-                FloorHeatingCoil.MainPipeBuffer mainPipeBuffer = new MainPipeBuffer(shell, hole, 300);
-                PassageShowUtils.ShowEntity(mainPipeBuffer.output.shape);
+                // 圆角测试
+                var fillet_shell=FilletUtils.FilletPolyline(shell, shell.StartPoint, shell.EndPoint, 500 / 3);
+                PassageShowUtils.ShowEntity(fillet_shell);
             }
         }
 

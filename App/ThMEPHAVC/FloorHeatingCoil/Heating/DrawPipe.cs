@@ -40,11 +40,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             GetDrawnPipe();
 
-            GetConnector();
+            //GetConnector();
 
-            DrawWholePipe();
+            //DrawWholePipe();
 
-            SaveResults();
+            //SaveResults();
         }
 
         public void DataInit()
@@ -294,7 +294,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //绘制
                     ////PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pins, pouts, pins_buffer, pouts_buffer, main_index);
 
-                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 400 , Parameter.SuggestDistanceWall);
+                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 600 , Parameter.SuggestDistanceWall);
                     passagePipeGenerator.CalculatePipeline();
                     List<PipeOutput> nowOutputList = passagePipeGenerator.outputs; 
                     nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l1passingPipe", x.pipe_id%7 + 1, 30));

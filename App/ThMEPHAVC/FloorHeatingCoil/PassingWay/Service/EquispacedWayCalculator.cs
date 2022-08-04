@@ -206,8 +206,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             foreach (var poly in last_lines)
                 poly.Dispose();
-            //foreach (var line in lines)
-            //    PassageShowUtils.ShowEntity(line, index % 7 + 1);
             return lines;
         }
         List<Polyline> ConvertToEquispacedWay(int index, List<Line> lines, List<int> idxs)

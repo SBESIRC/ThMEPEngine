@@ -16,7 +16,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 {
     class PassagePipeGenerator:IDisposable
     {
-        // input
+        // 输入数据
         Polyline region;
         double buffer { get; set; } = 600;
         double room_buffer { get; set; } = 100;
@@ -24,11 +24,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
         int main_index { get; set; } = -1;
         int mode { get; set; } = 0;         // 0:normal generate/1:simple generate
 
-        // output
+        // 输出数据
         public List<PipeOutput> outputs { get; set; } = new List<PipeOutput>();
         public List<ChangePointData> change_point_datas { get; set; } = new List<ChangePointData>();
 
-        // inner data
+        // 内部数据
         bool main_has_output { get; set; } = true;
         PipeInput main_pipe_input { get; set; } = null;
         List<List<PipeSegment>> pipe_segments { get; set; }
@@ -50,17 +50,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         public void CalculatePipeline()
         {
-            //for (int i = 0; i < pipe_inputs.Count; ++i)
-            //{
-            //    if (pipe_inputs[i].is_out_free == true)
-            //        PassageShowUtils.ShowPoint(pipe_inputs[i].pout);
-            //}
             if (mode == 0)
             {
                 CalculateDirectionWay();
                 CalculateShortestWay();
                 CalculateIntersectWay();
                 CheckPoutMoved();
+                // 主导管线接口
                 CalculateMainShortestWay();
                 CalculateMainWay();
             }
@@ -73,31 +69,31 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CalculateDirectionWay()
         {
-            // init calculator
+            // 初始化计算管线
             DirectionWayCalculator directionWayCalculator = new DirectionWayCalculator(region);
-            // init box graph
+            // 初始化线框图
             directionWayCalculator.BuildGraph();
-            // calculate shortest direction way
+            // 计算最短方向路径
             pipe_segments = new List<List<PipeSegment>>();
             for (int i = 0; i < pipe_inputs.Count; ++i)
                 pipe_segments.Add(directionWayCalculator.Calculate(pipe_inputs[i]));
         }
         void CalculateShortestWay()
         {
-            // init calculator
+            // 初始化计算管线
             EquispacedWayCalculator equispacedWayCalculator = new EquispacedWayCalculator(region, main_index, buffer, room_buffer, pipe_inputs, pipe_segments);
-            // group direction
+            // 建立方向树
             equispacedWayCalculator.BuildDirTree(0, pipe_inputs.Count - 1, 0);
             
-            // show direction group result
+            // 打印方向分组信息
             equispacedWayCalculator.ShowDirWay();
 
-            // adjust command buffer
+            // 调整推荐间距
             equispacedWayCalculator.AdjustCommandBuffer();
             buffer = equispacedWayCalculator.buffer;
             room_buffer = equispacedWayCalculator.room_buffer;
 
-            // calcualte equispaces way
+            // 计算均匀分布路径
             equispaced_segments = new List<List<Polyline>>();
             equispaced_lines = new List<List<Line>>();
             equispaced_buffers = new List<List<double>>();
@@ -112,7 +108,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CalculateIntersectWay()
         {
+            // 初始化计算管线
             IntersectWayCalculator intersectWayCalculator = new IntersectWayCalculator(region, main_index, buffer, room_buffer, pipe_inputs, equispaced_lines, equispaced_buffers, equispaced_segments);
+            // 如果主导管线有出口，则按照两边向主导管线的顺序计算管线导向路径
             if (main_has_output)
             {
                 for (int i = 0; i < main_index; ++i)
@@ -121,6 +119,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     intersectWayCalculator.Calculate(i, false);
                 intersectWayCalculator.Calculate(main_index, main_index < pipe_inputs.Count / 2);
             }
+            // 如果主导管线没有出口，则只计算非主导管线导向路径
             else
             {
                 for (int i = 0; i <= main_index; ++i)
@@ -129,7 +128,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     intersectWayCalculator.Calculate(i, false);
             }
             shortest_way = intersectWayCalculator.shortest_way;
-
+            // 保存非主导管线计算结果
             for (int i = 0; i < shortest_way.Count; ++i)
             {
                 if (main_has_output && i == main_index) continue;
@@ -138,6 +137,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CheckPoutMoved()
         {
+            // 计算修改过的管线出口
             for(int i = 0; i < pipe_inputs.Count; ++i)
             {
                 var point = shortest_way[i].poly.Last();
@@ -210,12 +210,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             else
                 outputs.Insert(main_index, mainPipeBuffer.output);
         }
-
-        //void CalculateMainWay()
-        //{
-        //    MainPipeCalculator mainPipeCalculator = new MainPipeCalculator(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
-        //    mainPipeCalculator.Calculate();
-        //}
         public void Dispose()
         {
             region.Dispose();

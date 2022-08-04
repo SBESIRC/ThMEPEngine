@@ -20,36 +20,28 @@ namespace ThMEPHVAC.FloorHeatingCoil
         protected Polyline room;
         protected Point3d pipe_in;
 
-        protected double buffer = -500;
-        protected double room_buffer = -100;
+        protected double buffer { get; set; } = 500;
+        protected double room_buffer { get; set; } = 100;
         protected double pipe_width = 50;
         // inner structure
         protected BufferTreeNode buffer_tree = null;
         // output
         public List<Polyline> skeleton = new List<Polyline>();
         List<Polyline> inner_skeleton = new List<Polyline>();
-
+        
         double adjust_dist = 1000;      // to avoid sharp curve
+        double smaller_last_dist = 0.8;     // 最后一段内缩阈值倍数
 
         protected RoomPipeGenerator() { }
 
         public RoomPipeGenerator(Polyline room, List<DrawPipeData> pipe_in_list, double room_buffer = 100)
         {
-            this.room = room;
+            this.room = room.Clone() as Polyline;
             this.pipe_in = room.GetClosePoint(pipe_in_list[0].CenterPoint);
             this.pipe_width = pipe_in_list[0].HalfPipeWidth;
-            this.buffer = pipe_in_list[0].HalfPipeWidth * (-4);
+            this.buffer = pipe_in_list[0].HalfPipeWidth * 4;
             var points = PassageWayUtils.GetPolyPoints(room);
-            this.room_buffer = Math.Max(-room_buffer, pipe_width - points.FindByMin(o => o.DistanceTo(pipe_in)).DistanceTo(pipe_in));
-        }
-        public RoomPipeGenerator(Polyline room, PipeInput pipeInput, double room_buffer = -100)
-        {
-            this.room = room;
-            this.pipe_in = room.GetClosePoint(pipeInput.pin);
-            this.pipe_width = pipeInput.in_buffer;
-            this.buffer = pipeInput.in_buffer * (-4);
-            var points = PassageWayUtils.GetPolyPoints(room);
-            this.room_buffer = Math.Max(room_buffer, pipe_width - points.FindByMin(o => o.DistanceTo(pipe_in)).DistanceTo(pipe_in));
+            this.room_buffer = Math.Min(room_buffer, points.FindByMin(o => o.DistanceTo(pipe_in)).DistanceTo(pipe_in)-pipe_width);
         }
         public void CalculatePipeline()
         {
@@ -58,7 +50,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             GetSkeleton(buffer_tree);
             AddInputSegment();
             BufferSkeleton();
-            PostProcess();
+            //PostProcess();
         }
         void AdjustRoom()
         {
@@ -80,10 +72,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
             //room.Dispose();
             //room=PassageWayUtils.BuildPolyline(points);
             if (room.NumberOfVertices <= 5) return;
-            var points = room.GetPoints().ToList();
-            if (room.ToNTSPolygon().Shell.IsCCW) points.Reverse();
-            if (points.Last() == points.First()) points.RemoveAt(points.Count - 1);
+            var points = PassageWayUtils.GetPolyPoints(room);
             var count = points.Count;
+            // 斜线处理
+            for (int i = 0; i < points.Count; ++i)
+            {
+                var next = (i + 1) % points.Count;
+                var dp = points[next] - points[i];
+                if (Math.Abs(dp.X) > 50 && Math.Abs(dp.Y) > 10 && dp.Length < buffer)
+                {
+                    Point3d new_point = new Point3d(points[i].X, points[next].Y, 0);
+                    if (room.Contains(new_point))
+                        points.Insert(next, new_point);
+                    else
+                        points.Insert(next, new Point3d(points[next].X, points[i].Y, 0));
+                }
+            }
+            room = PassageWayUtils.BuildPolyline(points);
 
             int inner_idx = -1;
             int outer_idx = -1;
@@ -109,8 +114,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 maxy = Math.Max(maxy, points[i].Y);
             }
             if (inner_idx == -1 || outer_idx == -1) return;
-            var boundary_dist = -room_buffer + pipe_width;
-            var pipe_dist = -buffer;
+            var boundary_dist = room_buffer + pipe_width;
+            var pipe_dist = buffer;
             if (Math.Abs(points[outer_idx].X - points[inner_idx].X) < (maxx - minx) / 2)
             {
                 double old_x = points[inner_idx].X;
@@ -146,9 +151,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
         BufferTreeNode GetBufferTree(Polyline poly, bool flag = true)
         {
             BufferTreeNode node = new BufferTreeNode(poly);
-            var next_buffer = PassageWayUtils.Buffer(poly, flag ? room_buffer - pipe_width : buffer);
+            var next_buffer = PassageWayUtils.Buffer(poly, flag ? -room_buffer - pipe_width : -buffer);
             if (next_buffer.Count == 0) return node;
             node.childs = new List<BufferTreeNode>();
+            if (flag == true)
+            {
+                if (next_buffer.Count > 1)
+                {
+                    for(int i=next_buffer.Count-1;i>=0;i--)
+                    {
+                        if(next_buffer[i].Distance(pipe_in)>room_buffer+pipe_width+100)
+                        {
+                            next_buffer[i].Dispose();
+                            next_buffer.RemoveAt(i);
+                        }
+                    }
+                }
+            }
             foreach (Polyline child_poly in next_buffer)
             {
                 var child = GetBufferTree(child_poly, false);
@@ -190,8 +209,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // cut last segment
             var p0 = coords.First();
             var p1 = coords.Last();
-            if (p1.DistanceTo(p0) > -buffer * 2)
-                coords.Add(p0 - (p1 - p0).GetNormal() * buffer);
+            if (p1.DistanceTo(p0) > buffer*2) 
+                coords.Add(p0 + (p1 - p0).GetNormal() * buffer);
             // add first segment
             if (node.parent.parent != null)
             {
@@ -203,7 +222,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     coords.Insert(0, pin);
                 }
             }
-            CleanThinBoundary(coords);
+            coords = SmoothUtils.SmoothPoints(coords);
+            //PassageShowUtils.ShowPoints(coords);
+            //coords=CleanThinBoundary(coords);
             // smooth shell
             SmoothPolyline(coords);
             if (coords.Count >= 4)
@@ -215,11 +236,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 {
                     var p = first_line.GetClosestPointTo(coords.Last(), last_dir, true);
                     if (p.DistanceTo(coords.Last()) < 100)
-                        coords[coords.Count - 1] = p + last_dir * buffer;
+                        coords[coords.Count - 1] = p - last_dir * buffer;
                 }
             }
             // smooth first line
-            if (node.parent.parent != null && node.parent.shell.EndPoint.DistanceTo(coords[0]) < -buffer)
+            if (node.parent.parent != null && node.parent.shell.EndPoint.DistanceTo(coords[0]) < buffer)
             {
                 var dir = (node.parent.shell.EndPoint - coords[0]).GetNormal();
                 var dir0 = (coords[0] - coords[1]).GetNormal();
@@ -241,6 +262,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var dir2 = (p1 - p2).GetNormal();
                 if (Math.Abs(dir1.DotProduct(dir2)) < 1e-3)
                 {
+                    // 如果倒数第二段较长，最后一段加粗
                     var L = (p1 - p2).Length;
                     if (L < 8 * pipe_width && L > 4 * pipe_width)
                     {
@@ -256,7 +278,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         inner_skeleton.Add(PassageWayUtils.BuildPolyline(inner_points));
                         //PassageShowUtils.ShowEntity(inner_skeleton.Last(), 1);
                     }
-                    else if (L < 4 * pipe_width)
+                    // 如果倒数第二段较短，最后一段略微变窄，变窄后的宽度>0.8*推荐宽度
+                    else if (L < 4 * pipe_width && L > (1 + 3 * smaller_last_dist) * pipe_width)
                     {
                         var x = (L + 2 * pipe_width) / 3;
                         coords.RemoveAt(coords.Count - 1);
@@ -274,10 +297,24 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         inner_skeleton.Add(PassageWayUtils.BuildPolyline(inner_points));
                         //PassageShowUtils.ShowEntity(inner_skeleton.Last(), 1);
                     }
+                    // 如果变窄后宽度<0.8*推荐宽度，且不变之前存在狭缝
+                    else if (L < (1 + 3 * smaller_last_dist) * pipe_width && L > 2 * pipe_width)  
+                    {
+                        var last2 = coords.Last() + (p2 - p1) / 2;
+                        coords.Add(last2);
+                        coords.Add(p2 + (p1 - p2) / 2);
+                    }
+                    // 如果不存在狭缝，则舍弃最后两段
+                    else if (L < 2 * pipe_width)
+                    {
+                        coords.RemoveAt(coords.Count - 1);
+                        coords.RemoveAt(coords.Count - 1);
+                    }
                 }
             }
             //PassageShowUtils.ShowEntity(node.shell);
             node.SetShell(PassageWayUtils.BuildPolyline(coords));
+            //PassageShowUtils.ShowEntity(node.shell);
             skeleton.Add(node.shell);
         }
         protected void GetSkeleton(BufferTreeNode node)
@@ -368,43 +405,36 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 shell.Closed = true;
                 skeleton.Add(shell);
             }
+            if (skeleton.Count > 1)
+            {
+                skeleton.OrderByDescending(o => o.Area);
+                for (int i = skeleton.Count - 1; i >= 1; i--)
+                {
+                    skeleton[i].Dispose();
+                    skeleton.RemoveAt(i);
+                }
+            }
             PassageWayUtils.ClearListPoly(pipes);
             PassageWayUtils.ClearListPoly(pipe);
         }
         protected void PostProcess()
         {
-            var points = skeleton[0].GetPoints().ToList();
-            skeleton[0].Dispose();
-            // smooth pipe boundary
-            List<int> remove_index = new List<int>();
-            for (int i = 0; i < points.Count; i++)
+            var pipe = room.ToNTSPolygon().Intersection(skeleton[0].ToNTSPolygon()).ToDbCollection().Cast<Polyline>().First();
+            var points = SmoothUtils.SmoothPoints(PassageWayUtils.GetPolyPoints(pipe));
+            var se = IntersectUtils.PolylineIntersectionPolyline(pipe, room);
+            for (int i = se.Count - 1; i >= 0; --i) 
             {
-                var pre = (i - 1 + points.Count) % points.Count;
-                var next = (i + 1) % points.Count;
-                if (PassageWayUtils.PointOnSegment(points[i], points[pre], points[next]))
-                    remove_index.Add(i);
-            }
-            for (int i = remove_index.Count - 1; i >= 0; i--)
-                points.RemoveAt(remove_index[i]);
-            var poly = PassageWayUtils.BuildPolyline(points);
-            poly.Closed = true;
-            // fillet
-            for (int i = 0; i < poly.NumberOfVertices; i++)
-            {
-                var cur = i;
-                var next = (i + 1) % poly.NumberOfVertices;
-                var dis = poly.GetPoint3dAt(next).DistanceTo(poly.GetPoint3dAt(cur));
-                int add_num = 0;
-                if (dis <= 3 * pipe_width)
+                if(PassageWayUtils.GetPointIndex(se[i],points)==-1)
                 {
-                    if (cur > next) cur = next + (next = cur) * 0;
-                    add_num += 1 + poly.FilletAt(next, dis / 3 - 1e-5);
-                    add_num += poly.FilletAt(cur, dis / 3 - 1e-5);
+                    se.RemoveAt(i);
                 }
-                i += add_num;
             }
-            poly.FilletAll(pipe_width);
-            skeleton[0] = poly;
+            if (se.Count != 2)
+            {
+                new NotSupportedException();
+            }
+            var fillet_poly=FilletUtils.FilletPolyline(pipe, se[0], se[1]);
+            PassageShowUtils.ShowEntity(fillet_poly);
         }
         protected List<Point3d> CleanThinBoundary(List<Point3d> coords)
         {
@@ -420,7 +450,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (p0.DistanceTo(p1) < 1) continue;
                 int p_1_index = (k-1+count) % count;
                 int p2_index = (k + 2) % count;
-                if ((p0 - p1).Length < -buffer / 2 + 10)  
+                if ((p0 - p1).Length < buffer / 2 + 10)  
                 {
                     // update the pre point and the third point
                     var dp = (p1 - p0) / 2;
@@ -449,7 +479,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     ret = a.GetPoint3dAt(i);
                 }
             }
-            if (dis > Math.Abs(1.5 * buffer)) 
+            if (dis > 1.5 * buffer) 
             {
                 var point_on_b = b.GetClosePoint(ret);
                 ret = a.GetClosePoint(point_on_b);

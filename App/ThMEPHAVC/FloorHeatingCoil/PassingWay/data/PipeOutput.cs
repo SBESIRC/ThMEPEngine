@@ -10,9 +10,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
 {
     public class PipeOutput
     {
-        public List<Polyline> skeleton = null;
-        public Polyline shape = null;
-        public int pipe_id = -1;
+        public List<Polyline> skeleton = null;          // 管道骨架线
+        public Polyline shape = null;                   // 管道轮廓
+        public int pipe_id = -1;                        // 管道索引
         public PipeOutput() { }
         public PipeOutput(int pipe_id,BufferPoly buffer_poly)
         {

@@ -48,6 +48,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             output = new PipeOutput();
             output.shape = BaseMergeHoleAndShell(hole, shell, buffer);
         }
+        // 测试用构造函数
         public MainPipeBuffer(MPolygon mPolygon, double buffer)
         {
             this.buffer = buffer;
@@ -57,11 +58,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         public void Calculate()
         {
-            //foreach (var skeleton in raw_skeletons)
-            //    PassageShowUtils.ShowEntity(skeleton, 1);
             MergeSkeleton();
-            //foreach (var skeleton in output.skeleton)
-            //    PassageShowUtils.ShowEntity(skeleton, 0);
             BufferMainWay();
             ConnectHoles();
         }
@@ -137,7 +134,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             var nts_polygon = raw_buffer.ToNTSPolygon();
             var shell = nts_polygon.Shell.ToDbPolyline();
-            //PassageShowUtils.ShowEntity(shell,0);
             if (nts_polygon.Holes.Count() == 0)
             {
                 var points = PreProcess(shell, true);
@@ -149,7 +145,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             foreach (var hole in nts_polygon.Holes)
             {
                 holes.Add(hole.ToDbPolyline());
-                //PassageShowUtils.ShowEntity(holes.Last());
             }
 
             foreach (var hole in holes)
