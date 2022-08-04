@@ -3,6 +3,7 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -15,6 +16,7 @@ using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
 using ThMEPWSS.HydrantConnectPipe.Service;
 using ThMEPWSS.Pipe;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
@@ -98,10 +100,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     Active.Editor.WriteMessage(System.DateTime.Now.ToString("yyyy-MM-dd HH：mm：ss：ffff"));
                     Active.Editor.WriteMessage("\n");
                     var range = new Point3dCollection();
-                    range.Add(input.Item1);
-                    range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                    range.Add(input.Item2);
-                    range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
+                    range.Add(input.Item1.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()));
+                    range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0).TransformBy(Active.Editor.UCS2WCS()));
+                    range.Add(input.Item2.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()));
+                    range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0).TransformBy(Active.Editor.UCS2WCS()));
 
                     var electricWells = ThHydrantDataManager.GetElectricWells(range);//获取电井
                     var shearWalls = ThHydrantDataManager.GetShearWalls(range);//获取剪力墙

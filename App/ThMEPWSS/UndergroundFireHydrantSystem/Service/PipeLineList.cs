@@ -91,7 +91,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             //lineList = CleanLaneLines3(lineList);
         }
 
-        public static void PipeLineAutoConnect(List<Line> lineList)
+        public static void PipeLineAutoConnect(ref List<Line> lineList)
          {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
