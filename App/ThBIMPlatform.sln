@@ -1,11 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32630.194
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThBIMSketchUp", "ThBIMSketchUp\ThBIMSketchUp.vcxproj", "{2EEF997A-DA2C-425B-91CD-C3AF0CBE578D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThBIMSketchUpNET", "ThBIMSketchUpNET\ThBIMSketchUpNET.vcxproj", "{F6ACBBB8-D2DE-4F6B-BB78-72FDECB1D040}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2EEF997A-DA2C-425B-91CD-C3AF0CBE578D} = {2EEF997A-DA2C-425B-91CD-C3AF0CBE578D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
