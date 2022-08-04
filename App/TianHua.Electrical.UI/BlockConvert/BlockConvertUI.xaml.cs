@@ -82,6 +82,16 @@ namespace TianHua.Electrical.UI.BlockConvert
         }
 
         /// <summary>
+        /// 视频教程
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnVideo_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", @"http://thlearning.thape.com.cn/kng/view/video/30b3c88329674aac91d26d29f30f4ee8.html");
+        }
+
+        /// <summary>
         /// 忽略变化
         /// </summary>
         /// <param name="sender"></param>
