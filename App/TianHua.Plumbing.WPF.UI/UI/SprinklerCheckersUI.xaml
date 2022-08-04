@@ -221,6 +221,7 @@
             </Grid>
         </StackPanel>
         <StackPanel Margin="0,2,0,0" Grid.Row="5" Orientation="Horizontal" Height="20" HorizontalAlignment="Right">
+            <Button Name="btnVideo" Content="视频教程" Margin="0,0,10,0" Width="60" Click="btnVideo_Click" />
             <Button Name="btnSprinklerCheck" Content="校核" Margin="0,0,5,0" Width="40" Command="{Binding SprinklerCheckCmd}" />
         </StackPanel>
     </Grid>

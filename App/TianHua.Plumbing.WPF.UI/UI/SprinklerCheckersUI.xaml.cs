@@ -153,5 +153,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var layerNum = btn.Tag.ToString();
             VM.Cancel(layerNum);
         }
+
+        private void btnVideo_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", @"http://thlearning.thape.com.cn/kng/view/video/045ceb423e8040df8b435f34d5b317c8.html");
+        }
     }
 }
