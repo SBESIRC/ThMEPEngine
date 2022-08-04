@@ -113,7 +113,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public static int GetSegIndexOnPolygon(Point3d p, List<Point3d> points)
         {
             for (int j = 0; j < points.Count; j++)
-                if (PointOnSegment(p,points[j],points[(j+1)%points.Count]))
+                if (PointOnSegment(p,points[j],points[(j+1)%points.Count]) || points[(j+1) % points.Count].DistanceTo(p) < 5)
                     return j;
             return -1;
         }

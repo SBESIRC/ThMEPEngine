@@ -613,6 +613,56 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
             List<Point3d> intersectionPointList = IntersectUtils.PolylineIntersectionPolyline(MainPipeRoad,buffer_tree.shell);
 
+            //没有交到，分两种情况，没有buffer/buffer有偏移
+            if (intersectionPointList.Count == 0) 
+            {
+                List<Point3d> ptList = buffer_tree.shell.GetPoints().ToList();
+                int index = -1;
+                double minDis = 10000;
+
+                for (int i = 0; i < ptList.Count; i++) 
+                {
+                    double nowDis = MainPipeRoad.DistanceTo(ptList[i],false);
+                    if (nowDis < minDis) 
+                    {
+                        minDis = nowDis;
+                        index = i;
+                    }
+                }
+
+                if (index != -1 && buffer_tree.shell.Area > 5000) 
+                {
+                    
+                    List<int> changeIndex = new List<int>();
+                    changeIndex.Add(index);
+
+                    Point3d pre = ptList[(index - 1 + ptList.Count) % ptList.Count];
+                    Point3d next = ptList[(index + 1) % ptList.Count];
+                    if (Math.Abs(MainPipeRoad.DistanceTo(pre, false) - minDis) < 20)
+                    {
+                        changeIndex.Add((index - 1 + ptList.Count) % ptList.Count);
+                    }
+                    else if (Math.Abs(MainPipeRoad.DistanceTo(next, false) - minDis) < 20) 
+                    {
+                        changeIndex.Add((index + 1) % ptList.Count);
+                    }
+
+                    if (changeIndex.Count == 2) 
+                    {
+                        for (int i = 0; i < changeIndex.Count; i++)
+                        {
+                            Point3d oldPt = ptList[changeIndex[i]];
+                            Point3d newPt = MainPipeRoad.GetClosestPointTo(oldPt,false);
+                            buffer_tree.shell.RemoveVertexAt(changeIndex[i]);
+                            buffer_tree.shell.AddVertexAt(changeIndex[i], newPt.ToPoint2D(), 0, 0, 0);
+                        }
+                        var ptListTmp = buffer_tree.shell.GetPoints().ToList();
+
+                        intersectionPointList = IntersectUtils.PolylineIntersectionPolyline(MainPipeRoad, buffer_tree.shell);
+                    }
+                }
+            }
+
             if (intersectionPointList.Count == 0) return new Point3d(0, 0, 0);
 
             Dictionary<Point3d, double> pointDis = new Dictionary<Point3d, double>();
