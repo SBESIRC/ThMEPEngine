@@ -4,6 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -121,6 +122,11 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/4f42b283210d4874b80f125f01767c6a.html");
         }
     }
 }

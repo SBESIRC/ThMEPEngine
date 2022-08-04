@@ -8,7 +8,7 @@
                     mc:Ignorable="d" 
                     Title="天华广播布置"
                     SizeToContent="WidthAndHeight"
-                    d:DesignHeight="220" d:DesignWidth="260">
+                    d:DesignHeight="245" d:DesignWidth="260">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -29,6 +29,7 @@
             <Label>m</Label>
         </StackPanel>
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,20,10,10" VerticalAlignment="Bottom">
+            <cus:ImageButton IsTabStop="True" TabIndex="1" Content="视频教程" x:Name="btnHelp" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="btnHelp_Click"></cus:ImageButton>
             <cus:ImageButton IsTabStop="True" TabIndex="1" Content="消防广播布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="btnLayout_Click"></cus:ImageButton>
             <cus:ImageButton IsTabStop="True" TabIndex="2" Content="消防广播连线" x:Name="btnWiringConnect" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnWiringConnect_Click"></cus:ImageButton>
             <cus:ImageButton IsTabStop="True" TabIndex="3" Content="广播盲区显示" x:Name="btnGetBlindArea" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnGetBlindArea_Click"></cus:ImageButton>
