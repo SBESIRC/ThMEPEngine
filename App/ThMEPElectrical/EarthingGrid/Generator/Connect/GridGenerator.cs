@@ -8,10 +8,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 {
     class GridGenerator
     {
-        public static HashSet<Tuple<Point3d, Point3d>> Genterate(PreProcess preProcessData, List<Tuple<double, double>> faceSize, bool beMerge)
+        public static HashSet<Tuple<Point3d, Point3d>> Genterate(PreProcess preProcessData, List<Tuple<double, double>> faceSize, bool beMerge, double findLength)
         {
             //1、生成柱网
-            var columnGrid = new ColumnGrid(preProcessData);
+            var columnGrid = new ColumnGrid(preProcessData, findLength);
             var findPolylineFromLines = columnGrid.Genterate();
 
             //1.5 删除禁区外的线

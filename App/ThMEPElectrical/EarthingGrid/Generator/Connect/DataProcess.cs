@@ -167,10 +167,13 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                         points.Add(column.GetCentroidPoint());
                     }
                 }
+                var cnt = points.Count;
                 //提取墙点
                 AddCrossPts(graph, ref points);
-
-                points.Add(polyline.GetCentroidPoint());
+                if(cnt == points.Count && polyline.Area < 5000000)
+                {
+                    points.Add(polyline.GetCentroidPoint());
+                }
             }
         }
 

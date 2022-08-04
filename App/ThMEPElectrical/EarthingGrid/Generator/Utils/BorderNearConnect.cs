@@ -12,7 +12,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
     class BorderNearConnect
     {
         public static void ConnectBorderNear(Dictionary<Polyline, HashSet<Point3d>> outlinewithBorderPts, Dictionary<Polyline, HashSet<Point3d>> outlinewithNearPts, 
-            HashSet<Point3d> columnPts, List<Polyline> allOutlines, HashSet<Polyline> buildingOutline, ref Dictionary<Point3d, HashSet<Point3d>> nearBorderGraph)
+            HashSet<Point3d> columnPts, List<Polyline> allOutlines, HashSet<Polyline> buildingOutline, double findLength, ref Dictionary<Point3d, HashSet<Point3d>> nearBorderGraph)
         {
             var nonBuildingOutline = new HashSet<Polyline>();
             allOutlines.ForEach(ol => { if (!buildingOutline.Contains(ol)) nonBuildingOutline.Add(ol); });
@@ -27,7 +27,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 outlinewithBorderPt.Value.ForEach(pt => allBorderPts.Add(pt));
             }
             //2、墙点和墙点连接
-            BorderConnectToNear(allBorderPts, columnPts, allOutlines, nonBuildingOutline, outlinewithBorderPts, ref nearBorderGraph, 13000, Math.PI / 6);
+            BorderConnectToNear(allBorderPts, columnPts, allOutlines, nonBuildingOutline, outlinewithBorderPts, ref nearBorderGraph, findLength, Math.PI / 6);
 
             //3、删除无用的墙墙连接，删除无用的近点-墙连接
             DeleteUselessConnects(allOutlines, ref nearBorderGraph);
