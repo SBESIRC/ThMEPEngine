@@ -46,11 +46,10 @@ namespace ThMEPHVAC
                 RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipe_in, room_buffer);
                 roomPipeGenerator.CalculatePipeline();
                 // show result
-                var show = roomPipeGenerator.skeleton;
-                foreach (Polyline poly in show)
-                {
-                    acadDatabase.ModelSpace.Add(poly);
-                }
+                var pipe = roomPipeGenerator.output;
+                acadDatabase.ModelSpace.Add(pipe.shape);
+                foreach (var sk in pipe.skeleton)
+                    acadDatabase.ModelSpace.Add(sk);
                 roomPipeGenerator.Dispose();
             }
         }

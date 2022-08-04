@@ -26,6 +26,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
         // inner structure
         protected BufferTreeNode buffer_tree = null;
         // output
+        public PipeOutput output;
+
         public List<Polyline> skeleton = new List<Polyline>();
         List<Polyline> inner_skeleton = new List<Polyline>();
         
@@ -181,11 +183,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (node.parent == null) return;
             var coords = PassageWayUtils.GetPolyPoints(node.shell);
             Point3d pin = node.parent.parent == null ? pipe_in : GetClosedPointAtoB(node.parent.shell, node.shell);
-            // rearrange coords
+            // 点列重排
             var point = node.shell.GetClosePoint(pin);
-            //PassageShowUtils.ShowPoint(point);
-            //PassageShowUtils.ShowPoint(pin, 4);
-            //PassageShowUtils.ShowEntity(node.shell, 4);
             int index = PassageWayUtils.GetPointIndex(point, coords);
             if (index == -1)
             {
@@ -206,12 +205,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if ((point - pin).GetNormal().CrossProduct((coords[0] - coords[1]).GetNormal()).Length > 1e-3) 
                     coords.Reverse(1, coords.Count - 1);
             }
-            // cut last segment
+            // 切断最后一条线
             var p0 = coords.First();
             var p1 = coords.Last();
             if (p1.DistanceTo(p0) > buffer*2) 
                 coords.Add(p0 + (p1 - p0).GetNormal() * buffer);
-            // add first segment
+            // 加入连接线
             if (node.parent.parent != null)
             {
                 if (point.DistanceTo(coords[0]) < 1) 
@@ -223,9 +222,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
             }
             coords = SmoothUtils.SmoothPoints(coords);
-            //PassageShowUtils.ShowPoints(coords);
-            //coords=CleanThinBoundary(coords);
-            // smooth shell
+            // 清洗骨架线的重复点、共线点
             SmoothPolyline(coords);
             if (coords.Count >= 4)
             {
@@ -239,7 +236,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         coords[coords.Count - 1] = p - last_dir * buffer;
                 }
             }
-            // smooth first line
+            // 平滑当前层骨架线的第一段
             if (node.parent.parent != null && node.parent.shell.EndPoint.DistanceTo(coords[0]) < buffer)
             {
                 var dir = (node.parent.shell.EndPoint - coords[0]).GetNormal();
@@ -249,7 +246,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 else
                     coords[0] = node.parent.shell.EndPoint;
             }
-            // deal with the most inner skeleton
+            // 处理最内层骨架线
             if (node.childs == null && coords.Count > 2)
             {
                 p0 = coords.Last();
@@ -331,7 +328,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             poly.AddVertexAt(0, pipe_in.ToPoint2D(), 0, 0, 0);
             var point = skeleton[0].GetClosePoint(pipe_in);
             var angle = (pipe_in - point).GetAngleTo(point - skeleton[0].GetPoint3dAt(1)) / Math.PI * 180;
-            if (Math.Abs(angle) > 0.1 && Math.Abs(angle - 90) > 0.1) 
+            if (Math.Abs(angle) > 0.1 && Math.Abs(angle - 90) > 0.1)
             {
                 var p0 = skeleton[0].GetPoint3dAt(0);
                 var p1 = skeleton[0].GetPoint3dAt(1);
@@ -347,6 +344,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void BufferSkeleton()
         {
+            // save skeleton result
+            output = new PipeOutput();
+            output.pipe_id = 0;
+            output.skeleton = new List<Polyline>();
+            foreach(var poly in skeleton)
+            {
+                output.skeleton.Add(poly.Clone() as Polyline);
+            }
             // buffer every line
             List<Polyline> pipes = new List<Polyline>();
             foreach(var poly in skeleton)
@@ -414,6 +419,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     skeleton.RemoveAt(i);
                 }
             }
+            output.shape = skeleton[0];
             PassageWayUtils.ClearListPoly(pipes);
             PassageWayUtils.ClearListPoly(pipe);
         }
