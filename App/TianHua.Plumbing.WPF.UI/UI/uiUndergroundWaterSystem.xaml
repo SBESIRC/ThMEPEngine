@@ -20,7 +20,7 @@
                 <cus:ImageButton  Content="读取楼层" Name="btnFloorRead" Height="25" Width="60" Margin="0,5,0,0" TabIndex="2" Click="btnFloorRead_Click"/>
             </WrapPanel>
             <cus:ImageButton Content="参数设置" Name="btnParaSet" Height="55" Width="85" Margin="10,0,0,0" Click="btnParaSet_Click" ImageTextLocation="TextOnly" TabIndex="3"/>
-            
+
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <Label x:Name="label" Content="楼层表"/>
@@ -28,7 +28,8 @@
             <Rectangle Margin="0,5,5,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="1 1" SnapsToDevicePixels="True"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="2">
-            <Button x:Name="btnCreateSystemMap" Content="生成" Width ="85" Margin="70,5,15,0" TabIndex="5" Click="btnCreateSystemMap_Click"/>
+            <Button x:Name="btn_Help" Content="视频教程" Width ="70" TabIndex="5" Margin="0,5,0,0" Click="btn_Help_Click" Height="20"/>
+            <Button x:Name="btnCreateSystemMap" Content="生成" Width ="70" Margin="20,5,15,0" TabIndex="5" Height="20" Click="btnCreateSystemMap_Click"/>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>
