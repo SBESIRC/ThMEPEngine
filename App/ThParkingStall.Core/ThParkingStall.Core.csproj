@@ -71,6 +71,7 @@
     <Compile Include="MPartitionLayout\Model\MNTSSpatialIndex.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\AdjacentLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\CarsGeneration.cs" />
+    <Compile Include="MPartitionLayout\MParkingPartitionClass\Estimate.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\InsertionBuildLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\LanesProcessingEntry.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\ModuleLanes.cs" />

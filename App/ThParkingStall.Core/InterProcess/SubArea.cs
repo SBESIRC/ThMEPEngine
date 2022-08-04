@@ -23,6 +23,8 @@ namespace ThParkingStall.Core.InterProcess
         public readonly SubAreaKey Key;
         public int Count = -3;//车位总数
         public MParkingPartitionPro mParkingPartitionPro;
+        public MParkingPartitionPro mParkingPartitionPro2;
+        public MParkingPartitionPro mParkingPartitionPro3;
 
         public SubArea(Polygon area, List<LineSegment> vaildLanes, List<LineString> walls,
             List<Polygon> buildings, List<Ramp> ramps, List<Polygon> boundingBoxes, SubAreaKey key)
@@ -46,7 +48,12 @@ namespace ThParkingStall.Core.InterProcess
             BoundingBoxes = boundingBoxes;
         }
         static object lockObj = new object();
-        public void UpdateParkingCnts(bool IgnoreCache)
+        /// <summary>
+        /// mode:1精准的 2估算方法一 3估算方法二
+        /// </summary>
+        /// <param name="IgnoreCache"></param>
+        /// <param name="mode"></param>
+        public void UpdateParkingCnts(bool IgnoreCache, int mode)
         {
             if (SubAreaParkingCnt.Contains(this) && !IgnoreCache)
             {
@@ -74,7 +81,12 @@ namespace ThParkingStall.Core.InterProcess
                     fs.Close();
 #endif
                     //mParkingPartitionPro.GenerateParkingSpaces();
-                    mParkingPartitionPro.Process(IgnoreCache);
+                    if (mode == 1)
+                        mParkingPartitionPro.Process(IgnoreCache);
+                    else if (mode == 2)
+                        mParkingPartitionPro2.EstimateOne();
+                    else if (mode == 3)
+                        mParkingPartitionPro3.EstimateTwo();
                 }
                 catch (Exception ex)
                 {

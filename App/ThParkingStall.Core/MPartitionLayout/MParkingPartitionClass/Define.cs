@@ -149,6 +149,12 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double LayoutScareFactor_SingleVert = 0.7;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
+
+        //估算用
+        public int EstimateCountOne = 0;
+        public int EstimateCountTwo = 0;
+        public List<EstimateLaneBox> EstimateLaneBoxes=new List<EstimateLaneBox>();
+
         public enum LayoutDirection : int
         {
             LENGTH = 0,
@@ -161,6 +167,34 @@ namespace ThParkingStall.Core.MPartitionLayout
             GenerateParkingSpaces();
             return CarSpots.Count;
         }
+        public void EstimateOne()
+        {
+            GenerateLanesFast();
+            GeneratePerpModules();
+            RemoveDuplicatedLanes();
+            foreach (var lane in IniLanes.Select(e => e.Line))
+            {
+                var length = lane.Length - DisLaneWidth / 2;
+                if (IsConnectedToLaneDouble(lane))
+                {
+                    length -= DisLaneWidth / 2;
+                }
+                if (length > 0)
+                {
+                    EstimateCountOne += ((int)Math.Floor(length / (DisVertCarWidth + DisPillarLength / 3)));
+                }
+            }
+            EstimateCountOne = ((int)Math.Floor(EstimateCountOne/1.1));
+        }
+        public void EstimateTwo()
+        {
+            GenerateEstimateLaneBox();
+            foreach (var length in EstimateLaneBoxes.Select(e => e.EffectiveLength))
+            {
+                EstimateCountTwo += ((int)Math.Floor(length / (DisVertCarWidth + DisPillarLength / 3)));
+            }
+            EstimateCountTwo = ((int)Math.Floor(EstimateCountTwo / 1.1));
+        }
         public void GenerateParkingSpaces()
         {
             PreProcess();
@@ -170,6 +204,30 @@ namespace ThParkingStall.Core.MPartitionLayout
             ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
             PostProcess();
+        }
+        private void RemoveDuplicatedLanes()
+        {
+            IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            if (IniLanes.Count > 1)
+            {
+                for (int i = 1; i < IniLanes.Count; i++)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        var lni = IniLanes[i];
+                        var lnj = IniLanes[j];
+                        if (lni.Vec.Normalize().Equals(lnj.Vec.Normalize()))
+                        {
+                            var line=lnj.Line;
+                            if (line.ClosestPoint(lni.Line.P0).Distance(lni.Line.P0) < 1 && line.ClosestPoint(lni.Line.P1).Distance(lni.Line.P1) < 1)
+                            {
+                                IniLanes.RemoveAt(i);
+                                i--;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void InitialzeDatas(List<LineSegment> iniLanes)

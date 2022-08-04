@@ -3,6 +3,7 @@ using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -45,15 +46,71 @@ namespace ThParkingStall.Core.MPartitionLayout
             var obs = new List<Polygon>();
             foreach (var subArea in subAreas) obs.AddRange(subArea.Buildings);
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
-            subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
+            subAreas.ForEach(subArea =>
+            {
+                subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro();
+                subArea.mParkingPartitionPro2 = subArea.ConvertSubAreaToMParkingPartitionPro();
+                subArea.mParkingPartitionPro3 = subArea.ConvertSubAreaToMParkingPartitionPro();
+            });
+            //
+            var sw = new Stopwatch();
+            sw.Start();
             if (InterParameter.MultiThread)
-            {        
-                Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display));
+            {
+                Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 1));
             }
             else
             {
-                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display));
+                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 1));
             }
+            sw.Stop();
+            var time_1 = sw.ElapsedMilliseconds;
+            //
+            sw.Restart();
+            if (InterParameter.MultiThread)
+            {
+                Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 2));
+            }
+            else
+            {
+                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 2));
+            }
+            sw.Stop();
+            var time_2 = sw.ElapsedMilliseconds;
+            //
+            sw.Restart();
+            if (InterParameter.MultiThread)
+            {
+                Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 3));
+            }
+            else
+            {
+                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 3));
+            }
+            sw.Stop();
+            var time_3 = sw.ElapsedMilliseconds;
+            //
+            #region 估算对比
+            var count_1 = 0;
+            var count_2 = 0;
+            var count_3 = 0;
+            foreach (var subArea in subAreas)
+            {
+                count_1 += subArea.mParkingPartitionPro.Cars.Count;
+                count_2 += subArea.mParkingPartitionPro2.EstimateCountOne;
+                count_3 += subArea.mParkingPartitionPro3.EstimateCountTwo;
+            }
+
+            string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            FileStream fs = new FileStream(dir + "\\estimate.txt", FileMode.Append, FileAccess.Write);
+            StreamWriter swr = new StreamWriter(fs);
+            swr.WriteLine("原始方法用时：" + time_1 + ",车位数: " + count_1);
+            swr.WriteLine("估算方法一用时：" + time_2 + ",车位数: " + count_2);
+            swr.WriteLine("估算方法二用时：" + time_3 + ",车位数: " + count_3 + "\r\n");
+            swr.Close();
+            fs.Close();
+
+            #endregion
             if (display)
             {
                 var walls = new List<LineString>();
@@ -67,7 +124,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 {
                     walls.AddRange(subArea.mParkingPartitionPro.Walls);
                     cars.AddRange(subArea.mParkingPartitionPro.Cars);
-                    pillars.AddRange(subArea.mParkingPartitionPro.Pillars);
+                    pillars.AddRange(/*subArea.mParkingPartitionPro.Pillars*/subArea.mParkingPartitionPro3.EstimateLaneBoxes.Select(e => e.Box).ToList());
                     iniPillars.AddRange(subArea.mParkingPartitionPro.IniPillar);
                     obsVertices.AddRange(subArea.mParkingPartitionPro.ObstacleVertexes);
                     lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
@@ -158,16 +215,16 @@ namespace ThParkingStall.Core.MPartitionLayout
             var linestring = new LineString(bound.Coordinates);
             //var walls = linestring.GetSplitCurves(points)
             //    .Where(e => e.Length > 1).ToList();
-            var walls = subArea.Walls;
+            var walls = subArea.Walls.Select(e => new LineString(e.Coordinates)).ToList();
             if (walls.Count > 0)
             {
                 walls = walls.Where(e => ClosestPointInCurvesFast(e.GetMidPoint(), inilanes.Select(f => f.ToLineString()).ToList()) > 10)
                     .Select(e => new LineString(RemoveDuplicatePts(e.Coordinates.ToList()).ToArray())).ToList();
             }
             MParkingPartitionPro mParkingPartitionPro = new MParkingPartitionPro(
-           walls, inilanes, obs, bound);
-            mParkingPartitionPro.OutBoundary = subArea.OutBound;
-            mParkingPartitionPro.BuildingBoxes = box;
+           walls, inilanes.Select(e => new LineSegment(e.P0,e.P1)).ToList(), obs.Select(e => e.Clone()).ToList(), bound.Clone());
+            mParkingPartitionPro.OutBoundary = subArea.OutBound.Clone();
+            mParkingPartitionPro.BuildingBoxes = box.Select(e => e.Clone()).ToList();
             //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
             mParkingPartitionPro.ObstaclesSpatialIndex = InterParameter.BuildingSpatialIndex;
             mParkingPartitionPro.RampList = subArea.Ramps.Where(e => bound.Contains(e.InsertPt)).ToList();

@@ -58,6 +58,38 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
         }
+        public void GenerateLanesFast()
+        {
+            int count = 0;
+            while (true)
+            {
+                count++;
+                if (count > 20) break;
+
+                SortLaneByDirection(IniLanes, LayoutMode);
+                GenerateLaneParas paras_integral_modules = new GenerateLaneParas();
+                GenerateLaneParas paras_adj_lanes = new GenerateLaneParas();
+
+                var length_integral_modules = ((int)GenerateIntegralModuleLanesOptimizedByRealLength(ref paras_integral_modules, true));
+                var length_adj_lanes = ((int)GenerateAdjacentLanesOptimizedByRealLength(ref paras_adj_lanes));
+                var max = Math.Max(length_integral_modules, length_adj_lanes);
+                if (max > 0)
+                {
+                    if (max == length_integral_modules)
+                    {
+                        RealizeGenerateLaneParas(paras_integral_modules);
+                    }
+                    else
+                    {
+                        RealizeGenerateLaneParas(paras_adj_lanes);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
         private void RealizeGenerateLaneParas(GenerateLaneParas paras)
         {
             if (paras.SetNotBeMoved != -1) IniLanes[paras.SetNotBeMoved].CanBeMoved = false;
