@@ -12,12 +12,14 @@
 #include <SketchUpAPI/model/edge.h>
 #include <SketchUpAPI/model/vertex.h>
 
-void ThBIMSUService::Initialize()
+using namespace ThBIM;
+
+ThBIMSUService::ThBIMSUService()
 {
     SUInitialize();
 }
 
-void ThBIMSUService::Terminate()
+ThBIMSUService::~ThBIMSUService()
 {
     SUTerminate();
 }

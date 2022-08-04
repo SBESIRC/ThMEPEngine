@@ -1,26 +1,18 @@
 #pragma once
+#include "ThBIMCppExport.h"
 
-class ThBIMSUService final
+namespace ThBIM
 {
-public:
-    static ThBIMSUService& GetInstance();
+    class THBIMMODULE_EXPORT ThBIMSUService
+    {
+    public:
+        ThBIMSUService();
+        ~ThBIMSUService();
 
-private:
-    ThBIMSUService() = default;
-    ~ThBIMSUService() = default;
-
-    ThBIMSUService(ThBIMSUService&&) = delete;
-    ThBIMSUService(const ThBIMSUService&) = delete;
-    ThBIMSUService& operator=(ThBIMSUService&&) = delete;
-    ThBIMSUService& operator=(const ThBIMSUService&) = delete;
-
-public:
-    void Terminate();
-    void Initialize();
-};
-
-ThBIMSUService& ThBIMSUService::GetInstance()
-{
-    static ThBIMSUService instance;
-    return instance;
+    private:
+        ThBIMSUService(ThBIMSUService&&) = delete;
+        ThBIMSUService(const ThBIMSUService&) = delete;
+        ThBIMSUService& operator=(ThBIMSUService&&) = delete;
+        ThBIMSUService& operator=(const ThBIMSUService&) = delete;
+    };
 }
