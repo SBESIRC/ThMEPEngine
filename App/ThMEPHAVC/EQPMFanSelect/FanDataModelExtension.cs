@@ -228,16 +228,12 @@ namespace ThMEPHVAC.EQPMFanSelect
             if (string.IsNullOrEmpty(retModel.FanModelCCCF))
             {
                 var name = blockId.GetDynBlockValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL);
-                if (!name.Contains("倾"))
+                if (!string.IsNullOrEmpty(name) && !name.Contains("倾"))
                 {
                     name = Regex.Replace(name, @"[\u4e00-\u9fa5]", ""); //去除汉字
                     if (name.Contains("（"))
                         name = name.Substring(0, name.IndexOf("（"));
                     retModel.FanModelCCCF = name;
-                }
-                else 
-                {
-                
                 }
             }
             if (string.IsNullOrEmpty(retModel.VibrationMode)) 
