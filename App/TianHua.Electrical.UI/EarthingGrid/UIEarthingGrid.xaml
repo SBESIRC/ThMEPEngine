@@ -9,7 +9,7 @@
              ResizeMode="NoResize"
              mc:Ignorable="d"
              Title="接地网"
-             Width="180" Height="157" Closed="Window_Closed">
+             Width="185" Height="157" Closed="Window_Closed">
     <Grid Margin="5,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
@@ -21,8 +21,8 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="17*"/>
-            <ColumnDefinition Width="12*"/>
+            <ColumnDefinition Width="83*"/>
+            <ColumnDefinition Width="87*"/>
         </Grid.ColumnDefinitions>
         <!--<Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="是否合并网格：" Grid.RowSpan="2"/>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" Width="150" Focusable="False" HorizontalAlignment="Left">
@@ -41,12 +41,14 @@
                       Text="{Binding EarthGridSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
         </ComboBox>
         <Label Grid.Row="2" Grid.Column="0" Content="接地内边界线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
-        <Button Grid.Row="2" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthInnerOutline" Content="绘  制" Width="60"
+        <Button Grid.Row="2" Grid.Column="1" Margin="22,3,0,3" HorizontalAlignment="Center" Name="btnEarthInnerOutline" Content="绘  制" Width="58"
                     Click="btnEarthInnerOutline_Click"></Button>
-        <Label Grid.Row="3" Grid.Column="0" Content="接地外边界线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
-        <Button Grid.Row="3" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthOutterOutline" Content="绘  制" Width="60"
+        <Label Grid.Row="2" Grid.Column="0" Content="接地外边界线" Grid.ColumnSpan="2" Margin="0,28,0,2" Grid.RowSpan="2"/>
+        <Button Grid.Row="3" Grid.Column="1" Margin="22,3,0,3" HorizontalAlignment="Center" Name="btnEarthOutterOutline" Content="绘  制" Width="58"
                     Click="btnEarthOutterOutline_Click"></Button>
-        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  Margin="0,3,0,3" Name="btnDrawEarthingGrid" Content="绘制接地网" 
+        <Button Grid.Row="4" Grid.Column="0"  Margin="0,3,10,3" Name="btnShowVideo" Content="视频演示" 
+                    Click="btnShowVideo_Click"/>
+        <Button Grid.Row="4" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnDrawEarthingGrid" Content="绘制接地网" Width="80"
                     Click="btnDrawEarthingGrid_Click"></Button>
     </Grid>
 </Window>
