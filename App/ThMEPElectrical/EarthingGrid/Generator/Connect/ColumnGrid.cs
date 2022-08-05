@@ -75,7 +75,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             GraphDealer.SimplifyGraph(ref graph, pts.ToList());
             GraphDealer.DeleteConnectUpToFour(ref graph, ref nearBorderGraph);
             GraphDealer.AddConnectUpToFour(ref graph, pts, findLength);
-            GraphDealer.RemoveIntersectLines(ref graph);
+            //GraphDealer.RemoveIntersectLines(ref graph);
         }
 
         private void Split()
@@ -83,6 +83,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var outlineWithBorderLine = new Dictionary<Polyline, List<Tuple<Point3d, Point3d>>>();
             StructureDealer.CloseBorder(allOutlines, graph.Keys.ToHashSet(), ref outlineWithBorderLine);
             outlineWithBorderLine.Values.ForEach(tups=> tups.ForEach(o => GraphDealer.AddLineToGraph(o.Item1, o.Item2, ref graph)));
+            GraphDealer.RemoveIntersectLines(ref graph);
             AreaDealer.BuildPolygonsCustom(graph, ref findPolylineFromLines);
             //AreaDealer.SplitBlock(ref findPolylineFromLines);
         }

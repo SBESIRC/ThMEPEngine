@@ -120,11 +120,25 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 Line reducedLine = LineDealer.ReduceLine(wallPt, nearPt, 1000);
                 foreach (var outline in allOutlines)
                 {
-                    outline.Closed = true;
+                    bool closed = false;
+                    if(outline.Closed == false)
+                    {
+                        closed = true;
+                        outline.Closed = true;
+                    }
+                    
                     var pl = outline.Buffer(500)[0] as Polyline;
                     if (pl.Intersects(reducedLine))
                     {
+                        if (closed == true)
+                        {
+                            outline.Closed = false;
+                        }
                         return false;
+                    }
+                    if(closed == true)
+                    {
+                        outline.Closed = false;
                     }
                 }
                 GraphDealer.AddLineToGraph(wallPt, nearPt, ref wallConnectWall);
