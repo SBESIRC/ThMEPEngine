@@ -47,12 +47,10 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </StackPanel>
-        <StackPanel Grid.Row="3" HorizontalAlignment="Right">
-            <cus:ImageButton Content="生成" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <cus:ImageButton Content="视频演示" Width="70" Height="24" Margin="0,0,25 ,0" TabIndex="5" Click="Help_Click"></cus:ImageButton>
+            <cus:ImageButton HorizontalAlignment="Left" Content="生成"  Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
-        <StackPanel Grid.Row="4" HorizontalAlignment="Left">
-            <cus:ImageButton Content="视频演示" Width="70" Height="24"  TabIndex="5" Click="Help_Click"></cus:ImageButton>
-            </StackPanel>
 
     </Grid>
 </cus:ThCustomWindow>
