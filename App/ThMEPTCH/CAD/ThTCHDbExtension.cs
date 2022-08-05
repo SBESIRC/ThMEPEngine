@@ -114,9 +114,35 @@ namespace ThMEPTCH.CAD
             {
                 var curve = GetCurve(tch);
                 dynamic acadObj = curve.AcadObject;
+                bool IsArc()
+                {
+                    if (acadObj.IsArc is string v)
+                    {
+                        return v == "弧墙";
+                    }
+                    return false;
+                }
+                double Bulge()
+                {
+                    if (IsArc())
+                    {
+                        // https://forums.autodesk.com/t5/net/arc-3-points/td-p/9424441
+                        var geArc = new CircularArc3d(
+                            curve.StartPoint, 
+                            curve.GetMidpoint(), 
+                            curve.EndPoint);
+                        if (Curve.CreateFromGeCurve(geArc) is Arc arc)
+                        {
+                            return arc.BulgeFromCurve(false);
+                        }
+                    }
+                    return 0.0;
+                }
                 var wall = new TArchWall
                 {
+                    // 标识信息
                     Id = (ulong)tch.Handle.Value,
+                    
                     // 几何信息
                     StartPointX = curve.StartPoint.X,
                     StartPointY = curve.StartPoint.Y,
@@ -129,9 +155,9 @@ namespace ThMEPTCH.CAD
                     Height = acadObj.Height,
                     Elevtion = acadObj.Elevation,
 
-                    // 暂时不支持圆弧墙
-                    Bulge = 0.0,
-                    IsArc = false
+                    // 圆弧信息
+                    Bulge = Bulge(),
+                    IsArc = IsArc(),
                 };
 
                 return wall;
