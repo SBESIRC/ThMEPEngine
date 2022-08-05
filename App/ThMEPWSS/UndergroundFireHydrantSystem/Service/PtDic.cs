@@ -200,10 +200,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 try
                 {
-                    if(pt.DistanceToEx(new Point3dEx(1579516.1,230455.1,0))<10)
-                    {
-                        ;
-                    }
                     CreateTermPtDic2(pt, fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
                 }
                 catch(Exception ex)
@@ -237,12 +233,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             termPoint.SetPipeNumber(textSpatialIndex);
                         }
-                        termPoint.Type=3;
-
-
-
+                        termPoint.SetType(false, false);
                         fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
-                        
                     }
                 }
             }
@@ -278,6 +270,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     termPoint.PipeNumber = OriginTermStartPtDic[pt].TextString;
                     termPoint.Type = 2;
+                    var dbText = ThTextSet.ThText(new Point3d(), termPoint.PipeNumber);
+                    double textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
+                    if (textWidth > 1300)
+                    {
+                        termPoint.TextWidth = textWidth + 100;
+                        termPoint.PipeWidth = textWidth + 300;
+                    }
                     fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
                 }
                 return;
@@ -291,6 +290,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     termPoint.PipeNumber = OriginTermStartPtDic[pt].TextString;
                     termPoint.Type = 2;
+                    var dbText = ThTextSet.ThText(new Point3d(), termPoint.PipeNumber);
+                    double textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
+                    if (textWidth > 1300)
+                    {
+                        termPoint.TextWidth = textWidth + 100;
+                        termPoint.PipeWidth = textWidth + 300;
+                    }
                     fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
                 }
                 return;

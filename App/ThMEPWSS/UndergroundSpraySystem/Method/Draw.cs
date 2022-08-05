@@ -11,6 +11,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
     public class Draw
     {
+        public static void Rect(Polyline rect, string layer)
+        {
+#if DEBUG
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                DbHelper.EnsureLayerOn(layer);
+                rect.LayerId = DbHelper.GetLayerId(layer);
+                acadDatabase.CurrentSpace.Add(rect);
+            }
+#endif
+        }
         public static void MainLoop(AcadDatabase acadDatabase, List<List<Point3dEx>> mainPathList)
         {
 #if DEBUG
@@ -120,7 +131,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                 }
             }
-                
+
 #endif
         }
 
@@ -157,7 +168,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
             foreach (var loop in spraySystem.BranchLoops)
             {
-                if(loop.Count < 40)
+                if (loop.Count < 40)
                 {
                     continue;
                 }
@@ -202,7 +213,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             {
                 ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
             }
-            var circle = new Circle(pt._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0,0,1), 500);
+            var circle = new Circle(pt._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0, 0, 1), 500);
             circle.LayerId = DbHelper.GetLayerId(layerNames);
             acadDatabase.CurrentSpace.Add(circle);
 #endif
@@ -236,7 +247,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
                 }
-                foreach(var pt in pts)
+                foreach (var pt in pts)
                 {
                     var circle = new Circle(pt._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0, 0, 1), 500);
                     circle.LayerId = DbHelper.GetLayerId(layerNames);
@@ -275,7 +286,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
                 }
-                foreach(var pts in ptsls)
+                foreach (var pts in ptsls)
                 {
                     foreach (var pt in pts)
                     {

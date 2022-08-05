@@ -86,17 +86,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             
             PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新
             
-            double textWidth = 1300;
+            //double textWidth = 1300;
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
-            var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textModel);
+            var textCollection = textEngine.Extract(acadDatabase.Database, selectArea);
             
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
             var dbText = ThTextSet.ThText(new Point3d(), textModel);
-            if(dbText.TextString.Trim().Count()!=0)
-            {
-                textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
-            }
+            //if(dbText.TextString.Trim().Count()!=0)
+            //{
+            //    textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
+            //}
             
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
             DNLineEngine.Extract(acadDatabase.Database, selectArea);
@@ -117,7 +117,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             PtDic.CreateLeadPtDic(fireHydrantSysIn, labelLine);//引线添加----20s----
 
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
-
+            double textWidth = 1300;
             PtDic.CreateTermPtDic(fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             fireHydrantSysIn.TextWidth = textWidth + 100;
             fireHydrantSysIn.PipeWidth = textWidth + 300;

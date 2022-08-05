@@ -78,7 +78,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 Point3dEx valvePt;
                 if (v is BlockReference br)
                 {
-                    valvePt = new Point3dEx(br.GetRect().GetCentroidPoint());
+                    valvePt = new Point3dEx(br.Position);
                 }
                 else
                 {
@@ -86,7 +86,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                     (v as Entity).Explode(objs);
                     var bkr = objs[0] as BlockReference;
-                    valvePt = new Point3dEx(bkr.GetRect().GetCentroidPoint());
+                    valvePt = new Point3dEx(bkr.Position);
                 }
                 valvePts.Add(valvePt);
             }

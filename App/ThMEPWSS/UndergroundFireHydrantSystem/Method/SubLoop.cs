@@ -18,10 +18,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 {
                     continue;
                 }
-                if (!mainPathList.First().Contains(nd[0]) && !mainPathList.First().Contains(nd[1]))
-                {
-                    continue;
-                }
+                //if (!mainPathList.First().Contains(nd[0]) && !mainPathList.First().Contains(nd[1]))
+                //{
+                //    continue;
+                //}
                 var subTempPath = new List<Point3dEx>();//次环路临时路径
                 var subRstPath = new List<Point3dEx>();//次环路临时路径
 
