@@ -154,7 +154,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 dis2 = dis2 < dis4 ? dis2 : dis4;
                 List<Point3d> pts = new();
                 verticalPipes.ForEach(o => pts.Add(o.Circle.Center));
-                submergedPumps.ForEach(o => pts.Add(o.Extents.CenterPoint()));
+                submergedPumps.ForEach(o => pts.Add(o.Extents.Centroid()));
                 List<Point3d> ptsEnd = new();
                 List<Point3d> ptstest = new ();
                 ptsEnd.Add(pt1);
@@ -616,7 +616,17 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             }
             return diameter;
         }
-       
+        public static Polyline CreatePolyFromPoints(Point3d[] points, bool closed = true)
+        {
+            Polyline p = new Polyline();
+            for (int i = 0; i < points.Length; i++)
+            {
+                p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
+            }
+            p.Closed = closed;
+            return p;
+        }
+
         /// <summary>
         /// 计算每个立管在使用中的潜水泵数量
         /// </summary>

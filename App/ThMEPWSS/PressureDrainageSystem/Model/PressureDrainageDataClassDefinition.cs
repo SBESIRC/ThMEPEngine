@@ -1,6 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
+using NFox.Cad;
 using System.Collections.Generic;
+using System.Linq;
+
 namespace ThMEPWSS.PressureDrainageSystem.Model
 {
     public class PressureDrainageModelData
@@ -14,12 +19,81 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public string InitialLayer { get; set; }
         public List<Polyline> WallLines { get; set; }
         public List<Polyline> Boundaries { get; set; }
+        public static Point3d UCSRotateLocPoint { get; set; }
         public PressureDrainageModelData()
         {
             FloorLineSpace = new double();
             FloorListDatas = new List<string>();
             FloorAreaList = new List<List<Point3dCollection>>();
             FloorDict = new Dictionary<string, PressureDrainageSystemDiagramStorey>();
+        }
+        public void ConvertToWCS()
+        {
+            var mat = Active.Editor.WCS2UCS();
+            FloorLocPoints = FloorLocPoints.Select(e => e.TransformBy(mat)).ToList();
+            FloorAreaList = FloorAreaList.Select(e => e.Select(col => col.Cast<Point3d>().Select(p => p.TransformBy(mat)).ToCollection()).ToList()).ToList();
+            WallLines = WallLines.Select(e =>
+            {
+                e.TransformBy(mat);
+                return e;
+            }).ToList();
+            Boundaries = Boundaries.Select(e =>
+             {
+                 e.TransformBy(mat);
+                 return e;
+             }).ToList();
+            var keys = FloorDict.Keys.ToList();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                if (FloorDict[keys[i]].SubmergedPumps != null)
+                {
+                    FloorDict[keys[i]].SubmergedPumps = FloorDict[keys[i]].SubmergedPumps.Select(e =>
+                    {
+                        var rec = e.Extents;
+                        rec.TransformBy(mat);
+                        e.Extents = rec;
+                        return e;
+                    }).ToList();
+                }
+                if (FloorDict[keys[i]].DrainWells != null)
+                {
+                    FloorDict[keys[i]].DrainWells = FloorDict[keys[i]].DrainWells.Select(e =>
+                    {
+                        var rec = e.Extents;
+                        rec.TransformBy(mat);
+                        e.Extents = rec;
+                        return e;
+                    }).ToList();
+                }
+                if (FloorDict[keys[i]].HorizontalPipe!=null)
+                {
+                    FloorDict[keys[i]].HorizontalPipe = FloorDict[keys[i]].HorizontalPipe.Select(e =>
+                    {
+                        var line = e.Line;
+                        line.TransformBy(mat);
+                        e.Line = line;
+                        return e;
+                    }).ToList();
+                }
+                if (FloorDict[keys[i]].VerticalPipes!=null)
+                {
+                    FloorDict[keys[i]].VerticalPipes = FloorDict[keys[i]].VerticalPipes.Select(e =>
+                    {
+                        var ci = e.Circle;
+                        ci.TransformBy(mat);
+                        e.Circle = ci;
+                        return e;
+                    }).ToList();
+                }
+                if (FloorDict[keys[i]].Wrappipes!=null)
+                {
+                    FloorDict[keys[i]].Wrappipes = FloorDict[keys[i]].Wrappipes.Select(e =>
+                    {
+                        e.TransformBy(mat);
+                        return e;
+                    }).ToList();
+                }
+            }
         }
     }
     public class PressureDrainageSystemDiagramStorey//楼层类
@@ -28,7 +102,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<Horizontal> HorizontalPipe;//横管
         public List<SubmergedPumpClass> SubmergedPumps;//潜水泵
         public List<DrainWellClass> DrainWells;//排水井
-        public List<Extents3d> Wrappipes;//套管
+        public List<Polyline> Wrappipes;//套管
     }
     public class PressureDrainageGeoData
     {
@@ -48,7 +122,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     }
     public class DrainWellClass
     {
-        public Extents3d Extents;
+        public Polyline Extents;
         public string Label;
         public string WellTypeName;
     }
@@ -106,7 +180,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     }
     public class SubmergedPumpClass
     {
-        public Extents3d Extents;
+        public Polyline Extents ;
         public string Serial = "";
         public string Visibility = "";
         public string Location = "普通车库";

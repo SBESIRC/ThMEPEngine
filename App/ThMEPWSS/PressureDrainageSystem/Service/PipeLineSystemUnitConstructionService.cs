@@ -1,6 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -63,7 +65,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             List<Horizontal> horizontalLines = new List<Horizontal>();
             List<VerticalPipeClass> verticalPipes = new List<VerticalPipeClass>();
             List<SubmergedPumpClass> submergedPumps = new List<SubmergedPumpClass>();
-            List<Extents3d> wrappipes = new List<Extents3d>();
+            List<Polyline> wrappipes = new List<Polyline>();
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].HorizontalPipe.ForEach(e => horizontalLines.Add(e));
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].VerticalPipes.ForEach(e => verticalPipes.Add(e));
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].SubmergedPumps.ForEach(e => submergedPumps.Add(e));
@@ -83,7 +85,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             //在潜水泵旁生成立管时，前面600的容差判断中找到的立管是别的系统的立管，此时在该系统重新生成
             foreach (var pump in submergedPumps)
             {
-                var rec = pump.Extents.ToRectangle();
+                var rec = pump.Extents;
                 bool generated = false;
                 for (int i = 0; i < _totalPipeLineUnitsByLayerByUnit[layer].Count; i++)
                 {
@@ -265,9 +267,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
         }
 
-        private void CollectWrapPipeIntoEachUnit(List<Extents3d> wrappipes, int layer)
+        private void CollectWrapPipeIntoEachUnit(List<Polyline> wrappipes, int layer)
         {
-            var wrappipes_spacial_index = new ThCADCoreNTSSpatialIndex(wrappipes.Select(e => e.ToRectangle()).ToCollection());
+            var wrappipes_spacial_index = new ThCADCoreNTSSpatialIndex(wrappipes.Select(e => e).ToCollection());
             foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
             {
                 var horlines = unit.HorizontalPipes;
@@ -549,7 +551,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     List<int> indexPipes = new ();
                     foreach (var hor in unit.HorizontalPipes)
                     {
-                        var ptscoll = pump.Extents.ToRectangle().Vertices();
+                        var ptscoll = pump.Extents.Vertices();
                         DBObjectCollection objs = new ();
                         objs.Add(hor.Line);
                         if (pump.Extents.IsPointIn(hor.Line.EndPoint) || pump.Extents.IsPointIn(hor.Line.StartPoint))
@@ -560,7 +562,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         //{
                         //    hors.Add(hor);
                         //}
-                        else if (pump.Extents.ToRectangle().Intersects(hor.Line))
+                        else if (pump.Extents.Intersects(hor.Line))
                         {
                             hors.Add(hor.Line);
                         }
@@ -596,12 +598,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             else
                             {
                                 int index = 0;
-                                double minDis = pump.Extents.CenterPoint().DistanceTo(unit.VerticalPipes[indexPipes[0]].Circle.Center);
+                                double minDis = pump.Extents.GetCenter().DistanceTo(unit.VerticalPipes[indexPipes[0]].Circle.Center);
                                 for (int p = 1; p < indexPipes.Count; p++)
                                 {
-                                    if (pump.Extents.CenterPoint().DistanceTo(unit.VerticalPipes[indexPipes[p]].Circle.Center) < minDis)
+                                    if (pump.Extents.GetCenter().DistanceTo(unit.VerticalPipes[indexPipes[p]].Circle.Center) < minDis)
                                     {
-                                        minDis = pump.Extents.CenterPoint().DistanceTo(unit.VerticalPipes[indexPipes[p]].Circle.Center);
+                                        minDis = pump.Extents.GetCenter().DistanceTo(unit.VerticalPipes[indexPipes[p]].Circle.Center);
                                         index = p;
                                     }
                                 }
@@ -636,7 +638,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         int ind = -1;
                         for (int i = 0; i < unit.VerticalPipes.Count; i++)
                         {
-                            double nowDis = unit.VerticalPipes[i].Circle.Center.DistanceTo(pump.Extents.CenterPoint());
+                            double nowDis = unit.VerticalPipes[i].Circle.Center.DistanceTo(pump.Extents.GetCenter());
                             dis = dis < nowDis ? dis : nowDis;
                             ind = dis < nowDis ? ind : i;
                         }
@@ -680,8 +682,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             foreach (var well in drainWells)
             {
                 var k = well.Extents;
-                k.TransformBy(Matrix3d.Scaling(scaleFactor, k.CenterPoint()));
-                var crosslines = GetCrossObjsByPtCollection(k.ToRectangle().Vertices(), objs).Cast<Line>().ToList();
+                k.TransformBy(Matrix3d.Scaling(scaleFactor, k.GetCenter()));
+                var crosslines = GetCrossObjsByPtCollection(k.Vertices(), objs).Cast<Line>().ToList();
                 if (crosslines.Count > 1)
                 {
                     for (int p = 0; p < crosslines.Count - 1; p++)
@@ -703,7 +705,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     double mindisinunit = double.PositiveInfinity;
                     foreach (var horLine in _totalPipeLineUnitsByLayerByUnit[0][i].HorizontalPipes)
                     {
-                        double dis = horLine.Line.GetClosestPointTo(well.Extents.CenterPoint(), false).DistanceTo(well.Extents.CenterPoint());
+                        double dis = horLine.Line.GetClosestPointTo(well.Extents.GetCenter(), false).DistanceTo(well.Extents.GetCenter());
                         if (dis < mindisinunit)
                         {
                             mindisinunit = dis;
@@ -728,7 +730,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     for (int i = 0; i < _totalPipeLineUnitsByLayerByUnit[0][index].VerticalPipes.Count; i++)
                     {
                         var j = _totalPipeLineUnitsByLayerByUnit[0][index].VerticalPipes[i];
-                        double dis1 = well.Extents.CenterPoint().DistanceTo(j.Circle.Center);
+                        double dis1 = well.Extents.GetCenter().DistanceTo(j.Circle.Center);
                         double dis2 = hor_real.GetClosestPointTo(j.Circle.Center, false).DistanceTo(j.Circle.Center);
                         double dis = Math.Min(dis1, dis2);
                         if (dis < mindisVertical)
@@ -754,6 +756,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="layerNumber"></param>
         private void ConstructRelationshipBetweenPipeLineUnitsInDifferentLayers(int layerNumber)
         {
+
             for (int i = 0; i < _totalPipeLineUnitsByLayerByUnit[0].Count; i++)
             {
                 PipeLineSystemUnitClass pipeLineSystemUnit = new ();
@@ -807,7 +810,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 var pumpline = new Line();
                                 foreach (var line in originalHors.Select(e => e.Line))
                                 {
-                                    var rec = pump.Extents.ToRectangle();
+                                    var rec = pump.Extents;
+                                    if (rec == null) continue;
                                     if (rec.Contains(line.StartPoint) && rec.Contains(line.EndPoint))
                                     {
                                         pumpline = line;
@@ -1476,13 +1480,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             List<VerticalPipeClass> adjacentPipes = new List<VerticalPipeClass>();
                             List<int> adjacentPipeIndexes = new List<int>();
-                            double dis = pump.Extents.ToRectangle().GetClosePoint(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[i].Circle.Center).DistanceTo(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[i].Circle.Center);
+                            double dis = pump.Extents.GetClosePoint(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[i].Circle.Center).DistanceTo(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[i].Circle.Center);
                             double tol = 300;
                             for (int p = 0; p < pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes.Count; p++)
                             {
                                 if (p != i)
                                 {
-                                    double testDis = pump.Extents.ToRectangle().GetClosePoint(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[p].Circle.Center).DistanceTo(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[p].Circle.Center);
+                                    double testDis = pump.Extents.GetClosePoint(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[p].Circle.Center).DistanceTo(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[p].Circle.Center);
                                     if (Math.Abs(dis - testDis) < tol)
                                     {
                                         adjacentPipes.Add(pipeLineSystemUnits[e].PipeLineUnits[j].VerticalPipes[p]);

@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         List<double> total_diameter_horizontalpipe = new List<double>();
         List<int> total_used_pump_horizontalpipe = new List<int>();
         List<Point3d> ptloc_diameter_horizontalpipe = new List<Point3d>();
+        public Matrix3d ucsmat = Active.Editor.UCS2WCS();
         private class DrawUnit
         {
             public DrawUnit(List<Entity> entities, List<BlockReference> blocks, List<Line> testLines, Extents3d extents, double serialOrder)
@@ -118,7 +120,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                InsertPt = UCSTools.TranslateCoordinates(InsertPt, CoordSystem.UCS, CoordSystem.WCS);
+                //InsertPt = UCSTools.TranslateCoordinates(InsertPt, CoordSystem.UCS, CoordSystem.WCS);
                 List<Line> floorLines = new();
                 double FloorLineLength = spacing * 10 * PipeLineSystemUnits.Count;//楼板线长度&参考值
                 if (FloorLineLength < widthDisTofloorLineStartPt + 20000) FloorLineLength = widthDisTofloorLineStartPt + 20000;
@@ -137,6 +139,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     DBText bText = new DBText();
                     string textstring = i == 0 ? "地库顶板" : "B" + i.ToString() + "F";
                     DefinePropertiesOfCADDBTexts(bText, "W-NOTE", textstring, floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(textHeight, textHeight, 0))), textHeight);
+                    bText.TransformBy(ucsmat);
                     bText.AddToCurrentSpace();
                     Dictionary<string, string> atts01 = new();
                     atts01.Add("标高", "X.XX");
@@ -156,18 +159,31 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         public void AttachIDToVerticalPipeForEachSystemUnit()
         {
-            foreach (var systemUnit in PipeLineSystemUnits)
+            for (int i = 0; i < PipeLineSystemUnits.Count; i++)
             {
+                var systemUnit = PipeLineSystemUnits[i];
                 systemUnit.verticalPipeId = new List<int>();
                 int idNumber = -1;
+                var invalid = false;
                 foreach (var unit in systemUnit.PipeLineUnits)
                 {
                     foreach (var pipe in unit.VerticalPipes)
                     {
                         idNumber += 1;
+                        //同一个立管被两个排水系统读取——上下跃层时上面两个系统，下面一个系统————通常图纸错误，上面删除一个系统
+                        if (pipe.Id != 0)
+                        {
+                            invalid = true;
+                            break;
+                        }
                         pipe.Id = idNumber;
                         systemUnit.verticalPipeId.Add(idNumber);
                     }
+                }
+                if (invalid)
+                {
+                    PipeLineSystemUnits.RemoveAt(i);
+                    i--;
                 }
             }
             return;
@@ -229,6 +245,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                     line.Layer = "AI-辅助";
                                     line.Linetype = "DASH";
                                     line.ColorIndex = 123;//低饱和度蓝
+                                    line.TransformBy(ucsmat);
                                     line.AddToCurrentSpace();
                                 }
                             }
@@ -478,11 +495,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             if (split.Length >= 2)
                             {
                                 var letter = split[0].ToString().ToUpper();
-                                byte[] array = new byte[1]; 
-                                array = System.Text.Encoding.ASCII.GetBytes(letter); 
-                                int asciicode = (short)(array[0])-64;
+                                byte[] array = new byte[1];
+                                array = System.Text.Encoding.ASCII.GetBytes(letter);
+                                int asciicode = (short)(array[0]) - 64;
                                 serial += (double)asciicode;
-                                var num = double.Parse(split[1].ToString());
+                                var numstr = System.Text.RegularExpressions.Regex.Replace(split, @"[^0-9]+", "");
+                                double num = 0;
+                                double.TryParse(numstr, out num);
                                 serial += num / 10;
                             }
                             break;
@@ -514,9 +533,30 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         i--;
                     }
                 }
+                //旋转WCSTOUCS
+                
+                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+                var p = PressureDrainageModelData.UCSRotateLocPoint;
+
+
+
+                foreach (var brs in allBlocks)
+                    foreach (var br in brs)
+                        br.TransformBy(/*Matrix3d.Rotation(angle, Vector3d.ZAxis, p)*/ucsmat);
+                foreach (var ents in allEntities)
+                    foreach (var ent in ents)
+                        ent.TransformBy(/*Matrix3d.Rotation(angle, Vector3d.ZAxis, p)*/ucsmat);
+                foreach (var line in floorLines)
+                    line.TransformBy(/*Matrix3d.Rotation(angle, Vector3d.ZAxis, p)*/ucsmat);
+
+
+                //
                 for (int i = 0; i < allEntities.Count; i++)
                 {
-                    Matrix3d mat = Matrix3d.Displacement(new Vector3d(totalspacine, 0, 0));
+                    var vec_move = new Vector3d(totalspacine, 0, 0);
+                    vec_move = vec_move.TransformBy(ucsmat);
+                    Matrix3d mat = Matrix3d.Displacement(vec_move);
                     foreach (var ent in allEntities[i])
                     {
                         if (ent is DBText text)
@@ -539,7 +579,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     foreach (var line in testLines[i])
                     {
                         Point3d pt = line.EndPoint.TransformBy(mat);
-                        var k = new Line(line.StartPoint, pt);
+                        var k = new Line(line.StartPoint.TransformBy(ucsmat), line.EndPoint.TransformBy(ucsmat).TransformBy(Matrix3d.Displacement(vec_move)));
                         k.Layer = "AI-辅助";
                         k.Linetype = "DASH";
                         k.ColorIndex = 13;//低饱和度梅红
@@ -590,6 +630,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                     }
                 }
+
+
                 Active.Editor.WriteMessage("共有排水单元" + allEntities.Count.ToString() + "组");
             }
         }
