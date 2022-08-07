@@ -96,7 +96,12 @@ namespace ThParkingStall.Core.InterProcess
                     MCompute.Logger?.Information("##################################");
                     MPGAData.Save();
                 }
-                Count = mParkingPartitionPro.Cars.Count;
+                if (mode == 1)
+                    Count = mParkingPartitionPro.Cars.Count;
+                else if (mode == 2)
+                    Count = mParkingPartitionPro2.EstimateCountOne;
+                else
+                    Count = mParkingPartitionPro3.EstimateCountTwo;
 
                 lock (lockObj)
                 {

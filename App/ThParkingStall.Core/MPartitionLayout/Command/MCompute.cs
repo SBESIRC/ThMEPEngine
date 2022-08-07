@@ -53,62 +53,85 @@ namespace ThParkingStall.Core.MPartitionLayout
                 subArea.mParkingPartitionPro3 = subArea.ConvertSubAreaToMParkingPartitionPro();
             });
             //
-            var sw = new Stopwatch();
-            sw.Start();
-            if (InterParameter.MultiThread)
+            if (display)
             {
-                Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 1));
+                if (InterParameter.MultiThread)
+                {
+                    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 1));
+                }
+                else
+                {
+                    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 1));
+                }
             }
             else
             {
-                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 1));
-            }
-            sw.Stop();
-            var time_1 = sw.ElapsedMilliseconds;
-            //
-            sw.Restart();
-            if (InterParameter.MultiThread)
-            {
-                Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 2));
-            }
-            else
-            {
-                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 2));
-            }
-            sw.Stop();
-            var time_2 = sw.ElapsedMilliseconds;
-            //
-            sw.Restart();
-            if (InterParameter.MultiThread)
-            {
-                Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 3));
-            }
-            else
-            {
-                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 3));
-            }
-            sw.Stop();
-            var time_3 = sw.ElapsedMilliseconds;
-            //
-            #region 估算对比
-            var count_1 = 0;
-            var count_2 = 0;
-            var count_3 = 0;
-            foreach (var subArea in subAreas)
-            {
-                count_1 += subArea.mParkingPartitionPro.Cars.Count;
-                count_2 += subArea.mParkingPartitionPro2.EstimateCountOne;
-                count_3 += subArea.mParkingPartitionPro3.EstimateCountTwo;
+                if (InterParameter.MultiThread)
+                {
+                    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 3));
+                }
+                else
+                {
+                    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 3));
+                }
             }
 
-            string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            FileStream fs = new FileStream(dir + "\\estimate.txt", FileMode.Append, FileAccess.Write);
-            StreamWriter swr = new StreamWriter(fs);
-            swr.WriteLine("原始方法用时：" + time_1 + ",车位数: " + count_1);
-            swr.WriteLine("估算方法一用时：" + time_2 + ",车位数: " + count_2);
-            swr.WriteLine("估算方法二用时：" + time_3 + ",车位数: " + count_3 + "\r\n");
-            swr.Close();
-            fs.Close();
+            //var sw = new Stopwatch();
+            //sw.Start();
+            //if (InterParameter.MultiThread)
+            //{
+            //    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 1));
+            //}
+            //else
+            //{
+            //    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 1));
+            //}
+            //sw.Stop();
+            //var time_1 = sw.ElapsedMilliseconds;
+            ////
+            //sw.Restart();
+            //if (InterParameter.MultiThread)
+            //{
+            //    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 2));
+            //}
+            //else
+            //{
+            //    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 2));
+            //}
+            //sw.Stop();
+            //var time_2 = sw.ElapsedMilliseconds;
+            ////
+            //sw.Restart();
+            //if (InterParameter.MultiThread)
+            //{
+            //    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 3));
+            //}
+            //else
+            //{
+            //    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 3));
+            //}
+            //sw.Stop();
+            //var time_3 = sw.ElapsedMilliseconds;
+            //
+            #region 估算对比
+            //var count_1 = 0;
+            //var count_2 = 0;
+            //var count_3 = 0;
+            //foreach (var subArea in subAreas)
+            //{
+            //    count_1 += subArea.mParkingPartitionPro.Cars.Count;
+            //    count_2 += subArea.mParkingPartitionPro2.EstimateCountOne;
+            //    count_3 += subArea.mParkingPartitionPro3.EstimateCountTwo;
+            //}
+
+            //string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            //FileStream fs = new FileStream(dir + "\\estimate.txt", FileMode.Append, FileAccess.Write);
+            //StreamWriter swr = new StreamWriter(fs);
+            //swr.WriteLine("原始方法用时：" + time_1 + ",车位数: " + count_1);
+            //swr.WriteLine("估算方法一用时：" + time_2 + ",车位数: " + count_2);
+            //swr.WriteLine("估算方法二用时：" + time_3 + ",车位数: " + count_3 + "\r\n");
+            //swr.Close();
+            //fs.Close();
 
             #endregion
             if (display)
