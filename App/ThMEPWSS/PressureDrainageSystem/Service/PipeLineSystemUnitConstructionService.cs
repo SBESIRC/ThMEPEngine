@@ -570,6 +570,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     List<Line> hors = new ();
                     List<int> indexPipes = new ();
+                    if (unit.OriginalHorizontalPipes == null) continue;
                     foreach (var hor in unit.OriginalHorizontalPipes)
                     {
                         var ptscoll = pump.Extents.Vertices();

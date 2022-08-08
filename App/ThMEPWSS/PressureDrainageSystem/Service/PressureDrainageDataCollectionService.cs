@@ -180,8 +180,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     string str1 = "带定位立管";
                     string str2 = "带定位立管150";
-                    string layerName1 = "W-DRAI-EQPM";
-                    string layerName2 = "W-RAIN-EQPM";
                     static Circle GetCorrespondindGeometry(Entity ent)
                     {
                         if (ent.Bounds is Extents3d)
@@ -204,12 +202,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                         else { return default; }
                     }
-                    foreach (var e in Entities.OfType<Entity>().Where(e => e.Layer == layerName1 || e.Layer == layerName2).Where(e => e.ObjectId.IsValid)
+                    foreach (var e in Entities.OfType<Entity>().Where(e => IsVertPipeLayer(e.Layer)).Where(e => e.ObjectId.IsValid)
                     .Where(e => e is BlockReference && (e.ToDataItem().EffectiveName == str1 || e.ToDataItem().EffectiveName == str2)))
                     {
                         this.CollectedData.VerticalPipes.Add(GetCorrespondindGeometry(e));
                     }
-                    foreach (var e in Entities.OfType<Circle>().Where(e => e.Layer == layerName1 || e.Layer == layerName2)
+                    foreach (var e in Entities.OfType<Circle>().Where(e => IsVertPipeLayer(e.Layer))
                     .Where(e => e.Radius >= distinguishDiameter && e.Radius <= 300))
                     {
                         if (e.Bounds is Extents3d extent3d)
@@ -218,7 +216,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             this.CollectedData.VerticalPipes.Add(circle);
                         }
                     }
-                    foreach (var e in Entities.OfType<Entity>().Where(e => (e.Layer == layerName1 || e.Layer == layerName2)
+                    foreach (var e in Entities.OfType<Entity>().Where(e => IsVertPipeLayer(e.Layer)
                      && PressureDrainageUtils.IsTianZhengElement(e)).Where(e => e.ExplodeToDBObjectCollection().OfType<Circle>().Any()))
                     {
                         if (e.Bounds is Extents3d extent3d)
@@ -228,8 +226,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                     }
                     foreach (var e in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid
-                     ? (e.Layer == layerName1 || e.Layer == layerName2) && e.ToDataItem().EffectiveName == "$LIGUAN"
-                     : (e.Layer == layerName1 || e.Layer == layerName2)))
+                     ? (IsVertPipeLayer(e.Layer)) && e.ToDataItem().EffectiveName == "$LIGUAN"
+                     : (IsVertPipeLayer(e.Layer))))
                     {
                         if (e.Bounds is Extents3d extent3d)
                         {
@@ -248,6 +246,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
+
+        bool IsVertPipeLayer(string layer)
+        {
+            string layerName1 = "DRAI";
+            string layerName2 = "RAIN";
+            return layer.Contains(layerName1) || layer.Contains(layerName2);
+        }
+        
         /// <summary>
         /// 提取雨水井及编号
         /// </summary>
