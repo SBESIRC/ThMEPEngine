@@ -90,7 +90,9 @@ namespace ThMEPIFC
             if (slab.Outline is Polyline pline)
             {
                 moveVector += slab.ExtrudedDirection.MultiplyBy(pline.Elevation);
-                var outPolyline = pline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
+                var outPolyline =  pline.Clone() as Polyline;
+                outPolyline.Elevation = 0;
+                outPolyline = outPolyline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
                 var slabSolid = CreateExtrudedSolid(outPolyline, -slab.Height, 0.0);
                 if (slabSolid != null)
                 { 
@@ -99,7 +101,9 @@ namespace ThMEPIFC
                     {
                         if (data.IsDescending)
                         {
-                            var wrap = data.Outline
+                            var outLine = data.Outline.Clone() as Polyline;
+                            outLine.Elevation = 0;
+                            var wrap = outLine
                                 .Buffer(data.DescendingWrapThickness)
                                 .OfType<Polyline>()
                                 .OrderByDescending(p => p.Area)
@@ -113,13 +117,17 @@ namespace ThMEPIFC
                     {
                         if (data.IsDescending)
                         {
-                            var outLine = data.Outline.GetTransformedCopy(Matrix3d.Displacement(moveVector + slab.ExtrudedDirection.MultiplyBy(1))) as Polyline;
+                            var outLine = data.Outline.Clone() as Polyline;
+                            outLine.Elevation = 0;
+                            outLine = outLine.GetTransformedCopy(Matrix3d.Displacement(moveVector + slab.ExtrudedDirection.MultiplyBy(1))) as Polyline;
                             var descendingSolid = CreateExtrudedSolid(outLine, -data.DescendingHeight-1, 0);
                             slabSolid.BooleanOperation(BooleanOperationType.BoolSubtract, descendingSolid);
                         }
                         else
                         {
-                            var outLine = data.Outline.GetTransformedCopy(Matrix3d.Displacement(moveVector + slab.ExtrudedDirection.MultiplyBy(1))) as Polyline;
+                            var outLine = data.Outline.Clone() as Polyline;
+                            outLine.Elevation = 0;
+                            outLine = outLine.GetTransformedCopy(Matrix3d.Displacement(moveVector + slab.ExtrudedDirection.MultiplyBy(1))) as Polyline;
                             var holeSolid = CreateExtrudedSolid(outLine, -(slab.Height + 2), 0.0);
                             slabSolid.BooleanOperation(BooleanOperationType.BoolSubtract, holeSolid);
                         }
