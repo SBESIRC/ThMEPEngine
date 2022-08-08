@@ -99,19 +99,21 @@ namespace ThMEPWSS.SprinklerDim.Cmd
 
                 // 给喷淋点分区
                 var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
-                netList = ThRoomWallConflictService.ReGroupByRoom(netList, dataProcess.Room, printTag);
+                netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, dataProcess.Room, printTag);
                 var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
                 List<Polyline> mix = new List<Polyline>();
                 mix.AddRange(dataProcess.Room);
                 mix.AddRange(dataProcess.Wall);
 
-                ThRoomWallConflictService.CutOffLinesByWall(transNetList, mix, printTag);
+                ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mix, printTag);
                 ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
 
                 // 区域标注喷淋点
                 ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mix);
+                mix.AddRange(dataProcess.Column);
+                ThSprinklerDimExtensionService.GenerateRealDimension(transNetList, mix, dataProcess.AxisCurves, printTag, step);
 
-                
+
 
             }
         }

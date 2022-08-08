@@ -242,7 +242,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             pts = ThChangeCoordinateService.MakeTransformation(pts, matrix.Inverse());
             Line line = new Line(pts[0], pts[pts.Count - 1]);
 
-            return ThRoomWallConflictService.IsConflicted(line, walls);
+            return ThSprinklerDimConflictService.IsConflicted(line, walls);
         }
 
 
