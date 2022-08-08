@@ -73,6 +73,14 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public class EstimateLaneBox
         {
+            public EstimateLaneBox()
+            {
+
+            }
+            public EstimateLaneBox(Polygon box)
+            {
+                Box = box;
+            }
             public Polygon Box;
             public double EffectiveLength = 0;
         }

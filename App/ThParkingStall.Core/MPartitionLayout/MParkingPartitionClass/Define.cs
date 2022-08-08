@@ -170,7 +170,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void EstimateOne()
         {
             GenerateLanesFast();
-            GeneratePerpModules();
+            //GeneratePerpModules();
             RemoveDuplicatedLanes();
             foreach (var lane in IniLanes.Select(e => e.Line))
             {
@@ -185,6 +185,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
             EstimateCountOne = ((int)Math.Floor(EstimateCountOne/1.1));
+            EstimateLaneBoxes = IniLanes.Select(e => new EstimateLaneBox(e.Line.Buffer(DisLaneWidth / 2)) ).ToList();
         }
         public void EstimateTwo()
         {

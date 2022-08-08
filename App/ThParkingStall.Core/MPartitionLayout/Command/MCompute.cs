@@ -68,11 +68,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 if (InterParameter.MultiThread)
                 {
-                    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 3));
+                    Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display, 2));
                 }
                 else
                 {
-                    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 3));
+                    subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display, 2));
                 }
             }
 
@@ -147,17 +147,19 @@ namespace ThParkingStall.Core.MPartitionLayout
                 {
                     walls.AddRange(subArea.mParkingPartitionPro.Walls);
                     cars.AddRange(subArea.mParkingPartitionPro.Cars);
-                    pillars.AddRange(/*subArea.mParkingPartitionPro.Pillars*/subArea.mParkingPartitionPro3.EstimateLaneBoxes.Select(e => e.Box).ToList());
+                    pillars.AddRange(/*subArea.mParkingPartitionPro.Pillars*/subArea.mParkingPartitionPro2.EstimateLaneBoxes.Select(e => e.Box).ToList());
                     iniPillars.AddRange(subArea.mParkingPartitionPro.IniPillar);
                     obsVertices.AddRange(subArea.mParkingPartitionPro.ObstacleVertexes);
                     lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
                 }
                 RemoveDuplicatedLines(lanes);
+
                 MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 //MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
                 MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
                 MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
+
                 mParkingPartition = new MParkingPartitionPro();
                 mParkingPartition.Cars = cars;
                 mParkingPartition.Pillars = pillars;
