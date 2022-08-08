@@ -494,7 +494,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             Point3d L = Rect.GetPoint3dAt(0);
             Point3d R = Rect.GetPoint3dAt(2);
             Polyline label = new Polyline();
-            label.LayerId = DbHelper.GetLayerId("LAEBL");
+            label.LayerId = DbHelper.GetLayerId("LABEL");
 
             if (type == 1)
             {
@@ -557,7 +557,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             DBText txt = new DBText();
             txt.Height = 300;
             txt.TextString = num + "%%132" + size;
-            txt.LayerId = DbHelper.GetLayerId("LABEL");
+            txt.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             txt.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
             txt.WidthFactor = 0.7;
             if (type == 1)

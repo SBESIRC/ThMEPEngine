@@ -18,8 +18,7 @@ namespace ThMEPStructure.Reinforcement.Service
 {
     public static class ThReinforcementUtils
     {
-        public readonly static double WallColumnBufferLength = 1.0;
-        public readonly static string TSDPProfileName = "TSDP2022";
+        public readonly static double WallColumnBufferLength = 1.0;        
         public static DBObjectCollection GetEntitiesFromMS(this Database db, List<string> layers)
         {
             using (var acadDb = AcadDatabase.Use(db))
@@ -393,21 +392,6 @@ namespace ThMEPStructure.Reinforcement.Service
                     e.Linetype = "Bylayer";
                 });
             }
-        }
-
-        public static void SetTSDPOptionConfig()
-        {
-            if (IsTSSDProfileName())
-            {
-                return;
-            }
-            ThCadOptionTool.SetActiveProfile(TSDPProfileName);
-        }
-
-        private static bool IsTSSDProfileName()
-        {
-            var activeProfile = ThCadOptionTool.GetActiveProfile();
-            return TSDPProfileName.ToUpper() == activeProfile.ToUpper();
         }
     }
 }

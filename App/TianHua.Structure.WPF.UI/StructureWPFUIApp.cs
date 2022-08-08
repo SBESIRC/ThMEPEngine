@@ -77,5 +77,15 @@ namespace TianHua.Structure.WPF.UI
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THTSDP", CommandFlags.Modal)]
+        public void THTSDP()
+        {
+            // 加载TSDP2022 profile
+            using (var cmd = new ThTSSDProfileSwitchCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

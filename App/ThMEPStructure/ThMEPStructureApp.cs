@@ -326,12 +326,5 @@ namespace ThMEPStructure
                 generator.Generate();
             }
         }
-
-        [CommandMethod("TIANHUACAD", "TSPL", CommandFlags.Modal)]
-        public void TSPL()
-        {
-            // 加载TSDP2022 profile
-            Reinforcement.Service.ThReinforcementUtils.SetTSDPOptionConfig();
-        }
     }
 }

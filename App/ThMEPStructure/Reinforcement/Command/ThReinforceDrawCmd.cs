@@ -31,14 +31,16 @@ namespace ThMEPStructure.Reinforcement.Command
         public int GBZLastCodeIndex { get; private set; }
         public int YBZLastCodeIndex { get; private set; }
         #endregion
-        private string edgeComponentLayer = "";
-        private readonly string MarkLineLayer = "Num";
-        private readonly string MarkTextLayer = "Num";
+        private string _edgeComponentLayer = "";
+        private string _markLineLayer = "";
+        private string _markTextLayer = "";
         public ThReinforceDrawCmd()
         {
             ActionName = "生成柱表";
             CommandName = "THQZPJ";
-            edgeComponentLayer = ThImportTemplateStyleService.StandardEdgeComponentLayer;
+            _markLineLayer = ThImportTemplateStyleService.EdgeComponentMarkLineLayer;
+            _markTextLayer = ThImportTemplateStyleService.EdgeComponentMarkTextLayer;
+            _edgeComponentLayer = ThImportTemplateStyleService.StandardEdgeComponentLayer;
         }
 
         public void Dispose()
@@ -58,7 +60,7 @@ namespace ThMEPStructure.Reinforcement.Command
         private void Draw(Point3d basePt)
         {
             using (var acadDb = AcadDatabase.Active())
-            {                
+            {
                 // 得到的是标准的构件
                 var edgeComponents = GetEdgeComponents();
                 // 绘制配筋表
@@ -67,7 +69,7 @@ namespace ThMEPStructure.Reinforcement.Command
                 Draw(edgeComponents.Select(o => o.Item1).ToList());
             }
         }
-        private void Draw(List<ThEdgeComponent> edgeComponents,Point3d basePt)
+        private void Draw(List<ThEdgeComponent> edgeComponents, Point3d basePt)
         {
             // 绘制柱表
             using (var acadDb = AcadDatabase.Active())
@@ -104,7 +106,7 @@ namespace ThMEPStructure.Reinforcement.Command
 
                 // 旋转                
                 results.OfType<Entity>().ForEach(e => e.TransformBy(ucs2Wcs));
-                results.OfType<Entity>().ForEach(e=>
+                results.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
                 });
@@ -115,8 +117,8 @@ namespace ThMEPStructure.Reinforcement.Command
             // 绘制边构轮廓+编号+标注
             using (var acadDb = AcadDatabase.Active())
             {
-                acadDb.Database.CreateAILayer(MarkLineLayer,7);
-                acadDb.Database.CreateAILayer(MarkTextLayer, 7);
+                acadDb.Database.CreateAILayer(_markLineLayer, 7);
+                acadDb.Database.CreateAILayer(_markTextLayer, 7);
                 var results = new DBObjectCollection();
                 infos.Where(o => o.IsStandard)
                     .Where(o => !string.IsNullOrEmpty(o.Number))
@@ -125,30 +127,30 @@ namespace ThMEPStructure.Reinforcement.Command
                     {
                         results = results.Union(Mark(o.Number, o.EdgeComponent));
                         var clone = o.EdgeComponent.Clone() as Polyline;
-                        clone.Layer = edgeComponentLayer;
+                        clone.Layer = _edgeComponentLayer;
                         clone.ColorIndex = (int)ColorIndex.BYLAYER;
                         clone.LineWeight = LineWeight.ByLayer;
                         clone.Linetype = "Bylayer";
                         results.Add(clone);
                     });
-                if(ExtractInfoGroups.Count>0)
+                if (ExtractInfoGroups.Count > 0)
                 {
                     infos.ForEach(o =>
                     {
                         var res = ExtractInfoGroups.Where(g => g.Contains(o));
-                        if(res.Count()==1)
+                        if (res.Count() == 1)
                         {
                             var group = res.First();
                             var index = group.IndexOf(o);
-                            for(int i=0; i< group.Count;i++)
+                            for (int i = 0; i < group.Count; i++)
                             {
-                                if(i == index)
+                                if (i == index)
                                 {
                                     continue;
                                 }
                                 results = results.Union(Mark(group[i].Number, group[i].EdgeComponent));
                                 var clone = group[i].EdgeComponent.Clone() as Polyline;
-                                clone.Layer = edgeComponentLayer;
+                                clone.Layer = _edgeComponentLayer;
                                 clone.ColorIndex = (int)ColorIndex.BYLAYER;
                                 clone.LineWeight = LineWeight.ByLayer;
                                 clone.Linetype = "Bylayer";
@@ -159,12 +161,12 @@ namespace ThMEPStructure.Reinforcement.Command
                 }
 
                 results.OfType<Entity>().ForEach(e => acadDb.ModelSpace.Add(e));
-            }  
+            }
         }
-        private DBObjectCollection Mark(string number,Polyline edgeComponent)
+        private DBObjectCollection Mark(string number, Polyline edgeComponent)
         {
-            var results = new DBObjectCollection();            
-            if (string.IsNullOrEmpty(number) || edgeComponent ==null)
+            var results = new DBObjectCollection();
+            if (string.IsNullOrEmpty(number) || edgeComponent == null)
             {
                 return results;
             }
@@ -180,10 +182,10 @@ namespace ThMEPStructure.Reinforcement.Command
                 case "右上":
                     var markPt1 = vertices
                         .OfType<Point3d>()
-                        .Select(o=>o.TransformBy(wcs2Ucs))
+                        .Select(o => o.TransformBy(wcs2Ucs))
                         .OrderByDescending(o => Math.Ceiling(o.Y))
                         .ThenByDescending(o => Math.Ceiling(o.X))
-                        .First();                    
+                        .First();
                     results = Mark(number, Point3d.Origin, new Vector3d(1, 1, 0), new Vector3d(1, 0, 0));
                     var mt1 = Matrix3d.Displacement(markPt1 - Point3d.Origin);
                     results.OfType<Entity>().ForEach(e => e.TransformBy(mt1));
@@ -193,7 +195,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     var markPt2 = vertices
                         .OfType<Point3d>()
                         .Select(o => o.TransformBy(wcs2Ucs))
-                        .OrderBy(o=> Math.Ceiling(o.Y))
+                        .OrderBy(o => Math.Ceiling(o.Y))
                         .ThenByDescending(o => Math.Ceiling(o.X))
                         .First();
                     results = Mark(number, Point3d.Origin, new Vector3d(1, -1, 0), new Vector3d(1, 0, 0));
@@ -206,8 +208,8 @@ namespace ThMEPStructure.Reinforcement.Command
                         .OfType<Point3d>()
                         .Select(o => o.TransformBy(wcs2Ucs))
                         .OrderByDescending(o => Math.Ceiling(o.Y))
-                        .ThenBy(o => Math.Ceiling(o.X))                        
-                        .First();                    
+                        .ThenBy(o => Math.Ceiling(o.X))
+                        .First();
                     results = Mark(number, Point3d.Origin, new Vector3d(-1, 1, 0), new Vector3d(-1, 0, 0));
                     var mt3 = Matrix3d.Displacement(markPt3 - Point3d.Origin);
                     results.OfType<Entity>().ForEach(e => e.TransformBy(mt3));
@@ -230,8 +232,8 @@ namespace ThMEPStructure.Reinforcement.Command
             }
             return results;
         }
-        private DBObjectCollection Mark(string number,Point3d basePt,
-            Vector3d vec1,Vector3d vec2)
+        private DBObjectCollection Mark(string number, Point3d basePt,
+            Vector3d vec1, Vector3d vec2)
         {
             /*
              *                    vec2
@@ -241,8 +243,8 @@ namespace ThMEPStructure.Reinforcement.Command
              *             ^
              *           (basePt)
              */
-            var results = new DBObjectCollection();         
-            var length1 = 400.0/ Math.Sin(Math.PI / 4.0);
+            var results = new DBObjectCollection();
+            var length1 = 400.0 / Math.Sin(Math.PI / 4.0);
             var length2 = 900.0;
             var pt1 = basePt + vec1.GetNormal().MultiplyBy(length1);
             var pt2 = pt1 + vec2.GetNormal().MultiplyBy(length2);
@@ -250,9 +252,9 @@ namespace ThMEPStructure.Reinforcement.Command
             pts.Add(basePt);
             pts.Add(pt1);
             pts.Add(pt2);
-            var leaderLine =ThDrawTool.CreatePolyline(pts, false);
-            leaderLine.Layer = MarkLineLayer;
-            leaderLine.ColorIndex=(int)ColorIndex.BYLAYER;
+            var leaderLine = ThDrawTool.CreatePolyline(pts, false);
+            leaderLine.Layer = _markLineLayer;
+            leaderLine.ColorIndex = (int)ColorIndex.BYLAYER;
             leaderLine.LineWeight = LineWeight.ByLayer;
             leaderLine.Linetype = "ByLayer";
 
@@ -262,14 +264,14 @@ namespace ThMEPStructure.Reinforcement.Command
             dbText.TextString = number;
             dbText.Height = 300;
             dbText.WidthFactor = 0.7;
-            dbText.Layer = MarkTextLayer;
+            dbText.Layer = _markTextLayer;
             dbText.HorizontalMode = TextHorizontalMode.TextCenter;
             dbText.VerticalMode = TextVerticalMode.TextBottom;
             dbText.AlignmentPoint = dbText.Position;
             dbText.ColorIndex = (int)ColorIndex.BYLAYER;
             dbText.TextStyleId = DbHelper.GetTextStyleId(
                 ThImportTemplateStyleService.ThStyle3TextStyle);
-         
+
             results.Add(leaderLine);
             results.Add(dbText);
             return results;
@@ -282,7 +284,7 @@ namespace ThMEPStructure.Reinforcement.Command
             switch (frame)
             {
                 case "A0":
-                    return new Extents2d(0, 0, 118900, 84100); 
+                    return new Extents2d(0, 0, 118900, 84100);
                 case "A1":
                     return new Extents2d(0, 0, 84100, 59400);
                 case "A2":
@@ -292,13 +294,13 @@ namespace ThMEPStructure.Reinforcement.Command
                 case "A4":
                     return new Extents2d(0, 0, 21000, 29700);
                 default:
-                    return new Extents2d(0,0,0,0);
+                    return new Extents2d(0, 0, 0, 0);
             }
         }
-        private List<Tuple<EdgeComponentExtractInfo,ThEdgeComponent>> GetEdgeComponents()
+        private List<Tuple<EdgeComponentExtractInfo, ThEdgeComponent>> GetEdgeComponents()
         {
             using (var query = new ThBuiltinWallColumnTableQueryService())
-            {                
+            {
                 GBZLastCodeIndex = 0;
                 YBZLastCodeIndex = 0;
                 var results = new List<Tuple<EdgeComponentExtractInfo, ThEdgeComponent>>();
@@ -306,14 +308,14 @@ namespace ThMEPStructure.Reinforcement.Command
                 {
                     var bwOrHc2 = GetBwOrHc2(o);
                     var specDict = GetSpecDict(o);
-                    if (bwOrHc2.HasValue && specDict.Count>0)
+                    if (bwOrHc2.HasValue && specDict.Count > 0)
                     {
                         if (o.ComponentType == ComponentType.YBZ)
                         {
                             var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value, specDict, o.StirrupRatio,
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
                                 ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
-                            if(edgeComponent ==null)
+                            if (edgeComponent == null)
                             {
                                 // 查看是不是增补规格
                                 if (IsSupplySpec(o))
@@ -324,12 +326,12 @@ namespace ThMEPStructure.Reinforcement.Command
                                 ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
                                 }
                             }
-                            if(edgeComponent!=null)
+                            if (edgeComponent != null)
                             {
                                 YBZLastCodeIndex++;
                                 SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
-                                results.Add(Tuple.Create(o,edgeComponent));
-                            }                            
+                                results.Add(Tuple.Create(o, edgeComponent));
+                            }
                         }
                         else if (o.ComponentType == ComponentType.GBZ)
                         {
@@ -352,29 +354,29 @@ namespace ThMEPStructure.Reinforcement.Command
                                 GBZLastCodeIndex++;
                                 SetValueToEdgeComponent(edgeComponent, o, o.ComponentType);
                                 results.Add(Tuple.Create(o, edgeComponent));
-                            }                            
+                            }
                         }
-                    }                    
+                    }
                 });
                 return results;
-            }            
+            }
         }
         private void SetValueToEdgeComponent(ThEdgeComponent edgeComponent,
-            EdgeComponentExtractInfo info,ComponentType componentType)
+            EdgeComponentExtractInfo info, ComponentType componentType)
         {
             // isFind 根据Cad计算书中的箍筋体积配箍率，在内置表中确实找到符合条件的列
-            if (edgeComponent ==null || info == null)
+            if (edgeComponent == null || info == null)
             {
                 return;
             }
-            else if(edgeComponent is ThRectangleEdgeComponent rectEdgeComponent)
+            else if (edgeComponent is ThRectangleEdgeComponent rectEdgeComponent)
             {
                 var bw = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
                 var hc = info.QuerySpec(ThHuaRunSecAnalysisService.HcKword);
                 rectEdgeComponent.Bw = bw.HasValue ? bw.Value : 0;
                 rectEdgeComponent.Hc = hc.HasValue ? hc.Value : 0;
             }
-            else if(edgeComponent is ThLTypeEdgeComponent lEdgeComponent)
+            else if (edgeComponent is ThLTypeEdgeComponent lEdgeComponent)
             {
                 var bw = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
                 var bf = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
@@ -385,7 +387,7 @@ namespace ThMEPStructure.Reinforcement.Command
                 lEdgeComponent.Hc1 = hc1.HasValue ? hc1.Value : 0;
                 lEdgeComponent.Hc2 = hc2.HasValue ? hc2.Value : 0;
             }
-            else if(edgeComponent is ThTTypeEdgeComponent tEdgeComponent)
+            else if (edgeComponent is ThTTypeEdgeComponent tEdgeComponent)
             {
                 var bw = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
                 var bf = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
@@ -407,7 +409,7 @@ namespace ThMEPStructure.Reinforcement.Command
             edgeComponent.ConcreteStrengthGrade = ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade;
             edgeComponent.PointReinforceLineWeight = ThWallColumnReinforceConfig.Instance.PointReinforceLineWeight;
             edgeComponent.StirrupLineWeight = ThWallColumnReinforceConfig.Instance.StirrupLineWeight;
-            if(info.IsCalculation)
+            if (info.IsCalculation)
             {
                 // YBZ和GBZ均放大纵筋
                 edgeComponent.EnhancedReinforce = GetEnhancedReinforce(
@@ -418,34 +420,34 @@ namespace ThMEPStructure.Reinforcement.Command
                     // For YBZ, 放大箍筋和拉筋
                     GetEnhancedStirrupAndLinks(edgeComponent, info.StirrupRatio);
                 }
-            }            
+            }
         }
-        
-        private void GetEnhancedStirrupAndLinks(ThEdgeComponent edgeComponent,double stirrupRatio)
+
+        private void GetEnhancedStirrupAndLinks(ThEdgeComponent edgeComponent, double stirrupRatio)
         {
             ThEdgeComponentStirrupEnhanceService enhanceService = null;
-            if(edgeComponent is ThRectangleEdgeComponent rectEdgeComponent)
+            if (edgeComponent is ThRectangleEdgeComponent rectEdgeComponent)
             {
                 enhanceService = new ThRectEdgeComponentStirrupEnhanceService(
                     rectEdgeComponent, stirrupRatio);
             }
-            else if(edgeComponent is ThLTypeEdgeComponent lTypeEdgeComponent)
+            else if (edgeComponent is ThLTypeEdgeComponent lTypeEdgeComponent)
             {
                 enhanceService = new ThLTypeEdgeComponentStirrupEnhanceService(
                     lTypeEdgeComponent, stirrupRatio);
             }
-            else if(edgeComponent is ThTTypeEdgeComponent tTypeEdgeComponent)
+            else if (edgeComponent is ThTTypeEdgeComponent tTypeEdgeComponent)
             {
                 enhanceService = new ThTTypeEdgeComponentStirrupEnhanceService(
                     tTypeEdgeComponent, stirrupRatio);
             }
-            if(enhanceService!=null)
+            if (enhanceService != null)
             {
                 enhanceService.Enhance();
             }
         }
 
-        private string GetEnhancedReinforce(string reinforce,double calculationReinforceArea)
+        private string GetEnhancedReinforce(string reinforce, double calculationReinforceArea)
         {
             var enhance = new ThReinforceEnhanceService(reinforce, calculationReinforceArea);
             enhance.Enhance();
@@ -454,7 +456,7 @@ namespace ThMEPStructure.Reinforcement.Command
 
         private int? GetBwOrHc2(EdgeComponentExtractInfo info)
         {
-            int? bwOrHc2 = null;           
+            int? bwOrHc2 = null;
             if (info.ShapeCode == ShapeCode.Rect)
             {
                 bwOrHc2 = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
@@ -481,7 +483,7 @@ namespace ThMEPStructure.Reinforcement.Command
             if (info.ShapeCode == ShapeCode.Rect)
             {
                 var hcValue = info.QuerySpec(ThHuaRunSecAnalysisService.HcKword);
-                if(hcValue.HasValue)
+                if (hcValue.HasValue)
                 {
                     specDict.Add(ThHuaRunSecAnalysisService.HcKword, hcValue.Value);
                 }
@@ -492,7 +494,7 @@ namespace ThMEPStructure.Reinforcement.Command
                 var bwValue = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
                 var bfValue = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
                 var hc1Value = info.QuerySpec(ThHuaRunSecAnalysisService.Hc1Kword);
-                if(bwValue.HasValue && bfValue.HasValue && hc1Value.HasValue)
+                if (bwValue.HasValue && bfValue.HasValue && hc1Value.HasValue)
                 {
                     specDict.Add(ThHuaRunSecAnalysisService.BwKword, bwValue.Value);
                     specDict.Add(ThHuaRunSecAnalysisService.BfKword, bfValue.Value);
@@ -518,7 +520,7 @@ namespace ThMEPStructure.Reinforcement.Command
             ppo.AllowArbitraryInput = true;
             ppo.AllowNone = false;
             var ppr = Active.Editor.GetPoint(ppo);
-            if(ppr.Status == PromptStatus.OK)
+            if (ppr.Status == PromptStatus.OK)
             {
                 var pt = ppr.Value;
                 return pt.TransformBy(Active.Editor.UCS2WCS());
@@ -534,10 +536,10 @@ namespace ThMEPStructure.Reinforcement.Command
             {
                 var hcSize = info.QuerySpec(ThHuaRunSecAnalysisService.HcKword);
                 var bwSize = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
-                if(hcSize.HasValue && bwSize.HasValue)
+                if (hcSize.HasValue && bwSize.HasValue)
                 {
                     return ThHuaRunDataManager.Instance.IsSupplyRectSpec(ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
-                    info.ComponentType.ToString(),hcSize.Value, bwSize.Value);
+                    info.ComponentType.ToString(), hcSize.Value, bwSize.Value);
                 }
             }
             else if (info.ShapeCode == ShapeCode.L)
@@ -546,10 +548,10 @@ namespace ThMEPStructure.Reinforcement.Command
                 var hc2Size = info.QuerySpec(ThHuaRunSecAnalysisService.Hc2Kword);
                 var bwSize = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
                 var bfSize = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
-                if(hc1Size.HasValue && hc2Size.HasValue && bwSize.HasValue && bfSize.HasValue)
+                if (hc1Size.HasValue && hc2Size.HasValue && bwSize.HasValue && bfSize.HasValue)
                 {
                     return ThHuaRunDataManager.Instance.IsSupplyLTypeSpec(ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
-                        info.ComponentType.ToString(),hc1Size.Value, bwSize.Value, hc2Size.Value, bfSize.Value);
+                        info.ComponentType.ToString(), hc1Size.Value, bwSize.Value, hc2Size.Value, bfSize.Value);
                 }
             }
             else if (info.ShapeCode == ShapeCode.T)
@@ -563,7 +565,7 @@ namespace ThMEPStructure.Reinforcement.Command
                 {
                     int hc2 = hc2sSize.Value + hc2lSize.Value + bfSize.Value;
                     return ThHuaRunDataManager.Instance.IsSupplyTTypeSpec(ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
-                        info.ComponentType.ToString(),hc1Size.Value, bwSize.Value, hc2, bfSize.Value);
+                        info.ComponentType.ToString(), hc1Size.Value, bwSize.Value, hc2, bfSize.Value);
                 }
             }
             return false;
