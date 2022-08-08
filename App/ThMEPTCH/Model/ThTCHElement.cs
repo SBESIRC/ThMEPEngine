@@ -17,6 +17,8 @@ namespace ThMEPTCH.Model
     [ProtoInclude(107, typeof(ThTCHWindow))]
     [ProtoInclude(108, typeof(ThTCHRailing))]
     [ProtoInclude(109, typeof(ThTCHOpening))]
+    [ProtoInclude(110, typeof(ThTCHColumn))]
+    [ProtoInclude(111, typeof(ThTCHBeam))]
     public class ThTCHElement
     {
         /*这里预留20个序列数据，外部序列数字从21开始*/

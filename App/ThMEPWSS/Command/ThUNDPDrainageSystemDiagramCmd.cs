@@ -34,6 +34,7 @@ namespace ThMEPWSS.Command
                     //读取模型数据
                     PressureDrainageDataReader ModelReader = new PressureDrainageDataReader();
                     PressureDrainageModelData modeldata = ModelReader.GetPressureDrainageModelData(_vm);
+                    modeldata.ConvertToWCS();
                     if (modeldata == null)
                     {
                         return;

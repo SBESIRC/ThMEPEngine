@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.Common;
 using ThMEPStructure.StructPlane;
@@ -37,11 +38,15 @@ namespace TianHua.Structure.WPF.UI.Command
             // ydb to ifc
             if (Path.GetExtension(fileName).ToUpper() == ".YDB")
             {
+                ThStopWatchService.Start();
                 var ydbToIfcService = new ThYdbToIfcConvertService();
                 fileName = ydbToIfcService.Convert(fileName);
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("YdbToIfc解析时间：");
             }
 
             // 转Svg ，*.Storey.txt
+            ThStopWatchService.Start();
             var printParameter = new ThPlanePrintParameter()
             {
                 DrawingScale = "1:100",
@@ -49,21 +54,35 @@ namespace TianHua.Structure.WPF.UI.Command
             var config = CreatePlaneConfig(fileName);
             var generator = new ThStructurePlaneGenerator(config, printParameter);
             generator.Convert();
+            ThStopWatchService.Stop();
+            ThStopWatchService.Print("IfcToSvg解析时间：");
 
             // 查找 storeys.json
             var storeyFile = GetStoreyFileName(fileName);
+            // 把楼层文件的解析的成果
+            ThDrawingParameterConfig.Instance.Storeies = ReadStoreys(storeyFile);
 
             // 打开成图参数设置
-            ThDrawingParameterConfig.Instance.Storeies = ReadStoreys(storeyFile);
             var parameterUI = new DrawingParameterSetUI();
             AcadApp.ShowModalWindow(parameterUI);
             if(parameterUI.IsGoOn)
             {
+                ThStopWatchService.Start();
                 // 更新 printParameter，将生成的Svg打印到图纸上
+                generator.SetDrawingType(ThDrawingParameterConfig.Instance.DrawingType); // 把成图类型传入到Generator
                 printParameter.DrawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
                 printParameter.DefaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;
-                generator.SetDrawingType(ThDrawingParameterConfig.Instance.DrawingType); // 把成图类型传入到Generator
+                if(ThDrawingParameterConfig.Instance.IsAllStorey)
+                {
+                    generator.SetStdFlrNo("");
+                }
+                else
+                {
+                    generator.SetStdFlrNo(ThDrawingParameterConfig.Instance.StdFlrNo);
+                }                
                 generator.Generate();
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("成图打印时间：");
             }
         }
 
@@ -81,14 +100,15 @@ namespace TianHua.Structure.WPF.UI.Command
 
         private string GetStoreyFileName(string ifcFileName)
         {
-            var storeyFileName = Path.GetFileNameWithoutExtension(ifcFileName) + "storeys.json";
-            return File.Exists(storeyFileName) ? storeyFileName : "";
+            var fi = new FileInfo(ifcFileName);
+            var storeyFileName = Path.GetFileNameWithoutExtension(ifcFileName) + ".storeys.txt";
+            return Path.Combine(fi.DirectoryName, storeyFileName);
         }
 
-        private List<string> ReadStoreys(string fileName)
+        private List<StoreyInfo> ReadStoreys(string fileName)
         {
-            // TODO
-            return new List<string>();
+            var parser = new ThParseStoreyService();
+            return parser.ParseFromTxt(fileName);
         }
 
         private string SelectFile()

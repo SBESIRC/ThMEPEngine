@@ -267,8 +267,9 @@
                         <CheckBox Name="chk_NormalFumeSupplementary" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="平时补风量" IsChecked="True"></CheckBox>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="70,0,0,0" Focusable="False">
-                    <cus:ImageButton Name="CreatBtn" TabIndex="0" Content="生成/更新" Width="70" Height="70" Margin="30,30,10,0" Click="CreatBtn_Click"></cus:ImageButton>
+                <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="50,0,0,0" Focusable="False">
+                    <cus:ImageButton Name="CreatBtn" TabIndex="0" Content="生成/更新" Width="70" Height="50" Margin="30,25,10,0" Click="CreatBtn_Click"></cus:ImageButton>
+                    <cus:ImageButton TabIndex="0" Content="视频教程" Width="70" Height="20" Margin="30,5,10,0" Click="VideoBtn_Click"></cus:ImageButton>
                 </StackPanel>
             </Grid>
         </StackPanel>

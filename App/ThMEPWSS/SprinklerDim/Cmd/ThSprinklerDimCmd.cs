@@ -48,7 +48,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         public override void SubExecute()
         {
             SprinklerDimExecute();
-        }
+        }  
         public void Dispose()
         {
         }
@@ -83,22 +83,37 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 //处理数据
                 var dataProcess = new ThSprinklerDimDataProcessService()
                 {
+                    InputExtractors = dataFactory.Extractors,
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
-
+                    AxisCurvesData  = dataFactory.AxisCurves,
                 };
 
                 // dataQuery.Transform(transformer);
-                dataProcess.RemoveDuplicateSprinklerPt();
-                dataProcess.CreateTchPipe();
-                dataProcess.ProjectOntoXYPlane();
+                //dataProcess.ProcessArchitechData();
+                //dataProcess.RemoveDuplicateSprinklerPt();
+                //dataProcess.CreateTchPipe();
+                //dataProcess.ProjectOntoXYPlane();
+                dataProcess.ProcessData();
                 dataProcess.Print();
 
-                double step = 0;
-                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out step);
-                ThSprinklerDimPosition.DrawDimLines(netList, printTag, step);
+                // 给喷淋点分区
+                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
+                netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, dataProcess.Room, printTag);
+                var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
+                List<Polyline> mix = new List<Polyline>();
+                mix.AddRange(dataProcess.Room);
+                mix.AddRange(dataProcess.Wall);
+
+                ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mix, printTag);
+                ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
 
                 // 区域标注喷淋点
+                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mix);
+                mix.AddRange(dataProcess.Column);
+                ThSprinklerDimExtensionService.GenerateRealDimension(transNetList, mix, dataProcess.AxisCurves, printTag, step);
+
+
 
             }
         }

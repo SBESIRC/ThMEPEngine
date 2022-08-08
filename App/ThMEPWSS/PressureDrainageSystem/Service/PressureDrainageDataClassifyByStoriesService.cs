@@ -1,6 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,9 +85,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             for (int i = 0; i < CollectDataService.CollectedData.SubmergedPumps.Count; i++)
             {
                 var pump = CollectDataService.CollectedData.SubmergedPumps[i];
+
                 for (int j = 0; j < floorNumber; j++)
                 {
-                    if (Algorithms.IsPointIn(extendList[j], pump.Extents.CenterPoint()))
+                    var s = Utils.PressureDrainageUtils.AnalysisPointList(CollectDataService.CollectedData.SubmergedPumps.Select(e => ((Extents3d)(e.Extents.Bounds)).MaxPoint).ToList());
+                    if (Algorithms.IsPointIn(extendList[j], pump.Extents.GetCenter()))
                     {
                         cond_QuitCycle += 1;
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[j]].SubmergedPumps.Add(pump);
@@ -99,7 +103,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     if (Algorithms.IsPointIn(extendList[i], new Point3d(wrappipe.CenterPoint().X, wrappipe.CenterPoint().Y,0)))
                     {
-                        Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].Wrappipes.Add(wrappipe);
+                        Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].Wrappipes.Add(wrappipe.ToRectangle());
                         break;
                     }
                 }
@@ -112,10 +116,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         private void AppendDrainWellsToModeldates()
         {
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells = new();
-            Extents3d extents = GetBoundaryExtendList(Viewmodel)[0];
+            var extents = GetBoundaryExtendList(Viewmodel)[0];
             foreach (var well in CollectDataService.CollectedData.DrainWells)
             {
-                if (Algorithms.IsPointIn(extents, well.Extents.CenterPoint()))
+                if (extents.Contains(well.Extents.GetCenter()))
                 {
                     Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells.Add(well);
                 }
@@ -129,7 +133,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                Extents3d ext = GetBoundaryExtendList(Viewmodel)[0];
+                var ext = GetBoundaryExtendList(Viewmodel)[0];
                 Modeldatas.WallLines = new List<Polyline>();
                 DBObjectCollection objWalls = new();
                 DBObjectCollection objColumns = new();
@@ -156,6 +160,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 objConcaveHull = concaveBuilder.Build();
                 Modeldatas.Boundaries = new List<Polyline>();
                 Modeldatas.Boundaries.AddRange(objConcaveHull.Cast<Polyline>().ToList());
+                //删除在边界附近的可疑线段，不认为是内墙
+                if (Modeldatas.Boundaries.Count > 0)
+                {
+                    var bound = Modeldatas.Boundaries.OrderByDescending(e => e.Area).First().BufferPL(5000).Cast<Polyline>().OrderBy(e => e.Area).First();
+                    for (int i = 0; i < Modeldatas.WallLines.Count; i++)
+                    {
+                        var pl = Modeldatas.WallLines[i];
+                        if (pl.Intersects(bound) || !bound.Contains(pl.GetMidpoint()))
+                        {
+                            Modeldatas.WallLines.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
                 //objConcaveHull.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objWalls.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objColumns.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
@@ -167,7 +185,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         private void AppendVerticalPipeToFloorDict()
         {
-            List<Extents3d> extendList = GetBoundaryExtendList(Viewmodel);
+            var extendList = GetBoundaryExtendList(Viewmodel);
             Modeldatas.FloorLocPoints = new List<Point3d>();
             for (int i = 0; i < extendList.Count; i++)
             {
@@ -192,6 +210,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         VerticalPipeClass verticalPipe = new VerticalPipeClass();
                         verticalPipe.Circle = cicle;
+                        if (cicle.Layer.Equals("AdditonPipe"))
+                        {
+                            verticalPipe.IsGenerated = true;
+                        }
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].VerticalPipes.Add(verticalPipe);
                         break;
                     }
@@ -293,9 +315,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         /// <param name="viewmodel"></param>
         /// <returns></returns>
-        private List<Extents3d> GetBoundaryExtendList(PressureDrainageSystemDiagramVieModel viewmodel)
+        private List<Polyline> GetBoundaryExtendList(PressureDrainageSystemDiagramVieModel viewmodel)
         {
-            var extendList = new List<Extents3d>();
+            var extendList = new List<Polyline>();
             for (int j = 0; j < viewmodel.FloorAreaList.Count; j++)
             {
                 var ptslist = new List<Point3d>();
@@ -307,7 +329,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                 }
                 var ptsListBoundary = ThGeometryTool.CalBoundingBox(ptslist);
-                extendList.Add(new Extents3d(ptsListBoundary[0], ptsListBoundary[1]));
+                var ext = new Extents3d(ptsListBoundary[0], ptsListBoundary[1]);
+                //旋转WCSTOUCS
+                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+                var p = new Point3d(ext.MinPoint.X, ext.MaxPoint.Y, 0);
+                PressureDrainageModelData.UCSRotateLocPoint = p;
+                var rec = ext.ToRectangle();
+                rec.TransformBy(Matrix3d.Rotation(angle, Vector3d.ZAxis, p));
+                extendList.Add(rec);
             }
             return extendList;
         }

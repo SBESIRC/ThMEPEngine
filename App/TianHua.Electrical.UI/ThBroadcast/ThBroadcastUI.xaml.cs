@@ -1,6 +1,7 @@
 ﻿using AcHelper.Commands;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,6 +62,9 @@ namespace TianHua.Electrical.UI.ThBroadcast
             CommandHandlerBase.ExecuteFromCommandLine(false, "THGBMQ");
         }
 
-
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/075be5d104964a9fab1b3f079c51d755.html");
+        }
     }
 }

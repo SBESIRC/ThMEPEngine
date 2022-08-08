@@ -102,11 +102,18 @@ namespace ThMEPWSS.Diagram.ViewModel
                     var kitchenIndex = new ThCADCoreNTSSpatialIndex(newRooms.ToCollection());
                     AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex, ref StartNum);
                 }
-
+                foreach(var fAreaLs in FloorAreaList)
+                {
+                    ;
+                    for(int i = fAreaLs.Count-1;i> AreaNums;i--)
+                    {
+                        fAreaLs.RemoveAt(i);
+                    }
+                }
                 DynamicRadioButtons = new ObservableCollection<DynamicRadioButtonViewModel>();
                 for (int i = 0; i < AreaNums; i++)
                 {
-                    DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true });
+                    DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "单元" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true });
                 }
                 DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "整层", GroupName = "group", IsChecked = true });
 

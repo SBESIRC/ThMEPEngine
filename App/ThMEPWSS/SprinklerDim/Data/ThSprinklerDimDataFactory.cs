@@ -34,11 +34,14 @@ namespace ThMEPWSS.SprinklerDim.Data
         //----output
         public List<Point3d> SprinklerPtData { get; set; }
         public List<ThIfcFlowSegment> TchPipeData { get; set; }
+        public List<ThExtractorBase> Extractors { get; set; }
+        public List<Curve> AxisCurves { get; set; }
 
         public ThSprinklerDimDataFactory()
         {
             SprinklerPtData = new List<Point3d>();
             TchPipeData = new List<ThIfcFlowSegment>();
+            AxisCurves = new List<Curve>();
         }
 
         /// <summary>
@@ -46,7 +49,8 @@ namespace ThMEPWSS.SprinklerDim.Data
         /// </summary>
         public void GetElements(Database database, Point3dCollection framePts)
         {
-           // ExtractBasicArchitechObject(database, framePts);
+            ExtractBasicArchitechObject(database, framePts);
+            GetAllAxisCurves(database, framePts);
             GetSprinklerPtData(database, framePts);
             GetTCHPipeData(database, framePts);
         }
@@ -56,7 +60,7 @@ namespace ThMEPWSS.SprinklerDim.Data
             var manger = Extract(database); // visitor manager,提取的是原始数据
             manger.MoveToOrigin(Transformer); // 移动到原点
 
-            var extractors = new List<ThExtractorBase>()
+            Extractors = new List<ThExtractorBase>()
             {
                 new ThSprinklerArchitectureWallExtractor()
                 {
@@ -85,10 +89,10 @@ namespace ThMEPWSS.SprinklerDim.Data
                     Transformer = Transformer,
                 },
             };
-            extractors.ForEach(o => o.Extract(database, framePts));
-           
+            Extractors.ForEach(o => o.Extract(database, framePts));
+
             // 移回原位
-            extractors.ForEach(o =>
+            Extractors.ForEach(o =>
             {
                 if (o is ITransformer iTransformer)
                 {
@@ -104,10 +108,10 @@ namespace ThMEPWSS.SprinklerDim.Data
             extractor.Accept(visitors.DB3ArchWallVisitor);
             extractor.Accept(visitors.DB3ShearWallVisitor);
             extractor.Accept(visitors.DB3ColumnVisitor);
-            extractor.Accept(visitors.DB3BeamVisitor);
-            extractor.Accept(visitors.DB3DoorMarkVisitor);
-            extractor.Accept(visitors.DB3DoorStoneVisitor);
-            extractor.Accept(visitors.DB3WindowVisitor);
+            //extractor.Accept(visitors.DB3BeamVisitor);
+            //extractor.Accept(visitors.DB3DoorMarkVisitor);
+            //extractor.Accept(visitors.DB3DoorStoneVisitor);
+            //extractor.Accept(visitors.DB3WindowVisitor);
             extractor.Accept(visitors.ColumnVisitor);
             extractor.Accept(visitors.ShearWallVisitor);
             extractor.Extract(database);
@@ -134,6 +138,23 @@ namespace ThMEPWSS.SprinklerDim.Data
             };
             TCHPipeRecognize.RecognizeMS(database, framePts);
             TchPipeData.AddRange(TCHPipeRecognize.Elements.OfType<ThIfcFlowSegment>().ToList());
+        }
+
+        private void GetAllAxisCurves(Database database, Point3dCollection framePts)
+        {
+            var axisEngine = new ThAXISLineRecognitionEngine();
+            axisEngine.Recognize(database, framePts);
+            foreach (var item in axisEngine.Elements)
+            {
+                if (item == null || item.Outline == null)
+                    continue;
+                if (item.Outline is Curve curve)
+                {
+                    var copy = (Curve)curve.Clone();
+                    AxisCurves.Add(copy);
+                }
+            }
+
         }
 
     }

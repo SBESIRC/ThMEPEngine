@@ -41,5 +41,10 @@ namespace TianHua.Electrical.UI.EarthingGrid
         {
 
         }
+
+        private void btnShowVideo_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", @"https://short.yunxuetang.cn/W9VQw6k1");
+        }
     }
 }

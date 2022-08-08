@@ -20,7 +20,7 @@ namespace ThMEPIFC
 		public IfcStore Model { get; private set; }
 		public void GenerateXBimMeshAndSave(ThTCHProject project, string file)
 		{
-			Model = ThTGL2IFC2x3Factory.CreateAndInitModel("ThTGL2IFCProject");
+			Model = ThTGL2IFC2x3Factory.CreateAndInitModel("ThTGL2IFCProject",project.Uuid);
 			if (Model != null)
 			{
 				ThTGL2IFC2x3Builder.BuildIfcModel(Model, project);

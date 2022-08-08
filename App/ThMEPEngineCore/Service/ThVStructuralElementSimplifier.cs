@@ -167,7 +167,11 @@ namespace ThMEPEngineCore.Service
 
         private static void Decompose(MPolygon mPolygon, DBObjectCollection columns, DBObjectCollection walls)
         {
-            throw new NotSupportedException();
+            if (mPolygon.HasHoles())
+            {
+                throw new NotSupportedException();
+            }
+            Decompose(mPolygon.Shell(), columns, walls);
         }
 
         private static double AspectRatio(AcPolygon polygon)

@@ -7,6 +7,7 @@ using ThMEPWSS.Service;
 using DevExpress.XtraEditors;
 using TianHua.Publics.BaseCode;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace TianHua.Plumbing.UI
 {
@@ -259,6 +260,11 @@ namespace TianHua.Plumbing.UI
             {
                 ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.BigCircle;
             }
+        }
+
+        private void BtnHelp_Click(object sender, EventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/332da01f52b2443690d84bb274d26cda.html");
         }
     }
 }

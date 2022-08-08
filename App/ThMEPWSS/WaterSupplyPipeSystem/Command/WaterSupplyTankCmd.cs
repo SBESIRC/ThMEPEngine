@@ -43,7 +43,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
                 var sysProcess = new SysProcess();
                 sysProcess.SetTank(sysIn);
                 var sysOut = new SysOut();
-                AddStoreyLine(sysOut, sysIn, highestFloor);//楼板线绘制
+                AddStoreyLine(sysOut, sysIn, highestFloor, uiConfigs.FloorAreaList[0].Count-1);//楼板线绘制
 
                 var insertPt = sysIn.InsertPt.Clone();
 
@@ -232,13 +232,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
             }
         }
 
-        public static void AddStoreyLine(SysOut sysOut, SysIn sysIn, int highestFloor)
+        public static void AddStoreyLine(SysOut sysOut, SysIn sysIn, int highestFloor,int areaCnt)
         {
             var floorHeightDic = FloorHeightsViewModel.Instance.GetSpecialFloorHeightsDict(highestFloor);
             var pt1 = sysIn.InsertPt.OffsetX(-9500);
             for (int i = 0; i < highestFloor + 1; i++)
             {
-                var pt2 = pt1.OffsetX(sysIn.FloorLength + 9500);
+                var pt2 = pt1.OffsetX(sysIn.FloorLength + 9500 + 5855 * (areaCnt-2));
                 sysOut.FloorLines.Add(new Line(pt1, pt2));
 
                 var floorText = Convert.ToString(i + 1) + "F";

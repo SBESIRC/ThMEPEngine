@@ -33,7 +33,7 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Vertical">
             <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
-            <Label Content="住户分组（从左到右）"></Label>
+            <Label Content="住户单元（从左到右）"></Label>
             <ItemsControl x:Name="testList" ItemsSource="{Binding DynamicRadioButtons}" MaxHeight="150">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -47,8 +47,10 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </StackPanel>
-        <StackPanel Grid.Row="3" HorizontalAlignment="Right">
-            <cus:ImageButton Content="生成" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <cus:ImageButton Content="视频演示" Width="70" Height="24" Margin="0,0,25 ,0" TabIndex="5" Click="Help_Click"></cus:ImageButton>
+            <cus:ImageButton HorizontalAlignment="Left" Content="生成"  Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
+
     </Grid>
 </cus:ThCustomWindow>

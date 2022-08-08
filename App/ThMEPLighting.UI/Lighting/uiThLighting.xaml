@@ -97,7 +97,7 @@
                     <cus:InputTextBox Margin="10,5,5,5" Width ="70" TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding BufferDist,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                     <Label Content="mm"/>
                 </StackPanel>
-                
+
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top">
                     <RadioButton GroupName="rbSelectFloorRoom" Margin="10,5,0,0" 
                              IsChecked="{Binding SelectFloor}">选楼层布置</RadioButton>
@@ -110,8 +110,9 @@
                     <RadioButton GroupName="rbFloorUpDown" Margin="10,5,0,0"
                              IsChecked ="{Binding FloorUp}">住宅地上</RadioButton>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"   >
+                    <Button Grid.Column="0" Name="btnHelp" Width="100" Height="25" Click="btnHelp_Click" Margin="0 0 30 0" >视频教程</Button>
+                    <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="0 0 5 0" >布置</Button>
                 </StackPanel>
 
             </StackPanel>

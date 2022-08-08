@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using ThControlLibraryWPF.ControlUtils;
+﻿using ThControlLibraryWPF.ControlUtils;
 using ThMEPStructure.StructPlane;
 
 namespace TianHua.Structure.WPF.UI.StructurePlane
@@ -71,14 +70,7 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
                 RaisePropertyChanged("DrawingTypeOption");
             }
         }
-        /// <summary>
-        /// 楼层集合
-        /// </summary>
-        public ObservableCollection<string> Storeies { get; set; }
-        /// <summary>
-        /// 图纸比例集合
-        /// </summary>
-        public ObservableCollection<string> DrawingScales { get; set; }
+        
 
         public DrawingParameterSetModel()
         {
@@ -87,9 +79,7 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
 
         private void Load()
         {
-            Storeies = new ObservableCollection<string>(ThDrawingParameterConfig.Instance.Storeies);
-            DrawingScales = new ObservableCollection<string>(ThDrawingParameterConfig.Instance.DrawingScales);
-
+            this.storey = ThDrawingParameterConfig.Instance.Storey;
             storey = ThDrawingParameterConfig.Instance.Storey;
             drawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
             defaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;

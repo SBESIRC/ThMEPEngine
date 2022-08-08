@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
@@ -106,23 +107,22 @@ namespace ThMEPHVAC.CAD
         }
         private FanOpening GetFanInlet()
         {
-            double angle2Property = Convert.ToDouble(Data.CustomProperties
-                    .Cast<DynamicBlockReferenceProperty>()
-                    .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
-                    .First().Value) * 180 / Math.PI;
-            double blockrotation = Data.Rotation * 180 / Math.PI;
-            double totalrotation = angle2Property + blockrotation > 360 ? angle2Property + blockrotation - 360 : angle2Property + blockrotation;
+            var properties = Data.CustomProperties;
+            double angle2 = Convert.ToDouble(
+                properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
+                ).ConvertToAngle();
+            double blockrotation = Data.Rotation.ConvertToAngle();
+            double totalrotation = angle2 + blockrotation > 360 ? angle2 + blockrotation - 360 : angle2 + blockrotation;
             if (Model.IsRawAXIALModel())
             {
-                var redius = Convert.ToDouble(Data.CustomProperties
-                    .Cast<DynamicBlockReferenceProperty>()
-                    .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
-                    .First().Value);
+                var radius = Convert.ToDouble(
+                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
+                    );
                 return new FanOpening()
                 {
                     IsCircleOpening = true,
-                    Width = redius,
-                    Height = redius,
+                    Width = radius,
+                    Height = radius,
                     Angle = totalrotation <= 270 ? totalrotation + 90 : totalrotation - 180 - 90
                 };
             }
@@ -133,12 +133,9 @@ namespace ThMEPHVAC.CAD
                 {
                     FanOpening fanopening = new FanOpening() 
                     {
-                        IsCircleOpening = false,
                         Height = 0,
-                        Width = Convert.ToDouble(Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)
-                        .First().Value),
+                        IsCircleOpening = false,
+                        Width = Convert.ToDouble(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)),
                     };
                     if (blockname.Contains("直进"))
                     {
@@ -146,12 +143,9 @@ namespace ThMEPHVAC.CAD
                     }
                     else
                     {
-                        string BlockFliped = Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2)
-                        .First().Value.ToString();
+                        string flipped = Convert.ToString(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2));
                         var realrotationangle = totalrotation == 270 ? totalrotation + 90 : totalrotation - 180 - 90;
-                        if (BlockFliped == "1")
+                        if (flipped == "1")
                         {
                             fanopening.Angle = realrotationangle < 180 ? realrotationangle + 180 : realrotationangle - 180;
                         }
@@ -166,40 +160,32 @@ namespace ThMEPHVAC.CAD
                 {
                     return new FanOpening()
                     {
-                        IsCircleOpening = false,
                         Angle = totalrotation,
-                        Height = Convert.ToDouble(Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)
-                        .First().Value),
-
-                        Width = Convert.ToDouble(Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL)
-                        .First().Value),
+                        IsCircleOpening = false,
+                        Width = Convert.ToDouble(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL)),
+                        Height = Convert.ToDouble(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)),
                     };
                 }
             }
         }
         private FanOpening GetFanOutlet()
         {
-            double angle2Property = Convert.ToDouble(Data.CustomProperties
-                    .Cast<DynamicBlockReferenceProperty>()
-                    .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
-                    .First().Value) * 180 / Math.PI;
-            double blockrotation = Data.Rotation * 180 / Math.PI;
-            double totalrotation = angle2Property + blockrotation > 360 ? angle2Property + blockrotation - 360 : angle2Property + blockrotation;
+            var properties = Data.CustomProperties;
+            double angle2 = Convert.ToDouble(
+                properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
+                ).ConvertToAngle();
+            double blockrotation = Data.Rotation.ConvertToAngle();
+            double totalrotation = angle2 + blockrotation > 360 ? angle2 + blockrotation - 360 : angle2 + blockrotation;
             if (Model.IsRawAXIALModel())
             {
-                var redius = Convert.ToDouble(Data.CustomProperties
-                    .Cast<DynamicBlockReferenceProperty>()
-                    .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
-                    .First().Value);
+                var radius = Convert.ToDouble(
+                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
+                    );
                 return new FanOpening()
                 {
                     IsCircleOpening = true,
-                    Width = redius,
-                    Height = redius,
+                    Width = radius,
+                    Height = radius,
                     Angle = totalrotation < 90 ? totalrotation + 270 : totalrotation - 90
                 };
             }
@@ -210,30 +196,20 @@ namespace ThMEPHVAC.CAD
                 {
                     return new FanOpening()
                     {
-                        IsCircleOpening = false,
                         Height = 0,
                         Angle = totalrotation,
-                        Width = Convert.ToDouble(Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
-                        .First().Value),
+                        IsCircleOpening = false,
+                        Width = Convert.ToDouble(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)),
                     };
                 }
                 else
                 {
                     return new FanOpening()
                     {
-                        IsCircleOpening = false,
                         Angle = totalrotation,
-                        Height = Convert.ToDouble(Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
-                        .First().Value),
-
-                        Width = Convert.ToDouble(Data.CustomProperties
-                        .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL)
-                        .First().Value),
+                        IsCircleOpening = false,
+                        Width = Convert.ToDouble(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL)),
+                        Height = Convert.ToDouble(properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)),
                     };
                 }
             }
@@ -296,16 +272,9 @@ namespace ThMEPHVAC.CAD
         }
         private Point3d CreatePointFromProperty(string xname,string yname)
         {
-            double inletX = Convert.ToDouble(Data.CustomProperties
-                .Cast<DynamicBlockReferenceProperty>()
-                .Where(d => d.PropertyName == xname)
-                .First().Value);
-
-            double inletY = Convert.ToDouble(Data.CustomProperties
-                .Cast<DynamicBlockReferenceProperty>()
-                .Where(d => d.PropertyName == yname)
-                .First().Value);
-
+            var properties = Data.CustomProperties;
+            double inletX = Convert.ToDouble(properties.GetValue(xname));
+            double inletY = Convert.ToDouble(properties.GetValue(yname));
             return new Point3d(inletX, inletY, 0);
         }
 

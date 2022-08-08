@@ -14,6 +14,8 @@ using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using TianHua.Mep.UI.Data;
+using ThMEPTCH.CAD;
+using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 
 namespace TianHua.Mep.UI.Command
 {
@@ -80,16 +82,20 @@ namespace TianHua.Mep.UI.Command
                 var roomData = GetRoomData(acadDb.Database, RangePts);
                 var wallObjs = GetConfigWalls(acadDb.Database, RangePts);
                 var otherShearWalls = GetOtherShearwalls(acadDb.Database, RangePts);
+                var tchwallElements = GetTCHWalls(acadDb.Database, RangePts);
+                var tchDoorElements = GetTCHDoors(acadDb.Database, RangePts);
+                
                 // 收集建筑墙线  
-                walls = walls.Union(wallObjs);
+                walls = walls.Union(wallObjs);               
                 walls = walls.Union(roomData.Slabs);
                 walls = walls.Union(roomData.Windows);
                 walls = walls.Union(roomData.Cornices);
                 walls = walls.Union(roomData.CurtainWalls);
                 walls = walls.Union(roomData.RoomSplitlines);
                 walls = walls.Union(roomData.ArchitectureWalls);
-                // 收集门和柱
-                doors = doors.Union(roomData.Doors);
+                // 收集门
+                doors = doors.Union(roomData.Doors);               
+                // 收集柱
                 columns = columns.Union(roomData.Columns);
                 // 收集剪力墙
                 shearwalls = shearwalls.Union(roomData.ShearWalls);
@@ -103,6 +109,39 @@ namespace TianHua.Mep.UI.Command
                 transformer.Transform(columns);
                 transformer.Transform(shearwalls);
                 transformer.Transform(otherShearWalls);
+
+                var tchDoors = tchDoorElements.Select(o => o.Geometry).ToCollection();
+                var tchwalls = tchwallElements.Select(o => o.Geometry).ToCollection();
+                transformer.Transform(tchwalls);
+                transformer.Transform(tchDoors);
+
+                // 对天正的门造洞(暂时不考虑弧门,暂时默认tchDoors没有弧门;暂时不考虑弧墙)
+                var linearWalls = tchwallElements
+                    .Where(o => o.Data is TArchWall archWall && archWall.IsArc == false)
+                    .Select(o => o.Geometry).ToCollection();
+               
+                var doorOpenings = CreateLinearDoorOpening(linearWalls, tchDoors);
+                tchDoors.MDispose();
+                tchDoors = doorOpenings.Values.ToCollection(); // 只收集天正的的门洞
+
+                // 用DB的门过滤天正的门洞
+                var dbBufferDoors = doors.BufferPolygons(5.0);
+                var innerTchDoors = FilterInnerObjs(dbBufferDoors, tchDoors);
+                tchDoors = tchDoors.Difference(innerTchDoors);
+                innerTchDoors.MDispose();
+                dbBufferDoors.MDispose();
+
+                // 用天正的门过滤DB的门
+                var tchBufferDoors = tchDoors.BufferPolygons(5.0);
+                var innerDbDoors = FilterInnerObjs(tchBufferDoors, doors);
+                doors = doors.Difference(innerDbDoors);
+                innerDbDoors.MDispose();
+                tchBufferDoors.MDispose();
+
+                // 把天正的门洞放入DB门中
+                doors = doors.Union(tchDoors);
+                // 把天正的墙放入建筑墙中
+                walls = walls.Union(tchwalls);
 
                 // 过滤
                 // 过滤柱子内的柱子
@@ -146,6 +185,116 @@ namespace TianHua.Mep.UI.Command
             }
         }
 
+        private Dictionary<Polyline,Polyline> CreateLinearDoorOpening(
+            DBObjectCollection linearWalls, 
+            DBObjectCollection linearDoors)
+        {
+            var doorSpatialIndex = new ThCADCoreNTSSpatialIndex(linearDoors);
+            var bufferService = new ThNTSBufferService();
+            var results = new Dictionary<Polyline, Polyline>();
+            // 修正墙里的门
+            linearWalls.OfType<Polyline>().ForEach(wall =>
+            {
+                var bufferObj = bufferService.Buffer(wall, 5.0);
+                var innerDoors =  doorSpatialIndex.SelectWindowPolygon(bufferObj);
+                innerDoors.OfType<Polyline>().ForEach(door =>
+                {
+                    var doorOpening =  CreateDoorOpening(wall, door);
+                    if (doorOpening != null && !results.ContainsKey(door))
+                    {
+                        results.Add(door, doorOpening);
+                    }
+                });
+            });
+            return results;
+        }
+
+        private Polyline CreateDoorOpening(Polyline linearWall, Polyline linearDoor)
+        {
+            var shortPairs = GetRectangleShortPair(linearDoor);
+            var longPairs = GetRectangleLongPair(linearWall);
+            if (shortPairs.Count==2 && longPairs.Count == 2)
+            {
+                var firstPt = shortPairs[0].Item1.GetMidPt(shortPairs[0].Item2);
+                var secondPt = shortPairs[1].Item1.GetMidPt(shortPairs[1].Item2);
+                var pt1 = ThGeometryTool.GetProjectPtOnLine(firstPt, longPairs[0].Item1, longPairs[0].Item2);
+                var pt2 = ThGeometryTool.GetProjectPtOnLine(secondPt, longPairs[0].Item1, longPairs[0].Item2);
+                var pt3 = ThGeometryTool.GetProjectPtOnLine(firstPt, longPairs[1].Item1, longPairs[1].Item2);
+                var pt4 = ThGeometryTool.GetProjectPtOnLine(secondPt, longPairs[1].Item1, longPairs[1].Item2);
+                var pts = new Point3dCollection() { pt1, pt3, pt4, pt2 };
+                return pts.CreatePolyline();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private List<Tuple<Point3d, Point3d>> GetRectangleShortPair(Polyline rectangle)
+        {
+            var results = new List<Tuple<Point3d,Point3d>>();   
+            var edges = GetRectangleEdges(rectangle);
+            edges = edges.Where(o => o.Item1.DistanceTo(o.Item2) > 1e-6).ToList();
+            if(edges.Count==4)
+            {
+                var first = edges[0];
+                var third = edges[2];
+                var second = edges[1];               
+                var fourth = edges[3];
+                if(first.Item1.DistanceTo(first.Item2)< second.Item1.DistanceTo(second.Item2))
+                {
+                    results.Add(first);
+                    results.Add(third);
+                }
+                else
+                {
+                    results.Add(second);
+                    results.Add(fourth);
+                }
+            }            
+            return results;
+        }
+
+        private List<Tuple<Point3d, Point3d>> GetRectangleLongPair(Polyline rectangle)
+        {
+            var results = new List<Tuple<Point3d, Point3d>>();
+            var edges = GetRectangleEdges(rectangle);
+            edges = edges.Where(o => o.Item1.DistanceTo(o.Item2) > 1e-6).ToList();
+            if (edges.Count == 4)
+            {
+                var first = edges[0];
+                var third = edges[2];
+                var second = edges[1];
+                var fourth = edges[3];
+                if (first.Item1.DistanceTo(first.Item2) > second.Item1.DistanceTo(second.Item2))
+                {
+                    results.Add(first);
+                    results.Add(third);
+                }
+                else
+                {
+                    results.Add(second);
+                    results.Add(fourth);
+                }
+            }
+            return results;
+        }
+        private List<Tuple<Point3d, Point3d>> GetRectangleEdges(Polyline rectangle)
+        {
+            var edges = new List<Tuple<Point3d, Point3d>>();
+            for (int i = 0; i < rectangle.NumberOfVertices; i++)
+            {
+                var segType = rectangle.GetSegmentType(i);
+                if (segType != SegmentType.Line)
+                {
+                    continue;
+                }
+                var lineSeg = rectangle.GetLineSegmentAt(i);
+                edges.Add(Tuple.Create(lineSeg.StartPoint, lineSeg.EndPoint));
+            }
+            return edges;
+        }
+
         private DBObjectCollection FilterIsolatedElements(DBObjectCollection polygons, ThCADCoreNTSSpatialIndex spatialIndex,double rangeTolerance)
         {
             var isolatedElements = new DBObjectCollection();
@@ -175,6 +324,20 @@ namespace TianHua.Mep.UI.Command
             });
             return results;
         }
+
+        private DBObjectCollection FilterInnerObjs(DBObjectCollection firstPolygons, DBObjectCollection secondPolygons)
+        {
+            // 过滤在First内部的元素
+            var sptialIndex = new ThCADCoreNTSSpatialIndex(secondPolygons);
+            var results = new DBObjectCollection();
+            firstPolygons.OfType<Entity>().ForEach(e =>
+            {
+                var innerObjs = sptialIndex.SelectWindowPolygon(e);
+                innerObjs.OfType<DBObject>().ForEach(o => results.Add(o));
+            });
+            return results;
+        }
+
 
         private DBObjectCollection ToCurves(DBObjectCollection objs,bool disposeMpolygon=false)
         {
@@ -232,6 +395,69 @@ namespace TianHua.Mep.UI.Command
             restObjs.MDispose();
             return results;
         }
+        private List<ThRawIfcBuildingElementData> GetTCHWalls(Database database,Point3dCollection polygon)
+        {
+            var visitor = new ThTCHArchWallExtractionVisitor();
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            extractor.ExtractFromMS(database);
+
+            var geometries = visitor.Results.Select(o => o.Geometry).ToCollection();
+            var transformer = new ThMEPOriginTransformer();
+            if (polygon.Count>=3)
+            {
+                var center = polygon.Envelope().CenterPoint();
+                transformer = new ThMEPOriginTransformer(center);
+            }
+            else
+            {
+                transformer = new ThMEPOriginTransformer(geometries);
+            }
+            var newFrame = transformer.Transform(polygon);
+            transformer.Transform(geometries);
+            var filterObjs = SelectCrossPolygon(geometries, newFrame);
+            transformer.Reset(geometries);
+            var results = visitor.Results.Where(o => filterObjs.Contains(o.Geometry)).ToList();
+
+            // 释放
+            var restObjs = geometries.Difference(filterObjs);
+            restObjs.MDispose();
+            return results;
+        }
+
+        private List<ThRawIfcBuildingElementData> GetTCHDoors(Database database, Point3dCollection polygon)
+        {
+            var visitor = new ThTCHDoorExtractionVisitor();
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            extractor.ExtractFromMS(database);
+
+            var geometries = visitor.Results.Select(o => o.Geometry).ToCollection();
+            var transformer = new ThMEPOriginTransformer();
+            if (polygon.Count >= 3)
+            {
+                var center = polygon.Envelope().CenterPoint();
+                transformer = new ThMEPOriginTransformer(center);
+            }
+            else
+            {
+                transformer = new ThMEPOriginTransformer(geometries);
+            }
+            var newFrame = transformer.Transform(polygon);
+            transformer.Transform(geometries);
+            var filterObjs = SelectCrossPolygon(geometries, newFrame);
+            transformer.Reset(geometries);
+            var results = visitor.Results.Where(o => filterObjs.Contains(o.Geometry)).ToList();
+
+            // 释放
+            var restObjs = geometries.Difference(filterObjs);
+            restObjs.MDispose();
+
+            return results;
+        }
+
         private DBObjectCollection SelectCrossPolygon(DBObjectCollection objs, Point3dCollection polygon)
         {
             if (polygon.Count > 0)

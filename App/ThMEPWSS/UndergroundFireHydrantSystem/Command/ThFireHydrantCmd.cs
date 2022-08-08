@@ -150,6 +150,12 @@ namespace ThMEPWSS.Command
                 var name = dbObj.GetRXClass().DxfName;
                 var rst = dbObj.IsTCHPipe();
                 ;
+                //dynamic X = dbObj.AcadObject;
+                var objs = new DBObjectCollection();
+                dbObj.Explode(objs);
+                var objs1 = new DBObjectCollection();
+                ;
+
             }
         }
     }

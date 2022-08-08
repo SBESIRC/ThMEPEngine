@@ -156,6 +156,11 @@ namespace ThMEPLighting.UI.UI
             Active.Document.Window.Focus();
 #endif
         }
+
+        private void btnVideoHelper_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/9c0675925da740d8a5f4b386a980bff1.html?m=1&view=1");
+        }
     }
 
     public class LayoutToBoolConverter : IValueConverter

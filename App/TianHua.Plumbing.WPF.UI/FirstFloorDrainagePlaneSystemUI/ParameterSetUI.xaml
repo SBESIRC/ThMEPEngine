@@ -6,7 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
                     Title="参数设置" SizeToContent="Manual" 
-                    Height="430" Width="180" MaxWidth="180" MaxHeight="430"
+                    Height="480" Width="180" MaxWidth="180" MaxHeight="480"
              mc:Ignorable="d">
     <Window.Resources>
         <converters:SewageWasteWaterConvert x:Key="sewageWasteRadioCheckd"/>
@@ -46,6 +46,8 @@
                                  IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=0}"/>
             <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="13#雨水口" IsThreeState="False"
                                  IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=1}"/>
+            <cus:ImageButton Margin="5,3,3,3" Content="放置13#雨水口" x:Name="btnRainwaterInlet" Width="140" Height="22" ImageTextLocation="TextOnly"  Click="btnRainwaterInlet_Click"></cus:ImageButton>
+            <cus:ImageButton Margin="5,3,3,3" Content="放置过水洞" x:Name="btnOverflowTunnel" Width="140" Height="22" ImageTextLocation="TextOnly"  Click="btnOverflowTunnel_Click"></cus:ImageButton>
             <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="室外水封井" IsThreeState="False"
                                  IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=2}"/>
             <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="不考虑间接排水" IsThreeState="False"

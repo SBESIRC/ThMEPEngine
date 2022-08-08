@@ -8,9 +8,9 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public sealed class ThPDSCreateLoadVM : ObservableObject
     {
-        private readonly ImageSourceConverter cvt = new();
-        public ObservableCollection<double> RatedVoltages { get; private set; }
-        public ObservableCollection<ThPDSLoadItemTypeVM> Types { get; private set; }
+        private static readonly ImageSourceConverter cvt = new();
+        public ObservableCollection<double> RatedVoltages { get; }
+        public ObservableCollection<ThPDSLoadItemTypeVM> Types { get; }
 
         public ThPDSCreateLoadVM()
         {
@@ -54,7 +54,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 new ThPDSLoadItemTypeVM()
                 {
                     Type = ImageLoadType.ACB,
-                    Image = LoadImage("AC Charger.png"),
+                    Image = LoadImage("Electrical Control Panel.png"),
                 },
                 new ThPDSLoadItemTypeVM()
                 {
@@ -90,7 +90,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 new ThPDSLoadItemTypeVM()
                 {
                     Type = ImageLoadType.AC,
-                    Image = LoadImage("Electrical Control Panel.png"),
+                     Image = LoadImage("AC Charger.png"),
                 },
                 new ThPDSLoadItemTypeVM()
                 {

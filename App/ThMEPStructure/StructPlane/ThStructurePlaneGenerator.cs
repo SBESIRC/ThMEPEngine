@@ -22,6 +22,11 @@ namespace ThMEPStructure.StructPlane
     public class ThStructurePlaneGenerator
     {
         /// <summary>
+        /// 标准层编号
+        /// 如果为空，则按所有层打印
+        /// </summary>
+        private string StdFlrNo { get; set; }
+        /// <summary>
         /// 结构出图类型        
         /// </summary>
         private string DrawingType { get; set; }
@@ -35,6 +40,7 @@ namespace ThMEPStructure.StructPlane
         private ThPlanePrintParameter PrintParameter { get; set; }
         public ThStructurePlaneGenerator(ThPlaneConfig config, ThPlanePrintParameter printParameter)
         {
+            StdFlrNo = "";
             Config = config;            
             PrintParameter = printParameter;
             DrawingType = ThStructurePlaneCommon.StructurePlanName;
@@ -60,6 +66,9 @@ namespace ThMEPStructure.StructPlane
             var svgFiles = GetGeneratedSvgFiles();
             svgFiles = Sort(svgFiles);
 
+            // 根据标准层编号过滤
+            svgFiles = FilterSvgFiles(svgFiles, StdFlrNo);
+
             // 打印
             Print(svgFiles);
 
@@ -73,6 +82,62 @@ namespace ThMEPStructure.StructPlane
                 drawingType == ThStructurePlaneCommon.WallColumnDrawingName)
             {
                 DrawingType  = drawingType; 
+            }
+        }
+
+        public void SetStdFlrNo(string stdFlrNo)
+        {
+            this.StdFlrNo = stdFlrNo;
+        }
+
+        private List<string> FilterSvgFiles(List<string> svgFiles , string stdFlrNo)
+        {
+            if (string.IsNullOrEmpty(stdFlrNo))
+            {
+                return svgFiles;
+            }
+
+            // 查找标准层编号相等的SvgFile
+            var filters = svgFiles.Where(o =>
+            {
+                var fileName = Path.GetFileNameWithoutExtension(o);
+                var strs = fileName.Split('-');
+                if (strs.Length > 3)
+                {
+                    var str = strs[strs.Length - 3].Trim();
+                    return str == stdFlrNo;
+                }
+                else
+                {
+                    return false;
+                }
+            }).ToList();
+
+            if(filters.Count==1)
+            {
+                return filters;
+            }
+            else
+            {
+                //  再按自然层是否有值
+                filters = filters.Where(o =>
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(o);
+                    var strs = fileName.Split('-');
+                    var str = strs[strs.Length - 2].Trim();
+                    return str.IsInteger();
+                }).ToList();
+
+                // 再按楼层编号
+                filters = filters.OrderBy(o =>
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(o);
+                    var strs = fileName.Split('-');
+                    var str = strs[strs.Length - 2].Trim();
+                    return int.Parse(str);
+                }).ToList();
+
+                return filters;
             }
         }
 

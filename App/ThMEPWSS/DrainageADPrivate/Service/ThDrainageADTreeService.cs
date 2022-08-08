@@ -60,6 +60,22 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return ptDict;
         }
 
+        /// <summary>
+        /// 立管：T 角阀：T 末端：T 结果：末端
+        /// 立管：T 角阀：F 末端：F 结果：起点
+        /// 立管：T 角阀：T 末端：F 结果：虚拟末端
+        /// 立管：T 角阀：F 末端：T 结果：末端,默认角阀
+        /// 立管：F 角阀：T 末端：T 结果：末端
+        /// 立管：F 角阀：F 末端：F 结果：起点
+        /// 立管：F 角阀：T 末端：F 结果：虚拟末端
+        /// 立管：F 角阀：F 末端：T 结果：起点
+        /// </summary>
+        /// <param name="ptDict"></param>
+        /// <param name="terminalList"></param>
+        /// <param name="angleValve"></param>
+        /// <param name="ptTerminal"></param>
+        /// <param name="ptValve"></param>
+        /// <param name="ptStart"></param>
         public static void GetEndTerminal(Dictionary<Point3d, List<Line>> ptDict, List<ThSaniterayTerminal> terminalList, List<ThValve> angleValve, out Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, out Dictionary<Point3d, ThValve> ptValve, out List<Point3d> ptStart)
         {
             var r = 50.0;
@@ -92,6 +108,11 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 }
                 else
                 {
+                    if (isVertical == true && hasAngleValve ==false)
+                    {
+                        ptStart.Add(endPt.Key);
+                        continue;
+                    }
                     //找不到末端洁具的，造个虚拟洁具 type： unknow
                     Polyline pl;
                     if (valve != null)
@@ -117,6 +138,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 }
             }
         }
+
 
         /// <summary>
         /// 是否立管。管线长度小于1的水平管也会被判定为true

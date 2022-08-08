@@ -18,17 +18,14 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
             <WrapPanel Orientation="Vertical">
-                <cus:ImageButton Content="楼层框定" Name="btnSelectFloor" Height="24" Width="80" TabIndex="1" Click="btnSelectFloor_Click"></cus:ImageButton>
-                <cus:ImageButton Content="读取楼层" Height="24" Width="80" Margin="0,5,0,0"  TabIndex="2" Click="ImageButton_Click_1"></cus:ImageButton>
+                <cus:ImageButton Content="楼层框定" Name="btnSelectFloor" Height="24" Width="100" TabIndex="1" Click="btnSelectFloor_Click"></cus:ImageButton>
+                <cus:ImageButton Content="读取楼层" Height="24" Width="100" Margin="0,5,0,0"  TabIndex="2" Click="ImageButton_Click_1"></cus:ImageButton>
             </WrapPanel>
-            <cus:ImageButton Content="参数设置" ImageTextLocation="TextOnly" Name="btnSet" Click="btnSet_Click"  Margin="5,0,0,0" Width="80"  TabIndex="3"></cus:ImageButton>
+            <cus:ImageButton Content="参数设置" ImageTextLocation="TextOnly" Name="btnSet" Click="btnSet_Click"  Margin="5,0,0,0" Width="130"  TabIndex="3"></cus:ImageButton>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Vertical">
-            <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
             <Label Content="楼层表：" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
-            <ListBox Height="320" ItemsSource="{Binding FloorListDatas}">
-
-            </ListBox>
+            <ListBox Height="320" ItemsSource="{Binding FloorListDatas}"></ListBox>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Vertical">
             <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
@@ -45,9 +42,10 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </StackPanel>
-        <DockPanel Grid.Row="3" LastChildFill="False">
-            <cus:ImageButton DockPanel.Dock="Left" Content="标注管径" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click_2"></cus:ImageButton>
-            <cus:ImageButton DockPanel.Dock="Right" Content="生成" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
-        </DockPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <cus:ImageButton Content="视频教程" Height="24" Width="70" Margin="5" Click="Button_Click"></cus:ImageButton>
+            <cus:ImageButton Content="标注管径" Width="70" Height="24" Margin="5" Click="ImageButton_Click_2"></cus:ImageButton>
+            <cus:ImageButton Content="生成" Width="70" Height="24" Margin="5" Click="ImageButton_Click"></cus:ImageButton>
+        </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

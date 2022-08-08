@@ -84,6 +84,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
 #endif
         }
 
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/8f0a9111993e4fe1b45294d73dbb02c8.html");
+        }
     }
 
     public class LayoutConverter : IValueConverter

@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Runtime;
+using ThMEPStructure.Reinforcement.Command;
 using TianHua.Structure.WPF.UI.Command;
 using TianHua.Structure.WPF.UI.Reinforcement;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -59,10 +60,29 @@ namespace TianHua.Structure.WPF.UI
             AcadApp.ShowModalWindow(ui);
         }
 
+        [CommandMethod("TIANHUACAD", "THQZPJ1", CommandFlags.Session)]
+        public void THQZPJ1()
+        {
+            using (var cmd  = new ThTSSDWallColumnReinforceDrawCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THSMBT", CommandFlags.Modal)]
         public void THSMBT()
         {
             using (var cmd = new ThStructurePlaneCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THTSDP", CommandFlags.Modal)]
+        public void THTSDP()
+        {
+            // 加载TSDP2022 profile
+            using (var cmd = new ThTSSDProfileSwitchCmd())
             {
                 cmd.Execute();
             }

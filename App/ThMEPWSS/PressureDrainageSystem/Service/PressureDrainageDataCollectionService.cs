@@ -180,8 +180,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     string str1 = "带定位立管";
                     string str2 = "带定位立管150";
-                    string layerName1 = "W-DRAI-EQPM";
-                    string layerName2 = "W-RAIN-EQPM";
                     static Circle GetCorrespondindGeometry(Entity ent)
                     {
                         if (ent.Bounds is Extents3d)
@@ -204,12 +202,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                         else { return default; }
                     }
-                    foreach (var e in Entities.OfType<Entity>().Where(e => e.Layer == layerName1 || e.Layer == layerName2).Where(e => e.ObjectId.IsValid)
+                    foreach (var e in Entities.OfType<Entity>().Where(e => IsVertPipeLayer(e.Layer)).Where(e => e.ObjectId.IsValid)
                     .Where(e => e is BlockReference && (e.ToDataItem().EffectiveName == str1 || e.ToDataItem().EffectiveName == str2)))
                     {
                         this.CollectedData.VerticalPipes.Add(GetCorrespondindGeometry(e));
                     }
-                    foreach (var e in Entities.OfType<Circle>().Where(e => e.Layer == layerName1 || e.Layer == layerName2)
+                    foreach (var e in Entities.OfType<Circle>().Where(e => IsVertPipeLayer(e.Layer))
                     .Where(e => e.Radius >= distinguishDiameter && e.Radius <= 300))
                     {
                         if (e.Bounds is Extents3d extent3d)
@@ -218,7 +216,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             this.CollectedData.VerticalPipes.Add(circle);
                         }
                     }
-                    foreach (var e in Entities.OfType<Entity>().Where(e => (e.Layer == layerName1 || e.Layer == layerName2)
+                    foreach (var e in Entities.OfType<Entity>().Where(e => IsVertPipeLayer(e.Layer)
                      && PressureDrainageUtils.IsTianZhengElement(e)).Where(e => e.ExplodeToDBObjectCollection().OfType<Circle>().Any()))
                     {
                         if (e.Bounds is Extents3d extent3d)
@@ -228,8 +226,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                     }
                     foreach (var e in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid
-                     ? (e.Layer == layerName1 || e.Layer == layerName2) && e.ToDataItem().EffectiveName == "$LIGUAN"
-                     : (e.Layer == layerName1 || e.Layer == layerName2)))
+                     ? (IsVertPipeLayer(e.Layer)) && e.ToDataItem().EffectiveName == "$LIGUAN"
+                     : (IsVertPipeLayer(e.Layer))))
                     {
                         if (e.Bounds is Extents3d extent3d)
                         {
@@ -248,6 +246,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
+
+        bool IsVertPipeLayer(string layer)
+        {
+            string layerName1 = "DRAI";
+            string layerName2 = "RAIN";
+            return layer.Contains(layerName1) || layer.Contains(layerName2);
+        }
+        
         /// <summary>
         /// 提取雨水井及编号
         /// </summary>
@@ -272,7 +278,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     if (e.Bounds is Extents3d extent)
                     {
                         DrainWellClass drainWell = new DrainWellClass();
-                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
+                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d()).ToRectangle();
                         drainWell.Label = e.GetAttributesStrValue("-") ?? "";
                         drainWell.WellTypeName = e.Name;
                         this.CollectedData.DrainWells.Add(drainWell);
@@ -294,7 +300,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     if (e.Bounds is Extents3d extent)
                     {
                         DrainWellClass drainWell = new DrainWellClass();
-                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
+                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d()).ToRectangle();
                         drainWell.Label = e.GetAttributesStrValue("-") ?? "";
                         drainWell.WellTypeName = e.Name;
                         this.CollectedData.DrainWells.Add(drainWell);
@@ -316,7 +322,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     if (e.Bounds is Extents3d extent)
                     {
                         DrainWellClass drainWell = new DrainWellClass();
-                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
+                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d()).ToRectangle();
                         drainWell.Label = e.GetAttributesStrValue("-") ?? "";
                         drainWell.WellTypeName = e.Name;
                         this.CollectedData.DrainWells.Add(drainWell);
@@ -477,7 +483,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         List<Point3d> ptsboundary = ThGeometryTool.CalBoundingBox(pts);
                         Extents3d boundExtent = new Extents3d(ptsboundary[0], ptsboundary[1]);
                         SubmergedPumpClass submergedPump = new SubmergedPumpClass();
-                        submergedPump.Extents = boundExtent;
+                        submergedPump.Extents = boundExtent.ToRectangle();
                         submergedPump.Visibility = e.ObjectId.GetDynBlockValue("可见性");
                         submergedPump.Serial = e.GetAttributesStrValue("编号");
                         if (submergedPump.Visibility == "单台")
@@ -510,6 +516,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 this.CollectedData.Wells.RemoveAt(0);
                             }
                         }
+                        submergedPump.Block = e;
                         this.CollectedData.SubmergedPumps.Add(submergedPump);
                     }
                 }
@@ -598,10 +605,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 this.CollectedData.HorizontalPipes.ForEach(o => lines.Add(o.Line));
                 List<Point3d> pts = new List<Point3d>();
                 this.CollectedData.VerticalPipes.ForEach(o => pts.Add(o.Center));
-                this.CollectedData.SubmergedPumps.ForEach(o => pts.Add(o.Extents.CenterPoint()));
+                this.CollectedData.SubmergedPumps.ForEach(o => pts.Add(o.Extents.Centroid()));
                 List<Line> mergedLines = new();
                 lines.ForEach(o => mergedLines.Add(o));
-                ConnectBrokenLine(lines,new List<Point3d>() { }, pts).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
+                var s = AnalysisLineList(lines);
+                ConnectBrokenLine(lines,/*pts*/new List<Point3d>() { }).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
                 var objs = new DBObjectCollection();
                 mergedLines.ForEach(o => objs.Add(o));
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
@@ -626,7 +634,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     int dd = 0;
                     foreach (var k in this.CollectedData.VerticalPipes)
                     {
-                        if (j.Extents.ToRectangle().GetClosePoint(k.Center).DistanceTo(k.Center) < tol || j.Extents.IsPointIn(k.Center))
+                        if (j.Extents.GetClosePoint(k.Center).DistanceTo(k.Center) < tol || j.Extents.IsPointIn(k.Center))
                         {
                             dd = 1;
                             break;
@@ -635,15 +643,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     if (dd == 0)
                     {
                         double toldis = 50;
-                        Point3d ptlocPipe = j.Extents.CenterPoint();
+                        Point3d ptlocPipe = j.Extents.Centroid();
                         foreach (var lin in this.CollectedData.HorizontalPipes)
                         {
-                            if (j.Extents.IsPointIn(lin.Line.StartPoint) || j.Extents.ToRectangle().GetClosePoint(lin.Line.StartPoint).DistanceTo(lin.Line.StartPoint) < toldis)
+                            if (j.Extents.IsPointIn(lin.Line.StartPoint) || j.Extents.GetClosePoint(lin.Line.StartPoint).DistanceTo(lin.Line.StartPoint) < toldis)
                             {
                                 ptlocPipe = lin.Line.StartPoint;
                                 break;
                             }
-                            else if (j.Extents.IsPointIn(lin.Line.EndPoint) || j.Extents.ToRectangle().GetClosePoint(lin.Line.EndPoint).DistanceTo(lin.Line.EndPoint) < toldis)
+                            else if (j.Extents.IsPointIn(lin.Line.EndPoint) || j.Extents.GetClosePoint(lin.Line.EndPoint).DistanceTo(lin.Line.EndPoint) < toldis)
                             {
                                 ptlocPipe = lin.Line.EndPoint;
                                 break;

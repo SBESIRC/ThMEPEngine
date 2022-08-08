@@ -18,7 +18,7 @@ namespace ThMEPStructure.Reinforcement.Service
 {
     public static class ThReinforcementUtils
     {
-        public readonly static double WallColumnBufferLength = 1.0;
+        public readonly static double WallColumnBufferLength = 1.0;        
         public static DBObjectCollection GetEntitiesFromMS(this Database db, List<string> layers)
         {
             using (var acadDb = AcadDatabase.Use(db))

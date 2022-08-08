@@ -526,5 +526,18 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 table.Rows[i][0] = IsChecked;
             }
         }
+
+        private void VideoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/d47be092826b4574a58757dda3640f7d.html?m=1&view=1";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
 }

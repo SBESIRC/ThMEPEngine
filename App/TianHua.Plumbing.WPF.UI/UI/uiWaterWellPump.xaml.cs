@@ -117,5 +117,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             WellInfoWidget.HighlightWell();
             AcadApp.ShowModelessWindow(WellInfoWidget);
         }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/3b20f31a34bb4bc7afef06f3895fdec3.html");
+        }
     }
 }

@@ -146,5 +146,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 }
             }, "THPSXTT", "标注管径");
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/26cdce3cf8124ccfa95dd5c47da53ca2.html");
+        }
     }
 }

@@ -249,6 +249,10 @@ namespace TianHua.Electrical.PDS.UI.Services
             {
                 data.Description = vm.Description;
             }
+            else
+            {
+                data.Description = data.Type.GetDescription();
+            }
             data.Sync();
             return data;
         }
@@ -740,11 +744,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                if (Node.Load.Location != null)
-                {
-                    return Node.Load.Location.ReferenceDWG;
-                }
-                return string.Empty;
+                return Node.Load.Location?.ReferenceDWG ?? string.Empty;
             }
         }
         public Point3d BasePoint

@@ -29,7 +29,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                         layer = ThWSSCommon.DraiWasteLayerName;
                         break;
                     case VerticalPipeType.CondensatePipe:
-                    case VerticalPipeType.rainPipe:
+                    case VerticalPipeType.RainwaterInlet13Pipe:
+                    case VerticalPipeType.RainPipe:
                         layer = ThWSSCommon.DraiLayerName;
                         break;
                     default:
@@ -42,6 +43,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                     {
                         PrintPipeFloorDraining(x.route.StartPoint, originTransformer);
                         x.route = GeometryUtils.ShortenPolylineByCircle(x.route, new Circle(x.route.StartPoint, Vector3d.ZAxis, 75 * scale), true);
+                    }
+                    else if (x.verticalPipeType == VerticalPipeType.RainwaterInlet13Pipe)
+                    {
+                        var recangle = CreateRecangle(x.route.StartPoint, x.block.Rotation, x.block.ScaleFactors.Y);
+                        x.route = GeometryUtils.ShortenPolylineByRecangle(x.route, recangle, true);
                     }
                     else
                     {
@@ -60,6 +66,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                 InsertBlockService.scaleNum = scale;
                 InsertBlockService.InsertConnectPipe(pipes, layer, null);
             }
+        }
+
+        private static Polyline CreateRecangle(Point3d pt, double angle, double scale)
+        {
+            var length = 100 * scale;
+            var vecY = Vector3d.YAxis.RotateBy(angle, Vector3d.ZAxis);
+            var vecX = Vector3d.ZAxis.CrossProduct(vecY);
+            Polyline poly = new Polyline() { Closed = true };
+            poly.AddVertexAt(0, (pt + vecY * length + vecX * length).ToPoint2D(), 0, 0, 0);
+            poly.AddVertexAt(1, (pt - vecY * length + vecX * length).ToPoint2D(), 0, 0, 0);
+            poly.AddVertexAt(2, (pt - vecY * length - vecX * length).ToPoint2D(), 0, 0, 0);
+            poly.AddVertexAt(3, (pt + vecY * length - vecX * length).ToPoint2D(), 0, 0, 0);
+            return poly;
         }
 
         private static void PrintPipeFloorDraining(Point3d pt, ThMEPOriginTransformer originTransformer)

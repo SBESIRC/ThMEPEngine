@@ -29,6 +29,18 @@ namespace ThMEPWSS.ViewModel
                 return new RelayCommand(RegionCheckClick);
             }
         }
+        public ICommand HelpCmd
+        {
+            get
+            {
+                return new RelayCommand(OnHelpClick);
+            }
+        }
+
+        private void OnHelpClick()
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/3f2cc6f7b5914d4ca42e42e98b628326.html");
+        }
 
         private void RegionCheckClick()
         {

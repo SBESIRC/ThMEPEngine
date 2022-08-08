@@ -40,7 +40,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             foreach (var l in DrawLineLinst)
             {
                 acadDatabase.ModelSpace.Add(l);
-                l.Layer = "W-FRPT-HYDT-PIPE-AI";
+                l.Layer = "W-FRPT-HYDT-PIPE";
                 l.Linetype = "ByLayer";
                 l.LineWeight = LineWeight.ByLayer;
                 l.ColorIndex = (int)ColorIndex.BYLAYER;

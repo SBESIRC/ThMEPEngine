@@ -53,9 +53,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Method
         public static int GetAreaIndex(WaterSupplyVM uiConfigs)
         {
             var areaIndex = 0;
-            if (uiConfigs.SelectRadionButton.Content.Contains("组"))
+            if (uiConfigs.SelectRadionButton.Content.Contains("单元"))
             {
-                areaIndex = Convert.ToInt32(uiConfigs.SelectRadionButton.Content.Split('组')[1]) + uiConfigs.StartNum - 1;//读取分区
+                areaIndex = Convert.ToInt32(uiConfigs.SelectRadionButton.Content.Split('元')[1]) + uiConfigs.StartNum - 1;//读取分区
             }
             return areaIndex;
         }

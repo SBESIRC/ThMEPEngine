@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -13,9 +14,15 @@ namespace ThMEPWSS.SprinklerDim.Model
 
         public List<ThSprinklerGraph> PtsGraph { get; set; } = new List<ThSprinklerGraph>();//图列表
 
-        public List<List<List<int>>> XCollineationGroup { get; set; } = new List<List<List<int>>>();
+        public List<List<List<int>>> XCollineationGroup { get; set; } = new List<List<List<int>>>();//X相同距离较近的形成组
 
-        public List<List<List<int>>> YCollineationGroup { get; set; } = new List<List<List<int>>>();
+        public List<List<List<int>>> YCollineationGroup { get; set; } = new List<List<List<int>>>();//Y相同距离较近的形成组
+
+        public List<List<int>> XDimension { get; set; } = new List<List<int>>();//X方向的喷淋标注点
+
+        public List<List<int>> YDimension { get; set; } = new List<List<int>>();//Y方向的喷淋标注点
+
+        public HashSet<Tuple<int, int>> LinesCuttedOffByWall = new HashSet<Tuple<int, int>>();//被墙打断的两点间连线
 
         //public List<Line> Lines { get; private set; } = new List<Line>();//所有的线列表，包括和支干管相交的打断线
         public double Angle { get; set; } = 0;//组角度

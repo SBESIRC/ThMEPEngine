@@ -10,7 +10,6 @@
 	</rule>
 	<module path="ThCADCore.dll" />
 	<module path="ThCADExtension.dll" />
-	<module path="THMEPCore3D.dll" />
 	<module path="ThMEPEngineCore.dll" />
 	<module path="ThMEPHVAC.dll" />
 	<module path="ThMEPElectrical.dll" />

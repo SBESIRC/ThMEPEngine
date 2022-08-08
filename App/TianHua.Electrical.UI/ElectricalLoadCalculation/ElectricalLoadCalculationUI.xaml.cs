@@ -455,5 +455,18 @@ namespace TianHua.Electrical.UI.ElectricalLoadCalculation
             configUI.Owner = this;
             var ret = configUI.ShowDialog();
         }
+
+        private void VideoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/e3bbd55fab1147bf9b9518c4bfb093b4.html?m=1&view=1";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
 }

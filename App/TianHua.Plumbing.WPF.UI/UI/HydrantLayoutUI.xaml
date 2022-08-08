@@ -27,6 +27,7 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" >
@@ -89,6 +90,9 @@
         </Grid>
         <Grid Grid.Row="9"  Margin="0 10 0 0">
             <Button  Content="调整" Click="btnLayout_Click" ></Button>
+        </Grid>
+        <Grid Grid.Row="10"  Margin="0 10 0 0">
+            <Button  Content="视频教程" Click="btnHelp_Click" ></Button>
         </Grid>
     </Grid>
 </cus:ThCustomWindow>

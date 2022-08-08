@@ -4,6 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ using ThMEPWSS.Command;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
+using TianHua.Plumbing.WPF.UI.Command;
 using TianHua.Plumbing.WPF.UI.UI;
 
 namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
@@ -71,6 +73,9 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
                 currentDb.Database.SetLayerColor(ThWSSCommon.OutFrameLayerName, 2);
                 ThMEPWSS.Common.Utils.FocusToCAD();
             }
+
+            ThDrawOutDoorCmd thDrawOutDoorCmd = new ThDrawOutDoorCmd(ThWSSCommon.OutFrameLayerName);
+            thDrawOutDoorCmd.SubExecute();
         }
 
         private void btnRainPipe_Click(object sender, RoutedEventArgs e)
@@ -83,6 +88,8 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorRainPipeLayerName);
                 ThMEPWSS.Common.Utils.FocusToCAD();
             }
+
+            DrawPline();
         }
 
         private void btnDrainagePipe_Click(object sender, RoutedEventArgs e)
@@ -95,6 +102,13 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorSewagePipeLayerName);
                 ThMEPWSS.Common.Utils.FocusToCAD();
             }
+
+            DrawPline();
+        }
+
+        private void DrawPline()
+        {
+            Active.Document.SendCommand("_Pline" + "\n");
         }
 
         /// <summary>
@@ -108,6 +122,11 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/4f42b283210d4874b80f125f01767c6a.html");
         }
     }
 }

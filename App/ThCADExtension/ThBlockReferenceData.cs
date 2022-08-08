@@ -1,4 +1,5 @@
-﻿using DotNetARX;
+﻿using System;
+using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -23,14 +24,11 @@ namespace ThCADExtension
         {
             get
             {
-                try
+                if (ObjId.GetObject(OpenMode.ForWrite) is BlockReference br)
                 {
-                    return ObjId.GetDynProperties();
+                    return br.DynamicBlockReferencePropertyCollection;
                 }
-                catch
-                {
-                    return null;
-                }
+                throw new NotSupportedException();
             }
         }
         public ThBlockReferenceData(ObjectId blockRef)

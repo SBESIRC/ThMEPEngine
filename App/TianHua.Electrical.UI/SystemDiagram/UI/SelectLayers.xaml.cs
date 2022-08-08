@@ -200,5 +200,18 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 FireCompartmentParameter.CacheDynamicCheckBoxs.Add(item);
             }
         }
+
+        private void VideoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/40d6880863a94ad8b4c6ecf81566acfc.html?m=1&view=1";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
 }

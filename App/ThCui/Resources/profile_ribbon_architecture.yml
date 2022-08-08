@@ -339,6 +339,10 @@ panels:
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "梯板配筋"
             attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "墙柱配筋"
+            attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "梁纵筋"
             attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": false, "IsEnabled": false }
@@ -441,6 +445,8 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "坐标辅助"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "TSSD切换"
+            attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": true, "IsEnabled": true }
 
 

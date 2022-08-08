@@ -824,5 +824,18 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             viewModel.DynamicModelData = new System.Collections.ObjectModel.ObservableCollection<DynamicLoadCalculationModelData>(ModelDataList);
             e.Handled = true;
         }
+
+        private void VideoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_b8cf86ebad614a1dbe60b25f685aa133.html";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
 }

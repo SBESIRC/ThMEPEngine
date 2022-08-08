@@ -23,6 +23,7 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         <cus:ImageButton Grid.Row="0" Content="参数设置" x:Name="btnParamSet" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnParamSet_Click"></cus:ImageButton>
         <Line Grid.Row="1" X1="5" Y1="0" X2="170" Y2="0" StrokeDashArray="5" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center"/>
@@ -45,6 +46,6 @@
             <cus:InputTextBox Width ="160" TextBoxInputType="InputDouble"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding DrivepipeLevel, Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
             <Label  Content="m"/>
         </StackPanel>
-        <cus:ImageButton Grid.Row="13" Content="生成套管标注" x:Name="btnPipeTag" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnParamSet_Click"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="13" Content="视频教程" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="ImageButton_Click"></cus:ImageButton>
     </Grid>
 </cus:ThCustomWindow>

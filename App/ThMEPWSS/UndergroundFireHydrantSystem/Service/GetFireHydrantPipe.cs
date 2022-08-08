@@ -54,9 +54,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             fireHydrantSysIn.CrossMainPtDic.Add(pt, stPt.OffsetY(pipeGap));
                         }
                     }
-         
-                    double pipeLength = fireHydrantSysIn.PipeWidth;
-                    
+
+                    double pipeLength = 1300;//fireHydrantSysIn.PipeWidth;
+                    double upperLen = 0;//走上面的管长，消火栓和无立管末端
+                    double lowerLen = 0;//走下面的管长，立管和水泵接合器
                     if (branchDic.ContainsKey(pt))
                     {
                         var tpts = branchDic[pt];
@@ -67,37 +68,55 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 branchDic[pt]?.Remove(tpts[j]);
                             }
                         }
-                        if (tpts.Count == 2)
+                        foreach(var tpt in tpts)
                         {
-                            var str1 = "";
-                            if(fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
+                            if(!fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
                             {
-                                str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
+                                continue;
                             }
-                            var str2 = "";
-                            if (fireHydrantSysIn.TermPointDic.ContainsKey(tpts[1]))
+                            var term = fireHydrantSysIn.TermPointDic[tpt];
+                            var type = term.Type;
+                            if (type == 1 || type == 3)
                             {
-                                str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
-                            }
-                            if (!str1.IsCurrentFloor() && !str2.IsCurrentFloor())
-                            {
-                                pipeLength = 2 * fireHydrantSysIn.PipeWidth;
-                            }
-                        }
-                        if (tpts.Count == 3)
-                        {
-                            var str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
-                            var str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
-                            var str3 = fireHydrantSysIn.TermPointDic[tpts[2]].PipeNumber;
-                            if (!str1.IsCurrentFloor() && !str2.IsCurrentFloor() && !str3.IsCurrentFloor())
-                            {
-                                pipeLength = 3 * fireHydrantSysIn.PipeWidth;
+                                lowerLen += term.PipeWidth;
                             }
                             else
                             {
-                                pipeLength = 2 * fireHydrantSysIn.PipeWidth;
+                                upperLen += term.PipeWidth;
                             }
                         }
+                        pipeLength = Math.Max(Math.Max(upperLen, lowerLen), 1600);
+                        //if (tpts.Count == 2)
+                        //{
+                        //    var str1 = "";
+                        //    if(fireHydrantSysIn.TermPointDic.ContainsKey(tpts[0]))
+                        //    {
+                        //        str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
+                        //    }
+                        //    var str2 = "";
+                        //    if (fireHydrantSysIn.TermPointDic.ContainsKey(tpts[1]))
+                        //    {
+                        //        str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
+                        //    }
+                        //    if (!str1.IsCurrentFloor() && !str2.IsCurrentFloor())
+                        //    {
+                        //        pipeLength = 2 * fireHydrantSysIn.PipeWidth;
+                        //    }
+                        //}
+                        //if (tpts.Count == 3)
+                        //{
+                        //    var str1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;
+                        //    var str2 = fireHydrantSysIn.TermPointDic[tpts[1]].PipeNumber;
+                        //    var str3 = fireHydrantSysIn.TermPointDic[tpts[2]].PipeNumber;
+                        //    if (!str1.IsCurrentFloor() && !str2.IsCurrentFloor() && !str3.IsCurrentFloor())
+                        //    {
+                        //        pipeLength = 3 * fireHydrantSysIn.PipeWidth;
+                        //    }
+                        //    else
+                        //    {
+                        //        pipeLength = 2 * fireHydrantSysIn.PipeWidth;
+                        //    }
+                        //}
                     }
 
                     if (fireHydrantSysIn.PtTypeDic[pt].Equals("MainLoop"))
@@ -629,6 +648,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 pipeNumber1 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber;//立管标号
                 pipeNumber12 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber2;//立管标号
+                textWidth = fireHydrantSysIn.TermPointDic[tpt].TextWidth;
             }
 
             var pt1 = stpt._pt;
@@ -797,6 +817,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
             {
                 pipeNumber1 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber;//立管标号
+                textWidth = fireHydrantSysIn.TermPointDic[tpt].TextWidth;
             }
 
             var pt1 = stpt._pt;

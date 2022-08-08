@@ -1,5 +1,6 @@
-﻿using AcHelper;
-using Linq2Acad;
+﻿using System;
+using AcHelper;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
@@ -10,7 +11,6 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -30,12 +30,12 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromEditor(Point3dCollection frame)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override void ExtractFromMS(Database database)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 
@@ -76,12 +76,12 @@ namespace ThMEPEngineCore.Engine
 
         public override void RecognizeEditor(Point3dCollection polygon)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

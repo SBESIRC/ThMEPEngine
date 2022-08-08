@@ -1,17 +1,77 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.SprinklerDim.Model;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThOptimizeGroupService
     {
+        /// <summary>
+        /// 断环算法的优化，断开连接较少的两根线之间的所有连线，形成多个图
+        /// </summary>
+        /// <param name="netList"></param>
+        /// <param name="printTag"></param>
+        /// <returns></returns>
+        public static List<ThSprinklerNetGroup> GetSprinklerPtOptimizedNet(List<ThSprinklerNetGroup> netList, double step, string printTag)
+        {
+            List<ThSprinklerNetGroup> transNetList = ThSprinklerNetGroupListService.ChangeToOrthogonalCoordinates(netList);
+            ThSprinklerNetGroupListService.CorrectGraphConnection(ref transNetList, 45.0);
 
-        public static void CutoffLines(List<Point3d> pts, ref ThSprinklerGraph graph, List<List<int>> collineationList, bool isXAxis)
+            // test
+            for (int i = 0; i < transNetList.Count; i++)
+            {
+                var net = transNetList[i];
+                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+                for (int j = 0; j < net.PtsGraph.Count; j++)
+                {
+                    var lines = net.PtsGraph[j].Print(pts);
+                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-245mm-{0}-{1}", i, j, printTag), i % 7);
+                }
+            }
+
+
+            ThSprinklerNetGroupListService.GenerateCollineationGroup(ref transNetList);
+            List<ThSprinklerNetGroup> opNetList = new List<ThSprinklerNetGroup>();
+            foreach (ThSprinklerNetGroup netGroup in transNetList)
+            {
+                var pts = netGroup.Pts;
+
+                List<Line> remainingLines = new List<Line>();
+                for (int i = 0; i < netGroup.PtsGraph.Count; i++)
+                {
+                    ThSprinklerGraph graph = netGroup.PtsGraph[i];
+                    CutoffLines(pts, ref graph, netGroup.XCollineationGroup[i], true);
+                    CutoffLines(pts, ref graph, netGroup.YCollineationGroup[i], false);
+                    remainingLines.AddRange(graph.Print(pts));
+                }
+                ThSprinklerNetGroup newNetGroup = ThSprinklerNetGraphService.CreateNetwork(netGroup.Angle, remainingLines);
+                newNetGroup.Transformer = netGroup.Transformer;
+                opNetList.Add(newNetGroup);
+            }
+
+            // test
+            for (int i = 0; i < opNetList.Count; i++)
+            {
+                var net = opNetList[i];
+                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+                for (int j = 0; j < net.PtsGraph.Count; j++)
+                {
+                    var lines = net.PtsGraph[j].Print(pts);
+                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-3OpNet-{0}-{1}", i, j, printTag), i % 7);
+                }
+            }
+
+            return opNetList;
+        }
+
+
+        private static void CutoffLines(List<Point3d> pts, ref ThSprinklerGraph graph, List<List<int>> collineationList, bool isXAxis)
         {
             // 共线中把相距较近的形成一组
             foreach (List<int> group in collineationList)

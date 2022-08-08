@@ -56,6 +56,12 @@ namespace ThCADCore.NTS
                 .Where(o => o.Area > 1.0)
                 .ForEach(o =>
                 {
+                    // 如果洞口和边界几乎一样，忽略此洞口
+                    if (o.SimilarityMeasure(shell) > 0.99) 
+                    {
+                        return;
+                    }
+
                     // 若Hole和Shell的距离很近，拆分成两个区域
                     if (o.Distance(shell) <= tolerance)
                     {

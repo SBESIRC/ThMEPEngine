@@ -84,7 +84,8 @@ namespace ThMEPWSS.Pipe
             {
                 return new Point3d();
             }
-            return point1.Value.TransformBy(Active.Editor.UCS2WCS());
+            var resPt = point1.Value.TransformBy(Active.Editor.UCS2WCS());
+            return new Point3d(resPt.X, resPt.Y, 0);
         }
         public static Point3dCollection SelectRange()
         {

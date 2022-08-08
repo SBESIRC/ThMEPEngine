@@ -29,6 +29,7 @@ using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentPipeConvertion;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.TangentSymbMultiLeaderConvertion;
 using static ThMEPWSS.DrainageSystemAG.Bussiness.CoordinateTransformation;
 using GeometryExtensions;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.Command
 {
@@ -381,6 +382,7 @@ namespace ThMEPWSS.Command
         {
             //屋面数据处理
             //有大屋面时，找到住人顶层的所有污废立管（PL）和废水立管（FL）。将所有的立管和编号标注根据基点复制到大屋面。
+            var filter_names = new string[] { "PL", "FL", "WL", "FYL", "FCL", "TL" };
             _roofBlockPoints = GetRoofFloorBlocks();
             var roofRooms = MaxRoofFloorRooms();
             var roofLayout = new RoofLayout(roofFloors, _roofBlockPoints, roofRooms);
@@ -389,11 +391,34 @@ namespace ThMEPWSS.Command
             {
                 foreach (var item in createBlockInfos)
                 {
-                    if (string.IsNullOrEmpty(item.tag) || (!item.tag.ToUpper().Equals("PL") && !item.tag.ToUpper().Equals("FL")))
+                    if (string.IsNullOrEmpty(item.tag))
                         continue;
+                    var matched_name = false;
+                    foreach (var name in filter_names)
+                        if (item.tag.ToUpper().Equals(name))
+                        {
+                            matched_name = true;
+                            break;
+                        }
+                    if (!matched_name) continue;
                     copyToRoofBlocks.Add(item);
                 }
             }
+            #region 通气管伸顶，TL等三个图块为一组时，只认TL；其他情况下，不认TL
+            var tLBlocks = copyToRoofBlocks.Where(e => e.tag.ToUpper().Equals("TL")).ToList();
+            var removedBks = new List<CreateBlockInfo>();
+            for (int i = 0; i < tLBlocks.Count; i++)
+            {
+                var rec = tLBlocks[i].createPoint.CreateSquare(400);
+                var crossedbks = copyToRoofBlocks.Where(e => e.createPoint.CreateSquare(200).Intersects(rec))
+                    .Where(e => !e.tag.ToUpper().Equals("TL")).ToList();
+                if (crossedbks.Count == 2)
+                    removedBks.AddRange(crossedbks);
+                else
+                    removedBks.Add(tLBlocks[i]);
+            }
+            copyToRoofBlocks = copyToRoofBlocks.Except(removedBks).ToList();
+            #endregion
             var addBlocks = roofLayout.RoofLayoutResult(livingHighestFloor, copyToRoofBlocks);
             if (null != addBlocks && addBlocks.Count > 0) 
             {

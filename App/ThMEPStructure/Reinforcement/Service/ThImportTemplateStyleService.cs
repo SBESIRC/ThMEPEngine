@@ -8,6 +8,11 @@ namespace ThMEPStructure.Reinforcement.Service
     public static class ThImportTemplateStyleService
     {
         public static string ThStyle3TextStyle = "TH-STYLE3";
+        public static string StandardEdgeComponentLayer = "COLU_DE_TH";
+        public static string NonStandardEdgeComponentLayer = "AI-边构";
+        public static string EdgeComponentMarkLineLayer = "S_PLAN_TEXT"; // 边缘构件引线标注文字图层
+        public static string EdgeComponentMarkTextLayer = "S_PLAN_TEXT"; // 边缘构件引线图层
+
         public static void Import(this Database database)
         {
             using (var acadDb = AcadDatabase.Use(database))
@@ -24,7 +29,7 @@ namespace ThMEPStructure.Reinforcement.Service
             get
             {
                 return new List<string> { 
-                    "COLU_DE_TH","COLU_DE_DIM","COLU_DE_TEXT","Defpoints",
+                    "COLU_DE_TH","COLU_DE_DIM","COLU_DE_TEXT","Defpoints","S_PLAN_TEXT",
                     "LABEL" ,"LINK","REIN", "TAB", "TAB_TEXT","THIN",
                     "xk-biaozhu","z-详图标注","tab-表头"};
             }

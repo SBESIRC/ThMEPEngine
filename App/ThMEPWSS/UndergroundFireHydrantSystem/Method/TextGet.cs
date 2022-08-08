@@ -18,6 +18,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
             {
                 pipeNumber1 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber;//立管标号
                 pipeNumber12 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber2;//立管标号
+                textWidth = fireHydrantSysIn.TermPointDic[tpt].TextWidth;
             }
 
             if (pipeNumber1 != "" && pipeNumber1.IsCurrentFloor())

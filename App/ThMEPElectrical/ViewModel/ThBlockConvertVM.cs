@@ -30,6 +30,8 @@ namespace ThMEPElectrical.ViewModel
 
         private readonly ThBConvertTransientService TransientService = new ThBConvertTransientService();
 
+        private readonly int MaxLineNumber = 16;
+
         public ThBlockConvertVM()
         {
             Parameter = new ThBlockConvertModel();
@@ -42,7 +44,7 @@ namespace ThMEPElectrical.ViewModel
         {
             BlockConvertInfos = new ObservableCollection<BlockConvertInfo>();
             // blank
-            for (var i = 0; i <= 15; i++)
+            for (var i = 0; i <= MaxLineNumber; i++)
             {
                 BlockConvertInfos.Add(new BlockConvertInfo());
             }
@@ -80,7 +82,7 @@ namespace ThMEPElectrical.ViewModel
                     continue;
                 }
 
-                if (i <= 15)
+                if (i <= MaxLineNumber)
                 {
                     BlockConvertInfos[i].Guid = CompareModels[j].Guid;
                     BlockConvertInfos[i].Category = CompareModels[j].Category.ToString();
@@ -175,7 +177,7 @@ namespace ThMEPElectrical.ViewModel
         private void FillBlank()
         {
             var count = BlockConvertInfos.Count();
-            for (var i = 0; i <= 15 - count; i++)
+            for (var i = 0; i <= MaxLineNumber - count; i++)
             {
                 BlockConvertInfos.Add(new BlockConvertInfo());
             }
@@ -220,7 +222,5 @@ namespace ThMEPElectrical.ViewModel
             }
             return cmd;
         }
-
-
     }
 }

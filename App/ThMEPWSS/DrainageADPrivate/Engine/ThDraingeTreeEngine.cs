@@ -56,7 +56,6 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
         {
             //找管线对应末端洁具和可能的起点
             Terminal.ForEach(x => x.Boundary = x.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First());
-            //ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, out var ptTerminalTemp, out var ptStart);
             ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, AngleValve, out var ptTerminalTemp, out var ptValve, out var ptStart);
             this.PtTerminal = ptTerminalTemp;
             this.PtAngleValve = ptValve;

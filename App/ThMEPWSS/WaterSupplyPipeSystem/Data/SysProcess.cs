@@ -29,10 +29,10 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
         public void Set(SysIn sysIn)
         {
             Households = ThWCompute.CountKitchenNums(sysIn);
-            MaxHouseholds = ThWCompute.GetMaxHouseholds(Households, sysIn.FlushFaucet);
+            MaxHouseholds = 0;//ThWCompute.GetMaxHouseholds(Households, sysIn.FlushFaucet);
             FloorCleanToolList = ThWCompute.CountCleanToolNums(sysIn, Households);
             StoreyList = ThWCompute.CreateStoreysList(sysIn, Households);
-            MaxHouseholdNums = Tool.GetMaxHouseholdNums(sysIn, FloorCleanToolList);
+            MaxHouseholdNums = 0;//Tool.GetMaxHouseholdNums(sysIn, FloorCleanToolList);
             PipeOffsetX = Tool.CreatePipeOffsetX(sysIn.FloorNumbers, sysIn.LowestStorey, sysIn.InsertPt);
             GetBranchPipeX();
         }
@@ -40,9 +40,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
         public void SetTank(SysIn sysIn)
         {
             Households = ThWCompute.CountKitchenNums(sysIn);
-            MaxHouseholds = ThWCompute.GetMaxHouseholds(Households, sysIn.FlushFaucet);
+            MaxHouseholds = 0;//ThWCompute.GetMaxHouseholds(Households, sysIn.FlushFaucet);
             FloorCleanToolList = ThWCompute.CountCleanToolNums(sysIn, Households);
-            MaxHouseholdNums = Tool.GetMaxHouseholdNums(sysIn, FloorCleanToolList);
+            MaxHouseholdNums = 0;//Tool.GetMaxHouseholdNums(sysIn, FloorCleanToolList);
         }
 
 

@@ -7,6 +7,7 @@ using GeometryExtensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -204,6 +205,11 @@ namespace TianHua.Hvac.UI.UI
         {
             e.Cancel = true;
             this.Hide();
+        }
+
+        private void btnHelp_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_5c447825f22d4d27b7869967d2ceb6d4.html");
         }
     }
 }

@@ -112,7 +112,7 @@
         public static string DisconnectionLayerName = "W-RAIN-EQPM";
         public static string DisconnectionBlockName = "断线";
         public static string RainwaterInletLayerName = "W-RAIN-EQPM";
-        public static string RainwaterInletBlockName = "13#雨水口";
+        public static string RainwaterInletBlockName = "13雨水口";
         public static string SealedWellLayerName = "W-RAIN-EQPM";
         public static string SealedWellBlockName = "水封井";
         //管径标注

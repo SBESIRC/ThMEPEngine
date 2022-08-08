@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public string PipeNumber { get; set; }//标注
         public string PipeNumber2 { get; set; }//标注
         public int Type { get; set; }//1 消火栓; 2 立管; 3 无立管; 4 水泵接合器 ; 5 跨层点; 
+        public double TextWidth { get; set; }//文字标注线长度
+        public double PipeWidth { get; set; }//管线长度
         private double Tolerance { get; set; }//容差
         public TermPoint(Point3dEx ptEx)
         {
             PtEx = ptEx;
             Tolerance = 100;
             PipeNumber = "";
+            TextWidth = 1300 + 100;
+            PipeWidth = 1300 + 300;
         }
 
         public void SetLines(FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine)
@@ -64,7 +69,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             foreach(var adj in adjs)
             {
                 var l = adj as Line;
-                if(l.IsHorizontalLine())
+                if(l.IsTextLine())
                 {
                     TextLine = l;
                     return;
@@ -76,6 +81,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         {
             string str = ExtractText(spatialIndex);
             PipeNumber = str;
+            if(PipeNumber.Length>4)
+            {
+                var dbText = ThTextSet.ThText(new Point3d(), PipeNumber);
+                double textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
+                if(textWidth > 1300)
+                {
+                    TextWidth = textWidth + 100;
+                    PipeWidth = textWidth + 300;
+                }
+            }
             var str2 = ExtractText(spatialIndex);
             PipeNumber2 = str2;
             if (PipeNumber2 is null)

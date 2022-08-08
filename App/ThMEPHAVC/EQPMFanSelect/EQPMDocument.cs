@@ -18,9 +18,10 @@ namespace ThMEPHVAC.EQPMFanSelect
             using (var acdb = AcadDatabase.Active())
             {
                 // 获取原模型对象
-                foreach (var item in allBlocks)
+                foreach (ObjectId item in allBlocks)
                 {
-                    var pModel = FanDataModelExtension.ReadBlockAllFanData(item, out FanDataModel cModel, out bool isCopy);
+                    var fanBlock = acdb.Element<BlockReference>(item);
+                    var pModel = FanDataModelExtension.ReadBlockAllFanData(fanBlock, out FanDataModel cModel, out bool isCopy);
                     if (null == pModel || !isCopy)
                         continue;
                     pModel.ID = Guid.NewGuid().ToString();
@@ -30,7 +31,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                         cModel.PID = pModel.ID;
                     }
                     int.TryParse(pModel.InstallFloor, out int number);
-                    item.Id.SetModelIdentifier(pModel.XDataValueList(number, cModel, item.Id.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
+                    item.SetModelIdentifier(pModel.XDataValueList(number, cModel, item.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
                 }
             }
         }
@@ -43,7 +44,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             
             return DocumentFanToFanModels(allBlocks);
         }
-        public List<FanDataModel> DocumentFanToFanModels(List<BlockReference> targetBlocks)
+        public List<FanDataModel> DocumentFanToFanModels(ObjectIdCollection targetBlocks)
         {
             VentSNCalculator ventSN = new VentSNCalculator();
             var allFanModels = new List<FanDataModel>();
@@ -52,9 +53,10 @@ namespace ThMEPHVAC.EQPMFanSelect
             using (var acdb = AcadDatabase.Active())
             {
                 // 获取原模型对象
-                foreach (var item in targetBlocks)
+                foreach (ObjectId item in targetBlocks)
                 {
-                    var pModel = FanDataModelExtension.ReadBlockAllFanData(item, out FanDataModel cModel, out bool isCopy);
+                    var fanBlock = acdb.Element<BlockReference>(item);
+                    var pModel = FanDataModelExtension.ReadBlockAllFanData(fanBlock, out FanDataModel cModel, out bool isCopy);
                     if (null == pModel)
                         continue;
                     bool haveChildFan = cModel != null;
@@ -93,7 +95,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             mergerFanModels.AddRange(allChilds);
             return mergerFanModels;
         }
-        public List<BlockReference> GetDocumentAllFanBlocks(Polyline selectArea)
+        private ObjectIdCollection GetDocumentAllFanBlocks(Polyline selectArea)
         {
             using (var acdb = AcadDatabase.Active())
             {
@@ -103,8 +105,14 @@ namespace ThMEPHVAC.EQPMFanSelect
                     .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(ThHvacCommon.RegAppName_FanSelectionEx))
                     .ToList();
+                if (models.Count == 0)
+                {
+                    return new ObjectIdCollection();
+                }
                 if (null == selectArea)
-                    return models;
+                {
+                    return new ObjectIdCollection(models.Select(o => o.ObjectId).ToArray());
+                }
                 var retBlocks = new List<BlockReference>();
                 foreach (var item in models) 
                 {
@@ -113,10 +121,17 @@ namespace ThMEPHVAC.EQPMFanSelect
                     if (selectArea.Contains(pt))
                         retBlocks.Add(item);
                 }
-                return retBlocks;
+                if (retBlocks.Count == 0)
+                {
+                    return new ObjectIdCollection();
+                }
+                else
+                {
+                    return new ObjectIdCollection(retBlocks.Select(o => o.ObjectId).ToArray());
+                }
             }
         }
-        public List<BlockReference> GetDocumentFanBlocks(FanDataModel dataModel)
+        public ObjectIdCollection GetDocumentFanBlocks(FanDataModel dataModel)
         {
             using (var acdb = AcadDatabase.Active())
             {
@@ -127,7 +142,14 @@ namespace ThMEPHVAC.EQPMFanSelect
                     .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(identifier, ThHvacCommon.RegAppName_FanSelectionEx))
                     .ToList();
-                return models;
+                if (models.Count == 0)
+                {
+                    return new ObjectIdCollection();
+                }
+                else
+                {
+                    return new ObjectIdCollection(models.Select(m => m.ObjectId).ToArray());
+                }
             }
         }
     }

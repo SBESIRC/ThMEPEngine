@@ -154,7 +154,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 dis2 = dis2 < dis4 ? dis2 : dis4;
                 List<Point3d> pts = new();
                 verticalPipes.ForEach(o => pts.Add(o.Circle.Center));
-                submergedPumps.ForEach(o => pts.Add(o.Extents.CenterPoint()));
+                submergedPumps.ForEach(o => pts.Add(o.Extents.Centroid()));
                 List<Point3d> ptsEnd = new();
                 List<Point3d> ptstest = new ();
                 ptsEnd.Add(pt1);
@@ -308,111 +308,112 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         
         /// <summary>
         /// 连接认为是一条直线的存在间距的两条直线
+        /// 暂时弃用
         /// </summary>
         /// <param name="lines"></param>
         /// <param name="hinderpts"></param>
         /// <returns></returns>
-        public static List<Line> ConnectBrokenLine(List<Line> lines, List<Point3d> hinderpts)
-        {
-            List<Line> connectedLines = new List<Line>();
-            List<Line> emilinatedSelfLines = new List<Line>();
-            lines.ForEach(o => emilinatedSelfLines.Add(o));
-            double tolHinderpts = 300;
-            double tolOriHinder = 300;
-            double tolBrokenLine = 2000;
-            double toldegree = 3;
-            List<Polyline> plylist = new List<Polyline>();
-            hinderpts.ForEach(o => plylist.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
-            DBObjectCollection dbObjsOriStart = new DBObjectCollection();
-            plylist.ForEach(o => dbObjsOriStart.Add(o));
-            for (int i = 0; i < lines.Count; i++)
-            {
-                emilinatedSelfLines.RemoveAt(i);
-                Point3d ptStart = lines[i].StartPoint;
-                Point3d ptEnd = lines[i].EndPoint;
-                Vector3d SelfLine = new Vector3d(ptEnd.X - ptStart.X, ptEnd.Y - ptStart.Y, 0);
-                if (GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0)
-                {
-                    for (int j = 0; j < emilinatedSelfLines.Count; j++)
-                    {
-                        Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
-                        Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
-                        Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
-                        if (ptStart.DistanceTo(ptmp1) < tolBrokenLine)
-                        {
-                            Vector3d vector = new Vector3d(ptStart.X - ptmp1.X, ptStart.Y - ptmp1.Y, 0);
-                            double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
-                            double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
-                            bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
-                            bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
-                            if (bool1 && bool2)
-                            {
-                                Line line = new Line(ptStart, ptmp1);
-                                connectedLines.Add(line);
-                                emilinatedSelfLines.Insert(i, lines[i]);
-                                break;
-                            }
-                        }
-                        else if (ptStart.DistanceTo(ptmp2) < tolBrokenLine)
-                        {
-                            Vector3d vector = new Vector3d(ptStart.X - ptmp2.X, ptStart.Y - ptmp2.Y, 0);
-                            double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
-                            double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
-                            bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
-                            bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
-                            if (bool1 && bool2)
-                            {
-                                Line line = new Line(ptStart, ptmp2);
-                                connectedLines.Add(line);
-                                emilinatedSelfLines.Insert(i, lines[i]);
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0)
-                {
-                    for (int j = 0; j < emilinatedSelfLines.Count; j++)
-                    {
-                        Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
-                        Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
-                        Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
-                        if (ptEnd.DistanceTo(ptmp1) < tolBrokenLine)
-                        {
-                            Vector3d vector = new Vector3d(ptEnd.X - ptmp1.X, ptEnd.Y - ptmp1.Y, 0);
-                            double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
-                            double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
-                            bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
-                            bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
-                            if (bool1 && bool2)
-                            {
-                                Line line = new Line(ptEnd, ptmp1);
-                                connectedLines.Add(line);
-                                emilinatedSelfLines.Insert(i, lines[i]);
-                                break;
-                            }
-                        }
-                        else if (ptEnd.DistanceTo(ptmp2) < tolBrokenLine)
-                        {
-                            Vector3d vector = new Vector3d(ptEnd.X - ptmp2.X, ptEnd.Y - ptmp2.Y, 0);
-                            double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
-                            double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
-                            bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
-                            bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
-                            if (bool1 && bool2)
-                            {
-                                Line line = new Line(ptEnd, ptmp2);
-                                connectedLines.Add(line);
-                                emilinatedSelfLines.Insert(i, lines[i]);
-                                break;
-                            }
-                        }
-                    }
-                }
-                emilinatedSelfLines.Insert(i, lines[i]);
-            }
-            return connectedLines;
-        }
+        //public static List<Line> ConnectBrokenLine(List<Line> lines, List<Point3d> hinderpts)
+        //{
+        //    List<Line> connectedLines = new List<Line>();
+        //    List<Line> emilinatedSelfLines = new List<Line>();
+        //    lines.ForEach(o => emilinatedSelfLines.Add(o));
+        //    double tolHinderpts = 300;
+        //    double tolOriHinder = 300;
+        //    double tolBrokenLine = 2000;
+        //    double toldegree = 3;
+        //    List<Polyline> plylist = new List<Polyline>();
+        //    hinderpts.ForEach(o => plylist.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
+        //    DBObjectCollection dbObjsOriStart = new DBObjectCollection();
+        //    plylist.ForEach(o => dbObjsOriStart.Add(o));
+        //    for (int i = 0; i < lines.Count; i++)
+        //    {
+        //        emilinatedSelfLines.RemoveAt(i);
+        //        Point3d ptStart = lines[i].StartPoint;
+        //        Point3d ptEnd = lines[i].EndPoint;
+        //        Vector3d SelfLine = new Vector3d(ptEnd.X - ptStart.X, ptEnd.Y - ptStart.Y, 0);
+        //        if (GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0)
+        //        {
+        //            for (int j = 0; j < emilinatedSelfLines.Count; j++)
+        //            {
+        //                Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
+        //                Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
+        //                Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
+        //                if (ptStart.DistanceTo(ptmp1) < tolBrokenLine)
+        //                {
+        //                    Vector3d vector = new Vector3d(ptStart.X - ptmp1.X, ptStart.Y - ptmp1.Y, 0);
+        //                    double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+        //                    double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+        //                    bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+        //                    bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+        //                    if (bool1 && bool2)
+        //                    {
+        //                        Line line = new Line(ptStart, ptmp1);
+        //                        connectedLines.Add(line);
+        //                        emilinatedSelfLines.Insert(i, lines[i]);
+        //                        break;
+        //                    }
+        //                }
+        //                else if (ptStart.DistanceTo(ptmp2) < tolBrokenLine)
+        //                {
+        //                    Vector3d vector = new Vector3d(ptStart.X - ptmp2.X, ptStart.Y - ptmp2.Y, 0);
+        //                    double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+        //                    double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+        //                    bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+        //                    bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+        //                    if (bool1 && bool2)
+        //                    {
+        //                        Line line = new Line(ptStart, ptmp2);
+        //                        connectedLines.Add(line);
+        //                        emilinatedSelfLines.Insert(i, lines[i]);
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0)
+        //        {
+        //            for (int j = 0; j < emilinatedSelfLines.Count; j++)
+        //            {
+        //                Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
+        //                Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
+        //                Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
+        //                if (ptEnd.DistanceTo(ptmp1) < tolBrokenLine)
+        //                {
+        //                    Vector3d vector = new Vector3d(ptEnd.X - ptmp1.X, ptEnd.Y - ptmp1.Y, 0);
+        //                    double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+        //                    double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+        //                    bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+        //                    bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+        //                    if (bool1 && bool2)
+        //                    {
+        //                        Line line = new Line(ptEnd, ptmp1);
+        //                        connectedLines.Add(line);
+        //                        emilinatedSelfLines.Insert(i, lines[i]);
+        //                        break;
+        //                    }
+        //                }
+        //                else if (ptEnd.DistanceTo(ptmp2) < tolBrokenLine)
+        //                {
+        //                    Vector3d vector = new Vector3d(ptEnd.X - ptmp2.X, ptEnd.Y - ptmp2.Y, 0);
+        //                    double degree1 = Math.Abs(SelfLine.GetAngleTo(TestLine).AngleToDegree());
+        //                    double degree2 = Math.Abs(SelfLine.GetAngleTo(vector).AngleToDegree());
+        //                    bool bool1 = degree1 < toldegree || (degree1 > 180 - toldegree && degree1 < 180 + toldegree);
+        //                    bool bool2 = degree2 < toldegree || (degree2 > 180 - toldegree && degree2 < 180 + toldegree);
+        //                    if (bool1 && bool2)
+        //                    {
+        //                        Line line = new Line(ptEnd, ptmp2);
+        //                        connectedLines.Add(line);
+        //                        emilinatedSelfLines.Insert(i, lines[i]);
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        emilinatedSelfLines.Insert(i, lines[i]);
+        //    }
+        //    return connectedLines;
+        //}
        
         /// <summary>
         /// 判断泛型是否为天正元素
@@ -616,7 +617,17 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             }
             return diameter;
         }
-       
+        public static Polyline CreatePolyFromPoints(Point3d[] points, bool closed = true)
+        {
+            Polyline p = new Polyline();
+            for (int i = 0; i < points.Length; i++)
+            {
+                p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
+            }
+            p.Closed = closed;
+            return p;
+        }
+
         /// <summary>
         /// 计算每个立管在使用中的潜水泵数量
         /// </summary>
@@ -889,10 +900,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         }
         private static void TraverseConnectedLinesWithHinderpts(
     ref List<Line> emilinatedSelfLines, Point3d point, double tolBrokenLine, Vector3d SelfLine,
-    ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines)
+    ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines,Line testLine)
         {
             for (int j = 0; j < emilinatedSelfLines.Count; j++)
             {
+                if (!emilinatedSelfLines[j].Layer.Equals(testLine.Layer)) continue;
                 Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
                 Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
                 Vector3d TestLine = new Vector3d(ptmp2.X - ptmp1.X, ptmp2.Y - ptmp1.Y, 0);
@@ -930,10 +942,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         }
         private static void TraverseConnectedLinesWithJoinedPoints(
          ref List<Line> emilinatedSelfLines, Point3d point, double tolBrokenLine, Vector3d SelfLine,
-         ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines, List<Polyline> crossedplys)
+         ref List<Line> lines, int i, double toldegree, ref List<Line> connectedLines, List<Polyline> crossedplys, Line testLine)
         {
             for (int j = 0; j < emilinatedSelfLines.Count; j++)
             {
+                if (!emilinatedSelfLines[j].Layer.Equals(testLine.Layer)) continue;
                 Point3d ptmp1 = emilinatedSelfLines[j].StartPoint;
                 Point3d ptmp2 = emilinatedSelfLines[j].EndPoint;
                 var p = lines[i].GetClosestPointTo(ptmp1, false).DistanceTo(ptmp1) <
@@ -1323,7 +1336,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         /// <param name="lines"></param>
         /// <param name="hinderpts"></param>
         /// <returns></returns>
-        public static List<Line> ConnectBrokenLine(List<Line> lines, List<Point3d> hinderpts, List<Point3d> joinedpts)
+        public static List<Line> ConnectBrokenLine(List<Line> lines, List<Point3d> hinderpts/*, List<Point3d> joinedpts*/)
         {
             List<Line> connectedLines = new List<Line>();
             List<Line> emilinatedSelfLines = new List<Line>();
@@ -1335,7 +1348,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             List<Polyline> plylist = new List<Polyline>();
             List<Polyline> plylist_joined = new List<Polyline>();
             hinderpts.ForEach(o => plylist.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
-            joinedpts.ForEach(o => plylist_joined.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
+            //joinedpts.ForEach(o => plylist_joined.Add(o.CreateRectangle(tolHinderpts, tolHinderpts)));
             DBObjectCollection dbObjsOriStart = plylist.ToCollection();
             DBObjectCollection dbObjsOriJoined = plylist_joined.ToCollection();
             //plylist.ForEach(o => dbObjsOriStart.Add(o));
@@ -1349,27 +1362,27 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                     && ClosestPointInVertLines(ptStart, lines[i], lines) > 1)
                 {
                     TraverseConnectedLinesWithHinderpts(ref emilinatedSelfLines, ptStart, tolBrokenLine, SelfLine, ref lines,
-                        i, toldegree, ref connectedLines);
+                        i, toldegree, ref connectedLines,lines[i]);
                 }
                 if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0
                     && ClosestPointInVertLines(ptEnd, lines[i], lines) > 1)
                 {
                     TraverseConnectedLinesWithHinderpts(ref emilinatedSelfLines, ptEnd, tolBrokenLine, SelfLine, ref lines,
-                        i, toldegree, ref connectedLines);
+                        i, toldegree, ref connectedLines,lines[i]);
                 }
                 var crossedStart = GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriJoined).Cast<Polyline>().ToList();
                 if (crossedStart.Count > 0
                     && ClosestPointInVertLines(ptStart, lines[i], lines) > 1)
                 {
                     TraverseConnectedLinesWithJoinedPoints(ref emilinatedSelfLines, ptStart, tolBrokenLine, SelfLine, ref lines,
-                        i, toldegree, ref connectedLines, crossedStart);
+                        i, toldegree, ref connectedLines, crossedStart,lines[i]);
                 }
                 var crossedEnd = GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriJoined).Cast<Polyline>().ToList();
                 if (crossedEnd.Count > 0
                     && ClosestPointInVertLines(ptEnd, lines[i], lines) > 1)
                 {
                     TraverseConnectedLinesWithJoinedPoints(ref emilinatedSelfLines, ptEnd, tolBrokenLine, SelfLine, ref lines,
-                        i, toldegree, ref connectedLines, crossedEnd);
+                        i, toldegree, ref connectedLines, crossedEnd, lines[i]);
                 }
                 emilinatedSelfLines.Insert(i, lines[i]);
             }

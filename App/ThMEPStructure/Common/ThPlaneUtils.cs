@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace ThMEPStructure.Common
 {
-    internal static class ThPlaneUtils
+    public static class ThPlaneUtils
     {
         public static string GetFloorRange(this double flrBottomEle,List<ThFloorInfo> FloorInfos)
         {

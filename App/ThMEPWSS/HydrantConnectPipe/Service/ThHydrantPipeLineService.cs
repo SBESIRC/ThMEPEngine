@@ -159,7 +159,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
                 PipeLine.AddPipeLine(dbObjs, fireHydrantSysIn, pointList, lineList);
 
-                PipeLineList.PipeLineAutoConnect(lineList);
+                PipeLineList.PipeLineAutoConnect(ref lineList);
+                
                 var tmpLines = ThHydrantConnectPipeUtils.FindInlineLines(startPt, ref lineList, 10);
                 pointList.Clear();
                 var starPts = tmpLines.Select(l=> new Point3dEx(l.StartPoint)).ToList();

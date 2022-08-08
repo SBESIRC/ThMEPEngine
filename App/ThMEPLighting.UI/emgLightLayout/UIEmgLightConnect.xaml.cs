@@ -101,6 +101,11 @@ namespace ThMEPLighting.UI.emgLightLayout
             Active.Document.Window.Focus();
 #endif
         }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/9c0675925da740d8a5f4b386a980bff1.html");
+        }
     }
 
 }

@@ -142,5 +142,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             SetHighlevelNozzleAndSemiPlatformNozzleUI.ShowModelSingletonWindow();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/2eb785b6665a4b1cae1e32ccb923fcde.html");
+        }
     }
 }

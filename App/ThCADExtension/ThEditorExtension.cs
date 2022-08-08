@@ -1,6 +1,7 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
+using System.Linq;
 using System.Windows;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
@@ -52,18 +53,13 @@ namespace ThCADExtension
             return ed.SelectCrossingPolygon(points);
         }
 
-        public static void ZoomWindow(this Editor ed, Extents3d ext)
+        public static void ZoomToObjects(this Editor ed, ObjectIdCollection objIds, double scale)
         {
-            ext.TransformBy(ed.WCS2UCS());
-            COMTool.ZoomWindow(ext.MinPoint, ext.MaxPoint);
-        }
-
-        public static void ZoomToObject(this Editor ed, ObjectId entId)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(entId.Database))
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var obj = acadDatabase.Element<Entity>(entId);
-                ed.ZoomToObjects(new Entity[] { obj }, 1.0);
+                var entities = objIds.OfType<ObjectId>()
+                    .Select(o => acadDatabase.ElementOrDefault<Entity>(o));
+                ed.ZoomToObjects(entities.Where(o => o != null).ToArray(), scale);
             }
         }
 

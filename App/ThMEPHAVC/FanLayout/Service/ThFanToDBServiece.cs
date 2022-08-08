@@ -44,36 +44,38 @@ namespace ThMEPHVAC.FanLayout.Service
             using (AcadDatabase tmpDataBase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(blkId);
-                if (data.CustomProperties.Contains("风口类型"))
+                var properties = data.CustomProperties;
+                if (properties.Contains("风口类型"))
                 {
-                    data.CustomProperties.SetValue("风口类型", airPort.AirPortType);
+                    properties.SetValue("风口类型", airPort.AirPortType);
                 }
             }
             using (AcadDatabase tmpDataBase = AcadDatabase.Active())
             {
                 var data = new ThBlockReferenceData(blkId);
-                if (data.CustomProperties.Contains("风口长度"))
+                var properties = data.CustomProperties;
+                if (properties.Contains("风口长度"))
                 {
-                    data.CustomProperties.SetValue("风口长度", airPort.AirPortLength);
+                    properties.SetValue("风口长度", airPort.AirPortLength);
                 }
-                if (data.CustomProperties.Contains("气流方向"))
+                if (properties.Contains("气流方向"))
                 {
-                    data.CustomProperties.SetValue("气流方向", airPort.AirPortDirection);
+                    properties.SetValue("气流方向", airPort.AirPortDirection);
                 }
-                if (data.CustomProperties.Contains("风口类型"))
+                if (properties.Contains("风口类型"))
                 {
-                    if ((string)data.CustomProperties.GetValue("风口类型") == "外墙防雨百叶")
+                    if ((string)properties.GetValue("风口类型") == "外墙防雨百叶")
                     {
-                        if (data.CustomProperties.Contains("外墙防雨百叶深度"))
+                        if (properties.Contains("外墙防雨百叶深度"))
                         {
-                            data.CustomProperties.SetValue("外墙防雨百叶深度", airPort.AirPortDepth);
+                            properties.SetValue("外墙防雨百叶深度", airPort.AirPortDepth);
                         }
                     }
                     else
                     {
-                        if (data.CustomProperties.Contains("侧风口深度"))
+                        if (properties.Contains("侧风口深度"))
                         {
-                            data.CustomProperties.SetValue("侧风口深度", airPort.AirPortDepth);
+                            properties.SetValue("侧风口深度", airPort.AirPortDepth);
                         }
                     }
                 }
@@ -336,9 +338,10 @@ namespace ThMEPHVAC.FanLayout.Service
                 Dictionary<string, string> attNameValues = new Dictionary<string, string>();
                 var blkId = InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, scale, angle, attNameValues);
                 var data = new ThBlockReferenceData(blkId);
-                if (data.CustomProperties.Contains("可见性"))
+                var properties = data.CustomProperties;
+                if (properties.Contains("可见性"))
                 {
-                    data.CustomProperties.SetValue("可见性", strType);
+                    properties.SetValue("可见性", strType);
                 }
             }
         }

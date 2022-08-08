@@ -18,6 +18,8 @@ namespace ThMEPIFC.Ifc2x3
                 foreach (var thtchstorey in project.Site.Building.Storeys)
                 {
                     var walls = new List<IfcWall>();
+                    var columns = new List<IfcColumn>();
+                    var beams = new List<IfcBeam>();
                     var slabs = new List<IfcSlab>();
                     var doors = new List<IfcDoor>();
                     var windows = new List<IfcWindow>();
@@ -43,6 +45,16 @@ namespace ThMEPIFC.Ifc2x3
                             var hole = ThTGL2IFC2x3Factory.CreateHole(Model, thtchhole, wall, thtchwall, floor_origin);
                         }
                     }
+                    foreach (var thtchcolumn in thtchstorey.Columns)
+                    {
+                        var column = ThTGL2IFC2x3Factory.CreateColumn(Model, thtchcolumn, floor_origin);
+                        columns.Add(column);
+                    }
+                    foreach (var thtchbeam in thtchstorey.Beams)
+                    {
+                        var beam = ThTGL2IFC2x3Factory.CreateBeam(Model, thtchbeam, floor_origin);
+                        beams.Add(beam);
+                    }
                     foreach (var thtchslab in thtchstorey.Slabs)
                     {
                         var slab = ThTGL2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin);
@@ -56,6 +68,8 @@ namespace ThMEPIFC.Ifc2x3
                     }
                     ThTGL2IFC2x3Factory.relContainSlabs2Storey(Model, slabs, storey);
                     ThTGL2IFC2x3Factory.relContainWalls2Storey(Model, walls, storey);
+                    ThTGL2IFC2x3Factory.relContainColumns2Storey(Model, columns, storey);
+                    ThTGL2IFC2x3Factory.relContainBeams2Storey(Model, beams, storey);
                     ThTGL2IFC2x3Factory.relContainDoors2Storey(Model, doors, storey);
                     ThTGL2IFC2x3Factory.relContainWindows2Storey(Model, windows, storey);
                     ThTGL2IFC2x3Factory.relContainsRailings2Storey(Model, railings, storey);

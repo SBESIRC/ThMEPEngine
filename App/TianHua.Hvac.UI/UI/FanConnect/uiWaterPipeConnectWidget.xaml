@@ -8,7 +8,7 @@
              xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
              mc:Ignorable="d" 
              Closing="ThCustomWindow_Closing"
-             Title="水管连接" Width="415.198" Height="394.892">
+             Title="水管连接" Width="415.198" Height="430" >
     <Window.Resources>
         <ResourceDictionary>
             <local1:FanLayoutIntToBool x:Key="layoutTypeConverter"/>
@@ -19,7 +19,7 @@
             </x:Array>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Height="382" VerticalAlignment="Top" Margin="0,0,0,-2">
+    <Grid Height="412" VerticalAlignment="Top" Margin="0,0,0,-2">
         <GroupBox x:Name="groupBox" Header="系统配置" HorizontalAlignment="Left" Height="360" VerticalAlignment="Top" Width="200">
             <Grid>
                 <Grid.RowDefinitions>
@@ -169,5 +169,7 @@
         <Button x:Name="btnConnectPipe" Content="生成水管路由" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,275,0,0" Height="25" Click="btnConnectPipe_Click"/>
         <Button x:Name="btnGeneraSPM" Content="生成水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,305,0,0" Height="25" Click="btnGeneraSPM_Click"/>
         <Button x:Name="btnUpdateSPM" Content="更新水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,335,0,0" Height="25" Click="btnUpdateSPM_Click"/>
+        <Button x:Name="btnHelpSPM" Content="视频教程" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,365,0,0" Height="25" Click="btnHelpSPM_Click"/>
+
     </Grid>
 </cus:ThCustomWindow>

@@ -24,6 +24,8 @@ namespace ThMEPTCH.Model
         public ThTCHBuildingStorey()
         {
             Walls = new List<ThTCHWall>();
+            Columns = new List<ThTCHColumn>();
+            Beams = new List<ThTCHBeam>();
             Doors = new List<ThTCHDoor>();
             Slabs = new List<ThTCHSlab>();
             Windows = new List<ThTCHWindow>();
@@ -40,5 +42,9 @@ namespace ThMEPTCH.Model
         public List<ThTCHSlab> Slabs { get; set; }
         [ProtoMember(35)]
         public List<ThTCHRailing> Railings { get; set; }
+        [ProtoMember(36)]
+        public List<ThTCHColumn> Columns { get; set; }
+        [ProtoMember(37)]
+        public List<ThTCHBeam> Beams { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
@@ -68,7 +69,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 }
             }
 
-            var nextDeepRooms = allRoomDic.Where(x => roomDeepDic.Any(y => x.Value.Contains(y.Key))).ToDictionary(x => x.Key, y => y.Value);
+            var nextDeepRooms = allRoomDic.Where(x => roomDeepDic.Any(y => x.Value.Any(z=> { 
+                var bufferPoly1 = z.Key.Buffer(5)[0] as Polyline; 
+                var bufferPoly2 = y.Key.Key.Buffer(5)[0] as Polyline;
+                return z.Equals(y.Key) && !bufferPoly1.IsIntersects(bufferPoly2);
+            })))
+                .ToDictionary(x => x.Key, y => y.Value);
             if (nextDeepRooms.Count > 0)
             {
                 var getNextDeepRooms = GetRoomDeep(nextDeepRooms, allRoomDic, ++deep);

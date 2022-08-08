@@ -81,5 +81,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
             cmd.InfoModel = InfoModel;
             cmd.Execute();
         }
+
+        private void btn_Help_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var web = "http://thlearning.thape.com.cn/kng/view/video/d4676fb948e3432fa46ec5677b2123b4.html";
+                System.Diagnostics.Process.Start(web);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
+            }
+        }
     }
 }

@@ -1,213 +1,100 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using ThCADCore.NTS;
-using ThMEPEngineCore;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.CADExtensionsNs;
-using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
     public class ThExtractLabelText//文字提取
     {
-        public List<Entity> Results { get; private set; }
-        public DBObjectCollection DBObjs { get; private set; }
-        public DBObjectCollection Extract(Database database, Point3dCollection polygon, ref double textWidth, ref string textModel)
+        public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                Results = acadDatabase
+                var results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
+                   .Where(o => IsTargetType(o));
 
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection());
+                var dBObjs = spatialIndex.SelectCrossingPolygon(polygon);
                 var dbTextCollection = new DBObjectCollection();
 
-                var bkrCollection = new DBObjectCollection();//筛选BlockRefrence
-                DBObjs.Cast<Entity>()
-                    .Where(o => o is Entity)
-                    .ForEach(o => bkrCollection.Add(o));
-                foreach (var bkr in bkrCollection)
+                foreach (var obj in dBObjs)
                 {
-                    try
+                    if (obj is Entity ent)
                     {
-                        if (bkr is Entity ent)
+                        try
                         {
-                            ExplodeText(ent, dbTextCollection, ref textWidth, ref textModel);
+                            if (ent.IsTCHMULTILEADER())//引出标注
+                            {
+                                ent.AddText(database, dbTextCollection);
+                            }
+                            else if(ent.IsTCHText())//天正文字
+                            {
+                                ent.AddTchText(database, dbTextCollection);
+                            }
+                            else
+                            {
+                                dbTextCollection.Add(ent);
+                            }
+                            ;
                         }
+                        catch { }
                     }
-                    catch
-                    {
-                        ;
-                    }
-                    
                 }
                 return dbTextCollection;
             }
         }
 
-        private bool IsHYDTPipeLayer(string layer)
+        private bool IsTargetType(Entity ent)
         {
-            return layer.ToUpper() == "W-RAIN-DIMS" ||
-                   layer.ToUpper() == "W-FRPT-HYDT-DIMS" ||
-                   layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
-                   layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
-                   layer.ToUpper() == "W-WSUP-DIMS" ||
-                   layer.ToUpper() == "W-DRAI-DIMS" ||
-                   layer.ToUpper() == "W-FRPT-NOTE" ||
-                   layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
-                   layer.ToUpper() == "W-RAIN-NOTE"||
-                   layer.ToUpper() == "W-NOTE" ||
-                   layer.ToUpper() == "W-SHET-PROF" ||
-                   layer.ToUpper() == "TWT_TEXT";
+            return ent is DBText || ent.IsTCHMULTILEADER() || ent.IsTCHText();
         }
 
-
-        /// <summary>
-        /// 判断字符串中是否包含中文
-        /// </summary>
-        /// <param name="str">需要判断的字符串</param>
-        /// <returns>判断结果</returns>
-        public bool HasChinese(string str)
+        private void ExplodeText(Entity ent, DBObjectCollection dBObjects)
         {
-            return Regex.IsMatch(str, @"[\u4e00-\u9fa5]");
-        }
-
-        //特别耗时
-        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
-        {
-            if (ent is BlockReference br)
-            {
-                try
-                {
-                    if (br.Name.Contains("SDRFSETEW"))
-                    {
-                        var objs = new DBObjectCollection();
-                        br.Explode(objs);
-                        foreach (var obj in objs)
-                        {
-                            if (obj.GetType().Name.Contains("ImpEntity"))
-                            {
-                                var objs1 = new DBObjectCollection();
-                                (obj as Entity).Explode(objs1);
-                                objs1.Cast<Entity>()
-                                    .Where(e => e.IsTCHText())
-                                    .ForEach(e => dBObjects.Add(e.ExplodeTCHText()[0]));
-                                objs1.Cast<Entity>()
-                                    .Where(e => e is DBText)
-                                    .ForEach(e => dBObjects.Add(e));
-                            }
-                        }
-                        return;
-                    }
-                }
-                catch
-                {
-                }
-            }
             if (ent is DBText dbText)//DBText直接添加
             {
                 var str = dbText.TextString;
-                if (str.Contains("De") || str.Contains("DN"))
-                {
-                    return;
-                }
-                if(HasChinese(str))
-                {
-                    return;
-                }
-                var tWidth = Math.Abs(ent.GeometricExtents.MaxPoint.X - ent.GeometricExtents.MinPoint.X);
-                if (tWidth > textWidth && str.Contains("X") && !(str.Contains("/")))
-                {
-                    textWidth = tWidth;
-                    textModel = str;
-                }
-
+                if (str.Contains("DN")) return;
                 dBObjects.Add(ent);
-                
                 return;
             }
-            if (ent is AlignedDimension || 
-                ent is Arc || 
-                ent is Line || 
-                ent is Circle || 
-                ent is Polyline || 
-                ent is DBPoint ||
-                ent is Hatch)//炸成线就退出
+            if (ent.IsTCHElement())//天正单行文字,先炸后添加
             {
-                return;
-            }
-            if (ent.IsTCHText())//天正单行文字,先炸后添加
-            {
-                var texts = ent.ExplodeTCHText();
+                var texts = new DBObjectCollection();//ent.ExplodeTCHText();
+                ent.Explode(texts);
                 var str = "";
                 var insertPt = new Point3d();//文字插入点
-                foreach(var text in texts)
+                foreach (var text in texts)
                 {
-                    if(text is DBText db)
+                    if (text is DBText db)
                     {
                         str += db.TextString;
-                        if(insertPt.Equals(new Point3d()))
+                        if (insertPt.Equals(new Point3d()))
                         {
                             insertPt = new Point3d(db.Position.X, db.Position.Y, 0);
                         }
                     }
+                    if ((text as Entity).IsTCHText())
+                    {
+                        ExplodeText(text as Entity, dBObjects);
+                    }
                 }
-                if (str.Contains("De") || str.Contains("DN"))
-                {
-                    return;
-                }
-                if (HasChinese(str))
-                {
-                    //return;
-                }
+                if (str.Contains("DN") || str.Equals("")) return;
+
                 var dBText = CreateText(insertPt, str);//创建成标准文字
-                var tWidth = Math.Abs(dBText.GeometricExtents.MaxPoint.X - dBText.GeometricExtents.MinPoint.X);
-                if (tWidth > textWidth && str.Trim().Contains("X") && (!str.Trim().Contains("/")))
-                {
-                    textWidth = tWidth;
-                    textModel = dBText.TextString;
-                }
                 dBObjects.Add(dBText);
+                ThMEPWSS.UndergroundSpraySystem.Method.Draw.Rect(insertPt.GetRect(), "文字test");
                 return;
-            }
-            if(ent.GetType().Name.Contains("ImpEntity"))
-            {
-                var dbObjs = new DBObjectCollection();
-                ent.Explode(dbObjs);
-                if (dbObjs.Count > 1)
-                    ;
-                foreach(var db  in dbObjs)
-                {
-                    if(db is Entity ent1)
-                    {
-                        ExplodeText(ent1, dBObjects, ref textWidth, ref textModel);
-                    }
-                }    
-            }
-            try
-            {
-                var dbObjs = new DBObjectCollection();
-                ent.Explode(dbObjs);
-                foreach (var obj in dbObjs)
-                {
-                    if (obj is Entity ent1)
-                    {
-                        ExplodeText(ent1, dBObjects, ref textWidth, ref textModel);
-                    }
-                }
-            }
-            catch
-            {
             }
         }
 
@@ -227,5 +114,88 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 ColorIndex = (int)ColorIndex.BYLAYER
             };
         }
+
     }
+
+
+    public static class TCHDeal
+    {
+        /// <summary>
+        /// 处理引出标注
+        /// </summary>
+        public static void AddText(this Entity ent, Database database, DBObjectCollection dbTextCollection)
+        {
+            var objID = ent.ObjectId;
+            dbTextCollection.Add(LoadTextFromDb(database,objID));
+        }
+
+        /// <summary>
+        /// 处理天正文字
+        /// </summary>
+        public static void AddTchText(this Entity ent, Database database, DBObjectCollection dbTextCollection)
+        {
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                dynamic acadObject = ent.AcadObject;
+                var text = acadObject;
+                //return CreateText(pts.FirstOrDefault(), text);
+            }
+        }
+
+        public static DBText LoadTextFromDb(Database database, ObjectId tch)
+        {
+            var dxfData = GetDXFData(tch);
+            var pts = new List<Point3d>();
+            foreach (TypedValue tv in dxfData.AsArray())
+            {
+                switch ((DxfCode)tv.TypeCode)
+                {
+                    case (DxfCode)11:
+                        {
+                            var pt = (Point3d)tv.Value;
+                            pts.Add(new Point3d(pt.X,pt.Y,0));
+
+                        }
+                        break;
+                }
+            }
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var ent = acadDatabase.Element<Entity>(tch);
+                dynamic acadObject = ent.AcadObject;
+                var text = acadObject.UpText;
+                return CreateText(pts.FirstOrDefault(),text);
+            }
+                
+
+        }
+        private static ResultBuffer GetDXFData(ObjectId tch)
+        {
+            InvokeTool.ads_name name = new InvokeTool.ads_name();
+            InvokeTool.acdbGetAdsName(ref name, tch);
+
+            ResultBuffer rb = new ResultBuffer();
+            Interop.AttachUnmanagedObject(rb, InvokeTool.acdbEntGet(ref name), true);
+
+            return rb;
+        }
+
+        private static DBText CreateText(Point3d insertPt, string text)
+        {
+            string layer = "W-FRPT-SPRL-DIMS";
+            double rotation = 0;
+            return new DBText
+            {
+                TextString = text,
+                Position = insertPt,
+                LayerId = DbHelper.GetLayerId(layer),
+                Rotation = rotation,
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                Height = 350,
+                WidthFactor = 0.7,
+                ColorIndex = (int)ColorIndex.BYLAYER
+            };
+        }
+    }
+
 }

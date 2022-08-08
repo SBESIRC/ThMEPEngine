@@ -65,7 +65,8 @@ namespace ThMEPWSS.Common
             var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点\n", leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
-                return Tuple.Create(leftDownPt.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), ptRightRes.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()));
+                //return Tuple.Create(leftDownPt.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), ptRightRes.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()));
+                return Tuple.Create(leftDownPt, ptRightRes.Value);
             }
             else
             {

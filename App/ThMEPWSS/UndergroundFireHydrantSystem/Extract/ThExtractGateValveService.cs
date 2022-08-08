@@ -36,10 +36,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     {
                         var dbColl = new DBObjectCollection();
                         (obj as Entity).Explode(dbColl);
-                        dbColl.Cast<Entity>()
-                            .Where(e => e is BlockReference)
-                            .Where(e => IsValve((e as BlockReference).Name))
-                            .ForEach(e => objs.Add(e));
+                        var blk = dbColl[0] as BlockReference;
+                        if(IsValve(blk.Name))
+                        {
+                            objs.Add(blk);
+                        }
+                        //dbColl.Cast<Entity>()
+                        //    .Where(e => e is BlockReference)
+                        //    .Where(e => IsValve((e as BlockReference).Name))
+                        //    .ForEach(e => objs.Add(e));
                     }
                 }
                 return objs;
@@ -56,14 +61,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             var blkName = blockReference.GetEffectiveName().ToUpper();
             return blkName.Contains("截止阀") ||
                    blkName.Contains("闸阀") ||
-                   blkName.Contains("296");
+                   blkName.Contains("296") ||
+                   blkName.Contains("019");
         }
 
         private bool IsValve(string valveName)
         {
             return valveName.Contains("截止阀") ||
                    valveName.Contains("296") ||
-                   valveName.Contains("闸阀");
+                   valveName.Contains("闸阀")||
+                   valveName.Contains("019");
         }
 
         public List<Point3d> GetGateValveSite(DBObjectCollection objs)
@@ -72,10 +79,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             foreach (var db in objs)
             {
                 var br = db as BlockReference;
-                var pt1 = br.GeometricExtents.MaxPoint;
-                var pt2 = br.GeometricExtents.MinPoint;
-                var pt = General.GetMidPt(pt1, pt2);
-                pts.Add(pt);
+                
+                //var pt1 = br.GeometricExtents.MaxPoint;
+                //var pt2 = br.GeometricExtents.MinPoint;
+                //var pt = General.GetMidPt(pt1, pt2);
+                pts.Add(br.Position);
             }
             return pts;
         }
