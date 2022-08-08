@@ -172,6 +172,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public bool IsAdditionPipe = false;
         public int IsBridgePipe = 0;//用于绘图，判断是否为连接立管
         public bool CanUsedToJudgeCrossLayer = true;
+        public bool IsGenerated = false;//是程序生成的立管
     }
     public class HorizontalLabelClass
     {
@@ -180,7 +181,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     }
     public class SubmergedPumpClass
     {
-        public Polyline Extents ;
+        public Polyline Extents;
         public string Serial = "";
         public string Visibility = "";
         public string Location = "普通车库";
@@ -188,10 +189,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public double paraH = 0;
         public double paraN = 0;
         public string Allocation = "";
-        public double Depth=0;
+        public double Depth = 0;
         public int PumpCount = 1;
         public string Length = "x";
         public string Width = "x";
+        public BlockReference Block { get; set; }
     }
     public class PipeLineSystemUnitClass
     {

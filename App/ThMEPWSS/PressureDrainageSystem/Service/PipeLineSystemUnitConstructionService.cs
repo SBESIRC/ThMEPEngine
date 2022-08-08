@@ -545,11 +545,32 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             foreach (var pump in submergedPumps)
             {
                 bool cond_VertPipeFound = false;
+                //系统做个排序，优先找潜水泵与横管对接的系统而非潜水泵穿过横管的系统
+                _totalPipeLineUnitsByLayerByUnit[layer] = _totalPipeLineUnitsByLayerByUnit[layer].OrderBy(e =>
+                 {
+                     var lines = e.OriginalHorizontalPipes;
+                     var distance = double.PositiveInfinity;
+                     if (lines == null) return distance;
+                     var rec = pump.Extents;
+                     foreach (var line in lines)
+                     {
+                         if (pump.Extents.Contains(line.Line.StartPoint) || pump.Extents.Contains(line.Line.EndPoint))
+                         {
+                             distance = 0;
+                         }
+                         else
+                         {
+                             distance = Math.Min(distance, pump.Extents.GetClosePoint(line.Line.StartPoint).DistanceTo(line.Line.StartPoint));
+                             distance = Math.Min(distance, pump.Extents.GetClosePoint(line.Line.EndPoint).DistanceTo(line.Line.EndPoint));
+                         }
+                     }
+                     return distance;
+                 }).ToList();
                 foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
                 {
                     List<Line> hors = new ();
                     List<int> indexPipes = new ();
-                    foreach (var hor in unit.HorizontalPipes)
+                    foreach (var hor in unit.OriginalHorizontalPipes)
                     {
                         var ptscoll = pump.Extents.Vertices();
                         DBObjectCollection objs = new ();
@@ -833,6 +854,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 foreach (var curPipe in unit.VerticalPipes)
                                 {
                                     if (!curPipe.CanUsedToJudgeCrossLayer) continue;
+                                    if (curPipe.IsGenerated) continue;
                                     var piperec = curPipe.Circle.Center.CreateSquare(curPipe.Circle.Diameter * 2);
                                     if (originalHorsSpacialIndex.SelectCrossingPolygon(piperec).Count > 0)
                                     {
