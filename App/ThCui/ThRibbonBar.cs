@@ -437,7 +437,7 @@ namespace TianHua.AutoCAD.ThCui
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("应急照明连线",
                     "天华车道应急照明连线",
-                    "THYJZMLX",
+                    "THYJZMLXUI",
                     "天华车道应急照明连线",
                     "IDI_THCAD_THYJZMLX_SMALL",
                     "IDI_THCAD_THYJZMLX_LARGE",
