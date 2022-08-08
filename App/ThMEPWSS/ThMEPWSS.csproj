@@ -231,14 +231,16 @@
     <Compile Include="SprinklerDim\Data\ThSprinklerDimDataProcessService.cs" />
     <Compile Include="SprinklerDim\Data\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Engine\ThSprinklerDimEngine.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerDimension.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerEdgeNode.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimGroup.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerNetGroup.cs" />
     <Compile Include="SprinklerDim\Service\ThCoordinateService.cs" />
     <Compile Include="SprinklerDim\Service\ThCreateGroupService.cs" />
     <Compile Include="SprinklerDim\Service\ThOptimizeGroupService.cs" />
-    <Compile Include="SprinklerDim\Service\ThRoomWallConflictService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerDimConflictService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerDimensionService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerDimExtensionService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetGroupListService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetGraphService.cs" />
