@@ -155,7 +155,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var dataWraper = new DataWraper();
                     dataWraper.UpdateVMParameter(ParameterViewModel);
                     VMStock.Init(dataWraper);
-                    //ProcessAndDisplay(null,i,stopWatch);
+                    ProcessAndDisplay(null, i, stopWatch);
                 }
             }
         }

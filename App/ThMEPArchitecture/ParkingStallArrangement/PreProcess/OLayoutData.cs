@@ -311,11 +311,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
             //7.求迭代范围
             SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
-            ShowLowerUpperBound();
+            //ShowLowerUpperBound();
 
             //SegLines = SegLines.Select(l => l.GetMovedLine()).ToList();
             //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
-            showVaildLanes();
+            //showVaildLanes();
             return true;
         }
         //public bool _ProcessSegLines()
