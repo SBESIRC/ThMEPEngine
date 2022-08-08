@@ -44,24 +44,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         // NTS 衍生数据
         public List<ORamp> Ramps = new List<ORamp>();// 坡道
         public List<Polygon> Buildings; // 初始障碍物,包含坡道
-        public Polygon SegLineBoundary;//智能边界，外部障碍物为可穿障碍物
+        //public Polygon SegLineBoundary;//智能边界，外部障碍物为可穿障碍物
         public Polygon BaseLineBoundary;//基线边界（包含内部孔），基线边界内的分割线的部分用来求基线
 
-        public List<LineSegment> VaildLanes;//分区线等价车道线
-        public List<Polygon> InnerBuildings; //不可穿障碍物（中间障碍物）,包含坡道
-        public List<int> OuterBuildingIdxs; //可穿建筑物（外围障碍物）的index,包含坡道
-        public List<Polygon> TightBoundaries = new List<Polygon>();//紧密轮廓，外扩合并+内缩2750得到。用于计算最大最小值
-        public List<Polygon> BoundingBoxes = new List<Polygon>();// 障碍物的外包框（矩形）
-        
+        //public List<LineSegment> VaildLanes;//分区线等价车道线
+        //public List<Polygon> InnerBuildings; //不可穿障碍物（中间障碍物）,包含坡道
+        //public List<int> OuterBuildingIdxs; //可穿建筑物（外围障碍物）的index,包含坡道
+        //public List<Polygon> TightBoundaries = new List<Polygon>();//紧密轮廓，外扩合并+内缩2750得到。用于计算最大最小值
+        //public List<Polygon> BoundingBoxes = new List<Polygon>();// 障碍物的外包框（矩形）
+
+        public MNTSSpatialIndex InnerBoundSPIndex;//不可穿障碍物外扩半车道宽的边界
+        public MNTSSpatialIndex OuterBoundSPIndex;//可穿障碍物外扩半车道宽的边界
+
         // SpatialIndex
-        public MNTSSpatialIndex ObstacleSpatialIndex; // 初始障碍物,不包含坡道 的spatialindex
+        //public MNTSSpatialIndex ObstacleSpatialIndex; // 初始障碍物,不包含坡道 的spatialindex
         public MNTSSpatialIndex BuildingSpatialIndex; // 初始障碍物,包含坡道 的spatialindex
         public MNTSSpatialIndex RampSpatialIndex; //坡道的spatial index
         public MNTSSpatialIndex BoundarySpatialIndex;//边界打成断线 + 障碍物 + 坡道的spatialindex(所有边界）
 
-        public MNTSSpatialIndex InnerObs_OutterBoundSPIDX;//中间障碍物（不可穿）+可穿障碍物的tightbound
-        public MNTSSpatialIndex BoundaryObjectsSPIDX;//边界打成断线+可忽略障碍物的spatialindex；
-        public MNTSSpatialIndex BoundLineSpatialIndex;//边界的打成碎线的spindex
+        //public MNTSSpatialIndex InnerObs_OutterBoundSPIDX;//中间障碍物（不可穿）+可穿障碍物的tightbound
+        //public MNTSSpatialIndex BoundaryObjectsSPIDX;//边界打成断线+可忽略障碍物的spatialindex；
+        //public MNTSSpatialIndex BoundLineSpatialIndex;//边界的打成碎线的spindex
 
         //SegLine Data
         public List<(List<int>, List<int>)> SeglineIndex;//分区线（起始终止点连接关系），数量为0则连到边界，其余为其他分区线的index
@@ -91,7 +94,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             UpdateSPIndex();//更新空间索引
             UpdateBasementInfo();
-            GetSegLineBoundary();
+            //GetSegLineBoundary();
+            UpdateBoundaries();
         }
         #region CAD数据提取+转换为需要的NTS数据结构
         private void Extract(BlockReference basement)
@@ -203,7 +207,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         //更新空间索引
         private void UpdateSPIndex()
         {
-            ObstacleSpatialIndex = new MNTSSpatialIndex(Obstacles);
+            //ObstacleSpatialIndex = new MNTSSpatialIndex(Obstacles);
             BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
             RampSpatialIndex = new MNTSSpatialIndex(RampPolgons);
             var allObjs = WallLine.Shell.ToLineStrings().Cast<Geometry>().ToList();
@@ -225,31 +229,53 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Logger?.Information($"地库总面积:" + string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2));
             Logger?.Information($"建筑物投影总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2));
         }
-        private void GetSegLineBoundary()//以半车道宽为基准外扩
+        //private void GetSegLineBoundary()//以半车道宽为基准外扩
+        //{
+        //    var bufferDistance = (ParameterStock.RoadWidth / 2) - SegLineEx.SegTol;
+        //    var buffered = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance);//建筑物外扩
+        //    var BuildingBounds = buffered.Union().Get<Polygon>(true);//合并+去除孔
+        //    var BuildingBoundsGeo = new MultiPolygon(BuildingBounds.ToArray());
+        //    TightBoundaries = BuildingBoundsGeo.Buffer(-bufferDistance).Get<Polygon>(true);//外扩后内缩
+        //    BoundingBoxes = BuildingBounds.Select(bound => BuildingSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
+        //        Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
+        //    BaseLineBoundary = WallLine.Buffer(-bufferDistance).Difference(BuildingBoundsGeo).
+        //        Get<Polygon>(false).OrderBy(p => p.Area).Last();//边界内缩,减掉外扩后的建筑，保留孔
+        //    SegLineBoundary = new Polygon(BaseLineBoundary.Shell);
+        //    var ignorableBuildings = ObstacleSpatialIndex.SelectNOTCrossingGeometry(SegLineBoundary).Cast<Polygon>().ToList();
+        //    InnerBuildings = BuildingSpatialIndex.SelectCrossingGeometry(SegLineBoundary).Cast<Polygon>().ToList();//内部建筑
+        //    OuterBuildingIdxs = Buildings.Select((v, i) => new { v, i }).Where(x => !SegLineBoundary.Intersects(x.v)).Select(x => x.i).ToList();//外部建筑的index
+
+        //    var outerTightBounds = TightBoundaries.Where(b => !SegLineBoundary.Contains(b));//外部障碍物的tight边界
+        //    InnerObs_OutterBoundSPIDX = new MNTSSpatialIndex(InnerBuildings.Concat(outerTightBounds));
+        //    var BoundaryObjects = new List<Geometry>();
+        //    BoundaryObjects.AddRange(ignorableBuildings);
+        //    BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
+        //    BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
+        //}
+
+        private void UpdateBoundaries()
         {
             var bufferDistance = (ParameterStock.RoadWidth / 2) - SegLineEx.SegTol;
-            var buffered = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance);//建筑物外扩
-            var BuildingBounds = buffered.Union().Get<Polygon>(true);//合并+去除孔
-            var BuildingBoundsGeo = new MultiPolygon(BuildingBounds.ToArray());
-            TightBoundaries = BuildingBoundsGeo.Buffer(-bufferDistance).Get<Polygon>(true);//外扩后内缩
-            BoundingBoxes = BuildingBounds.Select(bound => BuildingSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
-                Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
-            BaseLineBoundary = WallLine.Buffer(-bufferDistance).Difference(BuildingBoundsGeo).
-                Get<Polygon>(false).OrderBy(p => p.Area).Last();//边界内缩,减掉外扩后的建筑，保留孔
-            SegLineBoundary = new Polygon(BaseLineBoundary.Shell);
-            var ignorableBuildings = ObstacleSpatialIndex.SelectNOTCrossingGeometry(SegLineBoundary).Cast<Polygon>().ToList();
-            InnerBuildings = BuildingSpatialIndex.SelectCrossingGeometry(SegLineBoundary).Cast<Polygon>().ToList();//内部建筑
-            OuterBuildingIdxs = Buildings.Select((v, i) => new { v, i }).Where(x => !SegLineBoundary.Intersects(x.v)).Select(x => x.i).ToList();//外部建筑的index
-
-            var outerTightBounds = TightBoundaries.Where(b => !SegLineBoundary.Contains(b));//外部障碍物的tight边界
-            InnerObs_OutterBoundSPIDX = new MNTSSpatialIndex(InnerBuildings.Concat(outerTightBounds));
-            var BoundaryObjects = new List<Geometry>();
-            BoundaryObjects.AddRange(ignorableBuildings);
-            BoundaryObjects.AddRange(WallLine.Shell.ToLineStrings());
-            BoundaryObjectsSPIDX = new MNTSSpatialIndex(BoundaryObjects);
+            var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            var bufferedWallLine = WallLine.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
+            BaseLineBoundary = bufferedWallLine.Difference( new MultiPolygon(BuildingBounds.ToArray())).
+                Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+            var outerBounds = new List<Polygon>();
+            var innerBounds = new List<Polygon>();
+            //建筑外轮廓分类
+            foreach(var b in BuildingBounds)
+            {
+                if (bufferedWallLine.Shell.Intersects(b)) outerBounds.Add(b);
+                else innerBounds.Add(b);
+            }
+            OuterBoundSPIndex = new MNTSSpatialIndex(outerBounds);
+            InnerBoundSPIndex = new MNTSSpatialIndex(innerBounds);
+            //outerBounds.ForEach(b => b.ToDbMPolygon(3, "外边界").AddToCurrentSpace());
+            //innerBounds.ForEach(b => b.ToDbMPolygon(4, "内边界").AddToCurrentSpace());
         }
+
         #endregion
-        #region 分割线输入预处理
+        #region 分割线输入预处理,以及检查
         public bool ProcessSegLines()
         {
             bool isVaild = true;
@@ -261,21 +287,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var merged = init_segs.MergeSegs(idToMerge);
             //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
             SegLines = merged.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l =>l!=null).
-                Select(l => new SegLine(l, false, -1, 0, 0)).ToList();
+                Select(l => new SegLine(l, false, -1)).ToList();
             //3,处理坡道
             UpdateRamps();
-            //4.判断起始、终结线是否明确 + 更新连接关系
-            isVaild = FilteringSegLines(SegLines);
-            //5.获取最大全连接车道，若有未连接的，移除+标记+报错
-            //5.1获取有效车道
-            SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
-            //5.2过滤有效车道为null的线
-            SegLines = SegLines.Where(l => l.VaildLane != null).ToList();
-            //showVaildLanes();
-            //5.5获取最大全连接组,存在其他组标记 + 报错
-            //警告存在无效连接，将抛弃部分分割线
-            var groups = SegLines.GroupSegLines().OrderBy(g =>g.Count).ToList();
-            for(int i = 0; i < groups.Count-1; i++)
+            //4.获取最大全连接车道，若有未连接的，移除+标记+报错
+            var groups = SegLines.GroupSegLines(2).OrderBy(g => g.Count).ToList();
+            for (int i = 0; i < groups.Count - 1; i++)
             {
                 if (isVaild)
                 {
@@ -285,17 +302,64 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
                     Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
                 }
-                SegLines.Slice(groups[i]).ForEach(l => l.Splitter.MidPoint.MarkPoint());
+                SegLines.Slice(groups[i]).ForEach(l => l.Splitter?.MidPoint.MarkPoint());
             }
             SegLines = SegLines.Slice(groups.Last());
-            //6.再次判断起始、终结线是否明确 + 更新连接关系
-            isVaild =  FilteringSegLines(SegLines) && isVaild;
-            //SegLines.Select(seg => seg.Splitter?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 0; seg.AddToCurrentSpace(); });
-            //SegLines.Select(seg => seg.VaildLane?.ToDbLine()).ForEach(seg => { seg.ColorIndex = 1; seg.AddToCurrentSpace(); });
-            //showVaildLanes();
-            // 暂未包含车道自动调整逻辑，自动调整要放到迭代求最大最小值时做
+            //5.判断起始、终结线是否明确 + 更新连接关系
+            isVaild = FilteringSegLines(SegLines);
+            //6.获取有效车道
+            SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
+            //7.求迭代范围
+            SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
+            ShowLowerUpperBound();
+
+            //SegLines = SegLines.Select(l => l.GetMovedLine()).ToList();
+            //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
+            showVaildLanes();
             return true;
         }
+        //public bool _ProcessSegLines()
+        //{
+        //    bool isVaild = true;
+        //    // 标记圆半径5000
+        //    //源数据
+        //    var init_segs = CAD_SegLines.Select(l => l.ToNTSLineSegment()).ToList();
+        //    //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）
+        //    var idToMerge = init_segs.GroupSegLines(1);
+        //    var merged = init_segs.MergeSegs(idToMerge);
+        //    //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
+        //    SegLines = merged.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l => l != null).
+        //        Select(l => new SegLine(l, false, -1)).ToList();
+        //    //3,处理坡道
+        //    UpdateRamps();
+        //    //4.判断起始、终结线是否明确 + 更新连接关系
+        //    isVaild = FilteringSegLines(SegLines);
+        //    //5.获取最大全连接车道，若有未连接的，移除+标记+报错
+        //    //5.1获取有效车道
+        //    //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
+        //    var groups = SegLines.GroupSegLines(2).OrderBy(g => g.Count).ToList();
+        //    for (int i = 0; i < groups.Count - 1; i++)
+        //    {
+        //        if (isVaild)
+        //        {
+        //            isVaild = false;
+        //            //提示该分割线在满足车道宽内不与其他分割线连接
+        //            //警告存在无效连接，将抛弃部分分割线
+        //            Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
+        //            Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+        //        }
+        //        SegLines.Slice(groups[i]).ForEach(l => l.Splitter?.MidPoint.MarkPoint());
+        //    }
+        //    SegLines = SegLines.Slice(groups.Last());
+
+        //    SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
+        //    ShowLowerUpperBound();
+
+        //    //SegLines = SegLines.Select(l => l.GetMovedLine()).ToList();
+        //    SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
+        //    showVaildLanes();
+        //    return true;
+        //}
         //过滤起始、终结点不明确的线,获取线的连接关系
         public bool FilteringSegLines(List<SegLine> segLines)
         {
@@ -303,7 +367,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             for(int j = 0; j < 50;j++)
             {
                 var stop = true;
-                SeglineIndex = segLines.GetSegLineIndex(WallLine.Shell, BaseLineBoundary);
+                SeglineIndex = segLines.GetSegLineIndex(WallLine);
                 for (int i = segLines.Count - 1; i >= 0; i--)
                 {
                     if(SeglineIndex[i].Item1 == null || SeglineIndex[i].Item2 == null)
@@ -360,6 +424,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         #endregion
 
+        public void ShowLowerUpperBound(string layer = "最大最小值")
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 3);
+            }
+            foreach(var segLine in SegLines)
+            {
+                var normalVec = segLine.Splitter.NormalVector();
+                var posBuffer = segLine.Splitter.ShiftBuffer(segLine.MaxValue, normalVec).ToDbMPolygon(2, layer);
+                var negBuffer = segLine.Splitter.ShiftBuffer(segLine.MinValue, normalVec).ToDbMPolygon(3, layer);
+                var buffers = new List<MPolygon> { posBuffer, negBuffer }.Cast<Entity>().ToList();
+                buffers.ShowBlock(layer, layer);
+            }
+        }
         public void SetInterParam()
         {
             OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,BaseLineBoundary,SeglineIndex);

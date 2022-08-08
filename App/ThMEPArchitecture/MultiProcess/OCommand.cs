@@ -27,6 +27,7 @@ using ThParkingStall.Core.InterProcess;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
+using ThParkingStall.Core.OTools;
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -144,6 +145,7 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
+                
                 layoutData.SetInterParam();
                 for (int i = 0; i < MultiSolutionList.Count; i++)
                 {
@@ -153,7 +155,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var dataWraper = new DataWraper();
                     dataWraper.UpdateVMParameter(ParameterViewModel);
                     VMStock.Init(dataWraper);
-                    ProcessAndDisplay(null,i,stopWatch);
+                    //ProcessAndDisplay(null,i,stopWatch);
                 }
             }
         }

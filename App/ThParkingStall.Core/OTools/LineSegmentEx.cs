@@ -21,12 +21,32 @@ namespace ThParkingStall.Core.OTools
         {
             return lineSegment.DirVector(true).RotateByQuarterCircle(1);
         }
+
+        //返回原点与线垂直的向量，（保证正向）
+        //以及若线在原点，沿向量平移多远（distance）可以到当前线的位置
+        public static Vector2D OrgVector(this LineSegment lineSegment,out double distance)
+        {
+            var origin= new Coordinate(0, 0);
+            var projection = lineSegment.Project(origin);
+            distance = origin.Distance(projection);
+            if (distance < PointEx.EqualTol)//线段延长线与原点重合
+            {
+                distance = 0;
+                return lineSegment.NormalVector().Positivize();//取原线法向正向化向量
+            }
+            else
+            {
+                var orgvec = new Vector2D(projection.X, projection.Y).Normalize();
+                if (!orgvec.IsPositive()) distance = -distance;
+                return orgvec.Positivize();
+            }
+        }
         //正向化 保证P1 X坐标大于等于P0 X,相等则 P1 Y坐标大于等于X
         public static LineSegment Positivize(this LineSegment lineSegment)
         {
             var P0 = lineSegment.P0;
             var P1 = lineSegment.P1;
-            if (Math.Abs(P1.X - P0.X) < PointEx.PositiveTol)//x相等
+            if (Math.Abs(P1.X - P0.X) < PointEx.EqualTol)//x相等
             {
                 if (P1.Y > P0.Y) return lineSegment;
                 else return new LineSegment(P1,P0);
@@ -60,7 +80,7 @@ namespace ThParkingStall.Core.OTools
 
             return new Polygon(new LinearRing(points));
         }
-
+        //获取线上下offset 给定距离的矩形
         public static Polygon OGetRect(this LineSegment lineSegment,double offsetSize)
         {
             var vector = lineSegment.NormalVector().Multiply(offsetSize);

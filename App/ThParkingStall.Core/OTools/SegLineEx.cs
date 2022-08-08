@@ -13,12 +13,14 @@ namespace ThParkingStall.Core.OTools
 {
     public static class SegLineEx
     {
-        public static double MaxDistance = 100000000;//最大距离，10公里
-        public static double SegTol = 0.1;//分割线容差，距离大于半车道宽 -0.1则判断满足车道宽
-        public static double ExtendTol = 1.0;//延长容差，分割线使用的延长或回缩容差
-        public static double LengthTol = 100.0;//分割线过滤容差，小于该值自动丢弃
+        public static readonly double MaxDistance = 100000000;//最大距离，10公里
+        public static readonly double SegTol = 0.1;//分割线容差，距离大于半车道宽 -0.1则判断满足车道宽
+        public static readonly double ExtendTol = 1.0;//延长容差，分割线使用的延长或回缩容差
+        public static readonly double OutSideTol = 10.0;//迭代范围出边界的范围
+        public static readonly double LengthTol = 100.0;//分割线过滤容差，小于该值自动丢弃
+
         #region 获取分割线关系
-        public static List<(List<int>, List<int>)> GetSegLineIndex(this List<LineSegment>segLines,LinearRing wallLine,Polygon baseLineBoundary)
+        public static List<(List<int>, List<int>)> GetSegLineIndex(this List<LineSegment>segLines,Polygon wallLine )
         {
             var seglineIndex = new List<(List<int>, List<int>)>();
             for(int i = 0; i < segLines.Count; i++)
@@ -26,14 +28,19 @@ namespace ThParkingStall.Core.OTools
                 List<int> item1 = null;
                 List<int> item2 = null;
                 var segLine = segLines[i];
+                if(segLine.Distance(new Coordinate(3338684.1858759141, 10522765.62606502)) < 100)
+                {
+                    ;
+                }
                 //筛选有效范围内的交点
-                var coors = segLines.GetIntersections(i).Where(pt => baseLineBoundary.Contains(pt.ToPoint())).ToList();
+                var coors = segLines.GetIntersections(i).Where(pt => wallLine.Contains(pt.ToPoint())).ToList();
+                //var coors = segLines.GetIntersections(i).ToList();//获取关系即可，不需要管是否在边界内
                 if (coors.Count == 0)
                 {
                     seglineIndex.Add((null, null));//不与其他线相交，移除
                     continue;
                 }
-                var shellIntSecs = segLine.ToLineString().Intersection(wallLine).Coordinates.PositiveOrder();
+                var shellIntSecs = segLine.ToLineString().Intersection(wallLine.Shell).Coordinates.PositiveOrder();
                 if (shellIntSecs.Count() > 0 && !shellIntSecs.First().PositiveTo(coors.First()))
                 {
                     //无操作，负向连到边界
@@ -62,9 +69,9 @@ namespace ThParkingStall.Core.OTools
             }
             return seglineIndex;
         }
-        public static List<(List<int>, List<int>)> GetSegLineIndex(this List<SegLine> segLines, LinearRing wallLine, Polygon baseLineBoundary)
+        public static List<(List<int>, List<int>)> GetSegLineIndex(this List<SegLine> segLines, Polygon wallLine)
         {
-            return segLines.Select(seg => seg.Splitter).ToList().GetSegLineIndex(wallLine, baseLineBoundary);
+            return segLines.Select(seg => seg.Splitter).ToList().GetSegLineIndex(wallLine);
         }
         public static List<Coordinate> GetIntersections(this List<LineSegment> seglines, int idx)
         {
@@ -123,7 +130,7 @@ namespace ThParkingStall.Core.OTools
         public static SegLine GetBaseLine(this SegLine segLine,Polygon shell)
         {
             var baseLine = segLine.Splitter.GetBaseLine(shell);
-            var clone = segLine.Clone();
+            var clone = segLine.CreateNew();
             clone.Splitter = baseLine;
             return clone;
         }
@@ -167,7 +174,7 @@ namespace ThParkingStall.Core.OTools
             }
             return new LineSegment(spt, ept).GetBaseLine(shell).OExtend(ExtendTol);
         }
-
+        //函数有问题，连到某一个线要确保该线也延长过去
         public static List<LineSegment> Connect(this List<LineSegment> seglines, List<(List<int>, List<int>)> SeglineIndex, Polygon shell)
         {
             var connected = new List<LineSegment>();
@@ -176,6 +183,154 @@ namespace ThParkingStall.Core.OTools
                 connected.Add(seglines.Connect(i, SeglineIndex, shell));
             }
             return connected;
+        }
+
+        public static void _Connect(this List<LineSegment> seglines, List<(List<int>, List<int>)> SeglineIndex, Polygon shell)
+        {
+            var nullIndex = new HashSet<int>();//为null的index
+            var PtsToExtend = new Dictionary<int, List<Coordinate>>();//其他线相交该线于该点，需要后续将该线延长
+            for (int i = 0; i < seglines.Count; i++)
+            {
+                Coordinate spt = null;
+                Coordinate ept = null;
+                var segLine = seglines[i];
+                var boundPts = new List<Coordinate>();
+                if (SeglineIndex[i].Item1.Count == 0 || SeglineIndex[i].Item2.Count == 0)//需要连到边界
+                {
+                    var baseLine = segLine.GetBaseLine(shell);
+                    if (baseLine == null)
+                    {
+                        nullIndex.Add(i);
+                        continue;
+                    }
+                    var extended = baseLine.OExtend(MaxDistance).ToLineString();//无限延长+相交
+                    var basePt = new Point(baseLine.MidPoint);//基线中点
+                    var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
+                    boundPts = intersection.Coordinates.PositiveOrder();
+                }
+                if (SeglineIndex[i].Item1.Count > 0)//需连到其他分割线
+                {
+                    int idx;
+                    (spt, idx) = seglines.LineIntSecAndIdxByMax(i, SeglineIndex[i].Item1, true);
+                    if(PtsToExtend.ContainsKey(idx)) PtsToExtend[idx].Add(spt.Copy());
+                    else PtsToExtend.Add(idx,new List<Coordinate> { spt.Copy() });
+                }
+                else//需连到边界
+                {
+                    spt = boundPts.First();
+                }
+                if (SeglineIndex[i].Item2.Count > 0)
+                {
+                    int idx;
+                    (ept, idx) = seglines.LineIntSecAndIdxByMax(i, SeglineIndex[i].Item2, false);
+                    if (PtsToExtend.ContainsKey(idx)) PtsToExtend[idx].Add(ept.Copy());
+                    else PtsToExtend.Add(idx, new List<Coordinate> { ept.Copy() });
+                }
+                else
+                {
+                    ept = boundPts.Last();
+                }
+                seglines[i] = new LineSegment(spt, ept);
+                //return new LineSegment(spt, ept).GetBaseLine(shell).OExtend(ExtendTol);
+            }
+            foreach(var key in PtsToExtend.Keys)
+            {
+                if (nullIndex.Contains(key)) continue;//splitter为null，无需延长
+                var coors = PtsToExtend[key];
+                coors.Add(seglines[key].P0);
+                coors.Add(seglines[key].P1);
+                coors = coors.PositiveOrder();
+                seglines[key] = new LineSegment(coors.First(), coors.Last());
+            }
+            for (int i = 0; i < seglines.Count; i++)
+            {
+                if(nullIndex.Contains(i)) seglines[i] = null;
+                else seglines[i] = seglines[i].GetBaseLine(shell).OExtend(ExtendTol);
+            }
+        }
+        public static void Connect2(this List<LineSegment> seglines, List<(List<int>, List<int>)> SeglineIndex, Polygon shell)
+        {
+            var baseLines = seglines.Select(l => l.GetBaseLine(shell)).ToList();//为null的index
+            var negIdxs = new HashSet<int>();
+            var PtsToExtend = new Dictionary<int, List<Coordinate>>();//其他线相交该线于该点，需要后续将该线延长
+            for (int i = 0; i < seglines.Count; i++)
+            {
+                var baseLine = baseLines[i];
+                if (baseLine == null)//基线为null，跳过
+                {
+                    continue;
+                }
+                Coordinate spt = null;
+                Coordinate ept = null;
+                var segLine = seglines[i];
+                var boundPts = new List<Coordinate>();
+                bool negConnect = SeglineIndex[i].Item1.Count == 0 /*|| baseLines.Slice(SeglineIndex[i].Item1).Contains(null)*/;
+                bool posConnect = SeglineIndex[i].Item2.Count == 0 /*|| baseLines.Slice(SeglineIndex[i].Item2).Contains(null)*/;
+
+                var extended = baseLine.OExtend(MaxDistance).ToLineString();//无限延长+相交
+                var basePt = new Point(baseLine.MidPoint);//基线中点
+                var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
+                boundPts = intersection.Coordinates.PositiveOrder();
+                
+                if (!negConnect)//需连到其他分割线
+                {
+                    int idx;
+                    (spt, idx) = seglines.LineIntSecAndIdxByMax(i, SeglineIndex[i].Item1, true);
+                    if (PtsToExtend.ContainsKey(idx)) PtsToExtend[idx].Add(spt.Copy());
+                    else PtsToExtend.Add(idx, new List<Coordinate> { spt.Copy() });
+                    if (baseLines.Slice(SeglineIndex[i].Item1).Contains(null))
+                    {
+                        if(shell.Contains(spt.ToPoint()))negConnect = true;
+                    }
+                }
+                else//需连到边界
+                {
+                    spt = boundPts.First();
+                }
+                if (!posConnect)
+                {
+                    int idx;
+                    (ept, idx) = seglines.LineIntSecAndIdxByMax(i, SeglineIndex[i].Item2, false);
+                    if (PtsToExtend.ContainsKey(idx)) PtsToExtend[idx].Add(ept.Copy());
+                    else PtsToExtend.Add(idx, new List<Coordinate> { ept.Copy() });
+                    if (baseLines.Slice(SeglineIndex[i].Item2).Contains(null))
+                    {
+                        if (shell.Contains(ept.ToPoint())) posConnect = true;
+                    }
+                }
+                else
+                {
+                    ept = boundPts.Last();
+                }
+                var tempLine = new LineSegment(spt, ept);
+                if (ept.PositiveTo(spt)) seglines[i] = new LineSegment(spt, ept);
+                else negIdxs.Add(i);
+            }
+            foreach (var key in PtsToExtend.Keys)
+            {
+                if (baseLines[key] == null) continue;//splitter为null，无需延长
+                var coors = PtsToExtend[key];
+                coors.Add(seglines[key].P0);
+                coors.Add(seglines[key].P1);
+                coors = coors.PositiveOrder();
+                seglines[key] = new LineSegment(coors.First(), coors.Last());
+            }
+            for (int i = 0; i < seglines.Count; i++)
+            {
+                if (baseLines[i] == null || negIdxs.Contains(i)) seglines[i] = null;
+                else seglines[i] = seglines[i].GetBaseLine(shell).OExtend(ExtendTol);
+            }
+
+        }
+        public static (Coordinate,int) LineIntSecAndIdxByMax(this List<LineSegment> seglines,int curIdx,List<int> connectTo,bool IsNegative)
+        {
+            var segLine = seglines[curIdx];
+            Coordinate pt;
+            var pts = seglines.Slice(connectTo).Select(l => l.LineIntersection(segLine)).ToList();
+            if (IsNegative) pt = pts.Where(c => c != null).PositiveOrder().First();
+            else pt = pts.Where(c => c != null).PositiveOrder().Last();
+            int idx = connectTo[pts.FindIndex(p =>p.Equals(pt))];
+            return (pt,idx);
         }
         #endregion
         #region 更新分割线
@@ -191,7 +346,9 @@ namespace ThParkingStall.Core.OTools
         public static void UpdateSegLines(this List<SegLine> seglines, List<(List<int>, List<int>)> SeglineIndex,
             Polygon shell, MNTSSpatialIndex BoundarySpatialIndex, Polygon BaseLineBoundary = null)
         {
-            var splitters = seglines.Select(seg => seg.Splitter).ToList().Connect(SeglineIndex, shell);
+            //var splitters = seglines.Select(seg => seg.Splitter).ToList().Connect(SeglineIndex, shell);
+            var splitters = seglines.Select(seg => seg.Splitter).ToList();
+            splitters.Connect2(SeglineIndex, shell);
             for (int i = 0; i < seglines.Count; i++)
             {
                 var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
@@ -229,6 +386,7 @@ namespace ThParkingStall.Core.OTools
                     Buffer(halfWidth - SegTol).Union().Get<Polygon>(true);//提取范围内全部障碍物 + 外扩 + 合并 + 去孔
                 baseLine = connectedPart.GetBaseLine(new MultiPolygon(bufferedBuildings.ToArray()), false);//获取基线
             }
+            if(baseLine == null) return null;
             //3.(若需要连到边界)则以2的线中点为基点，左右buffer找到最远距离对应的线
             var basePt = baseLine.MidPoint;
             var bufferLine = basePt.LineBuffer(halfWidth-(2*SegTol), baseLine.DirVector());//buffer基线,确保不碰到上一步的障碍物
@@ -261,6 +419,8 @@ namespace ThParkingStall.Core.OTools
                 case 0:
                     return SegLines.Select(l => l.VaildLane).ToList().GroupSegLines(0);
                 case 1:
+                    return SegLines.Select(l => l.Splitter).ToList().GroupSegLines(1);
+                case 2:
                     return SegLines.Select(l => l.Splitter).ToList().GroupSegLines(0);
                 default:
                     return null;
@@ -361,7 +521,6 @@ namespace ThParkingStall.Core.OTools
             return new LineSegment(coors.First(),coors.Last());
         }
         #endregion
-
         #region 获取子区域内的车道，以及墙线
         //获取相同部分
         public static List<LineSegment> GetCommonParts(this List<LineString> lanes,Polygon area,double tol  = 0.01)
@@ -394,6 +553,169 @@ namespace ThParkingStall.Core.OTools
                 }
             }
             return walls.Get<LineString>();
+        }
+        #endregion
+
+        #region 更新分区线迭代范围
+
+        public static bool UpdateLowerUpperBound(this SegLine segLine, Polygon WallLine, MNTSSpatialIndex BuildingSpatialIndex,
+           MNTSSpatialIndex InnerBoundSPIndex, MNTSSpatialIndex OuterBoundSPIndex)
+        {
+            //segLine.IsInitLine = true;
+            if (segLine.IsFixed) return true;
+            if(!segLine.IsInitLine) return false;//非初始线
+            var splitterLstr = segLine.Splitter.ToLineString();
+            var IntSected = BuildingSpatialIndex.SelectCrossingGeometry(splitterLstr);
+            var halfWidth = VMStock.RoadWidth / 2;
+            if (IntSected.Any(b => InnerBoundSPIndex.SelectCrossingGeometry(b).Count > 0))//判断是否有相交到的障碍物在内部建筑中
+            {
+                segLine.IsFixed = true;//穿了中间障碍物，固定该分区线
+                return false;//不满足车道宽
+            }
+            //基于分割线求矩形buffer
+            //var laneBuffer = segLine.Splitter.OGetRect(halfWidth);
+            var ignoreBound =new MultiPolygon( OuterBoundSPIndex.SelectCrossingGeometry(splitterLstr).Cast<Polygon>().ToArray());
+
+            var normalVector = segLine.Splitter.NormalVector();
+            double maxVal = OutSideTol;
+            double minVal = -OutSideTol;
+            var posBuffer = segLine.Splitter.ShiftBuffer(MaxDistance, normalVector);
+            var posobjs = BuildingSpatialIndex.SelectCrossingGeometry(posBuffer).Where(b => b.Disjoint(ignoreBound)).Cast<Polygon>();
+            if (posobjs.Count() != 0)//正向有建筑
+            {
+                var intSection = new MultiPolygon(posobjs.ToArray());
+                maxVal = splitterLstr.Distance(intSection) - halfWidth;
+            }
+            else
+            {
+                var coors = WallLine.Shell.Intersection(posBuffer).Coordinates;
+                if (coors.Count() != 0)
+                {
+                    maxVal = coors.Max(c => segLine.Splitter.Distance(c)) + OutSideTol;
+                }
+            }
+
+            var negBuffer = segLine.Splitter.ShiftBuffer(-MaxDistance, normalVector);
+            var negobjs = BuildingSpatialIndex.SelectCrossingGeometry(negBuffer).Where(b => b.Disjoint(ignoreBound)).Cast<Polygon>();
+            if (negobjs.Count() != 0)//负向有建筑
+            {
+                var intSection = new MultiPolygon(negobjs.ToArray());
+                minVal = -splitterLstr.Distance(intSection) + halfWidth;
+            }
+            else
+            {
+                var coors = WallLine.Shell.Intersection(negBuffer).Coordinates;
+                if (coors.Count() != 0)
+                {
+                    minVal = -coors.Max(c => segLine.Splitter.Distance(c)) - OutSideTol;
+                }
+            }
+            if (maxVal - minVal < 0)
+            {
+                segLine.IsFixed = true;
+                return false;
+            }
+            segLine.SetMinMaxValue(minVal, maxVal);
+
+            return true;
+        }
+
+        public static bool UpdateLowerUpperBound(this SegLine segLine, Polygon WallLine, MNTSSpatialIndex BuildingSpatialIndex,
+             MNTSSpatialIndex OuterBoundSPIndex)
+        {
+            //if(segLine.Splitter.Distance(new Coordinate(3262192.0440, 5799553.6715))< 100)
+            //{
+            //    ;
+            //}
+            double roadWidth;
+            if (segLine.RoadWidth == -1) roadWidth = VMStock.RoadWidth;
+            else roadWidth = segLine.RoadWidth;
+            //segLine.IsInitLine = true;
+            if (segLine.IsFixed) return true;
+            if (!segLine.IsInitLine) return false;//非初始线
+            var splitterLstr = segLine.Splitter.ToLineString();
+            var normalVector = segLine.Splitter.NormalVector();
+            double posDistance =0;//分割线法向正方向距建筑距离
+            double negDistance =0;//分割线法向负方向距建筑距离
+            double maxVal = OutSideTol;
+            double minVal = -OutSideTol;
+            bool needFilter = true;//是否需要过滤
+            var IntSected = BuildingSpatialIndex.SelectCrossingGeometry(splitterLstr);
+            if(IntSected.Count() == 0)//count 不为0则必须过滤
+            {
+                (negDistance,posDistance) = segLine.RecDistance(BuildingSpatialIndex);
+                if (posDistance < 0 || negDistance < 0) needFilter = false;//正向和负向没有建筑，无需过滤 
+                else needFilter = (posDistance  + negDistance) < roadWidth;//距离和小于道路宽则需要过滤
+            }
+            var halfWidth = roadWidth / 2;
+            //MultiPolygon ignoreBound = MultiPolygon.Empty;
+            if (needFilter)
+            {
+                var ignoreBuffer = segLine.Splitter.OGetRect(SegTol + halfWidth - VMStock.RoadWidth / 2);//解决非标准车道
+                //基于分割线求矩形buffer
+                var ignoreBound = new MultiPolygon(OuterBoundSPIndex.SelectCrossingGeometry(ignoreBuffer).Cast<Polygon>().ToArray());
+                (negDistance,posDistance) = segLine.RecDistance(BuildingSpatialIndex,ignoreBound);
+            }
+            if(posDistance > 0)
+            {
+                maxVal = posDistance - halfWidth;
+            }
+            else//正向无建筑
+            {
+                var posBuffer = segLine.Splitter.ShiftBuffer(MaxDistance, normalVector);
+                var coors = WallLine.Shell.Intersection(posBuffer).Coordinates;
+                if (coors.Count() != 0)
+                {
+                    maxVal = coors.Max(c => segLine.Splitter.Distance(c)) + OutSideTol;
+                }
+            }
+            if (negDistance > 0)
+            {
+                minVal = -negDistance + halfWidth;
+
+            }
+            else//负向无建筑
+            {
+                var negBuffer = segLine.Splitter.ShiftBuffer(-MaxDistance, normalVector);
+                var coors = WallLine.Shell.Intersection(negBuffer).Coordinates;
+                if (coors.Count() != 0)
+                {
+                    minVal = -coors.Max(c => segLine.Splitter.Distance(c)) - OutSideTol;
+                }
+            }
+            if (maxVal - minVal < 0)
+            {
+                segLine.IsFixed = true;
+                return false;
+            }
+            segLine.SetMinMaxValue(minVal, maxVal);
+            return true;
+        }
+
+        //求分割线法向正方向以及负方向距离障碍物的距离（矩形框，框到的障碍物）
+        public static (double,double) RecDistance(this SegLine segLine, MNTSSpatialIndex BuildingSpatialIndex, MultiPolygon ignoreBound = null)
+        {
+            if (ignoreBound == null) ignoreBound = MultiPolygon.Empty;
+            var splitterLstr = segLine.Splitter.ToLineString();
+            var normalVector = segLine.Splitter.NormalVector();
+            double posDistance = -1;//法向正方向距离
+            double negDistance = -1;//法向负方向距离
+            var posBuffer = segLine.Splitter.ShiftBuffer(MaxDistance, normalVector);
+            var posobjs = BuildingSpatialIndex.SelectCrossingGeometry(posBuffer).Where(b => b.Disjoint(ignoreBound)).Cast<Polygon>();
+            if (posobjs.Count() != 0)//正向有建筑
+            {
+                var intSection = new MultiPolygon(posobjs.ToArray());
+                posDistance = splitterLstr.Distance(intSection);
+            }
+
+            var negBuffer = segLine.Splitter.ShiftBuffer(-MaxDistance, normalVector);
+            var negobjs = BuildingSpatialIndex.SelectCrossingGeometry(negBuffer).Where(b => b.Disjoint(ignoreBound)).Cast<Polygon>();
+            if (negobjs.Count() != 0)//负向有建筑
+            {
+                var intSection = new MultiPolygon(negobjs.ToArray());
+                negDistance = splitterLstr.Distance(intSection) ;
+            }
+            return (negDistance,posDistance);
         }
         #endregion
     }

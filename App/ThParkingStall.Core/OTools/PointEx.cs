@@ -10,7 +10,7 @@ namespace ThParkingStall.Core.OTools
 {
     public static class PointEx
     {
-        public static double PositiveTol = 0.001;
+        public static double EqualTol = 0.001;
         public static LineSegment LineBuffer(this Coordinate point, double Halfdistance, Vector2D vec)
         {
             var Vec = vec.Normalize();
@@ -21,7 +21,7 @@ namespace ThParkingStall.Core.OTools
         //P1是否在P0正方向
         public static bool PositiveTo(this Coordinate P1,Coordinate P0)
         {
-            if(Math.Abs(P1.X-P0.X) < PositiveTol)//x相等
+            if(Math.Abs(P1.X-P0.X) < EqualTol)//x相等
             {
                 if (P1.Y > P0.Y) return true;
                 else return false;  
@@ -43,7 +43,7 @@ namespace ThParkingStall.Core.OTools
             for (int i = 1; i < X_ordered.Count; i++)
             {
                 var current = X_ordered[i];
-                if (current.X -pre.X> PositiveTol)//当前x值与之前差值过大
+                if (current.X -pre.X> EqualTol)//当前x值与之前差值过大
                 {
                     result.AddRange(Y_to_order.OrderBy(c => c.Y));//根据y排序后清空
                     Y_to_order.Clear();

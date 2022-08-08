@@ -122,15 +122,15 @@ namespace ThParkingStall.Core.OInterProcess
             var newSegLines = new List<SegLine>();
             if (gene == null)
             {
-                newSegLines = InitSegLines.Select(segLine => segLine.Clone()).ToList();
+                newSegLines = InitSegLines.Select(segLine => segLine.CreateNew()).ToList();
             }
-            else
-            {
-                for (int i = 0; i < InitSegLines.Count; i++)
-                {
-                    newSegLines.Add(InitSegLines[i].GetMovedLine(gene[i]));
-                }
-            }
+            //else
+            //{
+            //    for (int i = 0; i < InitSegLines.Count; i++)
+            //    {
+            //        newSegLines.Add(InitSegLines[i].GetMovedLine(gene[i]));
+            //    }
+            //}
             newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex,BaseLineBoundary);
 
             newSegLines = newSegLines.Where(l => l.VaildLane != null).ToList();
