@@ -210,6 +210,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         VerticalPipeClass verticalPipe = new VerticalPipeClass();
                         verticalPipe.Circle = cicle;
+                        if (cicle.Layer.Equals("AdditonPipe"))
+                        {
+                            verticalPipe.IsGenerated = true;
+                        }
                         Modeldatas.FloorDict[Modeldatas.FloorListDatas[i]].VerticalPipes.Add(verticalPipe);
                         break;
                     }

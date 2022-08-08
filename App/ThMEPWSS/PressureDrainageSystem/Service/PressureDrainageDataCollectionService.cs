@@ -510,6 +510,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 this.CollectedData.Wells.RemoveAt(0);
                             }
                         }
+                        submergedPump.Block = e;
                         this.CollectedData.SubmergedPumps.Add(submergedPump);
                     }
                 }
@@ -601,7 +602,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 this.CollectedData.SubmergedPumps.ForEach(o => pts.Add(o.Extents.Centroid()));
                 List<Line> mergedLines = new();
                 lines.ForEach(o => mergedLines.Add(o));
-                ConnectBrokenLine(lines,new List<Point3d>() { }, pts).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
+                var s = AnalysisLineList(lines);
+                ConnectBrokenLine(lines,/*pts*/new List<Point3d>() { }).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
                 var objs = new DBObjectCollection();
                 mergedLines.ForEach(o => objs.Add(o));
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
