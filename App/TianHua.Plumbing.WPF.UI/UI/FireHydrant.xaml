@@ -199,8 +199,12 @@
                           IsChecked="{Binding Parameter.IsShowCheckResult,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Checked="chkShowResult_Checked" Unchecked="chkShowResult_Unchecked"></CheckBox>
-                <Button Grid.Row="2" Margin="0,0,8,3" HorizontalAlignment="Right" x:Name="btnRegionCheck" 
-                        Width="65" Height="20" Content="区域校核" Command="{Binding RegionCheckCmd}"></Button>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button HorizontalAlignment="Right" x:Name="btnHelp" 
+                        Width="60" Height="20" Content="视频教程" Command="{Binding HelpCmd}"></Button>
+                    <Button HorizontalAlignment="Right" x:Name="btnRegionCheck" Margin="5,0,0,0"
+                        Width="60" Height="20" Content="区域校核" Command="{Binding RegionCheckCmd}"></Button>
+                </StackPanel>                
             </Grid>
         </StackPanel>
     </Grid>
