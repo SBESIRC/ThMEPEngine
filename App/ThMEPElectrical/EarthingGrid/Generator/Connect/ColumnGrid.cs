@@ -21,20 +21,21 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         private Dictionary<Point3d, HashSet<Point3d>> graph = new Dictionary<Point3d, HashSet<Point3d>>();
         private Point3dCollection allPts = new Point3dCollection();
         private Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-
-        public ColumnGrid(PreProcess preProcessData)
+        private double findLength = 10000;
+        public ColumnGrid(PreProcess preProcessData, double _findLength)
         {
             outlinewithBorderPts = preProcessData.outlinewithBorderPts;
             allOutlines = preProcessData.outlines;
             outlinewithNearPts = preProcessData.outlinewithNearPts;
             buildingOutline = preProcessData.buildingOutline;
             columnPts = preProcessData.columnPts;
+            findLength = _findLength;
         }
 
         public Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> Genterate()
         {
             //1、近点与墙点、墙点墙点之间的连接
-            BorderNearConnect.ConnectBorderNear(outlinewithBorderPts, outlinewithNearPts, columnPts, allOutlines, buildingOutline, ref nearBorderGraph);
+            BorderNearConnect.ConnectBorderNear(outlinewithBorderPts, outlinewithNearPts, columnPts, allOutlines, buildingOutline, findLength, ref nearBorderGraph);
             //1.5、处理数据
             var nearAndBorderPts = nearBorderGraph.Keys.ToList();
             nearAndBorderPts.ForEach(pt => allPts.Add(pt));
@@ -70,10 +71,11 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var pts = new HashSet<Point3d>();
             columnPts.ForEach(pt => pts.Add(pt));
             outlinewithBorderPts.Values.ForEach(ptss => ptss.ForEach(pt => pts.Add(pt)));
-            GraphDealer.AddConnectUpToFour(ref graph, pts, 9000); //MaxBeamLength
+
+            GraphDealer.SimplifyGraph(ref graph, pts.ToList());
             GraphDealer.DeleteConnectUpToFour(ref graph, ref nearBorderGraph);
-            GraphDealer.SimplifyGraph(ref graph, columnPts.ToList());
-            GraphDealer.RemoveIntersectLines(ref graph);
+            GraphDealer.AddConnectUpToFour(ref graph, pts, findLength);
+            //GraphDealer.RemoveIntersectLines(ref graph);
         }
 
         private void Split()
@@ -81,6 +83,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var outlineWithBorderLine = new Dictionary<Polyline, List<Tuple<Point3d, Point3d>>>();
             StructureDealer.CloseBorder(allOutlines, graph.Keys.ToHashSet(), ref outlineWithBorderLine);
             outlineWithBorderLine.Values.ForEach(tups=> tups.ForEach(o => GraphDealer.AddLineToGraph(o.Item1, o.Item2, ref graph)));
+            GraphDealer.RemoveIntersectLines(ref graph);
             AreaDealer.BuildPolygonsCustom(graph, ref findPolylineFromLines);
             //AreaDealer.SplitBlock(ref findPolylineFromLines);
         }

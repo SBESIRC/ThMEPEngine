@@ -57,12 +57,14 @@ namespace ThMEPElectrical.Command
                 //    new Tuple<double, double>(5000, 5000)};
                 var faceSize = new List<Tuple<double, double>>();
                 var size = ThEarthingGridDataService.Instance.EarthingGridSize;
+                double findLength = 9000;
                 if (size == "10x10或12x8")
                 {
                     faceSize = new List<Tuple<double, double>> {
                         new Tuple<double, double>(10000, 10000),
                         new Tuple<double, double>(12000, 8000)
                     };
+                    findLength = 12500;
                 }
                 else if (size == "20x20或24x16")
                 {
@@ -70,6 +72,7 @@ namespace ThMEPElectrical.Command
                         new Tuple<double, double>(20000, 20000),
                         new Tuple<double, double>(24000, 16000)
                     };
+                    findLength = 24500;
                 }
                 //1、Extract data
                 var dataset = new ThEarthingGridDatasetFactory();
@@ -81,7 +84,7 @@ namespace ThMEPElectrical.Command
 
                 bool beMerge = false;
                 //3、Generate
-                var earthGridLines = GridGenerator.Genterate(preProcess, faceSize, beMerge);
+                var earthGridLines = GridGenerator.Genterate(preProcess, faceSize, beMerge, findLength);
 
                 //4、Display
                 string layerName = "E-GRND-WIRE";

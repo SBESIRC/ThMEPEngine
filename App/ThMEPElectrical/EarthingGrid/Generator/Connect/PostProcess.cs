@@ -45,7 +45,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             StichToBorder();
             //删除outline附近的线
             DeleteLineNearOutline();
-
             //添加线
             AddLinesOnOutlines();
             //删除禁区内的线
@@ -79,6 +78,13 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var nearPtToOutlines = new Dictionary<Point3d, HashSet<Polyline>>();
             foreach (var outline in Outlines)
             {
+                bool isClose = false;
+                if (outline.Closed == false)
+                {
+                    isClose = true;
+                    outline.Closed = true;
+                }
+                
                 var shell = outline.Buffer(bufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
                 var holes = outline.Buffer(-bufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());
@@ -91,6 +97,12 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                         nearPtToOutlines.Add(innerPt, new HashSet<Polyline>());
                     }
                     nearPtToOutlines[innerPt].Add(outline);
+                }
+
+                if (isClose == true)
+                {
+                    isClose = false;
+                    outline.Closed = false;
                 }
             }
             return nearPtToOutlines;
@@ -182,7 +194,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 for (int i = 0; i < cnt; ++i)
                 {
                     var curPt = outline.GetPoint3dAt(i);
-                    AddLineToGraph(prePt, curPt);
+                    if(!(outline.Closed == false && i == 0))
+                    {
+                        AddLineToGraph(prePt, curPt);
+                    }
                     prePt = curPt;
                 }
             }
