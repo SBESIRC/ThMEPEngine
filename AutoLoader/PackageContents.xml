@@ -501,6 +501,8 @@
                 <Command Local="THQZSZ" Global="THQZSZ" />
                 <Command Local="THQZPJ" Global="THQZPJ" />
                 <Command Local="THSMBT" Global="THSMBT" />
+                <Command Local="THTSDP" Global="THTSDP" />
+                <Command Local="THQZPJ1" Global="THQZPJ1" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -515,6 +517,8 @@
                 <Command Local="THQZSZ" Global="THQZSZ" />
                 <Command Local="THQZPJ" Global="THQZPJ" />
                 <Command Local="THSMBT" Global="THSMBT" />
+                <Command Local="THTSDP" Global="THTSDP" />
+                <Command Local="THQZPJ1" Global="THQZPJ1" />
             </Commands>
         </ComponentEntry>
     </Components>

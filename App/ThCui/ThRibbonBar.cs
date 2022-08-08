@@ -1019,6 +1019,47 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_SFSB_SMALL",
                     "IDI_THCAD_SFSB_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 墙柱配筋
+                var subRow = subPanel.AddNewRibbonRow();
+                {
+                    var splitButton = subRow.AddNewSplitButton(
+                        "墙柱配筋",
+                        RibbonSplitButtonBehavior.DropDownNoFollow,
+                        RibbonSplitButtonListStyle.IconText,
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 墙柱设置
+                    splitButton.AddNewButton("墙柱设置",
+                        "天华墙柱设置",
+                        "THQZSZ",
+                        "天华墙柱设置",
+                        "IDI_THCAD_THQZSZ_SMALL",
+                        "IDI_THCAD_THQZSZ_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 标准配筋
+                    splitButton.AddNewButton("标准配筋",
+                        "天华标准配筋",
+                        "THQZPJ",
+                        "天华标准配筋",
+                        "IDI_THCAD_THQZPJ_SMALL",
+                        "IDI_THCAD_THQZPJ_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 非标配筋
+                    splitButton.AddNewButton("非标配筋",
+                        "天华非标配筋",
+                        "THQZPJ1",
+                        "天华非标配筋",
+                        "IDI_THCAD_THQZPJ1_SMALL",
+                        "IDI_THCAD_THQZPJ1_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+                }
 
                 // 梁纵筋
                 subRow = subPanel.AddNewRibbonRow();
@@ -1421,6 +1462,16 @@ namespace TianHua.AutoCAD.ThCui
                         "IDI_THCAD_GOW_LARGE",
                         RibbonButtonStyle.SmallWithText);
                 }
+
+                // TSSD切换
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("TSSD切换",
+                    "天华TSSD切换",
+                    "THTSDP",
+                    "天华TSSD切换",
+                    "IDI_THCAD_THTSDP_SMALL",
+                    "IDI_THCAD_THTSDP_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
         }
 
