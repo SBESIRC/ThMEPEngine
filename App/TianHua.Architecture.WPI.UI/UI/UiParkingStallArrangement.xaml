@@ -6,7 +6,8 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.7)" SizeToContent="Manual" Height="680"
+              Title="车位自动排布(2.7)" SizeToContent="Height"
+
               Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -132,12 +133,12 @@
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding VerticalSolution}">优先纵向</CheckBox>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical" Visibility="{Binding AdvancedSettingVisibility}">
                 <StackPanel>
                     <Label FontSize="16" FontWeight="Bold">运算参数设置：</Label>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Vertical" >
+            <StackPanel Orientation="Vertical" Visibility="{Binding AdvancedSettingVisibility}">
                 <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
                     <StackPanel>
                         <StackPanel >
@@ -151,7 +152,7 @@
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Visibility="{Binding AdvancedSettingVisibility}">
+                    <StackPanel Orientation="Horizontal">
                         <RadioButton GroupName="SpeedGroup" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandRunSpeed, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="高级："/>
                         <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsAdvancedSettingEnabled}" RenderTransformOrigin="0.474,-0.205">
                             <Label Content="代数"/>
