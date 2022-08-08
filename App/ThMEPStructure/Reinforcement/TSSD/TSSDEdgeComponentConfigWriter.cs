@@ -15,8 +15,8 @@ namespace ThMEPStructure.Reinforcement.TSSD
         private string leaderTypeKey = "引线形式";
         private string markPosKey = "标注位置";
         private string mergeSizeKey = "归并尺寸";
-        private string mergeStirrupRatioKey = "归并配筋率(%)";
-        private string mergeReinforceRatioKey = "归并配箍率(%)";
+        private string mergeStirrupRatioKey = "归并配箍率(%)";
+        private string mergeReinforceRatioKey = "归并配筋率(%)";
         private string mergeConsiderWallKey = "归并考虑墙体";
         private string constructPrefixKey = "构造前缀";
         private string constructPrefixStartNumberKey = "构件前缀的起始编号";
@@ -78,11 +78,11 @@ namespace ThMEPStructure.Reinforcement.TSSD
             ThIniTool.WriteIni(this.section, mergeSizeKey, config.MergeSize, filePath);
 
             // 归并配筋率(%)
-            ThIniTool.WriteIni(this.section, mergeStirrupRatioKey, config.MergeStirrupRatio, filePath);
-
-            // 归并配箍率(%)
             ThIniTool.WriteIni(this.section, mergeReinforceRatioKey, config.MergeReinforceRatio, filePath);
 
+            // 归并配箍率(%)
+            ThIniTool.WriteIni(this.section, mergeStirrupRatioKey, config.MergeStirrupRatio, filePath);
+            
             // 归并考虑墙体
             var mergeConsiderWallIndex = config.MergeConsiderWall ? "1" : "0";
             ThIniTool.WriteIni(this.section, mergeConsiderWallKey, mergeConsiderWallIndex, filePath);
