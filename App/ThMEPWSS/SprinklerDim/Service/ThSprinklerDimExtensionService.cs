@@ -50,7 +50,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<ThSprinklerDimension> realDim = new List<ThSprinklerDimension>();
             foreach (List<int> dim in dims)
             {
-                if (dim == null)
+                if (dim == null || dim.Count == 0)
                     continue;
 
                 dim.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));

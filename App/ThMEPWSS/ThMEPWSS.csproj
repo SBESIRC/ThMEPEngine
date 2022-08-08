@@ -239,6 +239,8 @@
     <Compile Include="SprinklerDim\Service\ThCreateGroupService.cs" />
     <Compile Include="SprinklerDim\Service\ThOptimizeGroupService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerDimConflictService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerDimensionMergeService.cs" />
+    <Compile Include="SprinklerDim\Service\ThSprinklerDimensionOperateService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerDimensionService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerDimExtensionService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetGroupListService.cs" />
