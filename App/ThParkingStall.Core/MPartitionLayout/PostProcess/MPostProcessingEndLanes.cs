@@ -761,15 +761,15 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 if (lanes_copy[i].ClosestPoint(ls.P0).Distance(ls.P0) < 1)
                 {
-                    inilanesex.Add(lanes_copy[i]);
-                    i--;
+                    inilanesex.Add(lanes_copy[i]);             
                     lanes_copy.RemoveAt(i);
+                    i--;
                 }
                 else if (lanes_copy[i].ClosestPoint(ls.P1).Distance(ls.P1) < 1)
                 {
-                    inilanesex.Add(lanes_copy[i]);
-                    i--;
+                    inilanesex.Add(lanes_copy[i]);          
                     lanes_copy.RemoveAt(i);
+                    i--;
                 }
             }
             var tlanes = JoinCurves(new List<LineString>(), inilanesex).OrderByDescending(e => e.Length);
