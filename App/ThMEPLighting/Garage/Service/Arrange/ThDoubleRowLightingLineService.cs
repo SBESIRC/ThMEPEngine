@@ -326,25 +326,29 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 if (filter.Count > 0)
                 {
                     // 终点延伸
-                    var newLine = new Line(nonLightingLines[i].StartPoint,
+                    var endNewLine = new Line(nonLightingLines[i].StartPoint,
                         nonLightingLines[i].EndPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
-                    var pointSquare = newLine.EndPoint.CreateSquare(10.0);
-                    var extendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
-                    if (extendSearch.Count > 0)
+                    var pointSquare = endNewLine.EndPoint.CreateSquare(10.0);
+                    var endExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
+
+                    // 起点延伸
+                    var startNewLine = new Line(nonLightingLines[i].StartPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2,
+                        nonLightingLines[i].EndPoint);
+                    pointSquare = startNewLine.StartPoint.CreateSquare(10.0);
+                    var startExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
+
+                    if (endExtendSearch.Count > 0 && startExtendSearch.Count > 0)
                     {
-                        nonLightingLines[i] = newLine;
+                        nonLightingLines[i] = new Line(nonLightingLines[i].StartPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2,
+                        nonLightingLines[i].EndPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                     }
-                    else
+                    else if (endExtendSearch.Count > 0)
                     {
-                        // 起点延伸
-                        newLine = new Line(nonLightingLines[i].StartPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2,
-                            nonLightingLines[i].EndPoint);
-                        pointSquare = newLine.StartPoint.CreateSquare(10.0);
-                        extendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
-                        if (extendSearch.Count > 0)
-                        {
-                            nonLightingLines[i] = newLine;
-                        }
+                        nonLightingLines[i] = endNewLine;
+                    }
+                    else if (startExtendSearch.Count > 0)
+                    {
+                        nonLightingLines[i] = startNewLine;
                     }
                 }
             }
@@ -429,7 +433,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             return point.DistanceTo(line.StartPoint) < 10.0 || point.DistanceTo(line.EndPoint) < 10.0;
         }
 
-        
+
 
         private List<Line> HandleEvenEdge(Line first, Line second, ThCADCoreNTSSpatialIndex spatialIndex, Polyline frame)
         {
