@@ -137,6 +137,7 @@ namespace TianHua.Hvac.UI
             this.labelBypassNum = new System.Windows.Forms.Label();
             this.label41 = new System.Windows.Forms.Label();
             this.label40 = new System.Windows.Forms.Label();
+            this.btnHelp = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -391,7 +392,7 @@ namespace TianHua.Hvac.UI
             // 
             // label8
             // 
-            this.label8.Font = new System.Drawing.Font("宋体", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label8.Font = new System.Drawing.Font("SimSun", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label8.Location = new System.Drawing.Point(470, 12);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(37, 14);
@@ -457,7 +458,7 @@ namespace TianHua.Hvac.UI
             // 
             // label6
             // 
-            this.label6.Font = new System.Drawing.Font("宋体", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label6.Font = new System.Drawing.Font("SimSun", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label6.Location = new System.Drawing.Point(317, 13);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(37, 14);
@@ -1036,6 +1037,7 @@ namespace TianHua.Hvac.UI
             // 
             // splitContainer6.Panel2
             // 
+            this.splitContainer6.Panel2.Controls.Add(this.btnHelp);
             this.splitContainer6.Panel2.Controls.Add(this.label20);
             this.splitContainer6.Panel2.Controls.Add(this.label10);
             this.splitContainer6.Panel2.Controls.Add(this.labelBypassSpeed);
@@ -1323,9 +1325,9 @@ namespace TianHua.Hvac.UI
             // 
             // btn_Cancle
             // 
-            this.btn_Cancle.Location = new System.Drawing.Point(165, 203);
+            this.btn_Cancle.Location = new System.Drawing.Point(186, 203);
             this.btn_Cancle.Name = "btn_Cancle";
-            this.btn_Cancle.Size = new System.Drawing.Size(80, 23);
+            this.btn_Cancle.Size = new System.Drawing.Size(60, 23);
             this.btn_Cancle.TabIndex = 70;
             this.btn_Cancle.Text = "取消";
             this.btn_Cancle.UseVisualStyleBackColor = true;
@@ -1342,9 +1344,9 @@ namespace TianHua.Hvac.UI
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(80, 203);
+            this.btnOK.Location = new System.Drawing.Point(120, 203);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(80, 23);
+            this.btnOK.Size = new System.Drawing.Size(60, 23);
             this.btnOK.TabIndex = 69;
             this.btnOK.Text = "生成";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -1407,6 +1409,16 @@ namespace TianHua.Hvac.UI
             this.label40.Size = new System.Drawing.Size(65, 12);
             this.label40.TabIndex = 63;
             this.label40.Text = "旁通指定：";
+            // 
+            // btnHelp
+            // 
+            this.btnHelp.Location = new System.Drawing.Point(41, 203);
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(72, 23);
+            this.btnHelp.TabIndex = 78;
+            this.btnHelp.Text = "视频教程";
+            this.btnHelp.UseVisualStyleBackColor = true;
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
             // 
             // fmFpm
             // 
@@ -1572,5 +1584,6 @@ namespace TianHua.Hvac.UI
         private System.Windows.Forms.TextBox textPortElevation;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.RadioButton radioPortRange;
+        private System.Windows.Forms.Button btnHelp;
     }
 }

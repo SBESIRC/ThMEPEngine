@@ -1323,5 +1323,10 @@ namespace TianHua.Hvac.UI
                 ThMEPHVACService.PromptMsg("当前风机：" + key + " 路由未包含旁通");
             }
         }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_398cc3bda7f74f3db04b28de3a426b8d.html");
+        }
     }
 }
