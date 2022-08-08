@@ -69,6 +69,15 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="CAD\THDBSlabHatchExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBSlabBTHExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBSlabPLExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBBeamExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBColumnExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBMarkExtractionVisitor.cs" />
+    <Compile Include="CAD\ThDBStructureElementExtractionEngine.cs" />
+    <Compile Include="CAD\ThDBStructureElementBuilding.cs" />
+    <Compile Include="CAD\THDBWallExtractionVisitor.cs" />
     <Compile Include="CAD\ThTCHBuildingElementExtractionEngine.cs" />
     <Compile Include="CAD\ThTCHArchWallExtractionVisitor.cs" />
     <Compile Include="CAD\ThTCHDbExtension.cs" />
@@ -82,7 +91,9 @@
     <Compile Include="Model\SurrogateModel\Point3DSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\PolylineSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Vector3DSurrogate.cs" />
+    <Compile Include="Model\ThTCHBeam.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
+    <Compile Include="Model\ThTCHColumn.cs" />
     <Compile Include="Model\ThTCHElement.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
     <Compile Include="Model\ThTCHSlabDescendingData.cs" />
@@ -113,6 +124,15 @@
     <Compile Include="TCHArchDataConvert\THArchEntity\THArchEntityBase.cs" />
     <Compile Include="TCHArchDataConvert\THArchEntity\WallEntity.cs" />
     <Compile Include="TCHArchDataConvert\THArchEntity\WindowEntity.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureBeam.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureColumn.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureDBText.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureEntity.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlab.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlabBTH.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlabPL.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlabHatch.cs" />
+    <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureWall.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />

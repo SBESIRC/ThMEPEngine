@@ -35,7 +35,14 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            throw new System.NotImplementedException();
+            var visitor = new ThRawBeamExtractionVisitor()
+            {
+                LayerFilter = ThBeamLayerManager.GeometryXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database);
+            Results = visitor.Results;
         }
     }
 
@@ -81,7 +88,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new System.NotImplementedException();
+            var engine = new ThRawBeamExtractionEngine();
+            engine.ExtractFromMS(database);
+            Recognize(engine.Results, polygon);
         }
     }
 }

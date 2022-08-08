@@ -220,8 +220,8 @@ namespace ThMEPIFC.Ifc2x3
             {
                 result = model.Instances.New<IfcExtrudedAreaSolid>(s =>
                 {
-                    s.Depth = solid.Depth;
-                    s.SweptArea = solid.SweptArea;
+                    s.Depth = double.Parse(solid.Depth.Value.ToString());
+                    s.SweptArea = solid.SweptArea.CloneAndCreateNew(model);
                     s.ExtrudedDirection = solid.ExtrudedDirection.CloneAndCreateNew(model);
                     s.Position = solid.Position.CloneAndCreateNew(model);
                 });
@@ -231,6 +231,13 @@ namespace ThMEPIFC.Ifc2x3
                 var NewBrep = model.Instances.New<IfcFacetedBrep>();
                 NewBrep.Outer = brep.Outer.CloneAndCreateNew(model);
                 result = NewBrep;
+            }
+            else if(body is IfcFaceBasedSurfaceModel surfaceModel)
+            {
+                var newSurface = model.Instances.New<IfcFaceBasedSurfaceModel>();
+                var faceSet = surfaceModel.FbsmFaces.FirstOrDefault();
+                newSurface.FbsmFaces.Add(faceSet.CloneAndCreateNew(model));
+                result = newSurface;
             }
             else
             {
@@ -264,9 +271,9 @@ namespace ThMEPIFC.Ifc2x3
         {
             var result = model.Instances.New<IfcAxis2Placement3D>(p =>
             {
-                p.Axis = axis2Placement.Axis.CloneAndCreateNew(model);
-                p.RefDirection = axis2Placement.RefDirection.CloneAndCreateNew(model);
-                p.Location = axis2Placement.Location.CloneAndCreateNew(model);
+                p.Axis = axis2Placement.Axis?.CloneAndCreateNew(model);
+                p.RefDirection = axis2Placement.RefDirection?.CloneAndCreateNew(model);
+                p.Location = axis2Placement.Location.CloneAndCreateNewXYZ(model);
             });
             return result;
         }
@@ -303,7 +310,7 @@ namespace ThMEPIFC.Ifc2x3
                 var polygon = polyLoop.Polygon;
                 foreach (var pt in polygon)
                 {
-                    NewPolyLoop.Polygon.Add(pt.CloneAndCreateNew(model));
+                    NewPolyLoop.Polygon.Add(pt.CloneAndCreateNewXYZ(model));
                 }
                 result = NewPolyLoop;
             }
@@ -314,10 +321,17 @@ namespace ThMEPIFC.Ifc2x3
             return result;
         }
         
-        private static IfcCartesianPoint CloneAndCreateNew(this IfcCartesianPoint point,IfcStore model)
+        private static IfcCartesianPoint CloneAndCreateNewXYZ(this IfcCartesianPoint point,IfcStore model)
         {
             var Newpt = model.Instances.New<IfcCartesianPoint>();
             Newpt.SetXYZ(point.X, point.Y, point.Z);
+            return Newpt;
+        }
+
+        private static IfcCartesianPoint CloneAndCreateNewXY(this IfcCartesianPoint point, IfcStore model)
+        {
+            var Newpt = model.Instances.New<IfcCartesianPoint>();
+            Newpt.SetXY(point.X, point.Y);
             return Newpt;
         }
 
@@ -344,6 +358,83 @@ namespace ThMEPIFC.Ifc2x3
                         pset.HasProperties.Add(item.CloneAndCreateNew(model));
                     }
                 });
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return result;
+        }
+
+        private static IfcConnectedFaceSet CloneAndCreateNew(this IfcConnectedFaceSet faceSet,IfcStore model)
+        {
+            var result = model.Instances.New<IfcConnectedFaceSet>();
+            foreach(var face in faceSet.CfsFaces)
+            {
+                result.CfsFaces.Add(face.CloneAndCreateNew(model));
+            }
+            return result;
+        }
+
+        private static IfcProfileDef CloneAndCreateNew(this IfcProfileDef profileDef,IfcStore model)
+        {
+            IfcProfileDef result;
+            if(profileDef is IfcRectangleProfileDef rectangleProfileDef)
+            {
+                result = model.Instances.New<IfcRectangleProfileDef>(d =>
+                {
+                    d.XDim = double.Parse(rectangleProfileDef.XDim.Value.ToString());
+                    d.YDim = double.Parse(rectangleProfileDef.YDim.Value.ToString());
+                    d.ProfileType = IfcProfileTypeEnum.AREA;
+                    //d.Position = rectangleProfileDef.Position.CloneAndCreateNew(model);
+                });
+            }
+            else if(profileDef is IfcArbitraryClosedProfileDef arbitraryClosedProfileDef)
+            {
+                result = model.Instances.New<IfcArbitraryClosedProfileDef>(d =>
+                {
+                    d.ProfileType = IfcProfileTypeEnum.AREA;
+                    d.OuterCurve = (arbitraryClosedProfileDef.OuterCurve as IfcCompositeCurve).CloneAndCreateNew(model);
+                });
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return result;
+        }
+
+        private static IfcCompositeCurve CloneAndCreateNew(this IfcCompositeCurve curve, IfcStore model)
+        {
+            var compositeCurve = model.Instances.New<IfcCompositeCurve>();
+            foreach (var segment in curve.Segments)
+            {
+                compositeCurve.Segments.Add(segment.CloneAndCreateNew(model));
+            }
+            return compositeCurve;
+        }
+
+        private static IfcCompositeCurveSegment CloneAndCreateNew(this IfcCompositeCurveSegment segment,IfcStore model)
+        {
+            var result = model.Instances.New<IfcCompositeCurveSegment>(s =>
+            {
+                s.SameSense = true;
+            });
+            result.ParentCurve = segment.ParentCurve.CloneAndCreateNew(model);
+            return result;
+        }
+
+        private static IfcCurve CloneAndCreateNew(this IfcCurve ifcCurve, IfcStore model)
+        {
+            IfcCurve result;
+            if(ifcCurve is IfcPolyline ifcPolyline)
+            {
+                var poly = model.Instances.New<IfcPolyline>();
+                foreach (var point in ifcPolyline.Points)
+                {
+                    poly.Points.Add(point.CloneAndCreateNewXY(model));
+                }
+                result = poly;
             }
             else
             {

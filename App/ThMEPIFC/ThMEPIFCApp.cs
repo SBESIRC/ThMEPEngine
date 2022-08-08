@@ -312,6 +312,41 @@ namespace ThMEPIFC
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THDWG2IFC", CommandFlags.Modal)]
+        public void THDWG2IFC()
+        {
+            var ifcFilePath = "";
+            //选择保存路径
+            ifcFilePath = SaveFilePath("ifc");
+            if (string.IsNullOrEmpty(ifcFilePath))
+            {
+                return;
+            }
+            if (File.Exists(ifcFilePath))
+                File.Delete(ifcFilePath);
+            
+            // 读入并解析TGL XML文件
+            var service = new ThDWGToIFCService(string.Empty);
+            var project = service.DWGToProject(false, false);
+            if (project == null)
+            {
+                return;
+            }
+            Stopwatch sw = new Stopwatch();
+            // 转换并保存IFC数据
+            ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
+            Tgl2IfcService.GenerateIfcModelAndSave(project, ifcFilePath);
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                //string msg = string.Format(
+                    //"读取DB数据楼层信息，分层组合数据时间：{0},分出组合数据转换IfcModel时间：{1},总时间：{2}",
+                    //(dwgDBDate - startDate).TotalSeconds,
+                    //(endDate - dwgDBDate).TotalSeconds,
+                    //(endDate - startDate).TotalSeconds);
+                //Active.Database.GetEditor().WriteMessage(msg);
+            }
+        }
+
         private string OpenTGLXMLFile()
         {
             OpenFileDialog dlg = new OpenFileDialog();

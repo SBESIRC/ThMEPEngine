@@ -318,6 +318,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             }
             return resCurves;
         }
+        
         ThTCHWall WallEntityToTCHWall(WallEntity entity) 
         {
             var pl = entity.OutLine.Shell();
