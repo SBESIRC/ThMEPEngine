@@ -629,7 +629,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     int stop = 0;
                 }
                 //DrawUtils.ShowGeometry(sr.OriginalPl, "l1OriginalPl", 170, lineWeightNum: 30);
-                sr.ClearedPl = PolylineProcessService.PlRegularization2(sr.OriginalPl, Parameter.ClearThreshold/2);
+                sr.ClearedPl = PolylineProcessService.PlRegularization2(sr.OriginalPl, Parameter.ClearThreshold);
 
                 //调整推荐间距
                 if (sr.SuggestDist == 0) sr.SuggestDist = Parameter.SuggestDistanceRoom;
