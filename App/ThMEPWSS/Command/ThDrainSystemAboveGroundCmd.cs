@@ -553,7 +553,7 @@ namespace ThMEPWSS.Command
         }
         List<ThIfcRoom> RoomTransform(List<ThIfcRoom> ifcRooms,Matrix3d matrix) 
         {
-            return ifcRooms.Select(e => ThIfcRoom.CreateWithTags(e.Boundary.Clone() as Entity, e.Tags)).ToList();
+            return ifcRooms.Select(e => ThIfcRoom.CreateWithTags(e.Boundary.GetTransformedCopy(matrix), e.Tags)).ToList();
         }
         List<EquipmentBlcokModel> InitFloorData(FloorFramed floor, double disToDist=30) 
         {

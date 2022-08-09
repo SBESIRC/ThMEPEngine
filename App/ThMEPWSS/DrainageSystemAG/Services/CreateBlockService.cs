@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
@@ -17,12 +18,12 @@ namespace ThMEPWSS.DrainageSystemAG.Services
         public static List<CreateResult> CreateBlocks(this Database database, List<CreateBlockInfo> createBlockInfos)
         {
             List<CreateResult> createRes = new List<CreateResult>();
-
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
+                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
                 foreach (var item in createBlockInfos)
                 {
-                    
                     try
                     {
                         var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
@@ -30,7 +31,7 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                         item.blockName,
                         item.createPoint,
                         new Scale3d(item.scaleNum),
-                        item.rotateAngle,
+                        item.rotateAngle+angle,
                         item.attNameValues);
                         if (null == id || !id.IsValid)
                             continue;
@@ -46,11 +47,8 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                         createRes.Add(new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag));
                     }
                     catch (Exception ex) 
-                    { 
-                    
-                    }
-                    
-                    
+                    {                    
+                    }                    
                 }
             }
             return createRes;
