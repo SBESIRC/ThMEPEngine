@@ -44,12 +44,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
         BufferTreeNode buffer_tree = null;
         Polyline MainRegion;
         List<int> SkeletonType = new List<int>();
-
+        List<Polyline> ExcessPlList = new List<Polyline>();
         // output
         public List<Polyline> Connector = new List<Polyline>();
         public List<Polyline> Skeleton = new List<Polyline>();
+        
+        
         bool IsCCW = false;
         bool IfFind = true;
+        
 
 
         public MainPipeGet(Polyline room, List<BufferPoly> shortest_way, int main_index, double buffer, double room_buffer, bool main_has_output)
@@ -78,7 +81,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             MainPipeIn = mainPipeRoad.GetPoint3dAt(0);
         }
 
-        public void Pipeline() 
+        public void Pipeline2() 
         {
             MainRegion = GetMainPipeArea();
             Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
@@ -97,6 +100,29 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
             DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
         }
+
+
+        public void Pipeline()
+        {
+            MainRegion = GetMainPipeArea();
+            Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
+            //PassageShowUtils.ShowEntity(PassageWayUtils.Copy(MainRegion), 4);
+            //AdjustRoom();
+            //PassageShowUtils.ShowEntity(MainRegion, 5);
+
+            if (!IfFind) return;
+            DrawUtils.ShowGeometry(MainRegion, "l2AdjustedRoom", 4, lineWeightNum: 30);
+            buffer_tree = GetBufferTree2(MainRegion);
+            GetSkeleton(buffer_tree);
+
+            AdjustPolyline adjustPolyline = new AdjustPolyline(Skeleton, Connector, clonedMainRegion, Buffer * 0.85);
+            adjustPolyline.Pipeline3();
+            Skeleton = adjustPolyline.Skeleton;
+            Skeleton.AddRange(ExcessPlList);
+
+            DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
+        }
+
 
         public Polyline GetMainPipeArea()
         {
@@ -250,7 +276,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         void AdjustRoom()
         {
-            MainRegion = PolylineProcessService.PlRegularization2(MainRegion, Buffer/4);
+            MainRegion = PolylineProcessService.PlRegularization2(MainRegion, Buffer/2);
         }
 
         BufferTreeNode GetBufferTree(Polyline poly, bool flag = false)
@@ -789,73 +815,55 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
 
 
-
-
-
-
-
-
-
-
-
-        public void Pipeline2()
-        {
-            MainRegion = GetMainPipeArea();
-            Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
-
-            if (!IfFind) return;
-            DrawUtils.ShowGeometry(MainRegion, "l2AdjustedRoom", 4, lineWeightNum: 30);
-            buffer_tree = GetBufferTree(MainRegion);
-            GetSkeleton(buffer_tree);
-
-            AdjustPolyline adjustPolyline = new AdjustPolyline(Skeleton, Connector, clonedMainRegion, Buffer * 0.85);
-            adjustPolyline.Pipeline3();
-            Skeleton = adjustPolyline.Skeleton;
-
-            DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
-        }
-
         BufferTreeNode GetBufferTree2(Polyline poly, bool flag = false)
         {
             //if (!poly.IsCCW()) poly.ReverseCurve();
             PolylineProcessService.ClearPolyline(ref poly);
-
-            BufferTreeNode node = new BufferTreeNode(poly);
-            DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
-
-            DealWithShellNew(node);
-
-            var next_buffer = PassageWayUtils.Buffer(poly, -Buffer);
-            //if (next_buffer.Count == 0) return node;
-            var next_small_buffer = PassageWayUtils.Buffer(poly, -(Buffer * 0.86));
-            double lengthBig = 0;
-            double lengthSmall = 0;
-            int numBig = 0;
-            int numSmall = 0;
-            next_buffer.ForEach(x => lengthBig += x.Length);
-            next_buffer.ForEach(x => numBig += x.NumberOfVertices);
-            next_small_buffer.ForEach(x => lengthSmall += x.Length);
-            next_small_buffer.ForEach(x => numSmall += x.NumberOfVertices);
-
-            if ((next_buffer.Count == 0 && next_small_buffer.Count > 0) ||
-                (numSmall > numBig && lengthSmall > lengthBig + 500))
+            List<Polyline> centerLineList = PolylineProcessService.GetCenterLine(poly);
+            
+            var smallBuffer = PassageWayUtils.Buffer(poly, -0.5 * Buffer);
+            Polyline bigBuffer = new Polyline();
+            if (smallBuffer.Count > 0) 
             {
-                next_buffer = next_small_buffer;
+                  Polyline orBigBuffer = smallBuffer.OfType<Polyline>().ToList().FindByMax(x => x.Area);
+                  bigBuffer = PassageWayUtils.Buffer(orBigBuffer, 0.5 * Buffer).OfType<Polyline>().ToList().FindByMax(x => x.Area);
             }
-
-            if (next_buffer.Count == 0) return node;
-
-            node.childs = new List<BufferTreeNode>();
-            foreach (Polyline child_poly in next_buffer)
+            if (bigBuffer == new Polyline())
             {
-                if (child_poly.Area > 1000)
+                BufferTreeNode node = new BufferTreeNode(poly);
+                DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
+                return node;
+            }
+            else 
+            {
+                DBObjectCollection dboC = new DBObjectCollection();
+                centerLineList.ForEach(x => dboC.Add(x as DBObject));
+                DBObjectCollection dboC2 = new DBObjectCollection();
+                dboC2.Add(bigBuffer);
+                List<Polyline> excenterLineList = dboC.Difference(dboC2).OfType<Polyline>().ToList();
+                excenterLineList.ForEach(x => DrawUtils.ShowGeometry(x, "l3EXCenter", 8, lineWeightNum: 30));
+
+                ExcessPlList.AddRange(excenterLineList);
+                bigBuffer = PolylineProcessService.PlRegularization3(bigBuffer, Buffer / 3);
+                
+                BufferTreeNode node = new BufferTreeNode(poly);
+                DrawUtils.ShowGeometry(poly, "l2BufferedPl", 3, lineWeightNum: 30);
+
+                var next_buffer = PassageWayUtils.Buffer(poly, -Buffer);
+                if (next_buffer.Count == 0) return node;
+
+                node.childs = new List<BufferTreeNode>();
+                foreach (Polyline child_poly in next_buffer)
                 {
-                    var child = GetBufferTree(child_poly, false);
-                    child.parent = node;
-                    node.childs.Add(child);
+                    if (child_poly.Area > 1000)
+                    {
+                        var child = GetBufferTree(child_poly, false);
+                        child.parent = node;
+                        node.childs.Add(child);
+                    }
                 }
+                return node;
             }
-            return node;
         }
 
         void DealWithShellNew2(BufferTreeNode node)
