@@ -90,10 +90,10 @@ namespace ThParkingStall.Core.OInterProcess
             return subAreas;
         }
 
-        public static List<OSubArea> GetOSubAreas(List<double> gene = null)
+        public static List<OSubArea> GetOSubAreas(Genome genome)
         {
             var subAreas = new List<OSubArea>();
-            var newSegs = ProcessToSegLines(gene);
+            var newSegs = ProcessToSegLines(genome);
 
             var SegLineStrings = newSegs.Select(l =>l.Splitter).ToList().ToLineStrings();
             var vaildLanes = newSegs.Select(l => l.VaildLane).ToList().ToLineStrings();
@@ -117,26 +117,36 @@ namespace ThParkingStall.Core.OInterProcess
             return subAreas;
         }
         //输出的分区线数量一致，需要求最大全连接组
-        public static List<SegLine> ProcessToSegLines(List<double> gene)
+        public static List<SegLine> ProcessToSegLines(Genome genome)
         {
             var newSegLines = new List<SegLine>();
-            if (gene == null)
+            if (genome == null)
             {
                 newSegLines = InitSegLines.Select(segLine => segLine.CreateNew()).ToList();
             }
-            //else
-            //{
-            //    for (int i = 0; i < InitSegLines.Count; i++)
-            //    {
-            //        newSegLines.Add(InitSegLines[i].GetMovedLine(gene[i]));
-            //    }
-            //}
-            newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex,BaseLineBoundary);
+            else
+            {
+                for (int i = 0; i < InitSegLines.Count; i++)
+                {
+                    newSegLines.Add(InitSegLines[i].GetMovedLine(genome.OGenes[0][i]));
+                }
+            }
+            newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex, BaseLineBoundary);
 
-            newSegLines = newSegLines.Where(l => l.VaildLane != null).ToList();
+            //newSegLines = newSegLines.Where(l => l.VaildLane != null).ToList();
             //获取最大全连接组,存在其他组标记 + 报错
             var groups = newSegLines.GroupSegLines().OrderBy(g => g.Count).ToList();
-            newSegLines = newSegLines.Slice(groups.Last());
+            for (int i = 0; i < groups.Count - 1; i++)
+            {
+                newSegLines.Slice(groups[i]).ForEach(l => {l.VaildLane = null; });
+            }
+            groups = newSegLines.GroupSegLines(2).OrderBy(g => g.Count).ToList();
+            for (int i = 0; i < groups.Count - 1; i++)
+            {
+                newSegLines.Slice(groups[i]).ForEach(l => { l.Splitter = null; });
+            }
+
+            //newSegLines = newSegLines.Slice(groups.Last());
             return newSegLines;
         }
     }

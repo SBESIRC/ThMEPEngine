@@ -50,46 +50,52 @@ namespace ThParkingStall.Core.OInterProcess
             _MinValue = minValue;
             _MaxValue = maxValue;
         }
-        //输入基因值0~1，输出移动后的分割线（基于最大最小值）
-        //public SegLine GetMovedLine(double fraction)
+        //基因转换到线
+        //public SegLine _GetMovedLine(OGene oGene)
         //{
-        //    if (fraction < 0.0 || fraction > 1.0) throw new ArgumentOutOfRangeException("Fraction must between 0 and 1!");
-        //    if (!IsInitLine) throw new ArgumentException("Only InitLine Can Create new SegLine!");
-        //    var distance = MinVal* fraction + MaxVal* (1-fraction);
-        //    var clone = Clone();
-        //    clone.Splitter = Splitter.Translate(Splitter.NormalVector().Multiply(distance));
-        //    return clone;
-        //}
-        //public SegLine GetMovedLine(double distance)//输入基因法向绝对数值,可为正或者负
-        //{
-        //    var orgVector = Splitter.OrgVector(out double orgDistance);
         //    var clone = CreateNew();
-            
-        //    clone.Splitter = Splitter.Translate(orgVector.Multiply(distance-orgDistance));
+        //    var dDNA = oGene.dDNAs.First();
+        //    var relativeValue = dDNA.Value;
+        //    double moveDistance;
+        //    if(relativeValue == 0)//值为0，选最大或最小值
+        //    {
+        //        if (dDNA.IsLowerBound) moveDistance = MinValue;
+        //        else moveDistance = MaxValue;
+        //    }
+        //    else
+        //    {
+        //        if(relativeValue > 0) moveDistance = MinValue + relativeValue;//正值，基于最小值增加
+        //        else moveDistance = MaxValue + relativeValue;//负值，基于最大值减少
+        //    }
+        //    clone.Splitter = Splitter.Translate(Splitter.NormalVector().Multiply(moveDistance));
         //    return clone;
-           
         //}
-
-        public SegLine GetMovedLine(OGene oGene)
+        public SegLine GetMovedLine(OGene oGene = null)
         {
             var clone = CreateNew();
-            var dDNA = oGene.dDNAs.First();
-            var relativeValue = dDNA.Value;
             double moveDistance;
-            if(relativeValue == 0)//值为0，选最大或最小值
+            if (IsFixed || oGene == null)
             {
-                if (dDNA.IsLowerBound) moveDistance = MinValue;
-                else moveDistance = MaxValue;
+                moveDistance = 0;
             }
             else
             {
-                if(relativeValue > 0) moveDistance = MinValue + relativeValue;//正值，基于最小值增加
-                else moveDistance = MaxValue + relativeValue;//负值，基于最大值减少
+                var dDNA = oGene.dDNAs.First();
+                var relativeValue = dDNA.Value;
+                if (relativeValue > 0)//相对值为正
+                {
+                    moveDistance = Math.Min( MinValue + relativeValue,MaxValue);//正值，基于最小值增加
+                }
+                else//非正
+                {
+                    moveDistance =Math.Max( MaxValue + relativeValue,MinValue);//负值，基于最大值减少
+                }
             }
             clone.Splitter = Splitter.Translate(Splitter.NormalVector().Multiply(moveDistance));
             return clone;
         }
 
+        //线移动到最小或最大值
         public SegLine GetMovedLine(bool ToMin = true)
         {
             var clone = CreateNew();
@@ -98,6 +104,41 @@ namespace ThParkingStall.Core.OInterProcess
             else moveDistance = MaxValue;
             clone.Splitter = Splitter.Translate(Splitter.NormalVector().Multiply(moveDistance));
             return clone;
+        }
+        public OGene GetOGene(double relativeValue)
+        {
+            return new OGene(0, relativeValue);
+        }
+
+
+        //分割线转为基因，adjust--是否自动调整
+        public OGene ToGene(bool Adjust = true)
+        {
+            double relativeValue;
+            if(MinValue <= 0 && MaxValue >= 0)//原始分割线在范围内
+            {
+                if(Math.Abs(MaxValue) > Math.Abs(MinValue))//离下边界近
+                {
+                    relativeValue = Math.Abs(MinValue);//相对下边，取正
+                }
+                else
+                {
+                    relativeValue = -Math.Abs(MaxValue);//相对上边，取负
+                }
+            }
+            else 
+            {
+                if (MinValue > 0)//小于下边界
+                {
+                    relativeValue = 0.1;//取最小值 + 0.1
+                }
+                else
+                {
+                    relativeValue = -0.1;//最大值 - 0.1
+                }
+
+            }
+            return new OGene(0, relativeValue); 
         }
     }
 

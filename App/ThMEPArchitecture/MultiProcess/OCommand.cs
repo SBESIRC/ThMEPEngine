@@ -28,6 +28,8 @@ using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
 using ThParkingStall.Core.OTools;
+using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
+
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -75,6 +77,9 @@ namespace ThMEPArchitecture.MultiProcess
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
                     var saveDoc = true;
+#if DEBUG
+                    saveDoc = false;
+#endif
                     if (_CommandMode == CommandMode.WithoutUI)
                     {
                         Logger?.Information($"DEbug--读取复现");
@@ -89,7 +94,7 @@ namespace ThMEPArchitecture.MultiProcess
                         }
                         else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
                         {
-                            //Run(currentDb);
+                            Run(currentDb);
                         }
                         else
                         {
@@ -160,7 +165,42 @@ namespace ThMEPArchitecture.MultiProcess
             }
         }
 
-        private void ProcessAndDisplay(List<double> solution, int SolutionID = 0, Stopwatch stopWatch = null)
+        public void Run(AcadDatabase acadDatabase)
+        {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            //var block = InputData.SelectBlock(acadDatabase);//提取地库对象
+            //var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            var MultiSolutionList = new List<int> { 0 };
+            if (blks == null) return;
+            foreach (var blk in blks)
+            {
+                var blkName = blk.GetEffectiveName();
+                UpdateLogger(blkName);
+                Logger?.Information("块名：" + blkName);
+                Logger?.Information("文件名：" + DrawingName);
+                Logger?.Information("用户名：" + Environment.UserName);
+                var layoutData = new OLayoutData(blk, Logger, out bool succeed);
+                if (!succeed) return;
+                layoutData.ProcessSegLines();
+                layoutData.SetInterParam();
+                for (int i = 0; i < MultiSolutionList.Count; i++)
+                {
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    ParameterStock.RunMode = MultiSolutionList[i];
+                    var dataWraper = new DataWraper();
+                    dataWraper.UpdateVMParameter(ParameterViewModel);
+                    VMStock.Init(dataWraper);
+                    var GA_Engine = new OGAGenerator(ParameterViewModel);
+                    GA_Engine.Logger = Logger;
+                    var Solution = GA_Engine.Run().First();
+                    ProcessAndDisplay(Solution, i, stopWatch);
+                }
+            }
+        }
+
+
+        private void ProcessAndDisplay(Genome solution, int SolutionID = 0, Stopwatch stopWatch = null)
         {
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));

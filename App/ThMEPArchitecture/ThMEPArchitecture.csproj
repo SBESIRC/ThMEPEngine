@@ -34,6 +34,7 @@
     <Compile Include="ParkingStallArrangement\Algorithm\GAData.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\InterParameterEx.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\MultiProcessGAGenerator.cs" />
+    <Compile Include="ParkingStallArrangement\Algorithm\OGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ProcessForDisplay.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\SegBreak.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />

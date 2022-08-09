@@ -255,6 +255,7 @@ namespace ThParkingStall.Core.OTools
             var PtsToExtend = new Dictionary<int, List<Coordinate>>();//其他线相交该线于该点，需要后续将该线延长
             for (int i = 0; i < seglines.Count; i++)
             {
+                
                 var baseLine = baseLines[i];
                 if (baseLine == null)//基线为null，跳过
                 {
@@ -266,12 +267,10 @@ namespace ThParkingStall.Core.OTools
                 var boundPts = new List<Coordinate>();
                 bool negConnect = SeglineIndex[i].Item1.Count == 0 /*|| baseLines.Slice(SeglineIndex[i].Item1).Contains(null)*/;
                 bool posConnect = SeglineIndex[i].Item2.Count == 0 /*|| baseLines.Slice(SeglineIndex[i].Item2).Contains(null)*/;
-
                 var extended = baseLine.OExtend(MaxDistance).ToLineString();//无限延长+相交
                 var basePt = new Point(baseLine.MidPoint);//基线中点
                 var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
                 boundPts = intersection.Coordinates.PositiveOrder();
-                
                 if (!negConnect)//需连到其他分割线
                 {
                     int idx;
@@ -320,7 +319,6 @@ namespace ThParkingStall.Core.OTools
                 if (baseLines[i] == null || negIdxs.Contains(i)) seglines[i] = null;
                 else seglines[i] = seglines[i].GetBaseLine(shell).OExtend(ExtendTol);
             }
-
         }
         public static (Coordinate,int) LineIntSecAndIdxByMax(this List<LineSegment> seglines,int curIdx,List<int> connectTo,bool IsNegative)
         {
@@ -530,12 +528,13 @@ namespace ThParkingStall.Core.OTools
             var bound = area.Buffer(tol);
             foreach(var segLine in lanes)
             {
-                var commonPart = segLine.Intersection(bound);
-                if(commonPart.Length > LengthTol)
+                var commonPart = segLine.Intersection(bound).Get<LineString>();
+                foreach(var lstr in commonPart)
                 {
-                    var orderd = commonPart.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
-                    vaildParts.Add(new LineSegment(orderd.First(), orderd.Last()));
-                }
+                    var ordered = lstr.Coordinates.PositiveOrder();
+                    var vaildPart = new LineSegment(ordered.First(), ordered.Last());
+                    if(vaildPart.Length > LengthTol) vaildParts.Add(vaildPart);
+                }  
             }
             return vaildParts;
         }
@@ -623,7 +622,7 @@ namespace ThParkingStall.Core.OTools
         public static bool UpdateLowerUpperBound(this SegLine segLine, Polygon WallLine, MNTSSpatialIndex BuildingSpatialIndex,
              MNTSSpatialIndex OuterBoundSPIndex)
         {
-            //if(segLine.Splitter.Distance(new Coordinate(3262192.0440, 5799553.6715))< 100)
+            //if (segLine.Splitter.Distance(new Coordinate(2402180.0370, 4763590.3175)) < 100)
             //{
             //    ;
             //}
@@ -633,6 +632,7 @@ namespace ThParkingStall.Core.OTools
             //segLine.IsInitLine = true;
             if (segLine.IsFixed) return true;
             if (!segLine.IsInitLine) return false;//非初始线
+            if (segLine.Splitter == null) return false;
             var splitterLstr = segLine.Splitter.ToLineString();
             var normalVector = segLine.Splitter.NormalVector();
             double posDistance =0;//分割线法向正方向距建筑距离

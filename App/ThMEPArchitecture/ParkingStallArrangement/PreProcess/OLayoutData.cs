@@ -419,6 +419,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 {
                     Ramps.Add(new ORamp(segLine, ramp.First()));
                     if(lineSegs.GetIntersections( WallLine,i).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
+                    else SegLines[i].IsFixed = true;
                 }
             }
         }
