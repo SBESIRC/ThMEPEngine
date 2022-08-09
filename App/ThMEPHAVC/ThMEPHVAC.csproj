@@ -449,4 +449,19 @@
     <Folder Include="SmokeProofSystem\MarkEngine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(Configuration)==Debug-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Debug-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
