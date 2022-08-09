@@ -105,7 +105,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 return 0;
             }
             var floorStr = pt.GetFloor(floorRect);
-            return Convert.ToInt32(floorStr.Last().ToString());
+            try
+            {
+                return Convert.ToInt32(floorStr.Last().ToString());
+            }
+            catch (Exception ex)
+            {
+            }
+            return 999;
+
         }
 
         public static bool IsOnLine(this Point3d pt, Line line, double tolerance = 10)
