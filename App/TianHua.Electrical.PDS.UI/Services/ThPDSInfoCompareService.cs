@@ -17,7 +17,7 @@ using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.UserContorls;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using PDSGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;

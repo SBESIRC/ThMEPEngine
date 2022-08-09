@@ -1,21 +1,12 @@
-﻿using System.Windows.Input;
-
-using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using Microsoft.Toolkit.Mvvm.Input;
-using NFox.Cad;
-
-using ThMEPWSS.Command;
+﻿using AcHelper;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using ThMEPWSS.SprinklerConnect.Cmd;
 using ThMEPWSS.SprinklerConnect.Model;
 
 namespace ThMEPWSS.ViewModel
 {
-    public  class ThSprinklerConnectVM
+    public class ThSprinklerConnectVM
     {
         public ThSprinklerConnectUIModel Parameter { get; set; }
         public ThSprinklerConnectVM()
@@ -51,8 +42,8 @@ namespace ThMEPWSS.ViewModel
             SetFocusToDwgView();
             using (var cmd = new ThSprinklerConnectCommand
             {
-                ParameterFromUI=true,
-                LayoutDirection= Parameter .LayoutDirection
+                ParameterFromUI = true,
+                LayoutDirection = Parameter.LayoutDirection
             })
             {
                 cmd.Execute();

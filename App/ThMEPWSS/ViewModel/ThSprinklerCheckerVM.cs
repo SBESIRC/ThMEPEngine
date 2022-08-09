@@ -1,15 +1,12 @@
-﻿using System.Linq;
-using System.Windows.Input;
-
+﻿using NFox.Cad;
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
-using Microsoft.Toolkit.Mvvm.Input;
-using NFox.Cad;
-
+using System.Linq;
+using System.Windows.Input;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using CommunityToolkit.Mvvm.Input;
 using ThMEPWSS.Command;
 using ThMEPWSS.Sprinkler.Model;
 
@@ -30,7 +27,7 @@ namespace ThMEPWSS.ViewModel
             if (CheckParameter())
             {
                 SetFocusToDwgView();
-                using (var cmd = new ThSprinklerCheckCmd { CommandName = "THPTJH", ActionName = "校核"})
+                using (var cmd = new ThSprinklerCheckCmd { CommandName = "THPTJH", ActionName = "校核" })
                 {
                     cmd.Execute();
                 }
@@ -109,7 +106,7 @@ namespace ThMEPWSS.ViewModel
                         OpenLayer(layerName);
 
                         var set = Active.Editor.SelectImplied();
-                        if(set.Status == PromptStatus.OK)
+                        if (set.Status == PromptStatus.OK)
                         {
                             var setObjs = set.Value.GetObjectIds();
                             var results = setObjs.Where(obj => !objs.Contains(obj)).ToArray();

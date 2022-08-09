@@ -4,7 +4,7 @@ using System.Windows.Input;
 using ThMEPWSS.Hydrant.Model;
 using ThMEPWSS.Hydrant.Service;
 using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 
 namespace ThMEPWSS.ViewModel
 {
