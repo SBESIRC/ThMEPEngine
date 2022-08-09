@@ -13,111 +13,92 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimensionMergeService
     {
-        public static List<int> GetMergedDimension(List<Point3d> pts, List<int> currentDim, ref List<List<int>> dims, List<List<List<int>>> group, ref bool[] isMerged, double step, bool isXAxis)
+        public static bool CanMerge(List<Point3d> pts, List<int> dim1, List<int> dim2, bool isXAxis, double step, Matrix3d matrix, List<Polyline> walls, double tolerance = 400.0) 
         {
-            List<int> mergedDim = new List<int>();
-            mergedDim.AddRange(currentDim);
-            for (int i = 0; i < group.Count; i++)
+            if (!IsConflicted(pts[dim1[0]], pts[dim2[dim2.Count - 1]], matrix, walls) && !IsConflicted(pts[dim1[dim1.Count - 1]], pts[dim2[0]], matrix, walls))
             {
-                if (!isMerged[i])
+                //不考虑点与点之间的合并
+                if (dim1.Count == 1 && dim2.Count == 1)
                 {
-                    if (CanMerge(pts, mergedDim, group[i][0], isXAxis, step))
-                    {
-                        isMerged[i] = true;
-                        dims[i] = group[i][0];
-                        mergedDim.AddRange(group[i][0]);
-                        return GetMergedDimension(pts, mergedDim, ref dims, group, ref isMerged, step, isXAxis);
-                    }
-                    else if (CanMerge(pts, mergedDim, group[i][group[i].Count - 1], isXAxis, step))
-                    {
-                        isMerged[i] = true;
-                        dims[i] = group[i][group[i].Count - 1];
-                        mergedDim.AddRange(group[i][group[i].Count - 1]);
-                        return GetMergedDimension(pts, mergedDim, ref dims, group, ref isMerged, step, isXAxis);
-                    }
+                    return false;
                 }
-            }
-            return mergedDim;
-        }
-
-        public static bool CanMerge(List<Point3d> pts, List<int> dim1, List<int> dim2, bool isXAxis, double step, double tolerance = 400.0)
-        {
-            double det = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis);
-            if (Math.Abs(det) < tolerance)
-            {
-                double distance1 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
-                double distance2 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
-                double distance3 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
-                double distance4 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[dim2.Count-1]], isXAxis);
+                double det = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis);
+                if (Math.Abs(det) < tolerance)
+                {
+                    double distance1 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
+                    double distance2 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
+                    double distance3 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
+                    double distance4 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
 
 
-                if ((tolerance < Math.Abs(distance1) && Math.Abs(distance1) < 1.5 * step) || (tolerance < Math.Abs(distance2) && Math.Abs(distance2) < 1.5 * step)) return true;
-                else if (distance3 * distance4 < 0) return true;
+                    if ((tolerance < Math.Abs(distance1) && Math.Abs(distance1) < 1.5 * step) || (tolerance < Math.Abs(distance2) && Math.Abs(distance2) < 1.5 * step)) return true;
+                    else if (distance3 * distance4 < 0) return true;
+                }
             }
 
             return false;
         }
 
-        // 优先选转换后坐标系下值小的标注进行边缘合并，若无合并标注且点数小于最长的1/3，则选择最长标注
-        public static List<List<int>> MergeEdgeDimensions(List<Point3d> pts, List<List<List<int>>> group, out List<List<int>> dims, double step, bool isXAxis)
-        {
-            List<List<int>> mergedDim = new List<List<int>>();
-            dims = new List<List<int>>();
-            for (int i = 0; i < group.Count; i++)
-            {
-                dims.Add(new List<int>());
-            }
-            bool[] isMerged = Enumerable.Repeat(false, group.Count).ToArray();
-            for (int i = 0; i < group.Count; i++)
-            {
-                if (!isMerged[i])
-                {
-                    isMerged[i] = true;
-                    List<int> minDim = GetMergedDimension(pts, group[i][0], ref dims, group, ref isMerged, step, isXAxis);
-                    if (minDim.Count > group[i][0].Count)
-                    {
-                        dims[i] = group[i][0];
-                        mergedDim.Add(minDim);
-                    }
-                    else
-                    {
-                        List<int> maxDim = GetMergedDimension(pts, group[i][group[i].Count - 1], ref dims, group, ref isMerged, step, isXAxis);
-                        if (maxDim.Count > group[i][group[i].Count - 1].Count)
-                        {
-                            dims[i] = group[i][group[i].Count - 1];
-                            mergedDim.Add(maxDim);
-                        }
-                        else
-                        {
-                            List<int> longestDim = GetLongestLine(group[i]);
-                            if (minDim.Count >= longestDim.Count / 2)
-                            {
-                                dims[i] = minDim;
-                                mergedDim.Add(minDim);
-                            }
-                            else if (maxDim.Count >= longestDim.Count / 2)
-                            {
-                                dims[i] = maxDim;
-                                mergedDim.Add(maxDim);
-                            }
-                            else
-                            {
-                                dims[i] = longestDim;
-                                mergedDim.Add(longestDim);
-                            }
+        //// 优先选转换后坐标系下值小的标注进行边缘合并，若无合并标注且点数小于最长的1/3，则选择最长标注
+        //public static List<List<int>> MergeEdgeDimensions(List<Point3d> pts, List<List<List<int>>> group, out List<List<int>> dims, double step, bool isXAxis)
+        //{
+        //    List<List<int>> mergedDim = new List<List<int>>();
+        //    dims = new List<List<int>>();
+        //    for (int i = 0; i < group.Count; i++)
+        //    {
+        //        dims.Add(new List<int>());
+        //    }
+        //    bool[] isMerged = Enumerable.Repeat(false, group.Count).ToArray();
+        //    for (int i = 0; i < group.Count; i++)
+        //    {
+        //        if (!isMerged[i])
+        //        {
+        //            isMerged[i] = true;
+        //            List<int> minDim = GetMergedDimension(pts, group[i][0], ref dims, group, ref isMerged, step, isXAxis);
+        //            if (minDim.Count > group[i][0].Count)
+        //            {
+        //                dims[i] = group[i][0];
+        //                mergedDim.Add(minDim);
+        //            }
+        //            else
+        //            {
+        //                List<int> maxDim = GetMergedDimension(pts, group[i][group[i].Count - 1], ref dims, group, ref isMerged, step, isXAxis);
+        //                if (maxDim.Count > group[i][group[i].Count - 1].Count)
+        //                {
+        //                    dims[i] = group[i][group[i].Count - 1];
+        //                    mergedDim.Add(maxDim);
+        //                }
+        //                else
+        //                {
+        //                    List<int> longestDim = GetLongestLine(group[i]);
+        //                    if (minDim.Count >= longestDim.Count / 2)
+        //                    {
+        //                        dims[i] = minDim;
+        //                        mergedDim.Add(minDim);
+        //                    }
+        //                    else if (maxDim.Count >= longestDim.Count / 2)
+        //                    {
+        //                        dims[i] = maxDim;
+        //                        mergedDim.Add(maxDim);
+        //                    }
+        //                    else
+        //                    {
+        //                        dims[i] = longestDim;
+        //                        mergedDim.Add(longestDim);
+        //                    }
 
-                        }
+        //                }
 
-                    }
+        //            }
 
-                }
+        //        }
 
-            }
+        //    }
 
-            return mergedDim;
-        }
+        //    return mergedDim;
+        //}
 
-        public static void InsertPoints(ref List<Point3d> pts, ref List<List<List<int>>> Dimension, double step, bool IsxAxis, Matrix3d matrix, List<Polyline> walls, out List<int> ficpts)
+        public static void InsertPoints(ref List<Point3d> pts, ref List<List<List<int>>> Dimension, List<List<List<int>>> group, double step, bool IsxAxis, Matrix3d matrix, List<Polyline> walls, out List<int> ficpts)
         {
             ficpts = new List<int>();
             for (int i = 0; i < Dimension.Count - 1; i++)
@@ -135,11 +116,14 @@ namespace ThMEPWSS.SprinklerDim.Service
                                 if (k == j || Dimension[i][k].Count == 1) continue;
                                 else
                                 {
-                                    if (GetNeareastDistance(pts, Dimension[i][k], Dimension[i][j]) < 2 * step && GetNeareastDistance(pts, Dimension[i][k], Dimension[i][j]) > 45) 
+                                    List<int> t = new List<int>();
+                                    int index = Dimension[i][j][0];
+                                    t = group[i].Where(p => p.Contains(index)).ToList()[0];
+                                    if (GetNeareastDistance(pts, Dimension[i][k], t) < 1.5 * step && GetNeareastDistance(pts, Dimension[i][k], t) > 45)
                                     {
                                         Line line = new Line(pts[Dimension[i][k][0]], pts[Dimension[i][k][Dimension[i][k].Count - 1]]);
                                         Point3d DropPt = line.GetClosestPointTo(pts[Dimension[i][j][0]], true);
-                                        if (IsConflicted(DropPt, pts[Dimension[i][j][0]], matrix, walls) || IsConflicted(DropPt, pts[Dimension[i][k][0]], matrix, walls)) continue;
+                                        if (IsConflicted(DropPt, pts[Dimension[i][j][0]], matrix, walls) || IsConflicted(DropPt, pts[Dimension[i][k][0]], matrix, walls) || DropPt.DistanceTo(line.GetClosestPointTo(pts[Dimension[i][j][0]], false)) > 1.5 * step) continue;
                                         else
                                         {
                                             pts.Add(DropPt);
@@ -259,7 +243,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return group;
         }
 
-        public static List<List<int>> MergeDimension(ref List<Point3d> pts, List<List<int>> group, double step, bool isXAxis, out List<int> FicPts)
+        public static List<List<int>> MergeDimension(ref List<Point3d> pts, List<List<int>> group, double step, bool isXAxis, out List<int> FicPts, Matrix3d matrix, List<Polyline> walls)
         {
             List<int> FicPts1 = new List<int>();
             Dictionary<int, bool> isMerged = new Dictionary<int, bool>();
@@ -269,7 +253,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             {
                 if (!isMerged[group[i][0]])
                 {
-                    MergedDimensions.Add(GetMerged(ref pts, group[i], group, step, isXAxis, ref isMerged, ref FicPts1));
+                    MergedDimensions.Add(GetMerged(ref pts, group[i], group, step, isXAxis, ref isMerged, ref FicPts1, matrix, walls));
                 }
             }
 
@@ -282,7 +266,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return MergedDimensions;
         }
 
-        public static List<int> GetMerged(ref List<Point3d> pts, List<int> currentdim1, List<List<int>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts)
+        public static List<int> GetMerged(ref List<Point3d> pts, List<int> currentdim1, List<List<int>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts, Matrix3d matrix, List<Polyline> walls)
         {
             List<int> MergedDims = new List<int>();
             List<int> rMergedDims = new List<int>();
@@ -290,7 +274,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             double ymin = 0;
             foreach(List<int> currentdim2 in group)
             {
-                if (CanMerge(pts, currentdim1, currentdim2, isXAxis, step) && !currentdim1.Equals(currentdim2)) 
+                if (CanMerge(pts, currentdim1, currentdim2, isXAxis, step, matrix, walls) && !currentdim1.Equals(currentdim2)) 
                 {
                     isMerged[currentdim1[0]] = true;
                     MergedDims.AddRange(currentdim1);

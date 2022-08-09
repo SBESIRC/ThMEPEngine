@@ -78,7 +78,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             return ThSprinklerDimConflictService.IsConflicted(line, walls);
         }
 
-
         public static double GetNeareastDistance(List<Point3d> pts, List<int> dim, List<int> isNotDimensioned)
         {
             Line dimline = new Line(pts[dim[0]], pts[dim[dim.Count - 1]]);
@@ -92,17 +91,18 @@ namespace ThMEPWSS.SprinklerDim.Service
             return distance.Min();
         }
 
-        public static List<List<int>> SeperateLine(List<Point3d> pts, List<int> line, bool isXAxis, double step)
+        public static List<List<int>> SeperateLine(List<Point3d> pts, List<int> line, List<int> line2, bool isXAxis, double step)
         {
             line.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));
             List<List<int>> lines = new List<List<int>>();
+            line2.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));
 
             List<int> one = new List<int> { line[0] };
             for (int i = 1; i < line.Count; i++)
             {
                 int iPtIndex = one[one.Count - 1];
                 int jPtIndex = line[i];
-                if (ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 2 * step)
+                if (ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex) - line2.IndexOf(jPtIndex)) != 1) 
                 {
                     lines.Add(one);
                     one = new List<int> { jPtIndex };
@@ -125,7 +125,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             {
                 if (dim != null)
                 {
-                    if (dim.Count != 1)
+                    if (dim.Count != 1 && dim.Count != 0)
                     {
                         Line line = new Line(pts[dim[0]], pts[dim[dim.Count - 1]]);
                         d1.Add(pts[pt1].DistanceTo(line.GetClosestPointTo(pts[pt1], true)));

@@ -23,7 +23,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 FicPts.Add(new List<int>());
                 List<List<List<int>>> XDimension = new List<List<List<int>>>();
                 List<List<List<int>>> YDimension = new List<List<List<int>>>();
-                for (int i = 0; i < transNetList[j].PtsGraph.Count; i++) 
+                for (int i = 0; i < transNetList[j].PtsGraph.Count; i++)
                 {
                     XDimension.Add(new List<List<int>>());
                     YDimension.Add(new List<List<int>>());
@@ -35,9 +35,9 @@ namespace ThMEPWSS.SprinklerDim.Service
                 // 边缘标注
                 for (int i = 0; i < transNetList[j].PtsGraph.Count; i++)
                 {
-                    XDimension[i].Add(GetEdgeDimensions(transNetList[j].Pts, transNetList[j].YCollineationGroup[i], out var xdim, step, true));
+                    XDimension[i].Add(getEdgeDimensions(transNetList[j].Pts, transNetList[j].YCollineationGroup[i], transNetList[j].XCollineationGroup[i], out var xdim, step, true));
                     XDim.Add(xdim);
-                    YDimension[i].Add(GetEdgeDimensions(transNetList[j].Pts, transNetList[j].XCollineationGroup[i], out var ydim, step, false));
+                    YDimension[i].Add(getEdgeDimensions(transNetList[j].Pts, transNetList[j].XCollineationGroup[i], transNetList[j].YCollineationGroup[i], out var ydim, step, false));
                     YDim.Add(ydim);
                 }
 
@@ -45,20 +45,17 @@ namespace ThMEPWSS.SprinklerDim.Service
                 for (int i = 0; i < transNetList[j].PtsGraph.Count; i++)
                 {
                     XDimension[i].AddRange(AddDimensions(transNetList[j], transNetList[j].YCollineationGroup[i], transNetList[j].XCollineationGroup[i], XDim[i], step, true, walls));
-                    //XDim[i] = dimx;
-                    //transNetList[j].Pts = Ptsx;
-                    //FicPts.AddRange(ficPtsx);
                     YDimension[i].AddRange(AddDimensions(transNetList[j], transNetList[j].XCollineationGroup[i], transNetList[j].YCollineationGroup[i], YDim[i], step, false, walls));
-                    //YDim[i] = dimy;
-                    //transNetList[j].Pts = Ptsy;
-                    //FicPts.AddRange(ficPtsy);
                 }
 
+                //将虚拟点存入pts中
                 List<Point3d> pts = transNetList[j].Pts;
 
                 //插入点
-                InsertPoints(ref pts, ref XDimension, step, true, transNetList[j].Transformer, walls, out var ficptsx);
-                InsertPoints(ref pts, ref YDimension, step, false, transNetList[j].Transformer, walls, out var ficptsy);
+                InsertPoints(ref pts, ref XDimension, transNetList[j].XCollineationGroup, step, true, transNetList[j].Transformer, walls, out var ficptsx);
+                InsertPoints(ref pts, ref YDimension, transNetList[j].YCollineationGroup, step, false, transNetList[j].Transformer, walls, out var ficptsy);
+
+                //记录虚拟点的下标      
                 FicPts[j].AddRange(ficptsx);
                 FicPts[j].AddRange(ficptsy);
 
@@ -69,8 +66,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (List<List<int>> ydim in YDimension) transNetList[j].YDimension.AddRange(ydim);
 
                 //合并能合并的标注
-                transNetList[j].XDimension = MergeDimension(ref pts, transNetList[j].XDimension, step, true, out var FicPts1);
-                transNetList[j].YDimension = MergeDimension(ref pts, transNetList[j].YDimension, step, false, out var FicPts2);
+                transNetList[j].XDimension = MergeDimension(ref pts, transNetList[j].XDimension, step, true, out var FicPts1, transNetList[j].Transformer, walls);
+                transNetList[j].YDimension = MergeDimension(ref pts, transNetList[j].YDimension, step, false, out var FicPts2, transNetList[j].Transformer, walls);
                 FicPts[j].AddRange(FicPts1);
                 FicPts[j].AddRange(FicPts2);
 
@@ -135,203 +132,89 @@ namespace ThMEPWSS.SprinklerDim.Service
             return EdgeDim;
         }
 
-        private static List<int> GetLongestLine(List<List<int>> collineationList)
+        private static List<int> getEdgeDimensions(List<Point3d> pts, List<List<int>> collinearation, List<List<int>> anothercollinearation, out List<int> dims, double step, bool isXAxis)
         {
-            int longestLineIndex = 0;
-            for (int i = 1; i < collineationList.Count; i++)
+            List<int> EdgeDim = new List<int>();
+            dims = new List<int>();
+            List<int> longestDim = GetLongestLine(collinearation);
+            List<int> minmarks = new List<int>();
+            List<int> maxmarks = new List<int>();
+            List<int> minDim = new List<int>();
+            List<int> maxDim = new List<int>();
+
+            anothercollinearation.ForEach(p => minmarks.Add(p[0]));
+            anothercollinearation.ForEach(p => maxmarks.Add(p[p.Count - 1]));
+            int mincount = 0;
+            int maxcount = 0;
+            int longcount = 0;
+
+            for (int p = 0; p < collinearation.Count; p++)
             {
-                if (collineationList[i].Count > collineationList[longestLineIndex].Count)
-                    longestLineIndex = i;
-            }
-
-            return collineationList[longestLineIndex];
-        }
-
-        private static bool IsConflicted(Point3d pts1, Point3d pts2, Matrix3d matrix, List<Polyline> walls)
-        {
-            List<Point3d> pts = new List<Point3d> { pts1, pts2 };
-            pts = ThChangeCoordinateService.MakeTransformation(pts, matrix.Inverse());
-            Line line = new Line(pts[0], pts[pts.Count - 1]);
-
-            return ThSprinklerDimConflictService.IsConflicted(line, walls);
-        }
-
-
-        private static double GetNeareastDistance(List<Point3d> pts, List<int> dim, List<int> isNotDimensioned)
-        {
-            Line dimline = new Line(pts[dim[0]], pts[dim[dim.Count - 1]]);
-            Point3d Dropfoot = dimline.GetClosestPointTo(pts[isNotDimensioned[0]], true);
-            List<double> distance = new List<double>();
-            foreach (int i in isNotDimensioned)
-            {
-                distance.Add(pts[i].DistanceTo(Dropfoot));
-            }
-
-            return distance.Min();
-        }
-
-        private static void InsertPoints(ref List<Point3d> pts, ref List<List<List<int>>> Dimension, double step, bool IsxAxis, Matrix3d matrix, List<Polyline> walls, out List<int> ficpts)
-        {
-            List<List<List<int>>> dimensions = new List<List<List<int>>>();
-            ficpts = new List<int>();
-            for (int i = 0; i < Dimension.Count - 1; i++)
-            {
-                if (Dimension[i].Count == 1) continue;
-                for (int j = 0; j < Dimension[i].Count; j++)
+                int linecount = 0;
+                foreach (int i in collinearation[p])
                 {
-                    if (Dimension[i][j].Count == 1)
-                    {
-                        for (int k = 0; k < Dimension[i].Count; k++)
-                        {
-                            if (Dimension[i][k] == null) continue;
-                            else
-                            {
-                                if (k == j|| Dimension[i][k].Count == 1) continue;
-                                else
-                                {
-                                    if (GetNeareastDistance(pts, Dimension[i][k], Dimension[i][j]) < 2 * step)
-                                    {
-                                        Line line = new Line(pts[Dimension[i][k][0]], pts[Dimension[i][k][Dimension[i][k].Count - 1]]);
-                                        Point3d DropPt = line.GetClosestPointTo(pts[Dimension[i][j][0]], true);
-                                        if (IsConflicted(DropPt, pts[Dimension[i][j][0]], matrix, walls)) continue;
-                                        else
-                                        {
-                                            pts.Add(line.GetClosestPointTo(pts[Dimension[i][j][0]], true));
-                                            Dimension[i][k].Add(pts.Count - 1);
-                                            ficpts.Add(pts.Count - 1);
-                                            Dimension[i][j] = null;
-                                            List<Point3d> pts1 = pts;
-                                            if (IsxAxis) Dimension[i][k] = Dimension[i][k].OrderBy(p => pts1[p].X).ToList();
-                                            else
-                                            {
-                                                Dimension[i][k] = Dimension[i][k].OrderBy(p => pts1[p].Y).ToList();
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    if (minmarks.Contains(i) && !maxmarks.Contains(i)) linecount += 2;
+                    else if (minmarks.Contains(i) && maxmarks.Contains(i)) continue;
+                    else linecount += 1;
+                }
+                if (linecount > mincount)
+                {
+                    mincount = linecount;
+                    minDim = collinearation[p];
                 }
             }
-        }
-
-        public static List<List<int>> SeperateLine(List<Point3d> pts, List<int> line, bool isXAxis, double step)
-        {
-            line.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));
-            List<List<int>> lines = new List<List<int>>();
-
-            List<int> one = new List<int> { line[0] };
-            for (int i = 1; i < line.Count; i++)
+            for (int p = 0; p < collinearation.Count; p++)
             {
-                int iPtIndex = one[one.Count - 1];
-                int jPtIndex = line[i];
-                if (ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 2 * step)
+                int linecount = 0;
+                foreach (int i in collinearation[collinearation.Count - p - 1])
                 {
-                    lines.Add(one);
-                    one = new List<int> { jPtIndex };
+                    if (maxmarks.Contains(i) && !minmarks.Contains(i)) linecount += 2;
+                    else if (minmarks.Contains(i) && maxmarks.Contains(i)) continue;
+                    else linecount += 1;
+                }
+                if (linecount > maxcount)
+                {
+                    maxcount = linecount;
+                    maxDim = collinearation[collinearation.Count - p - 1];
                 }
             }
-            lines.Add(one);
-
-            return lines;
-        }
-
-        private static ThSprinklerNetGroup MergeClaster(ThSprinklerNetGroup group)
-        {
-            for (int n = 0; n < group.XDimension.Count; n++)
+            for (int p = 0; p < longestDim.Count; p++)
             {
-                List<int> xdim = group.XDimension[n];
-                if (xdim.Count == 1)
-                {
-                    for (int i = 0; i < group.PtsGraph.Count; i++)
-                    {
-                        foreach (List<int> Collineation in group.YCollineationGroup[i])
-                        {
-                            if (Collineation.Contains(xdim[0]) && Collineation.Count != 1)
-                            {
-                                List<List<int>> t = new List<List<int>>();
-                                foreach (int k in Collineation)
-                                {
-                                    List<int> line = group.XCollineationGroup[i].Where(x => x.Contains(k)).ToList()[0];
-                                    t.Add(line);
-                                }
-                                bool[] isDimensioned = Enumerable.Repeat(false, t.Count).ToArray();
-                                foreach (List<int> dim in group.XDimension)
-                                {
-                                    CheckDimensions(dim, t, ref isDimensioned);
-                                }
-                                List<double> distance = new List<double>();
-                                for (int m = 0; m < Collineation.Count; m++)
-                                {
-                                    if (isDimensioned[m])
-                                    {
-                                        distance.Add(group.Pts[xdim[0]].DistanceTo(group.Pts[Collineation[m]]));
-                                    }
-                                }
-                                for (int m = 0; m < Collineation.Count; m++)
-                                {
-                                    if ((int)group.Pts[xdim[0]].DistanceTo(group.Pts[Collineation[m]]) == (int)distance.Min())
-                                    {
-                                        group.XDimension[n].Add(Collineation[m]);
-                                    }
-                                }
-                            }
-                        }
-
-
-                    }
-                }
-
+                if (minmarks.Contains(p) && maxmarks.Contains(p)) continue;
+                if (minmarks.Contains(p) || maxmarks.Contains(p)) longcount += 2;
+                else longcount += 1;
             }
 
-            for (int n = 0; n < group.YDimension.Count; n++)
+            if (mincount > longcount && mincount > maxcount)
             {
-                List<int> ydim = group.YDimension[n];
-                if (ydim.Count == 1)
-                {
-                    for (int i = 0; i < group.PtsGraph.Count; i++)
-                    {
-                        foreach (List<int> Collineation in group.XCollineationGroup[i])
-                        {
-                            if (Collineation.Contains(ydim[0]) && Collineation.Count != 1)
-                            {
-                                List<List<int>> t = new List<List<int>>();
-                                foreach (int k in Collineation)
-                                {
-                                    List<int> line = group.YCollineationGroup[i].Where(x => x.Contains(k)).ToList()[0];
-                                    t.Add(line);
-                                }
-                                bool[] isDimensioned = Enumerable.Repeat(false, t.Count).ToArray();
-                                foreach (List<int> dim in group.YDimension)
-                                {
-                                    CheckDimensions(dim, t, ref isDimensioned);
-                                }
-                                List<double> distance = new List<double>();
-                                for (int m = 0; m < Collineation.Count; m++)
-                                {
-                                    if (isDimensioned[m])
-                                    {
-                                        distance.Add(group.Pts[ydim[0]].DistanceTo(group.Pts[Collineation[m]]));
-                                    }
-                                }
-                                for (int m = 0; m < Collineation.Count; m++)
-                                {
-                                    if ((int)group.Pts[ydim[0]].DistanceTo(group.Pts[Collineation[m]]) == (int)distance.Min())
-                                    {
-                                        group.YDimension[n].Add(Collineation[m]);
-                                    }
-                                }
-                            }
-                        }
-
-
-                    }
-                }
-
+                dims = minDim;
+                EdgeDim.AddRange(minDim);
             }
-            return group;
+            else if (maxcount > longcount && maxcount > mincount)
+            {
+                dims = maxDim;
+                EdgeDim.AddRange(maxDim);
+            }
+            else if (maxcount > longcount && maxcount == mincount)
+            {
+                if (!isXAxis)
+                {
+                    dims = minDim;
+                    EdgeDim.AddRange(minDim);
+                }
+                else
+                {
+                    dims = maxDim;
+                    EdgeDim.AddRange(maxDim);
+                }
+            }
+            else
+            {
+                dims = longestDim;
+                EdgeDim.AddRange(longestDim);
+            }
+
+            return EdgeDim;
         }
 
         private static List<List<int>> AddDimensions(ThSprinklerNetGroup group, List<List<int>> collineation, List<List<int>> anotherCollineation, List<int> dim, double step, bool isXAxis, List<Polyline> walls)
@@ -350,13 +233,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                         List<int> tDim = GetLongestDimension(anotherCollineation[i], collineation, anotherCollineation, isDimensioned);
                         if (DeleteIsDimed(tDim, anotherCollineation, isDimensioned).Count > tDim2.Count)
                         {
-                            if (tDim.Count == 1) 
-                            {
-                                if (resDims.Count != 0) tDim1.Add(ChooseNearestPt(group.Pts, anotherCollineation[i][0], anotherCollineation[i][anotherCollineation[i].Count - 1], resDims));
-                                else tDim1.Add(ChooseNearestPt(group.Pts, anotherCollineation[i][0], anotherCollineation[i][anotherCollineation[i].Count - 1], new List<List<int>> { dim }));
-                            }
-                            else tDim1 = tDim;
-                            tDim2 = DeleteIsDimed(tDim1, anotherCollineation, isDimensioned);
+                            tDim1 = tDim;
+                            tDim2 = DeleteIsDimed(tDim, anotherCollineation, isDimensioned);
                         }
 
                     }
@@ -390,7 +268,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 {
                     if (tDim2.Count != 0)
                     {
-                        resDims.AddRange(SeperateLine(group.Pts, tDim2, isXAxis, step));
+                        resDims.AddRange(SeperateLine(group.Pts, tDim2, tDim1, isXAxis, step));
                         CheckDimensions(tDim2, anotherCollineation, ref isDimensioned);
                     }
                 }
