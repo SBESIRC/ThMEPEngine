@@ -461,7 +461,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             // 计算a上的最后一个满足间距的顶点。
             var points = PassageWayUtils.GetPolyPoints(a);
-            PassageShowUtils.ShowPoints(points);
             points.Reverse();
             Point3d ret1 = points.FindByMin(o => b.Distance(o));
             points.Reverse();
@@ -496,8 +495,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 dis1 += (points[i + 1] - points[i]).Length;
             }
             dis1 += (ret1 - points[index]).Length;
-            PassageShowUtils.ShowPoint(ret1,0);
-            PassageShowUtils.ShowPoint(ret2);
             // 计算ret2的距离
             double dis2 = 0;
             index = PassageWayUtils.GetSegIndex2(ret2, points);
