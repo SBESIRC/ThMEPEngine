@@ -54,27 +54,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             GetSkeleton(buffer_tree);
             AddInputSegment();
             BufferSkeleton();
-            //PostProcess();
         }
         void AdjustRoom()
         {
-            //// adjust first skeleton by adjusting room
-            //var points = room.GetPoints().ToList();
-            //var index = PassageWayUtils.GetSegIndex(pipe_in, points);
-            //PassageWayUtils.RearrangePoints(ref points, index);
-            //if (points[0].DistanceTo(pipe_in) < points[1].DistanceTo(pipe_in))
-            //    points.Reverse(1, points.Count - 1);
-            //else
-            //    PassageWayUtils.RearrangePoints(ref points, 1);
-            //var dis = points[0].DistanceTo(pipe_in);
-            //Vector3d dp = new Vector3d(0, 0, 0);
-            //if (dis < 3*pipe_width - room_buffer)
-            //    dp = (points[0] - pipe_in).GetNormal() * (pipe_width - room_buffer - dis);
-            //points[0] += dp;
-            //points[1] += dp;
-            //points.Add(points[0]);
-            //room.Dispose();
-            //room=PassageWayUtils.BuildPolyline(points);
             if (room.NumberOfVertices <= 5) return;
             var points = PassageWayUtils.GetPolyPoints(room);
             var count = points.Count;
@@ -221,7 +203,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 切断最后一条线
             var p0 = coords.First();
             var p1 = coords.Last();
-            if (p1.DistanceTo(p0) > buffer*2) 
+            if (p1.DistanceTo(p0) > buffer*1.5) 
                 coords.Add(p0 + (p1 - p0).GetNormal() * buffer);
             // 加入连接线
             if (node.parent.parent != null)
@@ -332,7 +314,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
         void GetSkeleton(BufferTreeNode node)
         {
             DealWithShell(node);
-            //skeleton.Add(node.shell);
             if (node.childs == null) return;
             foreach (var child in node.childs)
                 GetSkeleton(child);
@@ -341,10 +322,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             // 计算入口方向
             var points = PassageWayUtils.GetPolyPoints(room);
-            var pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_input.pin, points);
+            var point = room.GetClosePoint(pipe_input.pin);
+            var pre = PassageWayUtils.GetSegIndexOnPolygon(point, points);
             var next = (pre + 1) % points.Count;
             var dir = (points[next] - points[pre]).GetNormal().RotateBy(-Math.PI / 2, Vector3d.ZAxis);
-            var le = pipe_input.pin + dir * (room_buffer + pipe_width);
+
+            var le = pipe_input.pin + dir * (room_buffer + pipe_width + pipe_input.pin.DistanceTo(point));
             var line = new Line(pipe_input.pin, le);
             input_seg = line.Buffer(pipe_input.in_buffer);
         }
@@ -438,7 +421,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 new NotSupportedException();
             }
             var fillet_poly=FilletUtils.FilletPolyline(pipe, se[0], se[1]);
-            PassageShowUtils.ShowEntity(fillet_poly);
         }
         protected List<Point3d> CleanThinBoundary(List<Point3d> coords)
         {
@@ -469,26 +451,62 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             return new_coords;
         }
+        /// <summary>
+        /// 计算外层轮廓上距离内层轮廓的最近点
+        /// </summary>
+        /// <param name="a">外层轮廓，非闭合</param>
+        /// <param name="b">内层轮廓，闭合</param>
+        /// <returns></returns>
         Point3d GetClosedPointAtoB(Polyline a, Polyline b)
         {
-            Point3d ret = a.EndPoint;
-            var dis = b.Distance(ret);
-            // A is open while B is closed
-            for (int i = a.NumberOfVertices - 2; i >= 0; --i) 
-            {
-                var cur_dis = b.Distance(a.GetPoint3dAt(i));
-                if (cur_dis < dis - 1) 
-                {
-                    dis = cur_dis;
-                    ret = a.GetPoint3dAt(i);
-                }
-            }
+            // 计算a上的最后一个满足间距的顶点。
+            var points = PassageWayUtils.GetPolyPoints(a);
+            PassageShowUtils.ShowPoints(points);
+            points.Reverse();
+            Point3d ret1 = points.FindByMin(o => b.Distance(o));
+            points.Reverse();
+            var dis = b.Distance(ret1);
             if (dis > 1.5 * buffer) 
             {
-                var point_on_b = b.GetClosePoint(ret);
-                ret = a.GetClosePoint(point_on_b);
+                var point_on_b = b.GetClosePoint(ret1);
+                ret1 = a.GetClosePoint(point_on_b);
             }
-            return ret;
+            // 计算a的边上距离b最近的最后一个点
+            Point3d ret2 = Point3d.Origin;
+            double min_dis = double.MaxValue;
+            for(int i = points.Count - 2; i >= 0; i--)
+            {
+                var line = new Line(points[i + 1], points[i]);
+                for(int j=0;j<b.NumberOfVertices;j++)
+                {
+                    var point_on_a = line.GetClosestPointTo(b.GetPoint3dAt(j), false);
+                    dis = point_on_a.DistanceTo(b.GetPoint3dAt(j));
+                    if(dis<min_dis)
+                    {
+                        min_dis = dis;
+                        ret2 = point_on_a;
+                    }
+                }
+            }
+            // 计算ret1的距离
+            double dis1 = 0;
+            int index = PassageWayUtils.GetSegIndex2(ret1, points);
+            for (int i = 0; i < index; i++)
+            {
+                dis1 += (points[i + 1] - points[i]).Length;
+            }
+            dis1 += (ret1 - points[index]).Length;
+            PassageShowUtils.ShowPoint(ret1,0);
+            PassageShowUtils.ShowPoint(ret2);
+            // 计算ret2的距离
+            double dis2 = 0;
+            index = PassageWayUtils.GetSegIndex2(ret2, points);
+            for (int i = 0; i < index; i++)
+            {
+                dis2 += (points[i + 1] - points[i]).Length;
+            }
+            dis2 += (ret2 - points[index]).Length;
+            return dis1 > dis2 ? ret1 : ret2;
         }
         protected void SmoothPolyline(List<Point3d> points)
         {
@@ -537,6 +555,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     points.RemoveAt(points.Count - 1);
             }
         }
+
         public void Dispose()
         {
             PassageWayUtils.ClearListPoly(skeleton);

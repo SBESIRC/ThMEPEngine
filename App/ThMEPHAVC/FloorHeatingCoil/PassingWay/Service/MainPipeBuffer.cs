@@ -65,8 +65,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
         void MergeSkeleton()
         {
             skeletons = new List<List<Point3d>>();
-            foreach (var poly in raw_skeletons)
-                skeletons.Add(SmoothUtils.SmoothPoints(poly.GetPoints().ToList()));
+            for(int i=0;i<raw_skeletons.Count;++i)
+            {
+                skeletons.Add(SmoothUtils.SmoothPoints(raw_skeletons[i].GetPoints().ToList()));
+                if (skeletons[i].Count >= 3)
+                {
+                    var p0 = skeletons[i][skeletons[i].Count - 1];
+                    var p1 = skeletons[i][skeletons[i].Count - 2];
+                    var p2 = skeletons[i][skeletons[i].Count - 3];
+                    if (PassageWayUtils.PointOnSegment(p0, p2, p1))
+                        skeletons[i].RemoveAt(skeletons[i].Count - 1);
+                }
+            }
+
 
             while (true)
             {

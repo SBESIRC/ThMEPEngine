@@ -12,8 +12,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public Polyline shell { get; set; } = null;
         public List<BufferTreeNode> childs { get; set; } = null;
         public BufferTreeNode parent { get; set; } = null;
+        public int depth { get; set; } = -1;
         public BufferTreeNode() { }
         public BufferTreeNode(Polyline poly) { shell = poly; }
+
+        public BufferTreeNode(Polyline poly, int depth)
+        {
+            shell = poly;
+            this.depth = depth;
+        }
         public void SetShell(Polyline poly)
         {
             shell.Dispose();

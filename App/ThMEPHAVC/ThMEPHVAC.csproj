@@ -113,6 +113,7 @@
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingRoom.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThRoomSetModel.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\CenterLineUtils.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\data\PipeInput.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\data\PipeOutput.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\MainPipeGet.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="FloorHeatingCoil\PassingWay\model\RectBox.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\PassagePipeGenerator.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\RoomPipeGenerator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\RoomPipeGenerator1.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\Service\DirectionWayCalculator.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\Service\EquispacedWayCalculator.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\Service\IntersectWayCalculator.cs" />
