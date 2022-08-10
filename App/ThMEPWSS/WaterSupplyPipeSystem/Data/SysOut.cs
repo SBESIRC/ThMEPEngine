@@ -195,7 +195,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Data
             dic.Add("H+2.5", "h+" + (tankVM.TankHeight).ToString("0.00"));
             dic.Add("H+2.45", "h+" + (tankVM.TankHeight - 0.05).ToString("0.00"));
             dic.Add("H(39.70)", (tankVM.Elevation).ToString("0.00"));
-            dic.Add("11.87", "11.87");
+            dic.Add("11.87", (tankVM.TankLength* tankVM.TankWidth* (tankVM.TankHeight-0.6)).ToString("0.00"));
             dic.Add("长", Convert.ToString(tankVM.TankLength));
             dic.Add("宽", Convert.ToString(tankVM.TankWidth));
             dic.Add("高", Convert.ToString(tankVM.TankHeight));
