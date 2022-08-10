@@ -133,7 +133,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
                                 }
                                 else//非加压楼层
                                 {
-                                    if (FloorHeightVM.GeneralFloor * (j + 1) / 1000 <= tankVM.Elevation - 20 && !((j + 1) < prValveGroupFloor && (prValveGroupFloor - j - 1) < 4))
+                                    if (FloorHeightVM.GeneralFloor * (j + 1) / 1000 <= tankVM.Elevation - 20 && !(j< prValveGroupFloor && (prValveGroupFloor - j) < 4))
                                     {
                                         sysOut.MetersWithPrValve.Add(pt2);
                                     }
