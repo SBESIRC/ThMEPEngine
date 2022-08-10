@@ -82,7 +82,7 @@ namespace ThMEPWSS.FlatDiagramNs
                     pt.UserData = e;
                     mlPts.Add(pt);
                 }
-                ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CollectRainGeoData(range, adb, out List<StoreyInfo> storeysItems, out ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData);
+                ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CollectRainGeoData(range, adb, out List<StoreyItem> storeysItems, out ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData);
                 var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CreateRainDrawingData(adb, geoData, INTRAVASCULARLY);
                 exInfo.drDatas = drDatas;
                 exInfo.geoData = geoData;
@@ -312,7 +312,7 @@ namespace ThMEPWSS.FlatDiagramNs
         {
             return Math.Floor(v + THESAURUSCONFECTIONERY);
         }
-        public static void DrawBackToFlatDiagram(List<StoreyInfo> storeysItems, ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData, List<ThMEPWSS.ReleaseNs.RainSystemNs.RainDrawingData> drDatas, ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo, RainSystemDiagramViewModel vm)
+        public static void DrawBackToFlatDiagram(List<StoreyItem> storeysItems, ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData, List<ThMEPWSS.ReleaseNs.RainSystemNs.RainDrawingData> drDatas, ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo, RainSystemDiagramViewModel vm)
         {
             static string getDn(int dn)
             {
