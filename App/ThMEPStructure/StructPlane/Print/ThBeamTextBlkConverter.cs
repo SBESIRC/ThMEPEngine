@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
@@ -41,7 +40,7 @@ namespace ThMEPStructure.StructPlane.Print
                 var results = new ObjectIdCollection();
                 beamTextObjs.Where(o=>o.Count>0.0).ForEach(o =>
                 {
-                    var blkName = GetMultiTextString(o);
+                    var blkName = o.GetMultiTextString();
                     var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
                         ThPrintLayerManager.BeamTextLayerName, blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
                     var blkObj = acadDb.Element<BlockReference>(blkId,true);
@@ -126,7 +125,7 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 // o 中的文字都是平行的
                 var clones = o.Clone();
-                var blkName = GetMultiTextString(clones);
+                var blkName = clones.GetMultiTextString();
                 if(!string.IsNullOrEmpty(blkName))
                 {
                     AdjustPosition(clones);
@@ -279,13 +278,6 @@ namespace ThMEPStructure.StructPlane.Print
         {
             var mt = Matrix3d.Rotation(text.Rotation * -1.0, text.Normal, text.Position);
             text.TransformBy(mt);
-        }
-
-        private string GetMultiTextString(DBObjectCollection texts)
-        {
-            var sb = new StringBuilder();
-            texts.OfType<DBText>().ForEach(o => sb.Append(o.TextString));
-            return sb.ToString();   
         }
     }
 }

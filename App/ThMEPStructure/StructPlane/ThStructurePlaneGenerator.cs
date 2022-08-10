@@ -66,11 +66,16 @@ namespace ThMEPStructure.StructPlane
             var svgFiles = GetGeneratedSvgFiles();
             svgFiles = Sort(svgFiles);
 
+            // 记录svg的相对楼层
+            var flrIndexDict = new Dictionary<string, int>();
+            var flrIndex = 1;
+            svgFiles.ForEach(o => flrIndexDict.Add(o, flrIndex++));
+
             // 根据标准层编号过滤
             svgFiles = FilterSvgFiles(svgFiles, StdFlrNo);
 
             // 打印
-            Print(svgFiles);
+            Print(svgFiles,flrIndexDict);
 
             // 删除
             Erase(svgFiles);
@@ -174,7 +179,7 @@ namespace ThMEPStructure.StructPlane
             }
         }
         
-        private void Print(List<string> svgFiles)
+        private void Print(List<string> svgFiles, Dictionary<string, int> flrIndexDict)
         {            
             if(svgFiles.Count==0)
             {
@@ -185,14 +190,13 @@ namespace ThMEPStructure.StructPlane
             var printers = new List<ThStruDrawingPrinter>();
             if (DrawingType == ThStructurePlaneCommon.StructurePlanName)
             {
-                printers = PrintStructurePlan(svgFiles);
+                svgFiles.ForEach(o => printers.Add(PrintStructurePlan(o, flrIndexDict[o])));
             }
             else if (DrawingType == ThStructurePlaneCommon.WallColumnDrawingName)
             {
-                printers = PrintWallColumnDrawing(svgFiles);
+                svgFiles.ForEach(o => printers.Add(PrintWallColumnDrawing(o, flrIndexDict[o])));
             }
             var floorObjIds = printers.Select(o => o.ObjIds).ToList();
-            floorObjIds.Layout(PrintParameter.FloorSpacing);
             InsertBasePoint();
 
             // 设置DrawOrder
@@ -200,17 +204,20 @@ namespace ThMEPStructure.StructPlane
             bool hasHatch = floorObjIds.IsIncludeHatch();
 
             // 成块
-            var blkName = GetDrawingBlkName();
-            var blkIds = new ObjectIdCollection(); // 要打块的元素
-            floorObjIds.ForEach(o => blkIds.AddRange(FilterBlockObjIds(o)));
-            var blkObjs = Clone(blkIds);
-            var blockId = BuildBlock(blkObjs, blkName);
-            if(blockId!=ObjectId.Null)
+            // purge
+            Active.Editor.Command("_.PURGE", "B", " ","N");
+            floorObjIds.ForEach(o =>
             {
-                InsertBlock("0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
-                Erase(blkIds);
-            }
-
+                var blkName = GetDrawingBlkName();
+                var blkIds = FilterBlockObjIds(o); // 要打块的元素
+                var blkObjs = Clone(blkIds);
+                var blockId = BuildBlock(blkObjs, blkName);
+                if (blockId != ObjectId.Null)
+                {
+                    InsertBlock("0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
+                    Erase(blkIds);
+                }
+            });
             if (hasHatch)
             {
                 Active.Document.SendCommand("HatchToBack" + "\n");
@@ -310,75 +317,81 @@ namespace ThMEPStructure.StructPlane
             floorObjIds.SetLayerOrder(layerPriority2);
         }
 
-        private List<ThStruDrawingPrinter> PrintWallColumnDrawing(List<string> svgFiles)
+        private ThStruDrawingPrinter PrintWallColumnDrawing(string svgFile, int flrNaturalNumber)
         {
-            var results = new List<ThStruDrawingPrinter>();
-            svgFiles.ForEach(svgFile =>
-            {
-                var svg = new ThStructureSVGReader();
-                svg.ReadFromFile(svgFile);
+            var svg = new ThStructureSVGReader();
+            svg.ReadFromFile(svgFile);
 
-                // 对剪力墙造洞
-                var buildAreaSevice = new ThWallBuildAreaService();
-                var passGeos = buildAreaSevice.BuildArea(svg.Geos);
-                var svgInput = new ThSvgInput()
-                {
-                    Geos = passGeos,
-                    FloorInfos = svg.FloorInfos,
-                    DocProperties = svg.DocProperties,
-                };
-                var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
-                printer.Print(Active.Database);
-                results.Add(printer);
-            });
-            return results;
+            // 移动
+            if(flrNaturalNumber>1)
+            {
+                var moveDir = new Vector3d(0, PrintParameter.FloorSpacing * (flrNaturalNumber - 1), 0);
+                var mt = Matrix3d.Displacement(moveDir);
+                svg.Geos.ForEach(o => o.Boundary.TransformBy(mt));
+            }
+            
+            // 对剪力墙造洞
+            var buildAreaSevice = new ThWallBuildAreaService();
+            var passGeos = buildAreaSevice.BuildArea(svg.Geos);
+            var svgInput = new ThSvgInput()
+            {
+                Geos = passGeos,
+                FloorInfos = svg.FloorInfos,
+                DocProperties = svg.DocProperties,
+            };
+            var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
+            printer.Print(Active.Database);
+            return printer;
         }
 
-        private List<ThStruDrawingPrinter> PrintStructurePlan(List<string> svgFiles)
+        private ThStruDrawingPrinter PrintStructurePlan(string svgFile,int flrNaturalNumber)
         {
-            var results = new List<ThStruDrawingPrinter>();
-            svgFiles.ForEach(svgFile =>
+            var svg = new ThStructureSVGReader();
+            svg.ReadFromFile(svgFile);
+
+            // 移动
+            if (flrNaturalNumber > 1)
             {
-                var svg = new ThStructureSVGReader();
-                svg.ReadFromFile(svgFile);
+                var moveDir = new Vector3d(0, PrintParameter.FloorSpacing * (flrNaturalNumber - 1), 0);
+                var mt = Matrix3d.Displacement(moveDir);
+                svg.Geos.ForEach(o => o.Boundary.TransformBy(mt));
+            }
 
-                #region ---------- 数据处理 ----------
-                // 对剪力墙造洞
-                var buildAreaSevice = new ThWallBuildAreaService();
-                var newGeos = buildAreaSevice.BuildArea(svg.Geos);
+            #region ---------- 数据处理 ----------
+            // 对剪力墙造洞
+            var buildAreaSevice = new ThWallBuildAreaService();
+            var newGeos = buildAreaSevice.BuildArea(svg.Geos);
 
-                // 梁处理
-                // 用下层墙、柱对梁线进行Trim+合并梁线
-                var beamGeos = newGeos.GetBeamGeos();
-                var beamMarkGeos = newGeos.GetBeamMarks();
-                var passGeos = newGeos.Except(beamGeos).ToList();
-                var belowObjs = GetBelowObjs(passGeos);
-                var newBeamGeos = ThBeamLineCleaner.Clean(beamGeos, belowObjs,
-                    beamMarkGeos.Select(o => o.Boundary).ToCollection());
-                passGeos.AddRange(newBeamGeos);
+            // 梁处理
+            // 用下层墙、柱对梁线进行Trim+合并梁线
+            var beamGeos = newGeos.GetBeamGeos();
+            var beamMarkGeos = newGeos.GetBeamMarks();
+            var passGeos = newGeos.Except(beamGeos).ToList();
+            var belowObjs = GetBelowObjs(passGeos);
+            var newBeamGeos = ThBeamLineCleaner.Clean(beamGeos, belowObjs,
+                beamMarkGeos.Select(o => o.Boundary).ToCollection());
+            passGeos.AddRange(newBeamGeos);
 
-                // 处理空调板
-                if (PrintParameter.IsFilterCantiSlab)
-                {
-                    passGeos = ThSlabFilter.FilterCantiSlabs(passGeos);
-                }
+            // 处理空调板
+            if (PrintParameter.IsFilterCantiSlab)
+            {
+                passGeos = ThSlabFilter.FilterCantiSlabs(passGeos);
+            }
 
-                // 过滤指定厚度的楼板标注
-                passGeos = ThSlabFilter.FilterSpecifiedThickSlabs(passGeos, PrintParameter.DefaultSlabThick);
-                #endregion
+            // 过滤指定厚度的楼板标注
+            passGeos = ThSlabFilter.FilterSpecifiedThickSlabs(passGeos, PrintParameter.DefaultSlabThick);
+            #endregion
 
-                // 打印
-                var svgInput = new ThSvgInput()
-                {
-                    Geos = passGeos,
-                    FloorInfos = svg.FloorInfos,
-                    DocProperties = svg.DocProperties,
-                };
-                var printer = new ThStruPlanDrawingPrinter(svgInput, PrintParameter);
-                printer.Print(Active.Database);
-                results.Add(printer);
-            });
-            return results;
+            // 打印
+            var svgInput = new ThSvgInput()
+            {
+                Geos = passGeos,
+                FloorInfos = svg.FloorInfos,
+                DocProperties = svg.DocProperties,
+            };
+            var printer = new ThStruPlanDrawingPrinter(svgInput, PrintParameter);
+            printer.Print(Active.Database);
+            return printer;
         }
 
         private string GetDrawingBlkName()

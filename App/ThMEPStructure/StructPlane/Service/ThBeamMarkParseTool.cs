@@ -44,6 +44,21 @@ namespace ThMEPStructure.StructPlane.Service
                 return newElevation;
             }
         }
+
+        public static bool IsBeamSpec(this string content)
+        {
+            // 400x200
+            string pattern = @"^\d+\s*[Xx]{1}\s*\d+$";
+            return Regex.IsMatch(content.Trim(), pattern);
+        }
+
+        public static bool IsBeamBgMark(this string content)
+        {
+            // 400x200(Bg-2.5)
+            string pattern = @"^\d+\s*[Xx]{1}\s*\d+\s*[(（]{1}[\S\s]*[）)]{1}$";
+            return Regex.IsMatch(content.Trim(), pattern);
+        }
+
         public static string UpdateBGElevation(this string elevation,double flrHeight)
         {
             // 200x530(BG+5.670) 

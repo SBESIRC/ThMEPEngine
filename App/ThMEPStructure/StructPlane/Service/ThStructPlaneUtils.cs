@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
@@ -351,6 +353,77 @@ namespace ThMEPStructure.StructPlane.Service
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(b), true);
                 });
             }
+        }
+
+        public static Polyline CreateBeamPolygon(this Curve first, Curve second)
+        {
+            // first 和 second 是 平行的，要么是一对Line，要么是一对Arc
+            if (first is Line line1 && second is Line line2)
+            {
+                return CreateParallelLineRectangle(line1, line2);
+            }
+            else if (first is Arc arc1 && second is Arc arc2)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static Curve CreateBeamCenter(this Curve first, Curve second)
+        {
+            // first 和 second 是 平行的，要么是一对Line，要么是一对Arc
+            if (first is Line line1 && second is Line line2)
+            {
+                return CreateParallelCenter(line1, line2);
+            }
+            else if (first is Arc arc1 && second is Arc arc2)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private static Line CreateParallelCenter(Line first, Line second)
+        {
+            var pt1 = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var pt2 = first.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var pts1 = new List<Point3d>() { pt1, pt2, second.StartPoint, second.EndPoint };
+            var maxPair = pts1.GetCollinearMaxPts();
+            var pt3 = second.StartPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint);
+            var vec = second.StartPoint.GetVectorTo(pt3) * 0.5;
+            return new Line(maxPair.Item1 + vec, maxPair.Item2 + vec);
+        }
+
+        private static Polyline CreateParallelLineRectangle(Line first,Line second)
+        {
+            var pt1 = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var pt2 = first.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var pts1 = new List<Point3d>() { pt1, pt2, second.StartPoint, second.EndPoint };
+            var maxPair = pts1.GetCollinearMaxPts();
+            var pt3 = second.StartPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint);
+            var vec = second.StartPoint.GetVectorTo(pt3);
+            var pts2 = new Point3dCollection();
+            pts2.Add(maxPair.Item1);
+            pts2.Add(maxPair.Item2);
+            pts2.Add(maxPair.Item2 + vec);
+            pts2.Add(maxPair.Item1 + vec);
+            return pts2.CreatePolyline();
+        }
+        internal static Point3d GetTextCenter(this DBText dbText)
+        {
+            return dbText.GetCenterPointByOBB();
+        }
+        internal static string GetMultiTextString(this DBObjectCollection texts)
+        {
+            var sb = new StringBuilder();
+            texts.OfType<DBText>().ForEach(o => sb.Append(o.TextString));
+            return sb.ToString();
         }
     }
 }

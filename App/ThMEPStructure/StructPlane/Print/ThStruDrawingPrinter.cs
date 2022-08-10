@@ -11,34 +11,36 @@ namespace ThMEPStructure.StructPlane.Print
     internal abstract class ThStruDrawingPrinter
     {
         #region ---------- input -----------
-        protected List<ThFloorInfo> FloorInfos { get; set; }
-        protected List<ThComponentInfo> ComponentInfos { get; set; }
-        protected List<ThGeometry> Geos { get; set; }
-        protected Dictionary<string, string> DocProperties { get; set; }
+        protected List<ThFloorInfo> _floorInfos { get; set; }
+        protected List<ThComponentInfo> _componentInfos { get; set; }
+        protected List<ThGeometry> _geos { get; set; }
+        protected Dictionary<string, string> _docProperties { get; set; }
         #endregion
+        #region ---------- output ---------        
         /// <summary>
         /// 收集所有当前图纸打印的物体
         /// </summary>
         public ObjectIdCollection ObjIds { get; protected set; }
+        #endregion
         /// <summary>
         /// 楼层底部标高
         /// </summary>
-        protected double FlrBottomEle { get; set; }
+        protected double _flrBottomEle { get; set; }
         /// <summary>
         /// 楼层高度
         /// </summary>
-        protected double FlrHeight { get; set; }
-        protected ThPlanePrintParameter PrintParameter { get; set; }
+        protected double _flrHeight { get; set; }
+        protected ThPlanePrintParameter _printParameter { get; set; }
         public ThStruDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
         {
-            Geos = input.Geos;
-            FloorInfos = input.FloorInfos;
-            DocProperties = input.DocProperties;
-            ComponentInfos = input.ComponentInfos;
+            _geos = input.Geos;
+            _floorInfos = input.FloorInfos;
+            _docProperties = input.DocProperties;
+            _componentInfos = input.ComponentInfos;
             ObjIds = new ObjectIdCollection();
-            PrintParameter = printParameter;            
-            FlrHeight = DocProperties.GetFloorHeight();
-            FlrBottomEle = DocProperties.GetFloorBottomElevation();
+            _printParameter = printParameter;            
+            _flrHeight = _docProperties.GetFloorHeight();
+            _flrBottomEle = _docProperties.GetFloorBottomElevation();
         }
         public abstract void Print(Database database);
         protected ObjectIdCollection PrintUpperColumn(Database db, ThGeometry column)
@@ -96,17 +98,22 @@ namespace ThMEPStructure.StructPlane.Print
         {
             var extents = GetPrintObjsExtents(database);
             var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
-                extents.MinPoint.Y - PrintParameter.HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
+                extents.MinPoint.Y - _printParameter.HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
             var printService = new ThPrintDrawingHeadService()
             {
                 Head = flrRange,
-                DrawingSacle = PrintParameter.DrawingScale,
+                DrawingSacle = _printParameter.DrawingScale,
                 BasePt = textCenter,
             };
             return printService.Print(database);
         }
+        /// <summary>
+        /// 获取 ObjIds 集合里的范围
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
 
-        private Extents2d GetPrintObjsExtents(Database database)
+        protected Extents2d GetPrintObjsExtents(Database database)
         {
             // ObjIds 是收集每层打印的物体
             return ObjIds.ToDBObjectCollection(database).ToExtents2d();
@@ -123,7 +130,7 @@ namespace ThMEPStructure.StructPlane.Print
         protected List<ElevationInfo> GetElevationInfos()
         {
             var results = new List<ElevationInfo>();
-            FloorInfos.ForEach(o =>
+            _floorInfos.ForEach(o =>
             {
                 double flrBottomElevation = 0.0;
                 if (double.TryParse(o.Bottom_elevation, out flrBottomElevation))
@@ -145,6 +152,23 @@ namespace ThMEPStructure.StructPlane.Print
                 });
             });
             return results;
+        }
+
+        protected ObjectIdCollection Difference(ObjectIdCollection objIds)
+        {
+            var dict = new Dictionary<ObjectId, bool>();  
+            foreach(ObjectId objId in objIds)
+            {
+                if(dict.ContainsKey(objId))
+                {
+                    continue;
+                }
+                else
+                {
+                    dict.Add(objId, true);
+                }
+            }
+            return dict.Keys.ToObjectIdCollection();
         }
     }
 }

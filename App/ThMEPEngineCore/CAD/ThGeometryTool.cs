@@ -214,6 +214,7 @@ namespace ThMEPEngineCore.CAD
 
         public static Point3d GetCenterPoint(this DBText text)
         {
+            // 将DBText旋转到平行位置，计算中线点
             var clone = text.Clone() as DBText;
             var mt1 = Matrix3d.Rotation(-1.0 * text.Rotation, text.Normal, text.Position);
             clone.TransformBy(mt1); // 转成0度
@@ -222,6 +223,17 @@ namespace ThMEPEngineCore.CAD
             centerPt = centerPt.TransformBy(mt2);
             clone.Dispose();
             return centerPt;
+        }
+
+        public static Point3d GetCenterPointByOBB(this DBText text)
+        {
+            // 使用DBText的Obb计算中心点
+            var obb = text.TextOBB();
+            if (obb == null || obb.Area <= 1.0 || obb.NumberOfVertices < 4)
+            {
+                return text.Position;
+            }
+            return obb.GetPoint3dAt(0).GetMidPt(obb.GetPoint3dAt(2));
         }
 
         public static bool IsPerpendicular(Vector3d firstVec, Vector3d secondVec, double tolerance = 1.0)
@@ -424,6 +436,26 @@ namespace ThMEPEngineCore.CAD
             }
 
             return newPolyline;
+        }
+
+        public static bool IsIn(this Point3d pt, Extents2d range, bool includeEdge = true)
+        {
+            if (includeEdge)
+            {
+                return pt.X >= range.MinPoint.X && pt.X <= range.MaxPoint.X &&
+                pt.Y >= range.MinPoint.Y && pt.Y <= range.MaxPoint.Y;
+            }
+            else
+            {
+                return pt.X > range.MinPoint.X && pt.X < range.MaxPoint.X &&
+                pt.Y > range.MinPoint.Y && pt.Y < range.MaxPoint.Y;
+            }
+        }
+        public static Extents2d Enlarge(this Extents2d extents, double dis)
+        {
+            var minPt = new Point2d(extents.MinPoint.X - dis, extents.MinPoint.Y - dis);
+            var maxPt = new Point2d(extents.MaxPoint.X + dis, extents.MaxPoint.Y + dis);
+            return new Extents2d(minPt, maxPt);
         }
     }
 }

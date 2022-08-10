@@ -80,7 +80,7 @@ namespace ThMEPStructure.StructPlane.Service
                 var envelope = CreateEnvelope(item.Value, ClosestDistanceTolerance, ClosestDistanceTolerance);
                 var objs = Query(SpatialIndex, envelope);
                 objs = objs.OfType<DBText>()
-                    .Where(o => IsParallel(item.Key.Rotation, o.Rotation, TextParallelTolerance))
+                    .Where(o => item.Key.Rotation.IsRadianParallel(o.Rotation, TextParallelTolerance))
                     .ToCollection();
                 Groups.Add(objs);
             }
@@ -121,12 +121,6 @@ namespace ThMEPStructure.StructPlane.Service
                 results.Add(e, center);
             });
             return results;
-        }
-        private bool IsParallel(double firstRad,double secondRad,double tolerance)
-        {
-            var firstAng = firstRad.RadToAng();
-            var secondAng = secondRad.RadToAng();
-            return firstAng.IsAngleParallel(secondAng, tolerance);
         }
     }
 }

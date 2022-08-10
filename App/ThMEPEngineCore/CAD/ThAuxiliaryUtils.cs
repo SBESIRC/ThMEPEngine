@@ -220,5 +220,15 @@ namespace ThMEPEngineCore.CAD
             var minus = Math.Abs(firstAng - secondAng);
             return minus <= tolerance || Math.Abs(180.0 - minus) <= tolerance;
         }
+        public static bool IsRadianParallel(this double firstRad, double secondRad, double tolerance)
+        {
+            var firstAng = firstRad.RadToAng();
+            var secondAng = secondRad.RadToAng();
+            return firstAng.IsAngleParallel(secondAng, tolerance);
+        }
+        public static void AddRange(this DBObjectCollection firstObjs, DBObjectCollection secondObjs)
+        {
+            secondObjs.OfType<DBObject>().ForEach(o => firstObjs.Add(o));
+        }
     }
 }
