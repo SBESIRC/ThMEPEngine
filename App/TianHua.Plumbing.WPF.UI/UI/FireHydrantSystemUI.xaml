@@ -48,9 +48,10 @@
             <Label>起始序号：</Label>
             <TextBox x:Name="tbxStartNum" Margin="0,2,0,2" Text="{Binding StartNum}"></TextBox>
         </DockPanel>
-        <StackPanel>
-            <Button Margin="0,5,5,0" HorizontalAlignment="Right" Width="50" Height="24" x:Name="btnGenerate" Click="btnGenerate_Click">生成</Button>
-        </StackPanel>
+        <DockPanel LastChildFill="False">
+            <Button Margin="5" DockPanel.Dock="Left" Height="24" Click="Button_Click">视频教程</Button>
+            <Button Margin="5" DockPanel.Dock="Right" Width="50" Height="24" x:Name="btnGenerate" Click="btnGenerate_Click">生成</Button>
+        </DockPanel>
     </StackPanel>
 
 </cus:ThCustomWindow>
