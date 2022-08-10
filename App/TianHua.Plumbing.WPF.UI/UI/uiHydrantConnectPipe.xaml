@@ -10,7 +10,7 @@
                     Title="消火栓连管"
                     SizeToContent="Height"
                     Width="160"
-                    Height="230"
+                    Height="255"
              mc:Ignorable="d" >
     <cus:ThCustomWindow.Resources>
         <x:Array x:Key="PSLists" Type ="sys:String">
@@ -20,6 +20,7 @@
     </cus:ThCustomWindow.Resources>
     <Grid Margin="5,5,5,5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -45,5 +46,7 @@
                 <Button x:Name="btnConnectPipe" Content="连管" Click="btnConnectPipe_Click" Width="65" Height="25" Margin="10,0,0,0"/>
             </StackPanel>
         </StackPanel>
+        <Button Name="btnHelp" Grid.Row="3" Content="视频教程" Click="btnHelp_Click" Width="145" Height="25" Margin="0,5,0,0"/>
+        
     </Grid>
 </cus:ThCustomWindow>
