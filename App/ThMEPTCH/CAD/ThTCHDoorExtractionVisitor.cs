@@ -54,13 +54,11 @@ namespace ThMEPTCH.CAD
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(tch) && CheckLayerValid(tch) && tch.Visible && tch.Bounds.HasValue)
             {
-                var archDoor = tch.Database.LoadDoorFromDb(tch.ObjectId);
-                var outline = CreateOutline(archDoor);
-                outline.TransformBy(matrix);
+                var archDoor = tch.Database.LoadDoorFromDb(tch.ObjectId, matrix);
                 results.Add(new ThRawIfcBuildingElementData()
                 {
                     Data = archDoor,
-                    Geometry = outline,
+                    Geometry = CreateOutline(archDoor),
                 });
             }
             return results;

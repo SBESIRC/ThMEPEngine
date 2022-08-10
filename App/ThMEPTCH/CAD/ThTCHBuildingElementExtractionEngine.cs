@@ -11,6 +11,11 @@ namespace ThMEPTCH.CAD
 {
     public class ThTCHBuildingElementExtractionEngine : ThBuildingElementExtractionEngine
     {
+        public ThTCHBuildingElementExtractionEngine()
+        {
+            Results = new List<ThRawIfcBuildingElementData>();
+        }
+
         public override void Extract(Database database)
         {
             var visitors = new ThBuildingElementExtractionVisitor[]{
@@ -21,7 +26,6 @@ namespace ThMEPTCH.CAD
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitors);
             extractor.Extract(database);
-            Results = new List<ThRawIfcBuildingElementData>();
             visitors.ForEach(v => Results.AddRange(v.Results));
         }
 
@@ -35,18 +39,7 @@ namespace ThMEPTCH.CAD
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitors);
             extractor.ExtractFromEditor(frame, GetSelectionFilter());
-            Results = new List<ThRawIfcBuildingElementData>();
             visitors.ForEach(v => Results.AddRange(v.Results));
-        }
-
-        private SelectionFilter GetSelectionFilter()
-        {
-            var dxfNames = new string[]
-            {
-                ThMEPTCHService.DXF_WALL,
-                ThMEPTCHService.DXF_OPENING,
-            };
-            return ThSelectionFilterTool.Build(dxfNames);
         }
 
         public override void ExtractFromMS(Database database)
@@ -59,8 +52,17 @@ namespace ThMEPTCH.CAD
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitors);
             extractor.ExtractFromMS(database);
-            Results = new List<ThRawIfcBuildingElementData>();
             visitors.ForEach(v => Results.AddRange(v.Results));
+        }
+
+        private SelectionFilter GetSelectionFilter()
+        {
+            var dxfNames = new string[]
+            {
+                ThMEPTCHService.DXF_WALL,
+                ThMEPTCHService.DXF_OPENING,
+            };
+            return ThSelectionFilterTool.Build(dxfNames);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace ThMEPTCH.CAD
             {
                 results.Add(new ThRawIfcBuildingElementData()
                 {
-                    Data = tch.Database.LoadWindowFromDb(tch.ObjectId),
+                    Data = tch.Database.LoadWindowFromDb(tch.ObjectId, matrix),
                 });
             }
             return results;
