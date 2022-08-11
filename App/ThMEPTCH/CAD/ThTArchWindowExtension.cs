@@ -1,4 +1,5 @@
 ﻿using DotNetARX;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using AcRectangle = Autodesk.AutoCAD.DatabaseServices.Polyline;
@@ -28,26 +29,9 @@ namespace ThMEPTCH.CAD
                 new Point2d(window.Width/2.0, -window.Thickness/2.0)
             };
             profile.CreatePolyline(vertices);
-            var scale = window.Scale();
-            var rotation = window.Rotation();
-            var displacement = window.Displacement();
-            profile.TransformBy(scale.PreMultiplyBy(rotation).PreMultiplyBy(displacement));
+            var move = new Vector3d(window.BasePointX, window.BasePointY, window.BasePointZ);
+            profile.TransformBy(ThMatrix3dExtension.MultipleTransformFroms(1.0, window.Rotation, move));
             return profile;
-        }
-
-        private static Matrix3d Scale(this TArchWindow window)
-        {
-            return Matrix3d.Scaling(1.0, Point3d.Origin);
-        }
-
-        private static Matrix3d Rotation(this TArchWindow window)
-        {
-            return Matrix3d.Rotation(window.Rotation, Vector3d.XAxis, Point3d.Origin);
-        }
-
-        private static Matrix3d Displacement(this TArchWindow window)
-        {
-            return Matrix3d.Displacement(new Vector3d(window.BasePointX, window.BasePointY, window.BasePointZ));
         }
 
         private static void SyncWithProfile(this TArchWindow window, AcRectangle profile)

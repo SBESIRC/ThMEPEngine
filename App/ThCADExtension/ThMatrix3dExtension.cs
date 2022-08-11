@@ -101,5 +101,13 @@ namespace ThCADExtension
             identity[5] = Math.Sign(mirrorTemp[1, 1]);
             mirror = new Matrix3d(identity);
         }
+
+        public static Matrix3d MultipleTransformFroms(double scale, double rotation, Vector3d move)
+        {
+            var scaleM = Matrix3d.Scaling(scale, Point3d.Origin);
+            var rotationM = Matrix3d.Rotation(rotation, Vector3d.ZAxis, Point3d.Origin);
+            var displacementM = Matrix3d.Displacement(move);
+            return scaleM.PreMultiplyBy(rotationM).PreMultiplyBy(displacementM);
+        }
     }
 }

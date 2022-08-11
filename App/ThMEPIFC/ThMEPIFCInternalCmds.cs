@@ -14,6 +14,7 @@ namespace ThMEPIFC
             {
                 var engine = new ThTCHBuildingElementExtractionEngine();
                 engine.Extract(acdb.Database);
+                engine.ExtractFromMS(acdb.Database);
                 engine.Results.ForEach(o =>
                 {
                     acdb.ModelSpace.Add(o.Geometry);
