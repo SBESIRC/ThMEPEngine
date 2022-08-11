@@ -62,7 +62,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
 
             var netList = ThCreateGroupService.CreateSegGroup(allLineFinal, printTag);
 
-            ThCreateGroupService. ThSpinrklerAddSinglePtToNetGroup(ref netList, sprinkPts, ptAngleDict);
+            ThCreateGroupService.ThSpinrklerAddSinglePtToNetGroup(ref netList, sprinkPts, ptAngleDict);
 
             return netList;
         }

@@ -32,6 +32,10 @@ namespace ThMEPWSS.SprinklerDim.Service
                         var angle = connectL.First().Angle;
                         dict.Add(pt, angle);
                     }
+                    else
+                    {
+                        dict.Add(pt, 0);
+                    }
                 }
             }
             return dict;
@@ -833,7 +837,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                     {
                         continue;
                     }
-                   
+
                     //这里其实还是有bug，增加个新逻辑：检查同方向角度。后面的继续分组能找回来所以不作处理了
                     int idxCheckOverlap = 0;
                     for (; idxCheckOverlap < allLine.Count; idxCheckOverlap++)
