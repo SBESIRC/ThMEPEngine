@@ -158,6 +158,7 @@
     <Compile Include="Garage\Service\LayoutResult\ThStraitLinkCreator.cs" />
     <Compile Include="Garage\Service\Number\ThPassNumberService.cs" />
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
+    <Compile Include="Garage\Service\ThCenterLineService.cs" />
     <Compile Include="Garage\Service\ThLightingCrossPointService.cs" />
     <Compile Include="Garage\Service\ThLightingLineCorrectionService.cs" />
     <Compile Include="Garage\Service\ThLineNodingService.cs" />

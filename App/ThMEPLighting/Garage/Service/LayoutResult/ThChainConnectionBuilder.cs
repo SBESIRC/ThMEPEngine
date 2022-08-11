@@ -14,7 +14,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     public class ThChainConnectionBuilder : ThLightWireBuilder, IPrinter
     {
-        public ThChainConnectionBuilder(List<ThLightGraphService> graphs):base(graphs)
+        public ThChainConnectionBuilder(List<ThLightGraphService> graphs) : base(graphs)
         {
         }
         public override void Build()
@@ -122,10 +122,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             graphs.ForEach(g =>
             {
-                var sameLinks = FindLightNodeLinkOnSamePath(g.Links);               
+                var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
                 var branchBetweenLinks = FindLightNodeLinkOnBetweenBranch(g);
                 branchBetweenLinks = branchBetweenLinks.Where(o => !IsExsited(sameLinks, o)).ToList();
-                BuildSameLink(sameLinks);          
+                BuildSameLink(sameLinks);
                 BuildSameLink(branchBetweenLinks);
                 sameLinks.ForEach(l => AddToLoopWireGroup(l));
                 branchBetweenLinks.ForEach(l => AddToLoopWireGroup(l));
@@ -149,8 +149,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public override void Reset()
         {
             ResetObjIds(ObjIds);
-        }  
-        
+        }
+
         public void Print(Database db)
         {
             SetDatabaseDefault(db);

@@ -11,6 +11,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -46,11 +47,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lines.ForEach(e =>
             {
                 var direction = e.LineDirection();
-                var startExtandLine = new Line(e.StartPoint - DoubleRowOffsetDis / 2 * direction, e.StartPoint - DoubleRowOffsetDis * direction);
-                Search(e, startExtandLine, spatial, direction, linkSourceLines, linkTargetLines);
+                // 端点无延伸线则尝试跨线连接
+                if (spatial.SelectCrossingPolygon( e.StartPoint.CreateSquare(10.0)).Count == 1)
+                {
+                    var startExtandLine = new Line(e.StartPoint - DoubleRowOffsetDis / 2 * direction, e.StartPoint - DoubleRowOffsetDis * direction);
+                    Search(e, startExtandLine, spatial, direction, linkSourceLines, linkTargetLines);
+                }
 
-                var endExtandLine = new Line(e.EndPoint + DoubleRowOffsetDis / 2 * direction, e.EndPoint + DoubleRowOffsetDis * direction);
-                Search(e, endExtandLine, spatial, direction, linkSourceLines, linkTargetLines);
+                if (spatial.SelectCrossingPolygon(e.EndPoint.CreateSquare(10.0)).Count == 1)
+                {
+                    var endExtandLine = new Line(e.EndPoint + DoubleRowOffsetDis / 2 * direction, e.EndPoint + DoubleRowOffsetDis * direction);
+                    Search(e, endExtandLine, spatial, direction, linkSourceLines, linkTargetLines);
+                }
             });
 
             for (var i = 0; i < linkSourceLines.Count; i++)

@@ -28,7 +28,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             ArrangeParameter = arrangeParameter;
             DirectionConfig = directionConfig;
             CenterSideDicts = centerSideDicts;
-            OffsetDis2 = (ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0)*3.0;
+            OffsetDis2 = (ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0) * 3.0;
         }
 
         public List<ThLightNodeLink> CreateStraitLinkJumpWire(List<ThLightEdge> edges, List<string> defaultNumbers)
@@ -36,9 +36,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             //绘制十字路口跨区具有相同编号的的跳线
             var linker = new ThCrossLightNodeLinker(edges, ArrangeParameter.DoubleRowOffsetDis);
             linker.Link();
-            if(ArrangeParameter.ConnectMode == ConnectMode.Linear)
+            if (ArrangeParameter.ConnectMode == ConnectMode.Linear)
             {
-                CreateCrossLinearLinkWire(linker.LightLinks, defaultNumbers,OffsetDis2);
+                CreateCrossLinearLinkWire(linker.LightLinks, defaultNumbers, OffsetDis2);
             }
             else
             {
@@ -143,7 +143,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }).Any();
         }
 
-        private void CreateCrossLinearLinkWire(List<ThLightNodeLink> crossLinks, List<string> defaultNumbers,double jumpWireHeight)
+        private void CreateCrossLinearLinkWire(List<ThLightNodeLink> crossLinks, List<string> defaultNumbers, double jumpWireHeight)
         {
             crossLinks.ForEach(link =>
             {
@@ -242,7 +242,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
         }
 
-        private List<Curve> CreateLinearJumpLink(Point3d firstPt, Point3d secondPt,Vector3d direction,double height,double angle =30.0)
+        private List<Curve> CreateLinearJumpLink(Point3d firstPt, Point3d secondPt, Vector3d direction, double height, double angle = 30.0)
         {
             /*
              *     pt1                                 pt2
@@ -255,7 +255,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<Curve>();
             var linkDir = firstPt.GetVectorTo(secondPt).GetNormal();
             var perpendVec = linkDir.GetPerpendicularVector();
-            if(perpendVec.DotProduct(direction)<0)
+            if (perpendVec.DotProduct(direction) < 0)
             {
                 perpendVec = perpendVec.Negate();
             }
@@ -276,12 +276,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var firstMidPt = first.StartPoint.GetMidPt(first.EndPoint);
             var secondMidPt = second.StartPoint.GetMidPt(first.EndPoint);
-            if (ThGeometryTool.IsCollinearEx(first.StartPoint,first.EndPoint, second.StartPoint,second.EndPoint))
-            {                
-                if(Math.Abs(firstMidPt.Y- secondMidPt.Y)<=1.0)
+            if (ThGeometryTool.IsCollinearEx(first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint))
+            {
+                if (Math.Abs(firstMidPt.Y - secondMidPt.Y) <= 1.0)
                 {
                     // 水平
-                    if(firstMidPt.X< secondMidPt.X)
+                    if (firstMidPt.X < secondMidPt.X)
                     {
                         return firstMidPt.GetVectorTo(secondMidPt).GetPerpendicularVector();
                     }
@@ -318,7 +318,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var dir = firstMidPt.GetVectorTo(secondMidPt).GetNormal();
                 var firstPerpendDir = first.LineDirection().GetPerpendicularVector();
-                if(dir.GetAngleTo(firstPerpendDir) <Math.PI/2.0)
+                if (dir.GetAngleTo(firstPerpendDir) < Math.PI / 2.0)
                 {
                     return firstPerpendDir;
                 }
