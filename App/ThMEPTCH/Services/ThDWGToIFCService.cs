@@ -43,6 +43,7 @@ namespace ThMEPTCH.Services
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var engine = new ThTCHBuildingElementExtractionEngine();
+                engine.Extract(acdb.Database);
                 engine.ExtractFromMS(acdb.Database);
                 return engine.Results.Select(o => o.Data as TArchEntity).ToList();
             }

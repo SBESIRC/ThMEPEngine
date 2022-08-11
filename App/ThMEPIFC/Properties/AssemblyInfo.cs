@@ -35,4 +35,5 @@ using Autodesk.AutoCAD.Runtime;
 [assembly: AssemblyVersion("1.9.37.0")]
 [assembly: AssemblyFileVersion("1.9.37.0")]
 
+[assembly: CommandClass(typeof(ThMEPIFC.ThMEPIFCApp))]
 [assembly: CommandClass(typeof(ThMEPIFC.ThMEPIFCInternalCmds))]
