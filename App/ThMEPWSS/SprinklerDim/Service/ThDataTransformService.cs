@@ -19,11 +19,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             DBObjectCollection referenceLines = new DBObjectCollection();
             foreach (Polyline r in reference)
             {
-                for (int i = 0; i < r.NumberOfVertices; i++)
+                for (int i = 0; i < r.NumberOfVertices-1; i++)
                 {
-                    referenceLines.Add(new Line(r.GetPoint3dAt(i), r.GetPoint3dAt((i + 1) % r.NumberOfVertices)));
+                    referenceLines.Add(new Line(r.GetPoint3dAt(i), r.GetPoint3dAt(i + 1)));
                 }
-
+                if(r.Closed)
+                    referenceLines.Add(new Line(r.GetPoint3dAt(0), r.GetPoint3dAt(r.NumberOfVertices-1)));
             }
             ThCADCoreNTSSpatialIndex linesSI = new ThCADCoreNTSSpatialIndex(referenceLines);
             return linesSI;

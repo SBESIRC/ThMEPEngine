@@ -33,8 +33,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
                 ThCADCoreNTSSpatialIndex dimLinesSI = ThDataTransformService.GenerateSpatialIndex(dimLines);
 
-                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.XDimension, wallsSI, axisCurvesSI, dimLinesSI, true, step));
-                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.YDimension, wallsSI, axisCurvesSI, dimLinesSI, false, step));
+                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.XDimension, wallsSI, axisCurvesSI, dimLinesSI, true, step, printTag));
+                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.YDimension, wallsSI, axisCurvesSI, dimLinesSI, false, step, printTag));
             }
 
             // test
@@ -44,10 +44,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                 List<Point3d> pts = dim.DimPts;
                 for(int i = 0; i < pts.Count-1; i++)
                 {
-                    DrawUtils.ShowGeometry(pts[i], string.Format("SSS-{0}-6Dim", printTag), 11, 50, 100);
                     lineList.Add(new Line(pts[i], pts[i + 1]));
                 }
-                DrawUtils.ShowGeometry(pts[pts.Count-1], string.Format("SSS-{0}-6Dim", printTag), 11, 50, 100);
 
                 if (dim.Distance < 0.5) // 0
                 {
@@ -68,7 +66,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return realDim;
         }
 
-        private static List<ThSprinklerDimension> GenerateRealDimension(List<Point3d> pts, Matrix3d transformer, List<List<int>> dims, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, ThCADCoreNTSSpatialIndex dimensionedLines, bool isXAxis, double step)
+        private static List<ThSprinklerDimension> GenerateRealDimension(List<Point3d> pts, Matrix3d transformer, List<List<int>> dims, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, ThCADCoreNTSSpatialIndex dimensionedLines, bool isXAxis, double step, string printTag)
         {
             List<ThSprinklerDimension> realDim = new List<ThSprinklerDimension>();
 
@@ -104,6 +102,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
                     ///////////////////////
                     realDim.Add(new ThSprinklerDimension(dimPts, new Vector3d(), tag));
+                    DrawUtils.ShowGeometry(pt, string.Format("SSS-{0}-6Dim", printTag), 11, 50, 100);
                 }
 
             }
