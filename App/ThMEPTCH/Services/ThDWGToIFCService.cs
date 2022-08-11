@@ -450,13 +450,13 @@ namespace ThMEPTCH.Services
             outPLine.Closed = true;
             return outPLine;
         }
-        List<LevelElevtion> GetBlockElevtionValue(List<FloorBlock> floorBlocks)
+        List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks)
         {
-            var res = new List<LevelElevtion>();
+            var res = new List<LevelElevation>();
             if (floorBlocks.Count == 2 && floorBlocks.Any(o => o.FloorName == "1F") && floorBlocks.Any(o => o.FloorName == "构架"))
             {
-                res.Add(new LevelElevtion { Num = 1, Elevation = -4900, LevelHeight = 4860, FloorName = "1F" });
-                res.Add(new LevelElevtion { Num = 35, Elevation = 98500, LevelHeight = 4400, FloorName = "构架" });
+                res.Add(new LevelElevation { Num = "1", Elevation = -4900, LevelHeight = 4860, FloorName = "1F" });
+                res.Add(new LevelElevation { Num = "35", Elevation = 98500, LevelHeight = 4400, FloorName = "构架" });
                 return res;
             }
             double firstFloorHeight = 5300;
@@ -473,7 +473,7 @@ namespace ThMEPTCH.Services
                     string result = System.Text.RegularExpressions.Regex.Replace(str, @"[^0-9]+", "");
                     if (int.TryParse(result, out floorNum))
                     {
-                        res.Add(new LevelElevtion { Num = floorNum, Elevation = 0, LevelHeight = levelHeight, FloorName = name });
+                        res.Add(new LevelElevation { Num = floorNum.ToString(), Elevation = 0, LevelHeight = levelHeight, FloorName = name });
                     }
                 }
             }
@@ -698,12 +698,12 @@ namespace ThMEPTCH.Services
             Id = id;
         }
     }
-    class LevelElevtion
+    class LevelElevation
     {
         /// <summary>
         /// 楼层编号
         /// </summary>
-        public int Num { get; set; }
+        public string Num { get; set; }
         /// <summary>
         /// 楼层标高
         /// </summary>
