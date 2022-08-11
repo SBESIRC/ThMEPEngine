@@ -185,8 +185,14 @@ namespace ThMEPStructure.Reinforcement.TSSD
 
         private bool IsDirectoryExists(string path)
         {
-            var di =new DirectoryInfo(path);
-            return di.Exists;
+            if (string.IsNullOrEmpty(path))
+            {
+                return false;
+            }
+            else
+            {
+                return Directory.Exists(path);
+            }
         }
 
         private bool IsFileExists(string filePath)
