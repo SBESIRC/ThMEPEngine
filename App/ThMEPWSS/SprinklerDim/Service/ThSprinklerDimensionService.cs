@@ -36,9 +36,9 @@ namespace ThMEPWSS.SprinklerDim.Service
                 // 边缘标注
                 for (int i = 0; i < transNetList[j].PtsGraph.Count; i++)
                 {
-                    XDimension[i].Add(getEdgeDimensions(transNetList[j].Pts, transNetList[j].YCollineationGroup[i], transNetList[j].XCollineationGroup[i], out var xdim, step, true));
+                    XDimension[i].Add(getEdgeDimensions(transNetList[j].Pts, transNetList[j].YCollineationGroup[i], transNetList[j].XCollineationGroup[i], out var xdim, true));
                     XDim.Add(xdim);
-                    YDimension[i].Add(getEdgeDimensions(transNetList[j].Pts, transNetList[j].XCollineationGroup[i], transNetList[j].YCollineationGroup[i], out var ydim, step, false));
+                    YDimension[i].Add(getEdgeDimensions(transNetList[j].Pts, transNetList[j].XCollineationGroup[i], transNetList[j].YCollineationGroup[i], out var ydim, false));
                     YDim.Add(ydim);
                 }
 
@@ -66,9 +66,14 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (List<List<int>> xdim in XDimension) transNetList[j].XDimension.AddRange(xdim);
                 foreach (List<List<int>> ydim in YDimension) transNetList[j].YDimension.AddRange(ydim);
 
+                List<List<int>> xcollinearation = new List<List<int>>();
+                List<List<int>> ycollinearation = new List<List<int>>();
+                transNetList[j].XCollineationGroup.ForEach(p => xcollinearation.AddRange(p));
+                transNetList[j].YCollineationGroup.ForEach(p => ycollinearation.AddRange(p));
+
                 //合并能合并的标注
-                transNetList[j].XDimension = MergeDimension(ref pts, transNetList[j].XDimension, step, true, out var FicPts1, transNetList[j].Transformer, walls);
-                transNetList[j].YDimension = MergeDimension(ref pts, transNetList[j].YDimension, step, false, out var FicPts2, transNetList[j].Transformer, walls);
+                transNetList[j].XDimension = MergeDimension(ref pts, transNetList[j].XDimension, step, true, out var FicPts1, transNetList[j].Transformer, walls, xcollinearation);
+                transNetList[j].YDimension = MergeDimension(ref pts, transNetList[j].YDimension, step, false, out var FicPts2, transNetList[j].Transformer, walls, ycollinearation);
                 FicPts[j].AddRange(FicPts1);
                 FicPts[j].AddRange(FicPts2);
 
@@ -133,7 +138,8 @@ namespace ThMEPWSS.SprinklerDim.Service
             return EdgeDim;
         }
 
-        private static List<int> getEdgeDimensions(List<Point3d> pts, List<List<int>> collinearation, List<List<int>> anothercollinearation, out List<int> dims, double step, bool isXAxis)
+        //选取第一根标注线
+        private static List<int> getEdgeDimensions(List<Point3d> pts, List<List<int>> collinearation, List<List<int>> anothercollinearation, out List<int> dims, bool isXAxis)
         {
             List<int> EdgeDim = new List<int>();
             dims = new List<int>();
@@ -143,8 +149,13 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<int> minDim = new List<int>();
             List<int> maxDim = new List<int>();
 
-            anothercollinearation.ForEach(p => minmarks.Add(p[0]));
-            anothercollinearation.ForEach(p => maxmarks.Add(p[p.Count - 1]));
+            anothercollinearation.ForEach(p => p.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], !isXAxis))));
+            for(int i = 0; i < anothercollinearation.Count; i++)
+            {
+                minmarks.Add(anothercollinearation[i][0]);
+                maxmarks.Add(anothercollinearation[i][anothercollinearation[i].Count - 1]);
+            }
+            
             int mincount = 0;
             int maxcount = 0;
             int longcount = 0;
@@ -155,8 +166,9 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (int i in collinearation[p])
                 {
                     if (minmarks.Contains(i) && !maxmarks.Contains(i)) linecount += 2;
-                    else if (minmarks.Contains(i) && maxmarks.Contains(i)) continue;
-                    else linecount += 1;
+                    else if (minmarks.Contains(i) && maxmarks.Contains(i)) linecount += 0;
+                    else
+                        linecount += 1;
                 }
                 if (linecount > mincount)
                 {
@@ -164,26 +176,28 @@ namespace ThMEPWSS.SprinklerDim.Service
                     minDim = collinearation[p];
                 }
             }
-            for (int p = 0; p < collinearation.Count; p++)
+
+            for (int p = collinearation.Count - 1; p >= 0; p--) 
             {
                 int linecount = 0;
-                foreach (int i in collinearation[collinearation.Count - p - 1])
+                foreach (int i in collinearation[p])
                 {
                     if (maxmarks.Contains(i) && !minmarks.Contains(i)) linecount += 2;
-                    else if (minmarks.Contains(i) && maxmarks.Contains(i)) continue;
-                    else linecount += 1;
+                    else if (minmarks.Contains(i) && maxmarks.Contains(i)) linecount += 0;
+                    else
+                        linecount += 1;
                 }
                 if (linecount > maxcount)
                 {
                     maxcount = linecount;
-                    maxDim = collinearation[collinearation.Count - p - 1];
+                    maxDim = collinearation[p];
                 }
             }
-            for (int p = 0; p < longestDim.Count; p++)
+            foreach (int p in longestDim)
             {
                 if (minmarks.Contains(p) && maxmarks.Contains(p)) continue;
-                if (minmarks.Contains(p) || maxmarks.Contains(p)) longcount += 2;
-                else longcount += 1;
+                else if (!minmarks.Contains(p) && !maxmarks.Contains(p)) longcount += 1;
+                else longcount += 2;
             }
 
             if (mincount > longcount && mincount > maxcount)
