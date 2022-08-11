@@ -28,10 +28,16 @@ namespace ThMEPTCH.CAD
                 new Point2d(window.Width/2.0, -window.Thickness/2.0)
             };
             profile.CreatePolyline(vertices);
+            var scale = window.Scale();
             var rotation = window.Rotation();
             var displacement = window.Displacement();
-            profile.TransformBy(rotation.PostMultiplyBy(displacement));
+            profile.TransformBy(scale.PreMultiplyBy(rotation).PreMultiplyBy(displacement));
             return profile;
+        }
+
+        private static Matrix3d Scale(this TArchWindow window)
+        {
+            return Matrix3d.Scaling(1.0, Point3d.Origin);
         }
 
         private static Matrix3d Rotation(this TArchWindow window)

@@ -28,9 +28,10 @@ namespace ThMEPTCH.CAD
                 new Point2d(door.Width/2.0, -door.Thickness/2.0)
             };
             profile.CreatePolyline(vertices);
+            var scale = Matrix3d.Scaling(1.0, Point3d.Origin);
             var rotation = Matrix3d.Rotation(door.Rotation, Vector3d.XAxis, Point3d.Origin);
             var displacement = Matrix3d.Displacement(new Vector3d(door.BasePointX, door.BasePointY, door.BasePointZ));
-            profile.TransformBy(rotation.PostMultiplyBy(displacement));
+            profile.TransformBy(scale.PreMultiplyBy(rotation).PreMultiplyBy(displacement));
             return profile;
         }
 
