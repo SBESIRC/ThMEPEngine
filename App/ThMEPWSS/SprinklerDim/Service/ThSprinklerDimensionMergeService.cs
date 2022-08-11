@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.SprinklerDim.Model;
 using static ThMEPWSS.SprinklerDim.Service.ThSprinklerDimensionOperateService;
@@ -13,7 +14,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimensionMergeService
     {
-        public static bool CanMerge(List<Point3d> pts, List<int> dim1, List<int> dim2, bool isXAxis, double step, Matrix3d matrix, List<Polyline> walls, double tolerance = 400.0) 
+        public static bool CanMerge(List<Point3d> pts, List<int> dim1, List<int> dim2, bool isXAxis, double step, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls, double tolerance = 400.0) 
         {
             if (!IsConflicted(pts[dim1[0]], pts[dim2[dim2.Count - 1]], matrix, walls) && !IsConflicted(pts[dim1[dim1.Count - 1]], pts[dim2[0]], matrix, walls))
             {
@@ -22,13 +23,13 @@ namespace ThMEPWSS.SprinklerDim.Service
                 {
                     return false;
                 }
-                double det = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis);
+                double det = ThCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis);
                 if (Math.Abs(det) < tolerance)
                 {
-                    double distance1 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
-                    double distance2 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
-                    double distance3 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
-                    double distance4 = ThChangeCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
+                    double distance1 = ThCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
+                    double distance2 = ThCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
+                    double distance3 = ThCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
+                    double distance4 = ThCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
 
 
                     if ((tolerance < Math.Abs(distance1) && Math.Abs(distance1) < 1.5 * step) || (tolerance < Math.Abs(distance2) && Math.Abs(distance2) < 1.5 * step)) return true;
@@ -98,7 +99,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         //    return mergedDim;
         //}
 
-        public static void InsertPoints(ref List<Point3d> pts, ref List<List<List<int>>> Dimension, List<List<List<int>>> group, double step, bool IsxAxis, Matrix3d matrix, List<Polyline> walls, out List<int> ficpts)
+        public static void InsertPoints(ref List<Point3d> pts, ref List<List<List<int>>> Dimension, List<List<List<int>>> group, double step, bool IsxAxis, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls, out List<int> ficpts)
         {
             ficpts = new List<int>();
             for (int i = 0; i < Dimension.Count - 1; i++)
@@ -243,7 +244,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return group;
         }
 
-        public static List<List<int>> MergeDimension(ref List<Point3d> pts, List<List<int>> group, double step, bool isXAxis, out List<int> FicPts, Matrix3d matrix, List<Polyline> walls)
+        public static List<List<int>> MergeDimension(ref List<Point3d> pts, List<List<int>> group, double step, bool isXAxis, out List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
             List<int> FicPts1 = new List<int>();
             Dictionary<int, bool> isMerged = new Dictionary<int, bool>();
@@ -266,7 +267,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return MergedDimensions;
         }
 
-        public static List<int> GetMerged(ref List<Point3d> pts, List<int> currentdim1, List<List<int>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts, Matrix3d matrix, List<Polyline> walls)
+        public static List<int> GetMerged(ref List<Point3d> pts, List<int> currentdim1, List<List<int>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
             List<int> MergedDims = new List<int>();
             List<int> rMergedDims = new List<int>();

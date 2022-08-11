@@ -151,7 +151,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 while (edge != null)
                 {
                     int jPtIndex = graph.SprinklerVertexNodeList[edge.EdgeIndex].NodeIndex;
-                    double det = ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis);
+                    double det = ThCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis);
                     if (det > tolerance)
                     {
                         break;

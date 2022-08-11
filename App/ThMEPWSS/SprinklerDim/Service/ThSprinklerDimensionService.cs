@@ -9,13 +9,14 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.SprinklerDim.Model;
 using static ThMEPWSS.SprinklerDim.Service.ThSprinklerDimensionOperateService;
 using static ThMEPWSS.SprinklerDim.Service.ThSprinklerDimensionMergeService;
+using ThCADCore.NTS;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimensionService
     {
 
-        public static void GenerateDimension(List<ThSprinklerNetGroup> transNetList, double step, string printTag, List<Polyline> walls)
+        public static void GenerateDimension(List<ThSprinklerNetGroup> transNetList, double step, string printTag, ThCADCoreNTSSpatialIndex walls)
         {
             List<List<int>> FicPts = new List<List<int>>();
             for (int j = 0; j < transNetList.Count; j++)
@@ -83,7 +84,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 DrawUtils.ShowGeometry(dimensions, string.Format("SSS-Dimension-{0}-{1}", printTag, i), 1, 35);
                 ptsx.ForEach(p => DrawUtils.ShowGeometry(p, string.Format("SSS-Dimension-{0}-{1}-clasterx", printTag, i), 2, 35, 300));
                 ptsy.ForEach(p => DrawUtils.ShowGeometry(p, string.Format("SSS-Dimension-{0}-{1}-clastery", printTag, i), 3, 35));
-                List<Point3d> ds = ThChangeCoordinateService.MakeTransformation(transNetList[i].Pts, transNetList[i].Transformer.Inverse());
+                List<Point3d> ds = ThCoordinateService.MakeTransformation(transNetList[i].Pts, transNetList[i].Transformer.Inverse());
                 FicPts[i].ForEach(p => DrawUtils.ShowGeometry(ds[p], string.Format("SSS-Dimension-{0}-{1}-ficPoints", printTag, i), 0, 35));
 
             }
@@ -217,7 +218,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return EdgeDim;
         }
 
-        private static List<List<int>> AddDimensions(ThSprinklerNetGroup group, List<List<int>> collineation, List<List<int>> anotherCollineation, List<int> dim, double step, bool isXAxis, List<Polyline> walls)
+        private static List<List<int>> AddDimensions(ThSprinklerNetGroup group, List<List<int>> collineation, List<List<int>> anotherCollineation, List<int> dim, double step, bool isXAxis, ThCADCoreNTSSpatialIndex walls)
         {
             bool[] isDimensioned = Enumerable.Repeat(false, anotherCollineation.Count).ToArray();
             List<List<int>> resDims = new List<List<int>>();
@@ -289,7 +290,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             Clatersx = new List<Point3d>();
             Clatersy = new List<Point3d>();
             List<Point3d> transPts = group.Pts;
-            List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(transPts, group.Transformer.Inverse());
+            List<Point3d> pts = ThCoordinateService.MakeTransformation(transPts, group.Transformer.Inverse());
             List<Line> lines = new List<Line>();
 
             foreach (List<int> dim in group.XDimension)

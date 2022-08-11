@@ -219,7 +219,6 @@
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmd.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmdEntrance.THPLBZ.cs" />
-    <Compile Include="SprinklerDim\Data\ThDataReprocessing.cs" />
     <Compile Include="SprinklerDim\Data\ThSprinklerDimDataFactory.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
@@ -248,6 +247,7 @@
     <Compile Include="SprinklerDim\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetGraphService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetworkService.cs" />
+    <Compile Include="SprinklerDim\Service\ThDataTransformService.cs" />
     <Compile Include="SprinklerDim\ThSprinklerDimCommon.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorEngine.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />

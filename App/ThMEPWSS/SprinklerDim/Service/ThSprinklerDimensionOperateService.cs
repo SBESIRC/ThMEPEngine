@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.SprinklerDim.Model;
 
@@ -69,10 +70,10 @@ namespace ThMEPWSS.SprinklerDim.Service
             return collineationList[longestLineIndex];
         }
 
-        public static bool IsConflicted(Point3d pts1, Point3d pts2, Matrix3d matrix, List<Polyline> walls)
+        public static bool IsConflicted(Point3d pts1, Point3d pts2, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
             List<Point3d> pts = new List<Point3d> { pts1, pts2 };
-            pts = ThChangeCoordinateService.MakeTransformation(pts, matrix.Inverse());
+            pts = ThCoordinateService.MakeTransformation(pts, matrix.Inverse());
             Line line = new Line(pts[0], pts[pts.Count - 1]);
 
             return ThSprinklerDimConflictService.IsConflicted(line, walls);
@@ -93,16 +94,16 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static List<List<int>> SeperateLine(List<Point3d> pts, List<int> line, List<int> line2, bool isXAxis, double step)
         {
-            line.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+            line.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
             List<List<int>> lines = new List<List<int>>();
-            line2.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+            line2.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
 
             List<int> one = new List<int> { line[0] };
             for (int i = 1; i < line.Count; i++)
             {
                 int iPtIndex = one[one.Count - 1];
                 int jPtIndex = line[i];
-                if (ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex) - line2.IndexOf(jPtIndex)) != 1) 
+                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex) - line2.IndexOf(jPtIndex)) != 1) 
                 {
                     lines.Add(one);
                     one = new List<int> { jPtIndex };
@@ -150,7 +151,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 {
                     if(dims[k] != null)
                     {
-                        dims[k].Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+                        dims[k].Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
                         List<int> one = new List<int> { dims[k][0] };
                         for(int j = 1; j < dims[k].Count; j++)
                         {

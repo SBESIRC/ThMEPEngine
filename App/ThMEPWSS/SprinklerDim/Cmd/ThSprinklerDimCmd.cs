@@ -101,19 +101,24 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
                 netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, dataProcess.Room, out var roomsOut, printTag);
                 var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
-                List<Polyline> mix = new List<Polyline>();
-                mix.AddRange(dataProcess.Room);
-                mix.AddRange(ThDataReprocessing.TrimByRoom(dataProcess.Wall, dataProcess.Room));
 
-                ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mix, printTag);
+                List<Polyline> mixRoomWall = new List<Polyline>();
+                mixRoomWall.AddRange(dataProcess.Room);
+                mixRoomWall.AddRange(dataProcess.Wall);
+
+                ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mixRoomWall, out var mixRoomWallSI, printTag);
                 ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
 
                 // 区域标注喷淋点
-                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mix);
-                mix.AddRange(ThDataReprocessing.TrimByRoom(dataProcess.Column, dataProcess.Room));
-                ThSprinklerDimExtensionService.GenerateRealDimension(transNetList, roomsOut, mix, ThDataReprocessing.TrimByRoom(dataProcess.AxisCurves, dataProcess.Room), printTag, step);
+                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
 
+                List<Polyline> mixColumnWall = new List<Polyline>();
+                mixColumnWall.AddRange(dataProcess.Column);
+                mixColumnWall.AddRange(dataProcess.Wall);
+                
 
+                // 生成靠参照物的标注点
+                ThSprinklerDimExtensionService.GenerateRealDimension(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(dataProcess.AxisCurves), printTag, step);
 
             }
         }

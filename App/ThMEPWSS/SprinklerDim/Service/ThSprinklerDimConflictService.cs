@@ -9,25 +9,15 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Diagnostics;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimConflictService
     {
-        public static bool IsConflicted(Line line, List<Polyline> walls, double tolerance=200.0)
+
+        public static bool IsConflicted(Line line, ThCADCoreNTSSpatialIndex wallLinesSI, double tolerance = 200.0)
         {
-            //生成所有线（墙）
-            DBObjectCollection wallLines = new DBObjectCollection();
-            foreach (Polyline wall in walls)
-            {
-                for (int i = 0; i < wall.NumberOfVertices; i++)
-                {
-                    wallLines.Add(new Line(wall.GetPoint3dAt(i), wall.GetPoint3dAt((i + 1) % wall.NumberOfVertices)));
-                }
-
-            }
-            ThCADCoreNTSSpatialIndex wallLinesSI = new ThCADCoreNTSSpatialIndex(wallLines);
-
             //穿图的墙线crossGraphLines
             List<Line> crossGraphLines = new List<Line>();
             DBObjectCollection dbSelect = wallLinesSI.SelectFence(line);
@@ -73,6 +63,45 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             return false;
         }
+
+
+        public static bool IsDimCrossReference(Line dim, ThCADCoreNTSSpatialIndex referenceSI, double tolerance=10)
+        {
+            if(dim.Length > tolerance)
+            {
+                //穿标注的参考线crossDimLines 过滤平行线
+                List<Line> crossDimLines = new List<Line>();
+                DBObjectCollection dbSelect = referenceSI.SelectFence(dim);
+                foreach (DBObject dbo in dbSelect)
+                {
+                    Line line = (Line)dbo;
+                    if(ThCoordinateService.IsParalleled(dim, line))
+                        continue;
+
+                    crossDimLines.Add(line);
+                }
+
+                if (crossDimLines.Count > 0)
+                {
+                    foreach (Line l in crossDimLines)
+                    {
+                        Point3d p = dim.Intersection(l);
+
+                        if (p.DistanceTo(dim.StartPoint) < tolerance || p.DistanceTo(dim.EndPoint) < tolerance)
+                            continue;
+                        else
+                            return true;
+
+                    }
+
+                }
+            }
+
+            return false;
+        }
+
+
+
 
         public static bool IsConflicted(Polyline dim, List<Entity> objects)
         {

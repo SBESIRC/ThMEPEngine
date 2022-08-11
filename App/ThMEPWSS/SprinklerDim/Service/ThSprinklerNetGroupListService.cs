@@ -208,7 +208,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static bool IsContained(MPolygon room, Point3d pt)
         {
-            if (!ThCADCoreNTSPolygonExtension.ContainsOrOnBoundary(room.Shell(), pt))
+            if (!ThCADCoreNTSPolygonExtension.Contains(room.Shell(), pt))
             {
                 return false;
             }
@@ -216,30 +216,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<Polyline> holes = room.Holes();
             foreach (Polyline hole in holes)
             {
-                if (ThCADCoreNTSPolygonExtension.ContainsOrOnBoundary(hole, pt))
+                if (ThCADCoreNTSPolygonExtension.Contains(hole, pt))
                     return false;
             }
 
             return true;
         }
-
-        //public static bool IsContainedOrOnBoundary(MPolygon room, Point3d pt)
-        //{
-        //    if (!ThCADCoreNTSPolygonExtension.ContainsOrOnBoundary(room.Shell(), pt))
-        //    {
-        //        return false;
-        //    }
-
-        //    List<Polyline> holes = room.Holes();
-        //    foreach (Polyline hole in holes)
-        //    {
-        //        if (ThCADCoreNTSPolygonExtension.ContainsOrOnBoundary(hole, pt))
-        //            return false;
-        //    }
-
-        //    return true;
-        //}
-
 
 
         /// <summary>
@@ -255,9 +237,9 @@ namespace ThMEPWSS.SprinklerDim.Service
             {
                 
                 List<Point3d> pts = net.Pts;
-                Matrix3d transformer = ThChangeCoordinateService.GetCoordinateTransformer(new Point3d(0, 0, 0), pts[0], net.Angle);
+                Matrix3d transformer = ThCoordinateService.GetCoordinateTransformer(new Point3d(0, 0, 0), pts[0], net.Angle);
 
-                List<Point3d> transPts = ThChangeCoordinateService.MakeTransformation(pts, transformer);
+                List<Point3d> transPts = ThCoordinateService.MakeTransformation(pts, transformer);
                 ThSprinklerNetGroup transGroup = new ThSprinklerNetGroup(transPts, net.PtsGraph, transformer);
                 transNetList.Add(transGroup);
             }
@@ -345,7 +327,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
             }
 
-            collineationList.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x[0]], isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y[0]], isXAxis)));
+            collineationList.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x[0]], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y[0]], isXAxis)));
             return collineationList;
 
         }
@@ -370,7 +352,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                         while (edge != null)
                         {
                             int jPtIndex = graph.SprinklerVertexNodeList[edge.EdgeIndex].NodeIndex;
-                            double det = ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], !isXAxis);
+                            double det = ThCoordinateService.GetOriginalValue(pts[iPtIndex], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[jPtIndex], !isXAxis);
                             if (!isContained[jPtIndex] && Math.Abs(det) > tolerance)
                             {
                                 isContained[jPtIndex] = true;
@@ -386,7 +368,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 nodeIndexs = tmp;
             }
 
-            collineation.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
+            collineation.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
             return collineation;
         }
 
@@ -423,7 +405,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<Line> allLines = new List<Line>();
             foreach (ThSprinklerNetGroup netGroup in transNetList)
             {
-                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
+                List<Point3d> pts = ThCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
 
                 foreach(List<List<int>> collineation in netGroup.XCollineationGroup)
                 {
@@ -472,8 +454,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                             if (!isVisited[j])
                             {
                                 List<int> group2 = collineationGroup[j];
-                                double collineTol1 = ThChangeCoordinateService.GetOriginalValue(pts[group1[0]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[group2[group2.Count - 1]], isXAxis);
-                                double collineTol2 = ThChangeCoordinateService.GetOriginalValue(pts[group1[group1.Count - 1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[group2[0]], isXAxis);
+                                double collineTol1 = ThCoordinateService.GetOriginalValue(pts[group1[0]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[group2[group2.Count - 1]], isXAxis);
+                                double collineTol2 = ThCoordinateService.GetOriginalValue(pts[group1[group1.Count - 1]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[group2[0]], isXAxis);
 
                                 if (Math.Min(Math.Abs(collineTol1), Math.Abs(collineTol2)) > tolerance)// 检查是否有可能共线
                                 {
@@ -481,8 +463,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                                 }
                                 else
                                 {
-                                    double connectTol1 = ThChangeCoordinateService.GetOriginalValue(pts[group1[0]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[group2[group2.Count - 1]], !isXAxis);
-                                    double connectTol2 = ThChangeCoordinateService.GetOriginalValue(pts[group1[group1.Count - 1]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[group2[0]], !isXAxis);
+                                    double connectTol1 = ThCoordinateService.GetOriginalValue(pts[group1[0]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[group2[group2.Count - 1]], !isXAxis);
+                                    double connectTol2 = ThCoordinateService.GetOriginalValue(pts[group1[group1.Count - 1]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[group2[0]], !isXAxis);
 
                                     if (Math.Min(Math.Abs(connectTol1), Math.Abs(connectTol2)) < 1.5 * step)// 检查是否有可能合并
                                     {
@@ -516,15 +498,15 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         private static bool IsOneLine(List<Point3d> pts, HashSet<Tuple<int, int>> LinesCuttedOffByWall, List<int> line, bool isXAxis, double step, double tolerance=45.0)
         {
-            line.Sort((x, y) => ThChangeCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThChangeCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
+            line.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
 
             for (int i = 0; i < line.Count-1; i++)
             {
                 if(LinesCuttedOffByWall.Contains(new Tuple<int, int>(line[i], line[i + 1])) || LinesCuttedOffByWall.Contains(new Tuple<int, int>(line[i + 1], line[i])))
                     return false;
 
-                double collineTol = ThChangeCoordinateService.GetOriginalValue(pts[line[i+1]], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[line[i]], isXAxis);
-                double connectTol = ThChangeCoordinateService.GetOriginalValue(pts[line[i+1]], !isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[line[i]], !isXAxis);
+                double collineTol = ThCoordinateService.GetOriginalValue(pts[line[i+1]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[line[i]], isXAxis);
+                double connectTol = ThCoordinateService.GetOriginalValue(pts[line[i+1]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[line[i]], !isXAxis);
 
                 if (Math.Abs(collineTol) > tolerance || connectTol > 1.5 * step)
                     return false;
@@ -541,13 +523,15 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="transNetList"></param>
         /// <param name="walls"></param>
         /// <param name="printTag"></param>
-        public static void CutOffLinesCrossWall(List<ThSprinklerNetGroup> transNetList, List<Polyline> walls, string printTag)
+        public static void CutOffLinesCrossWall(List<ThSprinklerNetGroup> transNetList, List<Polyline> walls, out ThCADCoreNTSSpatialIndex wallsSI, string printTag)
         {
+            wallsSI = ThDataTransformService.GenerateSpatialIndex(walls);
+
             for (int idx = 0; idx < transNetList.Count; idx++)
             {
                 ThSprinklerNetGroup net = transNetList[idx];
                 net.LinesCuttedOffByWall.Clear();
-                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+                List<Point3d> pts = ThCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
 
                 //生成所有线（图）
                 DBObjectCollection graphLines = new DBObjectCollection();
@@ -573,7 +557,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 //判断相交线是否需要断开
                 foreach (Line line in crossWallLines)
                 {
-                    if (ThSprinklerDimConflictService.IsConflicted(line, walls))
+                    if (ThSprinklerDimConflictService.IsConflicted(line, wallsSI))
                     {
                         int i = SearchIndex(pts, line.StartPoint);
                         int j = SearchIndex(pts, line.EndPoint);
