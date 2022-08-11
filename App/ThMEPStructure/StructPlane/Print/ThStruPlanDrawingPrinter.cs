@@ -110,7 +110,7 @@ namespace ThMEPStructure.StructPlane.Print
             // 将带有标高的文字，换成两行(后处理)
             var beamTextInfos = new Dictionary<DBText, Vector3d>();
             beamTexts.Difference(removedTexts1)
-                .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));           
+                .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));                                    
             var adjustService = new ThAdjustBeamMarkService(db,beamLines, beamTextInfos);
             adjustService.Adjust();
 
@@ -126,6 +126,10 @@ namespace ThMEPStructure.StructPlane.Print
                 dblRowTextIds.AddRange(printer.Print(db, x.Item3));
                 Append(dblRowTextIds);
                 beamTextGroupObjIds.Add(dblRowTextIds);
+                // item1 被分为两行字 item2 and item3, item1被删除
+                var item1Origin = beamMarkOriginTextPos[x.Item1];
+                beamMarkOriginTextPos.Add(x.Item2, item1Origin);
+                beamMarkOriginTextPos.Add(x.Item3, item1Origin);
             });
 
             // 把不是双行标注的文字加入到beamTextObjIds中
@@ -458,6 +462,20 @@ namespace ThMEPStructure.StructPlane.Print
         {
             if(beamMark.Boundary is DBText dbText)
             {
+                // 更新梁规格是0x0
+                if(dbText.TextString.Contains("0x0"))
+                {
+                    var profileName = beamMark.Properties.GetProfileName();
+                    if (!string.IsNullOrEmpty(profileName))
+                    {
+                        var beamSpec = profileName.GetReducingBeamSpec();
+                        if (!string.IsNullOrEmpty(beamSpec))
+                        {
+                            var bgContent = dbText.TextString.GetBGContent();
+                            dbText.TextString = beamSpec + bgContent;
+                        }
+                    }
+                }
                 var decription = beamMark.Properties.GetDescription();
                 if (string.IsNullOrEmpty(decription))
                 {

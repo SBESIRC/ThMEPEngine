@@ -16,5 +16,6 @@
         public readonly static string FloorBottomElevationPropertyName = "bottom_elevation";
         public readonly static string DescriptionPropertyName = "description";
         public readonly static string NamePropertyName = "name";
+        public readonly static string ProfileNamePropertyName = "ProfileName";
     }
 }

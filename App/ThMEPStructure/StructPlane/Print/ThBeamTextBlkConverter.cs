@@ -163,6 +163,7 @@ namespace ThMEPStructure.StructPlane.Print
 
         private void AjustTextGap(DBObjectCollection horParallelTexts,List<double> textGaps)
         {
+            // 保持水平位置的相对性，第一个排在最上面
             if(textGaps.Count==0)
             {
                 return;
@@ -171,19 +172,12 @@ namespace ThMEPStructure.StructPlane.Print
             for (int i = 1; i < horParallelTexts.Count; i++)
             {
                 var second = horParallelTexts[i] as DBText;
-                var currenGap = System.Math.Abs(second.Position.Y - first.Position.Y);
                 var oldGap = textGaps[i - 1];
-                var minus = oldGap - currenGap;
-                if(second.Position.Y> first.Position.Y)
-                {
-                    var mt = Matrix3d.Displacement(new Vector3d(0, minus, 0));
-                    second.TransformBy(mt);
-                }
-                else
-                {
-                    var mt = Matrix3d.Displacement(new Vector3d(0, -1.0 * minus, 0));
-                    second.TransformBy(mt);
-                }                
+                var newSecondY = first.Position.Y - oldGap;
+                var moveVec = new Vector3d(0, newSecondY - second.Position.Y, 0);
+                var mt = Matrix3d.Displacement(moveVec);
+                second.TransformBy(mt);
+                first = second;       
             }
         }
 

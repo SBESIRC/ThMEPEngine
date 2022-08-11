@@ -201,7 +201,10 @@ namespace ThMEPStructure.StructPlane.Service
                 }
                 var specSizes = beamSpec.GetDoubles();
                 var beamWidth = specSizes[0];
-
+                if(beamWidth == 0.0)
+                {
+                    continue;
+                }
                 // 根据文字中心、文字移动方向和宽度,获取标注两边的线
                 var envelop = beamText.Position.CreateRectangle(markMoveDir, beamWidth * 1.1, 1.0);
                 var beamCurves = GetMarkAndLinePair(envelop, beamWidth);

@@ -78,6 +78,19 @@ namespace ThMEPStructure.StructPlane.Service
             }
         }
 
+        public static string GetProfileName(this Dictionary<string, object> properties)
+        {
+            var value = properties.GetPropertyValue(ThSvgPropertyNameManager.ProfileNamePropertyName);
+            if (value == null)
+            {
+                return "";
+            }
+            else
+            {
+                return (string)value;
+            }
+        }
+
         public static string GetDirection(this Dictionary<string, object> properties)
         {
             var value = properties.GetPropertyValue(ThSvgPropertyNameManager.DirPropertyName);

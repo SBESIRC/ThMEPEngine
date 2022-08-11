@@ -52,16 +52,21 @@ namespace ThMEPStructure.StructPlane.Service
                 .ForEach(o =>
             {
                 var res = Normalize(o.Key.StartPoint, o.Key.EndPoint);
-                var sorts = o.Value
-                .OfType<DBText>()
-                .OrderBy(d => d.Position
-                .GetProjectPtOnLine(res.Item1, res.Item2)
-                .DistanceTo(res.Item1)).ToCollection();
-                // 先保留第一个
-                for (int i = 1; i < sorts.Count; i++)
+                o.Value.OfType<DBText>()
+                .GroupBy(g => g.TextString)
+                .ForEach(g =>
                 {
-                    results.Add(sorts[i]);
-                }
+                    var sorts = g.ToCollection()
+                    .OfType<DBText>()
+                    .OrderBy(d => d.Position
+                    .GetProjectPtOnLine(res.Item1, res.Item2)
+                    .DistanceTo(res.Item1)).ToCollection();
+                    // 保留第一个                    
+                    for (int i = 1; i < sorts.Count; i++)
+                    {
+                        results.Add(sorts[i]);
+                    }
+                });
             });
             return results;
         }
@@ -82,16 +87,21 @@ namespace ThMEPStructure.StructPlane.Service
                 .ForEach(o =>
             {
                 var res = Normalize(o.Key.StartPoint, o.Key.EndPoint);
-                var sorts = o.Value
-                .OfType<DBText>()
-                .OrderBy(d => d.Position
-                .GetProjectPtOnLine(res.Item1, res.Item2)
-                .DistanceTo(res.Item1)).ToCollection();
-                // 先保留第一个
-                for (int i = 1; i < sorts.Count; i++)
+                o.Value.OfType<DBText>()
+                .GroupBy(g => g.TextString)
+                .ForEach(g =>
                 {
-                    results.Add(sorts[i]);
-                }
+                    var sorts = g.ToCollection()
+                    .OfType<DBText>()
+                    .OrderBy(d => d.Position
+                    .GetProjectPtOnLine(res.Item1, res.Item2)
+                    .DistanceTo(res.Item1)).ToCollection();
+                    // 保留第一个                    
+                    for (int i = 1; i < sorts.Count; i++)
+                    {
+                        results.Add(sorts[i]);
+                    }
+                });
             });
             return results;
         }
@@ -133,7 +143,11 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     if(item.Value.Contains(l))
                     {
-                        texts.Add(item.Key);
+                        if(!results.Where(o=>o.Value.Contains(item.Key)).Any())
+                        {
+                            // 如果此文字已会属于别的线，不要再加入
+                            texts.Add(item.Key);
+                        }                        
                     }
                 }
                 results.Add(l, texts);
