@@ -178,9 +178,9 @@ namespace ThMEPTCH.Services
                 buildingStorey.Uuid = prjId + floor.Num.ToString()+"F";
                 buildingStorey.Number = floor.Num.ToString();
                 buildingStorey.Height = floor.LevelHeight;
-                buildingStorey.Elevation = floor.Elevtion;
+                buildingStorey.Elevation = floor.Elevation;
                 buildingStorey.Useage = floor.FloorName;
-                buildingStorey.Origin = new Point3d(0, 0, floor.Elevtion);
+                buildingStorey.Origin = new Point3d(0, 0, floor.Elevation);
 
                 ThTCHBuildingStorey memoryStory = null;
                 if (isMemoryStory)
@@ -455,8 +455,8 @@ namespace ThMEPTCH.Services
             var res = new List<LevelElevtion>();
             if (floorBlocks.Count == 2 && floorBlocks.Any(o => o.FloorName == "1F") && floorBlocks.Any(o => o.FloorName == "构架"))
             {
-                res.Add(new LevelElevtion { Num = 1, Elevtion = -4900, LevelHeight = 4860, FloorName = "1F" });
-                res.Add(new LevelElevtion { Num = 35, Elevtion = 98500, LevelHeight = 4400, FloorName = "构架" });
+                res.Add(new LevelElevtion { Num = 1, Elevation = -4900, LevelHeight = 4860, FloorName = "1F" });
+                res.Add(new LevelElevtion { Num = 35, Elevation = 98500, LevelHeight = 4400, FloorName = "构架" });
                 return res;
             }
             double firstFloorHeight = 5300;
@@ -473,7 +473,7 @@ namespace ThMEPTCH.Services
                     string result = System.Text.RegularExpressions.Regex.Replace(str, @"[^0-9]+", "");
                     if (int.TryParse(result, out floorNum))
                     {
-                        res.Add(new LevelElevtion { Num = floorNum, Elevtion = 0, LevelHeight = levelHeight, FloorName = name });
+                        res.Add(new LevelElevtion { Num = floorNum, Elevation = 0, LevelHeight = levelHeight, FloorName = name });
                     }
                 }
             }
@@ -482,13 +482,13 @@ namespace ThMEPTCH.Services
                 return res;
             }
             res = res.OrderBy(c => c.Num).ToList();
-            res.First().Elevtion = startElevtion;
+            res.First().Elevation = startElevtion;
             res.First().LevelHeight = firstFloorHeight;
             var elevtion = startElevtion + firstFloorHeight;
             for (int i = 1; i < res.Count; i++) 
             {
                 var level = res[i];
-                level.Elevtion = elevtion;
+                level.Elevation = elevtion;
                 level.LevelHeight = levelHeight;
                 elevtion += levelHeight;
             }
@@ -700,9 +700,21 @@ namespace ThMEPTCH.Services
     }
     class LevelElevtion
     {
+        /// <summary>
+        /// 楼层编号
+        /// </summary>
         public int Num { get; set; }
-        public double Elevtion { get; set; }
+        /// <summary>
+        /// 楼层标高
+        /// </summary>
+        public double Elevation { get; set; }
+        /// <summary>
+        /// 层高
+        /// </summary>
         public double LevelHeight { get; set; }
+        /// <summary>
+        /// 楼层框名称（图纸中楼层框内的字段）
+        /// </summary>
         public string FloorName { get; set; }
     }
     class SlabPolyline 
