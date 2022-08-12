@@ -75,7 +75,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (DBObject dbo in dbSelect)
                 {
                     Line line = (Line)dbo;
-                    if(ThCoordinateService.IsParalleled(dim, line))
+                    if (ThCoordinateService.IsParalleled(dim, line) || line.Length < tolerance)
                         continue;
 
                     crossDimLines.Add(line);
