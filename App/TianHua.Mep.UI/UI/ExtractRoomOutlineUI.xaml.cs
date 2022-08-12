@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Diagnostics;
+using System.Collections.Generic;
 using ThControlLibraryWPF.CustomControl;
 using TianHua.Mep.UI.ViewModel;
 using ThMEPEngineCore.Model.Common;
@@ -67,6 +68,11 @@ namespace TianHua.Mep.UI.UI
         private void btnBlkConfig_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             RoomOutlineVM.BlockConfig();
+        }
+
+        private void btnHelp_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/43a25083da7b4db2a1789cc50b66d948.html");
         }
     }
 }
