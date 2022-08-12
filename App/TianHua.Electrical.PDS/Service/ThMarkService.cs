@@ -142,7 +142,13 @@ namespace TianHua.Electrical.PDS.Service
 
                     var texts = new List<Polyline>();
                     var tolerence = 3.0 * Math.PI / 180.0;
-                    filter.Except(obliqueLines).ForEach(o =>
+                    filter = filter.Except(obliqueLines).ToList();
+                    if (filter.Count == 1)
+                    {
+                        var leaderFrame = ThPDSBufferService.Buffer(filter[0]);
+                        filter = LineIndex.SelectCrossingPolygon(leaderFrame).OfType<Line>().Except(new List<Line> { l, filter[0] }).ToList();
+                    }
+                    filter.ForEach(o =>
                     {
                         var searchFrame = ThPDSBufferService.Buffer(o, 10 * ThPDSCommon.ALLOWABLE_TOLERANCE);
                         var lineAngle = o.Angle % Math.PI;
@@ -211,6 +217,7 @@ namespace TianHua.Electrical.PDS.Service
                         circuitNumbers.Add(Tuple.Create(info, TextDic[o].Item2));
                     });
 
+                    circuitNumbers = circuitNumbers.Distinct().ToList();
                     if ((crossPoints.First() - crossPoints.Last()).GetNormal().DotProduct(direction) < 0.1)
                     {
                         crossPoints = crossPoints.OrderByDescending(x => x.Y).ToList();
