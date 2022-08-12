@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPIFC.Ifc2x3;
+using ThMEPTCH.Model;
 using Xbim.Ifc;
 
 namespace ThMEPIFC
@@ -174,6 +175,21 @@ namespace ThMEPIFC
 
             //返回
             return bigModel;
+        }
+
+        public IfcStore ModelMerge(string filePath, ThTCHProject tchProject)
+        {
+            var bigModel = IfcStore.Open(filePath);
+            var smallModel = ThTGL2IFC2x3Factory.CreateAndInitModel("ThTGL2IFCProject", tchProject.Uuid);
+            if (smallModel != null)
+            {
+                ThTGL2IFC2x3Builder.BuildIfcModel(smallModel, tchProject);
+                return ModelMerge(bigModel, smallModel);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
