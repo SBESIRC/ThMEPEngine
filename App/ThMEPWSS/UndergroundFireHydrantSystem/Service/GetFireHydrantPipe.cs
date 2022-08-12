@@ -215,7 +215,40 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         continue;
                     }
-                    double pipeLength = fireHydrantSysIn.PipeWidth;
+
+                    double pipeLength = 1300;//fireHydrantSysIn.PipeWidth;
+                    double upperLen = 0;//走上面的管长，消火栓和无立管末端
+                    double lowerLen = 0;//走下面的管长，立管和水泵接合器
+                    if (branchDic.ContainsKey(pt))
+                    {
+                        var tpts = branchDic[pt];
+                        for (int j = tpts.Count - 1; j > 0; j--)
+                        {
+                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpts[j]))
+                            {
+                                branchDic[pt]?.Remove(tpts[j]);
+                            }
+                        }
+                        foreach (var tpt in tpts)
+                        {
+                            if (!fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
+                            {
+                                continue;
+                            }
+                            var term = fireHydrantSysIn.TermPointDic[tpt];
+                            var type = term.Type;
+                            if (type == 1 || type == 3)
+                            {
+                                lowerLen += term.PipeWidth;
+                            }
+                            else
+                            {
+                                upperLen += term.PipeWidth;
+                            }
+                        }
+                        pipeLength = Math.Max(Math.Max(upperLen, lowerLen), 1600);
+                    }
+
                     if (branchDic.ContainsKey(pt))
                     {
                         if (branchDic[pt].Count == 3)
