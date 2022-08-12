@@ -316,7 +316,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2File" Global="THDB2File" />
+                <Command Local="THDB2Push" Global="THDB2Push" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -326,7 +326,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2File" Global="THDB2File" />
+                <Command Local="THDB2Push" Global="THDB2Push" />
             </Commands>
         </ComponentEntry>
     </Components>
