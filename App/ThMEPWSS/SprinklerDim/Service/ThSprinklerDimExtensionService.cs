@@ -27,14 +27,26 @@ namespace ThMEPWSS.SprinklerDim.Service
                 ThCADCoreNTSSpatialIndex wallsSI = GetReferanceSpatialIndex(walls, rooms[i]);
                 ThCADCoreNTSSpatialIndex axisCurvesSI = GetReferanceSpatialIndex(axisCurves, rooms[i]);
                 List<Line> dimLines = new List<Line>();
-                foreach(ThSprinklerGraph graph in transNet.PtsGraph)
+                foreach (ThSprinklerGraph graph in transNet.PtsGraph)
                 {
                     dimLines.AddRange(graph.Print(pts));
                 }
-                ThCADCoreNTSSpatialIndex dimLinesSI = ThDataTransformService.GenerateSpatialIndex(dimLines);
+                ThCADCoreNTSSpatialIndex dimLinesSI = GetReferanceSpatialIndex(dimLines, rooms[i]);
 
-                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.XDimension, wallsSI, axisCurvesSI, dimLinesSI, true, step, printTag));
-                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.YDimension, wallsSI, axisCurvesSI, dimLinesSI, false, step, printTag));
+
+                List<List<int>> xCollineation = new List<List<int>>();
+                List<List<int>> yCollineation = new List<List<int>>();
+                foreach (List<List<int>> x in transNet.XCollineationGroup)
+                {
+                    xCollineation.AddRange(x);
+                }
+                foreach (List<List<int>> y in transNet.YCollineationGroup)
+                {
+                    yCollineation.AddRange(y);
+                }
+
+                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.XDimension, xCollineation, wallsSI, axisCurvesSI, dimLinesSI, true, step, printTag));
+                realDim.AddRange(GenerateRealDimension(pts, transNet.Transformer, transNet.YDimension, yCollineation, wallsSI, axisCurvesSI, dimLinesSI, false, step, printTag));
             }
 
             // test
@@ -66,7 +78,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return realDim;
         }
 
-        private static List<ThSprinklerDimension> GenerateRealDimension(List<Point3d> pts, Matrix3d transformer, List<List<int>> dims, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, ThCADCoreNTSSpatialIndex dimensionedLines, bool isXAxis, double step, string printTag)
+        private static List<ThSprinklerDimension> GenerateRealDimension(List<Point3d> pts, Matrix3d transformer, List<List<int>> dims, List<List<int>> anotherCollineation, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, ThCADCoreNTSSpatialIndex dimensionedLines, bool isXAxis, double step, string printTag)
         {
             List<ThSprinklerDimension> realDim = new List<ThSprinklerDimension>();
 
@@ -75,28 +87,81 @@ namespace ThMEPWSS.SprinklerDim.Service
                 if (dim == null || dim.Count == 0)
                     continue;
 
-                dim.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+                
                 Vector3d dir = ThCoordinateService.GetDirrection(transformer.Inverse(), isXAxis);
-                Point3d pt = GetDimPtCloseToReference(pts, dim, dir, roomWallColumn, step);
 
-                // test
+                List<List<int>> allAvailableDims = new List<List<int>>();
+                if(dim.Count == 1)
+                {
+                    if (Math.Abs(pts[dim[0]].X- 848821.6) < 10)
+                    {
+                        int a = 0;
+                    }
+                    List<int> singleDims = anotherCollineation.Where(x => x.Contains(dim[0])).ToList()[0];
+                    foreach(int singleDim in singleDims)
+                        allAvailableDims.Add(new List<int> { singleDim });
+                }
+                else
+                {
+                    dim.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+                    allAvailableDims.Add(dim);
+                }
+
+                bool isFound = false;
                 int tag = 0;
-
-                if (pt.Equals(pts[dim[0]]))
+                Point3d pt = pts[dim[0]];
+                List<int> tDim = dim;
+                foreach (var d in allAvailableDims) // 房间框线、墙、柱
                 {
-                    tag = 1;
-                    pt = GetDimPtCloseToReference(pts, dim, dir, axisCurves, step);
+                    pt = GetDimPtCloseToReference(pts, d, dir, roomWallColumn, step);
+                    if (!pt.Equals(pts[d[0]]))
+                    {
+                        isFound = true;
+                        tDim = d;
+                        break;
+                    }
                 }
 
-                if (pt.Equals(pts[dim[0]]) && dim.Count < 3)
+                if (!isFound) // 轴网
                 {
-                    tag = 2;
-                    pt = GetDimPtCloseToReference(pts, dim, dir, dimensionedLines, step);
+                    foreach (var d in allAvailableDims)
+                    {
+                        pt = GetDimPtCloseToReference(pts, d, dir, axisCurves, step);
+                        if (!pt.Equals(pts[d[0]]))
+                        {
+                            isFound = true;
+                            tDim = d;
+                            tag = 1;
+                            break;
+                        }
+
+                    }
+
                 }
 
-                if (!pt.Equals(pts[dim[0]]))
+                if (!isFound) // 标注点小于3的找之前的格网，还不能判断这个格网是否标注
                 {
-                    List<Point3d> dimPts = ThDataTransformService.GetPoints(pts, dim);
+                    foreach (var d in allAvailableDims)
+                    {
+                        if(d.Count < 3)
+                        {
+                            pt = GetDimPtCloseToReference(pts, d, dir, roomWallColumn, step);
+                            if (!pt.Equals(pts[d[0]]))
+                            {
+                                isFound = true;
+                                tDim = d;
+                                tag = 2;
+                                break;
+                            }
+                        }
+
+                    }
+
+                }
+
+                if (isFound)
+                {
+                    List<Point3d> dimPts = ThDataTransformService.GetPoints(pts, tDim);
                     dimPts.Add(pt);
                     dimPts.Sort((x, y) => ThCoordinateService.GetOriginalValue(x, isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(y, isXAxis)));
 
@@ -105,9 +170,50 @@ namespace ThMEPWSS.SprinklerDim.Service
                     DrawUtils.ShowGeometry(pt, string.Format("SSS-{0}-6Dim", printTag), 11, 50, 100);
                 }
 
+                //foreach (var d in allAvailableDims)
+                //{
+                //    pt = GetDimPtCloseToReference(pts, d, dir, roomWallColumn, step);
+
+                //    // test
+                //    int tag = 0;
+
+                //    if (pt.Equals(pts[d[0]]))
+                //    {
+                //        tag = 1;
+                //        pt = GetDimPtCloseToReference(pts, d, dir, axisCurves, step);
+                //    }
+
+                //    if (pt.Equals(pts[d[0]]) && d.Count < 3)
+                //    {
+                //        tag = 2;
+                //        pt = GetDimPtCloseToReference(pts, d, dir, dimensionedLines, step);
+                //    }
+
+                //    if (!pt.Equals(pts[d[0]]))
+                //    {
+                //        List<Point3d> dimPts = ThDataTransformService.GetPoints(pts, d);
+                //        dimPts.Add(pt);
+                //        dimPts.Sort((x, y) => ThCoordinateService.GetOriginalValue(x, isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(y, isXAxis)));
+
+                //        ///////////////////////
+                //        realDim.Add(new ThSprinklerDimension(dimPts, new Vector3d(), tag));
+                //        DrawUtils.ShowGeometry(pt, string.Format("SSS-{0}-6Dim", printTag), 11, 50, 100);
+                //    }
+                //}
+                
+
             }
 
             return realDim;
+        }
+
+        private static ThCADCoreNTSSpatialIndex GetReferanceSpatialIndex(List<Line> dimLines, MPolygon room)
+        {
+            List<Line> allLines = new List<Line>();
+            allLines.AddRange(dimLines);
+            allLines.AddRange(ThDataTransformService.Change(room));
+
+            return ThDataTransformService.GenerateSpatialIndex(allLines);
         }
 
         private static ThCADCoreNTSSpatialIndex GetReferanceSpatialIndex(List<Polyline> reference, MPolygon room)

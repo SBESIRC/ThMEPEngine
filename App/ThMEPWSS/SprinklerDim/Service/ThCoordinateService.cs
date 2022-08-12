@@ -20,7 +20,6 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
-
         public static Matrix3d GetCoordinateTransformer(Point3d fromOrigin, Point3d toOrigin, Double angle)
         {
             while(angle > Math.Abs(angle - Math.PI / 2))

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -15,19 +16,8 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Polyline> reference)
         {
-            // 把参考物拆解为线,做成空间索引
-            DBObjectCollection referenceLines = new DBObjectCollection();
-            foreach (Polyline r in reference)
-            {
-                for (int i = 0; i < r.NumberOfVertices-1; i++)
-                {
-                    referenceLines.Add(new Line(r.GetPoint3dAt(i), r.GetPoint3dAt(i + 1)));
-                }
-                if(r.Closed)
-                    referenceLines.Add(new Line(r.GetPoint3dAt(0), r.GetPoint3dAt(r.NumberOfVertices-1)));
-            }
-            ThCADCoreNTSSpatialIndex linesSI = new ThCADCoreNTSSpatialIndex(referenceLines);
-            return linesSI;
+            List<Line> referenceLines = Change(reference);
+            return GenerateSpatialIndex(referenceLines);
         }
 
         public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Line> reference)
@@ -73,18 +63,62 @@ namespace ThMEPWSS.SprinklerDim.Service
             return line;
         }
 
-        public static List<Polyline> Change(List<Line> axisCurves)
+        public static List<Polyline> Change(List<Line> lines)
         {
-            List<Polyline> newAxisCurves = new List<Polyline>();
-            foreach (var l in axisCurves)
+            List<Polyline> polylines = new List<Polyline>();
+            foreach (var l in lines)
             {
                 Polyline p = new Polyline();
                 p.AddVertexAt(0, l.StartPoint.ToPoint2d(), 0, 0, 0);
                 p.AddVertexAt(1, l.EndPoint.ToPoint2d(), 0, 0, 0);
-                newAxisCurves.Add(p);
+                polylines.Add(p);
             }
 
-            return newAxisCurves;
+            return polylines;
+        }
+
+        public static List<Line> Change(List<Polyline> polylines)
+        {
+            List<Line> lines = new List<Line>();
+
+            foreach (Polyline p in polylines)
+            {
+                for (int i = 0; i < p.NumberOfVertices-1; i++)
+                {
+                    lines.Add(new Line(p.GetPoint3dAt(i), p.GetPoint3dAt(i + 1)));
+                }
+                if(p.Closed)
+                    lines.Add(new Line(p.GetPoint3dAt(0), p.GetPoint3dAt(p.NumberOfVertices-1)));
+            }
+
+            return lines;
+        }
+
+        public static List<Line> Change(MPolygon mPolygon)
+        {
+            List<Line> lines = new List<Line>();
+
+            lines.AddRange(Change(mPolygon.Shell()));
+            foreach(Polyline hole in mPolygon.Holes())
+            {
+                lines.AddRange(Change(hole));
+            }
+
+            return lines;
+        }
+
+        public static List<Line> Change(Polyline p)
+        {
+            List<Line> lines = new List<Line>();
+
+            for (int i = 0; i < p.NumberOfVertices - 1; i++)
+            {
+                lines.Add(new Line(p.GetPoint3dAt(i), p.GetPoint3dAt(i + 1)));
+            }
+            if (p.Closed)
+                lines.Add(new Line(p.GetPoint3dAt(0), p.GetPoint3dAt(p.NumberOfVertices - 1)));
+
+            return lines;
         }
 
     }
