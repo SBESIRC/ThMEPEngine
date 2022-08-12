@@ -17,6 +17,9 @@ namespace ThParkingStall.Core.OInterProcess
         private static Polygon _TotalArea;//总区域，边界为外包框
         public static Polygon TotalArea { get { return _TotalArea; } }//总区域，边界为外包框
 
+        private static List<LineSegment> _BorderLines;//可动边界线
+        public static List<LineSegment> BorderLines { get { return _BorderLines; } }//可动边界线
+
         private static List<SegLine> _InitSegLines;//所有初始分区线
         public static List<SegLine> InitSegLines { get { return _InitSegLines; } }//所有初始分区线
 
@@ -50,7 +53,8 @@ namespace ThParkingStall.Core.OInterProcess
             allObjs.AddRange(Buildings);
             _BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
         }
-        public static void Init(Polygon totalArea,List<SegLine> segLines,List<Polygon> buildings,List<ORamp> ramps,Polygon baseLineBoundary, List<(List<int>, List<int>)> seglineIndex)
+        public static void Init(Polygon totalArea,List<SegLine> segLines,List<Polygon> buildings,List<ORamp> ramps,
+            Polygon baseLineBoundary, List<(List<int>, List<int>)> seglineIndex,List<LineSegment> borderLines = null)
         {
             _TotalArea = totalArea;
             _InitSegLines = segLines;
@@ -62,6 +66,7 @@ namespace ThParkingStall.Core.OInterProcess
             var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
             allObjs.AddRange(Buildings);
             _BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
+            _BorderLines = borderLines;
         }
         //返回长度为0则为不合理解
         public static List<OSubArea> GetSubAreas()
@@ -93,11 +98,18 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<OSubArea> GetOSubAreas(Genome genome)
         {
             var subAreas = new List<OSubArea>();
-            var newSegs = ProcessToSegLines(genome);
-
+            Polygon newWallLine;
+            if (BorderLines != null)
+            {
+                newWallLine = ProcessToWallLine(genome);
+            }
+            else newWallLine = TotalArea;
+            if (newWallLine == null) return subAreas;
+            genome.Area = newWallLine.Area* 0.001 * 0.001;
+            var newSegs = ProcessToSegLines(genome, newWallLine);
             var SegLineStrings = newSegs.Select(l =>l.Splitter).ToList().ToLineStrings();
             var vaildLanes = newSegs.Select(l => l.VaildLane).ToList().ToLineStrings();
-            var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
+            var areas = newWallLine.Shell.GetPolygons(SegLineStrings);//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
             //var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
@@ -117,7 +129,7 @@ namespace ThParkingStall.Core.OInterProcess
             return subAreas;
         }
         //输出的分区线数量一致，需要求最大全连接组
-        public static List<SegLine> ProcessToSegLines(Genome genome)
+        public static List<SegLine> ProcessToSegLines(Genome genome,Polygon newWallLine)
         {
             var newSegLines = new List<SegLine>();
             if (genome == null)
@@ -131,7 +143,7 @@ namespace ThParkingStall.Core.OInterProcess
                     newSegLines.Add(InitSegLines[i].GetMovedLine(genome.OGenes[0][i]));
                 }
             }
-            newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex, BaseLineBoundary);
+            newSegLines.UpdateSegLines(SeglineIndex, newWallLine, BoundarySpatialIndex, BaseLineBoundary);
 
             //newSegLines = newSegLines.Where(l => l.VaildLane != null).ToList();
             //获取最大全连接组,存在其他组标记 + 报错
@@ -148,6 +160,24 @@ namespace ThParkingStall.Core.OInterProcess
 
             //newSegLines = newSegLines.Slice(groups.Last());
             return newSegLines;
+        }
+
+        public static Polygon ProcessToWallLine(Genome genome)
+        {
+            if(BorderLines == null || !genome.OGenes.ContainsKey(1))
+            {
+                return null;
+            }
+            var newBorderLines = new List<LineSegment>();
+            for(int i = 0; i < BorderLines.Count; i++)
+            {
+                var moveDist = genome.OGenes[1][i].dDNAs.First().Value;
+                newBorderLines.Add(BorderLines[i].Translate(BorderLines[i].NormalVector().Multiply(moveDist)));
+            }
+            var areas = newBorderLines.GetPolygons().OrderBy(p=>p.Area);
+            if(areas.Count() == 0) return null;
+            else return areas.Last();
+
         }
     }
 }

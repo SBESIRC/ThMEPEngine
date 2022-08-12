@@ -33,6 +33,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int Max_SelectionSize;
         double EliminateRate;
         double GoldenRatio;
+
+        int TargetParkingCntMin;
+        int TargetParkingCntMax;
+
+        double AreaMax;
         //private List<(double, double)> LowerUpperBound;
         //Inputs
 
@@ -47,7 +52,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public int CurIteration;
         public OGAGenerator(ParkingStallArrangementViewModel parameterViewModel = null)
         {
-
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
             IterationCount = parameterViewModel == null ? 60 : parameterViewModel.IterationCount;
@@ -84,6 +88,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Elite_popsize = Math.Max((int)(PopulationSize * 0.2), 1);//精英种群数量,种群数要大于3
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
             Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
+
+            TargetParkingCntMin = parameterViewModel.TargetParkingCntMin;
+            TargetParkingCntMax = parameterViewModel.TargetParkingCntMax;
+            AreaMax = ParameterStock.AreaMax;
             //LowerUpperBound = InterParameter.LowerUpperBound;//储存每条基因可变动范围，方便后续变异
         }
 
@@ -93,7 +101,38 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GC.WaitForPendingFinalizers();
             GC.WaitForFullGCComplete();
         }
-
+        public double GetScore(Genome genome,int flag)
+        {
+            var parkingCnt = genome.ParkingStallCount;
+            double score;
+            switch (flag)
+            {
+                case 0:
+                    score = parkingCnt;
+                    break;
+                case 1:
+                    if(parkingCnt < 2) { score = 99999; }
+                    if(parkingCnt < ParameterViewModel.TargetParkingCntMin)
+                    {
+                        score = AreaMax / parkingCnt;
+                    }
+                    else if(parkingCnt <= ParameterViewModel.TargetParkingCntMax)
+                    {
+                        if(genome.Area >0) score = genome.Area / parkingCnt;
+                        else score = ParameterStock.TotalArea / parkingCnt;
+                    }
+                    else
+                    {
+                        if (genome.Area > 0) score = genome.Area / ParameterViewModel.TargetParkingCntMax;
+                        else score = ParameterStock.TotalArea / ParameterViewModel.TargetParkingCntMax;
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException("Do Not Have This Case Now!");
+            }
+            genome.score = score;
+            return score;
+        }
         #region 第一代初始化
 
         private Genome RandomCreateChromosome()
@@ -113,13 +152,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 solution.Add(new OGene(0,relativeValue));
             }
+            if(OInterParameter.BorderLines != null)
+            {
+                foreach(var l in OInterParameter.BorderLines)
+                {
+                    double relativeValue = RandDoubleInRange(-ParameterViewModel.BorderlineMoveRange,ParameterViewModel.BorderlineMoveRange);
+                    solution.Add(new OGene(1, relativeValue));
+                }
+            }
             return solution;
         }
         public List<Genome> CreateFirstPopulation()
         {
             List<Genome> solutions = new List<Genome>();
             var orgSolution = new Genome();
-            OInterParameter.InitSegLines.ForEach(l => orgSolution.Add(l.ToGene()));;
+            OInterParameter.InitSegLines.ForEach(l => orgSolution.Add(l.ToGene()));
+            if (OInterParameter.BorderLines != null)
+            {
+                foreach (var l in OInterParameter.BorderLines)
+                {
+                    double relativeValue = RandDoubleInRange(-ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                    orgSolution.Add(new OGene(1, relativeValue));
+                }
+            }
             solutions.Add(orgSolution);
             while (solutions.Count < PopulationSize)
             {
@@ -325,9 +380,34 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //CalculateParkingSpacesSP(inputSolution);
             //CalculateParkingSpacesMP(inputSolution);
             //ReclaimMemory();
+            List<Genome> sorted;
+            if (ParameterStock.BorderlineMoveRange == 0)
+            {
+                sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
+                maxNums = sorted.First().ParkingStallCount;
+            }
+            else
+            {
+                inputSolution.ForEach(s => GetScore(s, 1));
+                sorted = inputSolution.OrderBy(s => s.score).ToList();
+                var scores = inputSolution.Select(s =>s.score).OrderBy(l =>l).ToList();
+                maxNums = sorted.First().ParkingStallCount;
+                var strScore = $"当前分数：";
+                for (int k = 0; k < sorted.Count; ++k)
+                {
+                    strScore += string.Format("{0:N2}",(scores[k]));
+                    strScore += " ";
+                }
+                Logger?.Information(strScore);
 
-            var sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
-            maxNums = sorted.First().ParkingStallCount;
+                var strArea = $"当前面积：";
+                for (int k = 0; k < sorted.Count; ++k)
+                {
+                    strArea += string.Format("{0:N2}", (sorted[k].Area));
+                    strArea += " ";
+                }
+                Logger?.Information(strArea);
+            }
             var strCnt = $"当前车位数：";
             for (int k = 0; k < sorted.Count; ++k)
             {
@@ -336,10 +416,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             Logger?.Information(strCnt);
             var maxCnt = sorted[0].ParkingStallCount;
-            DisplayLogger?.Information("当前车位数: " + maxCnt.ToString() + "\t");
+            DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
             var areaPerStall = ParameterStock.TotalArea / maxCnt;
             DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
-            System.Diagnostics.Debug.WriteLine(strCnt);
+            //System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<Genome>();
             // SelectionSize 直接保留
             for (int i = 0; i < SelectionSize; ++i)
@@ -468,6 +548,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 var maxDist = maxVal - minVal;
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = ToRelativeValue(RandDoubleInRange(0, maxDist), maxDist);//纯随机数
                                 break;
+                            case 1:
+                                s[i].OGenes[geneType][j].dDNAs.First().Value = RandDoubleInRange(-ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                                break;
                             default:
                                 throw new NotImplementedException("Do not have this type now");
                         }
@@ -515,6 +598,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                     newValue = RandomSpecialNumber(maxDist);
                                 }
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = newValue;
+                                break;
+                            case 1:
                                 break;
                             default:
                                 throw new NotImplementedException("Do not have this type now");

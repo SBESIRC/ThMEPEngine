@@ -12,6 +12,8 @@ namespace ThParkingStall.Core.OInterProcess
     {
         public Dictionary<int, List<OGene>> OGenes = new Dictionary<int, List<OGene>>();//key代表基因的type
         public int ParkingStallCount = -1;
+        public double Area;
+        public double score;
         public void Add(OGene oGene)
         {
             var type = oGene.GeneType;
@@ -54,6 +56,9 @@ namespace ThParkingStall.Core.OInterProcess
             {
                 case 0:
                     dDNA = new DDNA(0,value);
+                    break;
+                case 1:
+                    dDNA = new DDNA(1,value);
                     break;
                 default:
                     throw new NotImplementedException("Do not have this type now");
@@ -98,10 +103,10 @@ namespace ThParkingStall.Core.OInterProcess
             switch (Type)
             {
                 case 0:
-                    IsRelative = false;
+                    IsRelative = true;
                     break;
                 case 1:
-                    IsRelative = false;
+                    IsRelative = true;
                     break;
             }
         }

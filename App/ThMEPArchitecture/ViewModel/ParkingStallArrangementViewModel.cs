@@ -167,6 +167,17 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("BackToBackDecrease200");
             }
         }
+
+        private bool _AllowLoopThroughEnd = false;
+        public bool AllowLoopThroughEnd
+        {
+            get { return _AllowLoopThroughEnd; }
+            set
+            {
+                _AllowLoopThroughEnd = value;
+                RaisePropertyChanged("AllowLoopThroughEnd");
+            }
+        }
         private int _RoadWidth  = 5500; //mm
 
         public int RoadWidth
@@ -461,6 +472,41 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("MaxTimespan");
             }
         }
+        private int _BorderlineMoveRange = 0;
+        public int BorderlineMoveRange
+        {
+            get
+            { return _BorderlineMoveRange; }
+            set
+            {
+                _BorderlineMoveRange = value;
+                RaisePropertyChanged("BorderlineMoveRange");
+            }
+        }
+        private int _TargetParkingCntMin = 1;
+        public int TargetParkingCntMin
+        {
+            get
+            { return _TargetParkingCntMin; }
+            set
+            {
+                _TargetParkingCntMin = value;
+                RaisePropertyChanged("TargetParkingCntMin");
+            }
+        }
+
+        private int _TargetParkingCntMax = 1;
+        public int TargetParkingCntMax
+        {
+            get
+            { return _TargetParkingCntMax; }
+            set
+            {
+                _TargetParkingCntMax = value;
+                RaisePropertyChanged("TargetParkingCntMax");
+            }
+        }
+
         private int _ProcessCount = -1; //自动，设置为核心数量
         public int ProcessCount
         {
@@ -677,6 +723,8 @@ namespace ThMEPArchitecture.ViewModel
         public static bool AddBoundSegLines;
         public static double BuildingArea;//建筑面积（m^2)
         public static double TotalArea;//地库面积（m^2)
+        public static double AreaMax;//最大地库面积
+        public static int BorderlineMoveRange;
         public static bool ReadHiddenParameter = false;
         public static int CutTol = 995;//全自动分区线比车道多出的额外距离
         private static bool Setted = false;
@@ -703,6 +751,7 @@ namespace ThMEPArchitecture.ViewModel
             _ProcessCount = vm.ProcessCount;
             _ThreadCount = vm.ThreadCount;
             AddBoundSegLines = vm.AddBoundSegLines;
+            BorderlineMoveRange = vm.BorderlineMoveRange;
             var hp = HiddenParameter.ReadOrCreateDefault();
             if (ReadHiddenParameter)
             {

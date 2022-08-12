@@ -30,6 +30,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
     public class OLayoutData
     {
         public List<Polyline> CAD_WallLines = new List<Polyline>();// 提取到的cad边界线
+        public List<Line> CAD_BorderLines = new List<Line>();//提取到的可移动边界线
+
         public List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分区线
         public List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
@@ -37,10 +39,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         // NTS 数据结构
         //public Polygon Basement;//地库，面域部分为可布置区域
         public Polygon WallLine;//初始边界线
+        public List<LineSegment> BorderLines;//可动边界线
         public List<SegLine> SegLines = new List<SegLine>();// 初始分区线
         public List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public List<Polygon> RampPolgons;//坡道polygon
 
+        double MaxArea;//最大地库面积
         // NTS 衍生数据
         public List<ORamp> Ramps = new List<ORamp>();// 坡道
         public List<Polygon> Buildings; // 初始障碍物,包含坡道
@@ -78,14 +82,40 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Logger = logger;
             Extract(basement);
             succeed = true;
-            if (CAD_WallLines.Count == 0)
+            if(CAD_WallLines.Count != 0 && CAD_BorderLines.Count != 0)
+            {
+                ThMPArrangementCmd.DisplayLogger.Information("同时提取到两种地库边界，请保留一种！");
+                Active.Editor.WriteMessage("同时提取到两种地库边界，请保留一种！");
+                succeed = false;
+                return;
+            }
+            if(CAD_WallLines.Count != 0)
+            {
+                WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
+            }
+            else if(CAD_BorderLines.Count != 0)
+            {
+                BorderLines = CAD_BorderLines.Select(l => l.ToNTSLineSegment().OExtend(1)).ToList();
+                var areas = BorderLines.GetPolygons().OrderBy(plgn => plgn.Area);
+                if(areas.Count() == 0)
+                {
+                    ThMPArrangementCmd.DisplayLogger.Information("可动边界不构成闭合区域！");
+                    Active.Editor.WriteMessage("可动边界不构成闭合区域！");
+                    succeed = false;
+                    return;
+                }
+                WallLine = areas.Last();
+            }
+            else
             {
                 ThMPArrangementCmd.DisplayLogger.Information("地库边界不存在或者不闭合！");
                 Active.Editor.WriteMessage("地库边界不存在或者不闭合！");
                 succeed = false;
+                return;
             }
-            WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
             WallLine = WallLine.RemoveHoles();//初始墙线
+            MaxArea = WallLine.Buffer(ParameterStock.BorderlineMoveRange,MitreParam).Area *0.001 * 0.001;
+            ParameterStock.AreaMax = MaxArea;
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
             Buildings = Obstacles.Concat(RampPolgons).ToList();
@@ -119,6 +149,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         CAD_WallLines.Add(pline.GetClosed());
                     }
+                }
+                else if (ent is Line line)
+                {
+                    CAD_BorderLines.Add(line);
                 }
             }
             if (layerName.Contains("障碍物"))
@@ -443,7 +477,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         public void SetInterParam()
         {
-            OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,BaseLineBoundary,SeglineIndex);
+            OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,BaseLineBoundary,SeglineIndex,BorderLines);
         }
 
         private void showVaildLanes()

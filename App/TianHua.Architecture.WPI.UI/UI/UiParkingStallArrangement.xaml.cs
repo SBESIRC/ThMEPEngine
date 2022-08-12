@@ -121,8 +121,17 @@ namespace TianHua.Architecture.WPI.UI.UI
 
         }
 
-        private void oRun_Click(object sender, RoutedEventArgs e)
+        private void oDirect_Click(object sender, RoutedEventArgs e)
         {
+            _ViewModel.CommandType = CommandTypeEnum.RunWithoutIteration;
+            using (var cmd = new ThOArrangementCmd(_ViewModel))
+            {
+                cmd.Execute();
+            }
+        }
+        private void oIteration_Click(object sender, RoutedEventArgs e)
+        {
+            _ViewModel.CommandType = CommandTypeEnum.RunWithIteration;
             using (var cmd = new ThOArrangementCmd(_ViewModel))
             {
                 cmd.Execute();
