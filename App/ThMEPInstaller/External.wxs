@@ -104,6 +104,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Debug" Guid="{5DC7EC21-DD58-4899-969A-B42529A147FB}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.Linq.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Debug" Guid="{DF7A4E9F-97C1-4E94-927C-B0AC404C4FD0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Core_Debug" Guid="{EA6066CF-12F3-4586-B7BB-25C0C03959CC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.Core.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_X64">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -211,6 +217,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Debug" Guid="{D8FC45DA-FDA7-4ECD-8CA6-FE54EFC83E14}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Data.SQLite.Linq.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Debug" Guid="{C1136B5D-86D6-4BE2-BE4F-1A8C96E6B71E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\protobuf-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Core_Debug" Guid="{243E865C-A650-48D8-8E9F-7EED25C95584}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\protobuf-net.Core.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_X64">
@@ -321,6 +333,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Release" Guid="{36EEE9C1-0957-4A45-B1DE-91801D6251D9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Data_SQLite_Linq_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.Linq.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Release" Guid="{13D6B3B7-99B7-4A2A-B608-7BE15850DC44}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Core_Release" Guid="{FDF384BB-758A-4942-B626-F7859371F3AF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.Core.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_X64">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -429,6 +447,14 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Release" Guid="{B3521B25-EE71-46E9-BEDE-3D8AF05DA624}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Data.SQLite.Linq.dll" />
             </Component>
+
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Release" Guid="{D3CD4A70-2B10-4902-BBD8-D3C66108A3AC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\protobuf-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Core_Release" Guid="{9E0F2593-7FCE-4557-A605-7B9301145D5F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\protobuf-net.Core.dll" />
+            </Component>
+
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_X64">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -510,6 +536,10 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_EF6_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Core_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Core_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Release" />
@@ -580,6 +610,10 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_EF6_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Data_SQLite_Linq_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Protobuf_Net_Core_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Protobuf_Net_Core_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
