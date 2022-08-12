@@ -143,11 +143,22 @@ namespace ThMEPIFC.Ifc2x3
                         pset.Name = "Basic set of THifc properties";
                         foreach (var item in storey.Properties)
                         {
-                            pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
+                            if (!item.Key.Equals("Height"))
                             {
-                                p.Name = item.Key;
-                                p.NominalValue = new IfcText(item.Value.ToString());
-                            }));
+                                pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
+                                {
+                                    p.Name = item.Key;
+                                    p.NominalValue = new IfcText(item.Value.ToString());
+                                }));
+                            }
+                            else
+                            {
+                                pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
+                                {
+                                    p.Name = item.Key;
+                                    p.NominalValue = new IfcLengthMeasure(double.Parse(item.Value));
+                                }));
+                            }
                         }
                     });
                 });
