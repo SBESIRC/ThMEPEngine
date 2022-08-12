@@ -21,7 +21,7 @@ using TianHua.Electrical.PDS.UI.Converters;
 using TianHua.Electrical.PDS.UI.Project.Module;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
 using HandyControl.Controls;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using PDSGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;

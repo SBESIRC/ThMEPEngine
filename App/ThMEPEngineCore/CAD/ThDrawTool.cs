@@ -96,6 +96,12 @@ namespace ThMEPEngineCore.CAD
             polyline.AddVertexAt(3, new Point2d(pt.X + length / 2.0, pt.Y - width / 2.0), 0, 0, 0);
             return polyline;
         }
+        public static Polyline CreateRectangle(this Point3d center, Vector3d direction, double length, double width)
+        {
+            var sp = center - direction.GetNormal().MultiplyBy(length / 2.0);
+            var ep = center + direction.GetNormal().MultiplyBy(length / 2.0);
+            return ToRectangle(sp, ep, width);
+        }
         public static List<Line> GetLines(this DBObjectCollection objs,double length=10.0)
         {
             var lines = new List<Line>();

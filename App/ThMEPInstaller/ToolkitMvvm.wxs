@@ -3,41 +3,23 @@
 	<?include Variable.wxi ?>
 	<Fragment>
 		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
 			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Debug" Guid="{2DCBF477-ED4A-478F-B210-48A901C08BE1}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.Toolkit.Mvvm.dll" />
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" Guid="{FFBDAED7-6728-4F93-8CFA-6F6E5F9298A8}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\CommunityToolkit.Mvvm.dll" />
 			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Debug" Guid="{333D3FFC-3555-4892-AED5-A11D68270CD7}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.Bcl.AsyncInterfaces.dll" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Debug" Guid="{A16E7AB1-EA3E-4E5D-BD3B-08845E46A7BC}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Microsoft.Toolkit.Mvvm.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Debug" Guid="{F05B3AD4-147D-427A-B3AF-6C10814265AC}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Microsoft.Bcl.AsyncInterfaces.dll" />
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" Guid="{E68E5280-7FF1-4D5B-822B-1C26A74033EE}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.Bcl.AsyncInterfaces.dll" />
 			</Component>
 		</DirectoryRef>
 		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
 			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Release" Guid="{9105369F-F895-4B17-AF16-986A5C4F0535}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.Toolkit.Mvvm.dll" />
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" Guid="{FD1516C9-91FA-4906-AD11-DB5AE937DC69}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\CommunityToolkit.Mvvm.dll" />
 			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Release" Guid="{9D5252FB-EE19-44DF-BF99-680DF3A8802C}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.Bcl.AsyncInterfaces.dll" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Release" Guid="{0CCA0985-585A-4B11-AD63-F5A024A7C37D}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Microsoft.Toolkit.Mvvm.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Release" Guid="{8A723775-DAEC-4C9E-9B52-49880DC8E9C3}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Microsoft.Bcl.AsyncInterfaces.dll" />
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" Guid="{8E3E1DDA-B574-4A23-A886-6370B107DE70}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.Bcl.AsyncInterfaces.dll" />
 			</Component>
 		</DirectoryRef>
 		<?endif?>
@@ -45,15 +27,11 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponentsAppToolkitMvvm">
 			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" />
 			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ToolkitMvvm_AsyncInterfaces_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ToolkitMvvm_AsyncInterfaces_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" />
 			<?endif?>
 		</ComponentGroup>
 	</Fragment>

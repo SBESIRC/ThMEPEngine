@@ -178,6 +178,34 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
+        public static void ThSpinrklerAddSinglePtToNetGroup(ref List<ThSprinklerNetGroup> netGroup, List<Point3d> sprinkler, Dictionary<Point3d, double> ptAngleDict)
+        {
+            var singlePts = new List<Point3d>();
+            singlePts.AddRange(sprinkler.Except(netGroup.SelectMany(x => x.Pts)));
 
+            foreach (var pt in singlePts)
+            {
+                ptAngleDict.TryGetValue(pt, out var angle);
+                if (angle != 0)
+                {
+                    var group = netGroup.Where(x => ThSprinklerLineService.IsOrthogonalAngle(x.Angle, angle, 2));
+                    //先看第一个之后细化：点组外包框内， 如果没有group咋办等
+                    if (group.Any())
+                    {
+                        var selectGroup = group.First();
+                        var idxPt = selectGroup.AddPt(pt);
+                        var singleGraph = new ThSprinklerGraph();
+                        singleGraph.AddVertex(idxPt);
+                        selectGroup.PtsGraph.Add(singleGraph);
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+
+
+        }
     }
 }

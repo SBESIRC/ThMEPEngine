@@ -1,9 +1,9 @@
-﻿using Microsoft.Toolkit.Mvvm.Input;
+﻿using System.Linq;
+using System.Windows.Input;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows.Input;
 using ThControlLibraryWPF.ControlUtils;
+using CommunityToolkit.Mvvm.Input;
 using ThMEPLighting.Common;
 
 namespace ThMEPLighting.UI.ViewModels

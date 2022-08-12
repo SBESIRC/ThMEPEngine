@@ -44,11 +44,11 @@ namespace ThMEPStructure.StructPlane.Service
                 BeamTexts.ForEach(o =>
                 {
                     var text = acadDb.Element<DBText>(o.Key.ObjectId, true);
-                    if (IsBeamSpec(text.TextString))
+                    if (text.TextString.IsBeamSpec())
                     {
                         Move(text, o.Value);
                     }
-                    else if (IsBeamBgMark(text.TextString))
+                    else if (text.TextString.IsBeamBgMark())
                     {
                         var texts = Split(text); // spec,bg
                         if (texts != null)
@@ -207,18 +207,6 @@ namespace ThMEPStructure.StructPlane.Service
             return text.TextOBB();
         }
 
-        private bool IsBeamBgMark(string content)
-        {
-            // 400x200(Bg-2.5)
-            string pattern = @"^\d+\s*[Xx]{1}\s*\d+\s*[(（]{1}[\S\s]*[）)]{1}$";
-            return Regex.IsMatch(content.Trim(), pattern);
-        }
-        private bool IsBeamSpec(string content)
-        {
-            // 400x200
-            string pattern = @"^\d+\s*[Xx]{1}\s*\d+$";
-            return Regex.IsMatch(content.Trim(), pattern);
-        }
         private List<string> SplitBeamMarkTexts(string beamMark)
         {
             // 600x400(BG)

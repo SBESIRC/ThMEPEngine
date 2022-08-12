@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.HydrantConnectPipe.Command;
 using ThMEPWSS.ViewModel;
@@ -35,6 +36,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void btnMarkLoop_Click(object sender, RoutedEventArgs e)
         {
             FireHydrantSystemViewModel.InsertLoopMark();
+        }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://thlearning.thape.com.cn/kng/view/video/693b4adf25cc42e5b64d0a4c89507bf5.html");
         }
     }
 }

@@ -24,16 +24,16 @@ namespace ThMEPWSS.SprinklerDim.Service
             ThSprinklerNetGroupListService.CorrectGraphConnection(ref transNetList, 45.0);
 
             // test
-            for (int i = 0; i < transNetList.Count; i++)
-            {
-                var net = transNetList[i];
-                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
-                for (int j = 0; j < net.PtsGraph.Count; j++)
-                {
-                    var lines = net.PtsGraph[j].Print(pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-245mm-{0}-{1}", i, j, printTag), i % 7);
-                }
-            }
+            //for (int i = 0; i < transNetList.Count; i++)
+            //{
+            //    var net = transNetList[i];
+            //    List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+            //    for (int j = 0; j < net.PtsGraph.Count; j++)
+            //    {
+            //        var lines = net.PtsGraph[j].Print(pts);
+            //        DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-245mm-{0}-{1}", i, j, printTag), i % 7);
+            //    }
+            //}
 
 
             ThSprinklerNetGroupListService.GenerateCollineationGroup(ref transNetList);
@@ -52,24 +52,59 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
                 ThSprinklerNetGroup newNetGroup = ThSprinklerNetGraphService.CreateNetwork(netGroup.Angle, remainingLines);
                 newNetGroup.Transformer = netGroup.Transformer;
+
+                // 加入散点
+                List<Point3d> singlePoints = GetSinglePoints(pts, netGroup.PtsGraph);
+                foreach(Point3d point in singlePoints)
+                {
+                    int ptIndex = newNetGroup.AddPt(point);
+                    ThSprinklerGraph g = new ThSprinklerGraph();
+                    g.AddVertex(ptIndex);
+                    newNetGroup.PtsGraph.Add(g);
+                }
+
                 opNetList.Add(newNetGroup);
             }
 
             // test
-            for (int i = 0; i < opNetList.Count; i++)
-            {
-                var net = opNetList[i];
-                List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
-                for (int j = 0; j < net.PtsGraph.Count; j++)
-                {
-                    var lines = net.PtsGraph[j].Print(pts);
-                    DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-3OpNet-{0}-{1}", i, j, printTag), i % 7);
-                }
-            }
+            //for (int i = 0; i < opNetList.Count; i++)
+            //{
+            //    var net = opNetList[i];
+            //    List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+            //    for (int j = 0; j < net.PtsGraph.Count; j++)
+            //    {
+            //        var lines = net.PtsGraph[j].Print(pts);
+            //        DrawUtils.ShowGeometry(lines, string.Format("SSS-{2}-3OpNet-{0}-{1}", i, j, printTag), i % 7);
+            //    }
+            //}
 
             return opNetList;
         }
 
+        public static List<Point3d> GetSinglePoints(List<Point3d> pts, List<ThSprinklerGraph> graphs)
+        {
+            List<Point3d> points = new List<Point3d>();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                bool tag = true;
+                foreach (ThSprinklerGraph graph in graphs)
+                {
+                    int nodeIndex = graph.SearchNodeIndex(i);
+                    if (nodeIndex != -1 && graph.SprinklerVertexNodeList[nodeIndex].FirstEdge != null)
+                    {
+                        tag = false;
+                        break;
+                    }
+                }
+
+                if (tag)
+                {
+                    points.Add(pts[i]);
+                }
+            }
+
+            return points;
+        }
 
         private static void CutoffLines(List<Point3d> pts, ref ThSprinklerGraph graph, List<List<int>> collineationList, bool isXAxis)
         {
@@ -116,7 +151,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 while (edge != null)
                 {
                     int jPtIndex = graph.SprinklerVertexNodeList[edge.EdgeIndex].NodeIndex;
-                    double det = ThChangeCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThChangeCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis);
+                    double det = ThCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis);
                     if (det > tolerance)
                     {
                         break;

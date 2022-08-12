@@ -41,6 +41,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                             {
                                 ent.AddTchText(database, dbTextCollection);
                             }
+                            else if(ent.GetType().Name== "ImpEntity")
+                            {
+                                ent.AddImpEntity(database, dbTextCollection);
+                            }
                             else
                             {
                                 dbTextCollection.Add(ent);
@@ -50,13 +54,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         catch { }
                     }
                 }
+#if DEBUG
+                Dreambuild.AutoCAD.DbHelper.EnsureLayerOn("文字框");
+                foreach (var obj in dbTextCollection)
+                {
+                    var text = obj as DBText;
+                    var rect = text.GetRect();
+                    rect.Layer = "文字框";
+                    var text2 = TCHDeal.CreateText(text.Position,text.TextString);
+                    acadDatabase.CurrentSpace.Add(rect);
+                    acadDatabase.CurrentSpace.Add(text2);
+                }
+#endif
                 return dbTextCollection;
             }
         }
 
         private bool IsTargetType(Entity ent)
         {
-            return ent is DBText || ent.IsTCHMULTILEADER() || ent.IsTCHText();
+            return ent is DBText || ent.IsTCHMULTILEADER() || ent.IsTCHText() || ent.GetType().Name.Contains("ImpEntity");
         }
 
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects)
@@ -141,6 +157,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 //return CreateText(pts.FirstOrDefault(), text);
             }
         }
+        public static void AddImpEntity(this Entity ent, Database database, DBObjectCollection dbTextCollection)
+        {
+            var objs = new DBObjectCollection();
+            ent.Explode(objs);
+            foreach(var obj in objs)
+            {
+                if((obj as Entity).GetType().Name== "ImpEntity")
+                {
+                    var objs2 = new DBObjectCollection();
+                    (obj as Entity).Explode(objs2);
+                    foreach(var obj2 in objs2)
+                    {
+                        if(obj2 is DBText)
+                        {
+                            dbTextCollection.Add((DBObject)obj2);
+                        }
+                    }
+                }
+            }
+        }
 
         public static DBText LoadTextFromDb(Database database, ObjectId tch)
         {
@@ -180,7 +216,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return rb;
         }
 
-        private static DBText CreateText(Point3d insertPt, string text)
+        public static DBText CreateText(Point3d insertPt, string text)
         {
             string layer = "W-FRPT-SPRL-DIMS";
             double rotation = 0;

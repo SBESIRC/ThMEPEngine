@@ -28,22 +28,18 @@ namespace ThMEPStructure.StructPlane.Service
                 return;
             }
             var firstText = beamMarks.OfType<DBText>().First();
-            var textCenter = GetTextCenter(firstText);
-            if (!textCenter.HasValue)
-            {
-                return;
-            }
+            var textCenter = firstText.GetCenterPointByOBB();
             var maximumBeamWidth = GetBeamWidth(beamMarks.OfType<DBText>().OrderByDescending(o => GetBeamWidth(o)).First());
             // 获取firstText中心距离梁线的长度
-            var distance = GetTextMoveDisToBeam(textCenter.Value, firstText.Rotation, moveDir, maximumBeamWidth);
+            var distance = GetTextMoveDisToBeam(textCenter, firstText.Rotation, moveDir, maximumBeamWidth);
             if (distance == 0)
             {
                 distance = maximumBeamWidth / 2.0;
             }
             var geoHeights = beamMarks.OfType<DBText>().Select(o => CalculateTextHeight(o)).ToList();
-            var newTextCenter = textCenter.Value + moveDir.GetNormal().MultiplyBy(
+            var newTextCenter = textCenter + moveDir.GetNormal().MultiplyBy(
                distance + beamMarkInterval + geoHeights[0] / 2.0);
-            var mt1 = Matrix3d.Displacement(newTextCenter - textCenter.Value);
+            var mt1 = Matrix3d.Displacement(newTextCenter - textCenter);
             firstText.TransformBy(mt1);
             for (int i = 1; i < beamMarks.Count; i++)
             {
@@ -54,9 +50,9 @@ namespace ThMEPStructure.StructPlane.Service
                     middleTextHeights += geoHeights[j];
                 }
                 var textInterval = geoHeights[0] / 2.0 + middleTextHeights + geoHeights[i] / 2.0 + i * textBoundaryInterval;
-                var oldSecondTextCenter = GetTextCenter(secondText);
+                var oldSecondTextCenter = secondText.GetCenterPointByOBB();
                 var newSecondTextCenter = newTextCenter.GetExtentPoint(moveDir, textInterval);
-                var mt2 = Matrix3d.Displacement(newSecondTextCenter - oldSecondTextCenter.Value);
+                var mt2 = Matrix3d.Displacement(newSecondTextCenter - oldSecondTextCenter);
                 secondText.TransformBy(mt2);
             }
         }
@@ -104,16 +100,6 @@ namespace ThMEPStructure.StructPlane.Service
             var values = textstring.GetDoubles();
             return Tuple.Create(values[0], values[1]);
         }
-
-        private Point3d? GetTextCenter(DBText text)
-        {
-            var obb = GetTextObb(text);
-            if (obb == null || obb.Area <= 1.0 || obb.NumberOfVertices < 4)
-            {
-                return null;
-            }
-            return obb.GetPoint3dAt(0).GetMidPt(obb.GetPoint3dAt(2));
-        }
  
         private DBObjectCollection QueryBeamLines(Point3d startPt,Point3d endPt,double width)
         {
@@ -126,11 +112,6 @@ namespace ThMEPStructure.StructPlane.Service
         private DBObjectCollection QueryBeamLines(Polyline outline) 
         {
             return beamLineSpatialIndex.SelectCrossingPolygon(outline);
-        }
-
-        private Polyline GetTextObb(DBText text)
-        {
-            return text.TextOBB();
         }
     }
 }

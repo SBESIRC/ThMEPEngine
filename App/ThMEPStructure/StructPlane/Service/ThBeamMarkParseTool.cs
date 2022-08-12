@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
+using ThMEPStructure.Common;
 
 namespace ThMEPStructure.StructPlane.Service
 {
@@ -44,6 +46,73 @@ namespace ThMEPStructure.StructPlane.Service
                 return newElevation;
             }
         }
+
+        public static string GetReducingBeamSpec(this string profileName)
+        {
+            if (string.IsNullOrEmpty(profileName))
+            {
+                return "";
+            }
+            var values = profileName.GetIntegers().Where(o => o > 0).ToList();
+            if (values.Count == 4)
+            {
+                if (values[0] == 21)
+                {
+                    // 400x300~200, 宽，高，高
+                    return values[1] + "x" + values[2] + "~" + values[3];
+                }
+                else
+                {
+                    return "";  // 暂时不支持
+                }
+            }
+            else
+            {
+                return "";  // 暂时不支持
+            }
+        }
+
+        public static string GetBGContent(this string content)
+        {
+            // 200x530(BG+5.670)-> (BG+5.670)
+            if(IsBeamBgMark(content))
+            {
+                var newElevation = content;
+                if (newElevation.Contains("（"))
+                {
+                    newElevation = content.Replace("（", "(");
+                }
+                if (newElevation.Contains("）"))
+                {
+                    newElevation = content.Replace("）", ")");
+                }
+                var firstIndex = newElevation.IndexOf('(');
+                return newElevation.Substring(firstIndex);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public static bool IsBeamSpec(this string content)
+        {
+            // 400x200,400x200~300
+            string pattern1 = @"^\d+\s*[Xx]{1}\s*\d+$";
+            string pattern2 = @"^\d+\s*[Xx]{1}\s*\d+\s*[~]{1}\s*\d+$";
+            return Regex.IsMatch(content.Trim(), pattern1) ||
+                Regex.IsMatch(content.Trim(), pattern2);
+        }
+
+        public static bool IsBeamBgMark(this string content)
+        {
+            // 400x200(Bg-2.5)
+            string pattern1 = @"^\d+\s*[Xx]{1}\s*\d+\s*[(（]{1}[\S\s]*[）)]{1}$";
+            string pattern2 = @"^\d+\s*[Xx]{1}\s*\d+\s*[~]{1}\s*\d+\s*[(（]{1}[\S\s]*[）)]{1}$";
+            return Regex.IsMatch(content.Trim(), pattern1) || 
+                Regex.IsMatch(content.Trim(), pattern2);
+        }
+
         public static string UpdateBGElevation(this string elevation,double flrHeight)
         {
             // 200x530(BG+5.670) 

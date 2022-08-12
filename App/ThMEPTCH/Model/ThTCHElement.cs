@@ -62,13 +62,14 @@ namespace ThMEPTCH.Model
         public double ZOffSet { get; set; }
         #endregion
         #region 传object数据有问题，后面需要处理
-        public Dictionary<string, object> Properties { get; set; }
+        [ProtoMember(19)]
+        public Dictionary<string, string> Properties { get; set; }
         #endregion
 
         public ThTCHElement()
         {
             Uuid = Guid.NewGuid().ToString();
-            Properties = new Dictionary<string, object>();
+            Properties = new Dictionary<string, string>();
         }
     }
 }

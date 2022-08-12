@@ -1,7 +1,7 @@
-﻿using Microsoft.Toolkit.Mvvm.Input;
+﻿using System.Windows.Input;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using ThControlLibraryWPF.ControlUtils;
+using CommunityToolkit.Mvvm.Input;
 using ThMEPHVAC.EQPMFanModelEnums;
 
 namespace TianHua.Hvac.UI.ViewModels

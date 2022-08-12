@@ -247,6 +247,7 @@
     <Compile Include="SprinklerDim\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetGraphService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerNetworkService.cs" />
+    <Compile Include="SprinklerDim\Service\ThDataTransformService.cs" />
     <Compile Include="SprinklerDim\ThSprinklerDimCommon.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorEngine.cs" />
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />
@@ -1115,11 +1116,11 @@
     <Compile Include="ThSystemDiagramCmds.THJSZC.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.0.0</Version>
+    </PackageReference>
     <PackageReference Include="MathNet.Numerics">
       <Version>5.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.1.2</Version>
     </PackageReference>
     <PackageReference Include="Serilog">
       <Version>2.11.0</Version>

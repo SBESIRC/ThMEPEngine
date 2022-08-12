@@ -1,25 +1,24 @@
 ﻿using System;
+using ProtoBuf;
 using AcHelper;
 using DotNetARX;
 using Linq2Acad;
 using System.IO;
 using System.IO.Pipes;
-using ThMEPTCH.Services;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Security.Principal;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using ProtoBuf;
-using ThMEPTCH.Model.SurrogateModel;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPTCH.Services;
+using ThMEPTCH.Model.SurrogateModel;
 using CADApp = Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPIFC
 {
     public class ThMEPIFCApp : IExtensionApplication
     {
-        string dbFilePath = @"C:\Tangent\TArchT20V8\SYS\output\TG20.db";
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -83,7 +82,7 @@ namespace ThMEPIFC
                 }
                 ifcFilePath = Path.ChangeExtension(filePath, "ifc");
             }
-            else 
+            else
             {
                 //选择保存路径
                 ifcFilePath = SaveFilePath("ifc");
@@ -97,7 +96,7 @@ namespace ThMEPIFC
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false,false);
+            var project = service.DWGToProject(false, false);
             if (project == null)
             {
                 return;
@@ -148,7 +147,7 @@ namespace ThMEPIFC
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(false,false);
+            var project = service.DWGToProject(false, false);
             if (project == null)
             {
                 return;
@@ -224,7 +223,7 @@ namespace ThMEPIFC
             sw.Start();
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProject(true,false);
+            var project = service.DWGToProject(true, false);
             if (project == null)
             {
                 return;
@@ -267,7 +266,7 @@ namespace ThMEPIFC
                 pipeClient.Close();
                 Active.Database.GetEditor().WriteMessage("已发送至Viewer\r\n");
             }
-            catch(System.Exception ex)
+            catch (System.Exception ex)
             {
                 pipeClient.Dispose();
                 Active.Database.GetEditor().WriteMessage("未连接到Viewer\r\n");
@@ -294,7 +293,7 @@ namespace ThMEPIFC
                 {
                     THModelMergeService modelMergeService = new THModelMergeService();
                     var MergeModel = modelMergeService.ModelMerge(filePath1, filePath2);
-                    if(!MergeModel.IsNull())
+                    if (!MergeModel.IsNull())
                     {
                         Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, ifcFilePath);
                         MergeModel.Dispose();
@@ -324,7 +323,7 @@ namespace ThMEPIFC
             }
             if (File.Exists(ifcFilePath))
                 File.Delete(ifcFilePath);
-            
+
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(string.Empty);
             var project = service.DWGToProject(false, false);
@@ -339,10 +338,10 @@ namespace ThMEPIFC
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 //string msg = string.Format(
-                    //"读取DB数据楼层信息，分层组合数据时间：{0},分出组合数据转换IfcModel时间：{1},总时间：{2}",
-                    //(dwgDBDate - startDate).TotalSeconds,
-                    //(endDate - dwgDBDate).TotalSeconds,
-                    //(endDate - startDate).TotalSeconds);
+                //"读取DB数据楼层信息，分层组合数据时间：{0},分出组合数据转换IfcModel时间：{1},总时间：{2}",
+                //(dwgDBDate - startDate).TotalSeconds,
+                //(endDate - dwgDBDate).TotalSeconds,
+                //(endDate - startDate).TotalSeconds);
                 //Active.Database.GetEditor().WriteMessage(msg);
             }
         }

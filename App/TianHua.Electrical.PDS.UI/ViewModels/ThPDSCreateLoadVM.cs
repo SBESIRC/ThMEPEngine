@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Media;
 using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.UI.ViewModels

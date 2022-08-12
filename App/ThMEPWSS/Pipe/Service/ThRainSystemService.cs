@@ -257,7 +257,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         }
         public List<RainCadData> CadDatas;
         public List<Item> Items;
-        public List<StoreyInfo> storeysItems;
+        public List<StoreyItem> storeysItems;
         public RainGeoData geoData;
         public List<RainDrawingData> drDatas;
         public RainSystemDiagramViewModel vm;
@@ -1717,7 +1717,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     }
             }
         }
-        public static (ExtraInfo, bool) CollectRainData(Point3dCollection range, AcadDatabase adb, out List<StoreyInfo> storeysItems, out List<RainDrawingData> drDatas)
+        public static (ExtraInfo, bool) CollectRainData(Point3dCollection range, AcadDatabase adb, out List<StoreyItem> storeysItems, out List<RainDrawingData> drDatas)
         {
             CollectRainGeoData(range, adb, out storeysItems, out RainGeoData geoData);
             return CreateRainDrawingData(adb, out drDatas, geoData);
@@ -1787,7 +1787,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             cadDataMain = RainCadData.Create(geoData);
             cadDatas = cadDataMain.SplitByStorey();
         }
-        public static List<StoreyInfo> GetStoreys(AcadDatabase adb, CommandContext ctx)
+        public static List<StoreyItem> GetStoreys(AcadDatabase adb, CommandContext ctx)
         {
             return ctx.StoreyContext.StoreyInfos;
         }
@@ -1800,14 +1800,14 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             geoData.Init();
             RainService.CollectGeoData(adb, geoData, ctx);
         }
-        public static List<StoreyInfo> GetStoreys(Point3dCollection range, AcadDatabase adb)
+        public static List<StoreyItem> GetStoreys(Point3dCollection range, AcadDatabase adb)
         {
             var geo = range?.ToGRect().ToPolygon();
             var storeys = GetStoreyBlockReferences(adb).Select(x => GetStoreyInfo(x)).Where(info => geo?.Contains(info.Boundary.ToPolygon()) ?? THESAURUSOBSTINACY).ToList();
             FixStoreys(storeys);
             return storeys;
         }
-        public static void CollectRainGeoData(Point3dCollection range, AcadDatabase adb, out List<StoreyInfo> storeys, out RainGeoData geoData)
+        public static void CollectRainGeoData(Point3dCollection range, AcadDatabase adb, out List<StoreyItem> storeys, out RainGeoData geoData)
         {
             storeys = GetStoreys(range, adb);
             FixStoreys(storeys);
@@ -1815,7 +1815,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             geoData.Init();
             RainService.CollectGeoData(range, adb, geoData);
         }
-        public static List<StoreysItem> GetStoreysItem(List<StoreyInfo> thStoreys)
+        public static List<StoreysItem> GetStoreysItem(List<StoreyItem> thStoreys)
         {
             var storeysItems = new List<StoreysItem>();
             foreach (var s in thStoreys)
@@ -1889,10 +1889,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 }
             }
         }
-        public static List<ThwSDStoreyItem> CollectStoreys(List<StoreyInfo> thStoreys, List<RainDrawingData> drDatas)
+        public static List<ThwSDStoreyItem> CollectStoreys(List<StoreyItem> thStoreys, List<RainDrawingData> drDatas)
         {
             var wsdStoreys = new List<ThwSDStoreyItem>();
-            HashSet<string> GetVerticalPipeNotes(StoreyInfo storey)
+            HashSet<string> GetVerticalPipeNotes(StoreyItem storey)
             {
                 var i = thStoreys.IndexOf(storey);
                 if (i < THESAURUSSTAMPEDE) return new HashSet<string>();
@@ -1993,7 +1993,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             public string Storey;
         }
         public static bool ShowWaterBucketHitting;
-        public static List<RainGroupedPipeItem> GetRainGroupedPipeItems(List<RainDrawingData> drDatas, List<StoreyInfo> thStoreys, out List<int> allNumStoreys, out List<string> allRfStoreys, out OtherInfo otherInfo)
+        public static List<RainGroupedPipeItem> GetRainGroupedPipeItems(List<RainDrawingData> drDatas, List<StoreyItem> thStoreys, out List<int> allNumStoreys, out List<string> allRfStoreys, out OtherInfo otherInfo)
         {
             otherInfo = new OtherInfo()
             {
@@ -3595,7 +3595,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 var storeys = ThRainService.commandContext.StoreyContext.StoreyInfos;
                 List<RainDrawingData> drDatas;
                 var range = ThRainService.commandContext.range;
-                List<StoreyInfo> storeysItems;
+                List<StoreyItem> storeysItems;
                 ExtraInfo exInfo;
                 if (range != null)
                 {
@@ -3637,7 +3637,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             using (var adb = AcadDatabase.Active())
             using (var tr = new _DrawingTransaction(adb, THESAURUSOBSTINACY))
             {
-                List<StoreyInfo> storeysItems;
+                List<StoreyItem> storeysItems;
                 List<RainDrawingData> drDatas;
                 var (exInfo, ok) = CollectRainData(range, adb, out storeysItems, out drDatas);
                 if (!ok) return;
@@ -5614,7 +5614,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             br.Layer = THESAURUSJUBILEE;
         });
         }
-        public static void DrawRainDiagram(List<RainDrawingData> drDatas, List<StoreyInfo> storeysItems, Point2d basePoint, List<RainGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys, OtherInfo otherInfo, RainSystemDiagramViewModel vm, ExtraInfo exInfo)
+        public static void DrawRainDiagram(List<RainDrawingData> drDatas, List<StoreyItem> storeysItems, Point2d basePoint, List<RainGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys, OtherInfo otherInfo, RainSystemDiagramViewModel vm, ExtraInfo exInfo)
         {
             var allNumStoreyLabels = allNumStoreys.Select(i => i + THESAURUSASPIRATION).ToList();
             var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
@@ -6073,7 +6073,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
     {
         public AcadDatabase adb;
         public RainDiagram RainDiagram;
-        public List<StoreyInfo> Storeys;
+        public List<StoreyItem> Storeys;
         public RainGeoData GeoData;
         public RainCadData CadDataMain;
         public List<RainCadData> CadDatas;
@@ -8273,7 +8273,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             var geo = range?.ToGRect().ToPolygon();
             var brs = GetStoreyBlockReferences(adb);
             var _brs = new List<BlockReference>();
-            var storeys = new List<StoreyInfo>();
+            var storeys = new List<StoreyItem>();
             foreach (var br in brs)
             {
                 var info = GetStoreyInfo(br);
@@ -8306,10 +8306,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             t = Regex.Replace(t, THESAURUSMISTRUST, THESAURUSSPECIFICATION);
             return t;
         }
-        public static StoreyInfo GetStoreyInfo(BlockReference br)
+        public static StoreyItem GetStoreyInfo(BlockReference br)
         {
             var props = br.DynamicBlockReferencePropertyCollection;
-            return new StoreyInfo()
+            return new StoreyItem()
             {
                 StoreyType = GetStoreyType((string)props.GetValue(ADSIGNIFICATION)),
                 Numbers = ParseFloorNums(GetStoreyNumberString(br)),
@@ -8392,7 +8392,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             }
             return pt;
         }
-        public static void FixStoreys(List<StoreyInfo> storeys)
+        public static void FixStoreys(List<StoreyItem> storeys)
         {
             var lst1 = storeys.Where(s => s.Numbers.Count == THESAURUSHOUSING).Select(s => s.Numbers[THESAURUSSTAMPEDE]).ToList();
             foreach (var s in storeys.Where(s => s.Numbers.Count > THESAURUSHOUSING).ToList())

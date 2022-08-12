@@ -184,7 +184,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                     retValue = "定频";
                     break;
                 case EnumFanControl.TwoSpeed:
-                    retValue = "双频";
+                    retValue = "双速";
                     break;
                 case EnumFanControl.Inverters:
                     retValue = "变频";

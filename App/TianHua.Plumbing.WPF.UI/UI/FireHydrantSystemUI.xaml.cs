@@ -138,5 +138,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
                 Show();
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://thlearning.thape.com.cn/kng/view/video/693b4adf25cc42e5b64d0a4c89507bf5.html");
+        }
     }
 }

@@ -33,7 +33,7 @@ namespace ThMEPStructure.StructPlane.Print
         private void PrintGeos(Database database)
         {
             // 打印到图纸中
-            Geos.ForEach(o =>
+            _geos.ForEach(o =>
             {
                 // Svg解析的属性信息存在于Properties中
                 string category = o.Properties.GetCategory();
@@ -64,9 +64,9 @@ namespace ThMEPStructure.StructPlane.Print
         private void PrintElevationTable(Database db)
         {
             // 打印柱表
-            var maxX = Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
+            var maxX = _geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                  .MaxPoint.X).OrderByDescending(o => o).FirstOrDefault();
-            var minY = Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
+            var minY = _geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                  .MinPoint.Y).OrderBy(o => o).FirstOrDefault();
             var elevationTblBasePt = new Point3d(maxX + 1000.0, minY, 0);
             var elevationInfos = GetElevationInfos();
@@ -81,7 +81,7 @@ namespace ThMEPStructure.StructPlane.Print
         private void PrintHeadText(Database database)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
-            var flrRange = FloorInfos.GetFloorHeightRange(FlrBottomEle);
+            var flrRange = _floorInfos.GetFloorHeightRange(_flrBottomEle);
             if (string.IsNullOrEmpty(flrRange))
             {
                 return;

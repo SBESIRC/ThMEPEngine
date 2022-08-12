@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
-    public class ThChangeCoordinateService
+    public class ThCoordinateService
     {
         public static Matrix3d GetCoordinateTransformer(Point3d fromOrigin, Vector3d fromXAxis, Point3d toOrigin, Vector3d toXAxis)
         {
@@ -18,7 +19,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             return matrix.Inverse();
 
         }
-
 
         public static Matrix3d GetCoordinateTransformer(Point3d fromOrigin, Point3d toOrigin, Double angle)
         {
@@ -51,6 +51,41 @@ namespace ThMEPWSS.SprinklerDim.Service
             else
                 return pt.Y;
         }
+
+        public static Vector3d GetDirrection(Matrix3d transformer, bool isXAxis)
+        {
+            Point3d startPoint = new Point3d(0, 0, 0);
+            Point3d endPoint = new Point3d();
+
+            if (isXAxis)
+            {
+                endPoint = new Point3d(1, 0, 0);
+            }
+            else
+            {
+                endPoint = new Point3d(0, 1, 0);
+            }
+
+
+            List<Point3d> pts = new List<Point3d> { startPoint, endPoint };
+            pts = ThCoordinateService.MakeTransformation(pts, transformer);
+
+            Vector3d dir = (pts[1] - pts[0]).GetNormal();
+            return dir;
+        }
+
+        public static bool IsParalleled(Line l1, Line l2)
+        {
+            Vector3d v1 = l1.EndPoint - l1.StartPoint;
+            Vector3d v2 = l2.EndPoint - l2.StartPoint;
+
+
+            if (Math.Abs(v1.GetNormal().DotProduct(v2.GetNormal())) > Math.Cos(Math.PI / 180))
+                return true;
+
+            return false;
+        }
+
 
     }
 }

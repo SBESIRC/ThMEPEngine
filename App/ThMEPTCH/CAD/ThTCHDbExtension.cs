@@ -1,4 +1,5 @@
-﻿using Linq2Acad;
+﻿using System;
+using Linq2Acad;
 using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
@@ -9,7 +10,7 @@ namespace ThMEPTCH.CAD
 {
     public static class ThTCHDbExtension
     {
-        public static TArchDoor LoadDoorFromDb(this Database database, ObjectId tch)
+        public static TArchDoor LoadDoorFromDb(this Database database, ObjectId tch, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -54,11 +55,13 @@ namespace ThMEPTCH.CAD
                             break;
                     }
                 }
+
+                door.TransformBy(matrix);
                 return door;
             }
         }
 
-        public static TArchWindow LoadWindowFromDb(this Database database, ObjectId tch)
+        public static TArchWindow LoadWindowFromDb(this Database database, ObjectId tch, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -104,11 +107,12 @@ namespace ThMEPTCH.CAD
                     }
                 }
 
+                window.TransformBy(matrix);
                 return window;
             }
         }
 
-        public static TArchWall LoadWallFromDb(this Database database, ObjectId tch)
+        public static TArchWall LoadWallFromDb(this Database database, ObjectId tch, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -122,21 +126,47 @@ namespace ThMEPTCH.CAD
                     }
                     return false;
                 }
-                double Bulge()
+                bool IsLinear()
                 {
-                    if (IsArc())
+                    if (acadObj.IsArc is string v)
+                    {
+                        return v == "直墙";
+                    }
+                    return false;
+                }
+                Curve GetTransformedCurve()
+                {
+                    if (IsLinear())
+                    {
+                        var line = new Line(curve.StartPoint, curve.EndPoint);
+                        return line.GetTransformedCopy(matrix) as Curve;
+                    }
+                    else if (IsArc())
                     {
                         // https://forums.autodesk.com/t5/net/arc-3-points/td-p/9424441
                         var geArc = new CircularArc3d(
-                            curve.StartPoint, 
-                            curve.GetMidpoint(), 
+                            curve.StartPoint,
+                            curve.GetMidpoint(),
                             curve.EndPoint);
                         if (Curve.CreateFromGeCurve(geArc) is Arc arc)
                         {
-                            return arc.BulgeFromCurve(false);
+                            return arc.GetTransformedCopy(matrix) as Curve;
                         }
                     }
-                    return 0.0;
+                    throw new NotSupportedException();
+                }
+                var transCurve = GetTransformedCurve();
+                double Bulge()
+                {
+                    if (transCurve is Line)
+                    {
+                        return 0.0;
+                    }
+                    else if (transCurve is Arc arc)
+                    {
+                        return arc.BulgeFromCurve(false);
+                    }
+                    throw new NotSupportedException();
                 }
                 var wall = new TArchWall
                 {
@@ -144,12 +174,12 @@ namespace ThMEPTCH.CAD
                     Id = (ulong)tch.Handle.Value,
                     
                     // 几何信息
-                    StartPointX = curve.StartPoint.X,
-                    StartPointY = curve.StartPoint.Y,
-                    StartPointZ = curve.StartPoint.Z,
-                    EndPointX = curve.EndPoint.X,
-                    EndPointY = curve.EndPoint.Y,
-                    EndPointZ = curve.EndPoint.Z,
+                    StartPointX = transCurve.StartPoint.X,
+                    StartPointY = transCurve.StartPoint.Y,
+                    StartPointZ = transCurve.StartPoint.Z,
+                    EndPointX = transCurve.EndPoint.X,
+                    EndPointY = transCurve.EndPoint.Y,
+                    EndPointZ = transCurve.EndPoint.Z,
                     LeftWidth = acadObj.LeftWidth,
                     RightWidth = acadObj.RightWidth,
                     Height = acadObj.Height,
@@ -178,11 +208,6 @@ namespace ThMEPTCH.CAD
         private static Curve GetCurve(ObjectId tch)
         {
             return tch.GetObject(OpenMode.ForRead) as Curve;
-        }
-
-        private static object GetAcadObject(ObjectId tch)
-        {
-            return tch.GetObject(OpenMode.ForRead).AcadObject;
         }
     }
 }

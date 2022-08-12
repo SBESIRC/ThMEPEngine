@@ -99,18 +99,18 @@ namespace ThMEPLighting.Garage.Service.Arrange
             extendLines = ThLaneLineMergeExtension.Merge(extendLines.ToCollection()).OfType<Line>().ToList();
 
             // 保留十字型车道线的较长边和T字型的横边
-            CrossLineMerge(regionBorder.DxCenterLines, lightingLines, extendLines);
+            CrossLineMerge(regionBorder.DxCenterLines, lightingLines, ref extendLines);
             lightingLines = ThLaneLineMergeExtension.Merge(lightingLines.ToCollection()).OfType<Line>().ToList();
 
             // 检测连通性添加非灯线
-            AddNonLightingLine(lightingLines, regionBorder.FdxCenterLines, extendLines);
+            AddNonLightingLine(lightingLines, regionBorder.FdxCenterLines, regionBorder.DxCenterLines, extendLines);
             extendLines = extendLines.Except(regionBorder.FdxCenterLines).ToList();
             regionBorder.ExtendLines = extendLines;
 
             // 对中心线归一化后，将灯线分为1、2号线
             var firstLines = new List<Line>();
             var secondLines = new List<Line>();
-            lightingLines = lightingLines.Normalize(); //单位化
+            regionBorder.DxCenterLines = ThCenterLineService.NormalizeEx(regionBorder.DxCenterLines); //有序化
             Distinguish(regionBorder.DxCenterLines, lightingLines, firstLines, secondLines);
 
             // 连接处打断
@@ -192,7 +192,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             }
         }
 
-        private void CrossLineMerge(List<Line> centerLines, List<Line> lightingLines, List<Line> extendLines)
+        private void CrossLineMerge(List<Line> centerLines, List<Line> lightingLines, ref List<Line> extendLines)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(extendLines.ToCollection());
             var lightingIndex = new ThCADCoreNTSSpatialIndex(lightingLines.ToCollection());
@@ -233,14 +233,16 @@ namespace ThMEPLighting.Garage.Service.Arrange
                                         var newLine = new Line(thisLine.StartPoint + DoubleRowOffsetDis * direction, thisLine.EndPoint);
                                         lightingLines.Add(newLine);
                                         lightingLines.Remove(thisLine);
-                                        extendLines.Add(newLine);
+                                        Update(lightingIndex, newLine, thisLine);
+                                        extendLines.Add(new Line(thisLine.StartPoint, thisLine.StartPoint + DoubleRowOffsetDis * direction));
                                     }
                                     else
                                     {
                                         var newLine = new Line(thisLine.StartPoint, thisLine.EndPoint - DoubleRowOffsetDis * direction);
                                         lightingLines.Add(newLine);
                                         lightingLines.Remove(thisLine);
-                                        extendLines.Add(newLine);
+                                        Update(lightingIndex, newLine, thisLine);
+                                        extendLines.Add(new Line(thisLine.EndPoint - DoubleRowOffsetDis * direction, thisLine.EndPoint));
                                     }
                                 }
                             }
@@ -270,7 +272,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             }
         }
 
-        private void AddNonLightingLine(List<Line> lightingLines, List<Line> nonLightingLines, List<Line> extendLines)
+        private void AddNonLightingLine(List<Line> lightingLines, List<Line> nonLightingLines, List<Line> centerLines, List<Line> extendLines)
         {
             var searchedLine = new List<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lightingLines.ToCollection());
@@ -302,7 +304,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             });
 
             var graphIndex = new ThCADCoreNTSSpatialIndex(graphFrames.ToCollection());
-            extendLines.ForEach(line =>
+            ExtendLineSort(extendLines, centerLines).ForEach(line =>
             {
                 var lineBuffer = line.BufferSquare(10.0);
                 var frames = graphIndex.SelectCrossingPolygon(lineBuffer);
@@ -389,16 +391,25 @@ namespace ThMEPLighting.Garage.Service.Arrange
 
         private void Distinguish(List<Line> centerLines, List<Line> lightingLines, List<Line> firstLines, List<Line> secondLines)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(centerLines.ToCollection());
-            lightingLines.ForEach(line =>
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lightingLines.ToCollection());
+            centerLines.ForEach(line =>
             {
-                var center = LineCenter(line);
                 var direction = line.LineDirection();
-                var vertical = direction.TransformBy(Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, Point3d.Origin));
-                var reverseVertical = direction.TransformBy(Matrix3d.Rotation(-Math.PI / 2, Vector3d.ZAxis, Point3d.Origin));
-                LineSearch(line, center, spatialIndex, direction, vertical, secondLines);
-                LineSearch(line, center, spatialIndex, direction, reverseVertical, firstLines);
+                var antiClockwise = line.LineDirection().TransformBy(Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, Point3d.Origin));
+                var clockwise = line.LineDirection().TransformBy(Matrix3d.Rotation(-Math.PI / 2, Vector3d.ZAxis, Point3d.Origin));
+                var leftLine = (line.Clone() as Line);
+                leftLine.TransformBy(Matrix3d.Displacement(antiClockwise * DoubleRowOffsetDis / 2));
+                spatialIndex.SelectCrossingPolygon(leftLine.Buffer(10.0)).OfType<Line>()
+                    .Where(o => Math.Abs(o.LineDirection().DotProduct(direction)) > Math.Cos(1 / 180.0 * Math.PI))
+                    .ForEach(o => firstLines.Add(o));
+
+                var rightLine = (line.Clone() as Line);
+                rightLine.TransformBy(Matrix3d.Displacement(clockwise * DoubleRowOffsetDis / 2));
+                spatialIndex.SelectCrossingPolygon(rightLine.Buffer(10.0)).OfType<Line>()
+                    .Where(o => Math.Abs(o.LineDirection().DotProduct(direction)) > Math.Cos(1 / 180.0 * Math.PI))
+                    .ForEach(o => secondLines.Add(o));
             });
+
             lightingLines.Except(firstLines).Except(secondLines).ForEach(line => firstLines.Add(line));
         }
 
@@ -433,7 +444,20 @@ namespace ThMEPLighting.Garage.Service.Arrange
             return point.DistanceTo(line.StartPoint) < 10.0 || point.DistanceTo(line.EndPoint) < 10.0;
         }
 
+        private void Update(ThCADCoreNTSSpatialIndex index, Line add, Line delete)
+        {
+            index.Update(new DBObjectCollection { add }, new DBObjectCollection { delete });
+        }
 
+        private List<Line> ExtendLineSort(List<Line> extendLines, List<Line> centerLines)
+        {
+            return extendLines.OrderByDescending(o => Distance(o, centerLines)).ToList();
+        }
+
+        private double Distance(Line line, List<Line> centerLines)
+        {
+            return centerLines.Select(o => o.Distance(line)).OrderBy(o => o).First();
+        }
 
         private List<Line> HandleEvenEdge(Line first, Line second, ThCADCoreNTSSpatialIndex spatialIndex, Polyline frame)
         {

@@ -44,7 +44,7 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var ep = wallEntity.EndPoint;
                 var leftWidth = arch.LeftWidth;
                 var rightWidth = arch.RightWidth;
-                var angle = arch.Bulge;
+                var angle = Math.Atan(arch.Bulge) * 4;
                 var xAxis = (ep - sp).GetNormal();
                 var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
                 var length = sp.DistanceTo(ep);

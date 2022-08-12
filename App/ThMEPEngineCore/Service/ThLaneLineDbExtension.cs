@@ -1,16 +1,17 @@
 ﻿using System;
 using Linq2Acad;
-using ThMEPEngineCore.Service;
+using System.Linq;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThLaneLineDbExtension : ThOtherDbExtension,IDisposable
+    public class ThLaneLineDbExtension : ThOtherDbExtension, IDisposable
     {
         public List<Curve> LaneCurves { get; set; }
-        public ThLaneLineDbExtension(Database db):base(db)
+        public ThLaneLineDbExtension(Database db) : base(db)
         {
             LayerFilter = ThLaneLineLayerManager.GeometryXrefLayers(db);
             LaneCurves = new List<Curve>();
@@ -27,19 +28,14 @@ namespace ThMEPEngineCore.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                foreach(var ent in acadDatabase.ModelSpace)
-                {
-                    if (ent is BlockReference blkRef)
+                acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
+                    .ForEach(o =>
                     {
-                        if (blkRef.BlockTableRecord.IsNull)
-                        {
-                            continue;
-                        }
-                        BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
-                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        LaneCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
-                    }
-                }
+                        var mcs2wcs = o.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        LaneCurves.AddRange(BuildElementCurves(o, mcs2wcs));
+                    });
             }
         }
         private IEnumerable<Curve> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)

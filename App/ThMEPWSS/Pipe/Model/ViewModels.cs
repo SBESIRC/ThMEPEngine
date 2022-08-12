@@ -110,9 +110,9 @@ namespace ThMEPWSS.Pipe.Model
     }
     public class StoreyContext
     {
-        public List<StoreyInfo> StoreyInfos;
+        public List<StoreyItem> StoreyInfos;
     }
-    public class StoreyInfo
+    public class StoreyItem
     {
         public ThMEPEngineCore.Model.Common.StoreyType StoreyType;
         public List<int> Numbers;

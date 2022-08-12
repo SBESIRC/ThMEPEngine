@@ -501,11 +501,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.1.2</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\删除.png" />
     <Resource Include="Images\刷新.png" />
     <Resource Include="Images\单双速切换.png" />
@@ -518,6 +513,10 @@
     <Resource Include="Images\选择.png" />
     <Resource Include="Images\风机型号.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

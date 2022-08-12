@@ -1,7 +1,7 @@
 ﻿using ThCADExtension;
 using System.Windows.Media;
 using TianHua.Electrical.PDS.Project.Module;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace TianHua.Electrical.PDS.UI.ViewModels
 {

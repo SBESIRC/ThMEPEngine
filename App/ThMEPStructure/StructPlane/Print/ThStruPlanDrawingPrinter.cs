@@ -8,10 +8,11 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.CAD;
+using ThMEPStructure.Common;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.Model.Printer;
-using ThMEPStructure.Common;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print
@@ -25,109 +26,202 @@ namespace ThMEPStructure.StructPlane.Print
         public override void Print(Database db)
         {
             #region ---------- 前处理 -----------
+            var geoExtents = _geos.Select(o=>o.Boundary)
+                .ToCollection().ToExtents2d(); // 获取ObjIds的范围
+            geoExtents = geoExtents.Enlarge(_printParameter.FloorSpacing * 0.1); // 把范围扩大指定距离
+            var dwgExistedElements = GetAllObjsInRange(db, geoExtents); // 获取Dwg此范围内的所有对象
+            var dwgExistedBeamMarkBlks = GetBeamMarks(dwgExistedElements); // 图纸上已存在的梁标注(块)
+
             // 获取楼板的填充
-            var elevations = Geos.GetSlabElevations();
-            elevations = elevations.FilterSlabElevations(FlrHeight);
+            var elevations = _geos.GetSlabElevations();
+            elevations = elevations.FilterSlabElevations(_flrHeight);
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
 
-            //调整梁标注的方向
-            var stairSlabCorners = new DBObjectCollection();
-            UpdateBeamTextRotation(Geos.GetBeamMarks());
-
             // 创建楼梯板对角线            
-            var tenThckSlabMarks = Geos.GetTenThickSlabMarks();            
+            var stairSlabCorners = new DBObjectCollection();
+            var tenThckSlabMarks = _geos.GetTenThickSlabMarks();            
             if (tenThckSlabMarks.Count>0)
             {
-                var slabs = Geos.GetSlabGeos().Select(o => o.Boundary).ToCollection();
+                var slabs = _geos.GetSlabGeos().Select(o => o.Boundary).ToCollection();
                 var tenThickSlabTexts = tenThckSlabMarks.Select(o => o.Boundary).ToCollection();                
                 stairSlabCorners = CreateStairSlabCorner(tenThickSlabTexts, slabs);
-                Geos = Geos.Except(tenThckSlabMarks).ToList(); // 10mm厚的楼板标注不要打印
+                _geos = _geos.Except(tenThckSlabMarks).ToList(); // 10mm厚的楼板标注不要打印
             }
+
+            //调整梁标注的方向
+            var beamMarks = _geos.GetBeamMarks(); // 梁标注
+            var beamGeos = _geos.GetBeamGeos(); // 梁线
+            UpdateBeamTextRotation(beamMarks);
+            // 构件梁区域模型            
+            var beamPolygonCenters = CreateBeamPolygonAndCenter(beamGeos, beamMarks);
             
             // 处理双梁
             // 双梁是要单独处理的
-            var dblRowbeamMarks = FilterDoubleRowBeamMarks(Geos.GetBeamMarks());
-            Geos = Geos.Except(dblRowbeamMarks.SelectMany(o => o)).ToList();
-            dblRowbeamMarks.SelectMany(o => o).ForEach(o => UpdateBeamText(o));
+            var dblRowBeamMarks = FilterDoubleRowBeamMarks(_geos.GetBeamMarks());
+            _geos = _geos.Except(dblRowBeamMarks.SelectMany(o => o)).ToList();
+            dblRowBeamMarks.SelectMany(o => o).ForEach(o => UpdateBeamText(o));
             #endregion
 
             // 打印对象
-            // 用于把打印的文字转成块,最后把梁文字删除掉
-            var beamTextObjIds = new List<ObjectIdCollection>(); 
+            // 记录梁文字原始位置
+            var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
+            // 用于把打印的文字转成块,最后把梁文字删除掉  
+            var beamTextGroupObjIds = new List<ObjectIdCollection>();
 
             // 打印墙、柱、楼板、梁、洞、标注
-            var res = PrintGeos(db, Geos, slabHatchConfigs); //BeamLines,BeamTexts
+            var res = PrintGeos(db, _geos, slabHatchConfigs); //BeamLines,BeamTexts
+            var beamLines = res.Item1.ToDBObjectCollection(db); // BeamLines
+            var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
 
             // 打印楼梯板对角线及标注
             Append(PrintStairSlabCorner(db, stairSlabCorners));
-
             // 打印双梁标注
-            var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowbeamMarks);
-            dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
-            dblRowBeamMarkIds.ForEach(o => beamTextObjIds.Add(o.Item1));
+            var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowBeamMarks);
+            var dblRowBeamTexts = dblRowBeamMarks.SelectMany(o => o).Select(o => o.Boundary).ToCollection();
 
             // 过滤多余梁标注文字(后处理)
-            // 过滤一段上重复标注的梁文字
-            var beamLines = res.Item1.ToDBObjectCollection(db);
-            var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
-            var removedTexts = FilterBeamMarks(beamLines, beamTexts);
+            // 过滤一段上重复标注的梁文字     
+            var removedTexts1 = FilterBeamMarks(beamLines, beamTexts);
+
+            // 后处理双梁标注            
+            var removedTexts2 = FilterBeamMarks(beamLines, dblRowBeamTexts);
+            // 更新dblRowBeamMarkIds
+            var tempDblRowBeamMarkIds = new List<Tuple<ObjectIdCollection, Vector3d>>();
+            dblRowBeamMarkIds.ForEach(o =>
+            {
+                var tempIds = o.Item1.ToDBObjectCollection(db).OfType<DBObject>()
+                .Where(m => !removedTexts2.Contains(m)).Select(m => m.ObjectId).ToCollection();
+                if(tempIds.Count>0)
+                {
+                    tempDblRowBeamMarkIds.Add(Tuple.Create(tempIds, o.Item2));
+                }
+            });
+            dblRowBeamMarkIds = tempDblRowBeamMarkIds;
+            dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
+            dblRowBeamMarkIds.ForEach(o => beamTextGroupObjIds.Add(o.Item1));
+            
+            // 记录梁标注文字的原始位置
+            beamTexts.OfType<DBText>().ForEach(o => beamMarkOriginTextPos.Add(o, o.GetTextCenter()));
+            dblRowBeamTexts.OfType<DBText>().ForEach(o => beamMarkOriginTextPos.Add(o, o.GetTextCenter()));
 
             // 对双梁文字调整位置(后处理)
             AdjustDblRowMarkPos(db, dblRowBeamMarkIds, beamLines);
 
             // 将带有标高的文字，换成两行(后处理)
             var beamTextInfos = new Dictionary<DBText, Vector3d>();
-            beamTexts.Difference(removedTexts)
-                .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));           
+            beamTexts.Difference(removedTexts1)
+                .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));                                    
             var adjustService = new ThAdjustBeamMarkService(db,beamLines, beamTextInfos);
             adjustService.Adjust();
 
             // 将生成的文字打印出来
-            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
+            var config = ThAnnotationPrinter.GetAnnotationConfig(_printParameter.DrawingScale);
             var printer = new ThAnnotationPrinter(config);
             adjustService.DoubleRowTexts.ForEach(x =>
             {
-                removedTexts.Add(x.Item1);
+                removedTexts1.Add(x.Item1);
                 ObjIds.Remove(x.Item1.ObjectId);
                 var dblRowTextIds = new ObjectIdCollection();
                 dblRowTextIds.AddRange(printer.Print(db, x.Item2));
                 dblRowTextIds.AddRange(printer.Print(db, x.Item3));
                 Append(dblRowTextIds);
-                beamTextObjIds.Add(dblRowTextIds);
+                beamTextGroupObjIds.Add(dblRowTextIds);
+                // item1 被分为两行字 item2 and item3, item1被删除
+                var item1Origin = beamMarkOriginTextPos[x.Item1];
+                beamMarkOriginTextPos.Add(x.Item2, item1Origin);
+                beamMarkOriginTextPos.Add(x.Item3, item1Origin);
             });
 
             // 把不是双行标注的文字加入到beamTextObjIds中
-            beamTexts.Difference(removedTexts).OfType<DBText>().ForEach(o=> beamTextObjIds.Add(new ObjectIdCollection { o.ObjectId}));
+            beamTexts.Difference(removedTexts1).OfType<DBText>()
+                .ForEach(o=> beamTextGroupObjIds.Add(new ObjectIdCollection { o.ObjectId}));
 
-            // 把梁标注打成块(后处理)
-            var beamBlkIds = ConvertToBlock(db, beamTextObjIds);
+            // 寻找梁区域内指定范围是否已存在标注
+            var beamTextGroupObjs = beamTextGroupObjIds.Select(o => o.ToDBObjectCollection(db)).ToList();
+            var existedBeamFilterRes = FilterExistedBeamMarks(beamMarkOriginTextPos, beamPolygonCenters, 
+                dwgExistedBeamMarkBlks, beamTextGroupObjs);
+            // 需要转换成块的文字组合
+            var convertBlkGroupIds = existedBeamFilterRes.Item1
+                .Select(o => o.OfType<DBObject>()
+                .Select(k => k.ObjectId).ToCollection())
+                .ToList();
+
+            // 把梁文字转换成块
+            var beamBlkIds = ConvertToBlock(db, convertBlkGroupIds);
+            // 把转化的块和图纸上需要保留的块加入到ObjIds中
             Append(beamBlkIds);
-            beamTextObjIds.ForEach(o => o.ToDBObjectCollection(db).OfType<DBObject>().ForEach(e => removedTexts.Add(e)));
+            Append(existedBeamFilterRes.Item2.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
+            dwgExistedElements = dwgExistedElements.Difference(existedBeamFilterRes.Item2);
 
-            // 删除不要的文字
-            Erase(db, removedTexts);
+            // 把梁文字装入到removedTexts1中，梁文字最后要删除
+            beamTextGroupObjIds.ForEach(o => removedTexts1.AddRange(o.ToDBObjectCollection(db)));
 
             // 打印标题
             Append(PrintHeadText(db));
 
             // 打印柱表
-            var maxX= Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
-                .MaxPoint.X).OrderByDescending(o => o).FirstOrDefault();
-            var minY = Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
-                 .MinPoint.Y).OrderBy(o => o).FirstOrDefault();
-            var elevationTblBasePt = new Point3d(maxX+1000.0, minY,0);
+            var elevationTblBasePt = GetElevationBasePt(db);
             var elevationInfos = GetElevationInfos();
             elevationInfos = elevationInfos.OrderBy(o => int.Parse(o.FloorNo)).ToList(); // 按自然层编号排序
             Append(PrintElevationTable(db, elevationTblBasePt, elevationInfos));
 
             // 打印楼板填充
             // 表右上基点
-            var slabPatternTblRightUpBasePt = new Point3d(elevationTblBasePt.X, 
-                elevationTblBasePt.Y-1000.0,0);
+            var slabPatternTblRightUpBasePt = new Point3d(elevationTblBasePt.X,elevationTblBasePt.Y-1000.0,0);
             Append(PrintSlabPatternTable(db, slabPatternTblRightUpBasePt, slabHatchConfigs));
+
+            // 删除不要的文字
+            Erase(db, removedTexts1);
+            Erase(db, removedTexts2);
+            Erase(db, dwgExistedElements);
 
             // 过滤无效Id
             ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+            ObjIds = Difference(ObjIds);
+
+            // 释放 beamPolygonCenters
+            var beamPolygonCentersKeys = beamPolygonCenters.Keys.ToCollection();
+            var beamPolygonCentersValues = beamPolygonCenters.Values.ToCollection();
+            beamPolygonCentersKeys.MDispose();
+            beamPolygonCentersValues.MDispose();
+        }
+
+        private Point3d GetElevationBasePt(Database db)
+        {
+            var extents = GetPrintObjsExtents(db);
+            var maxX = extents.MaxPoint.X;
+            var minY = extents.MinPoint.Y;
+            return  new Point3d(maxX + 1000.0, minY, 0);
+        }
+
+        private DBObjectCollection GetBeamMarks(DBObjectCollection objs)
+        {
+            return objs.OfType<BlockReference>()
+                .Where(o => o.Layer == ThPrintLayerManager.BeamTextLayerName)
+                .ToCollection();
+        }
+
+        private DBObjectCollection GetAllObjsInRange(Database db, Extents2d extents)
+        {
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                return acadDb.ModelSpace.OfType<Entity>().Where(o =>
+                {
+                    return o.GeometricExtents.MinPoint.IsIn(extents,false) ||
+                    o.GeometricExtents.MaxPoint.IsIn(extents, false);
+                }).ToCollection();
+            }
+        }
+
+        private Tuple<List<DBObjectCollection>, DBObjectCollection> FilterExistedBeamMarks(
+           Dictionary<DBText, Point3d> beamMarkOriginTextPos,
+           Dictionary<Polyline, Curve> beamPolygonCenters,
+           DBObjectCollection generatedBeamMarkBlks,
+           List<DBObjectCollection> beamMarkGroups)
+        {
+            var filter = new ThGeneratedBeamMarkFilter(beamMarkOriginTextPos, beamPolygonCenters, generatedBeamMarkBlks);
+            filter.Filter(beamMarkGroups);
+            return Tuple.Create(filter.Results, filter.KeepBeamMarkBlks);
         }
 
         private ObjectIdCollection ConvertToBlock(Database db, List<ObjectIdCollection> beamTextObjIds)
@@ -136,6 +230,15 @@ namespace ThMEPStructure.StructPlane.Print
             var beamTextObjs = beamTextObjIds.Select(o => o.ToDBObjectCollection(db)).ToList();
             var converter = new ThBeamTextBlkConverter();
             return converter.Convert(db, beamTextObjs);
+        }
+
+        private Dictionary<Polyline, Curve> CreateBeamPolygonAndCenter(
+            List<ThGeometry> beamGeos,List<ThGeometry> beamMarks)
+        {
+            var grouper = new ThBeamMarkCurveGrouper(beamGeos, beamMarks);
+            var groupInfs = grouper.Group();
+            var results = grouper.CreateBeamPolygons(groupInfs);
+            return results;
         }
 
         private DBObjectCollection CreateStairSlabCorner(DBObjectCollection tenThckSlabTexts,
@@ -199,8 +302,8 @@ namespace ThMEPStructure.StructPlane.Print
                 Database = db,
                 HatchConfigs = cloneHPC,
                 RightUpbasePt = rightUpbasePt,
-                FlrBottomEle = this.FlrBottomEle,
-                FlrHeight = this.FlrHeight,
+                FlrBottomEle = this._flrBottomEle,
+                FlrHeight = this._flrHeight,
             };
             var builder = new ThSlabPatternTableBuilder(tblParameter);
             var results = builder.Build();
@@ -255,7 +358,7 @@ namespace ThMEPStructure.StructPlane.Print
                         }
                         else
                         {
-                            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
+                            var config = ThAnnotationPrinter.GetAnnotationConfig(_printParameter.DrawingScale);
                             var printer = new ThAnnotationPrinter(config);
                             Append(printer.Print(db, dbText));
                         }
@@ -359,17 +462,31 @@ namespace ThMEPStructure.StructPlane.Print
         {
             if(beamMark.Boundary is DBText dbText)
             {
+                // 更新梁规格是0x0
+                if(dbText.TextString.Contains("0x0"))
+                {
+                    var profileName = beamMark.Properties.GetProfileName();
+                    if (!string.IsNullOrEmpty(profileName))
+                    {
+                        var beamSpec = profileName.GetReducingBeamSpec();
+                        if (!string.IsNullOrEmpty(beamSpec))
+                        {
+                            var bgContent = dbText.TextString.GetBGContent();
+                            dbText.TextString = beamSpec + bgContent;
+                        }
+                    }
+                }
                 var decription = beamMark.Properties.GetDescription();
                 if (string.IsNullOrEmpty(decription))
                 {
-                    if (dbText.TextString.IsEqualElevation(FlrHeight))
+                    if (dbText.TextString.IsEqualElevation(_flrHeight))
                     {
                         dbText.TextString = dbText.TextString.GetBeamSpec();
                     }
                     else
                     {
                         // update to BG 
-                        dbText.TextString = dbText.TextString.UpdateBGElevation(FlrHeight);
+                        dbText.TextString = dbText.TextString.UpdateBGElevation(_flrHeight);
                     }
                 }
                 else
@@ -383,7 +500,7 @@ namespace ThMEPStructure.StructPlane.Print
 
         private ObjectIdCollection PrintBeams(Database db,DBText dbText)
         {
-            var config = ThAnnotationPrinter.GetAnnotationConfig(PrintParameter.DrawingScale);
+            var config = ThAnnotationPrinter.GetAnnotationConfig(_printParameter.DrawingScale);
             var printer = new ThAnnotationPrinter(config);
             return printer.Print(db, dbText);
         }
@@ -393,7 +510,7 @@ namespace ThMEPStructure.StructPlane.Print
             var results = new ObjectIdCollection();
             if (corners.Count > 0)
             {
-                var textConfig = ThStairLineMarkPrinter.GetTextConfig(PrintParameter.DrawingScale);
+                var textConfig = ThStairLineMarkPrinter.GetTextConfig(_printParameter.DrawingScale);
                 var lineConfig = ThStairLineMarkPrinter.GetLineConfig();
                 var stairLinePrinter = new ThStairLineMarkPrinter(lineConfig, textConfig);
                 corners.OfType<Line>().ForEach(l => results.AddRange(stairLinePrinter.Print(db, l)));
@@ -481,7 +598,7 @@ namespace ThMEPStructure.StructPlane.Print
         private ObjectIdCollection PrintHeadText(Database database)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
-            var flrRange = FloorInfos.GetFloorRange(FlrBottomEle);
+            var flrRange = _floorInfos.GetFloorRange(_flrBottomEle);
             if (string.IsNullOrEmpty(flrRange))
             {
                 return new ObjectIdCollection();

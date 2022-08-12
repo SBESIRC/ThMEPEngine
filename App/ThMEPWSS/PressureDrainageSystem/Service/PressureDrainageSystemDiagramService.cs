@@ -725,8 +725,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         ptLocPumpRec = ptLocPumpRec.TransformBy(Matrix3d.Displacement(new Vector3d(0, -frameHeigth / 2, 0)));
                         Polyline frameRec = ptLocPumpRec.CreateRectangle(frameWidth, frameHeigth);
                         //初步绘制潜水泵立管
-                        var contains_cond = pump.Location.Contains("梯") || pump.Location.Contains("电缆沟");
-                        contains_cond = contains_cond && !pump.Location.Equals("开敞楼梯");
+                        var contains_cond = pump.Location.Equals("消防电梯");
                         var HasSpecialPump = contains_cond;
                         InitiallyPlotPumpVerticalPipe(pipeLineSystemUnit, pump, ptLocPumpRec, frameHeigth, frameWidth, frameRec, ref curPoint, parLayers, parIndexes, HasSpecialPump);
                         //绘制潜水泵立管细节

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
@@ -41,7 +40,7 @@ namespace ThMEPStructure.StructPlane.Print
                 var results = new ObjectIdCollection();
                 beamTextObjs.Where(o=>o.Count>0.0).ForEach(o =>
                 {
-                    var blkName = GetMultiTextString(o);
+                    var blkName = o.GetMultiTextString();
                     var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
                         ThPrintLayerManager.BeamTextLayerName, blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
                     var blkObj = acadDb.Element<BlockReference>(blkId,true);
@@ -126,7 +125,7 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 // o 中的文字都是平行的
                 var clones = o.Clone();
-                var blkName = GetMultiTextString(clones);
+                var blkName = clones.GetMultiTextString();
                 if(!string.IsNullOrEmpty(blkName))
                 {
                     AdjustPosition(clones);
@@ -164,6 +163,7 @@ namespace ThMEPStructure.StructPlane.Print
 
         private void AjustTextGap(DBObjectCollection horParallelTexts,List<double> textGaps)
         {
+            // 保持水平位置的相对性，第一个排在最上面
             if(textGaps.Count==0)
             {
                 return;
@@ -172,19 +172,12 @@ namespace ThMEPStructure.StructPlane.Print
             for (int i = 1; i < horParallelTexts.Count; i++)
             {
                 var second = horParallelTexts[i] as DBText;
-                var currenGap = System.Math.Abs(second.Position.Y - first.Position.Y);
                 var oldGap = textGaps[i - 1];
-                var minus = oldGap - currenGap;
-                if(second.Position.Y> first.Position.Y)
-                {
-                    var mt = Matrix3d.Displacement(new Vector3d(0, minus, 0));
-                    second.TransformBy(mt);
-                }
-                else
-                {
-                    var mt = Matrix3d.Displacement(new Vector3d(0, -1.0 * minus, 0));
-                    second.TransformBy(mt);
-                }                
+                var newSecondY = first.Position.Y - oldGap;
+                var moveVec = new Vector3d(0, newSecondY - second.Position.Y, 0);
+                var mt = Matrix3d.Displacement(moveVec);
+                second.TransformBy(mt);
+                first = second;       
             }
         }
 
@@ -279,13 +272,6 @@ namespace ThMEPStructure.StructPlane.Print
         {
             var mt = Matrix3d.Rotation(text.Rotation * -1.0, text.Normal, text.Position);
             text.TransformBy(mt);
-        }
-
-        private string GetMultiTextString(DBObjectCollection texts)
-        {
-            var sb = new StringBuilder();
-            texts.OfType<DBText>().ForEach(o => sb.Append(o.TextString));
-            return sb.ToString();   
         }
     }
 }

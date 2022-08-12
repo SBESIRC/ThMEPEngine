@@ -45,7 +45,7 @@ namespace ThMEPEngineCore
                 // 输出房间
                 var markLayerId = acadDatabase.Database.CreateAIRoomMarkLayer();
                 var outlineLayerId = acadDatabase.Database.CreateAIRoomOutlineLayer();
-                var textStyleId = acadDatabase.TextStyles.Element("TH-STYLE3").ObjectId;
+                var textStyleId = acadDatabase.Database.ImportTextStyle("TH-STYLE3");
                 engine.Elements.OfType<ThIfcRoom>().ForEach(r =>
                 {
                     // 轮廓线
@@ -94,7 +94,7 @@ namespace ThMEPEngineCore
                 var engine = new ThDB3RoomMarkRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
                 var markLayerId = acadDatabase.Database.CreateAIRoomMarkLayer();
-                var textStyleId = acadDatabase.TextStyles.Element("TH-STYLE3").ObjectId;
+                var textStyleId = acadDatabase.Database.ImportTextStyle("TH-STYLE3");
                 engine.Elements.Cast<ThIfcTextNote>().ForEach(o =>
                 {
                     var dbText = new DBText

@@ -37,6 +37,7 @@ namespace ThMEPWSS.SprinklerDim.Data
 
         //----output
         public List<Line> TchPipe { get; private set; } = new List<Line>();
+        public List<Polyline> TchPipeText { get; private set; } = new List<Polyline>();
         public List<Polyline> Column { get; set; } = new List<Polyline>();
         public List<Polyline> Wall { get; set; } = new List<Polyline>(); //mpolygon //polyline
         public List<Polyline> Room { get; set; } = new List<Polyline>(); //mpolygon //polyline
@@ -47,6 +48,7 @@ namespace ThMEPWSS.SprinklerDim.Data
             ProcessAxisCurve();
             RemoveDuplicateSprinklerPt();
             CreateTchPipe();
+            CreateTchPipeText();
             ProjectOntoXYPlane();
         }
 
@@ -55,6 +57,12 @@ namespace ThMEPWSS.SprinklerDim.Data
         {
             var line = TchPipeData.Select(o => o.Outline).OfType<Line>().Where(x => x.Length >= LineTol);
             TchPipe.AddRange(line);
+        }
+
+        public void CreateTchPipeText()
+        {
+            var textGeom = TchPipeData.Select(o => o.Outline).OfType<DBText>().Select(x => x.TextOBB()).ToList();
+            TchPipeText.AddRange(textGeom);
         }
         public void RemoveDuplicateSprinklerPt()
         {
@@ -102,6 +110,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public void ProjectOntoXYPlane()
         {
             TchPipe.ForEach(x => x.ProjectOntoXYPlane());
+            TchPipeText.ForEach(x => x.ProjectOntoXYPlane());
             SprinklerPt = SprinklerPt.Select(x => new Point3d(x.X, x.Y, 0)).ToList();
             Column.ForEach(x => x.ProjectOntoXYPlane());
             Wall.ForEach(x => x.ProjectOntoXYPlane());
@@ -112,6 +121,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public void Print()
         {
             DrawUtils.ShowGeometry(TchPipe, "l0Pipe", 140);
+            DrawUtils.ShowGeometry(TchPipeText, "l0pipeText", 140);
             SprinklerPt.ForEach(x => DrawUtils.ShowGeometry(x, "l0sprinkler", 3));
 
             DrawUtils.ShowGeometry(Wall, "l0wall", 1);

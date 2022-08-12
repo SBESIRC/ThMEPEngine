@@ -1,6 +1,7 @@
 ﻿using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -37,18 +38,14 @@ namespace ThMEPEngineCore.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                foreach (var ent in acadDatabase.ModelSpace)
-                {
-                    if (ent is BlockReference blkRef)
+                acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
+                    .ForEach(o =>
                     {
-                        if (blkRef.BlockTableRecord.IsNull)
-                        {
-                            continue;
-                        }
-                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        DoExtract(blkRef, mcs2wcs, Visitors);
-                    }
-                }
+                        var mcs2wcs = o.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        DoExtract(o, mcs2wcs, Visitors);
+                    });
             }
         }
 

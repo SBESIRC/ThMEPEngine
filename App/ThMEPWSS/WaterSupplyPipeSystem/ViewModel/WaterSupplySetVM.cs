@@ -1,10 +1,10 @@
-﻿using Microsoft.Toolkit.Mvvm.Input;
-using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 using System.Linq;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.ComponentModel.DataAnnotations;
 using ThControlLibraryWPF.ControlUtils;
+using CommunityToolkit.Mvvm.Input;
 using ThMEPWSS.WaterSupplyPipeSystem.ViewModel;
 
 namespace ThMEPWSS.Diagram.ViewModel
@@ -193,10 +193,10 @@ namespace ThMEPWSS.Diagram.ViewModel
         /// <summary>
         /// 列表数据选中项
         /// </summary>
-        public PartitionData SelectPartition 
+        public PartitionData SelectPartition
         {
             get { return selectPartition; }
-            set 
+            set
             {
                 selectPartition = value;
                 this.RaisePropertyChanged();
@@ -220,17 +220,17 @@ namespace ThMEPWSS.Diagram.ViewModel
         /// <summary>
         /// 敷设方式数据列表
         /// </summary>
-        public ObservableCollection<DynamicRadioButton> LayingDynamicRadios 
+        public ObservableCollection<DynamicRadioButton> LayingDynamicRadios
         {
             get { return layingDynamicRadios; }
-            set 
+            set
             {
                 this.layingDynamicRadios = value;
                 this.RaisePropertyChanged();
             }
         }
 
-        
+
 
         private ObservableCollection<DynamicRadioButton> cleanToolDynamicRadios { get; set; }
         /// <summary>
@@ -286,7 +286,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 return;
             PartitionDatas.Remove(SelectPartition);
             SelectPartition = PartitionDatas.FirstOrDefault();
-            
+
         }
 
         public HalfPlatformSetVM halfViewModel { get; set; } = new HalfPlatformSetVM();
@@ -305,11 +305,11 @@ namespace ThMEPWSS.Diagram.ViewModel
             cloned.MeterType = MeterType;
 
             cloned.PartitionDatas?.Clear();
-            if(PartitionDatas is null)
+            if (PartitionDatas is null)
             {
                 return cloned;
             }
-            foreach(var pd in PartitionDatas)
+            foreach (var pd in PartitionDatas)
             {
                 cloned.PartitionDatas.Add(pd.Clone());
             }
@@ -323,12 +323,12 @@ namespace ThMEPWSS.Diagram.ViewModel
         public string RiserNumber { get; set; }
 
         private string minimumFloorNumber;
-        public string MinimumFloorNumber 
+        public string MinimumFloorNumber
         {
             get
             {
                 return minimumFloorNumber;
-            } 
+            }
             set
             {
                 if (value != null && Regex.IsMatch(value, @"^[+-]?\d*$") && value != "")
@@ -353,13 +353,13 @@ namespace ThMEPWSS.Diagram.ViewModel
             {
                 if (value != null && Regex.IsMatch(value, @"^[+-]?\d*$") && value != "")
                 {
-                    if(Convert.ToInt32(value) != 0)
+                    if (Convert.ToInt32(value) != 0)
                     {
                         highestFloorNumber = Convert.ToString((Convert.ToInt32(value)));
                         RaisePropertyChanged("HighestFloorNumber");
                     }
-                   
-                } 
+
+                }
             }
         }
 
