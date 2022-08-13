@@ -20,6 +20,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" Guid="{61010982-83B7-429B-AAF7-8BE7D71C8318}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.ValueTuple.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Collections_Immutable_Debug" Guid="{745ACB13-FE9A-4327-BA7A-EEC0D089208D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Collections_Immutable_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Collections.Immutable.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -37,6 +40,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" Guid="{D4E6BEAA-5657-4A14-92B1-FEABB3AD7860}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.ValueTuple.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Collections_Immutable_Debug" Guid="{95AF789B-042C-4096-A52D-95A99918662F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Collections_Immutable_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Collections.Immutable.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -57,6 +63,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" Guid="{80399139-098B-4AA8-B6B9-CF479FAD8D36}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.ValueTuple.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Collections_Immutable_Release" Guid="{B6245BC1-DA68-4BCE-A506-BD1959120C22}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Collections_Immutable_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Collections.Immutable.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -75,6 +84,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" Guid="{996A813E-0861-4943-BAD4-E2A1454AC0C7}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.ValueTuple.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Collections_Immutable_Release" Guid="{2788A3E7-2CDB-4E29-85D2-E61900670877}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Collections_Immutable_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Collections.Immutable.dll" />
+            </Component>
         </DirectoryRef>
         <?endif?>
     </Fragment>
@@ -91,6 +103,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Collections_Immutable_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Collections_Immutable_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" />
@@ -102,6 +116,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Collections_Immutable_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Collections_Immutable_Release" />   
             <?endif?>
         </ComponentGroup>
     </Fragment>
