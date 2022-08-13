@@ -484,7 +484,7 @@ namespace ThMEPTCH.Services
             {
                 return res;
             }
-            res = res.OrderBy(c => c.Num).ToList();
+            res = res.OrderBy(c => Convert.ToInt32(c.Num)).ToList();
             res.First().Elevation = startElevtion;
             res.First().LevelHeight = firstFloorHeight;
             var elevtion = startElevtion + firstFloorHeight;
