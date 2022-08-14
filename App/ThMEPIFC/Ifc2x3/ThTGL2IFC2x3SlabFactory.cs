@@ -25,8 +25,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcSlab>();
                 ret.Name = "TH Slab";
-                if (!string.IsNullOrEmpty(slab.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(slab.Uuid);
                 //create representation
                 var solid = slab.CreateSlabSolid(Point3d.Origin);
                 var brep = model.ToIfcFacetedBrep(solid);
@@ -47,8 +45,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcSlab>();
                 ret.Name = "TH Slab";
-                if (!string.IsNullOrEmpty(slab.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(slab.Uuid);
                 //create representation
                 var solid = slab.CreateSlabSolid(Point3d.Origin);
                 if (solid.Area < 1)
@@ -71,8 +67,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcSlab>();
                 ret.Name = "Standard Slab";
-                if (!string.IsNullOrEmpty(slab.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(slab.Uuid);
                 // create extruded solid body 
                 var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
                 {

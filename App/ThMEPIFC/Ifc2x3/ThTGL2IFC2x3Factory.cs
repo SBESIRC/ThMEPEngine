@@ -32,8 +32,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 //there should always be one project in the model
                 var project = model.Instances.New<IfcProject>(p => p.Name = projectName);
-                if (!string.IsNullOrEmpty(projectId))
-                    project.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(projectId);
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
                 //set GeometricRepresentationContext
@@ -67,8 +65,6 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     s.ObjectPlacement = model.ToIfcLocalPlacement(WCS());
                 });
-                if (!string.IsNullOrEmpty(site.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(site.Uuid);
                 //get the project there should only be one and it should exist
                 var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
                 project.AddSite(ret);
@@ -92,8 +88,6 @@ namespace ThMEPIFC.Ifc2x3
                     b.CompositionType = IfcElementCompositionEnum.ELEMENT;
                     b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
                 });
-                if (!string.IsNullOrEmpty(building.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(building.Uuid);
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
                 {
                     rel.Name = "THifc properties";
@@ -126,8 +120,6 @@ namespace ThMEPIFC.Ifc2x3
                     s.Name = storey.Number;
                     s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
                 });
-                if (!string.IsNullOrEmpty(storey.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(storey.Uuid);
                 // setup aggregation relationship
                 var ifcRel = model.Instances.New<IfcRelAggregates>();
                 ifcRel.RelatingObject = building;
@@ -189,8 +181,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcWall>();
                 ret.Name = "A Standard rectangular wall";
-                if (!string.IsNullOrEmpty(wall.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(wall.Uuid);
                 //model as a swept area solid
                 IfcProfileDef profile = null;
                 var moveVector = floor_origin.GetAsVector();
@@ -311,8 +301,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcColumn>();
                 ret.Name = "A Standard rectangular column";
-                if (!string.IsNullOrEmpty(column.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(column.Uuid);
                 //model as a swept area solid
                 IfcProfileDef profile = null;
                 var moveVector = floor_origin.GetAsVector();
@@ -433,8 +421,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcBeam>();
                 ret.Name = "A Standard rectangular beam";
-                if (!string.IsNullOrEmpty(beam.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(beam.Uuid);
                 //model as a swept area solid
                 IfcProfileDef profile = null;
                 var moveVector = floor_origin.GetAsVector();
@@ -608,8 +594,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcDoor>();
                 ret.Name = "door";
-                if (!string.IsNullOrEmpty(door.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(door.Uuid);
                 //model as a swept area solid
                 var profile = model.ToIfcRectangleProfileDef(door.Length, door.Width - epsilon);
                 var body = model.ToIfcExtrudedAreaSolid(profile, door.ExtrudedDirection, door.Height);
@@ -670,8 +654,6 @@ namespace ThMEPIFC.Ifc2x3
                 //create opening element
                 var hole = model.Instances.New<IfcOpeningElement>();
                 hole.Name = "hole";
-                if (!string.IsNullOrEmpty(door.Uuid))
-                    hole.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(door.Uuid+"hole");
                 //todo: describe hole's geometry
 
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
@@ -740,8 +722,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcWindow>();
                 ret.Name = "window";
-                if (!string.IsNullOrEmpty(window.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(window.Uuid);
                 //represent wall as a rectangular profile
                 var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
@@ -808,8 +788,6 @@ namespace ThMEPIFC.Ifc2x3
                 //create opening element
                 var hole = model.Instances.New<IfcOpeningElement>();
                 hole.Name = "hole";
-                if (!string.IsNullOrEmpty(window.Uuid))
-                    hole.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(window.Uuid + "hole");
                 //todo: describe hole's geometry
 
                 var hole_rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
@@ -879,8 +857,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcOpeningElement>();
                 ret.Name = "window";
-                if (!string.IsNullOrEmpty(hole.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(hole.Uuid);
                 //represent wall as a rectangular profile
                 var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
                 {
