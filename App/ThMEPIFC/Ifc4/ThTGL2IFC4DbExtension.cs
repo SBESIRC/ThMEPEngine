@@ -6,6 +6,7 @@ using Xbim.Ifc;
 using Xbim.Ifc4.MeasureResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.GeometricModelResource;
+using ThCADCore.NTS;
 
 namespace ThMEPIFC.Ifc4
 {
@@ -24,13 +25,15 @@ namespace ThMEPIFC.Ifc4
         {
             var ret = CreateIfcIndexedPolyCurve(model);
             var cartesianPointList2D = ret.Points as IfcCartesianPointList2D;
-
+            var pLine = polyline.TPSimplify(0.001);
             int pcount = 1;
             var points = new List<List<double>>();
-            var segments = new PolylineSegmentCollection(polyline);
+            var segments = new PolylineSegmentCollection(pLine);
             for (int k = 0; k < segments.Count(); k++)
             {
                 var segment = segments[k];
+                if (segment.StartPoint.GetDistanceTo(segment.EndPoint) < 0.001)
+                    continue;
                 if (segment.IsLinear)
                 {
                     // 直线段

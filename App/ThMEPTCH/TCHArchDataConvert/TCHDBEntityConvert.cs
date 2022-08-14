@@ -326,6 +326,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             pl.Elevation = entity.OutLine.Elevation;
             var newWall = new ThTCHWall(pl, entity.WallHeight);
             newWall.Uuid = projectId + entity.DBId;
+            newWall.Width = entity.LeftWidth + entity.RightWidth;
             //var newWall = new ThTCHWall(entity.StartPoint,entity.EndPoint,entity.RightWidth+entity.LeftWidth, entity.WallHeight);
             return newWall;
         }

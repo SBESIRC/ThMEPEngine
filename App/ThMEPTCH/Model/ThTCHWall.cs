@@ -64,6 +64,7 @@ namespace ThMEPTCH.Model
                 {
                     var cloneLine = polyline.Clone() as Polyline;
                     cloneWall = new ThTCHWall(cloneLine, this.Height);
+                    cloneWall.Width = this.Width;
                 }
             }
             else 
