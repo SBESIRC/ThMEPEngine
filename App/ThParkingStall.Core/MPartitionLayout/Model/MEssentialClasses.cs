@@ -24,6 +24,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool GStartAdjLine = false;
         public bool GEndAdjLine = false;
         public bool CanExtend = true;
+        public bool IsGeneratedForLoopThrough = false;
+        public bool IsAdjLaneForProcessLoopThroughEnd = false;
     }
     public class CarBoxPlus
     {

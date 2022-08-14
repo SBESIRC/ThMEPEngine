@@ -57,6 +57,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     break;
                 }
             }
+            if(LoopThroughEnd)
+                ProcessLanes();
         }
         private void RealizeGenerateLaneParas(GenerateLaneParas paras)
         {
@@ -98,6 +100,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             if (paras.CarBoxPlusToAdd.Count > 0) CarBoxesPlus.AddRange(paras.CarBoxPlusToAdd);
             if (paras.CarModulesToAdd.Count > 0) CarModules.AddRange(paras.CarModulesToAdd);
+        }
+        private void ProcessLanes()
+        {
+            RemoveDuplicatedLanes(IniLanes);
+            JoinLoopThroughLanes();
+            ThinInvalidLanesAndSpaceForNewLoopThroughLanes();
         }
     }
 }

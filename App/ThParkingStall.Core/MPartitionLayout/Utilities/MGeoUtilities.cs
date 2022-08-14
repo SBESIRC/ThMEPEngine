@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
+using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,6 +109,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (points.Count > 0 && curve.Length > 1)
             {
                 var ps = points.Select(e => curve.ClosestPoint(e)).ToList();
+                ps = SortAlongCurve(ps, curve);
                 var splited = curve.GetSplitCurves(ps);
                 return splited.Where(e => e.Length > 1).ToArray();
             }
@@ -115,6 +117,15 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 return new LineString[] { curve };
             }
+        }
+        public static LineString[] SplitCurveByNTS(Polygon curve, Polygon splitter)
+        {
+            var g = OverlayNGRobust.Overlay(curve, splitter, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+            if (g is MultiPolygon)
+            {
+                return ((MultiPolygon)g).Geometries.Select(e => new LineString(e.Coordinates)).ToArray();
+            }
+            return new LineString[] { };
         }
         public static LineString[] SplitCurve(Polygon curve, Polygon splitter)
         {
@@ -124,7 +135,12 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static List<LineSegment> SplitLine(LineSegment line, Polygon splitter)
         {
-            var linestring = SplitCurve(new LineString(new List<Coordinate>() { line.P0, line.P1 }.ToArray()), new LineString(splitter.Coordinates));
+            var tol = 1;
+            var linestring = SplitCurve(new LineString(new List<Coordinate>() { line.P0, line.P1 }.ToArray()), new LineString(splitter.Coordinates.Select(p =>
+            {
+                if (line.ClosestPoint(p).Distance(p) <= tol && line.ClosestPoint(p).Distance(p) > 0) return line.ClosestPoint(p);
+                return p;
+            }).ToArray()));
             return linestring.Select(e => new LineSegment(e.StartPoint.Coordinate, e.EndPoint.Coordinate)).ToList();
         }
         public static LineSegment[] SplitLine(LineSegment curve, List<Polygon> cutters, double length_filter = 1,

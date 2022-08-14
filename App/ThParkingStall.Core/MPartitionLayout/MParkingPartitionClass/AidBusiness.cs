@@ -548,12 +548,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             var pillars_to_remove = new List<Polygon>();
             foreach (var lane in lanebox)
             {
-                var cars= carspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
-                var pillars= pillarspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                var cars = carspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                var pillars = pillarspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
                 cars_to_remove.AddRange(cars);
                 pillars_to_remove.AddRange(pillars);
             }
-            cars_to_remove=cars_to_remove.Distinct().ToList();
+            cars_to_remove = cars_to_remove.Distinct().ToList();
             pillars_to_remove = pillars_to_remove.Distinct().ToList();
             CarSpots = CarSpots.Except(cars_to_remove).ToList();
             for (int i = 0; i < Cars.Count; i++)
@@ -586,11 +586,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             points.Add(pt);
             pt = pt.Translation(Vector(baseline).Normalize() * CollisionD);
             points.Add(pt);
-            pt = pt.Translation(vec * ( DisVertCarLength - CollisionCT - CollisionCM - CollisionTOP));
+            pt = pt.Translation(vec * (DisVertCarLength - CollisionCT - CollisionCM - CollisionTOP));
             points.Add(pt);
             pt = pt.Translation(Vector(baseline).Normalize() * DisVertCarWidth);
             points.Add(pt);
-            pt = pt.Translation(-vec * ( DisVertCarLength - CollisionCT - CollisionCM - CollisionTOP));
+            pt = pt.Translation(-vec * (DisVertCarLength - CollisionCT - CollisionCM - CollisionTOP));
             points.Add(pt);
             pt = pt.Translation(Vector(baseline).Normalize() * CollisionD);
             points.Add(pt);
@@ -604,5 +604,36 @@ namespace ThParkingStall.Core.MPartitionLayout
             CollisionD = collisionD;
             return pl;
         }
+
+        private void RemoveDuplicatedLanes(List<Lane> lanes)
+        {
+            if (lanes.Count < 2) return;
+            for (int i = 1; i < lanes.Count; i++)
+            {
+                for (int j = 0; j < i; j++)
+                {
+                    var exLane = lanes[j];
+                    var lane = lanes[i];
+                    var cond = IsSameLineIgnoreDirection(exLane.Line, lane.Line);
+                    cond = cond && exLane.Vec.IsParallel(lane.Vec) && exLane.Vec.Dot(lane.Vec) > 0;
+                    cond = cond && exLane.IsGeneratedForLoopThrough.Equals(lane.IsGeneratedForLoopThrough);
+                    if (cond)
+                    {
+                        lanes.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+        }
+        private bool IsSameLineIgnoreDirection(LineSegment a, LineSegment b)
+        {
+            if (a.P0.Distance(b.P0) < 1 && a.P1.Distance(b.P1) < 1)
+                return true;
+            else if (a.P1.Distance(b.P0) < 1 && a.P0.Distance(b.P1) < 1)
+                return true;
+            else return false;
+        }
+
     }
 }

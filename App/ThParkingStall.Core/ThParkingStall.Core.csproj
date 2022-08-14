@@ -73,6 +73,7 @@
     <Compile Include="MPartitionLayout\MParkingPartitionClass\CarsGeneration.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\InsertionBuildLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\LanesProcessingEntry.cs" />
+    <Compile Include="MPartitionLayout\MParkingPartitionClass\LoopThroughEnd.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\ModuleLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\PerpModule.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\PillarPostProcess.cs" />
