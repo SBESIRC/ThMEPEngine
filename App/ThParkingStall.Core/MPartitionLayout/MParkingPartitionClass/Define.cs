@@ -149,7 +149,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double LayoutScareFactor_SingleVert = 0.7;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
-        public static bool LoopThroughEnd = true;//尽端环通
+        public static bool LoopThroughEnd = false;//尽端环通
         public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-尽端环通车道条件判断长度
         public enum LayoutDirection : int
         {
