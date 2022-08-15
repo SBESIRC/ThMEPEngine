@@ -105,7 +105,7 @@ namespace ThParkingStall.Core.OInterProcess
             }
             else newWallLine = TotalArea;
             if (newWallLine == null) return subAreas;
-            genome.Area = newWallLine.Area* 0.001 * 0.001;
+            if(genome != null)genome.Area = newWallLine.Area* 0.001 * 0.001;
             var newSegs = ProcessToSegLines(genome, newWallLine);
             var SegLineStrings = newSegs.Select(l =>l.Splitter).ToList().ToLineStrings();
             var vaildLanes = newSegs.Select(l => l.VaildLane).ToList().ToLineStrings();
