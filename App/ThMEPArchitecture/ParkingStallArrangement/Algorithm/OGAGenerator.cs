@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +15,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ViewModel;
 using ThMEPEngineCore;
 using ThParkingStall.Core.OInterProcess;
+using ThParkingStall.Core.OTools;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -112,7 +114,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     break;
                 case 1:
                     if(parkingCnt < 2) { score = 99999; }
-                    if(parkingCnt < ParameterViewModel.TargetParkingCntMin)
+                    else if(parkingCnt < ParameterViewModel.TargetParkingCntMin)
                     {
                         score = AreaMax / parkingCnt;
                     }
@@ -137,6 +139,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         private Genome RandomCreateChromosome()
         {
+            var center = OInterParameter.TotalArea.Centroid;
             var solution = new Genome();
             foreach(var segLine in OInterParameter.InitSegLines)
             {
@@ -156,7 +159,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 foreach(var l in OInterParameter.BorderLines)
                 {
-                    double relativeValue = RandDoubleInRange(-ParameterViewModel.BorderlineMoveRange,ParameterViewModel.BorderlineMoveRange);
+
+                    var std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
+                    double relativeValue;
+                    if(new Vector2D(center.Coordinate,l.MidPoint).Dot(l.NormalVector()) > 0)
+                    {
+                        relativeValue = RandNormalInRange(ParameterViewModel.BorderlineMoveRange, std, 0, ParameterViewModel.BorderlineMoveRange);
+                    }
+                    else
+                    {
+                        relativeValue = RandNormalInRange(-ParameterViewModel.BorderlineMoveRange, std, -ParameterViewModel.BorderlineMoveRange,0);
+                    }
                     solution.Add(new OGene(1, relativeValue));
                 }
             }
@@ -171,8 +184,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 foreach (var l in OInterParameter.BorderLines)
                 {
-                    double relativeValue = RandDoubleInRange(-ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
-                    orgSolution.Add(new OGene(1, relativeValue));
+                    orgSolution.Add(new OGene(1, 0));
                 }
             }
             solutions.Add(orgSolution);
@@ -528,7 +540,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             // large mutation
             int cnt = Math.Min((int)(s.Count * MutationRate), 1);//需要变异的染色体数目，最小为1
            
-
             //需要变异的染色体list：
             var selectedGenomeIdx = RandChoice(s.Count, cnt);
             foreach (int i in selectedGenomeIdx)
@@ -549,7 +560,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = ToRelativeValue(RandDoubleInRange(0, maxDist), maxDist);//纯随机数
                                 break;
                             case 1:
-                                s[i].OGenes[geneType][j].dDNAs.First().Value = RandDoubleInRange(-ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                                var orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
+                                var std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
+                                double relativeValue = RandNormalInRange(orgValue, std, -ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                                s[i].OGenes[geneType][j].dDNAs.First().Value = relativeValue;
                                 break;
                             default:
                                 throw new NotImplementedException("Do not have this type now");
@@ -580,7 +594,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 var maxDist = maxVal - minVal;
                                 var orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
                                 double newValue;
-
                                 var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
                                 if (RandDouble() < GoldenRatio)
                                 {
@@ -600,6 +613,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = newValue;
                                 break;
                             case 1:
+                                orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
+                                std = ParameterViewModel.BorderlineMoveRange / lamda;//2sigma 原则，从mean到边界概率为95.45%
+                                double relativeValue = RandNormalInRange(orgValue, std, -ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                                s[i].OGenes[geneType][j].dDNAs.First().Value = relativeValue;
                                 break;
                             default:
                                 throw new NotImplementedException("Do not have this type now");
