@@ -125,6 +125,8 @@ namespace ThMEPArchitecture.MultiProcess
             datawraper.DoubleRowModularDecrease200 = vm.DoubleRowModularDecrease200;
             //尽端环通
             datawraper.AllowLoopThroughEnd = vm.AllowLoopThroughEnd;
+            //背靠背长度限制
+            datawraper.DisAllowMaxLaneLength = vm.DisAllowMaxLaneLength;
             //背靠背模块：柱子沿车道法向偏移距离
             datawraper.ColumnShiftDistanceOfDoubleRowModular = vm.ColumnShiftDistanceOfDoubleRowModular; //mm
             //背靠背模块是否使用中柱
