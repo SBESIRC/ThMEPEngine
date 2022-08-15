@@ -26,7 +26,12 @@ namespace ThMEPTCH.CAD
 
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            elements.AddRange(HandleTCHElement(dbObj, matrix));
+            elements.AddRange(HandleTCHElement(dbObj, matrix,0));
+        }
+
+        public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix, int uid)
+        {
+            elements.AddRange(HandleTCHElement(dbObj, matrix, uid));
         }
 
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -49,12 +54,12 @@ namespace ThMEPTCH.CAD
             return true;
         }
 
-        private List<ThRawIfcBuildingElementData> HandleTCHElement(Entity tch, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleTCHElement(Entity tch, Matrix3d matrix, int uid)
         {
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(tch) && CheckLayerValid(tch) && tch.Visible && tch.Bounds.HasValue)
             {
-                var archWall = tch.Database.LoadWallFromDb(tch.ObjectId, matrix);
+                var archWall = tch.Database.LoadWallFromDb(tch.ObjectId, matrix, uid);
                 results.Add(new ThRawIfcBuildingElementData()
                 {
                     Data = archWall,

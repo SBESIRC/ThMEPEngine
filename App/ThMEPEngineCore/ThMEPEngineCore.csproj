@@ -164,6 +164,7 @@
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
+    <Compile Include="CAD\ThMEPDbUniqueIdService.cs" />
     <Compile Include="CAD\ThMEPEntityExtension.cs" />
     <Compile Include="CAD\ThMEPPolylineEntityJig.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />

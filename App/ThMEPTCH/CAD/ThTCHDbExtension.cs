@@ -1,6 +1,7 @@
 ﻿using System;
 using Linq2Acad;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -10,13 +11,13 @@ namespace ThMEPTCH.CAD
 {
     public static class ThTCHDbExtension
     {
-        public static TArchDoor LoadDoorFromDb(this Database database, ObjectId tch, Matrix3d matrix)
+        public static TArchDoor LoadDoorFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var door = new TArchDoor()
                 {
-                    Id = (ulong)tch.Handle.Value,
+                    Id = (ulong)ThMEPDbUniqueIdService.UniqueId(tch, uid, matrix),
                 };
                 var dxfData = GetDXFData(tch);
                 foreach (TypedValue tv in dxfData.AsArray())
@@ -61,13 +62,13 @@ namespace ThMEPTCH.CAD
             }
         }
 
-        public static TArchWindow LoadWindowFromDb(this Database database, ObjectId tch, Matrix3d matrix)
+        public static TArchWindow LoadWindowFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var window = new TArchWindow()
                 {
-                    Id = (ulong)tch.Handle.Value,
+                    Id = (ulong)ThMEPDbUniqueIdService.UniqueId(tch, uid, matrix),
                 };
                 var dxfData = GetDXFData(tch);
                 foreach (TypedValue tv in dxfData.AsArray())
@@ -112,7 +113,7 @@ namespace ThMEPTCH.CAD
             }
         }
 
-        public static TArchWall LoadWallFromDb(this Database database, ObjectId tch, Matrix3d matrix)
+        public static TArchWall LoadWallFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -171,7 +172,7 @@ namespace ThMEPTCH.CAD
                 var wall = new TArchWall
                 {
                     // 标识信息
-                    Id = (ulong)tch.Handle.Value,
+                    Id = (ulong)ThMEPDbUniqueIdService.UniqueId(tch, uid, matrix),
                     
                     // 几何信息
                     StartPointX = transCurve.StartPoint.X,
