@@ -109,5 +109,11 @@ namespace ThCADExtension
             var displacementM = Matrix3d.Displacement(move);
             return scaleM.PreMultiplyBy(rotationM).PreMultiplyBy(displacementM);
         }
+
+        public static Matrix3d MultipleTransformFroms(double scale, Vector3d xDir, Point3d origin)
+        {
+            var rotation = xDir.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis);
+            return MultipleTransformFroms(scale, rotation, origin.GetAsVector());
+        }
     }
 }
