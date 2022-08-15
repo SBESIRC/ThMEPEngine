@@ -46,9 +46,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     {
                         lninsectpointss.AddRange(res.IntersectPoint(l));
                     }
+                    lninsectpointss = lninsectpointss.Where(p => p.Distance(res.P1) > 100).ToList();
                     if (lninsectpointss.Count() > 0)
-                        res.P0 = lninsectpointss.OrderBy(p => p.Distance(start)).First();
-                    else 
+                    {
+                        var pt = lninsectpointss.OrderBy(p => p.Distance(start)).First();
+                        if(start.Distance(pt)<10000)
+                            res.P0 = pt;
+                        else
+                            res.P0 = start;
+                    }
+                    else
                         res.P0 = start;
                 }
                 //偏移直线超出了边界2750的case
@@ -109,8 +116,15 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     {
                         lninsectpointss.AddRange(res.IntersectPoint(l));
                     }
+                    lninsectpointss = lninsectpointss.Where(p => p.Distance(res.P0) > 100).ToList();
                     if (lninsectpointss.Count() > 0)
-                        res.P1 = lninsectpointss.OrderBy(p => p.Distance(end)).First();
+                    {
+                        var pt = lninsectpointss.OrderBy(p => p.Distance(end)).First();
+                        if (end.Distance(pt) < 10000)
+                            res.P1 = pt;
+                        else
+                            res.P1 = end;
+                    }
                     else
                         res.P1 = end;
                 }
@@ -144,6 +158,14 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     else
                         res.P1 = end;
                 }
+            }
+            if (res.IntersectPoint(Boundary).Count() ==1)
+            {
+                var intersectPt = res.IntersectPoint(Boundary).First();
+                if(!Boundary.Contains(res.P0))
+                    res.P0=intersectPt;
+                else if(!Boundary.Contains(res.P1))
+                    res.P1=intersectPt;
             }
             return res;
         }
@@ -478,7 +500,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             foreach (var e in CarSpots)
             {
                 var k = e.Clone();
-                k = k.Scale(ScareFactorForCollisionCheck);
+                k = k.Scale(0.99);
                 var conda = Boundary.Contains(k.Envelope.Centroid.Coordinate);
                 //var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
                 var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(k.Envelope.Centroid).Cast<Polygon>().ToList();
@@ -499,7 +521,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             foreach (var e in Cars)
             {
                 var k = e.Polyline.Clone();
-                k = k.Scale(ScareFactorForCollisionCheck);
+                k = k.Scale(0.99);
                 var conda = Boundary.Contains(k.Envelope.Centroid);
                 //var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
                 var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(k.Envelope.Centroid).Cast<Polygon>().ToList();

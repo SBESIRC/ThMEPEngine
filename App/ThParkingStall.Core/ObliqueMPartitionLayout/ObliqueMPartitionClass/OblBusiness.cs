@@ -19,7 +19,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             CarSpatialIndex = new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
-            SortLaneByDirection(vertlanes, LayoutMode,Vector2D.Zero);
+            SortLaneByDirection(vertlanes, LayoutMode, Vector2D.Zero);
             var align_backback_for_align_rest = false;
             for (int i = 0; i < vertlanes.Count; i++)
             {
@@ -41,7 +41,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
 
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
-            SortLaneByDirection(vertlanes, LayoutMode,Vector2D.Zero);
+            SortLaneByDirection(vertlanes, LayoutMode, Vector2D.Zero);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;

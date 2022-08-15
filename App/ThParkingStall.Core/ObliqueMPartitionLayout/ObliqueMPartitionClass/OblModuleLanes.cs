@@ -111,14 +111,33 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     var bf = BufferReservedConnection(l, DisLaneWidth / 2 - 1);
                     bf = bf.Scale(ScareFactorForCollisionCheck);
                     var result = bf.IntersectPoint(Boundary).Count() == 0;
+                    //modified:有的边界在BOX内折了一下
+                    var edge_a = TranslateReservedConnection(l,Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth / 2 - 1));
+                    var edge_b = TranslateReservedConnection(l, -Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth / 2 - 1));
+                    var pl = PolyFromLines(edge_a, edge_a.Translation(-Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth - 2)));
+                    if (edge_b.Length < edge_a.Length)
+                        pl = PolyFromLines(edge_b, edge_b.Translation(Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth - 2)));
+                    pl = pl.Scale(ScareFactorForCollisionCheck);
+                    result = pl.IntersectPoint(Boundary).Count() == 0 || result;
+                    //end modified
                     //返回1模块+1半车道的位置作半车道的buffer与最外层原始边界相交判断，如果相交，返回
                     l = TranslateReservedConnection(l, vec * DisLaneWidth / 2);
                     l.P0 = l.P0.Translation(Vector(l).Normalize() * 10);
                     l.P1 = l.P1.Translation(-Vector(l).Normalize() * 10);
                     bf = BufferReservedConnection(l, DisLaneWidth / 2 - 1);
                     bf = bf.Scale(ScareFactorForCollisionCheck);
-                    if (bf.IntersectPoint(OutBoundary).Count() > 0)
+                    //if (bf.IntersectPoint(OutBoundary).Count() > 0)
+                    //    result = false;
+                    //modified:有的边界在BOX内折了一下
+                    edge_a = TranslateReservedConnection(l, Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth / 2-1));
+                    edge_b = TranslateReservedConnection(l, -Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth / 2 - 1));
+                    pl = PolyFromLines(edge_a, edge_a.Translation(-Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth - 2)));
+                    if (edge_b.Length > edge_a.Length)
+                        pl = PolyFromLines(edge_b, edge_b.Translation(Vector(l).Normalize().GetPerpendicularVector() * (DisLaneWidth - 2)));
+                    pl = pl.Scale(ScareFactorForCollisionCheck);
+                    if(pl.IntersectPoint(OutBoundary).Count() > 0 && bf.IntersectPoint(OutBoundary).Count() > 0)
                         result = false;
+                    //end modified
                     return result;
                 })
                 .Where(e => Boundary.Contains(e.MidPoint))
