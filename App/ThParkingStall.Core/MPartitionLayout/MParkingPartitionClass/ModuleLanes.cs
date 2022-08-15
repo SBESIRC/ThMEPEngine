@@ -68,6 +68,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 
         private double GenerateLaneForLayoutingSingleVertModule(ref GenerateLaneParas paras)
         {
+            if (QuickCalculate) return -1;
             double generate_lane_length;
             double max_length = -1;
             for (int i = 0; i < IniLanes.Count; i++)
@@ -691,7 +692,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 #region 针对尽端环通的处理
                 var split_un_loopthrough_cut = new LineSegment(split);
                 var generated_LoopThroughEnd = false;
-                if (LoopThroughEnd)
+                if (LoopThroughEnd && !QuickCalculate)
                 {
                     var distance_allow_generate_loopthrough_end = DisAllowMaxLaneLength;
                     if (split.Length >= distance_allow_generate_loopthrough_end)
@@ -909,8 +910,6 @@ namespace ThParkingStall.Core.MPartitionLayout
                     paras.CarModulesToAdd = paras.CarModulesToAdd.Except(crossed_modules).ToList();
                     paras.CarModulesToAdd.AddRange(temp_modules);
                 }
-
-
                 #endregion
             }
         }

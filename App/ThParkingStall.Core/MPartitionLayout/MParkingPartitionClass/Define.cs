@@ -74,6 +74,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
                 DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
             }
+            if (QuickCalculate)
+                AllowSplitLaneExceedMaxLength = false;
+            if (!AllowSplitLaneExceedMaxLength)
+                DisAllowMaxLaneLength = double.PositiveInfinity;
         }
         public List<LineString> Walls;
         public List<Polygon> Obstacles;
@@ -151,6 +155,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double SingleVertModulePlacementFactor = 1.0;
         public static bool LoopThroughEnd = false;//尽端环通
         public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-尽端环通车道条件判断长度
+        public bool AllowSplitLaneExceedMaxLength = true;
+        public bool QuickCalculate = false;//快速计算
         public enum LayoutDirection : int
         {
             LENGTH = 0,
@@ -166,7 +172,10 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void GenerateParkingSpaces()
         {
             PreProcess();
-            GenerateLanes();
+            if(!QuickCalculate)
+                GenerateLanes();
+            else
+                GenerateLanesSuperFast();
             GeneratePerpModules();
             GenerateCarsInModules();
             ProcessLanes(ref IniLanes);

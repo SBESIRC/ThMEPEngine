@@ -51,19 +51,22 @@ namespace ThParkingStall.Core.MPartitionLayout
                 int vertcount = ((int)Math.Floor((line.Length - modulecount * DisBackBackModulus) / DisVertCarWidth));
 
                 PerpModlues perpModlue = ConstructPerpModules(lane.Vec, ilanes);
-                int step = 1;
-                for (int i = 0; i < vertcount; i++)
+                if (!QuickCalculate)
                 {
-                    var test = UpdataPerpModlues(perpModlue, step);
-                    if (test.Count >= perpModlue.Count)
+                    int step = 1;
+                    for (int i = 0; i < vertcount; i++)
                     {
-                        perpModlue = test;
-                        step = 1;
-                    }
-                    else
-                    {
-                        step++;
-                        continue;
+                        var test = UpdataPerpModlues(perpModlue, step);
+                        if (test.Count >= perpModlue.Count)
+                        {
+                            perpModlue = test;
+                            step = 1;
+                        }
+                        else
+                        {
+                            step++;
+                            continue;
+                        }
                     }
                 }
                 foreach (var pl in perpModlue.Bounds)

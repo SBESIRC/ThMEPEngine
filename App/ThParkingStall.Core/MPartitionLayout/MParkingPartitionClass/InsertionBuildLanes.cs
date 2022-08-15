@@ -15,6 +15,7 @@ namespace ThParkingStall.Core.MPartitionLayout
     {
         private double GenerateLaneBetweenTwoBuilds(ref GenerateLaneParas paras)
         {
+            if (QuickCalculate) return -1;
             double generate_lane_length = -1;
             if (BuildingBoxes.Count <= 1) return generate_lane_length;
             #region 生成判断函数

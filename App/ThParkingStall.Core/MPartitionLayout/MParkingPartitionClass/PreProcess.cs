@@ -18,9 +18,11 @@ namespace ThParkingStall.Core.MPartitionLayout
         /// </summary>
         public void PreProcess()
         {
-            EliminateInvalidLanes();
+            if (!QuickCalculate)
+                EliminateInvalidLanes();
             ConvertRampDatas();
-            CorrectWallsWithTinyAngles();
+            if (!QuickCalculate)
+                CorrectWallsWithTinyAngles();
         }
 
         /// <summary>
