@@ -130,6 +130,13 @@ namespace ThParkingStall.Core.InterProcess
         {
             get { return _AllowLoopThroughEnd; }
         }
+        //背靠背长度限制
+        private static int _DisAllowMaxLaneLength = 50000;
+        public static int DisAllowMaxLaneLength
+        {
+            get { return _DisAllowMaxLaneLength; }
+        }
+
         //背靠背模块：柱子沿车道法向偏移距离
         private static int _ColumnShiftDistanceOfDoubleRowModular = 550; //mm
 
@@ -223,6 +230,8 @@ namespace ThParkingStall.Core.InterProcess
             _DoubleRowModularDecrease200 = datawraper.DoubleRowModularDecrease200;
             //尽端环通
             _AllowLoopThroughEnd = datawraper.AllowLoopThroughEnd;
+            //背靠背长度限制
+            _DisAllowMaxLaneLength = datawraper.DisAllowMaxLaneLength;
             //背靠背模块：柱子沿车道法向偏移距离
             _ColumnShiftDistanceOfDoubleRowModular = datawraper.ColumnShiftDistanceOfDoubleRowModular; //mm
             //背靠背模块是否使用中柱

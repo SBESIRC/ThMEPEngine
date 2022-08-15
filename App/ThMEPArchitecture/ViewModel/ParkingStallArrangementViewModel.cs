@@ -167,7 +167,7 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("BackToBackDecrease200");
             }
         }
-
+        //尽端环通
         private bool _AllowLoopThroughEnd = false;
         public bool AllowLoopThroughEnd
         {
@@ -178,6 +178,18 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("AllowLoopThroughEnd");
             }
         }
+        //背靠背长度限制
+        private int _DisAllowMaxLaneLength = 50000;
+        public int DisAllowMaxLaneLength
+        {
+            get { return _DisAllowMaxLaneLength; }
+            set
+            {
+                _DisAllowMaxLaneLength = value;
+                RaisePropertyChanged("DisAllowMaxLaneLength");
+            }
+        }
+
         private int _RoadWidth  = 5500; //mm
 
         public int RoadWidth

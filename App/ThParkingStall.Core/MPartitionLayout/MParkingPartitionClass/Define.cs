@@ -33,6 +33,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             PillarNetDepth = VMStock.ColumnSizeOfPerpendicularToRoad;
             ThicknessOfPillarConstruct = VMStock.ColumnAdditionalSize;
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;
+            DisAllowMaxLaneLength = VMStock.DisAllowMaxLaneLength;
             //LayoutMode = ((int)VMStock.RunMode);
 
             //其它参数设置
