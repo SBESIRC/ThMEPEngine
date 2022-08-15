@@ -49,12 +49,17 @@ namespace ThMEPStructure.StructPlane.Print
             }
 
             //调整梁标注的方向
-            var beamMarks = _geos.GetBeamMarks(); // 梁标注
+            var beamMarks = _geos.GetBeamMarks(); // 梁标注            
             var beamGeos = _geos.GetBeamGeos(); // 梁线
             UpdateBeamTextRotation(beamMarks);
-            // 构件梁区域模型            
-            var beamPolygonCenters = CreateBeamPolygonAndCenter(beamGeos, beamMarks);
-            
+            // 构件梁区域模型
+            var grouper = new ThBeamMarkCurveGrouper(beamGeos, beamMarks);
+            var groupInfs = grouper.Group();
+            var beamPolygonCenters = grouper.CreateBeamPolygons(groupInfs);
+            var removedBeamMarks = ThMultipleMarkFilter.Filter(groupInfs);
+            _geos = _geos.Except(removedBeamMarks).ToList();
+            removedBeamMarks.Select(o => o.Boundary).ToCollection().MDispose();
+
             // 处理双梁
             // 双梁是要单独处理的
             var dblRowBeamMarks = FilterDoubleRowBeamMarks(_geos.GetBeamMarks());
@@ -68,58 +73,41 @@ namespace ThMEPStructure.StructPlane.Print
             // 用于把打印的文字转成块,最后把梁文字删除掉  
             var beamTextGroupObjIds = new List<ObjectIdCollection>();
 
-            // 打印墙、柱、楼板、梁、洞、标注
-            var res = PrintGeos(db, _geos, slabHatchConfigs); //BeamLines,BeamTexts
-            var beamLines = res.Item1.ToDBObjectCollection(db); // BeamLines
-            var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
-
             // 打印楼梯板对角线及标注
             Append(PrintStairSlabCorner(db, stairSlabCorners));
+
+            // 打印墙、柱、楼板、梁、洞、标注
+            var res = PrintGeos(db, _geos, slabHatchConfigs); //BeamLines,BeamTexts
+            var beamLines = res.Item1.ToDBObjectCollection(db);
+            var beamTexts = res.Item2.Keys.ToCollection().ToDBObjectCollection(db);
+            var beamTextInfos = new Dictionary<DBText, Vector3d>();
+            beamTexts.OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));
+            
             // 打印双梁标注
             var dblRowBeamMarkIds = PrintDoubleRowBeams(db,dblRowBeamMarks);
-            var dblRowBeamTexts = dblRowBeamMarks.SelectMany(o => o).Select(o => o.Boundary).ToCollection();
-
-            // 过滤多余梁标注文字(后处理)
-            // 过滤一段上重复标注的梁文字     
-            var removedTexts1 = FilterBeamMarks(beamLines, beamTexts);
-
-            // 后处理双梁标注            
-            var removedTexts2 = FilterBeamMarks(beamLines, dblRowBeamTexts);
-            // 更新dblRowBeamMarkIds
-            var tempDblRowBeamMarkIds = new List<Tuple<ObjectIdCollection, Vector3d>>();
-            dblRowBeamMarkIds.ForEach(o =>
-            {
-                var tempIds = o.Item1.ToDBObjectCollection(db).OfType<DBObject>()
-                .Where(m => !removedTexts2.Contains(m)).Select(m => m.ObjectId).ToCollection();
-                if(tempIds.Count>0)
-                {
-                    tempDblRowBeamMarkIds.Add(Tuple.Create(tempIds, o.Item2));
-                }
-            });
-            dblRowBeamMarkIds = tempDblRowBeamMarkIds;
             dblRowBeamMarkIds.ForEach(o=> Append(o.Item1));
             dblRowBeamMarkIds.ForEach(o => beamTextGroupObjIds.Add(o.Item1));
-            
-            // 记录梁标注文字的原始位置
-            beamTexts.OfType<DBText>().ForEach(o => beamMarkOriginTextPos.Add(o, o.GetTextCenter()));
-            dblRowBeamTexts.OfType<DBText>().ForEach(o => beamMarkOriginTextPos.Add(o, o.GetTextCenter()));
 
-            // 对双梁文字调整位置(后处理)
+            // 记录梁标注文字的原始位置
+            _geos.GetBeamMarks()
+                .Select(o => o.Boundary)
+                .OfType<DBText>()
+                .ForEach(o => beamMarkOriginTextPos.Add(o, o.GetCenterPointByOBB()));
+
+            // 对双梁文字调整位置(后处理)  
             AdjustDblRowMarkPos(db, dblRowBeamMarkIds, beamLines);
 
-            // 将带有标高的文字，换成两行(后处理)
-            var beamTextInfos = new Dictionary<DBText, Vector3d>();
-            beamTexts.Difference(removedTexts1)
-                .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));                                    
+            // 将带有标高的文字，换成两行(后处理)                           
             var adjustService = new ThAdjustBeamMarkService(db,beamLines, beamTextInfos);
             adjustService.Adjust();
 
             // 将生成的文字打印出来
             var config = ThAnnotationPrinter.GetAnnotationConfig(_printParameter.DrawingScale);
             var printer = new ThAnnotationPrinter(config);
+            var removedTexts = new DBObjectCollection();
             adjustService.DoubleRowTexts.ForEach(x =>
             {
-                removedTexts1.Add(x.Item1);
+                removedTexts.Add(x.Item1);
                 ObjIds.Remove(x.Item1.ObjectId);
                 var dblRowTextIds = new ObjectIdCollection();
                 dblRowTextIds.AddRange(printer.Print(db, x.Item2));
@@ -133,7 +121,7 @@ namespace ThMEPStructure.StructPlane.Print
             });
 
             // 把不是双行标注的文字加入到beamTextObjIds中
-            beamTexts.Difference(removedTexts1).OfType<DBText>()
+            beamTexts.Difference(removedTexts).OfType<DBText>()
                 .ForEach(o=> beamTextGroupObjIds.Add(new ObjectIdCollection { o.ObjectId}));
 
             // 寻找梁区域内指定范围是否已存在标注
@@ -153,8 +141,8 @@ namespace ThMEPStructure.StructPlane.Print
             Append(existedBeamFilterRes.Item2.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
             dwgExistedElements = dwgExistedElements.Difference(existedBeamFilterRes.Item2);
 
-            // 把梁文字装入到removedTexts1中，梁文字最后要删除
-            beamTextGroupObjIds.ForEach(o => removedTexts1.AddRange(o.ToDBObjectCollection(db)));
+            // 把梁文字装入到removedTexts中，梁文字最后要删除
+            beamTextGroupObjIds.ForEach(o => removedTexts.AddRange(o.ToDBObjectCollection(db)));
 
             // 打印标题
             Append(PrintHeadText(db));
@@ -171,8 +159,7 @@ namespace ThMEPStructure.StructPlane.Print
             Append(PrintSlabPatternTable(db, slabPatternTblRightUpBasePt, slabHatchConfigs));
 
             // 删除不要的文字
-            Erase(db, removedTexts1);
-            Erase(db, removedTexts2);
+            Erase(db, removedTexts);
             Erase(db, dwgExistedElements);
 
             // 过滤无效Id
@@ -232,15 +219,6 @@ namespace ThMEPStructure.StructPlane.Print
             return converter.Convert(db, beamTextObjs);
         }
 
-        private Dictionary<Polyline, Curve> CreateBeamPolygonAndCenter(
-            List<ThGeometry> beamGeos,List<ThGeometry> beamMarks)
-        {
-            var grouper = new ThBeamMarkCurveGrouper(beamGeos, beamMarks);
-            var groupInfs = grouper.Group();
-            var results = grouper.CreateBeamPolygons(groupInfs);
-            return results;
-        }
-
         private DBObjectCollection CreateStairSlabCorner(DBObjectCollection tenThckSlabTexts,
             DBObjectCollection slabs)
         {
@@ -266,14 +244,6 @@ namespace ThMEPStructure.StructPlane.Print
             }
         }
 
-        private DBObjectCollection FilterBeamMarks(
-            DBObjectCollection beamLines,DBObjectCollection beamTexts)
-        {
-            // 处理多余的标注文字
-            var markFilter = new ThMultipleMarkFilter(beamLines, beamTexts);
-            markFilter.Filter();
-            return markFilter.Results; // 要删除的对象
-        }
         private void Erase(Database db,DBObjectCollection objs)
         {
             using (var acadDb = AcadDatabase.Use(db))

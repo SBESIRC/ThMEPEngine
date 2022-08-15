@@ -104,20 +104,16 @@ namespace ThMEPStructure.StructPlane.Service
             var diagonal = CalculateDiagonal(extents) + 2.0;
             while(lines.Count>0)
             {
-                var first = lines.OfType<Line>().First();
-                if (Math.Abs(first.StartPoint.Y - 127397.0) <= 5.0 && Math.Abs(first.StartPoint.Y - first.EndPoint.Y) <= 5.0)
-                {
-
-                }
+                var first = lines.OfType<Line>().First();                
                 var direction = first.LineDirection();
                 var midPt = first.StartPoint.GetMidPt(first.EndPoint);
                 var newSp = midPt - direction.MultiplyBy(diagonal);
                 var newEp = midPt + direction.MultiplyBy(diagonal);
+                var tempDict = lines.Convert();
                 var parallelGroups = Query(newSp, newEp, width)
-                    .OfType<Line>().Where(second=> lines.Contains(second))
+                    .OfType<Line>().Where(second=> tempDict.ContainsKey(second))
                     .OfType<Line>().Where(second => IsApproximateCollinear(first, second, width / 2.0))
                     .ToCollection();
-                parallelGroups = parallelGroups.OfType<DBObject>().Where(o => !results.Where(r => r.Contains(o)).Any()).ToCollection();
                 results.Add(parallelGroups);
                 parallelGroups.OfType<DBObject>().ForEach(o => lines.Remove(o));
             }
@@ -126,7 +122,7 @@ namespace ThMEPStructure.StructPlane.Service
         }
 
         private bool IsApproximateCollinear(Line first,Line second,double dis)
-        {
+        {            
             var spDis1 = first.GetClosestPointTo(second.StartPoint,true).DistanceTo(second.StartPoint);
             var epDis2 = first.GetClosestPointTo(second.EndPoint, true).DistanceTo(second.EndPoint);
             return spDis1 <= dis && epDis2 <= dis;

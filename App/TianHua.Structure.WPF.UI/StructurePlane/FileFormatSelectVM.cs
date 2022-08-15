@@ -1,5 +1,7 @@
 ﻿using AcHelper;
+using System.IO;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace TianHua.Structure.WPF.UI.StructurePlane
 {
@@ -18,20 +20,71 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
         }
         public void BrowseFile()
         {
-            PromptOpenFileOptions ops = null;
-            switch (Model.FileFormatOption)
+            string defaultFileName = GetDefaultFileName();
+            if(string.IsNullOrEmpty(defaultFileName))
             {
-                case FileFormatOps.YDB:
-                    ops = CreateYdbFileOption();
-                    break;
-                case FileFormatOps.IFC:
-                    ops = CreateIfcFileOption();
-                    break;
-                case FileFormatOps.GET:
-                    ops = CreateCacheFileOption();
-                    break;
+                PromptOpenFileOptions ops = null;
+                switch (Model.FileFormatOption)
+                {
+                    case FileFormatOps.YDB:
+                        ops = CreateYdbFileOption();
+                        break;
+                    case FileFormatOps.IFC:
+                        ops = CreateIfcFileOption();
+                        break;
+                    case FileFormatOps.GET:
+                        ops = CreateCacheFileOption();
+                        break;
+                }
+                SelectedFileName = SelectFile(ops);
             }
-            SelectedFileName = SelectFile(ops);
+            else
+            {
+                SelectedFileName = defaultFileName;
+            }
+        }
+
+        private string GetDefaultFileName()
+        {
+            // 根据当前Dwg的文件名，去找默认的文件
+            string dwgPath = GetActiveDwgPath();
+            if (File.Exists(dwgPath))
+            {
+                var fileInfo = new FileInfo(dwgPath);
+                var dir = fileInfo.Directory.FullName;
+                var fileName = Path.GetFileNameWithoutExtension(dwgPath);
+                string fullPath = "";
+                switch (Model.FileFormatOption)
+                {
+                    case FileFormatOps.YDB:
+                        fullPath = Path.Combine(dir, fileName + ".ydb");
+                        break;
+                    case FileFormatOps.IFC:
+                        fullPath = Path.Combine(dir, fileName + ".ifc");
+                        break;
+                    case FileFormatOps.GET:
+                        fullPath = Path.Combine(dir, fileName + ".get");
+                        break;
+                }
+                if(File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        private string GetActiveDwgPath()
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            return doc.Name;
         }
 
         private string SelectFile(PromptOpenFileOptions pofo)
