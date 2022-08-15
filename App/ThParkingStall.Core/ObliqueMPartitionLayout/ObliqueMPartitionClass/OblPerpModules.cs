@@ -96,7 +96,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 linetest = TranslateReservedConnection(linetest, lane.Vec.Normalize() * mindistance, false);
                 var bdpl = PolyFromLines(line, linetest);
                 bdpl = bdpl.Scale(ScareFactorForCollisionCheck);
-                var bdpoints = Boundary.Coordinates.ToList();
+                var bdpoints = Boundary.Coordinates.Where(p => !(line.ClosestPoint(p).Distance(p) < 1 && line.P0.Distance(p) > 1 && line.P1.Distance(p) > 1)).ToList();
+
                 bdpoints.AddRange(Boundary.IntersectPoint(bdpl));
                 bdpl = PolyFromLines(line, linetest);
                 bdpoints = bdpoints.Where(p => bdpl.IsPointInFast(p)).Select(p => linetest.ClosestPoint(p)).ToList();

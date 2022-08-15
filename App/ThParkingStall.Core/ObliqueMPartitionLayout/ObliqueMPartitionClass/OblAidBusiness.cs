@@ -16,6 +16,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
     {
         public LineSegment TranslateReservedConnection(LineSegment line, Vector2D vector,bool allow_extend_bound=true)
         {
+            double disallow_away_inipoint = 10000;
             var res = line.Translation(vector);
             var nonparallellines = IniLanes.Where(e => !IsParallelLine(line, e.Line)).Select(e => e.Line);
             //start
@@ -50,7 +51,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     if (lninsectpointss.Count() > 0)
                     {
                         var pt = lninsectpointss.OrderBy(p => p.Distance(start)).First();
-                        if(start.Distance(pt)<10000)
+                        if(start.Distance(pt)< disallow_away_inipoint)
                             res.P0 = pt;
                         else
                             res.P0 = start;
@@ -120,7 +121,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     if (lninsectpointss.Count() > 0)
                     {
                         var pt = lninsectpointss.OrderBy(p => p.Distance(end)).First();
-                        if (end.Distance(pt) < 10000)
+                        if (end.Distance(pt) < disallow_away_inipoint)
                             res.P1 = pt;
                         else
                             res.P1 = end;
@@ -159,14 +160,15 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         res.P1 = end;
                 }
             }
-            if (res.IntersectPoint(Boundary).Count() ==1)
-            {
-                var intersectPt = res.IntersectPoint(Boundary).First();
-                if(!Boundary.Contains(res.P0))
-                    res.P0=intersectPt;
-                else if(!Boundary.Contains(res.P1))
-                    res.P1=intersectPt;
-            }
+            //本身就比较长的车道，在该方向上偏移会超出边界 不能直接处理
+            //if (res.IntersectPoint(Boundary).Count() ==1)
+            //{
+            //    var intersectPt = res.IntersectPoint(Boundary).First();
+            //    if(!Boundary.Contains(res.P0))
+            //        res.P0=intersectPt;
+            //    else if(!Boundary.Contains(res.P1))
+            //        res.P1=intersectPt;
+            //}
             return res;
         }
         public Polygon BufferReservedConnection(LineSegment line, double dis)
