@@ -85,7 +85,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 List<int> tDim = dim;
                 foreach (var d in allAvailableDims) // 房间框线、墙、柱
                 {
-                    pt = GetDimPtCloseToReference(pts, d, dir, roomWallColumn, step);
+                    pt = GetDimPtCloseToReference(pts, d, dir, roomWallColumn, roomWallColumn, step);
                     if (!pt.Equals(pts[d[0]]))
                     {
                         isFound = true;
@@ -98,7 +98,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 {
                     foreach (var d in allAvailableDims)
                     {
-                        pt = GetDimPtCloseToReference(pts, d, dir, axisCurves, step);
+                        pt = GetDimPtCloseToReference(pts, d, dir, axisCurves, roomWallColumn, step);
                         if (!pt.Equals(pts[d[0]]))
                         {
                             isFound = true;
@@ -117,7 +117,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                     {
                         if(d.Count < 3)
                         {
-                            pt = GetDimPtCloseToReference(pts, d, dir, dimensionedLines, step);
+                            pt = GetDimPtCloseToReference(pts, d, dir, dimensionedLines, roomWallColumn, step);
                             if (!pt.Equals(pts[d[0]]))
                             {
                                 isFound = true;
@@ -149,11 +149,17 @@ namespace ThMEPWSS.SprinklerDim.Service
                     {
                         if (distance > 0)
                         {
-                            realDim.Add(new ThSprinklerDimension(dimPts, dir.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1)), distance));
+                            Vector3d dirrection = (dimPts[1] - dimPts[0]).GetNormal().RotateBy(Math.PI / 2, new Vector3d(0, 0, 1));
+                            realDim.Add(new ThSprinklerDimension(dimPts, dirrection, distance));
+
+                            DrawUtils.ShowGeometry(dimPts[0], string.Format("SSS-{0}-6Dim", printTag), 3, 50, 100);
                         }
                         else
                         {
-                            realDim.Add(new ThSprinklerDimension(dimPts, dir.RotateBy(-Math.PI / 2, new Vector3d(0, 0, 1)), -distance));
+                            Vector3d dirrection = (dimPts[1] - dimPts[0]).GetNormal().RotateBy(-Math.PI / 2, new Vector3d(0, 0, 1));
+                            realDim.Add(new ThSprinklerDimension(dimPts, dirrection, -distance));
+
+                            DrawUtils.ShowGeometry(dimPts[0], string.Format("SSS-{0}-6Dim", printTag), 2, 50, 100);
                         }
 
 
@@ -229,10 +235,10 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         
 
-        private static Point3d GetDimPtCloseToReference(List<Point3d> pts, List<int> dim, Vector3d dir, ThCADCoreNTSSpatialIndex reference, double step)
+        private static Point3d GetDimPtCloseToReference(List<Point3d> pts, List<int> dim, Vector3d dir, ThCADCoreNTSSpatialIndex reference, ThCADCoreNTSSpatialIndex barrier, double step)
         {
-            Tuple<int, Point3d> ptMin = GetDimPtCloseToReference(pts[dim[0]], -dir, reference, step);
-            Tuple<int, Point3d> ptMax = GetDimPtCloseToReference(pts[dim[dim.Count - 1]], dir, reference, step);
+            Tuple<int, Point3d> ptMin = GetDimPtCloseToReference(pts[dim[0]], -dir, reference, barrier, step);
+            Tuple<int, Point3d> ptMax = GetDimPtCloseToReference(pts[dim[dim.Count - 1]], dir, reference, barrier, step);
             if (ptMin.Item1==1 && ptMax.Item1==1)
             {
                 if (ptMin.Item2.DistanceTo(pts[dim[0]]) < ptMax.Item2.DistanceTo(pts[dim[dim.Count - 1]]))
@@ -269,7 +275,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 {
                     for(int i = 0; i < dim.Count-1; i++)
                     {
-                        Tuple<int, Point3d> t = GetDimPtCloseToReference(pts[dim[i]], dir, reference, step);
+                        Tuple<int, Point3d> t = GetDimPtCloseToReference(pts[dim[i]], dir, reference, barrier, step);
                         if (t.Item1 != 3)
                             return t.Item2;
                     }
@@ -280,7 +286,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return pts[dim[0]];
         }
 
-        private static Tuple<int, Point3d> GetDimPtCloseToReference(Point3d pt, Vector3d dir, ThCADCoreNTSSpatialIndex reference, double step, double tolerance=50.0)
+        private static Tuple<int, Point3d> GetDimPtCloseToReference(Point3d pt, Vector3d dir, ThCADCoreNTSSpatialIndex reference, ThCADCoreNTSSpatialIndex barrier, double step, double tolerance=50.0)
         {
             // 选出与box相交及其内部的线
             Polyline box = ThCoordinateService.GenerateBox(pt, dir, step, step);
@@ -318,7 +324,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                     Line t = new Line(pt, pt + dir);
                     Point3d pt2 = t.GetClosestPointTo(pt1, true);
 
-                    if (pt2.DistanceTo(pt) > tolerance && !IsDimCrossReference(pt, pt2, reference) && !IsDimCrossReference(pt1, pt2, reference))
+                    if (pt2.DistanceTo(pt) > tolerance && !IsDimCrossReference(pt, pt2, barrier) && !IsDimCrossReference(pt1, pt2, barrier))
                     {
 
                         if (pt1.Equals(pt3))
@@ -368,55 +374,49 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<Polyline> minTextBoxes = new List<Polyline>();
 
             int isOverlap = ThCoordinateService.IsTextBoxOverlap(dimPts[0], dimPts[1], 100);
-            for (double distance = 500+isOverlap*400; distance < 800+isOverlap*400; distance = distance + 50)
+            for (double distance = 500 + isOverlap * 400; distance < 800 + isOverlap * 400; distance = distance + 50)
             {
                 List<Polyline> textBoxes = GetDimTextBoxes(dimPts, distance);
+                double overlap = ThSprinklerDimConflictService.GetOverlap(textBoxes, texts, mixColumnWall, dimedArea, pipes, room);
 
-                //if(ThGeometryOperationService.Contains(room, textBoxes))
-                //{
-                    double overlap = ThSprinklerDimConflictService.GetOverlap(textBoxes, texts, mixColumnWall, dimedArea, pipes);
+                if (overlap < minOverlap)
+                {
+                    minDistance = distance;
+                    minOverlap = overlap;
+                    minTextBoxes = textBoxes;
+                }
 
-                    if (overlap < minOverlap)
-                    {
-                        minDistance = distance;
-                        minOverlap = overlap;
-                        minTextBoxes = textBoxes;
-                    }
-                    
-                //}
 
-                //if (minOverlap < 40000)
-                //    break;
+
+                if (minOverlap < 40000)
+                    break;
             }
 
             isOverlap = 1-isOverlap;
-            for (double distance = -500-isOverlap*400; distance > -800-isOverlap*400; distance = distance - 50)
+            for (double distance = -500 - isOverlap * 400; distance > -800 - isOverlap * 400; distance = distance - 50)
             {
                 List<Polyline> textBoxes = GetDimTextBoxes(dimPts, distance);
+                double overlap = ThSprinklerDimConflictService.GetOverlap(textBoxes, texts, mixColumnWall, dimedArea, pipes, room);
 
-                //if (ThGeometryOperationService.Contains(room, textBoxes))
-                //{
-                    double overlap = ThSprinklerDimConflictService.GetOverlap(textBoxes, texts, mixColumnWall, dimedArea, pipes);
+                if (overlap < minOverlap)
+                {
+                    minDistance = distance;
+                    minOverlap = overlap;
+                    minTextBoxes = textBoxes;
+                }
+                else if (overlap == minOverlap && Math.Abs(distance) < Math.Abs(minDistance))
+                {
+                    minDistance = distance;
+                    minOverlap = overlap;
+                    minTextBoxes = textBoxes;
+                }
 
-                    if (overlap < minOverlap)
-                    {
-                        minDistance = distance;
-                        minOverlap = overlap;
-                        minTextBoxes = textBoxes;
-                    }
-                    else if (overlap == minOverlap && Math.Abs(distance) < Math.Abs(minDistance))
-                    {
-                        minDistance = distance;
-                        minOverlap = overlap;
-                        minTextBoxes = textBoxes;
-                    }
-                //}
 
-                //if (minOverlap < 40000)
-                //    break;
+                if (minOverlap < 40000)
+                    break;
             }
 
-            foreach(Polyline p in minTextBoxes)
+            foreach (Polyline p in minTextBoxes)
             {
                 dimedArea.Add(p);
             }

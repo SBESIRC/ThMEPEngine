@@ -140,7 +140,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
             else
             {
-                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (250 - distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (250 - distance) * dir.Y, 0);
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (-250 +distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (-250 +distance) * dir.Y, 0);
             }
             Polyline box = GenerateBox(CentralPt, line.GetNormal(), Length / 2.0, 250);
 

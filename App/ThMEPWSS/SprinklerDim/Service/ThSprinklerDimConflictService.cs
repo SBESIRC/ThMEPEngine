@@ -101,13 +101,18 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-        public static double GetOverlap(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, double w1=1.0, double w2=1.0, double w3 = 1.0, double w4 = 100.0)
+        public static double GetOverlap(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, MPolygon room, double w1=1.0, double w2=1.0, double w3 = 1.0, double w4 = 1.0, double w5 = 100.0)
         {
             double area1 = w1 * GetOverlapArea(dimensions, texts);
-            double area2 = w2 * GetOverlapArea(dimensions, mixColumnWall);
             double area3 = w3 * GetOverlapArea(dimensions, dimedArea);
-            double len = w4 * GetOverlapLength(dimensions, pipes);
-            return area1 + area2 + area3 + len;
+
+            double area2 = w2 * GetOverlapArea(dimensions, mixColumnWall);
+
+            double area4 = w4 * GetDiffenceArea(dimensions, room);
+
+            double len = w5 * GetOverlapLength(dimensions, pipes);
+
+            return area1 + area2 + area3 + len + area4;
         }
 
 
@@ -179,7 +184,24 @@ namespace ThMEPWSS.SprinklerDim.Service
             return length;
         }
 
+        private static double GetDiffenceArea(List<Polyline> dimensions, MPolygon room)
+        {
+            double area = 0;
+            List<Polyline> overlapDims = ThGeometryOperationService.Intersection(dimensions, room);
 
+            foreach(Polyline d in dimensions)
+            {
+                area = area + d.Area;
+            }
+
+            foreach (Polyline o in overlapDims)
+            {
+                if (o.Closed)
+                    area = area - o.Area;
+            }
+
+            return area;
+        }
 
 
 
