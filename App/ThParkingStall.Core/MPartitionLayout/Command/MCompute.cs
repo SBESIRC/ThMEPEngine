@@ -46,7 +46,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var obs = new List<Polygon>();
             foreach (var subArea in subAreas) obs.AddRange(subArea.Buildings);
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
-            subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
+            subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro(display));
             if (InterParameter.MultiThread)
             {        
                 Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display));
@@ -134,7 +134,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             //    mParkingPartitionPros.AddRange(subAreas.Select(subarea => subarea.mParkingPartitionPro));
             //return subAreas.Sum(sa => sa.Count);
         }
-        public static MParkingPartitionPro ConvertSubAreaToMParkingPartitionPro(this SubArea subArea)
+        public static MParkingPartitionPro ConvertSubAreaToMParkingPartitionPro(this SubArea subArea,bool display)
         {
             var bound = new Polygon(subArea.Area.Shell);
             bound = bound.Simplify();
@@ -172,6 +172,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
             mParkingPartitionPro.ObstaclesSpatialIndex = InterParameter.BuildingSpatialIndex;
             mParkingPartitionPro.RampList = subArea.Ramps.Where(e => bound.Contains(e.InsertPt)).ToList();
+            if (display) mParkingPartitionPro.QuickCalculate = false;
             return mParkingPartitionPro;
         }
         public static bool IsValidatedSolutions(List<SubArea> subAreas)
