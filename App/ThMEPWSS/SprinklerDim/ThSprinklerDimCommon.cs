@@ -11,6 +11,8 @@ namespace ThMEPWSS.SprinklerDim
     public class ThSprinklerDimCommon
     {
         public static Tolerance Tol_ptToLine = new Tolerance(10, 10);
+        public static string Layer_Dim = "W-WSUP-DIMS";
+        public static string Style_Dim = "TH-STYLE3";
 
     }
 }
