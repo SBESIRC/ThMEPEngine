@@ -1,10 +1,11 @@
 ﻿using System;
 using Xbim.IO;
 using Xbim.Ifc;
-using System.Collections.Generic;
-using Xbim.Ifc2x3.SharedBldgElements;
 using ThMEPTCH.Model;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Xbim.Ifc2x3.ProductExtension;
+using Xbim.Ifc2x3.SharedBldgElements;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -41,7 +42,7 @@ namespace ThMEPIFC.Ifc2x3
                         }
                         foreach (var thtchhole in thtchwall.Openings)
                         {
-                            var hole = ThTGL2IFC2x3Factory.CreateHole(Model, thtchhole, wall, thtchwall, floor_origin);
+                            SetupHole(Model, wall, thtchhole, floor_origin);
                         }
                     }
                     foreach (var thtchcolumn in thtchstorey.Columns)
@@ -90,6 +91,13 @@ namespace ThMEPIFC.Ifc2x3
             var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, wall, window, floor_origin);
             ThTGL2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcWindow, ifcHole);
             return ifcWindow;
+        }
+
+        static public IfcOpeningElement SetupHole(IfcStore model, IfcWall ifcWall, ThTCHOpening hole, Point3d floor_origin)
+        {
+            var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, hole, floor_origin);
+            ThTGL2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcHole);
+            return ifcHole;
         }
 
         static public void SaveIfcModel(IfcStore Model, string filepath)

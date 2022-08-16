@@ -19,6 +19,21 @@ namespace ThMEPIFC.Ifc2x3
                 var relFillsElement = model.Instances.New<IfcRelFillsElement>();
                 relFillsElement.RelatingOpeningElement = hole;
                 relFillsElement.RelatedBuildingElement = element;
+
+                txn.Commit();
+            }
+        }
+
+        public static void BuildRelationship(IfcStore model, IfcWall wall, IfcOpeningElement hole)
+        {
+            using (var txn = model.BeginTransaction())
+            {
+                //create relVoidsElement
+                var relVoidsElement = model.Instances.New<IfcRelVoidsElement>();
+                relVoidsElement.RelatedOpeningElement = hole;
+                relVoidsElement.RelatingBuildingElement = wall;
+
+                txn.Commit();
             }
         }
     }

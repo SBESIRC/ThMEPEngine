@@ -23,8 +23,6 @@ namespace ThMEPIFC.Ifc2x3
 {
     public partial class ThTGL2IFC2x3Factory
     {
-        static int epsilon = 0;
-
         static public IfcStore CreateAndInitModel(string projectName,string projectId = "")
         {
             var model = CreateModel();
@@ -500,65 +498,6 @@ namespace ThMEPIFC.Ifc2x3
                 }
                 relContainedIn.RelatingStructure = Storey;
                 txn.Commit();
-            }
-        }
-        static public IfcOpeningElement CreateHole(IfcStore model, ThTCHOpening hole, IfcElement openedElement, ThTCHWall thwall, Point3d floor_origin)
-        {
-            using (var txn = model.BeginTransaction("Create Window"))
-            {
-                var ret = model.Instances.New<IfcOpeningElement>();
-                ret.Name = "window";
-                //represent wall as a rectangular profile
-                var rectProf = model.Instances.New<IfcRectangleProfileDef>(p =>
-                {
-                    p.XDim = hole.Length;
-                    p.YDim = hole.Width - epsilon;
-                    p.ProfileType = IfcProfileTypeEnum.AREA;
-                    p.Position = model.ToIfcAxis2Placement2D(default);
-                });
-
-                //model as a swept area solid
-                var body = model.Instances.New<IfcExtrudedAreaSolid>(s =>
-                {
-                    s.Depth = hole.Height;
-                    s.SweptArea = rectProf;
-                    s.ExtrudedDirection = model.ToIfcDirection(hole.ExtrudedDirection);
-                });
-
-                //parameters to insert the geometry in the model
-                body.Position = model.ToIfcAxis2Placement3D(Point3d.Origin);
-
-                //Create a Definition shape to hold the geometry
-                var shape = model.Instances.New<IfcShapeRepresentation>();
-                var modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
-                shape.ContextOfItems = modelContext;
-                shape.RepresentationType = "SweptSolid";
-                shape.RepresentationIdentifier = "Body";
-                shape.Items.Add(body);
-
-                //Create a Product Definition and add the model geometry to the wall
-                var rep = model.Instances.New<IfcProductDefinitionShape>();
-                rep.Representations.Add(shape);
-                ret.Representation = rep;
-
-                //now place the wall into the model
-                var lp = model.Instances.New<IfcLocalPlacement>();
-                var ax3D = model.Instances.New<IfcAxis2Placement3D>(p =>
-                {
-                    p.Axis = model.ToIfcDirection(Vector3d.ZAxis);
-                    p.RefDirection = model.ToIfcDirection(hole.XVector);
-                    p.Location = model.ToIfcCartesianPoint(hole.Origin + floor_origin.GetAsVector());
-                });
-                lp.RelativePlacement = ax3D;
-                ret.ObjectPlacement = lp;
-
-                //create relVoidsElement
-                var relVoidsElement = model.Instances.New<IfcRelVoidsElement>();
-                relVoidsElement.RelatedOpeningElement = ret;
-                relVoidsElement.RelatingBuildingElement = openedElement;
-
-                txn.Commit();
-                return ret;
             }
         }
 

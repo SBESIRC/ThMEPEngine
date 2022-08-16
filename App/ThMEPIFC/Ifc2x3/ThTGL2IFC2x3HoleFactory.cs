@@ -1,4 +1,5 @@
 ﻿using ThMEPTCH.Model;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Xbim.Ifc;
 using Xbim.Ifc2x3.ProfileResource;
@@ -48,6 +49,37 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
                 return ret;
             }
+        }
+
+        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHOpening hole, Point3d floor_origin)
+        {
+            using (var txn = model.BeginTransaction("Create Hole"))
+            {
+                var ret = model.Instances.New<IfcOpeningElement>();
+                ret.Name = "Generic Hole";
+
+                //create representation
+                var profile = GetProfile(model, hole);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, hole.ExtrudedDirection, hole.Height);
+
+                //object placement
+                var transform = GetTransfrom(hole, floor_origin);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+
+                txn.Commit();
+                return ret;
+            }
+        }
+
+        private static Matrix3d GetTransfrom(ThTCHOpening hole, Point3d floor_origin)
+        {
+            var offset = floor_origin.GetAsVector();
+            return ThMatrix3dExtension.MultipleTransformFroms(1.0, hole.XVector, hole.Origin + offset);
+        }
+
+        private static IfcProfileDef GetProfile(IfcStore model, ThTCHOpening hole)
+        {
+            return model.ToIfcRectangleProfileDef(hole.Length, hole.Width);
         }
 
         private static IfcProfileDef GetProfile(IfcStore model, ThTCHWall wall, ThTCHWindow window)
