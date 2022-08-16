@@ -84,12 +84,22 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IfcProfileDef GetProfile(IfcStore model, ThTCHWall wall, ThTCHWindow window)
         {
-            return model.ToIfcRectangleProfileDef(window.Length, wall.Width);
+            // 为了确保开洞完全贯通墙，
+            // 洞的宽度需要在墙的厚度的基础上增加一定的延伸
+            // TODO：
+            //  1）暂时只支持直墙和弧墙
+            //  2）弧墙的延伸量需要考虑弧的半径以及墙的厚度，这里暂时给一个经验值
+            return model.ToIfcRectangleProfileDef(window.Length, wall.Width + 120);
         }
 
         private static IfcProfileDef GetProfile(IfcStore model, ThTCHWall wall, ThTCHDoor door)
         {
-            return model.ToIfcRectangleProfileDef(door.Length, wall.Width);
+            // 为了确保开洞完全贯通墙，
+            // 洞的宽度需要在墙的厚度的基础上增加一定的延伸
+            // TODO：
+            //  1）暂时只支持直墙和弧墙
+            //  2）弧墙的延伸量需要考虑弧的半径以及墙的厚度，这里暂时给一个经验值
+            return model.ToIfcRectangleProfileDef(door.Length, wall.Width + 120);
         }
     }
 }

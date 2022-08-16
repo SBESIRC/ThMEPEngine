@@ -100,7 +100,6 @@ namespace ThMEPTCH.TCHArchDataConvert
                     var copyDoor = item.Value.Clone() as ThTCHDoor;
                     copyDoor.Uuid += wallEntity.DBId.ToString();
                     wall.Doors.Add(copyDoor);
-                    wall.Openings.Add(WallDoorOpening(wallEntity, doorEntity));
                 }
             }
             foreach (var item in windowDic)
@@ -114,7 +113,6 @@ namespace ThMEPTCH.TCHArchDataConvert
                     var copyWindow = item.Value.Clone() as ThTCHWindow;
                     copyWindow.Uuid += wallEntity.DBId.ToString();
                     wall.Windows.Add(copyWindow);
-                    wall.Openings.Add(WallWindowOpening(wallEntity, windowEntity));
                 }
             }
             var resList = new List<ThTCHWall>();
@@ -341,19 +339,6 @@ namespace ThMEPTCH.TCHArchDataConvert
             var newWindow = new ThTCHWindow(entity.MidPoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
             newWindow.Uuid = projectId + entity.DBId;
             return newWindow;
-        }
-        
-        ThTCHOpening WallDoorOpening(WallEntity wallEntity, DoorEntity doorEntity) 
-        {
-            var opening = new ThTCHOpening(doorEntity.MidPoint, doorEntity.Width, doorEntity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, doorEntity.Rotation);
-            opening.Uuid = projectId + wallEntity.DBId.ToString() + doorEntity.DBId.ToString();
-            return opening;
-        }
-        ThTCHOpening WallWindowOpening(WallEntity wallEntity, WindowEntity entity)
-        {
-            var opening = new ThTCHOpening(entity.MidPoint, entity.Width, entity.Height, wallEntity.RightWidth + wallEntity.LeftWidth + openingThickinessAdd, entity.Rotation);
-            opening.Uuid = projectId + wallEntity.DBId.ToString() + entity.DBId.ToString();
-            return opening;
         }
     }
 }

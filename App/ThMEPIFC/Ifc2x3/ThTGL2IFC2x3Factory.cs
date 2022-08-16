@@ -49,7 +49,7 @@ namespace ThMEPIFC.Ifc2x3
         {
             return model.Instances.New<IfcGeometricRepresentationContext>(c =>
             {
-                c.Precision = 1E-5;
+                c.Precision = ThTGL2IFCCommon.PRECISION;
                 c.CoordinateSpaceDimension = new IfcDimensionCount(3);
                 c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(Point3d.Origin);
             });
