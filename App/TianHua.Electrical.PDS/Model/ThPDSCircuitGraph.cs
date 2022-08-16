@@ -35,11 +35,13 @@ namespace TianHua.Electrical.PDS.Model
         {
             Loads = new List<ThPDSLoad>();
             LightingCableTray = new ThPDSLightingCableTray();
+            HasWarning = false;
         }
 
         public PDSNodeType NodeType { get; set; }
         public List<ThPDSLoad> Loads { get; set; }
         public ThPDSLightingCableTray LightingCableTray { get; set; }
+        public bool HasWarning { get; set; }
 
         public bool Equals(ThPDSCircuitGraphNode other)
         {

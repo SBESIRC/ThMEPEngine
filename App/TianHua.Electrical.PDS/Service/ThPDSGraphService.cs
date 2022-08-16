@@ -62,7 +62,7 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
-        public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService,
+        public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService, ThPDSTextInfo mark,
             List<string> distBoxKey, List<ObjectId> objectIds, ref string attributesCopy)
         {
             var node = new ThPDSCircuitGraphNode();
@@ -107,6 +107,8 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
+                        marks.Texts.AddRange(mark.Texts);
+                        marks.ObjectIds.AddRange(mark.ObjectIds);
                         var load = service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy);
                         load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
                         load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
@@ -244,7 +246,7 @@ namespace TianHua.Electrical.PDS.Service
 
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
             var tarPanelID = edge.Target.Loads.Count > 0 ? edge.Target.Loads[0].ID.LoadID : "";
-            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, tarPanelID, infos, distBoxKey);
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, tarPanelID, edge.Target, infos, distBoxKey);
             AssignCircuitNumber(edge, circuitAssign);
 
             if (reversible && source.NodeType != PDSNodeType.CableCarrier
@@ -256,7 +258,7 @@ namespace TianHua.Electrical.PDS.Service
                 var anotherTarPanelID = anotherEdge.Target.Loads.Count > 0 ? anotherEdge.Target.Loads[0].ID.LoadID : "";
                 if (!string.IsNullOrEmpty(anotherSrcPanelID))
                 {
-                    anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, infos, distBoxKey);
+                    anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, anotherEdge.Target, infos, distBoxKey);
                     AssignCircuitNumber(anotherEdge, circuitAssign);
                     if (!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber))
                     {

@@ -608,8 +608,36 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var objectIds = new List<ObjectId>();
             var attributesCopy = "";
-            var newNode = ThPDSGraphService.CreateNode(new List<Entity> { load }, Database, MarkService,
+
+            var marks = new ThPDSTextInfo();
+            var polyline = ThPDSBufferService.Buffer(load, Database);
+            var results = FindNextLine(load, polyline);
+            //配电箱搭着线
+            foreach (Curve findcurve in results)
+            {
+                //线得搭到块上才可遍历，否则认为线只是跨过块
+                if (polyline.Contains(findcurve.StartPoint) || polyline.Contains(findcurve.EndPoint))
+                {
+                    var findLoop = FindRootNextElement(load, findcurve, out var isBranch);
+                    foreach (var item in findLoop)
+                    {
+                        // 搜索回路标注
+                        item.Value.ForEach(curve =>
+                        {
+                            var mark = MarkService.GetMarks(ThPDSBufferService.Buffer(curve, Database));
+                            marks.Texts.AddRange(mark.Texts);
+                            marks.ObjectIds.AddRange(mark.ObjectIds);
+                        });
+                    }
+                }
+            }
+
+            var newNode = ThPDSGraphService.CreateNode(new List<Entity> { load }, Database, MarkService, marks,
                 DistBoxKey, objectIds, ref attributesCopy);
+            if (results.Count > 0)
+            {
+                newNode.HasWarning = true;
+            }
             PDSGraph.Graph.AddVertex(newNode);
             NodeMap.Add(newNode, objectIds);
         }
@@ -837,7 +865,7 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var attributesCopy = "";
             var objectIds = new List<ObjectId>();
-            var newNode = ThPDSGraphService.CreateNode(loads, Database, MarkService, DistBoxKey,
+            var newNode = ThPDSGraphService.CreateNode(loads, Database, MarkService, new ThPDSTextInfo(), DistBoxKey,
                 objectIds, ref attributesCopy);
             if (onLightingCableTray)
             {
@@ -905,8 +933,11 @@ namespace TianHua.Electrical.PDS.Engine
                 {
                     return Tuple.Create(false, newNode, newEdge);
                 }
-                PDSGraph.Graph.AddEdge(newEdge);
-                EdgeMap.Add(newEdge, logos.ObjectIds);
+                if (!newNode.HasWarning || newEdge.Circuit.ID.CircuitNumberList.Count == newEdge.Circuit.ID.SourcePanelIDList.Count)
+                {
+                    PDSGraph.Graph.AddEdge(newEdge);
+                    EdgeMap.Add(newEdge, logos.ObjectIds);
+                }
                 return Tuple.Create(true, newNode, newEdge);
             }
             else
