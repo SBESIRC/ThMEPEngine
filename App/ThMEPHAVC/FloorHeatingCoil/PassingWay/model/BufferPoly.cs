@@ -41,7 +41,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         /// </summary>
         /// <param name="multiple">外扩倍数</param>
         /// <returns>外扩后的多段线轮廓</returns>
-        public Polyline Buffer(int multiple = 1)
+        public Polyline Buffer(double multiple = 1)
         {
             var list_buffer = new List<Polyline>();
             for(int i = 0; i < buff.Count; ++i)

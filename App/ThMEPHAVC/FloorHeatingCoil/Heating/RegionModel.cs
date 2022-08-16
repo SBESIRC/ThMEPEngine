@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.CAD;
-using NFox.Cad;
-using Linq2Acad;
-using ThMEPEngineCore.Diagnostics;
-using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore.Model.Hvac;
-using ThMEPHVAC.FloorHeatingCoil.Heating;
+using System.Collections.Generic;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {

@@ -46,7 +46,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         List<Polyline> MainReigonList = new List<Polyline>(); 
         List<int> SkeletonType = new List<int>();
         List<Polyline> ExcessPlList = new List<Polyline>();
-        
+        List<Polyline> MainReigonListCopy = new List<Polyline>();
 
         // output
         public List<Polyline> Connector = new List<Polyline>();
@@ -84,7 +84,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         public void Pipeline()
         {
-            MainRegion = GetMainPipeArea(0);
+            MainRegion = GetMainPipeArea(0,1);
            
             Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
             //PassageShowUtils.ShowEntity(PassageWayUtils.Copy(MainRegion), 4);
@@ -113,12 +113,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         public void Pipeline2() 
         {
-            MainRegion = GetMainPipeArea(0);
+            GetMainPipeArea(0,0);
+            GetMainPipeArea(0,1);
+
+            if (MainReigonListCopy.Count == 0) return;
+            if (CheckSmallBetter()) MainReigonList = MainReigonListCopy;
 
             List<Polyline> MainRegionListRoom = new List<Polyline>();
             for (int i = 0; i < MainReigonList.Count; i++)
             {
-                Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, 0.25 * Buffer + Parameter.SuggestDistanceWall).First();
+                Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, 0.25 *Buffer+ Parameter.SuggestDistanceWall).First();
                 DrawUtils.ShowGeometry(mainReigonListRoom, "l2AdjustedRoom", 4, lineWeightNum: 30);
                 MainRegionListRoom.Add(mainReigonListRoom);
             }
@@ -130,15 +134,20 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 Point3d pin = new Point3d();
                 Point3d point = new Point3d();
                 FindPin2(MainReigonList[i], ref pin, ref point);
+                if (point == new Point3d()) continue;
+
+                DrawUtils.ShowGeometry(MainReigonList[i], "l4MainShell", 5 , 30);
                 Polyline pinToPoint = new Polyline();
 
                 pinToPoint.AddVertexAt(0, pin.ToPoint2D(), 0, 0, 0);
                 pinToPoint.AddVertexAt(0, point.ToPoint2D(), 0, 0, 0);
                 point = IntersectUtils.PolylineIntersectionPolyline(MainRegionListRoom[i],pinToPoint).First();
-                DrawUtils.ShowGeometry(point, "l4SPin", 0, 30, (int)Buffer/4);
+
+                double pinBuffer = GetPinBuffer(pin);
+                DrawUtils.ShowGeometry(point, "l4SPin", 0, 30, (int)pinBuffer);
 
                 List<DrawPipeData> pipeInList = new List<DrawPipeData>();
-                pipeInList.Add(new DrawPipeData(point, Buffer/4, 0, 20));
+                pipeInList.Add(new DrawPipeData(point, pinBuffer, 0, 20));
                 RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(MainRegionListRoom[i], pipeInList, Buffer, Parameter.SuggestDistanceWall);
                 roomPipeGenerator.CalculatePipeline();
                 // show result
@@ -149,7 +158,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 BufferedPipeList.Add(output.shape);
                 //chatou
                 Line line0 = new Line(pin, point + (point - pin).GetNormal() * 50);
-                Polyline chatou = line0.Buffer((int)Buffer / 4);
+                Polyline chatou = line0.Buffer(pinBuffer);
                 BufferedPipeList.Add(chatou);
                 DrawUtils.ShowGeometry(BufferedPipeList, "l4SinglePipe", pipeInList[0].PipeId % 7 + 1, 30);
                 DrawUtils.ShowGeometry(MainPipeRoad, "l4MainPipeRoad", pipeInList[0].PipeId % 7 + 1, 30);
@@ -161,12 +170,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         public void Pipeline3()
         {
-            MainRegion = GetMainPipeArea(1);
+            GetMainPipeArea(1, 0);
+            GetMainPipeArea(1,1);
+
+            if (MainReigonListCopy.Count == 0) return;
+            if (CheckSmallBetter()) MainReigonList = MainReigonListCopy;
 
             List<Polyline> MainRegionListRoom = new List<Polyline>();
             for (int i = 0; i < MainReigonList.Count; i++)
             {
-                Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, 0.25 * Buffer + Parameter.SuggestDistanceWall).First();
+                Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, Parameter.SuggestDistanceWall).First();
                 DrawUtils.ShowGeometry(mainReigonListRoom, "l2AdjustedRoom", 4, lineWeightNum: 30);
                 MainRegionListRoom.Add(mainReigonListRoom);
             }
@@ -196,8 +209,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
             //Skeleton.Add(MainPipeRoad);
         }
 
-        public Polyline GetMainPipeArea(int mode)
+        public Polyline GetMainPipeArea(int mode,int isSmall)
         {
+            double smallCoefficient = 1;
+            if (isSmall == 1) smallCoefficient = 0.85;
+
             List<Polyline> pipeInputs = new List<Polyline>();
             for (int i = 0; i < PipeList.Count; i++)
             {
@@ -219,7 +235,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
 
             // init remove part
-            DBObjectCollection rest = new DBObjectCollection();
+            DBObjectCollection rest0 = new DBObjectCollection();
 
             //rest.Add(shortest_way[main_index].Buffer(3));  //出口
             if (pipeInputs.Count > 1)
@@ -227,45 +243,50 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (mode == 0)
                 {
                     if (main_index > 0)
-                        rest.Add(PassageWayUtils.Buffer(PipeList[main_index - 1].Buffer(1), 0.75 * Buffer).First());
+                        rest0.Add(PassageWayUtils.Buffer(PipeList[main_index - 1].Buffer(1), 0.75 * Buffer* smallCoefficient).First());
                     if (main_index < pipeInputs.Count - 1)
-                        rest.Add(PassageWayUtils.Buffer(PipeList[main_index + 1].Buffer(1), 0.75 * Buffer).First());
+                        rest0.Add(PassageWayUtils.Buffer(PipeList[main_index + 1].Buffer(1), 0.75 * Buffer* smallCoefficient).First());
                 }
                 else if(mode == 1)
                 {
                     if (main_index > 0)
-                        rest.Add(PipeList[main_index - 1].Buffer(3));
+                        rest0.Add(PipeList[main_index - 1].Buffer(3*smallCoefficient));
                     if (main_index < pipeInputs.Count - 1)
-                        rest.Add(PipeList[main_index + 1].Buffer(3));
+                        rest0.Add(PipeList[main_index + 1].Buffer(3*smallCoefficient));
                 }
             }
             // get rest
             if (mode == 0)
             {
-                rest.Add(PassageWayUtils.Buffer(PipeList[main_index].Buffer(1), 0.75 * Buffer).First());
+                rest0.Add(PassageWayUtils.Buffer(PipeList[main_index].Buffer(1), 0.75 * Buffer * smallCoefficient).First());
                 
                 DrawUtils.ShowGeometry(PipeList[main_index].Buffer(1), "l4Test", 9, lineWeightNum: 30);
             }
 
-            rest.OfType<Polyline>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l2Rest", 5, lineWeightNum: 30));
+            rest0.OfType<Polyline>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l2Rest", 5, lineWeightNum: 30));
             DrawUtils.ShowGeometry(main_region, "l2OldMainArea", 6, lineWeightNum: 30);
 
             if (main_region.Area < 1000)
             {
                 Skeleton.Add(MainPipeRoad);
                 IfFind = false;
-                SkeletonType.Add(-1);
                 return new Polyline();
             }
 
-            rest = main_region.Difference(rest);
+            var rest = main_region.Difference(rest0);
+
+
+
+            List<Polyline> newRegionList = rest.OfType<Polyline>().ToList();
 
             //var newRoom = AdjustBufferRoom();
             var newRoom = Room;
-            var smallRegionPl = newRoom.Buffer(-RoomBuffer - 0.5 * Buffer / 2);
+            double smallRoomBuffer = -RoomBuffer - 0.5 * Buffer / 2;
+            if (mode == 1) smallRoomBuffer = smallRoomBuffer + 0.5 * Buffer / 2;
+            var smallRegionPl = newRoom.Buffer(smallRoomBuffer);
             DrawUtils.ShowGeometry(smallRegionPl.OfType<Polyline>().ToList(), "l3SmallMainRoom", 8, lineWeightNum: 30);
             Polyline newRegion = new Polyline();
-            List<Polyline> newRegionList = rest.OfType<Polyline>().ToList();
+            
             if (newRegionList.Count > 0)
             {
                 DrawUtils.ShowGeometry(newRegionList, "l3BeforeInterMainRegion", 5, lineWeightNum: 30);
@@ -280,7 +301,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (interNewRegionList.Count > 0)
                 {
                     newRegion = interNewRegionList.FindByMax(x => x.Area);
-                    MainReigonList = interNewRegionList;
+                    interNewRegionList.RemoveAll(x => x.Area < 5000);
+                    if (isSmall == 1) MainReigonListCopy = interNewRegionList;
+                    else MainReigonList = interNewRegionList;
                     DrawUtils.ShowGeometry(interNewRegionList, "l2MainArea", 170, lineWeightNum: 30);
                 }
                 else
@@ -906,17 +929,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public void FindPin2(Polyline roomPl, ref Point3d pin, ref Point3d point)
         {
             var coords = PassageWayUtils.GetPolyPoints(roomPl);
+            coords = SmoothUtils.SmoothPoints(coords);
+            coords.Add(coords.First());
+
             double minDis = 100000;
             double roadDis = 100000;
             for (int i = 0; i < coords.Count; i++)
             {
                 Point3d nowPt = coords[i];
                 Point3d close = MainPipeRoad.GetClosestPointTo(nowPt, false);
+                Point3d closeContrary = roomPl.GetClosestPointTo(close, false);
 
                 if (close.DistanceTo(MainPipeRoad.StartPoint) < Parameter.SuggestDistanceWall ||
                     close.DistanceTo(MainPipeRoad.EndPoint) < Parameter.SuggestDistanceWall) continue;
                 double nowDis = close.DistanceTo(nowPt);
+                double nowDisC = closeContrary.DistanceTo(close);
                 bool rec = Math.Abs(close.X - nowPt.X) < 1 || Math.Abs(close.Y - nowPt.Y) < 1;
+                bool recC = Math.Abs(close.X - closeContrary.X) < 1 || Math.Abs(close.Y - closeContrary.Y) < 1;
 
                 if (nowDis < minDis - 20)
                 {
@@ -937,12 +966,32 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         roadDis = tmpRoadDis;
                     }
                 }
+
+                if (nowDisC < minDis - 20)
+                {
+                    minDis = nowDisC;
+                    pin = close;
+                    point = closeContrary;
+                    roadDis = GetDis(MainPipeRoad, close);
+                }
+                else if (Math.Abs(nowDisC - minDis) < 20 && recC)
+                {
+                    bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
+                    double tmpRoadDis = GetDis(MainPipeRoad, close);
+                    if (tmpRoadDis < roadDis || (!oldRec && recC))
+                    {
+                        minDis = nowDisC;
+                        pin = close;
+                        point = closeContrary;
+                        roadDis = tmpRoadDis;
+                    }
+                }
             }
 
             if (minDis == 100000)
             {
-                pin = new Point3d(0, 0, 0);
-                point = new Point3d(0, 0, 0);
+                pin = new Point3d();
+                point = new Point3d();
             }
         }
 
@@ -971,6 +1020,43 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 pin = new Point3d();
                 point = new Point3d();
             }
+        }
+
+        public double GetPinBuffer(Point3d pin) 
+        {
+            double r = Buffer / 4;
+            List<Point3d> coords = PassageWayUtils.GetPolyPoints(MainPipeRoad);
+
+            int index = PassageWayUtils.GetPointIndex(pin, coords);
+            if (index != -1)
+            {
+                if (index == 0 || index == coords.Count - 1) return r;
+                r = Math.Min(PipeList[main_index].buff[index], PipeList[main_index].buff[index - 1]);
+            }
+            else
+            {
+                index = PassageWayUtils.GetSegIndexOnPolyline(pin, coords);
+                double up = (pin - coords[index]).Length;
+                double down = (pin - coords[index+1]).Length;
+                if (up + PipeList[main_index].buff[index] < r) r = up + PipeList[main_index].buff[index];
+                if (down + PipeList[main_index].buff[index+1] < r) r = down + PipeList[main_index].buff[index+1];
+            }
+            return r;
+        }
+
+        public bool CheckSmallBetter()
+        {
+            bool flag = false;
+            if (MainReigonListCopy.Count > MainReigonList.Count) return true;
+            else 
+            {
+                Polyline copyPl = MainReigonListCopy.FindByMax(x => x.Area);
+                Polyline pl = MainReigonList.FindByMax(x => x.Area);
+
+                if ((copyPl.NumberOfVertices > pl.NumberOfVertices && copyPl.Area > pl.Area + 50000)
+                    ) return true;
+            }
+            return flag;
         }
     }
 }

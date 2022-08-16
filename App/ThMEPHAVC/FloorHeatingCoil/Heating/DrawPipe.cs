@@ -65,7 +65,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (i == 2)
+                if (i == 1)
                 {
                     int stop = 5;
                 }
