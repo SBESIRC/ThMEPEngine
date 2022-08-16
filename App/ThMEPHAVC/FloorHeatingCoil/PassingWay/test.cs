@@ -44,9 +44,7 @@ namespace ThMEPHVAC
                 double buffer = 600;
                 double room_buffer = 100;
                 // core process
-                //RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(room, pipe_in, buffer,room_buffer);
-                //roomPipeGenerator.CalculatePipeline();
-                RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(room, pipe_in, buffer, room_buffer);
+                RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(room, pipe_in, buffer, room_buffer);
                 roomPipeGenerator.CalculatePipeline();
                 // show result
                 var pipe = roomPipeGenerator.output;
@@ -87,7 +85,7 @@ namespace ThMEPHVAC
                     //var free_result = Active.Editor.GetInteger(str);
                     //if (free_result.Status != PromptStatus.OK) return;
                     //pouts_freedom.Add(free_result.Value);
-                    pouts_freedom.Add(0);
+                    pouts_freedom.Add(0); 
                 }
                 //pouts_freedom[2] = 1;
                 // input pipe ins
@@ -262,11 +260,5 @@ namespace ThMEPHVAC
                 //mainPipeGet.Pipeline();
             }
         }
-
-
-
-
-
-
     }
 }

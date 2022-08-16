@@ -116,6 +116,7 @@
     <Compile Include="FloorHeatingCoil\PassingWay\data\PipeInput.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\data\PipeOutput.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\MainPipeGet.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\MainPipeGet2.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\model\BufferPoly.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\model\BufferTreeNode.cs" />
     <Compile Include="FloorHeatingCoil\PassingWay\model\PipeSegment.cs" />

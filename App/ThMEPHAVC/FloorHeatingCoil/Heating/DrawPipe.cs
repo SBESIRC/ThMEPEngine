@@ -43,13 +43,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             GetDrawnPipe();
 
-            GetConnector();
+            //GetConnector();
 
-            DrawWholePipe();
+            //DrawWholePipe();
 
-            Fillet();
+            //Fillet();
 
-            SaveResults();
+            //SaveResults();
         }
 
         public void DataInit()

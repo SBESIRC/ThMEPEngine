@@ -197,7 +197,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             RegionUsedLength.Add(regionId, nowRegion.UsedPipeLength);
             tmpPipe.UpstreamLength = ComputeTotalDistance(upDoorId, 0) * 2;
             tmpPipe.TotalLength = tmpPipe.UpstreamLength + tmpPipe.DownstreamLength;
-   
+
             //主房间判断
             if (nowRegion.RegionType == 2) tmpPipe.Independent = 1;
             //附属房间判断
@@ -267,7 +267,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return flag;
         }
 
-        bool IsMergeAble(SingleRegion nowRegion,TmpPipe pipe1, TmpPipe pipe2) 
+        bool IsMergeAble(SingleRegion nowRegion, TmpPipe pipe1, TmpPipe pipe2)
         {
             //主房间判别
             if (Parameter.IndependentRoomConstraint)
@@ -295,9 +295,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //公区判别
             if (Parameter.PublicRegionConstraint)
             {
-                if ((pipe1.DomainIdList.Count == 1 && pipe1.DomainIdList.First() == nowRegion.RegionId)
-                    || (pipe2.DomainIdList.Count == 1 && pipe2.DomainIdList.First() == nowRegion.RegionId)) { }
-                else if (pipe1.IsPublicPipe != pipe2.IsPublicPipe) return false;
+                //if ((pipe1.DomainIdList.Count == 1 && pipe1.DomainIdList.First() == nowRegion.RegionId)
+                //    || (pipe2.DomainIdList.Count == 1 && pipe2.DomainIdList.First() == nowRegion.RegionId)) { }
+                //else if (pipe1.IsPublicPipe != pipe2.IsPublicPipe) return false;
+
+                if (pipe1.IsPublicPipe != pipe2.IsPublicPipe) return false;
             }
             return true;
         }
@@ -444,7 +446,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                             List<int> optList = AdjacentIdList.OrderBy(x => tmpPipesCopy[x].DownstreamLength).ToList();
                             int optId = optList.First();
 
-                            for (int a = 0; a < optList.Count; a++) 
+                            for (int a = 0; a < optList.Count; a++)
                             {
                                 optId = optList[a];
 
@@ -522,7 +524,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                         List<int> optList = AdjacentIdList.OrderBy(x => tmpPipesCopy[x].DownstreamLength).ToList();
                         int optId = optList.First();
-                        
+
                         for (int a = 0; a < optList.Count; a++)
                         {
                             optId = optList[a];
@@ -589,7 +591,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     }
                 }
             }
-            
+
             tmpPipes = tmpPipesCopy;
 
             //合并完毕后,整理管道
@@ -613,11 +615,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     SingleRegion childRegion = nowRegion.ChildRegion[i];
                     if (childRegion.RegionType != 0)
                     {
-                        for (int a = 0; a < tmpPipes.Count; a++) 
+                        for (int a = 0; a < tmpPipes.Count; a++)
                         {
                             if (tmpPipes[a].DomainIdList.Contains(childRegion.RegionId))
                             {
-                                if (!tmpPipes[a].DomainIdList.Contains(nowRegion.RegionId)) 
+                                if (!tmpPipes[a].DomainIdList.Contains(nowRegion.RegionId))
                                 {
                                     tmpPipes[a].Dead = 1;
                                 }
@@ -714,7 +716,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                             int topoId = RegionToNode[regionId];
                             List<TmpPipe> testPipesList = bestTmpPipeList.Copy();
 
-                            if (regionId == 13) 
+                            if (regionId == 13)
                             {
                                 int stopTest = 0;
                             }

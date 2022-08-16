@@ -13,13 +13,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public List<BufferTreeNode> childs { get; set; } = null;
         public BufferTreeNode parent { get; set; } = null;
         public int depth { get; set; } = -1;
+        public int IsCW { get; set; } = 1;
         public BufferTreeNode() { }
         public BufferTreeNode(Polyline poly) { shell = poly; }
 
-        public BufferTreeNode(Polyline poly, int depth)
+        public BufferTreeNode(Polyline poly, int depth,BufferTreeNode parent)
         {
             shell = poly;
             this.depth = depth;
+            this.parent = parent;
         }
         public void SetShell(Polyline poly)
         {

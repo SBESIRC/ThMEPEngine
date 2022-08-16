@@ -15,14 +15,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
         /// </summary>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static List<Point3d> SmoothPoints(List<Point3d> points)
+        public static List<Point3d> SmoothPoints(List<Point3d> points, double eps = 2)
         {
             for (int i = points.Count - 1; i > 0; --i)
-                if (points[i].DistanceTo(points[i - 1])<1)
+                if (points[i].DistanceTo(points[i - 1]) < eps) 
                     points.RemoveAt(i);
             for(int i = points.Count - 2; i > 0; --i)
             {
-                if (PassageWayUtils.PointOnSegment(points[i], points[i + 1], points[i - 1]))
+                if (PassageWayUtils.PointOnSegment(points[i], points[i + 1], points[i - 1], eps)) 
                     points.RemoveAt(i);
             }
             return points;

@@ -131,7 +131,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 保存非主导管线计算结果
             for (int i = 0; i < shortest_way.Count; ++i)
             {
-                if (main_has_output && i == main_index) continue;
+                //if (main_has_output && i == main_index) continue;
                 outputs.Add(new PipeOutput(pipe_inputs[i].pipe_id, shortest_way[i]));
             }
         }
@@ -194,21 +194,32 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CalculateMainWay()
         {
-            MainPipeGet mainPipeGet = new MainPipeGet(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
-            mainPipeGet.Pipeline();
-            MainPipeBuffer mainPipeBuffer = new MainPipeBuffer(
-                mainPipeGet.Skeleton,
-                equispaced_lines[main_index],
-                equispaced_buffers[main_index],
-                main_has_output ? pipe_inputs[main_index] : main_pipe_input,
-                buffer,
-                main_has_output);
-            mainPipeBuffer.Calculate();
+            MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
+            mainPipeGet.Pipeline2();
 
-            if (main_index == outputs.Count)
-                outputs.Add(mainPipeBuffer.output);
+            PipeOutput main_output = null;
+            if (main_has_output)
+            {
+                main_output = new PipeOutput(main_pipe_input.pipe_id, shortest_way[main_index]);
+                // 合并主导管线轮廓
+                DBObjectCollection shape = new DBObjectCollection();
+                foreach (var rest_shape in mainPipeGet.Skeleton)
+                    shape.Add(rest_shape);
+                shape.Add(main_output.shape);
+                main_output.shape = shape.UnionPolygons().Cast<Polyline>().First();
+            }
             else
-                outputs.Insert(main_index, mainPipeBuffer.output);
+            {
+                main_output = new PipeOutput();
+                main_output.pipe_id = main_pipe_input.pipe_id;
+                main_output.skeleton = new List<Polyline>();
+                main_output.shape = mainPipeGet.Skeleton.First();
+            }
+            // 添加至输出列表
+            if (main_index == outputs.Count)
+                outputs.Add(main_output);
+            else
+                outputs.Insert(main_index, main_output);
         }
         public void Dispose()
         {

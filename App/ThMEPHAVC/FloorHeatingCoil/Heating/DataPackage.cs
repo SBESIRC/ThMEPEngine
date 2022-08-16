@@ -84,9 +84,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public double KeyRoomShortSide = 2000;        //什么样的房间被认定为单独只出一根管道
 
         //用户输入模式
-        static public bool IndependentRoomConstraint = false;
-        static public bool PublicRegionConstraint = false;
-        static public bool AuxiliaryRoomConstraint = false;
+        static public bool IndependentRoomConstraint = true;
+        static public bool PublicRegionConstraint = true;
+        static public bool AuxiliaryRoomConstraint = true;
 
         //
         static public double SuggestDistancePass = 600;
