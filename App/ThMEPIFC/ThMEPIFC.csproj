@@ -29,7 +29,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ifc2x3\ThTGL2IFC2x3BeamFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3CloneExtension.cs" />
+    <Compile Include="Ifc2x3\ThTGL2IFC2x3ColumnFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3CommonFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3DoorFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3HoleFactory.cs" />
