@@ -78,6 +78,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 AllowSplitLaneExceedMaxLength = false;
             if (!AllowSplitLaneExceedMaxLength)
                 DisAllowMaxLaneLength = double.PositiveInfinity;
+            if (QuickCalculate && IniLanes.Count >= 4)
+                IgnorePerpModules = true;
         }
         public List<LineString> Walls;
         public List<Polygon> Obstacles;
@@ -156,7 +158,9 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static bool LoopThroughEnd = false;//尽端环通
         public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-尽端环通车道条件判断长度
         public bool AllowSplitLaneExceedMaxLength = true;
-        public bool QuickCalculate = false;//快速计算
+        public bool QuickCalculate = true;//快速计算
+        //如果是快速计算且四边有车道，则跳过PerpModules
+        public bool IgnorePerpModules = false;
         public enum LayoutDirection : int
         {
             LENGTH = 0,
@@ -176,7 +180,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 GenerateLanes();
             else
                 GenerateLanesSuperFast();
-            GeneratePerpModules();
+            if(!IgnorePerpModules)
+                GeneratePerpModules();
             GenerateCarsInModules();
             ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
