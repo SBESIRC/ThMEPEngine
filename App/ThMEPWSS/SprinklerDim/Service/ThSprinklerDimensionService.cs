@@ -82,7 +82,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
 
 
-            // 打印标注
+            // 打印标注test
             for (int i = 0; i < transNetList.Count; i++)
             {
                 List<Line> dimensions = Print(transNetList[i], out var ptsx, out var ptsy);

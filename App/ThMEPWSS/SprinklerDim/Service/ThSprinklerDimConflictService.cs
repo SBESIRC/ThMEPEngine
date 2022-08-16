@@ -101,14 +101,86 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-
-
-        public static bool IsConflicted(Polyline dim, List<Entity> objects)
+        public static double GetOverlap(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, double w1=1.0, double w2=1.0, double w3 = 1.0, double w4 = 100.0)
         {
-
-
-            return false;
+            double area1 = w1 * GetOverlapArea(dimensions, texts);
+            double area2 = w2 * GetOverlapArea(dimensions, mixColumnWall);
+            double area3 = w3 * GetOverlapArea(dimensions, dimedArea);
+            double len = w4 * GetOverlapLength(dimensions, pipes);
+            return area1 + area2 + area3 + len;
         }
+
+
+        private static double GetOverlapArea(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts)
+        {
+            if (texts.IsNull())
+                return 0.0;
+
+            List<Polyline> overlapTexts = new List<Polyline>();
+            foreach (Polyline dimText in dimensions)
+            {
+                overlapTexts.AddRange(ThGeometryOperationService.Intersection(ThDataTransformService.GetPolylines(texts.SelectCrossingPolygon(dimText)), dimText));
+            }
+
+            double area = 0;
+            foreach(Polyline overlap in overlapTexts)
+            {
+                if (overlap.Closed)
+                {
+                    area += overlap.Area;
+                }
+                    
+            }
+
+            return area;
+        }
+
+        private static double GetOverlapArea(List<Polyline> dimensions, DBObjectCollection dimedArea)
+        {
+            if (dimedArea.Count == 0)
+                return 0.0;
+
+            List<Polyline> overlapDims = new List<Polyline>();
+            foreach (Polyline dimText in dimensions)
+            {
+                overlapDims.AddRange(ThDataTransformService.GetPolylines(dimText.Intersection(dimedArea)));
+            }
+
+            double area = 0;
+            foreach (Polyline overlap in overlapDims)
+            {
+                if (overlap.Closed)
+                {
+                    area += overlap.Area;
+                }
+
+            }
+
+            return area;
+        }
+
+        private static double GetOverlapLength(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex pipes)
+        {
+            if (pipes.IsNull())
+                return 0.0;
+
+            List<Polyline> overlapPipes = new List<Polyline>();
+            foreach (Polyline dimText in dimensions)
+            {
+                overlapPipes.AddRange(ThGeometryOperationService.Intersection(ThDataTransformService.GetPolylines(pipes.SelectCrossingPolygon(dimText)), dimText));
+            }
+
+            double length = 0;
+            foreach(Polyline overlap in overlapPipes)
+            {
+                length += overlap.Length;
+            }
+
+            return length;
+        }
+
+
+
 
 
     }

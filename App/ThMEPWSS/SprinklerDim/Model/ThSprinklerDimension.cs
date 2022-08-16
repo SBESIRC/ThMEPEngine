@@ -20,6 +20,11 @@ namespace ThMEPWSS.SprinklerDim.Model
             Distance = distance;
         }
 
+        public ThSprinklerDimension(List<Point3d> dimPts, double distance)
+        {
+            DimPts = dimPts;
+            Distance = distance;
+        }
 
     }
 }

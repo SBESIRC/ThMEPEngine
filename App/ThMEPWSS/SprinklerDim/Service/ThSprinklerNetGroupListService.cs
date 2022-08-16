@@ -21,7 +21,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         public static List<ThSprinklerNetGroup> ReGroupByRoom(List<ThSprinklerNetGroup> netList, List<Polyline> roomsIn, out List<MPolygon> roomsOut, string printTag)
         {
             List<MPolygon> roomList = PreprocessRooms(roomsIn);
-            
+
             List<ThSprinklerNetGroup> newNetList = new List<ThSprinklerNetGroup>();
             roomsOut = new List<MPolygon>();
             if (roomList.Count > 0)
@@ -56,63 +56,64 @@ namespace ThMEPWSS.SprinklerDim.Service
                         }
 
                         bool tag = false;
-                        ThSprinklerNetGroup newNet = new ThSprinklerNetGroup();
+                        ThSprinklerNetGroup newNet = new ThSprinklerNetGroup(net.Angle);
+
+                        // 获取fence line
+                        List<Line> selectFenceLines = new List<Line>();
+                        List<DBObjectCollection> tdbSelectList = new List<DBObjectCollection>();
+                        tdbSelectList.Add(linesSI.SelectFence(room.Shell()));
+                        foreach (Polyline hole in room.Holes())
+                        {
+                            tdbSelectList.Add(linesSI.SelectFence(hole));
+                        }
+
+                        foreach (DBObjectCollection tdbSelect in tdbSelectList)
+                        {
+                            foreach (DBObject dbo in tdbSelect)
+                            {
+                                selectFenceLines.Add((Line)dbo);
+                            }
+                        }
+
+
+                        // 加入满足首尾两点被框进房间的fence line到window line
+                        if (selectFenceLines.Count > 0)
+                        {
+                            foreach (Line l in selectFenceLines)
+                            {
+                                if (IsContained(room, l.StartPoint) && IsContained(room, l.EndPoint))
+                                {
+                                    selectWindowLines.Add(l);
+                                }
+                            }
+
+                        }
 
                         if (selectWindowLines.Count > 0)
                         {
                             tag = true;
-
-                            // 获取fence line
-                            List<Line> selectFenceLines = new List<Line>();
-                            List<DBObjectCollection> tdbSelectList = new List<DBObjectCollection>();
-                            tdbSelectList.Add(linesSI.SelectFence(room.Shell()));
-                            foreach(Polyline hole in room.Holes())
-                            {
-                                tdbSelectList.Add(linesSI.SelectFence(hole));
-                            }
-
-                            foreach(DBObjectCollection tdbSelect in tdbSelectList)
-                            {
-                                foreach (DBObject dbo in tdbSelect)
-                                {
-                                    selectFenceLines.Add((Line)dbo);
-                                }
-                            }
-                            
-
-                            // 加入满足首尾两点被框进房间的fence line到window line
-                            if (selectFenceLines.Count > 0)
-                            {
-                                foreach (Line l in selectFenceLines)
-                                {
-                                    if (IsContained(room, l.StartPoint) && IsContained(room, l.EndPoint))
-                                    {
-                                        selectWindowLines.Add(l);
-                                    }
-                                }
-
-                            }
                             newNet = ThSprinklerNetGraphService.CreateNetwork(net.Angle, selectWindowLines);
+                        }
 
-                            // 断穿房间框线的线也可能产生散点
-                            foreach(Line l in selectFenceLines)
+                        // 断穿房间框线的线也可能产生散点
+                        foreach (Line l in selectFenceLines)
+                        {
+                            if (IsContained(room, l.StartPoint))
                             {
-                                if (IsContained(room, l.StartPoint))
-                                {
-                                    newNet.AddPt(l.StartPoint);
+                                tag = true;
+                                newNet.AddPt(l.StartPoint);
 
-                                    // test
-                                    DrawUtils.ShowGeometry(l.StartPoint, string.Format("SSS-{0}-0SinglePointProd", printTag), 11, 50, 1000);
-                                }
-                                    
-                                if(IsContained(room, l.EndPoint))
-                                {
-                                    newNet.AddPt(l.EndPoint);
+                                // test
+                                //DrawUtils.ShowGeometry(l.StartPoint, string.Format("SSS-{0}-0SinglePointProd", printTag), 11, 50, 1000);
+                            }
 
-                                    // test
-                                    DrawUtils.ShowGeometry(l.EndPoint, string.Format("SSS-{0}-0SinglePointProd", printTag), 11, 50, 1000);
-                                }
-                                    
+                            if (IsContained(room, l.EndPoint))
+                            {
+                                tag = true;
+                                newNet.AddPt(l.EndPoint);
+
+                                // test
+                                //DrawUtils.ShowGeometry(l.EndPoint, string.Format("SSS-{0}-0SinglePointProd", printTag), 11, 50, 1000);
                             }
 
                         }
@@ -120,7 +121,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                         foreach (Point3d p in singlePoints)
                         {
                             // test
-                            DrawUtils.ShowGeometry(p, string.Format("SSS-{0}-0SinglePoint", printTag), 4, 50, 800);
+                            //DrawUtils.ShowGeometry(p, string.Format("SSS-{0}-0SinglePoint", printTag), 4, 50, 800);
 
                             if (IsContained(room, p))
                             {
@@ -525,7 +526,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="printTag"></param>
         public static void CutOffLinesCrossWall(List<ThSprinklerNetGroup> transNetList, List<Polyline> walls, out ThCADCoreNTSSpatialIndex wallsSI, string printTag)
         {
-            wallsSI = ThDataTransformService.GenerateSpatialIndex(walls);
+            wallsSI = ThDataTransformService.GenerateSpatialIndex(ThDataTransformService.Change(walls));
 
             for (int idx = 0; idx < transNetList.Count; idx++)
             {

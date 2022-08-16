@@ -106,7 +106,7 @@ namespace ThMEPWSS.SprinklerDim.Service
     //    }
     //}
 
-    internal static class ThInsertDimToDBService
+    public static class ThInsertDimToDBService
     {
         public static List<RotatedDimension> ToCADDim(List<ThSprinklerDimension> dims)
         {

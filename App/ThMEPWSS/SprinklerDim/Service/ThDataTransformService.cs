@@ -16,20 +16,38 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Polyline> reference)
         {
-            List<Line> referenceLines = Change(reference);
-            return GenerateSpatialIndex(referenceLines);
+            DBObjectCollection dboc = ChangeToDboc(reference);
+            ThCADCoreNTSSpatialIndex si = new ThCADCoreNTSSpatialIndex(dboc);
+            return si;
         }
 
-        public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Line> reference)
+        public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Line> references)
         {
             // 把参考物拆解为线,做成空间索引
-            DBObjectCollection referenceLines = new DBObjectCollection();
-            foreach (Line r in reference)
+            DBObjectCollection dboc = ChangeToDboc(references);
+            ThCADCoreNTSSpatialIndex si = new ThCADCoreNTSSpatialIndex(dboc);
+            return si;
+        }
+
+        public static List<Polyline> GetBothPolylinesAndLines(DBObjectCollection dboc)
+        {
+            List<Polyline> polylines = new List<Polyline>();
+
+            polylines.AddRange(GetPolylines(dboc));
+            polylines.AddRange(Change(GetLines(dboc)));
+            
+            return polylines;
+        }
+
+        public static List<Line> GetLines(DBObjectCollection dboc)
+        {
+            List<Line> lines = new List<Line>();
+            foreach (Line l in dboc.OfType<Line>())
             {
-                referenceLines.Add(r);
+                lines.Add(l);
             }
-            ThCADCoreNTSSpatialIndex linesSI = new ThCADCoreNTSSpatialIndex(referenceLines);
-            return linesSI;
+
+            return lines;
         }
 
         public static List<Polyline> GetPolylines(DBObjectCollection dboc)
@@ -40,15 +58,18 @@ namespace ThMEPWSS.SprinklerDim.Service
                 polylines.Add(p);
             }
 
-            foreach (Line l in dboc.OfType<Line>())
+            return polylines;
+        }
+
+        public static List<MPolygon> GetPolygons(DBObjectCollection dboc)
+        {
+            List<MPolygon> mpolygons = new List<MPolygon>();
+            foreach (MPolygon p in dboc.OfType<MPolygon>())
             {
-                Polyline p = new Polyline();
-                p.AddVertexAt(0, l.StartPoint.ToPoint2d(), 0, 0, 0);
-                p.AddVertexAt(1, l.EndPoint.ToPoint2d(), 0, 0, 0);
-                polylines.Add(p);
+                mpolygons.Add(p);
             }
 
-            return polylines;
+            return mpolygons;
         }
 
         public static List<Point3d> GetPoints(List<Point3d> pts, List<int> idxs)
@@ -120,6 +141,44 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             return lines;
         }
+
+        public static DBObjectCollection ChangeToDboc(List<Polyline> polylines)
+        {
+            DBObjectCollection dboc = new DBObjectCollection();
+
+            foreach(Polyline polyline in polylines)
+            {
+                dboc.Add(polyline);
+            }
+
+            return dboc;
+        }
+
+        public static DBObjectCollection ChangeToDboc(List<Line> lines)
+        {
+            DBObjectCollection dboc = new DBObjectCollection();
+
+            foreach (Line line in lines)
+            {
+                dboc.Add(line);
+            }
+
+            return dboc;
+        }
+
+        public static List<List<int>> Change(List<List<List<int>>> arrLists)
+        {
+            List<List<int>> list = new List<List<int>>();
+
+            foreach (List<List<int>> l in arrLists)
+            {
+                list.AddRange(l);
+            }
+
+            return list;
+        }
+
+
 
     }
 }

@@ -16,6 +16,10 @@ namespace ThMEPWSS.SprinklerDim.Service
     {
         public static bool CanMerge(List<Point3d> pts, List<int> dim1, List<int> dim2, bool isXAxis, double step, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls, List<List<int>> anothercollinearation, double tolerance = 400.0)
         {
+            Vector3d xAxis = new Vector3d();
+            if (isXAxis) xAxis = new Vector3d(1, 0, 0);
+            else xAxis = new Vector3d(0, 1, 0);
+
             //不考虑点与点之间的合并
             if (dim1.Count == 1 && dim2.Count == 1)
                 return false;
@@ -25,7 +29,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             double det = Math.Abs(ThCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis));
             if (dim1.Count == 1 && dim2.Count != 1)
             {
-                Line line = new Line(pts[dim2[0]], pts[dim2[dim2.Count - 1]]);
+                Line line = new Line(pts[dim2[0]], pts[dim2[0]] + xAxis * 100);
                 Point3d droppt = line.GetClosestPointTo(pts[dim1[0]], true);
                 List<int> t = anothercollinearation.Where(p => p.Contains(dim1[0])).ToList()[0];
                 if (t.Count == 1) tolerance = 1.0 * step;                                        //仅仅当xy方向都为单点的时候放大tolerance
@@ -38,7 +42,19 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
             }
             else if (dim2.Count == 1 && dim1.Count != 1)
-                return CanMerge(pts, dim2, dim1, isXAxis, step, matrix, walls, anothercollinearation);
+            {
+                Line line = new Line(pts[dim1[0]], pts[dim1[0]] + xAxis * 100);
+                Point3d droppt = line.GetClosestPointTo(pts[dim2[0]], true);
+                List<int> t = anothercollinearation.Where(p => p.Contains(dim2[0])).ToList()[0];
+                if (t.Count == 1) tolerance = 1.0 * step;                                        //仅仅当xy方向都为单点的时候放大tolerance
+                foreach (int j in t)
+                {
+                    if (droppt.DistanceTo(pts[j]) < det)
+                    {
+                        det = droppt.DistanceTo(pts[j]);
+                    }
+                }
+            }
 
             if (det < tolerance)
             {
@@ -46,17 +62,17 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (int i in dim1)
                 {
                     if (dim2.Count == 1) break;
-                    Line line = new Line(pts[dim2[0]], pts[dim2[dim2.Count - 1]]);
+                    Line line = new Line(pts[dim2[0]], pts[dim2[0]] + xAxis * 100);
                     Point3d droppt = line.GetClosestPointTo(pts[i], true);
-                    if (IsConflicted(droppt, pts[i], matrix, walls) || IsConflicted(droppt, pts[dim2[0]], matrix, walls))
+                    if (IsConflicted(droppt, pts[i], matrix, walls) || IsConflicted(droppt, pts[dim2[0]], matrix, walls) || IsConflicted(droppt, pts[dim2[dim2.Count - 1]], matrix, walls))
                         return false;
                 }
                 foreach (int i in dim2)
                 {
                     if (dim1.Count == 1) break;
-                    Line line = new Line(pts[dim1[0]], pts[dim1[dim1.Count - 1]]);
+                    Line line = new Line(pts[dim1[0]], pts[dim1[0]] + xAxis * 100);
                     Point3d droppt = line.GetClosestPointTo(pts[i], true);
-                    if (IsConflicted(droppt, pts[i], matrix, walls) || IsConflicted(droppt, pts[dim1[0]], matrix, walls))
+                    if (IsConflicted(droppt, pts[i], matrix, walls) || IsConflicted(droppt, pts[dim1[0]], matrix, walls) || IsConflicted(droppt, pts[dim1[dim1.Count - 1]], matrix, walls))
                         return false;
                 }
                 double distance1 = ThCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
@@ -69,6 +85,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
 
             return false;
+
         }
 
         //// 优先选转换后坐标系下值小的标注进行边缘合并，若无合并标注且点数小于最长的1/3，则选择最长标注
@@ -343,6 +360,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                             }
                         }
                         MergedDims = GetMerged(ref pts, MergedDims, group, step, isXAxis, ref isMerged, ref FicPts, matrix, walls, anothercollinearation);
+                        break;
                     }
                 }
             }

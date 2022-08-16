@@ -34,6 +34,11 @@ namespace ThMEPWSS.SprinklerDim.Model
 
         }
 
+        public ThSprinklerNetGroup(double angle)
+        {
+             Angle = angle;
+        }
+
         public ThSprinklerNetGroup(List<Point3d> pts, List<ThSprinklerGraph> ptsGraph, Matrix3d transformer)
         {
             this.Pts = pts;

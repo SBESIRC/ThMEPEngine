@@ -24,6 +24,7 @@ using ThMEPWSS.Common;
 using ThMEPWSS.SprinklerDim.Data;
 using ThMEPWSS.SprinklerDim.Engine;
 using ThMEPWSS.SprinklerDim.Service;
+using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Cmd
 {
@@ -118,7 +119,9 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 
 
                 // 生成靠参照物的标注点
-                ThSprinklerDimExtensionService.GenerateRealDimension(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(dataProcess.AxisCurves), printTag, step);
+                List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateReferenceDimensionPoint(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(dataProcess.AxisCurves), dataProcess.TchPipeText, ThDataTransformService.Change(dataProcess.TchPipe), printTag, step);
+                ThInsertDimToDBService.InsertDim(ThInsertDimToDBService.ToCADDim(dims));
+
 
             }
         }
