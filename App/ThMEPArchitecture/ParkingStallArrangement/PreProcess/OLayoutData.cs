@@ -84,7 +84,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             succeed = true;
             if(CAD_WallLines.Count != 0 && CAD_BorderLines.Count != 0)
             {
-                ThMPArrangementCmd.DisplayLogger.Information("同时提取到两种地库边界，请保留一种！");
+                //ThMPArrangementCmd.DisplayLogger.Information("同时提取到两种地库边界，请保留一种！");
                 Active.Editor.WriteMessage("同时提取到两种地库边界，请保留一种！");
                 succeed = false;
                 return;
@@ -99,7 +99,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 var areas = BorderLines.GetPolygons().OrderBy(plgn => plgn.Area);
                 if(areas.Count() == 0)
                 {
-                    ThMPArrangementCmd.DisplayLogger.Information("可动边界不构成闭合区域！");
+                    //ThMPArrangementCmd.DisplayLogger.Information("可动边界不构成闭合区域！");
                     Active.Editor.WriteMessage("可动边界不构成闭合区域！");
                     succeed = false;
                     return;
@@ -108,7 +108,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             else
             {
-                ThMPArrangementCmd.DisplayLogger.Information("地库边界不存在或者不闭合！");
+                //ThMPArrangementCmd.DisplayLogger.Information("地库边界不存在或者不闭合！");
                 Active.Editor.WriteMessage("地库边界不存在或者不闭合！");
                 succeed = false;
                 return;
@@ -315,13 +315,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             bool isVaild = true;
             // 标记圆半径5000
             //源数据
-            var init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment()).ToList();
+            var init_segs = CAD_SegLines.Select(l =>ToSegLine(l)).ToList();
             //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）
             var idToMerge = init_segs.GroupSegLines(1);
             var merged = init_segs.MergeSegs(idToMerge);
             //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
-            SegLines = merged.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l =>l!=null).
-                Select(l => new SegLine(l, false, -1)).ToList();
+            SegLines = merged.Select(l => l.GetBaseLine(WallLine)).Where(l =>l!=null).ToList();
+            SegLines.ForEach(l => { l.Splitter = l.Splitter.OExtend(1);l.IsInitLine = true; });
             //3,处理坡道
             UpdateRamps();
             //4.获取最大全连接车道，若有未连接的，移除+标记+报错
@@ -346,55 +346,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //7.求迭代范围
             SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
             //ShowLowerUpperBound();
-
             //SegLines = SegLines.Select(l => l.GetMovedLine()).ToList();
             //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
             //showVaildLanes();
             return true;
         }
-        //public bool _ProcessSegLines()
-        //{
-        //    bool isVaild = true;
-        //    // 标记圆半径5000
-        //    //源数据
-        //    var init_segs = CAD_SegLines.Select(l => l.ToNTSLineSegment()).ToList();
-        //    //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）
-        //    var idToMerge = init_segs.GroupSegLines(1);
-        //    var merged = init_segs.MergeSegs(idToMerge);
-        //    //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
-        //    SegLines = merged.Select(l => l.GetBaseLine(WallLine).OExtend(1)).Where(l => l != null).
-        //        Select(l => new SegLine(l, false, -1)).ToList();
-        //    //3,处理坡道
-        //    UpdateRamps();
-        //    //4.判断起始、终结线是否明确 + 更新连接关系
-        //    isVaild = FilteringSegLines(SegLines);
-        //    //5.获取最大全连接车道，若有未连接的，移除+标记+报错
-        //    //5.1获取有效车道
-        //    //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
-        //    var groups = SegLines.GroupSegLines(2).OrderBy(g => g.Count).ToList();
-        //    for (int i = 0; i < groups.Count - 1; i++)
-        //    {
-        //        if (isVaild)
-        //        {
-        //            isVaild = false;
-        //            //提示该分割线在满足车道宽内不与其他分割线连接
-        //            //警告存在无效连接，将抛弃部分分割线
-        //            Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
-        //            Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
-        //        }
-        //        SegLines.Slice(groups[i]).ForEach(l => l.Splitter?.MidPoint.MarkPoint());
-        //    }
-        //    SegLines = SegLines.Slice(groups.Last());
-
-        //    SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
-        //    ShowLowerUpperBound();
-
-        //    //SegLines = SegLines.Select(l => l.GetMovedLine()).ToList();
-        //    SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
-        //    showVaildLanes();
-        //    return true;
-        //}
-        //过滤起始、终结点不明确的线,获取线的连接关系
+        public SegLine ToSegLine(Line line,double extendTol = 1)
+        {
+            var segLine = new SegLine(line.ToNTSLineSegment().OExtend(extendTol),line.Layer.Contains("固定"), -1);
+            return segLine;
+        }
         public bool FilteringSegLines(List<SegLine> segLines)
         {
             bool Isvaild = true;

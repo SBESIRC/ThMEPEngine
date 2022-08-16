@@ -495,7 +495,17 @@ namespace ThParkingStall.Core.OTools
             return false;
         }
         #endregion
-        #region 分区线合并
+        #region 
+        public static List<SegLine> MergeSegs(this List<SegLine> segLines, List<List<int>> idToMerge)
+        {
+            var newsegs = new List<SegLine>();
+            foreach (var group in idToMerge)
+            {
+                var merged = segLines.Slice(group).Merge();
+                if (merged != null) newsegs.Add(merged);
+            }
+            return newsegs;
+        }
         public static List<LineSegment> MergeSegs(this List<LineSegment> segLines,List<List<int>> idToMerge)
         {
             var newsegs = new List<LineSegment>();
@@ -517,6 +527,13 @@ namespace ThParkingStall.Core.OTools
             }
             var ordered = coors.PositiveOrder();
             return new LineSegment(coors.First(),coors.Last());
+        }
+        public static SegLine Merge(this List<SegLine> segLines)
+        {
+            var newSplitter = segLines.Select(l =>l.Splitter).ToList().Merge();
+            var isFixed = segLines.Any(l => l.IsFixed);
+            var roadWidth = segLines.Max(l =>l.RoadWidth);
+            return new SegLine(newSplitter, isFixed, roadWidth);
         }
         #endregion
         #region 获取子区域内的车道，以及墙线

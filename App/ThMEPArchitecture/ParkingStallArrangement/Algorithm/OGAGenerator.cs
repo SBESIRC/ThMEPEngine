@@ -159,7 +159,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 foreach(var l in OInterParameter.BorderLines)
                 {
-
                     var std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
                     double relativeValue;
                     if(new Vector2D(center.Coordinate,l.MidPoint).Dot(l.NormalVector()) > 0)
@@ -307,7 +306,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                     selected = Selection(pop, out int CurNums);
                     //Logger?.Information($"选择总用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
-                    if (maxNums >= CurNums)
+                    if (maxNums == CurNums)
                     {
                         maxCount++;
                     }
