@@ -82,9 +82,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
                         double Ngi = ThWCompute.InnerProduct(sysProcess.FloorCleanToolList[i][sysIn.AreaIndex].GetCleaningTools(), sysIn.WaterEquivalent) / HouseholdNum;
                         double U0i = Ngi.ComputeU0i(sysIn);
 
-                        var DN = Tool.GetDN(U0i, Ngi, HouseholdNum);
+                        //var DN = Tool.GetDN(U0i, Ngi, HouseholdNum);
 
-                        BranchPipe.Add(new ThWSSDBranchPipe(i, DN, sysIn, sysProcess, prValveStyle));
+                        BranchPipe.Add(new ThWSSDBranchPipe(i, "", sysIn, sysProcess, prValveStyle));
                     }
                     //支管绘制
                     for (int i = 0; i < BranchPipe.Count; i++)

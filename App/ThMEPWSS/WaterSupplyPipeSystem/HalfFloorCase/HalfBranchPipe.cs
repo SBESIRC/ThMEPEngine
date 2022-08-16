@@ -87,12 +87,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
             using var acadDatabase = AcadDatabase.Active();
             if (!(BranchPipes is null))
             {
-                if (DN != "")
-                {
-                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
-                    TextSite, new Scale3d(1, 1, 1), Math.PI / 2);
-                    objID.SetDynBlockValue("可见性", DN);
-                }
+                //if (DN != "")
+                //{
+                //    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
+                //    TextSite, new Scale3d(1, 1, 1), Math.PI / 2);
+                //    objID.SetDynBlockValue("可见性", DN);
+                //}
 
                 var BPipeLines = BranchPipes;
                 for (int j = 0; j < BPipeLines.Count; j++)
@@ -157,7 +157,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                 {
                     textX += 450;
                 }
-                var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
+                var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DN25*" + WaterPipeInterrupted.Count.ToString() + " (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
 
                 var text2 = ThText.NoteText(pt2.OffsetXY(textX, -400), layMethod);
@@ -180,7 +180,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                     pt2 = WaterPipeInterrupted[0].OffsetXY(200, 60);
                 }
                 var pt4 = new Point3d(pt2.X, IndexStartY + FloorHeight * (FloorNumber - 1) + 500, 0);// pt2.OffsetY(400);
-                var pt3 = pt4.OffsetX(4100);
+                var pt3 = pt4.OffsetX(3500);
 
                 InsertLine(acadDatabase, pt1, pt2);
                 InsertLine(acadDatabase, pt2, pt4);
@@ -191,7 +191,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                 {
                     textX += 450;
                 }
-                var text1 = ThText.NoteText(pt4.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
+                var text1 = ThText.NoteText(pt4.OffsetXY(textX, 50), "DN25*" + WaterPipeInterrupted.Count.ToString() + " (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
                 var text2 = ThText.NoteText(pt4.OffsetXY(textX, -400), layMethod);
                 acadDatabase.CurrentSpace.Add(text2);

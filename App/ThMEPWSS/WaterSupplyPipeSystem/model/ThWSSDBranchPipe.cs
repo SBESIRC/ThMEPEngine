@@ -404,12 +404,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             using var acadDatabase = AcadDatabase.Active();
             if (!(BranchPipes is null))
             {
-                if (GetDN() != "")
-                {
-                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
-                    GetTextSite(), new Scale3d(1, 1, 1), Math.PI / 2);
-                    objID.SetDynBlockValue("可见性", GetDN());
-                }
+                //if (GetDN() != "")
+                //{
+                //    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
+                //    GetTextSite(), new Scale3d(1, 1, 1), Math.PI / 2);
+                //    objID.SetDynBlockValue("可见性", GetDN());
+                //}
 
                 var BPipeLines = BranchPipes;
                 for (int j = 0; j < BPipeLines.Count; j++)
@@ -457,7 +457,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 }
                 var pt1 = new Point3d(GetWaterPipeInterrupted()[0].X - 150, GetWaterPipeInterrupted()[GetWaterPipeInterrupted().Count - 1].Y, 0);
                 var pt2 = new Point3d(pt1.X, IndexStartY + FloorHeight * FloorNumber + 500, 0);
-                var pt3 = new Point3d(pt2.X + 4100, pt2.Y, 0);
+                var pt3 = new Point3d(pt2.X + 3500, pt2.Y, 0);
                 if (HasFlushFaucet)
                 {
                     pt3.OffsetX(450);
@@ -470,7 +470,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 {
                     textX += 450;
                 }
-                var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
+                var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DN25*"+ GetHouseholds().ToString() + " (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
 
                 var text2 = ThText.NoteText(pt2.OffsetXY(textX, -400), "穿梁敷设，接至户内给水管");
@@ -493,7 +493,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                     pt2 = GetWaterPipeInterrupted()[0].OffsetXY(200, 60);
                 }
                 var pt4 = new Point3d(pt2.X, IndexStartY + FloorHeight * (FloorNumber - 1) + 500, 0);// pt2.OffsetY(400);
-                var pt3 = pt4.OffsetX(4100);
+                var pt3 = pt4.OffsetX(3500);
 
                 InsertLine(acadDatabase, pt1, pt2);
                 InsertLine(acadDatabase, pt2, pt4);
@@ -504,7 +504,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 {
                     textX += 450;
                 }
-                var text1 = ThText.NoteText(pt4.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
+                var text1 = ThText.NoteText(pt4.OffsetXY(textX, 50), "DN25*" + GetHouseholds().ToString() + " (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
                 var text2 = ThText.NoteText(pt4.OffsetXY(textX, -400), "埋地敷设，接至户内给水管");
                 acadDatabase.CurrentSpace.Add(text2);
