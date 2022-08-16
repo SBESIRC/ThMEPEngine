@@ -194,26 +194,32 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CalculateMainWay()
         {
-            MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
-            mainPipeGet.Pipeline2();
 
             PipeOutput main_output = null;
             if (main_has_output)
             {
+                MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
+                mainPipeGet.Pipeline2();
                 main_output = new PipeOutput(main_pipe_input.pipe_id, shortest_way[main_index]);
                 // 合并主导管线轮廓
                 DBObjectCollection shape = new DBObjectCollection();
-                foreach (var rest_shape in mainPipeGet.Skeleton)
+                foreach (var rest_shape in mainPipeGet.BufferedPipeList)
                     shape.Add(rest_shape);
                 shape.Add(main_output.shape);
                 main_output.shape = shape.UnionPolygons().Cast<Polyline>().First();
             }
             else
             {
+                MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
+                mainPipeGet.Pipeline3();
                 main_output = new PipeOutput();
                 main_output.pipe_id = main_pipe_input.pipe_id;
                 main_output.skeleton = new List<Polyline>();
-                main_output.shape = mainPipeGet.Skeleton.First();
+
+                DBObjectCollection shape = new DBObjectCollection();
+                foreach (var rest_shape in mainPipeGet.BufferedPipeList)
+                    shape.Add(rest_shape);
+                main_output.shape = shape.UnionPolygons().Cast<Polyline>().First();
             }
             // 添加至输出列表
             if (main_index == outputs.Count)

@@ -79,7 +79,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public double TotalLength = 115000;
 
         static public double SuggestDistanceWall = 100;
-        static public double SuggestDistanceRoom = 300;
+        static public double SuggestDistanceRoom = 250;
         static public double PipeSpaceing = 50;              //集水器管间距
         static public double KeyRoomShortSide = 2000;        //什么样的房间被认定为单独只出一根管道
 

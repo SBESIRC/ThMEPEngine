@@ -46,6 +46,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
         public List<SinglePipe> SinglePipeList = new List<SinglePipe>();
 
+
+        //类内临时变量
+        public int LeftRightIndex = 0; 
+
         public DistributionService()
         {
 
@@ -1156,7 +1160,37 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
-        
+        public void GetTopoTreeNodeLeftRightIndex(List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree, TopoTreeNode topoTree)
+        {
+            int left = -1;
+            int right = -1;
+            for (int i = 0; i < topoTree.ChildIdList.Count; i++)
+            {
+                int childRegionId = topoTree.ChildIdList[i];
+                TopoTreeNode childTree = treeList[regionToTree[childRegionId]];
+                GetTopoTreeNodeLeftRightIndex(treeList, regionToTree, childTree);
+                left = Math.Min(childTree.LeftTopoIndex, left);
+                right = Math.Min(childTree.RightTopoIndex, left);
+            }
+
+            if (topoTree.ChildIdList.Count == 0) 
+            {
+                left = LeftRightIndex;
+                right = LeftRightIndex;
+                LeftRightIndex++;
+            }
+
+            topoTree.LeftTopoIndex = left;
+            topoTree.RightTopoIndex = right;
+        }
+
+        public void PipeListReSort(List<TmpPipe> tmpPipes, List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree) 
+        {
+            tmpPipes.Sort((a,b) =>
+            {
+                return TmpPipe.GetLeftRight(a,b,treeList,regionToTree);
+            });
+        }
     }
 
     class SubScheme
@@ -1315,6 +1349,145 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
             return passingRegionIdList;
         }
+
+        //比较左右拓扑顺序 < 0  左右， > 右左
+        static public int GetLeftRight(TmpPipe a, TmpPipe b, List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree) 
+        {
+            TopoTreeNode aLeftNode = treeList[regionToTree[a.LeftRegionIdList.Last()]];
+            int all = aLeftNode.LeftTopoIndex;
+            int alr = aLeftNode.RightTopoIndex;
+            TopoTreeNode aRightNode = treeList[regionToTree[a.RightRegionIdList.Last()]];
+            int arl = aRightNode.LeftTopoIndex;
+            int arr = aRightNode.RightTopoIndex;
+
+            TopoTreeNode bLeftNode = treeList[regionToTree[b.LeftRegionIdList.Last()]];
+            int bll = bLeftNode.LeftTopoIndex;
+            int blr = bLeftNode.RightTopoIndex;
+            TopoTreeNode bRightNode = treeList[regionToTree[b.RightRegionIdList.Last()]];
+            int brl = bRightNode.LeftTopoIndex;
+            int brr =bRightNode.RightTopoIndex;
+
+            if (aLeftNode.ChildIdList.Count == 0 && bLeftNode.ChildIdList.Count == 0)
+            {
+                if (all < bll) return -1;
+                else return 1;
+            } 
+            else if(bLeftNode.ChildIdList.Count == 0 && aLeftNode .ChildIdList.Count != 0)
+            {
+                if (bll < all || arl > brr) return 1;
+                else if (brr > arr || alr < bll) return -1;
+
+                else if (b.RegionIdList.Contains(aLeftNode.NodeId)) 
+                {
+                    double minDis = 1000000;
+                    bool bLeft = false;
+                    int upDoorId = aLeftNode.UpDoorId;
+                    for (int i = 0; i < aLeftNode.ChildIdList.Count; i++) 
+                    {
+                        int downRegionId = aLeftNode.ChildIdList[i];
+                        if (b.RegionIdList.Contains(downRegionId)) 
+                        {
+                            int downDoorId = treeList[regionToTree[downRegionId]].UpDoorId;
+                            double cwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CWDistance;
+                            double ccwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CCWDistance;
+                            if (Math.Min(ccwDis, cwDis) < minDis) 
+                            {
+                                minDis = Math.Min(ccwDis, cwDis);
+                                bLeft = cwDis < ccwDis;
+                            }
+                        }
+                    }
+
+                    if (bLeft) return 1;
+                    else return -1;
+                } 
+            }
+            else if (aLeftNode.ChildIdList.Count == 0 && bLeftNode.ChildIdList.Count != 0)
+            {
+                if (all < bll || brl > arr) return -1;
+                else if (arr > brr || blr < all) return 1;
+
+                else if (a.RegionIdList.Contains(bLeftNode.NodeId))
+                {
+                    double minDis = 1000000;
+                    bool aLeft = false;
+                    int upDoorId = bLeftNode.UpDoorId;
+                    for (int i = 0; i < bLeftNode.ChildIdList.Count; i++)
+                    {
+                        int downRegionId = bLeftNode.ChildIdList[i];
+                        if (a.RegionIdList.Contains(downRegionId))
+                        {
+                            int downDoorId = treeList[regionToTree[downRegionId]].UpDoorId;
+                            double cwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CWDistance;
+                            double ccwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CCWDistance;
+                            if (Math.Min(ccwDis, cwDis) < minDis)
+                            {
+                                minDis = Math.Min(ccwDis, cwDis);
+                                aLeft = cwDis < ccwDis;
+                            }
+                        }
+                    }
+
+                    if (aLeft) return -1;
+                    else return 1;
+                }
+            }
+            else if (aLeftNode.ChildIdList.Count != 0 && bLeftNode.ChildIdList.Count != 0)
+            {
+                if (alr < bll || brl > arr) return -1;
+                else if (blr < all || arl > brr) return 1;
+
+                else if (a.RegionIdList.Contains(bLeftNode.NodeId))
+                {
+                    double minDis = 1000000;
+                    bool aLeft = false;
+                    int upDoorId = bLeftNode.UpDoorId;
+                    for (int i = 0; i < bLeftNode.ChildIdList.Count; i++)
+                    {
+                        int downRegionId = bLeftNode.ChildIdList[i];
+                        if (a.RegionIdList.Contains(downRegionId))
+                        {
+                            int downDoorId = treeList[regionToTree[downRegionId]].UpDoorId;
+                            double cwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CWDistance;
+                            double ccwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CCWDistance;
+                            if (Math.Min(ccwDis, cwDis) < minDis)
+                            {
+                                minDis = Math.Min(ccwDis, cwDis);
+                                aLeft = cwDis < ccwDis;
+                            }
+                        }
+                    }
+
+                    if (aLeft) return -1;
+                    else return 1;
+                }
+                else if (b.RegionIdList.Contains(aLeftNode.NodeId))
+                {
+                    double minDis = 1000000;
+                    bool bLeft = false;
+                    int upDoorId = aLeftNode.UpDoorId;
+                    for (int i = 0; i < aLeftNode.ChildIdList.Count; i++)
+                    {
+                        int downRegionId = aLeftNode.ChildIdList[i];
+                        if (b.RegionIdList.Contains(downRegionId))
+                        {
+                            int downDoorId = treeList[regionToTree[downRegionId]].UpDoorId;
+                            double cwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CWDistance;
+                            double ccwDis = ProcessedData.DoorToDoorDistanceMap[downDoorId, upDoorId].CCWDistance;
+                            if (Math.Min(ccwDis, cwDis) < minDis)
+                            {
+                                minDis = Math.Min(ccwDis, cwDis);
+                                bLeft = cwDis < ccwDis;
+                            }
+                        }
+                    }
+                    if (bLeft) return 1;
+                    else return -1;
+                }
+            }
+
+            return 0;
+        }
     }
 
     class TopoTreeNode
@@ -1324,6 +1497,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public int FatherId = -1;
         public int UpDoorId = -1;
         public List<int> ChildIdList = new List<int>();
+
+        public int LeftTopoIndex = -1;
+        public int RightTopoIndex = -1;
 
         public TopoTreeNode(int nodeId, int level, int fatherId, int upDoorId)
         {

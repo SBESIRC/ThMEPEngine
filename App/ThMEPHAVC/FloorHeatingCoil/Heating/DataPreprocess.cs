@@ -139,6 +139,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public int FindMainRegion()
         {
             //处理集水器
+            if (rawData1.WaterSeparator.OBB == null) return 0 ;
             Polyline waterPl = rawData1.WaterSeparator.OBB;
             if (!waterPl.IsCCW()) waterPl.ReverseCurve();
             for (int i = 0; i < waterPl.NumberOfVertices; i++) 

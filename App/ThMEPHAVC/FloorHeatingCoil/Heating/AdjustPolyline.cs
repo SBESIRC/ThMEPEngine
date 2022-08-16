@@ -469,7 +469,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
              
             for (int i = 0; i < points.Count - 1;i++)
             {
-                if (i == points.Count - 2) 
+                if (i == points.Count - 2 && !deleteList.Contains(i)) 
                 {
                     newPtList.Add(points[i]);
                     newPtList.Add(points[i + 1]);
@@ -478,7 +478,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
                 if (deleteList.Contains(i)) 
                 {
-                    newPtList.Add(points[i]);
+                    if (!deleteList.Contains((i - 1 + points.Count) % points.Count))
+                    {
+                        newPtList.Add(points[i]);
+                    }
                     if (newPtList.Count > 2) 
                     {
                         Polyline newPl = PassageWayUtils.BuildPolyline(newPtList);

@@ -43,13 +43,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             GetDrawnPipe();
 
-            //GetConnector();
+            GetConnector();
 
-            //DrawWholePipe();
+            DrawWholePipe();
 
-            //Fillet();
+            Fillet();
 
-            //SaveResults();
+            SaveResults();
         }
 
         public void DataInit()
@@ -65,10 +65,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (i == 1)
+                if (i == 2)
                 {
                     int stop = 5;
                 }
+
+                int mode = 0;
+                if (i == 0) mode = 0;
 
                 SingleRegion nowRegion = RegionList[i];
 
@@ -315,7 +318,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //绘制
                     //PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pins, pouts, pins_buffer, pouts_buffer, main_index);
 
-                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 600, Parameter.SuggestDistanceWall);
+                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 600, Parameter.SuggestDistanceWall,mode);
                     passagePipeGenerator.CalculatePipeline();
                     List<PipeOutput> nowOutputList = passagePipeGenerator.outputs;
                     nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l4PassingPipe", x.pipe_id % 7 + 1, 30));
@@ -379,7 +382,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     int upRegionId = DoorList[doorId].UpstreamRegion.RegionId;
                     int downRegionId = DoorList[doorId].DownstreamRegion.RegionId;
 
-                    if (doorId == 2) 
+                    if (doorId == 14) 
                     {
                         int stop = 0;
                     }
@@ -408,18 +411,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             for (int i = 0; i < SinglePipeList.Count; i++) 
             {
                 List<Polyline> tmpPolyList = new List<Polyline>();
+
+
                 foreach (var plList in PipePolyListMap[i]) 
                 {
                     tmpPolyList.AddRange(plList.Value);
                 }
+
+                for (int j = 0; j < tmpPolyList.Count; j++) 
+                {
+                    tmpPolyList[j].Closed = true;
+                    //DrawUtils.ShowGeometry(tmpPolyList[i], "l4Why", 5, 30);
+                }
                 var pl = tmpPolyList.ToArray().ToCollection().UnionPolygons(false).Cast<Polyline>().First();
 
                 WholePipeList.Add(pl);
-
                 DrawUtils.ShowGeometry(pl, "l3WholePipe", 0, 30);
+                
+                //var plList2 = tmpPolyList.ToArray().ToCollection().UnionPolygons(false).Cast<Polyline>().ToList();
+                //if (plList2.Count > 1)
+                //{
+                //    DrawUtils.ShowGeometry(plList2, "l3DisconnectedWholePipe", 0, 30);
+                //}
             }
-           
-           
         }
 
         public double GetConnectorOuterDis(Point3d left, Point3d right, Polyline oldPl)
@@ -431,7 +445,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             double disRight = pl.GetClosePoint(right).DistanceTo(right);
             if (Math.Abs(disLeft - disRight) > 5)
             {
-                return Math.Min(disLeft, disRight + 100);
+                return Math.Min(disLeft, disRight) + 100;
             }
             else if (Math.Max(disLeft, disRight) < 20)
             {

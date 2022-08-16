@@ -81,7 +81,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             MainPipeIn = mainPipeRoad.GetPoint3dAt(0);
         }
 
-        public void Pipeline2() 
+        public void Pipeline() 
         {
             MainRegion = GetMainPipeArea();
             Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
@@ -102,7 +102,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
 
 
-        public void Pipeline()
+        public void Pipeline2()
         {
             MainRegion = GetMainPipeArea();
             Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
@@ -159,6 +159,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     rest.Add(PipeList[main_index + 1].Buffer(4));
             }
             // get rest
+
+            
 
             rest.OfType<Polyline>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l2Rest", 5, lineWeightNum: 30));
             DrawUtils.ShowGeometry(main_region, "l2OldMainArea", 6, lineWeightNum: 30);
@@ -395,6 +397,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 Point3d closePoint = node.shell.GetClosePoint(pin);
 
                 Point3d point = GetInputPoint();
+                coords = PassageWayUtils.GetPolyPoints(node.shell);
                 if (point.Equals(new Point3d(0, 0, 0)))
                 {
                     Skeleton.Add(MainPipeRoad);
@@ -432,6 +435,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
                 else //index == -1,说明不在端点上
                 {
+                    
                     index = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
                     var pre = (index + coords.Count - 1) % coords.Count;
                     var next = (index + 1) % coords.Count;
@@ -501,7 +505,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 {
                     point = node.shell.GetClosePoint(parentLast);
                     Point3d tmpPin = node.parent.shell.GetClosePoint(point);
-                    if (tmpPin.DistanceTo(point) < point.DistanceTo(parentLast) - 10)
+                    if (tmpPin.DistanceTo(point) < (point.DistanceTo(parentLast) - 20))
                     {
                         pin = tmpPin;
                     }
@@ -509,7 +513,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     {
                         pin = parentLast;
                         int tmpIndex = PassageWayUtils.GetPointIndex(point, coords);
-                        if (tmpIndex == -1) 
+                        if (tmpIndex == -1)
                         {
                             tmpIndex = PassageWayUtils.GetSegIndexOnPolygon(point, coords);
                             var pre = (tmpIndex + coords.Count - 1) % coords.Count;
@@ -517,7 +521,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                             double lengthCCW = (coords[tmpIndex] - point).Length;
                             double lengthCW = (coords[next] - point).Length;
-                            if (Math.Min(lengthCW, lengthCCW) < 0.32 * Buffer) 
+                            if (Math.Min(lengthCW, lengthCCW) < 0.32 * Buffer)
                             {
                                 if (lengthCW < lengthCCW)
                                 {
@@ -528,7 +532,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                     node.parent.shell.RemoveVertexAt(node.parent.shell.NumberOfVertices - 1);
                                     node.parent.shell.AddVertexAt(node.parent.shell.NumberOfVertices, newLast.ToPoint2D(), 0, 0, 0);
                                 }
-                                else 
+                                else
                                 {
                                     Point3d newLast = pin + (coords[tmpIndex] - point);
                                     point = coords[tmpIndex];
@@ -539,7 +543,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                                 DrawUtils.ShowGeometry(node.parent.shell, "l3AdjustNodeShell", 8, lineWeightNum: 30);
                             }
-                        } 
+                        }
+                        else if (Math.Abs(point.X - pin.X) > 5 && Math.Abs(point.Y - pin.Y) > 5) 
+                        {
+                            if (Math.Abs(point.X - pin.X) < Buffer * 0.25)
+                            {
+                                pin = new Point3d(point.X, pin.Y, 0);
+                                node.parent.shell.RemoveVertexAt(node.parent.shell.NumberOfVertices - 1);
+                                node.parent.shell.AddVertexAt(node.parent.shell.NumberOfVertices, pin.ToPoint2D(), 0, 0, 0);
+                            }
+                            else if (Math.Abs(point.Y - pin.Y) < Buffer * 0.25) 
+                            {
+                                pin = new Point3d(pin.X, point.Y, 0);
+                                node.parent.shell.RemoveVertexAt(node.parent.shell.NumberOfVertices - 1);
+                                node.parent.shell.AddVertexAt(node.parent.shell.NumberOfVertices, pin.ToPoint2D(), 0, 0, 0);
+                            }
+                        
+                        }
                     }
                 }
                 else

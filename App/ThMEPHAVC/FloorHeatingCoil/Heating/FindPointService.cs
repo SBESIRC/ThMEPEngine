@@ -221,13 +221,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     
                     int tend = UpperTopologicalTendency(nowDoor);
 
-                    if (nowDoor.DoorId == 6)
+                    if (nowDoor.DoorId == 1)
                     {
                         int stop = 0;
                     }
 
                     //固定均匀分布
-                    if (upDoor.Length < Parameter.SuggestDistanceRoom * (nowDoor.PipeIdList.Count * 2 - 1) + 2 * Parameter.SuggestDistanceWall)
+                    if (upDoor.Length < nowDoor.DownstreamRegion.SuggestDist * (nowDoor.PipeIdList.Count * 2 - 1) + 2 * Parameter.SuggestDistanceWall)
                     {
                         DoorPointTypeMap.Add(nowDoor.DoorId, new DoorPoinType(0,-1,0, 0));
 
@@ -390,14 +390,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     GetAdjacentPipeNumNew(nowDoor, ref leftAdjacentPipeNum, ref rightAdjacentPipeNum);
                     DoorLeftRightPipe.Add(nowDoor, new Tuple<int, int>(leftAdjacentPipeNum, rightAdjacentPipeNum));
                     DoorPoinType doorType = DoorPointTypeMap[nowDoor.DoorId];
-                                                                                                                                                                                                                          
+
+                    double offsetLeft = 0;
+                    double offsetRight = 0;
                     if (leftAdjacentPipeNum > 0 && doorType.Index > -1)  //需要缩进
                     {
                         if (doorType.Type != 0) 
                         {
-                            double offset = leftAdjacentPipeNum * 2 * nowDoor.UpstreamRegion.SuggestDist;
-                            if (doorType.Type == 1) doorType.Type = 2;
-                            FixPointNew(nowDoor, 0, doorType.Index , offset, doorType.Type);
+                            offsetLeft = leftAdjacentPipeNum * 2 * nowDoor.UpstreamRegion.SuggestDist;
                         }
                     }
 
@@ -405,9 +405,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     {
                         if (doorType.Type != 0)
                         {
-                            double offset = rightAdjacentPipeNum * 2 * nowDoor.UpstreamRegion.SuggestDist;
-                            if (doorType.Type == 1) doorType.Type = 2;
-                            FixPointNew(nowDoor, 1, doorType.Index, offset, doorType.Type);
+                            offsetRight = rightAdjacentPipeNum * 2 * nowDoor.UpstreamRegion.SuggestDist;
+                        }
+                    }
+
+                    if (offsetLeft > 0 || offsetRight > 0)
+                    {
+                        if (doorType.Type == 1) doorType.Type = 2;
+                        if (offsetLeft > 0)
+                        {
+                            FixPointNew(nowDoor, 0, doorType.Index, offsetLeft, doorType.Type);
+                        }
+                        if (offsetRight > 0)
+                        {
+                            FixPointNew(nowDoor, 1, doorType.Index, offsetRight, doorType.Type);
                         }
                     }
                 }
