@@ -131,7 +131,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 保存非主导管线计算结果
             for (int i = 0; i < shortest_way.Count; ++i)
             {
-                //if (main_has_output && i == main_index) continue;
+                if (main_has_output && i == main_index) continue;
                 outputs.Add(new PipeOutput(pipe_inputs[i].pipe_id, shortest_way[i]));
             }
         }
@@ -200,7 +200,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
                 mainPipeGet.Pipeline2();
-                main_output = new PipeOutput(main_pipe_input.pipe_id, shortest_way[main_index]);
+                main_output = new PipeOutput(pipe_inputs[main_index].pipe_id, shortest_way[main_index]);
                 // 合并主导管线轮廓
                 DBObjectCollection shape = new DBObjectCollection();
                 foreach (var rest_shape in mainPipeGet.BufferedPipeList)

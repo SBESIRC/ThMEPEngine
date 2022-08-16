@@ -145,13 +145,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 //var show = roomPipeGenerator.skeleton;
                 //show.ForEach(x => DrawUtils.ShowGeometry(x, "l4RoomPipe", pipeInList[0].PipeId % 7 + 1, 30));
                 PipeOutput output = roomPipeGenerator.output;
-                DrawUtils.ShowGeometry(output.shape, "l4SinglePipe", pipeInList[0].PipeId % 7 + 1, 30);
+
                 BufferedPipeList.Add(output.shape);
-                
                 //chatou
                 Line line0 = new Line(pin, point + (point - pin).GetNormal() * 50);
                 Polyline chatou = line0.Buffer((int)Buffer / 4);
                 BufferedPipeList.Add(chatou);
+                DrawUtils.ShowGeometry(BufferedPipeList, "l4SinglePipe", pipeInList[0].PipeId % 7 + 1, 30);
+                DrawUtils.ShowGeometry(MainPipeRoad, "l4MainPipeRoad", pipeInList[0].PipeId % 7 + 1, 30);
             }
 
             //DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
@@ -242,6 +243,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (mode == 0)
             {
                 rest.Add(PassageWayUtils.Buffer(PipeList[main_index].Buffer(1), 0.75 * Buffer).First());
+                
+                DrawUtils.ShowGeometry(PipeList[main_index].Buffer(1), "l4Test", 9, lineWeightNum: 30);
             }
 
             rest.OfType<Polyline>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l2Rest", 5, lineWeightNum: 30));

@@ -16,7 +16,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
     {
         public static List<Polyline> Buffer(Polyline frame, double distance)
         {
-            var results = frame.Buffer(distance);
+            var points = PassageWayUtils.GetPolyPoints(frame);
+            points = SmoothUtils.SmoothPoints(points);
+            points.Add(points.First());
+            Polyline newPl = PassageWayUtils.BuildPolyline(points); 
+            var results = newPl.Buffer(distance);
+            newPl.Dispose();
             return results.Cast<Polyline>().ToList();
         }
         public static Polyline HVBuffer(Polyline poly,double distance)

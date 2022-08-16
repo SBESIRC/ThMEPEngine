@@ -91,7 +91,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         DrawPipeData drawPipeData0 = new DrawPipeData(nowPipePoint.PointList[2], nowPipePoint.PointList[3], nowPipePoint.NowDoor.DownSecond, nowPipePoint.NowDoor.DownFirst, nowPipePoint.FreeDegree, pipeId, doorId);
                         pipeInList.Add(drawPipeData0);
 
-                        Vector3d vec0 = nowPipePoint.PointList[1] - nowPipePoint.PointList[0];
+                        Vector3d vec0 = nowPipePoint.PointList[3] - nowPipePoint.PointList[2];
                         Point3d circleCenter = nowPipePoint.PointList[0] + vec0 / 2;
                         double radius = vec0.Length / 2;
 
@@ -114,7 +114,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     //// calculate pipeline
 
-                    RoomPipeGenerator roomPipeGenerator = new RoomPipeGenerator(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist*2, Parameter.SuggestDistanceWall);
+                    RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist*2, Parameter.SuggestDistanceWall);
                     roomPipeGenerator.CalculatePipeline();
                     // show result
                     //var show = roomPipeGenerator.skeleton;
