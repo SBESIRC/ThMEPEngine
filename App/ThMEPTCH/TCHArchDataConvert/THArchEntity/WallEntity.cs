@@ -13,6 +13,9 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         /// 非线或弧线的异形墙不计算延长计算轮廓
         /// </summary>
         public Curve WallCenterCurve { get; set; }
+        /// <summary>
+        /// 圆弧墙时，此轮廓为内弧线
+        /// </summary>
         public Curve WallLeftCurve { get; set; }
         public Curve WallRightCurve { get; set; }
         public double Elevtion { get; set; }

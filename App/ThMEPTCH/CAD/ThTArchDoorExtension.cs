@@ -43,7 +43,7 @@ namespace ThMEPTCH.CAD
             door.BasePointX = basePoint.X;
             door.BasePointY = basePoint.Y;
             door.BasePointZ = basePoint.Z;
-            door.Rotation = direction.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis);
+            door.Rotation = Vector3d.XAxis.GetAngleTo(direction.GetNormal(), Vector3d.ZAxis);
         }
     }
 }

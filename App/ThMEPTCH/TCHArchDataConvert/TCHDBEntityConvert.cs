@@ -241,53 +241,23 @@ namespace ThMEPTCH.TCHArchDataConvert
             }
             else 
             {
-                var leftArc = thisEntity.WallLeftCurve as Arc;
-                var rightArc = thisEntity.WallRightCurve as Arc;
+                //leftOffSet为InnerArc的偏移
+                //rightOffSet为OutArc的偏移
+                var leftArc = thisLeftCurve as Arc;
+                var rightArc = thisRightCurve as Arc;
                 var leftAngle = (leftPt - leftArc.Center).GetNormal().GetAngleTo((leftInsPoint - leftArc.Center).GetNormal());
                 var rightAngle = (rightPt - rightArc.Center).GetNormal().GetAngleTo((rightInsPoint - rightArc.Center).GetNormal());
-                if (otherLeftCurve == otherEntity.WallLeftCurve)
+                var leftRatio = dir.DotProduct(leftInsPoint - leftPt) > 0 ? -1 : 1;
+                var rightRatio = dir.DotProduct(rightInsPoint - rightPt) > 0 ? -1 : 1;
+                if (leftArc.Radius > rightArc.Radius)
                 {
-                    if (dir.DotProduct(leftInsPoint - leftPt) > 0)
-                    {
-                        leftOffSet = -leftArc.Radius * leftAngle;
-                    }
-                    else
-                    {
-                        leftOffSet = leftArc.Radius * leftAngle;
-                    }
-                    if (dir.DotProduct(rightInsPoint - rightPt) > 0)
-                    {
-                        rightOffSet = -rightArc.Radius * rightAngle;
-                    }
-                    else
-                    {
-                        rightOffSet = rightArc.Radius * rightAngle;
-                    }
+                    leftOffSet = rightArc.Radius * rightAngle * rightRatio;
+                    rightOffSet = leftArc.Radius * leftAngle * leftRatio;
                 }
                 else 
                 {
-                    if (dir.DotProduct(leftInsPoint - leftPt) > 0)
-                    {
-                        rightOffSet = -leftArc.Radius * leftAngle;
-                    }
-                    else
-                    {
-                        rightOffSet = leftArc.Radius * leftAngle;
-                    }
-                    if (dir.DotProduct(rightInsPoint - rightPt) > 0)
-                    {
-                        leftOffSet = -rightArc.Radius * rightAngle;
-                    }
-                    else
-                    {
-                        leftOffSet = rightArc.Radius * rightAngle;
-                    }
-                }
-                if (isSp)
-                {
-                    var temp = rightOffSet;
-                    rightOffSet = leftOffSet;
-                    leftOffSet = temp;
+                    leftOffSet = leftArc.Radius * leftAngle * leftRatio;
+                    rightOffSet = rightArc.Radius * rightAngle * rightRatio;
                 }
             }
             return leftOffSet;
