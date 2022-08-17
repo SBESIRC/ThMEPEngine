@@ -114,26 +114,6 @@ namespace ThParkingStall.Core.OInterProcess
         {
             return new DDNA(Type,Value);
         }
-        //public DDNA GetDDNA(double new_value)
-        //{
-        //    return new DDNA(Type, new_value);
-        //}
-        //public double GetAbsoluteValue()
-        //{
-        //    if (IsRelative) return Value;
-        //    else throw new ArgumentException("Only Absolute DNA can get absolute value without lower upper Bound ");
-        //}
-        //public double GetAbsoluteValue(double lb,double ub)
-        //{
-        //    if (IsRelative) return Value;
-        //    else
-        //    {
-        //        if(Value < 0) return lb;    
-        //        var absoluteVal = lb + Value;
-        //        if (absoluteVal < ub) return absoluteVal;
-        //        else return ub;
-        //    }
-        //}
     }
     [Serializable]
     public class IDNA//Int DNA

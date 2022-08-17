@@ -54,20 +54,18 @@ namespace ThParkingStall.Core.InterProcess
         public static bool MultiThread = false;//是否使用进程内多线程
         public static void Init(DataWraper dataWraper)
         {
-            _TotalArea = dataWraper.TotalArea;//总区域
-            _InitSegLines = dataWraper.SegLines;//初始分区线
-            _Buildings = dataWraper.Buildings;//所有障碍物，包含坡道
-
-            _BoundingBoxes = dataWraper.BoundingBoxes;// 所有的建筑物的边框
-
-            _Ramps = dataWraper.Ramps;//坡道
-
-            _BuildingSpatialIndex = new MNTSSpatialIndex(dataWraper.Buildings);
-            _BoundingBoxSpatialIndex = new MNTSSpatialIndex(dataWraper.BoundingBoxes);
-            var boundaries = new List<Geometry> { dataWraper.TotalArea.Shell };
-            boundaries.AddRange(dataWraper.Buildings);
+            var interParamWraper = dataWraper.interParamWraper;
+            _TotalArea = interParamWraper.TotalArea;//总区域
+            _InitSegLines = interParamWraper.SegLines;//初始分区线
+            _Buildings = interParamWraper.Buildings;//所有障碍物，包含坡道
+            _BoundingBoxes = interParamWraper.BoundingBoxes;// 所有的建筑物的边框
+            _Ramps = interParamWraper.Ramps;//坡道
+            _BuildingSpatialIndex = new MNTSSpatialIndex(interParamWraper.Buildings);
+            _BoundingBoxSpatialIndex = new MNTSSpatialIndex(interParamWraper.BoundingBoxes);
+            var boundaries = new List<Geometry> { interParamWraper.TotalArea.Shell };
+            boundaries.AddRange(interParamWraper.Buildings);
             _BoundarySpatialIndex = new MNTSSpatialIndex(boundaries);
-            _OuterBuildingIdxs = dataWraper.OuterBuildingIdxs;
+            _OuterBuildingIdxs = interParamWraper.OuterBuildingIdxs;
             var ignorableBuildings = new List<Geometry>();
             foreach (int idx in OuterBuildingIdxs) ignorableBuildings.Add(Buildings[idx]);
             ignorableBuildings.AddRange(TotalArea.Shell.ToLineStrings().ToList());
@@ -79,10 +77,10 @@ namespace ThParkingStall.Core.InterProcess
                 if (!outerIdx.Contains(i)) InnerObject.Add(Buildings[i]);
             }
             _InnerObjectSpatialIndex = new MNTSSpatialIndex(InnerObject);
-            _SegLineIntsecList = dataWraper.SeglineIndexList;
-            _SeglineConnectToBound = dataWraper.SeglineConnectToBound;
-            _LowerUpperBound = dataWraper.LowerUpperBound;
-            _SegLineIntSecNode = dataWraper.SegLineIntSecNode;
+            _SegLineIntsecList = interParamWraper.SeglineIndexList;
+            _SeglineConnectToBound = interParamWraper.SeglineConnectToBound;
+            _LowerUpperBound = interParamWraper.LowerUpperBound;
+            _SegLineIntSecNode = interParamWraper.SegLineIntSecNode;
             //NewIdxToOrg = new List<HashSet<int>>();
             //for (int i = 0; i < InitSegLines.Count; i++)
             //{

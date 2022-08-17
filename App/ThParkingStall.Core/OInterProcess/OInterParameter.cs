@@ -44,24 +44,40 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<(List<int>, List<int>)> SeglineIndex;//分区线（起始终止点连接关系），数量为0则连到边界，其余为其他分区线的index
         public static void Init(DataWraper dataWraper)
         {
-            _TotalArea = dataWraper.TotalArea;//总区域
-            _SegLines = dataWraper.SegLines;//初始分区线
-            _Buildings = dataWraper.Buildings;//所有障碍物，包含坡道
-            _BuildingSpatialIndex = new MNTSSpatialIndex(dataWraper.Buildings);
+            var oWarper = dataWraper.oParamWraper;
+            _TotalArea = oWarper.TotalArea;
+            _InitSegLines = oWarper.SegLines;
+            _Buildings = oWarper.Buildings;
+            _BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
+            _Ramps = oWarper.Ramps;
 
+            var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
+            var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            var bufferedWallLine = TotalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
+            _BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
+                Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+
+            SeglineIndex = oWarper.seglineIndex;
             var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
             allObjs.AddRange(Buildings);
             _BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
+            _BorderLines = oWarper.borderLines;
         }
         public static void Init(Polygon totalArea,List<SegLine> segLines,List<Polygon> buildings,List<ORamp> ramps,
-            Polygon baseLineBoundary, List<(List<int>, List<int>)> seglineIndex,List<LineSegment> borderLines = null)
+             List<(List<int>, List<int>)> seglineIndex,List<LineSegment> borderLines = null)
         {
             _TotalArea = totalArea;
             _InitSegLines = segLines;
             _Buildings = buildings;
             _BuildingSpatialIndex = new MNTSSpatialIndex(buildings);
             _Ramps = ramps;
-            _BaseLineBoundary = baseLineBoundary;
+
+            var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
+            var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            var bufferedWallLine = totalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
+            _BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
+                Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+            //_BaseLineBoundary = baseLineBoundary;
             SeglineIndex = seglineIndex;
             var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
             allObjs.AddRange(Buildings);
@@ -98,18 +114,19 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<OSubArea> GetOSubAreas(Genome genome)
         {
             var subAreas = new List<OSubArea>();
-            Polygon newWallLine;
-            if (BorderLines != null)
+            Polygon newWallLine = null;
+            if (BorderLines != null && genome != null)
             {
                 newWallLine = ProcessToWallLine(genome);
+                if (newWallLine == null) return subAreas;
+                genome.Area = newWallLine.Area * 0.001 * 0.001;
             }
-            else newWallLine = TotalArea;
-            if (newWallLine == null) return subAreas;
-            if(genome != null)genome.Area = newWallLine.Area* 0.001 * 0.001;
             var newSegs = ProcessToSegLines(genome, newWallLine);
             var SegLineStrings = newSegs.Select(l =>l.Splitter).ToList().ToLineStrings();
             var vaildLanes = newSegs.Select(l => l.VaildLane).ToList().ToLineStrings();
-            var areas = newWallLine.Shell.GetPolygons(SegLineStrings);//区域分割
+            List<Polygon> areas;
+            if(newWallLine != null) areas = newWallLine.Shell.GetPolygons(SegLineStrings);//区域分割
+            else areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
             //var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
@@ -129,7 +146,7 @@ namespace ThParkingStall.Core.OInterProcess
             return subAreas;
         }
         //输出的分区线数量一致，需要求最大全连接组
-        public static List<SegLine> ProcessToSegLines(Genome genome,Polygon newWallLine)
+        public static List<SegLine> ProcessToSegLines(Genome genome,Polygon newWallLine = null)
         {
             var newSegLines = new List<SegLine>();
             if (genome == null)
@@ -143,8 +160,14 @@ namespace ThParkingStall.Core.OInterProcess
                     newSegLines.Add(InitSegLines[i].GetMovedLine(genome.OGenes[0][i]));
                 }
             }
-            newSegLines.UpdateSegLines(SeglineIndex, newWallLine, BoundarySpatialIndex, BaseLineBoundary);
-
+            if(newWallLine == null) newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex, BaseLineBoundary);//注意边界可变的情况存在bug
+            else
+            {
+                var allObjs = newWallLine.Shell.ToLineStrings().Cast<Geometry>().ToList();
+                allObjs.AddRange(Buildings);
+                var boundarySpatialIndex = new MNTSSpatialIndex(allObjs);
+                newSegLines.UpdateSegLines(SeglineIndex, newWallLine, boundarySpatialIndex);
+            }
             //newSegLines = newSegLines.Where(l => l.VaildLane != null).ToList();
             //获取最大全连接组,存在其他组标记 + 报错
             var groups = newSegLines.GroupSegLines().OrderBy(g => g.Count).ToList();

@@ -372,7 +372,7 @@ namespace ThParkingStall.Core.OTools
             if(connectedPart == null) return null;
             //筛选车道范围内的障碍物
             LineSegment baseLine;
-            if(roadWidth == -1)
+            if(roadWidth == -1 && BaseLineBoundary != null)
             {
                 baseLine = connectedPart.GetBaseLine(BaseLineBoundary,true);
             }

@@ -526,7 +526,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (LogAllInfo) log_subprocess = "1";
             else log_subprocess = "0";
             proc.StartInfo.Arguments = ProcessCount.ToString() + ' ' + idx.ToString() + ' ' +
-                IterationCount.ToString() + ' ' + log_subprocess + ' ' + ThreadCnt.ToString();
+                IterationCount.ToString() + ' ' + log_subprocess + ' ' + ThreadCnt.ToString() + ' ' + "0";
             proc.StartInfo.CreateNoWindow = true;
             proc.StartInfo.UseShellExecute = false;
             //proc.StartInfo.RedirectStandardOutput = true;

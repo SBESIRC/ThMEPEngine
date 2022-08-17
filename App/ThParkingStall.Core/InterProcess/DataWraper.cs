@@ -8,25 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
 using ThParkingStall.Core.MPartitionLayout;
+using ThParkingStall.Core.OInterProcess;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 namespace ThParkingStall.Core.InterProcess
 {
     [Serializable]
     public class DataWraper
     {
-        #region LayoutParameter(InterParameter)
-        public Polygon TotalArea;//总区域
-        public List<LineSegment> SegLines;//初始分区线
-        public List<Polygon> Buildings;//建筑物，包含坡道
-        public List<int> OuterBuildingIdxs = new List<int>(); //可穿建筑物（外围障碍物）的index,包含坡道
-        public List<Polygon> BoundingBoxes;//建筑外包框
-        public List<Ramp> Ramps;//坡道
-
-        public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
-        public List<List<int>> SeglineIndexList ;// 分区线相交关系
-        public List<(bool, bool)> SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
-        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分区线index
-        #endregion
+        public InterParamWraper interParamWraper = null;//正交数据
+        public OParamWraper oParamWraper = null;//斜交数据
         #region ViewModel Parameters
         //平行车位尺寸,长度
         public int ParallelSpotLength = 6000; //mm
@@ -81,6 +71,32 @@ namespace ThParkingStall.Core.InterProcess
         public Chromosome chromosome;
     }
 
+    [Serializable]
+    public class InterParamWraper
+    {
+        public Polygon TotalArea;//总区域
+        public List<LineSegment> SegLines;//初始分区线
+        public List<Polygon> Buildings;//建筑物，包含坡道
+        public List<int> OuterBuildingIdxs = new List<int>(); //可穿建筑物（外围障碍物）的index,包含坡道
+        public List<Polygon> BoundingBoxes;//建筑外包框
+        public List<Ramp> Ramps;//坡道
+        public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
+        public List<List<int>> SeglineIndexList;// 分区线相交关系
+        public List<(bool, bool)> SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
+        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分区线index
+    }
+
+    [Serializable]
+    public class OParamWraper
+    {
+        public Polygon TotalArea;//总区域
+        public List<SegLine> SegLines;//初始分区线
+        public List<Polygon> Buildings;//所有建筑物，包含坡道
+        public List<ORamp> Ramps;//坡道
+        public List<(List<int>, List<int>)> seglineIndex;//每根分区线初始以及终点接到哪
+        public List<LineSegment> borderLines = null;//可动边界
+        //缺一个可动边界的连接关系
+    }
     public class ProgramDebug
     {
         public static List<int> TestMain(string[] ProcessInfo, ChromosomeCollection chromosomeCollection)

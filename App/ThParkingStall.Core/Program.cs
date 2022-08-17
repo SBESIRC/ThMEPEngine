@@ -19,39 +19,50 @@ namespace ThParkingStall.Core
 {
     internal class Program
     {
+        static bool IsOblique;
+        static int ProcessCount;
+        static int ProcessIndex;
+        static int IterationCount;
+        static bool LogAllInfo;
+        static int ThreadCnt;
         static void Main(string[] ProcessInfo)
         {
             try
             {
-                Run(ProcessInfo);
+                UpdateStartInfo(ProcessInfo);
+                if (!IsOblique) Run();
+                else ORun();
             }
             catch (Exception ex)
             {
-                MCompute.Logger?.Information(ex.Message);
-                MCompute.Logger?.Information("----------------------------------");
-                MCompute.Logger?.Information(ex.StackTrace);
-                MCompute.Logger?.Information("##################################");
+                Logger?.Information(ex.Message);
+                Logger?.Information("----------------------------------");
+                Logger?.Information(ex.StackTrace);
+                Logger?.Information("##################################");
                 MPGAData.Save();
             }
         }
-        static void Run(string[] ProcessInfo)
+        static void UpdateStartInfo(string[] ProcessInfo)
         {
-            var ProcessCount = Int32.Parse(ProcessInfo[0]);
-            var ProcessIndex = Int32.Parse(ProcessInfo[1]);
-            var IterationCount = Int32.Parse(ProcessInfo[2]);
-            var LogAllInfo = ProcessInfo[3] == "1";//是否Log 所有信息
-            var ThreadCnt = Int32.Parse(ProcessInfo[4]);// 使用的线程数量
+            ProcessCount = Int32.Parse(ProcessInfo[0]);
+            ProcessIndex = Int32.Parse(ProcessInfo[1]);
+            IterationCount = Int32.Parse(ProcessInfo[2]);
+            LogAllInfo = ProcessInfo[3] == "1";//是否Log 所有信息
+            ThreadCnt = Int32.Parse(ProcessInfo[4]);// 使用的线程数量
+            IsOblique = ProcessInfo[5] == "1";//是否使用斜交框架
             if (ThreadCnt > 2) InterParameter.MultiThread = true;
             else InterParameter.MultiThread = false;
             string LogFileName;
             if (LogAllInfo) LogFileName = Path.Combine(GetPath.GetAppDataPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
             else LogFileName = Path.Combine(GetPath.GetDebugPath(), "SubProcessDebug" + ProcessIndex.ToString() + "_.txt");
-            var Logger = new Serilog.LoggerConfiguration().WriteTo
+            Logger = new Serilog.LoggerConfiguration().WriteTo
                                 .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
-            MCompute.Logger = Logger;
             MCompute.LogInfo = LogAllInfo;
             MCompute.ThreadCnt = ThreadCnt;
             MPGAData.ProcIndex = ProcessIndex;
+        }
+        static void Run()
+        {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var t_pre = 0.0;
@@ -160,7 +171,6 @@ namespace ThParkingStall.Core
                 SubAreaParkingCnt.ClearNewAdded();
                 if (IterationCount % 3 == 0)
                     ReclaimMemory();
-
             }
             if (LogAllInfo)
             {
@@ -168,6 +178,11 @@ namespace ThParkingStall.Core
                 Logger?.Information($"总用时用时: {stopWatch.Elapsed.TotalSeconds}秒\n");
             }
             stopWatch.Stop();
+        }
+
+        static void ORun()
+        {
+
         }
         private static void ReclaimMemory()
         {

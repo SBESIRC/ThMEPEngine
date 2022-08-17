@@ -22,6 +22,7 @@ using Dreambuild.AutoCAD;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Linq2Acad;
+using ThParkingStall.Core.OInterProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -58,23 +59,48 @@ namespace ThMEPArchitecture.MultiProcess
             }
             return dataWraper;
         }
+
+        public static DataWraper GetDataWraper(OLayoutData oLayoutData,ParkingStallArrangementViewModel vm)
+        {
+            var dataWraper = new DataWraper();
+            dataWraper.UpdateVMParameter(vm);
+            VMStock.Init(dataWraper);
+            dataWraper.UpdateOInterParameter(oLayoutData);
+            OInterParameter.Init(dataWraper);
+            return dataWraper;
+        }
         private static void UpdateInterParameter(this DataWraper dataWraper, LayoutData layoutData)
         {
-            dataWraper.TotalArea = layoutData.WallLine;
-            dataWraper.SegLines = layoutData.SegLines;
-            dataWraper.Buildings = layoutData.Buildings;
-            dataWraper.BoundingBoxes = layoutData.BoundingBoxes;
-            dataWraper.Ramps = layoutData.Ramps;
-            dataWraper.SeglineIndexList = layoutData.SeglineIndexList;
-            dataWraper.LowerUpperBound = layoutData.LowerUpperBound;
-            dataWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
-            dataWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
-            dataWraper.SegLineIntSecNode = layoutData.SegLineIntSecNode;
+            var interParamWraper = new InterParamWraper();
+            interParamWraper.TotalArea = layoutData.WallLine;
+            interParamWraper.SegLines = layoutData.SegLines;
+            interParamWraper.Buildings = layoutData.Buildings;
+            interParamWraper.BoundingBoxes = layoutData.BoundingBoxes;
+            interParamWraper.Ramps = layoutData.Ramps;
+            interParamWraper.SeglineIndexList = layoutData.SeglineIndexList;
+            interParamWraper.LowerUpperBound = layoutData.LowerUpperBound;
+            interParamWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
+            interParamWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
+            interParamWraper.SegLineIntSecNode = layoutData.SegLineIntSecNode;
+            dataWraper.interParamWraper = interParamWraper;
+        }
+
+        private static void UpdateOInterParameter(this DataWraper dataWraper,OLayoutData oLayoutData)
+        {
+            var oWraper = new OParamWraper();
+            oWraper.TotalArea = oLayoutData.WallLine;
+            oWraper.SegLines = oLayoutData.SegLines;
+            oWraper.Buildings = oLayoutData.Buildings;
+            oWraper.Ramps = oLayoutData.Ramps;
+            oWraper.seglineIndex = oLayoutData.SeglineIndex;
+            oWraper.borderLines = oLayoutData.BorderLines;
+            dataWraper.oParamWraper = oWraper;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {
-            dataWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon().RemoveHoles();
-            dataWraper.SegLines = outerBrder.SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).
+            var interParamWraper = new InterParamWraper();
+            interParamWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon().RemoveHoles();
+            interParamWraper.SegLines = outerBrder.SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).
                 Select(l => l.ToNTSLineSegment()).ToList();
             var entities = outerBrder.BuildingObjs.ExplodeBlocks();
             var buildingBounds = new List<LineString>();
@@ -86,17 +112,18 @@ namespace ThMEPArchitecture.MultiProcess
                     buildingBounds.Add(bound);
                 }
             }
-            dataWraper.Buildings = buildingBounds.GetPolygons();
-            dataWraper.Buildings = dataWraper.Buildings.Select(build => build.RemoveHoles()).ToList();
-            dataWraper.BoundingBoxes = new List<Polygon>();
+            interParamWraper.Buildings = buildingBounds.GetPolygons();
+            interParamWraper.Buildings = interParamWraper.Buildings.Select(build => build.RemoveHoles()).ToList();
+            interParamWraper.BoundingBoxes = new List<Polygon>();
             foreach (BlockReference blk in outerBrder.BuildingWithoutRampObjs)
             {
-                dataWraper.BoundingBoxes.Add(blk.GetRect().ToNTSPolygon());
+                interParamWraper.BoundingBoxes.Add(blk.GetRect().ToNTSPolygon());
             }
-            dataWraper.BoundingBoxes = dataWraper.BoundingBoxes.Select(box => box.RemoveHoles()).ToList();
-            dataWraper.Ramps = outerBrder.GetRamps();
-            dataWraper.SeglineIndexList = outerBrder.SegLines.Select(l =>l.ToNTSLineSegment()).ToList().GetSegLineIntsecList();
-            dataWraper.LowerUpperBound = dataWraper.SegLines.GetLowerUpperBound(dataWraper);
+            interParamWraper.BoundingBoxes = interParamWraper.BoundingBoxes.Select(box => box.RemoveHoles()).ToList();
+            interParamWraper.Ramps = outerBrder.GetRamps();
+            interParamWraper.SeglineIndexList = outerBrder.SegLines.Select(l =>l.ToNTSLineSegment()).ToList().GetSegLineIntsecList();
+            interParamWraper.LowerUpperBound = interParamWraper.SegLines.GetLowerUpperBound(dataWraper);
+            dataWraper.interParamWraper = interParamWraper;
 
         }
         public static void UpdateVMParameter(this DataWraper datawraper, ParkingStallArrangementViewModel vm)
@@ -187,9 +214,10 @@ namespace ThMEPArchitecture.MultiProcess
 
         public static List<(double, double)> GetLowerUpperBound(this List<LineSegment> SegLines, DataWraper dataWraper)
         {
-            var TotalArea = dataWraper.TotalArea;
-            var Buildings = dataWraper.Buildings;
-            var Ramps = dataWraper.Ramps;
+            var interParamWraper = dataWraper.interParamWraper;
+            var TotalArea = interParamWraper.TotalArea;
+            var Buildings = interParamWraper.Buildings;
+            var Ramps = interParamWraper.Ramps;
             var lowerUpperBound = new List<(double, double)>();
             var vaildSegs = SegLines.GetVaildSegLines(TotalArea,0);//获取有效分区线,边界上线取最大值
             var ObstacleSpatialIndex = new MNTSSpatialIndex(Buildings);

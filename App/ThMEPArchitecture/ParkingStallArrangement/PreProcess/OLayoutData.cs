@@ -438,7 +438,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         public void SetInterParam()
         {
-            OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,BaseLineBoundary,SeglineIndex,BorderLines);
+            OInterParameter.Init(WallLine,SegLines,Buildings,Ramps,SeglineIndex,BorderLines);
         }
 
         private void showVaildLanes()

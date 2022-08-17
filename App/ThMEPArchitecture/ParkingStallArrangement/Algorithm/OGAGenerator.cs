@@ -71,9 +71,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 else max_process = PopulationSize;
             }
             else max_process = ParameterStock.ProcessCount;
-            //ProcessCount = Math.Min(Environment.ProcessorCount - 1, PopulationSize);
             ProcessCount = Math.Min(max_process, PopulationSize);
-            //var ProcList = new List<Process>();
             MutexLists = new List<List<Mutex>>();
             MaxTime = parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
 

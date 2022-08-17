@@ -150,8 +150,9 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
-                
-                layoutData.SetInterParam();
+
+                //layoutData.SetInterParam();
+                Converter.GetDataWraper(layoutData, ParameterViewModel);
                 for (int i = 0; i < MultiSolutionList.Count; i++)
                 {
                     var stopWatch = new Stopwatch();
@@ -182,7 +183,8 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
-                layoutData.SetInterParam();
+                //layoutData.SetInterParam();
+                Converter.GetDataWraper(layoutData, ParameterViewModel);
                 for (int i = 0; i < MultiSolutionList.Count; i++)
                 {
                     var stopWatch = new Stopwatch();

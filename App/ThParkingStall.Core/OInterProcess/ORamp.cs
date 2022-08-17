@@ -16,7 +16,8 @@ namespace ThParkingStall.Core.OInterProcess
         //插入点
         public Point InsertPt { get; set; }
         //坡道上车道的向量
-        public Vector2D Vector { get; set; }
+        //public Vector2D Vector { get; set; }
+        public (double,double) Vector { get; set; }
         //坡道的面域
         public Polygon Area { get; set; }
         public double RoadWidth { get; set; }
@@ -25,7 +26,8 @@ namespace ThParkingStall.Core.OInterProcess
             var segLineStr = segLine.Splitter.GetLineString();
             InsertPt = area.Shell.Intersection(segLineStr).Get<Point>().First();
             var outSidePart = segLineStr.Difference(area).Centroid;
-            Vector = new Vector2D(InsertPt.Coordinate, outSidePart.Coordinate).Normalize();
+            var vector = new Vector2D(InsertPt.Coordinate, outSidePart.Coordinate).Normalize();
+            Vector = (vector.X,vector.Y);
             Area = area;
             if (segLine.RoadWidth == -1) RoadWidth = VMStock.RoadWidth;
             else RoadWidth = segLine.RoadWidth;
