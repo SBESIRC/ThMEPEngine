@@ -60,16 +60,11 @@ namespace ThMEPTCH.CAD
             if (IsBuildElement(tch) && CheckLayerValid(tch) && tch.Visible && tch.Bounds.HasValue)
             {
                 var archWall = tch.Database.LoadWallFromDb(tch.ObjectId, matrix, uid);
-                var wallSp = GetStartPoint(archWall);
-                var wallEp = GetEndPoint(archWall);
-                if(wallSp.DistanceTo(wallEp)>1.0)
+                results.Add(new ThRawIfcBuildingElementData()
                 {
-                    results.Add(new ThRawIfcBuildingElementData()
-                    {
-                        Data = archWall,
-                        Geometry = CreateOutline(archWall),
-                    });
-                }
+                    Data = archWall,
+                    Geometry = CreateOutline(archWall),
+                });
             }
             return results;
         }
@@ -85,14 +80,6 @@ namespace ThMEPTCH.CAD
             {
                 return new Polyline() { Closed = true };
             }
-        }
-        private Point3d GetStartPoint(TArchWall wall)
-        {
-            return new Point3d(wall.StartPointX,wall.StartPointY,wall.StartPointZ);
-        }
-        private Point3d GetEndPoint(TArchWall wall)
-        {
-            return new Point3d(wall.EndPointX, wall.EndPointY, wall.EndPointZ);
         }
     }
 }
