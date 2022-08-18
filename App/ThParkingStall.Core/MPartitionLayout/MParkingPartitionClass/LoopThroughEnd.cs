@@ -70,6 +70,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                         {
                             if(splits.Count()==2)
                                 IniLanes[i].Line = splits.First();
+                            else if(splits.Count()==1)
+                                IniLanes[i].Line = splits.First();
                         }
                         else
                         {
