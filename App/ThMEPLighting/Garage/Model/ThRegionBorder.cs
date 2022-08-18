@@ -162,6 +162,10 @@ namespace ThMEPLighting.Garage.Model
 
         public void HandleSharpAngle()
         {
+            if (DxCenterLines.Count == 0)
+            {
+                return;
+            }
             var cleaner = new ThSharpAngleHandleService(DxCenterLines, FdxCenterLines, SingleRowLines, 2700);
             cleaner.Handle();
             DxCenterLines = cleaner.Dxs.OfType<Line>().ToList();
