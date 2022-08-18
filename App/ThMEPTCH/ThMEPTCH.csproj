@@ -211,9 +211,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf">
+      <Version>3.21.5</Version>
+    </PackageReference>
     <PackageReference Include="protobuf-net">
       <Version>3.1.17</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="proto\ThTCHBuiltElementData.proto" />
+    <None Include="proto\ThTCHDoorData.proto" />
+    <None Include="proto\ThTCHOpeningData.proto" />
+    <None Include="proto\ThTCHWallData.proto" />
+    <None Include="proto\ThTCHGeometry.proto" />
+    <None Include="proto\ThTCHRootData.proto" />
+    <None Include="proto\ThTCHWindowData.proto" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

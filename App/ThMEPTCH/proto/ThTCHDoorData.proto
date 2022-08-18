@@ -1,0 +1,7 @@
+﻿syntax = "proto3";
+import "ThTCHBuiltElementData.proto";
+
+message ThTCHDoorData {
+    ThTCHBuiltElementData build_element = 1;
+}
+
