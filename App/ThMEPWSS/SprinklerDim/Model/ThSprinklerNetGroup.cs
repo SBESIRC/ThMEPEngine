@@ -18,9 +18,9 @@ namespace ThMEPWSS.SprinklerDim.Model
 
         public List<List<List<int>>> YCollineationGroup { get; set; } = new List<List<List<int>>>();//Y相同距离较近的形成组
 
-        public List<List<int>> XDimension { get; set; } = new List<List<int>>();//X方向的喷淋标注点
+        public List<List<ThSprinklerDimGroup>> XDimension { get; set; } = new List<List<ThSprinklerDimGroup>>();//X方向的喷淋标注点
 
-        public List<List<int>> YDimension { get; set; } = new List<List<int>>();//Y方向的喷淋标注点
+        public List<List<ThSprinklerDimGroup>> YDimension { get; set; } = new List<List<ThSprinklerDimGroup>>();//Y方向的喷淋标注点
 
         public HashSet<Tuple<int, int>> LinesCuttedOffByWall = new HashSet<Tuple<int, int>>();//被墙打断的两点间连线
 

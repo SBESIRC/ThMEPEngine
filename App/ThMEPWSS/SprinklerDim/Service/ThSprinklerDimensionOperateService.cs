@@ -3,16 +3,19 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Diagnostics;
-using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimensionOperateService
     {
+        /// <summary>
+        /// 去除已经标注过的点位
+        /// </summary>
+        /// <param name="tdim"></param>
+        /// <param name="anotherCollineation"></param>
+        /// <param name="isDimensioned"></param>
+        /// <returns></returns>
         public static List<int> DeleteIsDimed(List<int> tdim, List<List<int>> anotherCollineation, bool[] isDimensioned)
         {
             List<int> dims = new List<int>();
@@ -26,6 +29,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dims;
         }
 
+        /// <summary>
+        /// 给已经标注过的组打上标签
+        /// </summary>
+        /// <param name="dim"></param>
+        /// <param name="anotherCollineation"></param>
+        /// <param name="isDimensioned"></param>
         public static void CheckDimensions(List<int> dim, List<List<int>> anotherCollineation, ref bool[] isDimensioned)
         {
             foreach (int idx in dim)
@@ -40,6 +49,14 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
         }
 
+        /// <summary>
+        /// 选取最长的一根标注位
+        /// </summary>
+        /// <param name="undimensionedLine"></param>
+        /// <param name="collineation"></param>
+        /// <param name="anoCollineation"></param>
+        /// <param name="isDimensioned"></param>
+        /// <returns></returns>
         public static List<int> GetLongestDimension(List<int> undimensionedLine, List<List<int>> collineation, List<List<int>> anoCollineation, bool[] isDimensioned)
         {
             int len = 0;
@@ -58,6 +75,11 @@ namespace ThMEPWSS.SprinklerDim.Service
             return Dim;
         }
 
+        /// <summary>
+        /// 选取点最多的组
+        /// </summary>
+        /// <param name="collineationList"></param>
+        /// <returns></returns>
         public static List<int> GetLongestLine(List<List<int>> collineationList)
         {
             int longestLineIndex = 0;
@@ -70,6 +92,14 @@ namespace ThMEPWSS.SprinklerDim.Service
             return collineationList[longestLineIndex];
         }
 
+        /// <summary>
+        /// 判断是否碰撞
+        /// </summary>
+        /// <param name="pts1"></param>
+        /// <param name="pts2"></param>
+        /// <param name="matrix"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
         public static bool IsConflicted(Point3d pts1, Point3d pts2, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
             List<Point3d> pts = new List<Point3d> { pts1, pts2 };
@@ -79,6 +109,13 @@ namespace ThMEPWSS.SprinklerDim.Service
             return ThSprinklerDimConflictService.IsConflicted(line, walls);
         }
 
+        /// <summary>
+        /// 获取最近距离
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="dim"></param>
+        /// <param name="isNotDimensioned"></param>
+        /// <returns></returns>
         public static double GetNeareastDistance(List<Point3d> pts, List<int> dim, List<int> isNotDimensioned)
         {
             Line dimline = new Line(pts[dim[0]], pts[dim[dim.Count - 1]]);
@@ -92,6 +129,15 @@ namespace ThMEPWSS.SprinklerDim.Service
             return distance.Min();
         }
 
+        /// <summary>
+        /// 打断去除过已经标注的组
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="line"></param>
+        /// <param name="line2"></param>
+        /// <param name="isXAxis"></param>
+        /// <param name="step"></param>
+        /// <returns></returns>
         public static List<List<int>> SeperateLine(List<Point3d> pts, List<int> line, List<int> line2, bool isXAxis, double step)
         {
             line.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
@@ -118,29 +164,13 @@ namespace ThMEPWSS.SprinklerDim.Service
             return lines;
         }
 
-        public static int ChooseNearestPt(List<Point3d> pts, int pt1, int pt2, List<List<int>> dims)
-        {
-            List<double> d1 = new List<double>();
-            List<double> d2 = new List<double>();
-            foreach (List<int> dim in dims)
-            {
-                if (dim != null)
-                {
-                    if (dim.Count != 1 && dim.Count != 0)
-                    {
-                        Line line = new Line(pts[dim[0]], pts[dim[dim.Count - 1]]);
-                        d1.Add(pts[pt1].DistanceTo(line.GetClosestPointTo(pts[pt1], true)));
-                        d2.Add(pts[pt1].DistanceTo(line.GetClosestPointTo(pts[pt2], true)));
-                    }
-                }
-            }
-            d1.RemoveAll(p => p < 45);
-            d2.RemoveAll(p => p < 45);
-            if (d1.Min() > d2.Min()) return pt2;
-            else return pt1;
-        }
-
-        //去重和去空
+        /// <summary>
+        /// 去重去空处理
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="dimensions"></param>
+        /// <param name="isXAxis"></param>
+        /// <returns></returns>
         public static List<List<List<int>>> DeletNullDimensions(List<Point3d> pts, List<List<List<int>>> dimensions, bool isXAxis)
         {
             List<List<List<int>>> Dimensions = new List<List<List<int>>>();

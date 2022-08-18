@@ -232,12 +232,12 @@
     <Compile Include="SprinklerDim\Data\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Engine\ThSprinklerDimEngine.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimension.cs" />
-    <Compile Include="SprinklerDim\Model\ThSprinklerEdgeNode.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimGroup.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerEdgeNode.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerNetGroup.cs" />
     <Compile Include="SprinklerDim\Service\ThCoordinateService.cs" />
     <Compile Include="SprinklerDim\Service\ThCreateGroupService.cs" />
-<Compile Include="SprinklerDim\Service\ThGeometryOperationService.cs" />
+    <Compile Include="SprinklerDim\Service\ThGeometryOperationService.cs" />
     <Compile Include="SprinklerDim\Service\ThInsertDimToDB.cs" />
     <Compile Include="SprinklerDim\Service\ThOptimizeGroupService.cs" />
     <Compile Include="SprinklerDim\Service\ThSprinklerDimConflictService.cs" />

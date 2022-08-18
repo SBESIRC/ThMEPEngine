@@ -3,8 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.SprinklerDim.Model;
 using static ThMEPWSS.SprinklerDim.Service.ThSprinklerDimensionOperateService;
@@ -15,7 +13,13 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimensionService
     {
-
+        /// <summary>
+        /// 选取标注位主函数
+        /// </summary>
+        /// <param name="transNetList"></param>
+        /// <param name="step"></param>
+        /// <param name="printTag"></param>
+        /// <param name="walls"></param>
         public static void GenerateDimension(List<ThSprinklerNetGroup> transNetList, double step, string printTag, ThCADCoreNTSSpatialIndex walls)
         {
             List<List<int>> FicPts = new List<List<int>>();
@@ -63,8 +67,12 @@ namespace ThMEPWSS.SprinklerDim.Service
                 XDimension = DeletNullDimensions(pts, XDimension, true);
                 YDimension = DeletNullDimensions(pts, YDimension, false);
 
-                foreach (List<List<int>> xdim in XDimension) transNetList[j].XDimension.AddRange(xdim);
-                foreach (List<List<int>> ydim in YDimension) transNetList[j].YDimension.AddRange(ydim);
+
+                List<List<int>> xdims = new List<List<int>>();
+                List<List<int>> ydims = new List<List<int>>();
+
+                foreach (List<List<int>> xdim in XDimension) xdims.AddRange(xdim);
+                foreach (List<List<int>> ydim in YDimension) ydims.AddRange(ydim);
 
                 List<List<int>> xcollinearation = new List<List<int>>();
                 List<List<int>> ycollinearation = new List<List<int>>();
@@ -72,13 +80,35 @@ namespace ThMEPWSS.SprinklerDim.Service
                 transNetList[j].YCollineationGroup.ForEach(p => ycollinearation.AddRange(p));
 
                 //合并能合并的标注
-                transNetList[j].XDimension = MergeDimension(ref pts, transNetList[j].XDimension, step, true, out var FicPts1, transNetList[j].Transformer, walls, xcollinearation);
-                transNetList[j].YDimension = MergeDimension(ref pts, transNetList[j].YDimension, step, false, out var FicPts2, transNetList[j].Transformer, walls, ycollinearation);
+                xdims = MergeDimension(ref pts, xdims, step, true, out var FicPts1, transNetList[j].Transformer, walls, xcollinearation);
+                ydims = MergeDimension(ref pts, ydims, step, false, out var FicPts2, transNetList[j].Transformer, walls, ycollinearation);
                 FicPts[j].AddRange(FicPts1);
                 FicPts[j].AddRange(FicPts2);
-
                 transNetList[j].Pts = pts;
 
+                foreach(List<int>dim in xdims)
+                {
+                    List<ThSprinklerDimGroup> tdim = new List<ThSprinklerDimGroup>();
+                    foreach(int id in dim)
+                    {
+                        ThSprinklerDimGroup idt = new ThSprinklerDimGroup();
+                        idt.AddPt(pts, id, xcollinearation, true, step);
+                        tdim.Add(idt);
+                    }
+                    transNetList[j].XDimension.Add(tdim);
+                }
+
+                foreach (List<int> dim in ydims)
+                {
+                    List<ThSprinklerDimGroup> tdim = new List<ThSprinklerDimGroup>();
+                    foreach (int id in dim)
+                    {
+                        ThSprinklerDimGroup idt = new ThSprinklerDimGroup();
+                        idt.AddPt(pts, id, ycollinearation, false, step);
+                        tdim.Add(idt);
+                    }
+                    transNetList[j].YDimension.Add(tdim);
+                }
             }
 
 
@@ -96,7 +126,6 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
-        //选取第一根标注线
         private static List<int> GetEdgeDimensions(List<Point3d> pts, List<List<int>> group, out List<int> dims, double step, bool isXAxis)
         {
             List<int> EdgeDim = new List<int>();
@@ -138,7 +167,15 @@ namespace ThMEPWSS.SprinklerDim.Service
             return EdgeDim;
         }
 
-        //选取第一根标注线
+        /// <summary>
+        /// 获取第一根标注位
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="collinearation"></param>
+        /// <param name="anothercollinearation"></param>
+        /// <param name="dims"></param>
+        /// <param name="isXAxis"></param>
+        /// <returns></returns>
         private static List<int> getEdgeDimensions(List<Point3d> pts, List<List<int>> collinearation, List<List<int>> anothercollinearation, out List<int> dims, bool isXAxis)
         {
             List<int> EdgeDim = new List<int>();
@@ -232,6 +269,17 @@ namespace ThMEPWSS.SprinklerDim.Service
             return EdgeDim;
         }
 
+        /// <summary>
+        /// 在第一根标注位上循环补点
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="collineation"></param>
+        /// <param name="anotherCollineation"></param>
+        /// <param name="dim"></param>
+        /// <param name="step"></param>
+        /// <param name="isXAxis"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
         private static List<List<int>> AddDimensions(ThSprinklerNetGroup group, List<List<int>> collineation, List<List<int>> anotherCollineation, List<int> dim, double step, bool isXAxis, ThCADCoreNTSSpatialIndex walls)
         {
             bool[] isDimensioned = Enumerable.Repeat(false, anotherCollineation.Count).ToArray();
@@ -299,6 +347,13 @@ namespace ThMEPWSS.SprinklerDim.Service
             return resDims;
         }
 
+        /// <summary>
+        /// test  打印结果
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="Clatersx"></param>
+        /// <param name="Clatersy"></param>
+        /// <returns></returns>
         private static List<Line> Print(ThSprinklerNetGroup group, out List<Point3d> Clatersx, out List<Point3d> Clatersy)
         {
             Clatersx = new List<Point3d>();
@@ -307,39 +362,38 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<Point3d> pts = ThCoordinateService.MakeTransformation(transPts, group.Transformer.Inverse());
             List<Line> lines = new List<Line>();
 
-            foreach (List<int> dim in group.XDimension)
+            foreach (List<ThSprinklerDimGroup> dim in group.XDimension)
             {
                 if (dim == null) continue;
                 else if (dim.Count == 1)
                 {
-                    Clatersx.Add(pts[dim[0]]);
+                    Clatersx.Add(pts[dim[0].pt]);
                 }
                 else
                 {
                     for (int i = 0; i < dim.Count - 1; i++)
                     {
-                        lines.Add(new Line(pts[dim[i]], pts[dim[i + 1]]));
+                        lines.Add(new Line(pts[dim[i].pt], pts[dim[i + 1].pt]));
                     }
                 }
             }
 
-            foreach (List<int> dim in group.YDimension)
+            foreach (List<ThSprinklerDimGroup> dim in group.YDimension)
             {
                 if (dim == null) continue;
                 else if (dim.Count == 1)
                 {
-                    Clatersy.Add(pts[dim[0]]);
+                    Clatersy.Add(pts[dim[0].pt]);
                 }
                 else
                 {
                     for (int i = 0; i < dim.Count - 1; i++)
                     {
-                        lines.Add(new Line(pts[dim[i]], pts[dim[i + 1]]));
+                        lines.Add(new Line(pts[dim[i].pt], pts[dim[i + 1].pt]));
                     }
                 }
             }
             return lines;
         }
-
     }
 }

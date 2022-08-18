@@ -42,6 +42,8 @@ namespace ThMEPWSS.SprinklerDim.Service
 
                 DBObjectCollection dimedArea = new DBObjectCollection();
 
+
+
                 realDim.AddRange(GenerateReferenceDimensionPoint(pts, transNet.Transformer, transNet.XDimension, xCollineation, columnWallsSI, axisCurvesSI, dimLinesSI, rooms[i], textsInRoom, mixColumnWallInRoom, ref dimedArea, pipesInRoom, true, step, printTag));
                 realDim.AddRange(GenerateReferenceDimensionPoint(pts, transNet.Transformer, transNet.YDimension, yCollineation, columnWallsSI, axisCurvesSI, dimLinesSI, rooms[i], textsInRoom, mixColumnWallInRoom, ref dimedArea, pipesInRoom, false, step, printTag));
             }
@@ -49,12 +51,20 @@ namespace ThMEPWSS.SprinklerDim.Service
             return realDim;
         }
 
-        private static List<ThSprinklerDimension> GenerateReferenceDimensionPoint(List<Point3d> pts, Matrix3d transformer, List<List<int>> dims, List<List<int>> anotherCollineation, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, ThCADCoreNTSSpatialIndex dimensionedLines, MPolygon room, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, ref DBObjectCollection dimedArea , ThCADCoreNTSSpatialIndex pipes, bool isXAxis, double step, string printTag)
+        private static List<ThSprinklerDimension> GenerateReferenceDimensionPoint(List<Point3d> pts, Matrix3d transformer, List<List<ThSprinklerDimGroup>> dims, List<List<int>> anotherCollineation, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, ThCADCoreNTSSpatialIndex dimensionedLines, MPolygon room, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, ref DBObjectCollection dimedArea , ThCADCoreNTSSpatialIndex pipes, bool isXAxis, double step, string printTag)
         {
             List<ThSprinklerDimension> realDim = new List<ThSprinklerDimension>();
             dims.Sort((x, y) =>y.Count - x.Count);
 
-            foreach (List<int> dim in dims)
+            List<List<int>> tdims = new List<List<int>>();
+            foreach(List<ThSprinklerDimGroup> p in dims)
+            {
+                List<int> td = new List<int>();
+                p.ForEach(q => td.Add(q.pt));
+                tdims.Add(td);
+            }
+
+            foreach (List<int> dim in tdims)
             {
                 if (dim == null || dim.Count == 0)
                     continue;
