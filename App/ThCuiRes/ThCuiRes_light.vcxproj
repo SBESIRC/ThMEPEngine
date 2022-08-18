@@ -378,6 +378,8 @@
     <Image Include="Images\THTSDP_light_large.ico" />
     <Image Include="Images\THSMBT_light_small.ico" />    
     <Image Include="Images\THSMBT_light_large.ico" />
+    <Image Include="Images\THMEPHELP_light_small.ico" />    
+    <Image Include="Images\THMEPHELP_light_large.ico" />
     <Image Include="Images\THALIGN_bottom_light_small.ico" />
     <Image Include="Images\THALIGN_bottom_light_large.ico" />
     <Image Include="Images\THALIGN_horizontal_light_small.ico" />

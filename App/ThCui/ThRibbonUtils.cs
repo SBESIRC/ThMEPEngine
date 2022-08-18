@@ -3,7 +3,6 @@ using Autodesk.Windows;
 using System.Collections.Generic;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPIdentity;
 
 namespace TianHua.AutoCAD.ThCui
 {
@@ -41,7 +40,7 @@ namespace TianHua.AutoCAD.ThCui
             foreach (var panel in Tab.Panels.Where(o => o.UID == "pnl" + "Help"))
             {
                 // 隐藏登陆按钮，显示退出按钮
-                foreach(RibbonRowPanel rowPanel in panel.Source.Items)
+                foreach (RibbonRowPanel rowPanel in panel.Source.Items)
                 {
                     rowPanel.Items.Where(o => o.Text == "专业切换").ForEach(o => o.IsVisible = true);
                 }
@@ -70,26 +69,6 @@ namespace TianHua.AutoCAD.ThCui
                 {
                     rowPanel.Items.Where(o => o.Text == "专业切换").ForEach(o => o.IsVisible = false);
                 }
-            }
-        }
-
-        public static void ConfigPanelsWithCurrentUser()
-        {
-            if (ThAcsSystemService.Instance.IsLogged)
-            {
-                OpenAllPanels();
-            }
-            else
-            {
-                CloseAllPanels();
-            }
-        }
-
-        public static void ConfigPanelsWithCurrentProfile()
-        {
-            if (ThAcsSystemService.Instance.IsLogged)
-            {
-                ConfigPanelsWithProfile(ThAcsSystemService.Instance.MajorCode);
             }
         }
 

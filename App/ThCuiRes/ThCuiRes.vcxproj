@@ -380,6 +380,8 @@
     <Image Include="Images\THTSDP_dark_large.ico" />
     <Image Include="Images\THSMBT_dark_small.ico" />    
     <Image Include="Images\THSMBT_dark_large.ico" />
+    <Image Include="Images\THMEPHELP_dark_small.ico" />    
+    <Image Include="Images\THMEPHELP_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />
