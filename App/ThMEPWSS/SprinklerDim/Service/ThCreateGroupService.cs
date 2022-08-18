@@ -201,7 +201,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                         break;
                     }
                 }
-                if (selectGroup == null)
+                if (selectGroup == null && nearPts.Count > 0)
                 {
                     //没有再找范围内最近距离的
                     var nearPt = nearPts.First();
@@ -226,7 +226,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
                 if (selectGroup == null)
                 {
-                    //全局其实只有一个点
+                    //全局其实只有一个点or两个点
                     selectGroup = new ThSprinklerNetGroup();
                     selectGroup.Angle = angle;
                     netGroup.Add(selectGroup);

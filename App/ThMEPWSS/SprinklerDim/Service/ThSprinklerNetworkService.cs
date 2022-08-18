@@ -118,33 +118,28 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             var length = 2000.0;
 
-            //var lengthGroup = dtOrthogonalSeg.GroupBy(x => x.Length).ToDictionary(g => g.Key, g => g.ToList()).OrderByDescending(x => x.Value.Count).ToList();
-
-            //var averageC = 0;
-            //var lengthTemp = 0.0;
-
-            //var list = dtOrthogonalSeg.Select(x => x.Length).ToList();
-
-            //for (int i = 0; i < 3 && i < lengthGroup.Count(); i++)
-            //{
-            //    lengthTemp += lengthGroup[i].Key;
-            //    averageC++;
-            //}
-
             var group = dtOrthogonalSeg.GroupBy(x => Math.Round(x.Length / 100, MidpointRounding.AwayFromZero));
             var dict = group.OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Select(x => x.Length).ToList());
 
             var list = new List<double>();
-            for (int i = 0; i < 3; i++)
+            var maxI = 3;
+            if (dict.Count() < maxI)
+            {
+                maxI = dict.Count;
+            }
+
+            for (int i = 0; i < maxI; i++)
             {
                 list.AddRange(dict.ElementAt(i).Value);
             }
 
-            var ave = list.Average();
-
-            if (ave > 2000)
+            if (list.Count > 0)
             {
-                length = ave;
+                var ave = list.Average();
+                if (ave > 2000)
+                {
+                    length = ave;
+                }
             }
 
             return length;
@@ -159,28 +154,30 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             var angleTol = 1;
             var angleGroupDict = new Dictionary<double, List<Line>>();
-
-            var angleGroupTemp = dtOrthogonalSeg.GroupBy(x => x.Angle).ToDictionary(g => g.Key, g => g.ToList()).OrderByDescending(x => x.Value.Count).ToDictionary(x => x.Key, x => x.Value);
-            angleGroupDict.Add(angleGroupTemp.ElementAt(0).Key, angleGroupTemp.ElementAt(0).Value);
-
-            for (int i = 1; i < angleGroupTemp.Count; i++)
+            if (dtOrthogonalSeg.Count > 0)
             {
-                var angleA = angleGroupTemp.ElementAt(i).Key;
-                var bAdded = false;
-                for (int j = 0; j < angleGroupDict.Count; j++)
-                {
-                    var angleB = angleGroupDict.ElementAt(j).Key;
+                var angleGroupTemp = dtOrthogonalSeg.GroupBy(x => x.Angle).ToDictionary(g => g.Key, g => g.ToList()).OrderByDescending(x => x.Value.Count).ToDictionary(x => x.Key, x => x.Value);
+                angleGroupDict.Add(angleGroupTemp.ElementAt(0).Key, angleGroupTemp.ElementAt(0).Value);
 
-                    if (ThSprinklerLineService.IsOrthogonalAngle(angleA, angleB, angleTol))
-                    {
-                        angleGroupDict[angleB].AddRange(angleGroupTemp[angleA]);
-                        bAdded = true;
-                        break;
-                    }
-                }
-                if (bAdded == false)
+                for (int i = 1; i < angleGroupTemp.Count; i++)
                 {
-                    angleGroupDict.Add(angleA, angleGroupTemp[angleA]);
+                    var angleA = angleGroupTemp.ElementAt(i).Key;
+                    var bAdded = false;
+                    for (int j = 0; j < angleGroupDict.Count; j++)
+                    {
+                        var angleB = angleGroupDict.ElementAt(j).Key;
+
+                        if (ThSprinklerLineService.IsOrthogonalAngle(angleA, angleB, angleTol))
+                        {
+                            angleGroupDict[angleB].AddRange(angleGroupTemp[angleA]);
+                            bAdded = true;
+                            break;
+                        }
+                    }
+                    if (bAdded == false)
+                    {
+                        angleGroupDict.Add(angleA, angleGroupTemp[angleA]);
+                    }
                 }
             }
 
@@ -709,7 +706,8 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
         /// <summary>
-        /// 找喷淋点垂直线个数为0的点，找正交
+        /// 找喷淋点正交线个数为0的点，找德劳内正交
+        /// 德劳内线另一端也必须是空点才行
         /// </summary>
         /// <param name="ptDtDict"></param>
         /// <param name="ptDtOriDict"></param>

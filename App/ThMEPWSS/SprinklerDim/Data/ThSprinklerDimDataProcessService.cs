@@ -40,7 +40,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public List<Polyline> TchPipeText { get; private set; } = new List<Polyline>();
         public List<Polyline> Column { get; set; } = new List<Polyline>();
         public List<Polyline> Wall { get; set; } = new List<Polyline>(); //mpolygon //polyline
-        public List<Polyline> Room { get; set; } = new List<Polyline>(); //mpolygon //polyline
+        public List<MPolygon> Room { get; set; } = new List<MPolygon>(); //mpolygon //polyline
         public List<Line> AxisCurves { get; set; } = new List<Line>();
         public void ProcessData()
         {
@@ -87,9 +87,13 @@ namespace ThMEPWSS.SprinklerDim.Data
                 Wall.AddRange(WallData.OfType<MPolygon>().Select(x => x.Shell()));
                 Wall.AddRange(WallData.OfType<MPolygon>().SelectMany(x => x.Holes()));
 
-                Room.AddRange(RoomData.OfType<Polyline>());
-                Room.AddRange(RoomData.OfType<MPolygon>().Select(x => x.Shell()));
-                Room.AddRange(RoomData.OfType<MPolygon>().SelectMany(x => x.Holes()));
+                //Room.AddRange(RoomData.OfType<Polyline>());
+                //Room.AddRange(RoomData.OfType<MPolygon>().Select(x => x.Shell()));
+                //Room.AddRange(RoomData.OfType<MPolygon>().SelectMany(x => x.Holes()));
+
+                Room.AddRange(RoomData.OfType<Polyline>().Select(x => ThMPolygonTool.CreateMPolygon(x)));
+                Room.AddRange(RoomData.OfType<MPolygon>());
+
             }
         }
 
@@ -126,7 +130,7 @@ namespace ThMEPWSS.SprinklerDim.Data
 
             DrawUtils.ShowGeometry(Wall, "l0wall", 1);
             DrawUtils.ShowGeometry(Column, "l0column", 3);
-            DrawUtils.ShowGeometry(Room, "l0room", 30);
+            Room.ForEach(x => DrawUtils.ShowGeometry(x, "l0room", 30));
 
             AxisCurves.ForEach(x => DrawUtils.ShowGeometry(x, "l0axis", 1));
         }
