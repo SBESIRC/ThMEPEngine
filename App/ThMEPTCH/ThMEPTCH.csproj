@@ -112,6 +112,7 @@
     <Compile Include="Model\ThTCHWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
+    <Compile Include="Services\ThMEPTCHTool.cs" />
     <Compile Include="Services\ThTCHArchDBService.cs" />
     <Compile Include="Services\ThTGLXMLService.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />

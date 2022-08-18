@@ -60,11 +60,14 @@ namespace ThMEPTCH.CAD
             if (IsBuildElement(tch) && CheckLayerValid(tch) && tch.Visible && tch.Bounds.HasValue)
             {
                 var archDoor = tch.Database.LoadDoorFromDb(tch.ObjectId, matrix, uid);
-                results.Add(new ThRawIfcBuildingElementData()
+                if(archDoor.IsValid())
                 {
-                    Data = archDoor,
-                    Geometry = CreateOutline(archDoor),
-                });
+                    results.Add(new ThRawIfcBuildingElementData()
+                    {
+                        Data = archDoor,
+                        Geometry = CreateOutline(archDoor),
+                    });
+                }
             }
             return results;
         }

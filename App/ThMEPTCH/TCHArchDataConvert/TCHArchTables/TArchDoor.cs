@@ -37,5 +37,10 @@
         public int Kind { get; set; }
         public string SubKind { get; set; }
         public double Rotation { get; set; }
+
+        public override bool IsValid()
+        {
+            return Width > 1.0 && Thickness > 1.0;
+        }
     }
 }

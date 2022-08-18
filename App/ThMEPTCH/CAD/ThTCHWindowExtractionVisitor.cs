@@ -42,12 +42,14 @@ namespace ThMEPTCH.CAD
             if (IsBuildElement(tch) && CheckLayerValid(tch))
             {
                 var archWindow = tch.Database.LoadWindowFromDb(tch.ObjectId, matrix, uid);
-                results.Add(new ThRawIfcBuildingElementData()
+                if(archWindow.IsValid())
                 {
-
-                    Data = archWindow,
-                    Geometry = CreateOutline(archWindow),
-                });
+                    results.Add(new ThRawIfcBuildingElementData()
+                    {
+                        Data = archWindow,
+                        Geometry = CreateOutline(archWindow),
+                    });
+                }
             }
             return results;
         }

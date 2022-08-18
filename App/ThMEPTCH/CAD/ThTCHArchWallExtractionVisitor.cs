@@ -60,11 +60,14 @@ namespace ThMEPTCH.CAD
             if (IsBuildElement(tch) && CheckLayerValid(tch) && tch.Visible && tch.Bounds.HasValue)
             {
                 var archWall = tch.Database.LoadWallFromDb(tch.ObjectId, matrix, uid);
-                results.Add(new ThRawIfcBuildingElementData()
+                if(archWall.IsValid())
                 {
-                    Data = archWall,
-                    Geometry = CreateOutline(archWall),
-                });
+                    results.Add(new ThRawIfcBuildingElementData()
+                    {
+                        Data = archWall,
+                        Geometry = CreateOutline(archWall),
+                    });
+                }
             }
             return results;
         }
