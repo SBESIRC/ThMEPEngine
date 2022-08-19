@@ -9,28 +9,22 @@ namespace ThMEPStructure.StructPlane.Print
 {
     internal class ThSlabAnnotationPrinter
     {
-        public ThSlabAnnotationPrinter()
+        public static ObjectIdCollection Print(AcadDatabase acadDb, DBText text)
         {
-        }
-        public ObjectIdCollection Print(Database db, DBText text)
-        {
-            using (var acadDb = AcadDatabase.Use(db))
-            {
-                var results = new ObjectIdCollection();
-                var positon = text.Position;
-                var textString = text.TextString;
-                var attNameValues = new Dictionary<string, string>() { };
-                attNameValues.Add("BTH", textString);
-                var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(
-                                        ThPrintLayerManager.SlabTextLayerName,
-                                        ThPrintBlockManager.BthBlkName,
-                                        positon,
-                                        new Scale3d(1.0),
-                                        0.0,
-                                        attNameValues);
-                results.Add(blkId);
-                return results;
-            }
+            var results = new ObjectIdCollection();
+            var positon = text.Position;
+            var textString = text.TextString;
+            var attNameValues = new Dictionary<string, string>() { };
+            attNameValues.Add("BTH", textString);
+            var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                                    ThPrintLayerManager.SlabTextLayerName,
+                                    ThPrintBlockManager.BthBlkName,
+                                    positon,
+                                    new Scale3d(1.0),
+                                    0.0,
+                                    attNameValues);
+            results.Add(blkId);
+            return results;
         }
     }
 }

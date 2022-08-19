@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ThCADExtension
@@ -21,46 +22,28 @@ namespace ThCADExtension
 
         public static DBObjectCollection Union(this DBObjectCollection first, DBObjectCollection second)
         {
-            var results = new DBObjectCollection();
-            foreach (DBObject dbObj in first)
-            {
-                if (!results.Contains(dbObj))
-                {
-                    results.Add(dbObj);
-                }
-            }
-            foreach (DBObject dbObj in second)
-            {
-                if (!results.Contains(dbObj))
-                {
-                    results.Add(dbObj);
-                }
-            }
-            return results;
+            var firstHash = first.OfType<DBObject>().ToHashSet();
+            var secondHash = second.OfType<DBObject>().ToHashSet();
+            return firstHash.Union(secondHash).ToCollection();
         }
 
         public static DBObjectCollection Difference(this DBObjectCollection first, DBObjectCollection second)
         {
-            var results = new DBObjectCollection();
-            results = Union(results, first);
-            foreach (DBObject dbObj in second)
-            {
-                results.Remove(dbObj);
-            }
-            return results;
+            var firstHash = first.OfType<DBObject>().ToHashSet();
+            var secondHash = second.OfType<DBObject>().ToHashSet();
+            return firstHash.Except(secondHash).ToCollection();
+        }
+
+        public static DBObjectCollection Intersect(this DBObjectCollection first, DBObjectCollection second)
+        {
+            var firstHash = first.OfType<DBObject>().ToHashSet();
+            var secondHash = second.OfType<DBObject>().ToHashSet();
+            return firstHash.Intersect(secondHash).ToCollection();
         }
 
         public static DBObjectCollection Distinct(this DBObjectCollection objs)
         {
-            var results = new DBObjectCollection();
-            foreach (DBObject dbObj in objs)
-            {
-                if (!results.Contains(dbObj))
-                {
-                    results.Add(dbObj);
-                }
-            }
-            return results;
+            return objs.OfType<DBObject>().ToHashSet().ToCollection();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using Linq2Acad;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
@@ -9,20 +11,12 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
-using ThCADCore.NTS;
 
 namespace ThMEPStructure.StructPlane.Print
 {
     internal class ThHolePrinter
     {
-        private HatchPrintConfig HatchConfig { get; set; }
-        private PrintConfig OutlineConfig { get; set; }
-        public ThHolePrinter(HatchPrintConfig hatchConfig, PrintConfig outlineConfig)
-        {
-            HatchConfig = hatchConfig;
-            OutlineConfig = outlineConfig;
-        }
-        public ObjectIdCollection Print(Database db, Polyline polygon)
+        public static ObjectIdCollection Print(AcadDatabase db, Polyline polygon, PrintConfig outlineConfig, HatchPrintConfig hatchConfig)
         {
             var results = new ObjectIdCollection();
             if(polygon.Length<=1.0 || polygon.Area<=1.0 || 
@@ -30,7 +24,7 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 return results;
             }            
-            var outPolygonId = polygon.Print(db, OutlineConfig);
+            var outPolygonId = polygon.Print(db, outlineConfig);
             results.Add(outPolygonId);
             var newOutPolygon = Handle(polygon);
             if (newOutPolygon.Area < 1.0)
@@ -40,15 +34,15 @@ namespace ThMEPStructure.StructPlane.Print
             var innerhole = BuildHatchHole(newOutPolygon);
             if (innerhole.Area > 0.0)
             {
-                var innerPolygonId = innerhole.Print(db, OutlineConfig);
+                var innerPolygonId = innerhole.Print(db, outlineConfig);
                 var objIds = new ObjectIdCollection { innerPolygonId };
-                var hatchId = objIds.Print(db, HatchConfig);
+                var hatchId = objIds.Print(db, hatchConfig);
                 results.Add(innerPolygonId);
                 results.Add(hatchId);
             }
             return results;
         }
-        private Polyline Handle(Polyline polygon)
+        private static Polyline Handle(Polyline polygon)
         {
             var objs = new DBObjectCollection() { polygon };
             if (polygon.IsRectangle())
@@ -77,7 +71,7 @@ namespace ThMEPStructure.StructPlane.Print
                 }
             }
         }
-        private Polyline BuildHatchHole(Polyline polygon)
+        private static Polyline BuildHatchHole(Polyline polygon)
         {
             // 传入的polygon顶点不能有重复,只允许首尾有重复点,不支持弧
             var pairs = new List<Tuple<int, int, int>>();
@@ -164,7 +158,7 @@ namespace ThMEPStructure.StructPlane.Print
                 return new Polyline();
             }
         }
-        private bool IsContains(Polyline polygon,Point3d lineSp,Point3d lineEp)
+        private static bool IsContains(Polyline polygon,Point3d lineSp,Point3d lineEp)
         {
             var line = new Line(lineSp, lineEp);
             bool isIn = polygon.EntityContains(line);

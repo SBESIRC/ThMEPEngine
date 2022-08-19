@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using NFox.Cad;
+using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -17,20 +18,23 @@ namespace ThMEPStructure.StructPlane.Print
         }
         public override void Print(Database db)
         {
-            // 打印墙柱
-            PrintGeos(db);
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                // 打印墙柱
+                PrintGeos(acadDb);
 
-            // 打印标题
-            PrintHeadText(db);
+                // 打印标题
+                PrintHeadText(acadDb);
 
-            // 打印层高表
-            //PrintElevationTable(db);
+                // 打印层高表
+                //PrintElevationTable(acadDb);
 
-            // 过滤无效Id
-            ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+                // 过滤无效Id
+                ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+            }
         }
 
-        private void PrintGeos(Database database)
+        private void PrintGeos(AcadDatabase acadDb)
         {
             // 打印到图纸中
             _geos.ForEach(o =>
@@ -47,21 +51,21 @@ namespace ThMEPStructure.StructPlane.Print
                     {
                         if(o.IsBelowFloorColumn())
                         {
-                            Append(PrintUpperColumn(database, o));
+                            Append(PrintUpperColumn(acadDb, o));
                         }                       
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
                         if(o.IsBelowFloorShearWall())
                         {
-                            Append(PrintUpperShearWall(database, o));
+                            Append(PrintUpperShearWall(acadDb, o));
                         }                        
                     }
                 }
             });
         }
        
-        private void PrintElevationTable(Database db)
+        private void PrintElevationTable(AcadDatabase acadDb)
         {
             // 打印柱表
             var maxX = _geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
@@ -76,9 +80,9 @@ namespace ThMEPStructure.StructPlane.Print
             var objs = tblBuilder.Build();
             var mt = Matrix3d.Displacement(elevationTblBasePt - Point3d.Origin);
             objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt));
-            Append(objs.Print(db));
+            Append(objs.Print(acadDb));
         }
-        private void PrintHeadText(Database database)
+        private void PrintHeadText(AcadDatabase acadDb)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
             var flrRange = _floorInfos.GetFloorHeightRange(_flrBottomEle);
@@ -86,7 +90,7 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 return;
             }            
-            Append(PrintHeadText(database,flrRange)); // 把结果存到ObjIds中
+            Append(PrintHeadText(acadDb, flrRange)); // 把结果存到ObjIds中
         }
     }
 }

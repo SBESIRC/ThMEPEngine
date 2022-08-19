@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NFox.Cad;
+using Linq2Acad;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -23,46 +23,40 @@ namespace ThMEPStructure.StructPlane.Service
         private ThCADCoreNTSSpatialIndex BeamLineSpatialIndex { get; set; }
 
         public List<Tuple<DBText, DBText, DBText>> DoubleRowTexts { get; set; }
-        private Database database;
 
         public ThAdjustBeamMarkService(
-            Database db,
             DBObjectCollection beamLines,
             Dictionary<DBText, Vector3d> beamTexts)
         {
-            database = db;
             BeamLines = beamLines;
             BeamTexts = beamTexts;
             DoubleRowTexts = new List<Tuple<DBText, DBText, DBText>>();
             BeamLineSpatialIndex = new ThCADCoreNTSSpatialIndex(BeamLines);
         }
-        public void Adjust()
+        public void Adjust(AcadDatabase acadDb)
         {
-            using (var acadDb = Linq2Acad.AcadDatabase.Use(database))
+            // 要把单行文字拆成两行
+            BeamTexts.ForEach(o =>
             {
-                // 要把单行文字拆成两行
-                BeamTexts.ForEach(o =>
+                var text = acadDb.Element<DBText>(o.Key.ObjectId, true);
+                if (text.TextString.IsBeamSpec())
                 {
-                    var text = acadDb.Element<DBText>(o.Key.ObjectId, true);
-                    if (text.TextString.IsBeamSpec())
+                    Move(text, o.Value);
+                }
+                else if (text.TextString.IsBeamBgMark())
+                {
+                    var texts = Split(text); // spec,bg
+                    if (texts != null)
+                    {
+                        Move(text, texts.Item1, texts.Item2, o.Value);
+                        DoubleRowTexts.Add(Tuple.Create(text, texts.Item1, texts.Item2));
+                    }
+                    else
                     {
                         Move(text, o.Value);
                     }
-                    else if (text.TextString.IsBeamBgMark())
-                    {
-                        var texts = Split(text); // spec,bg
-                        if (texts != null)
-                        {
-                            Move(text, texts.Item1, texts.Item2, o.Value);
-                            DoubleRowTexts.Add(Tuple.Create(text, texts.Item1, texts.Item2));
-                        }
-                        else
-                        {
-                            Move(text, o.Value);
-                        }
-                    }
-                });
-            }
+                }
+            });
         }
 
         private void Move(DBText beamMark,Vector3d moveVec)

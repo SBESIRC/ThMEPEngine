@@ -183,11 +183,15 @@ namespace ThMEPStructure.Common
         {
             using (var acadDb = AcadDatabase.Use(db))
             {
-                return objIds
+                return objIds.ToDBObjectCollection(acadDb);
+            }
+        }
+        public static DBObjectCollection ToDBObjectCollection(this ObjectIdCollection objIds, AcadDatabase acadDb)
+        {
+            return objIds
                     .OfType<ObjectId>()
                     .Where(o => !o.IsErased)
                     .Select(o => acadDb.Element<Entity>(o)).ToCollection();
-            }
         }
         public static void SetLayerOrder(this List<ObjectIdCollection> floorObjIds,List<string> layerPriority)
         {

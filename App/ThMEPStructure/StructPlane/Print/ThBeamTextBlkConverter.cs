@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
@@ -27,52 +28,51 @@ namespace ThMEPStructure.StructPlane.Print
             this.alignmentIndex = alignmentIndex;
         }
 
-        public ObjectIdCollection Convert(Database database,List<DBObjectCollection> beamTextObjs)
+        public ObjectIdCollection Convert(AcadDatabase acadDb,List<DBObjectCollection> beamTextObjs)
         {
-            CreateBlock(database, beamTextObjs);
-            return InsertBlock(database,beamTextObjs);
+            CreateBlock(acadDb, beamTextObjs);
+            return InsertBlock(acadDb, beamTextObjs);
         }
 
-        private ObjectIdCollection InsertBlock(Database database, List<DBObjectCollection> beamTextObjs)
+        private ObjectIdCollection InsertBlock(AcadDatabase acadDb, List<DBObjectCollection> beamTextObjs)
         {
-            using (var acadDb = AcadDatabase.Use(database))
+            var results = new ObjectIdCollection();
+            beamTextObjs.Where(o => o.Count > 0.0).ForEach(o =>
             {
-                var results = new ObjectIdCollection();
-                beamTextObjs.Where(o=>o.Count>0.0).ForEach(o =>
-                {
-                    var blkName = o.GetMultiTextString();
-                    var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
-                        ThPrintLayerManager.BeamTextLayerName, blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
-                    var blkObj = acadDb.Element<BlockReference>(blkId,true);
-                    
-                    // 把块中心放置在原点
-                    MoveToCenter(blkObj);
+                var blkName = o.GetMultiTextString();
+                var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
+                    ThPrintLayerManager.BeamTextLayerName, blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
+                var blkObj = acadDb.Element<BlockReference>(blkId, true);
 
-                    var blkFrame = GetBlkFrame(blkObj);
+                // 把块的中心移动原点
+                var blkObjOldCenter = blkObj.GeometricExtents.GetCenter();
+                var mt = Matrix3d.Displacement(blkObjOldCenter.GetVectorTo(Point3d.Origin));
+                blkObj.TransformBy(mt);
 
-                    // 调整块的角度
-                    var blkCenter = GetABBCenter(blkObj);
-                    var rotation = o.OfType<DBText>().First().Rotation;
-                    var rotateMt = Matrix3d.Rotation(rotation, Vector3d.ZAxis, blkCenter);
-                    blkObj.TransformBy(rotateMt);
-                    blkFrame.TransformBy(rotateMt);
-                    var blkFrameCenter = GetFrameCenter(blkFrame);
+                // 获取块的外包框、中心点
+                var blkFrame = GetBlkFrame(blkObj);
+                var blkCenter = GetABBCenter(blkObj);
 
-                    // 让块的OBB 和 o中装的文字的OBB对齐
-                    var textGroupFrame = GetParallelTextsFrame(o);
-                    var textGroupCenter = GetFrameCenter(textGroupFrame);
+                // 调整块的角度
+                var rotation = o.OfType<DBText>().First().Rotation;
+                var rotateMt = Matrix3d.Rotation(rotation, Vector3d.ZAxis, blkCenter);
+                blkObj.TransformBy(rotateMt);
+                blkFrame.TransformBy(rotateMt);
+                var blkFrameCenter = GetFrameCenter(blkFrame);
 
-                    // 把块移动到文字组的中心
-                    
-                    var moveMt = Matrix3d.Displacement(blkFrameCenter.GetVectorTo(textGroupCenter));
-                    blkObj.TransformBy(moveMt);
+                // 让块的OBB 和 o中装的文字的OBB对齐
+                var textGroupFrame = GetParallelTextsFrame(o);
+                var textGroupCenter = GetFrameCenter(textGroupFrame);
 
-                    results.Add(blkId);
-                    blkFrame.Dispose();
-                    textGroupFrame.Dispose();
-                });
-                return results;
-            }
+                // 把块移动到文字组的中心
+                var moveMt = Matrix3d.Displacement(blkFrameCenter.GetVectorTo(textGroupCenter));
+                blkObj.TransformBy(moveMt);
+
+                results.Add(blkId);
+                blkFrame.Dispose();
+                textGroupFrame.Dispose();
+            });
+            return results;
         }
 
         private Point3d GetFrameCenter(Polyline frame)
@@ -96,13 +96,6 @@ namespace ThMEPStructure.StructPlane.Print
             return extents.MinPoint.GetMidPt(extents.MaxPoint);
         }
 
-        private void MoveToCenter(BlockReference br)
-        {
-            var center = GetABBCenter(br);
-            var mt = Matrix3d.Displacement(center.GetVectorTo(Point3d.Origin));
-            br.TransformBy(mt);
-        }
-
         private Polyline GetBlkFrame(BlockReference br)
         {
             // br 是 0 度
@@ -119,7 +112,7 @@ namespace ThMEPStructure.StructPlane.Print
             return pts.CreatePolyline();
         }
 
-        private void CreateBlock(Database db, List<DBObjectCollection> beamTextObjs)
+        private void CreateBlock(AcadDatabase acadDb, List<DBObjectCollection> beamTextObjs)
         {
             beamTextObjs.Where(o=>o.Count>0).ForEach(o =>
             {
@@ -129,7 +122,7 @@ namespace ThMEPStructure.StructPlane.Print
                 if(!string.IsNullOrEmpty(blkName))
                 {
                     AdjustPosition(clones);
-                    CreateBlock(db, clones, blkName);
+                    CreateBlock(acadDb, clones, blkName);
                 }
             });
         }
@@ -141,12 +134,13 @@ namespace ThMEPStructure.StructPlane.Print
             // 把文字旋转到0度,并将文字移动到原点
             dbTexts.OfType<DBText>().ForEach(o => RotateToHorizontalPosition(o));
 
+            // 把所有文字中心移动到原点
+            dbTexts.OfType<DBText>().ForEach(o => MoveTo(o,Point3d.Origin));
+
             // 调整文字间距
             AjustTextGap(dbTexts,textGaps);
 
-            var bottomPos = dbTexts.OfType<DBText>().OrderBy(o => o.Position.Y).First().GeometricExtents.MinPoint;
-            var mt = Matrix3d.Displacement(bottomPos.GetVectorTo(Point3d.Origin));
-            dbTexts.OfType<DBText>().ForEach(o => o.TransformBy(mt));
+            // 调整对齐方式
             if(alignmentIndex == 0)
             {
                 AdjustCenterAlignment(dbTexts);
@@ -159,25 +153,36 @@ namespace ThMEPStructure.StructPlane.Print
             {
                 AdjustRightAlignment(dbTexts);
             }
+
+            // 把整个文字中心放到原点
+            MoveCenterToOrigin(dbTexts);
+
+            // 调整文字中心
+            dbTexts.OfType<DBText>().ForEach(o =>
+            {
+                var center = o.GeometricExtents.GetCenter();
+                SetTextCenter(o, center);
+            });
         }
 
         private void AjustTextGap(DBObjectCollection horParallelTexts,List<double> textGaps)
         {
+            // horParallelTexts的中心都在原点
             // 保持水平位置的相对性，第一个排在最上面
-            if(textGaps.Count==0)
+            if (textGaps.Count==0)
             {
                 return;
-            }
-            var first = horParallelTexts.OfType<DBText>().First();   
-            for (int i = 1; i < horParallelTexts.Count; i++)
+            } 
+            for (int i = 0; i < horParallelTexts.Count; i++)
             {
-                var second = horParallelTexts[i] as DBText;
-                var oldGap = textGaps[i - 1];
-                var newSecondY = first.Position.Y - oldGap;
-                var moveVec = new Vector3d(0, newSecondY - second.Position.Y, 0);
-                var mt = Matrix3d.Displacement(moveVec);
-                second.TransformBy(mt);
-                first = second;       
+                var current = horParallelTexts[i] as DBText;
+                var moveDistance = 0.0;
+                for(int j =i;j< textGaps.Count;j++)
+                {
+                    moveDistance += textGaps[j];
+                }
+                var mt = Matrix3d.Displacement(new Vector3d(0, moveDistance, 0));
+                current.TransformBy(mt);
             }
         }
 
@@ -206,14 +211,11 @@ namespace ThMEPStructure.StructPlane.Print
         private void AdjustCenterAlignment(DBObjectCollection dbTexts)
         {
             // dbTexts 都是水平文字
-            var bottomText = dbTexts.OfType<DBText>().OrderBy(o => o.Position.Y).First();
-            var bottomCenter = bottomText.GeometricExtents.GetCenter();
-            for (int i=0;i<dbTexts.Count;i++)
+            for (int i = 0; i < dbTexts.Count; i++)
             {
                 var current = dbTexts[i] as DBText;
-                var currentCenter = current.GeometricExtents.GetCenter();
-                var xMinus = bottomCenter.X - currentCenter.X;
-                var mt = Matrix3d.Displacement(new Vector3d(xMinus,0,0));
+                var currentCenterPt = current.GeometricExtents.GetCenter();
+                var mt = Matrix3d.Displacement(new Vector3d(currentCenterPt.X * -1.0, 0, 0));
                 current.TransformBy(mt);
             }
         }
@@ -221,57 +223,77 @@ namespace ThMEPStructure.StructPlane.Print
         private void AdjustLeftAlignment(DBObjectCollection dbTexts)
         {
             // dbTexts 都是水平文字
-            var bottomText = dbTexts.OfType<DBText>().OrderBy(o => o.Position.Y).First();
-            var bottomMinPt = bottomText.GeometricExtents.MinPoint;
             for (int i = 0; i < dbTexts.Count; i++)
             {
                 var current = dbTexts[i] as DBText;
                 var currentMinPt = current.GeometricExtents.MinPoint;
-                var xMinus = bottomMinPt.X - currentMinPt.X;
-                var mt = Matrix3d.Displacement(new Vector3d(xMinus, 0, 0));
+                var mt = Matrix3d.Displacement(new Vector3d(currentMinPt.X * -1.0, 0, 0));
                 current.TransformBy(mt);
             }
         }
 
         private void AdjustRightAlignment(DBObjectCollection dbTexts)
         {
-            // dbTexts 都是水平文字
-            var bottomText = dbTexts.OfType<DBText>().OrderBy(o => o.Position.Y).First();
-            var bottomMaxPt = bottomText.GeometricExtents.MaxPoint;
+            //// dbTexts 都是水平文字
             for (int i = 0; i < dbTexts.Count; i++)
             {
                 var current = dbTexts[i] as DBText;
                 var currentMaxPt = current.GeometricExtents.MaxPoint;
-                var xMinus = bottomMaxPt.X - currentMaxPt.X;
-                var mt = Matrix3d.Displacement(new Vector3d(xMinus, 0, 0));
+                var mt = Matrix3d.Displacement(new Vector3d(currentMaxPt.X * -1.0, 0, 0));
                 current.TransformBy(mt);
             }
         }
 
-        private ObjectId CreateBlock(Database database , DBObjectCollection objs,string blkName)
+        private ObjectId CreateBlock(AcadDatabase acadDb , DBObjectCollection objs,string blkName)
         {
-            using (var acadDb = AcadDatabase.Use(database))
+            BlockTable bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId, true);
+            if (!bt.Has(blkName))
             {
-                BlockTable bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId, true);
-                if (!bt.Has(blkName))
+                var btr = new BlockTableRecord()
                 {
-                    var btr = new BlockTableRecord()
-                    {
-                        Name = blkName,
-                        Explodable =false,
-                    };
-                    objs.OfType<Entity>().ForEach(o => btr.AppendEntity(o));
-                    bt.Add(btr);
-                    acadDb.Database.TransactionManager.AddNewlyCreatedDBObject(btr, true);
-                }                
-                return bt[blkName];
+                    Name = blkName,
+                    Explodable = false,
+                };
+                objs.OfType<Entity>().ForEach(o => btr.AppendEntity(o));
+                bt.Add(btr);
+                acadDb.Database.TransactionManager.AddNewlyCreatedDBObject(btr, true);
             }
+            return bt[blkName];
         }
 
         private void RotateToHorizontalPosition(DBText text)
         {
             var mt = Matrix3d.Rotation(text.Rotation * -1.0, text.Normal, text.Position);
             text.TransformBy(mt);
+        }
+
+        private void SetTextCenter(DBText text,Point3d center)
+        {
+            text.Position = center;
+            text.AlignmentPoint = center;
+        }
+
+        private void MoveTo(DBText text, Point3d newCenter)
+        {
+            var oldCenter = text.GeometricExtents.GetCenter();
+            var mt = Matrix3d.Displacement(oldCenter.GetVectorTo(newCenter));
+            text.TransformBy(mt);
+        }
+
+        private void MoveCenterToOrigin(DBObjectCollection texts)
+        {
+            var extents = new Extents3d();
+            texts.OfType<DBText>().ForEach(o =>
+            {
+                extents.AddExtents(o.GeometricExtents);
+            });
+            var oldCenter = extents.GetCenter();
+            var newCenter = Point3d.Origin;
+            var mt = Matrix3d.Displacement(oldCenter.GetVectorTo(newCenter));
+            texts.OfType<DBText>().ForEach(o =>
+            {
+                o.TransformBy(mt);
+            });
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
@@ -11,39 +12,32 @@ namespace ThMEPStructure.StructPlane.Print
 {
     internal class ThSlabPrinter
     {
-        private HatchPrintConfig HatchConfig { get; set; }
-        private PrintConfig OutlineConfig { get; set; }
-        public ThSlabPrinter(HatchPrintConfig hatchConfig,PrintConfig outlineConfig)
-        {
-            HatchConfig = hatchConfig;
-            OutlineConfig= outlineConfig;
-        }
-        public ObjectIdCollection Print(Database db,Polyline polygon)
+        public static ObjectIdCollection Print(AcadDatabase acadDb,Polyline polygon, PrintConfig outlineConfig, HatchPrintConfig hatchConfig)
         {
             var results = new ObjectIdCollection();
             if (polygon==null || polygon.Area<=1.0)
             {
                 return results;
             }            
-            var outlineId = polygon.Print(db, OutlineConfig);
+            var outlineId = polygon.Print(acadDb, outlineConfig);
             var objIds = new ObjectIdCollection { outlineId };
-            if(HatchConfig!=null)
+            if(hatchConfig != null)
             {
-                var hatchId = objIds.Print(db, HatchConfig);
+                var hatchId = objIds.Print(acadDb, hatchConfig);
                 results.Add(hatchId);
             }            
             results.Add(outlineId);            
             return results;
         }
 
-        public ObjectIdCollection Print(Database db, MPolygon polygon)
+        public static ObjectIdCollection Print(AcadDatabase acadDb, MPolygon polygon, PrintConfig outlineConfig, HatchPrintConfig hatchConfig)
         {
             var results = new ObjectIdCollection();
             if (polygon == null || polygon.Area <= 1.0)
             {
                 return results;
             }
-            var hatchIds = polygon.Print(db, HatchConfig, OutlineConfig);
+            var hatchIds = polygon.Print(acadDb, outlineConfig, hatchConfig);
             hatchIds.OfType<ObjectId>().ForEach(o => results.Add(o));
             return results;
         }

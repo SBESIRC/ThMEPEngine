@@ -161,23 +161,23 @@ namespace ThMEPStructure.StructPlane.Service
 
         private DBObjectCollection DoClip(DBObjectCollection beamLines, DBObjectCollection polygons)
         {
-            var lastObjs = beamLines;
-            var garbages = new DBObjectCollection();
+            var newBeamLines = beamLines.OfType<DBObject>().ToCollection();
             polygons.OfType<Entity>().ForEach(e =>
             {
                 // 反向裁剪，保留外面的实体
-                var tempObjs = e.Clip(lastObjs, true);
-                garbages = garbages.Union(tempObjs);
-                lastObjs = tempObjs;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(newBeamLines);
+                var crossBeams = spatialIndex.SelectCrossingPolygon(e);
+                newBeamLines = newBeamLines.Difference(crossBeams);
+                var clipBeams = e.Clip(crossBeams, true);
+                newBeamLines = newBeamLines.Union(clipBeams);
             });            
             
             // 炸成线
-            var lines = ExplodeToLines(lastObjs);
-            garbages = garbages.Difference(beamLines);
-            garbages = garbages.Difference(lines);
+            var results = ExplodeToLines(newBeamLines);
+            var garbages = newBeamLines.Difference(results);
             garbages.MDispose();
 
-            return lines;
+            return results;
         }
         private DBObjectCollection ExplodeToLines(DBObjectCollection objs)
         {
