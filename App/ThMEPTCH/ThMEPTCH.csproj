@@ -220,6 +220,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="proto\ThTCHBuildingData.proto" />
+    <None Include="proto\ThTCHBuildingStoreyData.proto" />
     <None Include="proto\ThTCHBuiltElementData.proto" />
     <None Include="proto\ThTCHDoorData.proto" />
     <None Include="proto\ThTCHOpeningData.proto" />
