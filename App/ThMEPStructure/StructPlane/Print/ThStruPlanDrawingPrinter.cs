@@ -45,14 +45,18 @@ namespace ThMEPStructure.StructPlane.Print
             }
 
             //调整梁标注的方向
-            var beamMarks = _geos.GetBeamMarks(); // 梁标注            
             var beamGeos = _geos.GetBeamGeos(); // 梁线
-            UpdateBeamTextRotation(beamMarks);
+            var beamMarks = _geos.GetBeamMarks(); // 梁标注           
+            beamMarks.ForEach(o => UpdateBeamText(o)); // 更新文字内容
+            UpdateBeamTextRotation(beamMarks); // 更新文字方向
+
             // 构件梁区域模型
             var grouper = new ThBeamMarkCurveGrouper(beamGeos, beamMarks);
-            var groupInfs = grouper.Group();
-            var beamPolygonCenters = grouper.CreateBeamPolygons(groupInfs);
-            var removedBeamMarks = ThMultipleMarkFilter.Filter(groupInfs);
+            grouper.Group();
+            var beamPolygonCenters = grouper.CreateBeamPolygons();
+            _geos = _geos.Except(grouper.InvalidBeamMarks).ToList();
+
+            var removedBeamMarks = ThMultipleMarkFilter.Filter(grouper.Groups);
             _geos = _geos.Except(removedBeamMarks).ToList();
             removedBeamMarks.Select(o => o.Boundary).ToCollection().MDispose();
 
@@ -189,7 +193,7 @@ namespace ThMEPStructure.StructPlane.Print
             var extents = GetPrintObjsExtents(acadDb);
             var maxX = extents.MaxPoint.X;
             var minY = extents.MinPoint.Y;
-            return  new Point3d(maxX + 1000.0, minY, 0);
+            return  new Point3d(maxX + 1500.0, minY, 0);
         }
 
         private DBObjectCollection GetBeamMarks(DBObjectCollection objs)
@@ -300,8 +304,7 @@ namespace ThMEPStructure.StructPlane.Print
                         Append(ThSlabAnnotationPrinter.Print(acadDb, dbText));
                     }
                     else if (category == ThIfcCategoryManager.BeamCategory)
-                    {
-                        UpdateBeamText(o);
+                    {                        
                         Vector3d textMoveDir = new Vector3d();
                         if (o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
                         {
@@ -504,7 +507,7 @@ namespace ThMEPStructure.StructPlane.Print
             // svg转换的文字角度是0
             beamMarks.ForEach(o =>
             {
-                if(o.Boundary is DBText dbText)
+                if (o.Boundary is DBText dbText)
                 {
                     var textMoveDir = new Vector3d();
                     if (o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
@@ -519,6 +522,7 @@ namespace ThMEPStructure.StructPlane.Print
                 }
             });
         }
+
         private ObjectIdCollection PrintHeadText(AcadDatabase acadDb)
         {
             // 打印自然层标识, eg 一层~五层结构平面层

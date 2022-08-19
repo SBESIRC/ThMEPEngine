@@ -154,7 +154,9 @@ namespace ThMEPStructure.Common
             var extents = new Extents2d();
             double minX = double.MaxValue, minY = double.MaxValue,
                 maxX = double.MinValue, maxY = double.MinValue;
-            objs.OfType<Curve>().ForEach(entity =>
+            objs.OfType<Entity>()
+                .Where(o => o is Curve || o is DBText)
+                .ForEach(entity =>
             {
                 if (!entity.IsErased && entity.GeometricExtents != null)
                 {
