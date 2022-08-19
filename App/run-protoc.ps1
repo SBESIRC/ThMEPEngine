@@ -10,7 +10,7 @@ Task Compile.Protoc {
     Push-Location $path
     foreach($proto in Get-ChildItem "$path" -Recurse -Include "*.proto") {
         exec {
-            & $protoc --csharp_out=".\" (Get-Item $proto).Name
+            & $protoc --csharp_out="..\Data" (Get-Item $proto).Name
         }
     }
     Pop-Location
