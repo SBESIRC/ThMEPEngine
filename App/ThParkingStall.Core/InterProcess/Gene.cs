@@ -11,6 +11,8 @@ using ThParkingStall.Core.MPartitionLayout;
 using System.Runtime.Serialization;
 using System.Reflection;
 using ThParkingStall.Core.IO;
+using ThParkingStall.Core.OInterProcess;
+
 namespace ThParkingStall.Core.InterProcess
 {
     [Serializable]
@@ -402,6 +404,10 @@ namespace ThParkingStall.Core.InterProcess
         public static void Set(Chromosome chromosome)
         {
             dataWraper.chromosome = chromosome;
+        }
+        public static void Set(Genome genome)
+        {
+            dataWraper.genome = genome;
         }
         public static void Save(string fileName = "MPGAData")
         {

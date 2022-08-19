@@ -29,6 +29,9 @@ using Dreambuild.AutoCAD;
 using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
 using ThParkingStall.Core.OTools;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
+using System.IO.MemoryMappedFiles;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -150,7 +153,6 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
-
                 //layoutData.SetInterParam();
                 Converter.GetDataWraper(layoutData, ParameterViewModel);
                 for (int i = 0; i < MultiSolutionList.Count; i++)
@@ -170,29 +172,41 @@ namespace ThMEPArchitecture.MultiProcess
         {
             var blks = InputData.SelectBlocks(acadDatabase);
             //var block = InputData.SelectBlock(acadDatabase);//提取地库对象
-            //var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
-            var MultiSolutionList = new List<int> { 0 };
             if (blks == null) return;
             foreach (var blk in blks)
             {
-                var blkName = blk.GetEffectiveName();
-                UpdateLogger(blkName);
-                Logger?.Information("块名：" + blkName);
-                Logger?.Information("文件名：" + DrawingName);
-                Logger?.Information("用户名：" + Environment.UserName);
-                var layoutData = new OLayoutData(blk, Logger, out bool succeed);
-                if (!succeed) return;
-                layoutData.ProcessSegLines();
-                //layoutData.SetInterParam();
-                Converter.GetDataWraper(layoutData, ParameterViewModel);
-                for (int i = 0; i < MultiSolutionList.Count; i++)
+                ProcessTheBlock(blk);
+            }
+        }
+
+        private void ProcessTheBlock(BlockReference block)
+        {
+            int fileSize = 64; // 64Mb
+            var nbytes = fileSize * 1024 * 1024;
+            //var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            var MultiSolutionList = new List<int> { 0 };
+            var blkName = block.GetEffectiveName();
+            UpdateLogger(blkName);
+            Logger?.Information("块名：" + blkName);
+            Logger?.Information("文件名：" + DrawingName);
+            Logger?.Information("用户名：" + Environment.UserName);
+            var layoutData = new OLayoutData(block, Logger, out bool succeed);
+            if (!succeed) return;
+            layoutData.ProcessSegLines();
+            //layoutData.SetInterParam();
+            for (int i = 0; i < MultiSolutionList.Count; i++)
+            {
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+                ParameterStock.RunMode = MultiSolutionList[i];
+                var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
                 {
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    ParameterStock.RunMode = MultiSolutionList[i];
-                    var dataWraper = new DataWraper();
-                    dataWraper.UpdateVMParameter(ParameterViewModel);
-                    VMStock.Init(dataWraper);
+                    using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                    {
+                        IFormatter formatter = new BinaryFormatter();
+                        formatter.Serialize(stream, dataWraper);
+                    }
                     var GA_Engine = new OGAGenerator(ParameterViewModel);
                     GA_Engine.Logger = Logger;
                     var Solution = GA_Engine.Run().First();
@@ -201,13 +215,12 @@ namespace ThMEPArchitecture.MultiProcess
             }
         }
 
-
         private void ProcessAndDisplay(Genome solution, int SolutionID = 0, Stopwatch stopWatch = null)
         {
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = OInterParameter.GetOSubAreas(solution);
-            subAreas.ForEach(s =>s.UpdateParkingCnts());
+            subAreas.ForEach(s =>s.UpdateParkingCnts(true));
             var ParkingStallCount = subAreas.Where(s =>s.Count>0).Sum(s =>s.Count);
             foreach(var subArea in subAreas)
             {

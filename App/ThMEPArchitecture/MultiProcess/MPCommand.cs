@@ -332,7 +332,6 @@ namespace ThMEPArchitecture.MultiProcess
         {
             Logger?.Information("##################################");
             Logger?.Information("迭代模式：");
-
             int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
             DisplayParkingStall.Add(blk.Clone() as BlockReference);
@@ -585,7 +584,7 @@ namespace ThMEPArchitecture.MultiProcess
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 0);
             }
             var entities = new List<Entity>();
-            entities.Add(subArea.Area.ToDbMPolygon());
+            entities.Add(subArea.Region.ToDbMPolygon());
             entities[0].Layer = layer;
             if (subArea.VaildLanes != null)
                 entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2, layer)));

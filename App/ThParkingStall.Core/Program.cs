@@ -15,6 +15,8 @@ using static ThParkingStall.Core.MPartitionLayout.MCompute;
 using Serilog;
 using System.Threading;
 using ThParkingStall.Core.IO;
+using ThParkingStall.Core.OInterProcess;
+
 namespace ThParkingStall.Core
 {
     internal class Program
@@ -182,7 +184,125 @@ namespace ThParkingStall.Core
 
         static void ORun()
         {
-
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var t_pre = 0.0;
+            if (LogAllInfo)
+            {
+                Logger?.Information("#####################################");
+                Logger?.Information("子进程启动");
+                Logger?.Information("线程数量：" + ThreadCnt.ToString());
+            }
+            var initSingal = Mutex.OpenExisting("Mutex" + ProcessIndex.ToString());
+            initSingal.WaitOne();
+            using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("DataWraper"))
+            {
+                using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
+                {
+                    IFormatter formatter = new BinaryFormatter();
+                    var dataWraper = (DataWraper)formatter.Deserialize(stream);
+                    VMStock.Init(dataWraper);
+                    OInterParameter.Init(dataWraper);
+                    MPGAData.dataWraper = dataWraper;
+                }
+            }
+            initSingal.ReleaseMutex();
+            for (int iter = 0; iter < IterationCount; iter++)
+            {
+                var StartSignal = Mutex.OpenExisting("Mutex" + iter.ToString() + "_" + ProcessIndex.ToString());
+                StartSignal.WaitOne();
+                try
+                {
+                    if (LogAllInfo)
+                    {
+                        Logger?.Information("第" + (iter + 1).ToString() + "代开始：");
+                        t_pre = stopWatch.Elapsed.TotalSeconds;
+                    }
+                    GenomeColection genomeColection;
+                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("GenomeColection", MemoryMappedFileRights.Read))//读取
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
+                        {
+                            BinaryReader reader = new BinaryReader(stream);
+                            genomeColection = GenomeColection.ReadFromStream(reader);
+                            OCached.Update(genomeColection);
+                        }
+                    }
+                    if (LogAllInfo)
+                    {
+                        Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                        t_pre = stopWatch.Elapsed.TotalSeconds;
+                    }
+                    var layoutResults = new List<LayoutResult>();
+                    var genomes = genomeColection.Genomes;
+                    for (int i = 0; i <= genomes.Count / ProcessCount; i++)//计算
+                    {
+                        MCompute.CatchedTimes = 0;
+                        int j = i * ProcessCount + ProcessIndex;
+                        if (j >= genomes.Count) break;
+                        var genome = genomes[j];
+                        MPGAData.Set(genome);
+                        var subAreas = OInterParameter.GetOSubAreas(genome);
+                        if (LogAllInfo)
+                        {
+                            Logger?.Information($"区域分割用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                            t_pre = stopWatch.Elapsed.TotalSeconds;
+                        }
+                        if (InterParameter.MultiThread)
+                        {
+                            Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts());
+                        }
+                        else subAreas.ForEach(s => s.UpdateParkingCnts());
+                        var ParkingCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
+                        if (LogAllInfo)
+                        {
+                            Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                            Logger?.Information("Catched:" + CatchedTimes.ToString() + "/" + subAreas.Count.ToString());
+                            t_pre = stopWatch.Elapsed.TotalSeconds;
+                        }
+                        layoutResults.Add(new LayoutResult(ParkingCount,genome.Area));
+                    }
+                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("OResults" + ProcessIndex.ToString()))
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream())//结果输出
+                        {
+                            //IFormatter formatter = new BinaryFormatter();
+                            //var newCatched = SubAreaParkingCnt.GetNewUpdated();
+                            //formatter.Serialize(stream, (ParkingCnts, newCatched.Item1, newCatched.Item2));
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            layoutResults.WriteToStream(writer);
+                            OCached.NewCachedPartitionCnt.WriteToStream(writer);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("----------------------------------");
+                    Logger?.Information(ex.StackTrace);
+                    Logger?.Information("##################################");
+                    MPGAData.Save();
+                }
+                finally
+                {
+                    StartSignal.ReleaseMutex();//发出信号确认完成
+                }
+                if (LogAllInfo)
+                {
+                    Logger?.Information("输出完成");
+                    Logger?.Information($"输出用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
+                    t_pre = stopWatch.Elapsed.TotalSeconds;
+                }
+                SubAreaParkingCnt.ClearNewAdded();
+                if (IterationCount % 3 == 0)
+                    ReclaimMemory();
+            }
+            if (LogAllInfo)
+            {
+                Logger?.Information("子进程退出");
+                Logger?.Information($"总用时用时: {stopWatch.Elapsed.TotalSeconds}秒\n");
+            }
+            stopWatch.Stop();
         }
         private static void ReclaimMemory()
         {

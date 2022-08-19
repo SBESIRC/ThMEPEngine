@@ -62,6 +62,8 @@ namespace ThMEPArchitecture.MultiProcess
 
         public static DataWraper GetDataWraper(OLayoutData oLayoutData,ParkingStallArrangementViewModel vm)
         {
+            OCached.Clear();//清空cache
+            MCompute.CatchedTimes = 0;
             var dataWraper = new DataWraper();
             dataWraper.UpdateVMParameter(vm);
             VMStock.Init(dataWraper);

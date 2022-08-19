@@ -585,7 +585,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 inputSolution[i * ProcessCount + idx].ParkingStallCount = parkingCnts[i];
             }
             SubAreaParkingCnt.Update(subProcResult);//更新子进程记录
-
         }
         private List<List<MPChromosome>> CreateNextGeneration2(List<MPChromosome> solutions)
         {
