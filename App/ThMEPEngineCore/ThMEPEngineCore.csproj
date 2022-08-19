@@ -172,7 +172,9 @@
     <Compile Include="Command\ThPickRoomCmd.cs" />
     <Compile Include="Command\ThSuperBoundaryCmd.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
+    <Compile Include="Config\ThExtractShearWallConfig.cs" />
     <Compile Include="Config\ThExtractBeamConfig.cs" />
+    <Compile Include="Config\ThExtratRoomOutlineConfig.cs" />
     <Compile Include="Config\ThRegularMatchingService.cs" />
     <Compile Include="ConnectWiring\ConnectWiringService.cs" />
     <Compile Include="ConnectWiring\Data\ThBlockPointsExtractor.cs" />

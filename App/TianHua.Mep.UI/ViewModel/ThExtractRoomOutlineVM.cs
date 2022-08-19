@@ -17,6 +17,7 @@ using ThControlLibraryWPF.ControlUtils;
 using ThCADExtension;
 using AcHelper.Commands;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Config;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -103,7 +104,6 @@ namespace TianHua.Mep.UI.ViewModel
             roomDatas = roomDatas.Union(shearWalls);
             return roomDatas;
         }
-
         private void SuperBoundary(DBObjectCollection roomDatas)
         {
             if (roomDatas.Count==0)
@@ -144,17 +144,39 @@ namespace TianHua.Mep.UI.ViewModel
                     {
                         if (pner.ObjectId != ObjectId.Null)
                         {
-                            var entity = acdb.Element<Entity>(pner.ObjectId);
-                            if (entity is Curve || entity is Mline)
+                            var pickedEntity = acdb.Element<Entity>(pner.ObjectId);                            
+                            if (pickedEntity is Curve || pickedEntity is Mline)
                             {
-                                var sameSuffixLayers = GetSameSuffixLayers(entity.Layer);
-                                sameSuffixLayers.ForEach(layer =>
+                                var entityLayerSuffix = ThMEPXRefService.OriginalFromXref(pickedEntity.Layer);
+                                if (entityLayerSuffix != "0")
                                 {
-                                    if (!IsExisted(layer))
+                                    var sameSuffixLayers = GetSameSuffixLayers(entityLayerSuffix);
+                                    sameSuffixLayers.ForEach(layer =>
                                     {
-                                        AddLayer(layer);
-                                    }
-                                });
+                                        if (!IsExisted(layer))
+                                        {
+                                            AddLayer(layer);
+                                        }
+                                    });
+                                }
+                                else
+                                {
+                                    var containers = pner.GetContainers();
+                                    if (containers.Length > 0)
+                                    {
+                                        // 如果 pick 到的实体是0图层，就获取其父亲的图层
+                                        var parentEntity = acdb.Element<Entity>(containers.First());
+                                        entityLayerSuffix = ThMEPXRefService.OriginalFromXref(parentEntity.Layer);
+                                        var sameSuffixLayers = GetSameSuffixLayers(entityLayerSuffix);
+                                        sameSuffixLayers.ForEach(layer =>
+                                        {
+                                            if (!IsExisted(layer))
+                                            {
+                                                AddLayer(layer);
+                                            }
+                                        });
+                                    }                                    
+                                }
                             }
                         }
                     }
@@ -165,24 +187,16 @@ namespace TianHua.Mep.UI.ViewModel
                 }
             }
         }
-
-        private List<string> GetSameSuffixLayers(string layer)
+        private List<string> GetSameSuffixLayers(string suffixLayer)
         {
             using (var acdb = AcadDatabase.Active())
             {
-                var suffix= ThMEPXRefService.OriginalFromXref(layer).ToUpper();
+                var suffix= suffixLayer.ToUpper();
                 return acdb.Layers
-                    .Where(o =>
-                    {
-                        var currentSuffix = ThMEPXRefService.OriginalFromXref(o.Name).ToUpper();
-                        return suffix == currentSuffix;
-                    })
-                    .Select(o => o.Name)
-                    .Distinct()
-                    .ToList();
+                    .Where(o => ThMEPXRefService.OriginalFromXref(o.Name).ToUpper() == suffix)
+                    .Select(o => o.Name).Distinct().ToList();
             }            
         }
-
         public void RemoveLayers(List<string> layers)
         {
             if (layers.Count > 0)
@@ -254,7 +268,6 @@ namespace TianHua.Mep.UI.ViewModel
                 });
             }
         }
-
         private void EraseEntities(Point3dCollection pts, string layer)
         {
             using (var acadDb = AcadDatabase.Active())
@@ -277,7 +290,6 @@ namespace TianHua.Mep.UI.ViewModel
                 });
             }
         }
-
         private DBObjectCollection GetEntitiesFromMS(string layer)
         {
             using (var acadDb = AcadDatabase.Active())
@@ -289,7 +301,6 @@ namespace TianHua.Mep.UI.ViewModel
                     .ToCollection();
             }
         }
-
         private List<ThLayerInfo> LoadLayers()
         {
             // 优先获取以A_WALL结尾的梁
@@ -349,20 +360,5 @@ namespace TianHua.Mep.UI.ViewModel
             Active.Document.Window.Focus();
 #endif
         }
-    }
-
-    public class ThExtratRoomOutlineConfig
-    {
-        private static readonly ThExtratRoomOutlineConfig instance = new ThExtratRoomOutlineConfig() { };
-        public static ThExtratRoomOutlineConfig Instance { get { return instance; } }
-        internal ThExtratRoomOutlineConfig()
-        {
-            LayerInfos= new List<ThLayerInfo>();
-        }
-        static ThExtratRoomOutlineConfig()
-        {
-        }
-        public List<ThLayerInfo> LayerInfos { get; set; }
-        public bool YnExtractShearWall { get; set; } = true;
-    }
+    }    
 }

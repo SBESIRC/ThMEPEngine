@@ -62,7 +62,7 @@ namespace TianHua.Mep.UI
         [CommandMethod("TIANHUACAD", "THLPZ", CommandFlags.Modal)]
         public void ThExtractBeamAreaConfig()
         {
-            var config = new ExtractBeamConfigUI();
+            var config = new ExtractLayerConfigUI();
             config.WindowStartupLocation = System.Windows.
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(config);
