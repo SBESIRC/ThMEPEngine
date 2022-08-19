@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Linq;
-using AcHelper.Commands;
 using System.Windows.Data;
 using System.Globalization;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using ThControlLibraryWPF.ControlUtils;
-using ThMEPEngineCore.Service;
+
+using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
+using ThMEPEngineCore.Service;
+using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPLighting.ViewModel
 {
@@ -50,6 +54,50 @@ namespace ThMEPLighting.ViewModel
         downlight,
         //emergencyLight
     }
+    public enum CableTraySpecification
+    {
+        [Description("50*25")]
+        _50x25,
+        [Description("100*50")]
+        _100x50,
+        [Description("150*75")]
+        _150x75,
+        [Description("200*100")]
+        _200x100,
+        [Description("300*100")]
+        _300x100,
+        [Description("400*100")]
+        _400x100,
+        [Description("500*100")]
+        _500x100,
+        [Description("600*100")]
+        _600x100,
+        [Description("800*100")]
+        _800x100,
+        [Description("200*150")]
+        _200x150,
+        [Description("300*150")]
+        _300x150,
+        [Description("400*150")]
+        _400x150,
+        [Description("500*150")]
+        _500x150,
+        [Description("600*150")]
+        _600x150,
+        [Description("800*150")]
+        _800x150,
+        [Description("300*200")]
+        _300x200,
+        [Description("400*200")]
+        _400x200,
+        [Description("500*200")]
+        _500x200,
+        [Description("600*200")]
+        _600x200,
+        [Description("800*200")]
+        _800x200,
+    }
+
     public class EnumBooleanConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -407,17 +455,31 @@ namespace ThMEPLighting.ViewModel
             }
         }
 
-        double _TrunkingWidth = 150;
-        public double TrunkingWidth
+        private string _Specification = CableTraySpecification._150x75.GetDescription();
+        public string Specification
         {
-            get => _TrunkingWidth;
+            get
+            {
+                return _Specification;
+            }
             set
             {
-                if (value != _TrunkingWidth)
-                {
-                    _TrunkingWidth = value;
-                    OnPropertyChanged(nameof(TrunkingWidth));
-                }
+                _Specification = value;
+                OnPropertyChanged("Specification");
+            }
+        }
+
+        private ObservableCollection<string> _Specifications = new ObservableCollection<string>();
+        public ObservableCollection<string> Specifications
+        {
+            get
+            {
+                return _Specifications;
+            }
+            set
+            {
+                _Specifications = value;
+                OnPropertyChanged("Specifications");
             }
         }
 
@@ -448,6 +510,18 @@ namespace ThMEPLighting.ViewModel
                 }
             }
         }
+
+        bool _IsTCHCableTray = false;
+        public bool IsTCHCableTray
+        {
+            get => _IsTCHCableTray;
+            set
+            {
+                _IsTCHCableTray = value;
+                OnPropertyChanged("IsTCHCableTray");
+            }
+        }
+
         #endregion
         string _EvacuationInstructions = "优先壁装";
         public string EvacuationInstructions
@@ -553,6 +627,12 @@ namespace ThMEPLighting.ViewModel
             ShouldConsiderBeam = true;
             LightingType = LightTypeEnum.circleCeiling;
             LightingLayoutType = LightingLayoutTypeEnum.IlluminationLighting;
+
+            Specification = CableTraySpecification._150x75.GetDescription();
+            foreach (CableTraySpecification suit in Enum.GetValues(typeof(CableTraySpecification)))
+            {
+                Specifications.Add(suit.GetDescription());
+            }
         }
 
         public class Item : NotifyPropertyChangedBase

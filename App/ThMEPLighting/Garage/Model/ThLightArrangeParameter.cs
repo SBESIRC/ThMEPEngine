@@ -6,6 +6,10 @@ namespace ThMEPLighting.Garage.Model
     public class ThLightArrangeParameter
     {
         /// <summary>
+        /// 是否输出天正桥架
+        /// </summary>
+        public bool IsTCHCableTray { get; set; }
+        /// <summary>
         /// 灯间距
         /// </summary>
         public double Interval { get; set; } = 2700;
@@ -19,9 +23,13 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public double DoubleRowOffsetDis { get; set; } = 2700.0;
         /// <summary>
+        /// 线槽高度
+        /// </summary>
+        public double Height { get; set; } = 75.0;
+        /// <summary>
         /// 线槽宽度
         /// </summary>
-        public double Width { get; set; } = 300.0;
+        public double Width { get; set; } = 150.0;
         /// <summary>
         /// 单排布置
         /// </summary>
@@ -67,7 +75,6 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 默认灯的起始编号
         /// </summary>
-
         public int DefaultStartNumber { get; set; } = 1;
         /// <summary>
         /// 灯具长度
@@ -84,8 +91,8 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 跳接线偏移高度
         /// </summary>
-        public double JumpWireOffsetDistance 
-        { 
+        public double JumpWireOffsetDistance
+        {
             get
             {
                 return Width / 2.0;
@@ -125,14 +132,14 @@ namespace ThMEPLighting.Garage.Model
         {
             if (AutoCalculate)
             {
-                return IsSingleRow ? 
+                return IsSingleRow ?
                     CalculateSingleRowLoopNumber(lightNumber, LightNumberOfLoop) :
                     CalculateDoubleRowLoopNumber(lightNumber, LightNumberOfLoop);
             }
             else
             {
-                return IsSingleRow ? 
-                    GetSingleRowUILoopNumber() : 
+                return IsSingleRow ?
+                    GetSingleRowUILoopNumber() :
                     GetDoubleRowUILoopNumber();
             }
         }

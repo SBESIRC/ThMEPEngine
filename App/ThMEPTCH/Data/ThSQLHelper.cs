@@ -6,7 +6,7 @@ namespace ThMEPTCH.Data
 {
     class ThSQLHelper
     {
-        public static string TabelModelToSqlString(string tableName,object tableModel) 
+        public static string TabelModelToSqlString(string tableName, object tableModel)
         {
             string nameStr = "";
             string valueStr = "";
@@ -14,17 +14,16 @@ namespace ThMEPTCH.Data
             {
                 nameStr += p.Name + ",";
                 var value = p.GetValue(tableModel);
-                var strValue = value ==null?"": value.ToString();
+                var strValue = value == null ? "" : value.ToString();
                 var type = p.FieldType;
                 if (type == typeof(int) || type == typeof(double) || type == typeof(ulong))
                 {
                     valueStr += string.Format("{0},", strValue);
                 }
-                else 
+                else
                 {
                     valueStr += string.Format("'{0}',", strValue);
                 }
-                
             }
             nameStr = nameStr.Substring(0, nameStr.LastIndexOf(","));
             valueStr = valueStr.Substring(0, valueStr.LastIndexOf(","));
@@ -35,12 +34,12 @@ namespace ThMEPTCH.Data
         public static string TwtBlockSqlString(TCHTwtBlock tableModel)
         {
             string nameStr = "ID,Type,Number";
-            string valueStr = string.Format("{0},'{1}','{2}'",tableModel.ID,tableModel.Type, tableModel.Number.ToString().PadLeft(8, '0'));
+            string valueStr = string.Format("{0},'{1}','{2}'", tableModel.ID, tableModel.Type, tableModel.Number.ToString().PadLeft(8, '0'));
             string insertSql = string.Format("INSERT INTO {0} ({1}) values({2})",
                 "TwtBlock", nameStr, valueStr);
             return insertSql;
         }
-        public static TCHTwtPoint PointToTwtPointModel(ulong Id, Point3d point) 
+        public static TCHTwtPoint PointToTwtPointModel(ulong Id, Point3d point)
         {
             TCHTwtPoint twtPoint = new TCHTwtPoint
             {

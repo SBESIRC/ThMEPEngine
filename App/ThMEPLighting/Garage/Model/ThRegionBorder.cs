@@ -81,6 +81,11 @@ namespace ThMEPLighting.Garage.Model
         /// 线槽边线(包括端口线)
         /// </summary>
         public List<Curve> JumpWires { get; set; }
+
+        /// <summary>
+        /// 天正桥架
+        /// </summary>
+        public List<Entity> TCHCableTrays { get; set; }
         #endregion
 
         /// <summary>
@@ -125,6 +130,7 @@ namespace ThMEPLighting.Garage.Model
             UpgradeOpen();
             Transformer.Transform(Lights.ToCollection());
             Transformer.Transform(Texts.ToCollection());
+            Transformer.Transform(TCHCableTrays.ToCollection());
             Transformer.Transform(CenterLines.ToCollection());
             Transformer.Transform(SideLines.ToCollection());
             Transformer.Transform(JumpWires.ToCollection());
@@ -134,6 +140,7 @@ namespace ThMEPLighting.Garage.Model
         {
             Transformer.Reset(DxCenterLines.ToCollection());
             Transformer.Reset(FdxCenterLines.ToCollection());
+            Transformer.Reset(TCHCableTrays.ToCollection());
             Transformer.Reset(RegionBorder);
             Columns.ForEach(c => Transformer.Reset(c.Outline));
             Beams.ForEach(c => Transformer.Reset(c.Outline));

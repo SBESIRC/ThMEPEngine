@@ -1,7 +1,4 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.Runtime;
-using Linq2Acad;
-using ThMEPTCH.CAD;
+﻿using Autodesk.AutoCAD.Runtime;
 
 namespace ThMEPTCH
 {

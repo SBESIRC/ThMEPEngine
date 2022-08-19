@@ -121,7 +121,7 @@
                     <!--<RadioButton GroupName="LightingLayoutType"  FontSize="20" FontWeight="Bold" IsChecked="{Binding LightingLayoutType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightingLayoutTypeEnum.GarageLighting},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">车道照明</RadioButton>-->
                     <TextBlock Text="车道照明" FontSize="20" FontWeight="Bold"/>
                 </GroupBox.Header>
-                <Grid>
+                <Grid Height="325">
                     <Grid.RowDefinitions></Grid.RowDefinitions>
                     <Grid.ColumnDefinitions >
                         <ColumnDefinition Width="5.5*"/>
@@ -255,12 +255,15 @@
                         <StackPanel HorizontalAlignment="Right">
                             <Button Name="btnExtractLaneLine" IsEnabled="true" Width="116" Height="Auto" Click="btnExtractLaneLine_Click" Margin="5">提取车道中心线</Button>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="5,10,5,5">
-                            <TextBlock>线槽宽度：</TextBlock>
-                            <TextBox Width="100" Text="{Binding TrunkingWidth}"></TextBox>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,10,5,5" >
+                            <TextBlock>线槽规格：</TextBlock>
+                            <ComboBox Width="100" Margin="0,-2.5,0,0"
+                            SelectedItem="{Binding Specification, Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                            ItemsSource="{Binding Specifications, Mode=OneWay, NotifyOnSourceUpdated=True}">
+                            </ComboBox>
                             <TextBlock>mm</TextBlock>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="5">
+                        <StackPanel Orientation="Horizontal" Margin="5,1,5,5">
                             <TextBlock>双排间距：</TextBlock>
                             <TextBox Width="100" Text="{Binding DoubleRowSpacing}" 
                                      IsEnabled="{Binding ElementName=rbDoubleRow,
@@ -268,10 +271,15 @@
                             </TextBox>
                             <TextBlock>mm</TextBlock>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="5">
+                        <StackPanel Orientation="Horizontal" Margin="5,0,5,5">
                             <TextBlock>灯具间距：</TextBlock>
                             <TextBox Width="100" Text="{Binding LampSpacing}"></TextBox>
                             <TextBlock>mm</TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="5,0,5,5">
+                            <CheckBox Content="使用天正桥架（仅限专版天正）" Name="cbIsTCHCableTray" IsChecked= "{Binding IsTCHCableTray, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}" 
+                                      Checked="cbIsTCHCableTray_Checked">
+                            </CheckBox>
                         </StackPanel>
                     </StackPanel>
                     <Grid Margin="5" Grid.Column="1">
@@ -361,14 +369,15 @@
                                 </RadioButton>
                             </StackPanel>
                         </GroupBox>
-                        <StackPanel Grid.Row="4" VerticalAlignment="Bottom" Orientation="Vertical">
+                        <StackPanel Grid.Row="4" VerticalAlignment="Top" Orientation="Vertical" Margin="0,30,0,0" Height="65">
                             <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Margin="5">
                                 <TextBlock Margin="0,0,5,0">起始编号：WL</TextBlock>
                                 <TextBox Width="40" Text="{Binding StartingNumber}" TextAlignment="Center"></TextBox>
                             </StackPanel>
-                            <WrapPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,5,0">
-                                <Button x:Name="btnCdzmLayout" Width="100" Height="25" Click="btnPlace_Click">布置</Button>
-                            </WrapPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5,5,5,0">
+                                <Button Grid.Column="0" Margin="0,0,10,0" x:Name="btnCdzmVideo" Width="80" Height="25" Click="btnCdzmVideo_Click" >视频教程</Button>
+                                <Button Grid.Column="1" Margin="0,0,0,0" x:Name="btnCdzmLayout" Width="80" Height="25" Click="btnPlace_Click">布置</Button>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                 </Grid>

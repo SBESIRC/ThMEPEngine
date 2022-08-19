@@ -44,6 +44,7 @@ namespace ThMEPLighting.Garage
                 var allJumpWires = GetJumpWires(acdb); // 跳线
                 var allFdxLines = GetFdxLines(acdb); // 非灯线
                 var allSingleRowCableTrunkingCenterLines = GetSingleRowCabelTrunkingCenterLines(acdb); // 单排线槽中心线
+                var allTCHCableTrays = GetTCHCableTrays(acdb); // 单排线槽中心线
                 #endregion
                 #region ----------移动到原点位置-----------
                 var basePt = borders[0].GetBorderBasePt();
@@ -56,6 +57,7 @@ namespace ThMEPLighting.Garage
                 Transform(allJumpWires, transformer);
                 Transform(allFdxLines, transformer);
                 Transform(allSingleRowCableTrunkingCenterLines, transformer);
+                Transform(allTCHCableTrays, transformer);
                 #endregion
                 #region ----------获取单个框的元素----------
                 borders.ForEach(o =>
@@ -71,11 +73,12 @@ namespace ThMEPLighting.Garage
                         DxCenterLines = GetRegionLaneLines(newBorder, allLaneLines),
                         FdxCenterLines = GetRegionLines(newBorder, allFdxLines),
                         SingleRowLines = GetRegionLines(newBorder, allSingleRowCableTrunkingCenterLines),
-                        SideLines = newBorder.SpatialFilter(allSideLines).Cast<Line>().ToList(),
-                        Texts = newBorder.SpatialFilter(allNumberTexts).Cast<DBText>().ToList(),
-                        JumpWires = newBorder.SpatialFilter(allJumpWires).Cast<Curve>().ToList(),
-                        CenterLines = newBorder.SpatialFilter(allCenterLines).Cast<Line>().ToList(),
-                        Lights = newBorder.SpatialFilter(allLightBlks).Cast<BlockReference>().ToList(),
+                        SideLines = newBorder.SpatialFilter(allSideLines).OfType<Line>().ToList(),
+                        Texts = newBorder.SpatialFilter(allNumberTexts).OfType<DBText>().ToList(),
+                        JumpWires = newBorder.SpatialFilter(allJumpWires).OfType<Curve>().ToList(),
+                        CenterLines = newBorder.SpatialFilter(allCenterLines).OfType<Line>().ToList(),
+                        Lights = newBorder.SpatialFilter(allLightBlks).OfType<BlockReference>().ToList(),
+                        TCHCableTrays = newBorder.SpatialFilter(allTCHCableTrays).OfType<Entity>().ToList(),
                     };
 
                     // 将获取到的灯线、非灯线Z坐标归零
@@ -96,6 +99,7 @@ namespace ThMEPLighting.Garage
                 Reset(allCenterLines, transformer);
                 Reset(allSideLines, transformer);
                 Reset(allLightBlks, transformer);
+                Reset(allTCHCableTrays, transformer);
                 Reset(allNumberTexts, transformer);
                 Reset(allLaneLines, transformer);
                 Reset(allJumpWires, transformer);
@@ -219,6 +223,14 @@ namespace ThMEPLighting.Garage
             // 单排线槽中心线
             return acdb.ModelSpace
                 .Where(e => ThGarageLightUtils.IsSingleRowCabelTrunkingCenterline(e))
+                .ToCollection();
+        }
+
+        private static DBObjectCollection GetTCHCableTrays(AcadDatabase acdb)
+        {
+            // 单排线槽中心线
+            return acdb.ModelSpace
+                .Where(e => ThGarageLightUtils.IsTCHCableTray(e))
                 .ToCollection();
         }
 
