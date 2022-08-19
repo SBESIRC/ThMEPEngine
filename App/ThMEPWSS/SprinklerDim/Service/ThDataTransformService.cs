@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -16,20 +17,38 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Polyline> reference)
         {
-            List<Line> referenceLines = Change(reference);
-            return GenerateSpatialIndex(referenceLines);
+            DBObjectCollection dboc = ChangeToDboc(reference);
+            ThCADCoreNTSSpatialIndex si = new ThCADCoreNTSSpatialIndex(dboc);
+            return si;
         }
 
-        public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Line> reference)
+        public static ThCADCoreNTSSpatialIndex GenerateSpatialIndex(List<Line> references)
         {
             // 把参考物拆解为线,做成空间索引
-            DBObjectCollection referenceLines = new DBObjectCollection();
-            foreach (Line r in reference)
+            DBObjectCollection dboc = ChangeToDboc(references);
+            ThCADCoreNTSSpatialIndex si = new ThCADCoreNTSSpatialIndex(dboc);
+            return si;
+        }
+
+        public static List<Polyline> GetBothPolylinesAndLines(DBObjectCollection dboc)
+        {
+            List<Polyline> polylines = new List<Polyline>();
+
+            polylines.AddRange(GetPolylines(dboc));
+            polylines.AddRange(Change(GetLines(dboc)));
+            
+            return polylines;
+        }
+
+        public static List<Line> GetLines(DBObjectCollection dboc)
+        {
+            List<Line> lines = new List<Line>();
+            foreach (Line l in dboc.OfType<Line>())
             {
-                referenceLines.Add(r);
+                lines.Add(l);
             }
-            ThCADCoreNTSSpatialIndex linesSI = new ThCADCoreNTSSpatialIndex(referenceLines);
-            return linesSI;
+
+            return lines;
         }
 
         public static List<Polyline> GetPolylines(DBObjectCollection dboc)
@@ -37,14 +56,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<Polyline> polylines = new List<Polyline>();
             foreach (Polyline p in dboc.OfType<Polyline>())
             {
-                polylines.Add(p);
-            }
-
-            foreach (Line l in dboc.OfType<Line>())
-            {
-                Polyline p = new Polyline();
-                p.AddVertexAt(0, l.StartPoint.ToPoint2d(), 0, 0, 0);
-                p.AddVertexAt(1, l.EndPoint.ToPoint2d(), 0, 0, 0);
                 polylines.Add(p);
             }
 
@@ -94,32 +105,89 @@ namespace ThMEPWSS.SprinklerDim.Service
             return lines;
         }
 
-        public static List<Line> Change(MPolygon mPolygon)
+        public static List<Polyline> Change(List<MPolygon> mPolygons)
         {
-            List<Line> lines = new List<Line>();
+            List<Polyline> lines = new List<Polyline>();
 
-            lines.AddRange(Change(mPolygon.Shell()));
+            foreach (MPolygon mPolygon in mPolygons)
+            {
+                lines.AddRange(Change(mPolygon));
+            }
+
+            return lines;
+        }
+
+        public static List<Polyline> Change(MPolygon mPolygon)
+        {
+            List<Polyline> lines = new List<Polyline>();
+
+            lines.Add(mPolygon.Shell());
             foreach(Polyline hole in mPolygon.Holes())
             {
-                lines.AddRange(Change(hole));
+                lines.Add(hole);
             }
 
             return lines;
         }
 
-        public static List<Line> Change(Polyline p)
+        public static DBObjectCollection ChangeToDboc(List<Polyline> polylines)
         {
-            List<Line> lines = new List<Line>();
+            DBObjectCollection dboc = new DBObjectCollection();
 
-            for (int i = 0; i < p.NumberOfVertices - 1; i++)
+            foreach(Polyline polyline in polylines)
             {
-                lines.Add(new Line(p.GetPoint3dAt(i), p.GetPoint3dAt(i + 1)));
+                dboc.Add(polyline);
             }
-            if (p.Closed)
-                lines.Add(new Line(p.GetPoint3dAt(0), p.GetPoint3dAt(p.NumberOfVertices - 1)));
 
-            return lines;
+            return dboc;
         }
+
+        public static DBObjectCollection ChangeToDboc(List<Line> lines)
+        {
+            DBObjectCollection dboc = new DBObjectCollection();
+
+            foreach (Line line in lines)
+            {
+                dboc.Add(line);
+            }
+
+            return dboc;
+        }
+
+        public static List<List<int>> Mix(List<List<List<int>>> arrLists)
+        {
+            List<List<int>> list = new List<List<int>>();
+
+            foreach (List<List<int>> l in arrLists)
+            {
+                list.AddRange(l);
+            }
+
+            return list;
+        }
+
+        public static List<int> Mix(List<List<int>> arrLists)
+        {
+            List<int> list = new List<int>();
+
+            foreach (List<int> l in arrLists)
+            {
+                list.AddRange(l);
+            }
+
+            return list;
+        }
+
+        public static List<int> GetDim(List<ThSprinklerDimGroup> dimGroup)
+        {
+            return dimGroup.Select(d => d.pt).ToList();
+        }
+
+        public static List<int> GetDimedPts(List<ThSprinklerDimGroup> dimGroup)
+        {
+            return Mix(dimGroup.Select(d => d.PtsDimed).ToList());
+        }
+
 
     }
 }

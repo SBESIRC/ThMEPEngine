@@ -346,6 +346,53 @@ namespace ThMEPIFC
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THJGHM", CommandFlags.Modal)]
+        public void THJGHM()
+        {
+            var ifcFilePath = "";
+            //选择需要合模的文件
+            var filePath = OpenIFCFile("请选择需要合模的IFC文件:");
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+            //选择保存路径
+            ifcFilePath = SaveFilePath("ifc");
+            if (string.IsNullOrEmpty(ifcFilePath))
+            {
+                return;
+            }
+            if (File.Exists(ifcFilePath))
+                File.Delete(ifcFilePath);
+
+            // 读入并解析TGL XML文件
+            var service = new ThDWGToIFCService(string.Empty);
+            var project = service.DWGToProject(false, false);
+            if (project == null)
+            {
+                return;
+            }
+            try
+            {
+                THModelMergeService modelMergeService = new THModelMergeService();
+                var MergeModel = modelMergeService.ModelMerge(filePath, project);
+                if (!MergeModel.IsNull())
+                {
+                    Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, ifcFilePath);
+                    MergeModel.Dispose();
+                    Active.Database.GetEditor().WriteMessage($"合模成功：已保存至目录:{ifcFilePath}");
+                }
+                else
+                {
+                    throw new System.Exception("合模失败!");
+                }
+            }
+            catch
+            {
+                Active.Database.GetEditor().WriteMessage($"合模失败!");
+            }
+        }
+
         private string OpenTGLXMLFile()
         {
             OpenFileDialog dlg = new OpenFileDialog();

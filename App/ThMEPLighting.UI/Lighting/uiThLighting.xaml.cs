@@ -1,11 +1,14 @@
-﻿using AcHelper;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using ThControlLibraryWPF.CustomControl;
+
+using AcHelper;
+using AcHelper.Commands;
+
+using ThMEPLighting;
 using ThMEPLighting.Garage;
-using ThMEPLighting.Command;
 using ThMEPLighting.ViewModel;
+using ThControlLibraryWPF.CustomControl;
 
 namespace TianHua.Lighting.UI
 {
@@ -14,9 +17,10 @@ namespace TianHua.Lighting.UI
     /// </summary>
     public partial class uiThLighting : ThCustomWindow
     {
-        LightingViewModel UIConfigs = null;
         public static uiThLighting Instance = null;
-     
+        private LightingViewModel UIConfigs = null;
+        private bool _cbIsTCHCableTrayChecked = false;
+
         static uiThLighting()
         {
             Instance = new uiThLighting();
@@ -40,7 +44,7 @@ namespace TianHua.Lighting.UI
 
         public void Update()
         {
-            if(UIConfigs!=null)
+            if (UIConfigs != null)
             {
                 UIConfigs.UpdateLaneLineLayers();
             }
@@ -115,11 +119,8 @@ namespace TianHua.Lighting.UI
             }
             #endregion
 
-            using (var cmd = new ThLightingLayoutCommand(UIConfigs))
-            {
-                FocusToCAD();
-                cmd.Execute();
-            }
+            ThMEPGarageLayoutCmd.UIConfigs = UIConfigs;
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THMEPGARAGELAYOUT");
         }
         void FocusToCAD()
         {
@@ -206,12 +207,31 @@ namespace TianHua.Lighting.UI
         private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Hide();
-            e.Cancel = true;            
+            e.Cancel = true;
         }
 
         private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/view/video/7a52f241cc1b4fb6acdd7799c225e7b2.html");
+        }
+
+        private void btnCdzmVideo_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"https://short.yunxuetang.cn/7Yg1m9q8");
+        }
+
+        private void cbIsTCHCableTray_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!_cbIsTCHCableTrayChecked)
+            {
+                var showMsg = "本功能在未安装专版天正及参数化数据库补丁包的情况下会导致CAD崩溃，请确保已具备使用条件。";
+                var result = MessageBox.Show(showMsg, "天华-警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.OK)
+                {
+                    cbIsTCHCableTray.IsChecked = false;
+                }
+                _cbIsTCHCableTrayChecked = true;
+            }
         }
     }
 }

@@ -164,6 +164,7 @@
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
+    <Compile Include="CAD\ThMEPDbUniqueIdService.cs" />
     <Compile Include="CAD\ThMEPEntityExtension.cs" />
     <Compile Include="CAD\ThMEPPolylineEntityJig.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
@@ -171,7 +172,9 @@
     <Compile Include="Command\ThPickRoomCmd.cs" />
     <Compile Include="Command\ThSuperBoundaryCmd.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
+    <Compile Include="Config\ThExtractShearWallConfig.cs" />
     <Compile Include="Config\ThExtractBeamConfig.cs" />
+    <Compile Include="Config\ThExtratRoomOutlineConfig.cs" />
     <Compile Include="Config\ThRegularMatchingService.cs" />
     <Compile Include="ConnectWiring\ConnectWiringService.cs" />
     <Compile Include="ConnectWiring\Data\ThBlockPointsExtractor.cs" />
@@ -816,9 +819,6 @@
     </PackageReference>
     <PackageReference Include="NPOI">
       <Version>2.5.5</Version>
-    </PackageReference>
-    <PackageReference Include="protobuf-net">
-      <Version>3.1.17</Version>
     </PackageReference>
     <PackageReference Include="Svg">
       <Version>3.4.2</Version>

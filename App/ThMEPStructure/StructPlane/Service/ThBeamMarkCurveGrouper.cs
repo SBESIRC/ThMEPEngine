@@ -16,50 +16,67 @@ namespace ThMEPStructure.StructPlane.Service
     // 对梁线和文字分组
     internal class ThBeamMarkCurveGrouper
     {
-        private double _pointTolerance = 1.0;
         private Dictionary<DBText, ThGeometry> _beamMarkDict;
         private Dictionary<Curve, ThGeometry> _beamCurveDict;
         private ThCADCoreNTSSpatialIndex _beamCurveSpatialIndex;
+        public List<Dictionary<ThGeometry, List<ThGeometry>>> Groups { get; private set; }
+        /// <summary>
+        /// 文字两边都没有梁线
+        /// </summary>
+        public List<ThGeometry> InvalidBeamMarks { get; private set; }
 
         public ThBeamMarkCurveGrouper(List<ThGeometry> beamGeos, List<ThGeometry> beamMarks)
         {
+            InvalidBeamMarks = new List<ThGeometry>();
+            Groups = new List<Dictionary<ThGeometry, List<ThGeometry>>>();
+
             // 便于查询            
             _beamCurveDict = new Dictionary<Curve, ThGeometry>();
             beamGeos.Where(o => o.Boundary is Curve).ForEach(o => _beamCurveDict.Add(o.Boundary as Curve, o));
 
             _beamMarkDict = new Dictionary<DBText, ThGeometry>();
             beamMarks.Where(o => o.Boundary is DBText).ForEach(o => _beamMarkDict.Add(o.Boundary as DBText, o));
-
-            _pointTolerance = ThStructurePlaneCommon.PointTolerance;            
             _beamCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(_beamCurveDict.Keys.ToCollection());
         }
-        public List<Dictionary<ThGeometry,List<ThGeometry>>> Group()
+        public void Group()
         {
             // 查找文字两边的梁线
             var beamMarkPairs = GetBeamMarkPairCurves();
+
+            // get isolated beammarks
+            InvalidBeamMarks = new List<ThGeometry>();
+            InvalidBeamMarks = beamMarkPairs
+                .Where(o => o.Value.Count == 0)
+                .Select(o => _beamMarkDict[o.Key])
+                .ToList();
+
+            // 目前只认为文字两边都有线才是合理的
+            var hasTwoSideMarkPairs = beamMarkPairs
+                .Where(o => o.Value.Count == 2)
+                .ToDictionary(o => o.Key, o => o.Value);
+
             // 按文字具有共边来分组
-            var beamMarkGroups = MergeBeamMarks(beamMarkPairs);
+            var beamMarkGroups = MergeBeamMarks(hasTwoSideMarkPairs);
             // 返回结果
             // 一个字典表示一组,key表示beamMark,value表示两边的梁线
-            var results = new List<Dictionary<ThGeometry, List<ThGeometry>>>();
+            Groups = new List<Dictionary<ThGeometry, List<ThGeometry>>>();
             beamMarkGroups.ForEach(g =>
             {
                 var groupDict = new Dictionary<ThGeometry, List<ThGeometry>>();
                 g.OfType<DBText>().ForEach(o =>
                 {
                     var markGeo = _beamMarkDict[o];
-                    var sides = beamMarkPairs[o].OfType<Curve>().Select(c => _beamCurveDict[c]).ToList();
+                    var sides = hasTwoSideMarkPairs[o].OfType<Curve>().Select(c => _beamCurveDict[c]).ToList();
                     groupDict.Add(markGeo, sides); 
                 });
-                results.Add(groupDict);
+                Groups.Add(groupDict);
             });            
-            return results;
         }
 
-        public Dictionary<Polyline, Curve> CreateBeamPolygons(List<Dictionary<ThGeometry, List<ThGeometry>>> beamMarkPairs)
+        public Dictionary<Polyline, Curve> CreateBeamPolygons()
         {
             var beamPolygons = new Dictionary<Polyline, Curve>();
-            beamMarkPairs.ForEach(o =>
+            Groups.ForEach(o =>
             {
                 o.ForEach(k =>
                 {
@@ -123,16 +140,25 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     var first = group.OfType<DBText>().First();
                     group.Remove(first);
-                    var firstEdges = beamMarkPairs[first];
-                    var sameEdges = group.OfType<DBText>().Where(o => HasCommonEdge(firstEdges, beamMarkPairs[o])).ToCollection();
-                    sameEdges.OfType<DBObject>().ForEach(o => group.Remove(o));
-                    sameEdges.Add(first);
-                    results.Add(sameEdges);
+                    var sides = new DBObjectCollection(); // 记录具有共边的线
+                    sides.AddRange(beamMarkPairs[first]);
+                    var sameEdgeMarks = new DBObjectCollection(); // 记录具有共边的文字
+                    group.OfType<DBText>().ForEach(o =>
+                    {
+                        if(HasCommonEdge(sides, beamMarkPairs[o]))
+                        {
+                            sides.AddRange(beamMarkPairs[o]);
+                            sameEdgeMarks.Add(o);
+                        }
+                    });
+                    sameEdgeMarks.OfType<DBObject>().ForEach(o => group.Remove(o));
+                    sameEdgeMarks.Add(first);
+                    results.Add(sameEdgeMarks);
                 }
             });
             return results;
         }
-
+        
         private void Intersection(DBObjectCollection firstObjs,DBObjectCollection secondObjs)
         {
             var firstHash = new HashSet<DBObject>(firstObjs.OfType<DBObject>());
@@ -188,7 +214,7 @@ namespace ThMEPStructure.StructPlane.Service
             foreach (var item in _beamMarkDict)
             {
                 var markMoveDir = GetMarkDirection(item.Value);
-                var beamText = item.Key as DBText;
+                var beamText = item.Key;
                 if (markMoveDir.Length <= 1e-6 || beamText == null)
                 {
                     continue;
@@ -206,12 +232,10 @@ namespace ThMEPStructure.StructPlane.Service
                     continue;
                 }
                 // 根据文字中心、文字移动方向和宽度,获取标注两边的线
-                var envelop = beamText.Position.CreateRectangle(markMoveDir, beamWidth * 1.1, 1.0);
+                var textCenter = beamText.GetCenterPointByOBB();
+                var envelop = textCenter.CreateRectangle(markMoveDir, beamWidth * 1.1, 1.0);
                 var beamCurves = GetMarkAndLinePair(envelop, beamWidth);
-                if(beamCurves.Count==2)
-                {
-                    results.Add(beamText, beamCurves);
-                }
+                results.Add(beamText, beamCurves);
                 envelop.Dispose();
             }
             return results;
@@ -236,8 +260,7 @@ namespace ThMEPStructure.StructPlane.Service
             }
             else
             {
-                //TODO
-
+                return beamCurves;
             }
             return new DBObjectCollection();
         }

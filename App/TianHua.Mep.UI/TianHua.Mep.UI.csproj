@@ -43,8 +43,8 @@
     <Compile Include="ViewModel\ThFrameCompareVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMepUIApp.cs" />
-    <Compile Include="UI\ExtractBeamConfigUI.xaml.cs">
-      <DependentUpon>ExtractBeamConfigUI.xaml</DependentUpon>
+    <Compile Include="UI\ExtractLayerConfigUI.xaml.cs">
+      <DependentUpon>ExtractLayerConfigUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\ExtractRoomOutlineUI.xaml.cs">
       <DependentUpon>ExtractRoomOutlineUI.xaml</DependentUpon>
@@ -52,7 +52,7 @@
     <Compile Include="UI\RoomOutlineUI.xaml.cs">
       <DependentUpon>RoomOutlineUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\ThExtractBeamConfigVM.cs" />
+    <Compile Include="ViewModel\ThExtractLayerConfigVM.cs" />
     <Compile Include="ViewModel\ThExtractRoomOutlineVM.cs" />
     <Compile Include="ViewModel\ThRoomOutlineVM.cs" />
   </ItemGroup>
@@ -65,7 +65,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\ExtractBeamConfigUI.xaml">
+    <Page Include="UI\ExtractLayerConfigUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

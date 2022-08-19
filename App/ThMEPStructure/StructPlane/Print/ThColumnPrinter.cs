@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using Linq2Acad;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Common;
 using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
@@ -7,19 +8,12 @@ namespace ThMEPStructure.StructPlane.Print
 {
     internal class ThColumnPrinter
     {
-        private HatchPrintConfig HatchConfig { get; set; }
-        private PrintConfig OutlineConfig { get; set; }
-        public ThColumnPrinter(HatchPrintConfig hatchConfig, PrintConfig outlineConfig)
-        {
-            HatchConfig = hatchConfig;
-            OutlineConfig = outlineConfig;
-        }
-        public ObjectIdCollection Print(Database db, Polyline polygon)
+        public static ObjectIdCollection Print(AcadDatabase db, Polyline polygon, PrintConfig outlineConfig,HatchPrintConfig hatchConfig)
         {
             var results = new ObjectIdCollection();
-            var outlineId =  polygon.Print(db, OutlineConfig);
+            var outlineId =  polygon.Print(db, outlineConfig);
             var objIds = new ObjectIdCollection { outlineId };
-            var hatchId = objIds.Print(db, HatchConfig);
+            var hatchId = objIds.Print(db, hatchConfig);
             results.Add(outlineId);
             results.Add(hatchId);
             return results;

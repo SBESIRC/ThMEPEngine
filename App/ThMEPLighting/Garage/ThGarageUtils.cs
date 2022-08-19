@@ -573,18 +573,24 @@ namespace ThMEPLighting.Garage
                 var results = new DBObjectCollection(); // 返回删除的元素
                 var lightBlks = border.Lights.ToCollection();
                 var numberTexts = border.Texts.ToCollection();
+                var tchCableTrays = border.TCHCableTrays.ToCollection();
                 var lightWires = new DBObjectCollection();
                 border.JumpWires.ForEach(j => lightWires.Add(j));
                 border.CenterLines.ForEach(c => lightWires.Add(c));
                 border.SideLines.ForEach(s => lightWires.Add(s));
 
+                var lightingLines = new List<Line>();
+                lightingLines.AddRange(border.FirstLightingLines);
+                lightingLines.AddRange(border.SecondLightingLines);
+                lightingLines.AddRange(border.FdxCenterLines);
                 var queryService = new ThQueryLightWireService(
-                    lightBlks, numberTexts, lightWires, arrangeParameter);
+                    lightBlks, numberTexts, lightWires, lightingLines, tchCableTrays, arrangeParameter);
                 queryService.Query();
 
                 // 将查询的结果删除
                 results = results.Union(queryService.QualifiedBlks);
                 results = results.Union(queryService.QualifiedTexts);
+                results = results.Union(queryService.QualifiedTCHCableTrays);
                 results = results.Union(queryService.QualifiedCurves);
                 results = results.Distinct();
 
@@ -735,13 +741,15 @@ namespace ThMEPLighting.Garage
             });
             return results;
         }
+
         private static List<Line> Query(ThCADCoreNTSSpatialIndex spatialIndex, Line line)
         {
             var poly = ThDrawTool.ToRectangle(line.StartPoint, line.EndPoint, 2.0);
             var objs = spatialIndex.SelectCrossingPolygon(poly);
             return objs.OfType<Line>().ToList();
         }
-        public static List<Line> SelectCrossingEntities(this Polyline searchFrame,ThCADCoreNTSSpatialIndex spatialIndex)
+
+        public static List<Line> SelectCrossingEntities(this Polyline searchFrame, ThCADCoreNTSSpatialIndex spatialIndex)
         {
             var results = new List<Line>();
             results.AddRange(spatialIndex.SelectCrossingPolygon(searchFrame).OfType<Line>());

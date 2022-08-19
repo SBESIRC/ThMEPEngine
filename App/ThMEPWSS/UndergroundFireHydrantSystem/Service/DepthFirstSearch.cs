@@ -116,6 +116,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     return true;
                 }
             }
+            else
+            {
+                if (fireHydrantSysIn.AngleList.ContainsKey(cur))//不是次环点
+                {
+                    if (!PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))//不是主环方向
+                    {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 

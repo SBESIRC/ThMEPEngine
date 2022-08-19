@@ -84,7 +84,7 @@ namespace ThMEPWSS.SprinklerDim.Data
                 },
                 new ThSprinklerRoomExtractor()
                 {
-                    IsWithHole=false,
+                    IsWithHole=true,
                     UseDb3Engine=true,
                     Transformer = Transformer,
                 },

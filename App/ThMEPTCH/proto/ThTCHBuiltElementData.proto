@@ -1,0 +1,21 @@
+﻿syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThTCHGeometry.proto";
+
+message ThTCHBuiltElementData {
+    ThTCHRootData root = 1;
+    
+    // geometry size
+    double length = 2;
+    double width = 3;
+    double height = 4;
+
+    // geometry location 
+    double z_offset = 5;
+    ThTCHPoint3d origin = 6;
+    ThTCHVector3d x_vector = 7;
+    ThTCHVector3d extruded_direction = 8;
+
+    // geometry profile
+    optional ThTCHPolyline outline = 9;
+}

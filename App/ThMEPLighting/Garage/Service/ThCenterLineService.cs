@@ -32,29 +32,33 @@ namespace ThMEPLighting.Garage.Service
                 searchedLines.Add(startLine);
                 startLine = FindStartLine(startLine, index);
                 results.Add(startLine);
-                Search(startLine, results, searchedLines, index);
+                Search(null, startLine, results, searchedLines, index);
             }
 
             return results;
         }
 
-        private static void Search(Line startLine, List<Line> results, List<Line> searchedLines, ThCADCoreNTSSpatialIndex index)
+        private static void Search(Line originalLine, Line startLine, List<Line> results, List<Line> searchedLines, ThCADCoreNTSSpatialIndex index)
         {
             var frame = startLine.BufferSquare(10.0);
             var filter = index.SelectCrossingPolygon(frame).OfType<Line>().Except(searchedLines).ToList();
             filter.ForEach(o =>
             {
                 searchedLines.Add(o);
-                if (o.LineDirection().DotProduct(startLine.LineDirection()) < -Math.Sin(1 / 180.0 * Math.PI))
+                // ①目标线在源线上的映射小于零
+                // ②目标线距离起始线较近且方向反向
+                if ((o.LineDirection().DotProduct(startLine.LineDirection()) < -Math.Sin(1 / 180.0 * Math.PI))
+                || (!originalLine.IsNull() && o.Distance(originalLine) < 500.0
+                    && o.LineDirection().DotProduct(originalLine.LineDirection()) < -Math.Cos(1 / 180.0 * Math.PI)))
                 {
                     var newLine = new Line(o.EndPoint, o.StartPoint);
                     results.Add(newLine);
-                    Search(newLine, results, searchedLines, index);
+                    Search(startLine, newLine, results, searchedLines, index);
                 }
                 else
                 {
                     results.Add(o);
-                    Search(o, results, searchedLines, index);
+                    Search(startLine, o, results, searchedLines, index);
                 }
             });
         }

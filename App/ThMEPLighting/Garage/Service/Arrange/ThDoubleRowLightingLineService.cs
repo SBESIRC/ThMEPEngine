@@ -100,7 +100,15 @@ namespace ThMEPLighting.Garage.Service.Arrange
 
             // 保留十字型车道线的较长边和T字型的横边
             CrossLineMerge(regionBorder.DxCenterLines, lightingLines, ref extendLines);
+            var beforeNumber = lightingLines.Count;
             lightingLines = ThLaneLineMergeExtension.Merge(lightingLines.ToCollection()).OfType<Line>().ToList();
+            var afterNumer = lightingLines.Count;
+            while (beforeNumber > afterNumer)
+            {
+                beforeNumber = afterNumer;
+                lightingLines = ThLaneLineMergeExtension.Merge(lightingLines.ToCollection()).OfType<Line>().ToList();
+                afterNumer = lightingLines.Count;
+            }
 
             // 检测连通性添加非灯线
             AddNonLightingLine(lightingLines, regionBorder.FdxCenterLines, regionBorder.DxCenterLines, extendLines);
@@ -303,19 +311,22 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 graphFrames.Add(searchFrame);
             });
 
-            var graphIndex = new ThCADCoreNTSSpatialIndex(graphFrames.ToCollection());
-            ExtendLineSort(extendLines, centerLines).ForEach(line =>
+            if (graphFrames.Count > 1)
             {
-                var lineBuffer = line.BufferSquare(10.0);
-                var frames = graphIndex.SelectCrossingPolygon(lineBuffer);
-                if (frames.Count > 1)
+                var graphIndex = new ThCADCoreNTSSpatialIndex(graphFrames.ToCollection());
+                ExtendLineSort(extendLines, centerLines).ForEach(line =>
                 {
-                    nonLightingLines.Add(line);
-                    frames.Add(lineBuffer);
-                    var union = frames.ToNTSMultiPolygon().Union().ToDbCollection();
-                    graphIndex.Update(union, frames);
-                }
-            });
+                    var lineBuffer = line.BufferSquare(10.0);
+                    var frames = graphIndex.SelectCrossingPolygon(lineBuffer);
+                    if (frames.Count > 1)
+                    {
+                        nonLightingLines.Add(line);
+                        frames.Add(lineBuffer);
+                        var union = frames.ToNTSMultiPolygon().Union().ToDbCollection();
+                        graphIndex.Update(union, frames);
+                    }
+                });
+            }
         }
 
         private void Extend(List<Line> nonLightingLines, List<Line> lightingLines)

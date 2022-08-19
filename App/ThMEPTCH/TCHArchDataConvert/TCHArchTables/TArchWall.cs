@@ -1,4 +1,6 @@
-﻿namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
+﻿using ThMEPTCH.Services;
+
+namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
     public class TArchWall : TArchEntity
     {
@@ -56,5 +58,21 @@
         public string MaterialName { get; set; }
         public int FireproofID { get; set; }
         public string FireproofName { get; set; }
+
+        public override bool IsValid()
+        {
+            var width = LeftWidth + RightWidth;
+            if (IsArc)
+            {
+                // CircularArc Wall
+                return Bulge > 0.0 && width > 1.0;
+            }
+            else
+            {
+                // Linear Wall
+                var length = ThMEPTCHTool.DistanceTo(StartPointX, StartPointY, StartPointZ, EndPointX, EndPointY, EndPointZ);
+                return length > 1.0 && width > 1.0;
+            }
+        }
     }
 }

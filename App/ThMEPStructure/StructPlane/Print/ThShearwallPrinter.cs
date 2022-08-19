@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Common;
@@ -9,33 +10,26 @@ namespace ThMEPStructure.StructPlane.Print
 {
     internal class ThShearwallPrinter
     {
-        private HatchPrintConfig HatchConfig { get; set; }
-        private PrintConfig OutlineConfig { get; set; }
-        public ThShearwallPrinter(HatchPrintConfig hatchConfig, PrintConfig outlineConfig)
-        {
-            HatchConfig = hatchConfig;
-            OutlineConfig = outlineConfig;
-        }
-        public ObjectIdCollection Print(Database db, Polyline polygon)
+        public static ObjectIdCollection Print(AcadDatabase acadDb, Polyline polygon,PrintConfig outlineConfig,HatchPrintConfig hatchConfig)
         {
             var results = new ObjectIdCollection();
-            var outlineId =  polygon.Print(db, OutlineConfig);
+            var outlineId =  polygon.Print(acadDb, outlineConfig);
             var objIds = new ObjectIdCollection { outlineId };
-            var hatchId = objIds.Print(db, HatchConfig);
+            var hatchId = objIds.Print(acadDb, hatchConfig);
             results.Add(outlineId);
             results.Add(hatchId);
             return results;
         }
-        public ObjectIdCollection Print(Database db, MPolygon polygon)
+        public static ObjectIdCollection Print(AcadDatabase acadDb, MPolygon polygon,PrintConfig outlineConfig, HatchPrintConfig hatchConfig)
         {
             var results = new ObjectIdCollection();
             if (polygon == null || polygon.Area <= 1.0)
             {
                 return results;
             }
-            if (HatchConfig != null && polygon.Hatch != null)
+            if (hatchConfig != null && polygon.Hatch != null)
             {
-                var hatchIds = polygon.Print(db, HatchConfig, OutlineConfig);
+                var hatchIds = polygon.Print(acadDb, outlineConfig,hatchConfig);
                 hatchIds.OfType<ObjectId>().ForEach(o => results.Add(o));
             }
             return results;

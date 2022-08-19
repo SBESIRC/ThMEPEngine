@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
@@ -13,6 +14,9 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.Common;
 using ThMEPWSS.SprinklerDim.Data;
 using ThMEPWSS.SprinklerDim.Engine;
+using ThMEPWSS.SprinklerDim.Model;
+using ThMEPWSS.SprinklerDim.Service;
+
 
 namespace ThMEPWSS.SprinklerDim.Cmd
 {
@@ -72,6 +76,24 @@ namespace ThMEPWSS.SprinklerDim.Cmd
             {
                 cmd.Execute();
             }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThSprinklerDimTestDim", CommandFlags.Modal)]
+        public void ThSprinklerDimTestDim()
+        {
+
+            var pts = new List<Point3d>();
+            pts.Add(new Point3d(0, 0, 0));
+            pts.Add(new Point3d(1000, 1000, 0));
+            pts.Add(new Point3d(2000, 2000, 0));
+            var dir = (pts.Last() - pts.First()).GetNormal().RotateBy(90 * System.Math.PI / 180, Vector3d.ZAxis);
+            var dist = 800;
+
+            var dim = new ThSprinklerDimension(pts, dir, dist);
+
+            var caddim = ThInsertDimToDBService.ToCADDim(new List<ThSprinklerDimension>() { dim });
+            ThInsertDimToDBService.InsertDim(caddim);
         }
     }
 }

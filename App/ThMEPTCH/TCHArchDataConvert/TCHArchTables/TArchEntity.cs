@@ -12,5 +12,6 @@ namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
         public string StyleID { get; set; }
         public string LineType { get; set; }
         public string Layer { get; set; }
+        public virtual bool IsValid() => true;
     }
 }

@@ -451,7 +451,7 @@ namespace ThMEPIFC.Ifc2x3
                 result = model.Instances.New<IfcPropertySingleValue>(p =>
                 {
                     p.Name = propertySingleValue.Name.ToString();
-                    p.NominalValue = new IfcText(propertySingleValue.NominalValue.ToString());
+                    p.NominalValue = propertySingleValue.NominalValue.CloneAndCreateNew();
                 });
             }
             else
@@ -459,6 +459,22 @@ namespace ThMEPIFC.Ifc2x3
                 throw new NotSupportedException();
             }
             return result;
+        }
+
+        private static IfcValue CloneAndCreateNew(this IfcValue value)
+        {
+            if(value is IfcText ifcText)
+            {
+                return new IfcText(ifcText.ToString());
+            }
+            else if(value is IfcLengthMeasure ifcLengthMeasure)
+            {
+                return new IfcLengthMeasure(double.Parse(ifcLengthMeasure.Value.ToString()));
+            }
+            else
+            {
+                return new IfcText(value.Value.ToString());
+            }
         }
 
         private static Autodesk.AutoCAD.Geometry.CoordinateSystem3d WCS()

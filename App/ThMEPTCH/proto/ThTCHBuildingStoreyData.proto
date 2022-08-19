@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThTCHWallData.proto";
+import "ThTCHDoorData.proto";
+import "ThTCHWindowData.proto";
+import "ThTCHOpeningData.proto";
+
+message ThTCHBuildingStoreyData {
+    ThTCHRootData root = 1;
+    repeated ThTCHWallData walls = 2;
+    repeated ThTCHDoorData doors = 3;
+    repeated ThTCHWindowData windows = 4;
+    repeated ThTCHOpeningData openings = 5;
+}

@@ -56,5 +56,9 @@ namespace ThMEPEngineCore.Engine
         {
             return false;
         }
+        public virtual void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix, int uid)
+        {
+            DoExtract(elements, dbObj, matrix);
+        }
     }
 }

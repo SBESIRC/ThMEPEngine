@@ -185,6 +185,8 @@ namespace ThMEPStructure.StructPlane
             {
                 return;
             }
+            Active.Editor.Command("_.PURGE", "B", " ", "N");
+
             Active.Database.ImportStruPlaneTemplate();
             SetSysVariables();
             var printers = new List<ThStruDrawingPrinter>();
@@ -203,9 +205,7 @@ namespace ThMEPStructure.StructPlane
             SetLayerOrder(floorObjIds);
             bool hasHatch = floorObjIds.IsIncludeHatch();
 
-            // 成块
-            // purge
-            Active.Editor.Command("_.PURGE", "B", " ","N");
+            // 成块            
             floorObjIds.ForEach(o =>
             {
                 var blkName = GetDrawingBlkName();

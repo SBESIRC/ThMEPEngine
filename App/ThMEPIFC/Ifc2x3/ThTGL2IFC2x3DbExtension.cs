@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Xbim.Ifc;
 using Xbim.Ifc2x3.GeometryResource;
+using ThCADCore.NTS;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -13,10 +14,13 @@ namespace ThMEPIFC.Ifc2x3
     {
         public static IfcCompositeCurve ToIfcCompositeCurve(IfcStore model, Polyline polyline)
         {
+            var pLine = polyline.TPSimplify(0.001);
             var compositeCurve = CreateIfcCompositeCurve(model);
-            var segments = new PolylineSegmentCollection(polyline);
+            var segments = new PolylineSegmentCollection(pLine);
             segments.OfType<PolylineSegment>().ForEach(s =>
             {
+                if (s.StartPoint.GetDistanceTo(s.EndPoint) < 0.001)
+                    return;
                 compositeCurve.Segments.Add(ToIfcCompositeCurveSegment(model, s));
             });
             return compositeCurve;

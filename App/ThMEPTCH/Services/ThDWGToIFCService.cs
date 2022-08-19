@@ -182,7 +182,9 @@ namespace ThMEPTCH.Services
                 buildingStorey.Elevation = floor.Elevation;
                 buildingStorey.Useage = floor.FloorName;
                 buildingStorey.Origin = new Point3d(0, 0, floor.Elevation);
-
+                //buildingStorey.Properties.Add("FloorNo", floor.Num.ToString());
+                //buildingStorey.Properties.Add("Height", floor.LevelHeight.ToString());
+                //buildingStorey.Properties.Add("StdFlrNo", floor.Num.ToString());
                 ThTCHBuildingStorey memoryStory = null;
                 if (isMemoryStory)
                 {
@@ -482,7 +484,7 @@ namespace ThMEPTCH.Services
             {
                 return res;
             }
-            res = res.OrderBy(c => c.Num).ToList();
+            res = res.OrderBy(c => Convert.ToInt32(c.Num)).ToList();
             res.First().Elevation = startElevtion;
             res.First().LevelHeight = firstFloorHeight;
             var elevtion = startElevtion + firstFloorHeight;

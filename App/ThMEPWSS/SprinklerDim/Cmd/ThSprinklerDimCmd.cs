@@ -24,6 +24,7 @@ using ThMEPWSS.Common;
 using ThMEPWSS.SprinklerDim.Data;
 using ThMEPWSS.SprinklerDim.Engine;
 using ThMEPWSS.SprinklerDim.Service;
+using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Cmd
 {
@@ -48,7 +49,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         public override void SubExecute()
         {
             SprinklerDimExecute();
-        }  
+        }
         public void Dispose()
         {
         }
@@ -86,7 +87,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                     InputExtractors = dataFactory.Extractors,
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
-                    AxisCurvesData  = dataFactory.AxisCurves,
+                    AxisCurvesData = dataFactory.AxisCurves,
                 };
 
                 // dataQuery.Transform(transformer);
@@ -97,28 +98,33 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 dataProcess.ProcessData();
                 dataProcess.Print();
 
-                // 给喷淋点分区
-                var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
-                netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, dataProcess.Room, out var roomsOut, printTag);
-                var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
+                //// 给喷淋点分区
+                //var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
+                //netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, dataProcess.Room, out var roomsOut, printTag);
+                //var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
 
-                List<Polyline> mixRoomWall = new List<Polyline>();
-                mixRoomWall.AddRange(dataProcess.Room);
-                mixRoomWall.AddRange(dataProcess.Wall);
+                //List<Polyline> mixRoomWall = new List<Polyline>();
+                //mixRoomWall.AddRange(dataProcess.Room);
+                //mixRoomWall.AddRange(dataProcess.Wall);
 
-                ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mixRoomWall, out var mixRoomWallSI, printTag);
-                ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
+                //ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mixRoomWall, out var mixRoomWallSI, printTag);
+                //ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
 
-                // 区域标注喷淋点
-                ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
+                //// 区域标注喷淋点
+                //ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
 
-                List<Polyline> mixColumnWall = new List<Polyline>();
-                mixColumnWall.AddRange(dataProcess.Column);
-                mixColumnWall.AddRange(dataProcess.Wall);
-                
+                //List<Polyline> mixColumnWall = new List<Polyline>();
+                //mixColumnWall.AddRange(dataProcess.Column);
+                //mixColumnWall.AddRange(dataProcess.Wall);
 
-                // 生成靠参照物的标注点
-                ThSprinklerDimExtensionService.GenerateRealDimension(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(dataProcess.AxisCurves), printTag, step);
+
+                //// 生成靠参照物的标注点
+                //List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateReferenceDimensionPoint(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(dataProcess.AxisCurves), dataProcess.TchPipeText, ThDataTransformService.Change(dataProcess.TchPipe), printTag, step);
+
+                var dims = ThSprinklerDimEngine.LayoutDimEngine(dataProcess, printTag);
+
+                ThInsertDimToDBService.InsertDim(ThInsertDimToDBService.ToCADDim(dims));
+
 
             }
         }

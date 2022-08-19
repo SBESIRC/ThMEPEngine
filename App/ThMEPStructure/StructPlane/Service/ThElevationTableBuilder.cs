@@ -25,13 +25,15 @@ namespace ThMEPStructure.StructPlane.Service
         private double contentWidthFactor = 0.7;
         private List<int> RowHeights;
         private List<int> ColumnWidths;
-        
+        private ObjectId _elevationTableTextStyleId = ObjectId.Null;
+
         private List<ElevationInfo> Infos { get; set; }
         public ThElevationTableBuilder(List<ElevationInfo> infos)
         {
             Infos = infos;
             RowHeights = GetRowHeights();            
             ColumnWidths = new List<int> { 1000, 1500, 1500, 1000, 1000 };
+            _elevationTableTextStyleId = DbHelper.GetTextStyleId(ThPrintStyleManager.ElevationTableTextStyleName);
         }
         public DBObjectCollection Build()
         {
@@ -90,27 +92,27 @@ namespace ThMEPStructure.StructPlane.Service
                     {
                         case 0:
                             var text1 = CreateText(center, info.FloorNo, contentTextHeight,
-                                contentWidthFactor, ThPrintStyleManager.ElevationTableTextStyleName);
+                                contentWidthFactor, _elevationTableTextStyleId);
                             results.Add(text1);
                             break;
                         case 1:
                             var text2 = CreateText(center, info.BottomElevation, contentTextHeight,
-                                contentWidthFactor, ThPrintStyleManager.ElevationTableTextStyleName);
+                                contentWidthFactor, _elevationTableTextStyleId);
                             results.Add(text2);
                             break;
                         case 2:
                             var text3 = CreateText(center, info.FloorHeight, contentTextHeight,
-                                contentWidthFactor, ThPrintStyleManager.ElevationTableTextStyleName);
+                                contentWidthFactor, _elevationTableTextStyleId);
                             results.Add(text3);
                             break;
                         case 3:
                             var text4 = CreateText(center,info.WallColumnGrade, contentTextHeight, 
-                                contentWidthFactor, ThPrintStyleManager.ElevationTableTextStyleName);                            
+                                contentWidthFactor, _elevationTableTextStyleId);                            
                             results.Add(text4);
                             break;
                         case 4:
                             var text5 = CreateText(center, info.BeamBoardGrade, contentTextHeight,
-                                contentWidthFactor, ThPrintStyleManager.ElevationTableTextStyleName);
+                                contentWidthFactor, _elevationTableTextStyleId);
                             results.Add(text5);
                             break;
                         default:
@@ -135,36 +137,36 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     case 0:
                         var text1 = CreateText(center, column1Title, titleTextHeight, 
-                            titleWidthFactor,ThPrintStyleManager.ElevationTableTextStyleName);
+                            titleWidthFactor, _elevationTableTextStyleId);
                         results.Add(text1);
                         break;
                     case 1:
                         var text2 = CreateText(center, column2Title, titleTextHeight, 
-                            titleWidthFactor,ThPrintStyleManager.ElevationTableTextStyleName);
+                            titleWidthFactor, _elevationTableTextStyleId);
                         results.Add(text2);
                         break;
                     case 2:
                         var text3 = CreateText(center, column3Title, titleTextHeight, 
-                            titleWidthFactor,ThPrintStyleManager.ElevationTableTextStyleName);
+                            titleWidthFactor, _elevationTableTextStyleId);
                         results.Add(text3);
                         break;
                     case 3:
                         var text4a = CreateText(center + new Vector3d(0, titleTextHeight*0.7, 0), 
                             column4aTitle, titleTextHeight, titleWidthFactor,
-                            ThPrintStyleManager.ElevationTableTextStyleName);
+                            _elevationTableTextStyleId);
                         var text4b = CreateText(center - new Vector3d(0, titleTextHeight * 0.7, 0), 
                             column4bTitle, titleTextHeight, titleWidthFactor,
-                            ThPrintStyleManager.ElevationTableTextStyleName);
+                            _elevationTableTextStyleId);
                         results.Add(text4a);
                         results.Add(text4b);
                         break;
                     case 4:
                         var text5a = CreateText(center + new Vector3d(0, titleTextHeight * 0.7, 0),
                             column5aTitle, titleTextHeight, titleWidthFactor,
-                            ThPrintStyleManager.ElevationTableTextStyleName);
+                            _elevationTableTextStyleId);
                         var text5b = CreateText(center - new Vector3d(0, titleTextHeight * 0.7, 0), 
                             column5bTitle, titleTextHeight, titleWidthFactor,
-                            ThPrintStyleManager.ElevationTableTextStyleName);
+                            _elevationTableTextStyleId);
                         results.Add(text5a);
                         results.Add(text5b);
                         break;
@@ -179,19 +181,18 @@ namespace ThMEPStructure.StructPlane.Service
             string content,
             double height,
             double widthFactor,
-            string textStyleName,
+            ObjectId textStyleId,
             TextHorizontalMode hm = TextHorizontalMode.TextCenter,
             TextVerticalMode vm = TextVerticalMode.TextVerticalMid)
         {
             //在原点创建文字
             if(string.IsNullOrEmpty(content) || height<=0.0 || 
-                widthFactor<=0.0 || string.IsNullOrEmpty(textStyleName))
+                widthFactor<=0.0 || textStyleId == ObjectId.Null)
             {
                 return null;
             }
             else
             {
-                var textStyleId = DbHelper.GetTextStyleId(textStyleName);
                 return new DBText()
                 {
                     TextString = content,

@@ -428,10 +428,6 @@ namespace ThMEPStructure.StructPlane.Service
             pts2.Add(maxPair.Item1 + vec);
             return pts2.CreatePolyline();
         }
-        internal static Point3d GetTextCenter(this DBText dbText)
-        {
-            return dbText.GetCenterPointByOBB();
-        }
         internal static string GetMultiTextString(this DBObjectCollection texts)
         {
             var sb = new StringBuilder();

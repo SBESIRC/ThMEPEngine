@@ -90,22 +90,24 @@ namespace ThMEPLighting.Garage.Service.Arrange
             if (layoutPointService != null)
             {
                 layoutPointService.Margin = ArrangeParameter.Margin;
-                layoutPointService.Interval = ArrangeParameter.Interval;                
+                layoutPointService.Interval = ArrangeParameter.Interval;
                 layoutPointService.DoubleRowOffsetDis = ArrangeParameter.DoubleRowOffsetDis;
 
                 // 先做内缩处理
                 var firstShortenLines = ThLightingLineCorrectionService.SingleRowCorrect(
                 GetEdges(FirstLightEdges), GetEdges(SecondLightEdges), ArrangeParameter.ShortenDistance);
-                //Print.ThPrintService.Print(firstShortenLines.Select(o=>o.Clone() as Curve).ToList(),1);
+                //Print.ThPrintService.Print(firstShortenLines.Select(o => o.Clone() as Curve).ToList(), 1);
 
+                // 将1号线映射到
                 var secondShortenLines = GetSecondShortLines(firstShortenLines, GetEdges(SecondLightEdges));
-                //Print.ThPrintService.Print(secondShortenLines.Select(o => o.Clone() as Curve).ToList(), 1);
+                //Print.ThPrintService.Print(secondShortenLines.Select(o => o.Clone() as Curve).ToList(), 2);
+                
                 results = layoutPointService.Layout(firstShortenLines, secondShortenLines);
             }
             return results;
         }
 
-        private List<Line> GetSecondShortLines(List<Line> firstShortenLines,List<Line> secondLines)
+        private List<Line> GetSecondShortLines(List<Line> firstShortenLines, List<Line> secondLines)
         {
             var results = new List<Line>();
             var firstPairService = new ThFirstSecondPairService(firstShortenLines, secondLines, ArrangeParameter.DoubleRowOffsetDis);
@@ -113,7 +115,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             {
                 firstPairService.Query(l).ForEach(s =>
                 {
-                    var pts = new List<Point3d> { s.StartPoint,s.EndPoint };
+                    var pts = new List<Point3d> { s.StartPoint, s.EndPoint };
                     var pt1 = l.StartPoint.GetProjectPtOnLine(s.StartPoint, s.EndPoint);
                     if (pt1.IsPointOnCurve(s, 1.0))
                     {

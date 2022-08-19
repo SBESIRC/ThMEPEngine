@@ -242,7 +242,7 @@ namespace TianHua.Electrical.PDS.Service
             var descriptionAssign = true;
             foreach (var str in markStrings.Except(searchedString))
             {
-                if (!r.Match(str).Success)
+                if (!r.Match(str).Success && !string.IsNullOrEmpty(str))
                 {
                     // 过滤电压
                     if (new Regex(@"[0-9]+[kK]?[vV]{1}").Match(str).Success
@@ -554,10 +554,10 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="infos"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSCircuit CircuitMarkAnalysis(string srcPanelID, string tarPanelID, List<string> infos,
+        public ThPDSCircuit CircuitMarkAnalysis(string srcPanelID, string tarPanelID, ThPDSCircuitGraphNode target, List<string> infos,
             List<string> distBoxKey)
         {
-            var id = CreateCircuitID(srcPanelID, tarPanelID, infos, distBoxKey);
+            var id = CreateCircuitID(srcPanelID, tarPanelID, target, infos, distBoxKey);
             if (string.IsNullOrEmpty(id.SourcePanelID) && !string.IsNullOrEmpty(srcPanelID))
             {
                 id.SourcePanelIDList.Add(srcPanelID);
@@ -588,7 +588,7 @@ namespace TianHua.Electrical.PDS.Service
             return circuit;
         }
 
-        private ThPDSID CreateCircuitID(string srcPanelID, string tarPanelID, List<string> infos, List<string> distBoxKey)
+        private ThPDSID CreateCircuitID(string srcPanelID, string tarPanelID, ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey)
         {
             var circuitID = new ThPDSID();
             var panelIDs = new List<string>();
@@ -653,7 +653,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (circuitIDs.Count == panelIDs.Count
                     && (panelIDs[0].Equals(srcPanelID) || string.IsNullOrEmpty(srcPanelID))
-                    && !(panelIDs[0].Equals(tarPanelID)))
+                    && !panelIDs[0].Equals(tarPanelID))
                 {
                     circuitID.SourcePanelIDList.Add(panelIDs[0]);
                     circuitID.CircuitIDList.Add(circuitIDs[0]);
@@ -662,6 +662,14 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     circuitID.SourcePanelIDList.Add(srcPanelID);
                     circuitID.CircuitIDList.Add(circuitIDs[0]);
+                }
+                else if (circuitIDs.Count == panelIDs.Count
+                    && !panelIDs[0].Equals(srcPanelID) && !panelIDs[0].Equals(tarPanelID)
+                    && target.Loads.Count > 0)
+                {
+                    target.Loads[0].ID.SourcePanelIDList.Add(panelIDs[0]);
+                    target.Loads[0].ID.CircuitIDList.Add(circuitIDs[0]);
+                    target.HasWarning = true;
                 }
             }
 

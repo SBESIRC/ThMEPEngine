@@ -178,34 +178,67 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
-        public static void ThSpinrklerAddSinglePtToNetGroup(ref List<ThSprinklerNetGroup> netGroup, List<Point3d> sprinkler, Dictionary<Point3d, double> ptAngleDict)
+        public static void ThSpinrklerAddSinglePtToNetGroup(ref List<ThSprinklerNetGroup> netGroup, List<Point3d> sprinkler, Dictionary<Point3d, double> ptAngleDict, double DTTol)
         {
             var singlePts = new List<Point3d>();
-            singlePts.AddRange(sprinkler.Except(netGroup.SelectMany(x => x.Pts)));
+            var allPtInGroup = netGroup.SelectMany(x => x.Pts).ToList();
+            singlePts.AddRange(sprinkler.Except(allPtInGroup));
 
             foreach (var pt in singlePts)
             {
-                ptAngleDict.TryGetValue(pt, out var angle);
-                if (angle != 0)
+                ThSprinklerNetGroup selectGroup = null;
+                var angle = ptAngleDict[pt];
+                var nearPts = allPtInGroup.Where(x => x.DistanceTo(pt) <= DTTol * 2).OrderBy(x => x.DistanceTo(pt)).ToList();
+
+                ////先看方向+距离，没有再找最近距离的
+                foreach (var nearPt in nearPts)
                 {
-                    var group = netGroup.Where(x => ThSprinklerLineService.IsOrthogonalAngle(x.Angle, angle, 2));
-                    //先看第一个之后细化：点组外包框内， 如果没有group咋办等
+                    // var group = netGroup.Where(x => ThSprinklerLineService.IsOrthogonalAngle(x.Angle, angle, 2));
+                    var group = netGroup.Where(x => x.Pts.Contains(nearPt) && ThSprinklerLineService.IsOrthogonalAngle(x.Angle, angle, 2));
                     if (group.Any())
                     {
-                        var selectGroup = group.First();
-                        var idxPt = selectGroup.AddPt(pt);
-                        var singleGraph = new ThSprinklerGraph();
-                        singleGraph.AddVertex(idxPt);
-                        selectGroup.PtsGraph.Add(singleGraph);
-                    }
-                    else
-                    {
-
+                        selectGroup = group.First();
+                        break;
                     }
                 }
+                if (selectGroup == null && nearPts.Count > 0)
+                {
+                    //没有再找范围内最近距离的
+                    var nearPt = nearPts.First();
+                    var group = netGroup.Where(x => x.Pts.Contains(nearPt));
+                    if (group.Any())
+                    {
+                        selectGroup = group.First();
+                    }
+                }
+                if (selectGroup == null)
+                {
+                    //范围内没找到点，则找全局最近的
+                    var allNearPt = allPtInGroup.OrderBy(x => x.DistanceTo(pt)).ToList();
+                    if (allNearPt.Any())
+                    {
+                        var group = netGroup.Where(x => x.Pts.Contains(allNearPt.First()));
+                        if (group.Any())
+                        {
+                            selectGroup = group.First();
+                        }
+                    }
+                }
+                if (selectGroup == null)
+                {
+                    //全局其实只有一个点or两个点
+                    selectGroup = new ThSprinklerNetGroup();
+                    selectGroup.Angle = angle;
+                    netGroup.Add(selectGroup);
+                }
+
+                var idxPt = selectGroup.AddPt(pt);
+                var singleGraph = new ThSprinklerGraph();
+                singleGraph.AddVertex(idxPt);
+                selectGroup.PtsGraph.Add(singleGraph);
+
             }
-
-
         }
+
     }
 }

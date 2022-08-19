@@ -22,6 +22,8 @@ namespace ThMEPLighting.Garage.Service
         private DBObjectCollection LightBlks { get; set; }
         private DBObjectCollection NumberTexts { get; set; }
         private DBObjectCollection LightWires { get; set; }
+        private List<Line> LightingLines { get; set; }
+        private DBObjectCollection TCHCableTrays { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
         #endregion
         #region ----------中间参数----------
@@ -30,6 +32,7 @@ namespace ThMEPLighting.Garage.Service
         private const int MaxFindCount = 20;
         private ThCADCoreNTSSpatialIndex NumberTextSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex LightWireSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex TCHCableTraysSpatialIndex { get; set; }
         // <summary>
         /// 用于查找灯块上方的文字
         /// </summary>
@@ -37,21 +40,26 @@ namespace ThMEPLighting.Garage.Service
         private double WireQueryLength { get; set; }
         #endregion
         #region ----------返回结果----------
-        public DBObjectCollection QualifiedBlks   { get; private set; }
-        public DBObjectCollection QualifiedTexts  { get; private set; }
+        public DBObjectCollection QualifiedBlks { get; private set; }
+        public DBObjectCollection QualifiedTexts { get; private set; }
+        public DBObjectCollection QualifiedTCHCableTrays { get; private set; }
         public DBObjectCollection QualifiedCurves { get; private set; }
         #endregion
-        
+
         public ThQueryLightWireService(
             DBObjectCollection lightBlks,
             DBObjectCollection numberTexts,
             DBObjectCollection lightWires,
+            List<Line> lightLines,
+            DBObjectCollection tchCableTrays,
             ThLightArrangeParameter arrangeParameter
             )
         {
             LightBlks = lightBlks;
             NumberTexts = numberTexts;
             LightWires = lightWires;
+            LightingLines = lightLines;
+            TCHCableTrays = tchCableTrays;
             ArrangeParameter = arrangeParameter;
             Init();
         }
@@ -59,27 +67,33 @@ namespace ThMEPLighting.Garage.Service
         {
             QualifiedBlks = new DBObjectCollection();
             QualifiedTexts = new DBObjectCollection();
+            QualifiedTCHCableTrays = new DBObjectCollection();
             QualifiedCurves = new DBObjectCollection();
             NumberTextSpatialIndex = CreateSpatialIndex(NumberTexts, true);
             LightWireSpatialIndex = CreateSpatialIndex(LightWires, true);
+            TCHCableTraysSpatialIndex = CreateSpatialIndex(TCHCableTrays, true);
             TextQueryHeight = ArrangeParameter.Width / 2.0 + ArrangeParameter.LightNumberTextGap
                 + ArrangeParameter.LightNumberTextHeight + SearchDistanceTolerance;
             WireQueryLength = (ArrangeParameter.LampLength + ArrangeParameter.LightWireBreakLength) / 2.0
                 + SearchDistanceTolerance;
         }
-        public void Query( )
+        public void Query()
         {
             // 查找思路：
             // 从灯块出发，按照一定范围搜索其附近的编号文字
             // 从块出发找到其附近的编号文字和相连的线
-            var lightTextPairs = GetLightBlockTextPairs(LightBlks, NumberTextSpatialIndex);
-            
-            // 收集找到的灯块和编号文字
-            lightTextPairs.ForEach(o =>
+            var lightPairs = GetLightBlockTextPairs(LightBlks, NumberTextSpatialIndex);
+            var tchCableTrays = GetTCHCAbleTrays(LightingLines, TCHCableTraysSpatialIndex);
+
+            // 收集找到的灯块，编号文字
+            lightPairs.ForEach(o =>
             {
                 QualifiedBlks.Add(o.Item1);
                 Add(QualifiedTexts, o.Item2);
             });
+
+            // 收集天正桥架
+            Add(QualifiedTCHCableTrays, tchCableTrays);
 
             // 查找QualifiedBlks附近的线
             var nearbyWires = GetLightBlockNearbyWires(QualifiedBlks, LightWireSpatialIndex);
@@ -93,12 +107,12 @@ namespace ThMEPLighting.Garage.Service
                 if (o is Line line)
                 {
                     int findCount = 0;
-                    if(TraceIsLinkWire(line,line.StartPoint,findCount))
+                    if (TraceIsLinkWire(line, line.StartPoint, findCount))
                     {
                         QualifiedCurves.Add(o);
                     }
                     findCount = 0;
-                    if (TraceIsLinkWire(line, line.EndPoint,findCount))
+                    if (TraceIsLinkWire(line, line.EndPoint, findCount))
                     {
                         QualifiedCurves.Add(o);
                     }
@@ -106,9 +120,9 @@ namespace ThMEPLighting.Garage.Service
             });
         }
 
-        private bool TraceIsLinkWire(Line line,Point3d pt,int findCount)
+        private bool TraceIsLinkWire(Line line, Point3d pt, int findCount)
         {
-            if(findCount<MaxFindCount)
+            if (findCount < MaxFindCount)
             {
                 findCount++;
             }
@@ -122,10 +136,10 @@ namespace ThMEPLighting.Garage.Service
             {
                 return true;
             }
-            if (links.Count==0)
+            if (links.Count == 0)
             {
                 var dir = line.LineDirection();
-                if(pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint))
+                if (pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint))
                 {
                     dir = dir.Negate();
                 }
@@ -154,12 +168,12 @@ namespace ThMEPLighting.Garage.Service
                 .Where(o => QualifiedCurves.Contains(o)).Any();
         }
 
-        private List<Line> FilterExtendLinks(Line line,DBObjectCollection extLinks)
+        private List<Line> FilterExtendLinks(Line line, DBObjectCollection extLinks)
         {
             return extLinks
                 .OfType<Curve>()
-                .Where(o=>o is Line).Select(o=>o as Line)
-                .Where(o=>ThGeometryTool.IsCollinearEx(line.StartPoint,
+                .Where(o => o is Line).Select(o => o as Line)
+                .Where(o => ThGeometryTool.IsCollinearEx(line.StartPoint,
                 line.EndPoint, o.StartPoint, o.EndPoint))
                 .ToList();
         }
@@ -178,9 +192,9 @@ namespace ThMEPLighting.Garage.Service
         private List<Tuple<BlockReference, DBObjectCollection>> GetLightBlockTextPairs(
             DBObjectCollection lightBlks, ThCADCoreNTSSpatialIndex numberTextSpatialIndex)
         {
-            var results = new List<Tuple<BlockReference, DBObjectCollection>>();
             // 从灯块出发，优先查找一定范围以内有编号文字，如果有，则视为布置的照明灯
             // 如果没有则看其连接处是否有灯连线
+            var results = new List<Tuple<BlockReference, DBObjectCollection>>();
             lightBlks.OfType<BlockReference>().ForEach(b =>
             {
                 var vec = Vector3d.XAxis.RotateBy(b.Rotation + Math.PI / 2.0, b.Normal).GetNormal();
@@ -195,6 +209,24 @@ namespace ThMEPLighting.Garage.Service
             });
             return results;
         }
+
+        private DBObjectCollection GetTCHCAbleTrays(List<Line> lightingLines, ThCADCoreNTSSpatialIndex tchCableTraySpatialIndex)
+        {
+            // 从灯块出发，优先查找一定范围以内有编号文字，如果有，则视为布置的照明灯
+            // 如果没有则看其连接处是否有灯连线
+            var results = new DBObjectCollection();
+            lightingLines.ForEach(l =>
+            {
+                var envelop = l.BufferSquare(50.0);
+                var objs = tchCableTraySpatialIndex.SelectCrossingPolygon(envelop);
+                if (objs.Count > 0)
+                {
+                    Add(results, objs);
+                }
+            });
+            return results;
+        }
+
         private DBObjectCollection GetLightBlockNearbyWires(
             DBObjectCollection lightBlks, ThCADCoreNTSSpatialIndex wireSpatialIndex)
         {
@@ -203,12 +235,12 @@ namespace ThMEPLighting.Garage.Service
             // 如果没有则看其连接处是否有灯连线
             lightBlks.OfType<BlockReference>().ForEach(b =>
             {
-                var vec1 = Vector3d.XAxis.RotateBy(b.Rotation, b.Normal).GetNormal();                
+                var vec1 = Vector3d.XAxis.RotateBy(b.Rotation, b.Normal).GetNormal();
                 var sp = b.Position + vec1.MultiplyBy(WireQueryLength);
                 var ep = b.Position - vec1.MultiplyBy(WireQueryLength);
                 var envelop1 = ThDrawTool.ToOutline(sp, ep, EnvelopWidth);
                 results = results.Union(wireSpatialIndex.SelectCrossingPolygon(envelop1));
-               
+
                 var vec2 = vec1.RotateBy(Math.PI / 2.0, b.Normal).GetNormal();
                 sp = b.Position + vec2.MultiplyBy(TextQueryHeight);
                 ep = b.Position - vec2.MultiplyBy(TextQueryHeight);
@@ -224,11 +256,11 @@ namespace ThMEPLighting.Garage.Service
                 AllowDuplicate = allowDuplicate,
             };
         }
-        private void Add(DBObjectCollection origins,DBObjectCollection newAdds)
+        private void Add(DBObjectCollection origins, DBObjectCollection newAdds)
         {
-            foreach(DBObject dbObj in newAdds)
+            foreach (DBObject dbObj in newAdds)
             {
-                if(!origins.Contains(dbObj))
+                if (!origins.Contains(dbObj))
                 {
                     origins.Add(dbObj);
                 }

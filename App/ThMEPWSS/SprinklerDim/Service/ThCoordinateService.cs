@@ -86,6 +86,117 @@ namespace ThMEPWSS.SprinklerDim.Service
             return false;
         }
 
+        public static bool IsVertical(Vector3d l, Vector3d v)
+        {
+            if (Math.Abs(l.GetNormal().DotProduct(v.GetNormal())) < Math.Cos(Math.PI / 2 - Math.PI / 180))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsTheSameDirrection(Vector3d v1, Vector3d v2)
+        {
+            if(v1.DotProduct(v2) > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        
+        public static Polyline GetDimTextPolyline(Point3d pts1, Point3d pts2, double distance)
+        {
+            double TextHeight = 300.0;
+            double EachCharWidth = 200.0;
+            double Length = pts1.DistanceTo(pts2);
+            Vector3d line = pts2 - pts1;
+            Vector3d xAxis = new Vector3d(1, 0, 0);
+            Vector3d dir = line.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1)).GetNormal();
+            double angle = xAxis.GetAngleTo(line);
+            Point3d CentralPt = new Point3d();
+
+            if ((3 * Math.PI / 2 < angle && angle < 2 * Math.PI) || (angle >= 0 && angle <= Math.PI / 2))
+            {
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (350 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (350 + distance) * dir.Y, 0);
+            }
+            else
+            {
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (350 - distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (350 - distance) * dir.Y, 0);
+            }
+
+            int CharNum = 1;
+            int t = (int)Length;
+            while (t > 10)
+            {
+                t /= 10;
+                CharNum += 1;
+            }
+            Polyline box = GenerateBox(CentralPt, line.GetNormal(), CharNum * EachCharWidth / 2.0, TextHeight / 2.0);
+
+            return box;
+        }
+
+        public static Polyline GetDimWholePolyline(Point3d pts1, Point3d pts2, double distance)
+        {
+            double Length = pts1.DistanceTo(pts2);
+            Vector3d line = pts2 - pts1;
+            Vector3d xAxis = new Vector3d(1, 0, 0);
+            Vector3d dir = line.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1)).GetNormal();
+            double angle = xAxis.GetAngleTo(line);
+            Point3d CentralPt = new Point3d();
+
+            if ((3 * Math.PI / 2 < angle && angle < 2 * Math.PI) || (angle >= 0 && angle <= Math.PI / 2))
+            {
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (250 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (250 + distance) * dir.Y, 0);
+            }
+            else
+            {
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (-250 +distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (-250 +distance) * dir.Y, 0);
+            }
+            Polyline box = GenerateBox(CentralPt, line.GetNormal(), Length / 2.0, 250);
+
+            return box;
+        }
+
+        public static int IsTextBoxOverlap(Point3d pts1, Point3d pts2, double distance)
+        {
+            Vector3d line = pts2 - pts1;
+            Vector3d xAxis = new Vector3d(1, 0, 0);
+            double angle = xAxis.GetAngleTo(line);
+            if ((3 * Math.PI / 2 < angle && angle < 2 * Math.PI) || (angle >= 0 && angle <= Math.PI / 2))
+            {
+                if (distance > 0) return 0;
+                else return 1;
+            }
+            else
+            {
+                if (distance < 0) return 0;
+                else return 1;
+            }
+        }
+
+        public static Polyline GenerateBox(Point3d pt, Vector3d dir, double sTol = 2000.0, double dTol = 1500.0)
+        {
+            Polyline box = new Polyline();
+            Vector3d tDir = dir.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1));
+
+            Point3d a = pt - sTol * dir + dTol * tDir;
+            Point3d b = pt + sTol * dir + dTol * tDir;
+            Point3d c = pt + sTol * dir - dTol * tDir;
+            Point3d d = pt - sTol * dir - dTol * tDir;
+
+            box.AddVertexAt(0, a.ToPoint2D(), 0, 0, 0);
+            box.AddVertexAt(1, b.ToPoint2D(), 0, 0, 0);
+            box.AddVertexAt(2, c.ToPoint2D(), 0, 0, 0);
+            box.AddVertexAt(3, d.ToPoint2D(), 0, 0, 0);
+
+            box.Closed = true;
+            return box;
+        }
+
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using ThMEPStructure.Common;
 
 namespace ThMEPStructure.Model.Printer
@@ -69,10 +70,22 @@ namespace ThMEPStructure.Model.Printer
         /// 文字高度
         /// </summary>
         public double Height { get; set; }
+        private string _textStyleName = "";
         /// <summary>
         /// 样式名
         /// </summary>
-        public string TextStyleName { get; set; } = "";
+        public string TextStyleName 
+        { 
+            get
+            {
+                return _textStyleName;
+            }
+            set
+            {
+                _textStyleName = value;
+                SetTextStyleId();
+            }
+        }
         /// <summary>
         /// 文字内容
         /// </summary>
@@ -89,6 +102,9 @@ namespace ThMEPStructure.Model.Printer
         /// 倾斜角度
         /// </summary>
         public double Oblique { get; set; }
+
+        public ObjectId TextStyleId { get; private set; } = ObjectId.Null;
+
         /// <summary>
         /// 按比例缩放文字高度
         /// </summary>
@@ -97,6 +113,17 @@ namespace ThMEPStructure.Model.Printer
         {
             var pair = drawingScale.GetDrawScaleValue();
             Height = Height.GetScaleTextHeight(pair.Item1, pair.Item2);
+        }
+        private void SetTextStyleId()
+        {
+            if (string.IsNullOrEmpty(_textStyleName))
+            {
+                TextStyleId = ObjectId.Null;
+            }
+            else
+            {
+                TextStyleId = DbHelper.GetTextStyleId(_textStyleName);
+            }
         }
     }
 }

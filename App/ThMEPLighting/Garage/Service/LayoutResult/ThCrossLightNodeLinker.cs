@@ -48,7 +48,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var direction = e.LineDirection();
                 // 端点无延伸线则尝试跨线连接
-                if (spatial.SelectCrossingPolygon( e.StartPoint.CreateSquare(10.0)).Count == 1)
+                if (spatial.SelectCrossingPolygon(e.StartPoint.CreateSquare(10.0)).Count == 1)
                 {
                     var startExtandLine = new Line(e.StartPoint - DoubleRowOffsetDis / 2 * direction, e.StartPoint - DoubleRowOffsetDis * direction);
                     Search(e, startExtandLine, spatial, direction, linkSourceLines, linkTargetLines);
@@ -176,7 +176,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private void Search(Line line, Line extandLine, ThCADCoreNTSSpatialIndex spatial, Vector3d direction,
             List<List<Line>> linkSourceLines, List<List<Line>> linkTargetLines)
         {
-            var searchFrame = extandLine.BufferSquare(10.0);
+            var searchFrame = extandLine.BufferSquare(500.0);
             var searchLines = searchFrame.SelectCrossingEntities(spatial)
                 .Where(l => l.Distance(line) > DoubleRowOffsetDis / 2).ToList();
             if (searchLines.Count == 0)

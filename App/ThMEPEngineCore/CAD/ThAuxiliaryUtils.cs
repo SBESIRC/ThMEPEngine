@@ -230,5 +230,27 @@ namespace ThMEPEngineCore.CAD
         {
             secondObjs.OfType<DBObject>().ForEach(o => firstObjs.Add(o));
         }
+        public static DBObjectCollection DistinctEx(this DBObjectCollection objs)
+        {
+            var dict = Convert(objs);
+            return dict.Keys.ToCollection();
+        }
+        public static bool IsContains(this DBObjectCollection objs,DBObject obj)
+        {
+            var dict = Convert(objs);
+            return dict.ContainsKey(obj);
+        }
+        public static Dictionary<DBObject, DBObject> Convert(this DBObjectCollection objs)
+        {
+            var dict = new Dictionary<DBObject, DBObject>();
+            objs.OfType<DBObject>().ForEach(o =>
+            {
+                if (!dict.ContainsKey(o))
+                {
+                    dict.Add(o, o);
+                }
+            });
+            return dict;
+        }
     }
 }

@@ -41,6 +41,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         public List<CreateBasicElement> createBasicElements = new List<CreateBasicElement>();
         public List<CreateBlockInfo> createBlockInfos = new List<CreateBlockInfo>();
         public List<CreateDBTextElement> createDBTextElements = new List<CreateDBTextElement>();
+        private List<string> ChangedRoomTypeuid = new List<string>();
 
         private string _floorId;
         public BalconyCorridorEquPlatform(string floorId,List<RoomModel> balconyRooms, List<RoomModel> corridorRooms, List<RoomModel> otherRooms, List<EquipmentBlockSpace> balcCoorEqus, StruParameters parameters)
@@ -136,6 +137,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             _pipeDrainCircles = GetCheckCircles();
             //阳台设备、立管连线
             BalconyCorridorConnect(balcCorridRooms);
+            //阳台附近连线的转管，该标志为阳台立管
+            foreach (var blockinfo in balconyDrainCoverter)
+            {
+                if (ChangedRoomTypeuid.Contains(blockinfo.belongBlockId))
+                    blockinfo.tag = "FyL";
+            }
             //根据连接设备判断连线图层
             PipeRelationToLayoutLine();
             foreach (var item in _pipeConnectRelations)
@@ -422,7 +429,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             var nearPipe = targetPipes.OrderBy(c => c.blockCenterPoint.DistanceTo(centerPoint)).FirstOrDefault();
             if (nearPipe.blockCenterPoint.DistanceTo(centerPoint) >= _floorDrainEqumPipeNearDistance)
                 return false;
-
+            ChangedRoomTypeuid.Add(nearPipe.uid);
             var pipeRelation = _pipeConnectRelations.Where(c => c.pipeBlockUid.Equals(nearPipe.uid)).FirstOrDefault();
             if (pipeRelation == null)
             {

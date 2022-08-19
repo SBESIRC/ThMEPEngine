@@ -1,0 +1,7 @@
+﻿syntax = "proto3";
+
+message ThTCHRootData {
+    string globalId = 1;
+    optional string name = 2;
+    optional string description = 3; 
+}

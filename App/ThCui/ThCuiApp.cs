@@ -4,6 +4,7 @@ using System.IO;
 using ThMEPIdentity;
 using ThCADExtension;
 using System.Reflection;
+using System.Diagnostics;
 using System.Configuration;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
@@ -15,6 +16,11 @@ namespace TianHua.AutoCAD.ThCui
     public class ThCuiApp : IExtensionApplication
     {
         ThPartialCui partialCui = new ThPartialCui();
+
+        /// <summary>
+        /// 当前专业
+        /// </summary>
+        private string CURRENTPROFILE = "W";
 
         public void Initialize()
         {
@@ -149,26 +155,31 @@ namespace TianHua.AutoCAD.ThCui
             {
                 case "ARCHITECTURE":
                     {
+                        CURRENTPROFILE = "A";
                         ThRibbonUtils.ConfigPanelsWithProfile("A");
                     }
                     break;
                 case "HAVC":
                     {
+                        CURRENTPROFILE = "H";
                         ThRibbonUtils.ConfigPanelsWithProfile("H");
                     }
                     break;
                 case "ELECTRICAL":
                     {
+                        CURRENTPROFILE = "E";
                         ThRibbonUtils.ConfigPanelsWithProfile("E");
                     }
                     break;
                 case "WSS":
                     {
+                        CURRENTPROFILE = "W";
                         ThRibbonUtils.ConfigPanelsWithProfile("W");
                     }
                     break;
                 case "STRUCTURE":
                     {
+                        CURRENTPROFILE = "S";
                         ThRibbonUtils.ConfigPanelsWithProfile("S");
                     }
                     break;
@@ -181,6 +192,27 @@ namespace TianHua.AutoCAD.ThCui
         public void ThMEPUserConfig()
         {
             Active.Editor.WriteLine(string.Format("配置文件路径：{0}", UserConfigPath()));
+        }
+
+        [CommandMethod("TIANHUACAD", "THMEPHELP", CommandFlags.Modal)]
+        public void THMEPHELP()
+        {
+            switch (CURRENTPROFILE)
+            {
+                case "H":
+                    Process.Start("https://short.yunxuetang.cn/psgYGMsB");
+                    break;
+                case "E":
+                    Process.Start("https://short.yunxuetang.cn/sLFj1XWu");
+                    break;
+                case "W":
+                    Process.Start("https://short.yunxuetang.cn/sWkg6fbU");
+                    break;
+                case "A":
+                case "S":
+                default:
+                    break;
+            }
         }
 
         private string UserConfigPath()
@@ -297,30 +329,28 @@ namespace TianHua.AutoCAD.ThCui
                 switch (major)
                 {
                     case "A":
-                        ThRibbonUtils.ConfigPanelsWithProfile("A");
+                        CURRENTPROFILE = "A";
                         break;
                     case "S":
-                        ThRibbonUtils.ConfigPanelsWithProfile("S");
+                        CURRENTPROFILE = "S";
                         break;
                     case "H":
-                        ThRibbonUtils.ConfigPanelsWithProfile("H");
+                        CURRENTPROFILE = "H";
                         break;
                     case "E":
-                        ThRibbonUtils.ConfigPanelsWithProfile("E");
+                        CURRENTPROFILE = "E";
                         break;
                     case "W":
-                        ThRibbonUtils.ConfigPanelsWithProfile("W");
+                        CURRENTPROFILE = "W";
                         break;
                     default:
-                        ThRibbonUtils.ConfigPanelsWithProfile("W");
+                        CURRENTPROFILE = "W";
                         break;
                 }
             }
-            else
-            {
-                // 未登录，使用默认专业配置Panels
-                ThRibbonUtils.ConfigPanelsWithProfile("W");
-            }
+
+            // 切换Ribbon界面
+            ThRibbonUtils.ConfigPanelsWithProfile(CURRENTPROFILE);
         }
 
         //private void UpdateToolbarUserInterface()

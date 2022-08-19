@@ -43,7 +43,7 @@ namespace ThMEPTCH.CAD
             window.BasePointX = basePoint.X;
             window.BasePointY = basePoint.Y;
             window.BasePointZ = basePoint.Z;
-            window.Rotation = direction.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis);
+            window.Rotation = Vector3d.XAxis.GetAngleTo(direction.GetNormal(), Vector3d.ZAxis);
         }
     }
 }

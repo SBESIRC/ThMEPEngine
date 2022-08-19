@@ -1,12 +1,10 @@
-﻿using Autodesk.AutoCAD.Geometry;
-
-namespace ThMEPIFC
+﻿namespace ThMEPIFC
 {
     public class ThTGL2IFCCommon
     {
         /// <summary>
-        /// 全局精度
+        /// 默认项目精度
         /// </summary>
-        public Tolerance Global = new Tolerance(1e-3, 1e-5);
+        public static readonly double PRECISION = 1E-5;
     }
 }

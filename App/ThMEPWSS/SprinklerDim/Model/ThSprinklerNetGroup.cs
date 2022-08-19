@@ -18,11 +18,11 @@ namespace ThMEPWSS.SprinklerDim.Model
 
         public List<List<List<int>>> YCollineationGroup { get; set; } = new List<List<List<int>>>();//Y相同距离较近的形成组
 
-        public List<List<int>> XDimension { get; set; } = new List<List<int>>();//X方向的喷淋标注点
+        public List<List<ThSprinklerDimGroup>> XDimension { get; set; } = new List<List<ThSprinklerDimGroup>>();//X方向的喷淋标注点
 
-        public List<List<int>> YDimension { get; set; } = new List<List<int>>();//Y方向的喷淋标注点
+        public List<List<ThSprinklerDimGroup>> YDimension { get; set; } = new List<List<ThSprinklerDimGroup>>();//Y方向的喷淋标注点
 
-        public HashSet<Tuple<int, int>> LinesCuttedOffByWall = new HashSet<Tuple<int, int>>();//被墙打断的两点间连线
+        public HashSet<Tuple<int, int>> LinesCuttedOffByRoomWall = new HashSet<Tuple<int, int>>();//被墙打断的两点间连线
 
         //public List<Line> Lines { get; private set; } = new List<Line>();//所有的线列表，包括和支干管相交的打断线
         public double Angle { get; set; } = 0;//组角度
@@ -32,6 +32,11 @@ namespace ThMEPWSS.SprinklerDim.Model
         public ThSprinklerNetGroup()
         {
 
+        }
+
+        public ThSprinklerNetGroup(double angle)
+        {
+             Angle = angle;
         }
 
         public ThSprinklerNetGroup(List<Point3d> pts, List<ThSprinklerGraph> ptsGraph, Matrix3d transformer)
@@ -68,11 +73,48 @@ namespace ThMEPWSS.SprinklerDim.Model
             var ptsInGraph = new List<Point3d>();
             for (int i = 0; i < PtsGraph[graphIdx].SprinklerVertexNodeList.Count; i++)
             {
-                var p = Pts[PtsGraph[graphIdx].SprinklerVertexNodeList[i].NodeIndex];
+                var p = Pts[PtsGraph[graphIdx].SprinklerVertexNodeList[i].PtIndex];
                 ptsInGraph.Add(p);
             }
 
             return ptsInGraph;
+        }
+
+        public List<Line> GetAllLines(List<Point3d> pts)
+        {
+            List<Line> allLines = new List<Line> ();
+
+            foreach(var graph in PtsGraph)
+            {
+                allLines.AddRange(graph.GetAllLines(pts));
+            }
+
+            return allLines;
+        }
+
+        public List<Point3d> GetSinglePoints(List<Point3d> pts)
+        {
+            List<Point3d> points = new List<Point3d>();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                bool tag = true;
+                foreach (ThSprinklerGraph graph in PtsGraph)
+                {
+                    int nodeIndex = graph.SearchNodeIndex(i);
+                    if (nodeIndex != -1 && graph.SprinklerVertexNodeList[nodeIndex].FirstEdge != null)
+                    {
+                        tag = false;
+                        break;
+                    }
+                }
+
+                if (tag)
+                {
+                    points.Add(pts[i]);
+                }
+            }
+
+            return points;
         }
 
         //public List<Line> GetGraphLines(int graphIdx)

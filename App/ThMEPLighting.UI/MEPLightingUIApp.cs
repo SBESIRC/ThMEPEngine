@@ -1,9 +1,9 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using TianHua.Lighting.UI;
-using ThMEPLighting.UI.UI;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.UI.emgLightLayout;
+using ThMEPLighting.UI.UI;
 using ThMEPLighting.UI.WiringConnecting;
-using Autodesk.AutoCAD.ApplicationServices;
+using TianHua.Lighting.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPLighting.UI
@@ -36,7 +36,7 @@ namespace ThMEPLighting.UI
         }
         private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
-            if(AcadApp.DocumentManager.Count==1)
+            if (AcadApp.DocumentManager.Count == 1)
             {
                 if (uiThLighting.Instance != null)
                 {

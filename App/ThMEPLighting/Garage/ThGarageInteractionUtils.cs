@@ -13,11 +13,9 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Garage.Model;
-using ThMEPLighting.Garage.Service.LayoutPoint;
 
 namespace ThMEPLighting.Garage
 {
@@ -36,7 +34,7 @@ namespace ThMEPLighting.Garage
                 if (borders.Count == 0)
                 {
                     return results;
-                }                
+                }
                 #region ----------获取图纸中的元素----------
                 var allCenterLines = GetCenterLines(acdb); // 中心线(线槽)
                 var allSideLines = GetSideLines(acdb); // 边线(线槽)                            
@@ -46,6 +44,7 @@ namespace ThMEPLighting.Garage
                 var allJumpWires = GetJumpWires(acdb); // 跳线
                 var allFdxLines = GetFdxLines(acdb); // 非灯线
                 var allSingleRowCableTrunkingCenterLines = GetSingleRowCabelTrunkingCenterLines(acdb); // 单排线槽中心线
+                var allTCHCableTrays = GetTCHCableTrays(acdb); // 单排线槽中心线
                 #endregion
                 #region ----------移动到原点位置-----------
                 var basePt = borders[0].GetBorderBasePt();
@@ -58,6 +57,7 @@ namespace ThMEPLighting.Garage
                 Transform(allJumpWires, transformer);
                 Transform(allFdxLines, transformer);
                 Transform(allSingleRowCableTrunkingCenterLines, transformer);
+                Transform(allTCHCableTrays, transformer);
                 #endregion
                 #region ----------获取单个框的元素----------
                 borders.ForEach(o =>
@@ -65,18 +65,20 @@ namespace ThMEPLighting.Garage
                     var newBorder = o.Clone() as Entity;
                     var borderTransformer = new ThMEPOriginTransformer(newBorder.GetBorderBasePt());
                     transformer.Transform(newBorder);
+
                     var regionBorder = new ThRegionBorder
                     {
                         RegionBorder = o.Clone() as Entity,
                         Transformer = borderTransformer,
-                        DxCenterLines = GetRegionLines(newBorder, allLaneLines),
+                        DxCenterLines = GetRegionLaneLines(newBorder, allLaneLines),
                         FdxCenterLines = GetRegionLines(newBorder, allFdxLines),
                         SingleRowLines = GetRegionLines(newBorder, allSingleRowCableTrunkingCenterLines),
-                        SideLines = newBorder.SpatialFilter(allSideLines).Cast<Line>().ToList(),
-                        Texts = newBorder.SpatialFilter(allNumberTexts).Cast<DBText>().ToList(),
-                        JumpWires = newBorder.SpatialFilter(allJumpWires).Cast<Curve>().ToList(),
-                        CenterLines = newBorder.SpatialFilter(allCenterLines).Cast<Line>().ToList(),
-                        Lights = newBorder.SpatialFilter(allLightBlks).Cast<BlockReference>().ToList(),
+                        SideLines = newBorder.SpatialFilter(allSideLines).OfType<Line>().ToList(),
+                        Texts = newBorder.SpatialFilter(allNumberTexts).OfType<DBText>().ToList(),
+                        JumpWires = newBorder.SpatialFilter(allJumpWires).OfType<Curve>().ToList(),
+                        CenterLines = newBorder.SpatialFilter(allCenterLines).OfType<Line>().ToList(),
+                        Lights = newBorder.SpatialFilter(allLightBlks).OfType<BlockReference>().ToList(),
+                        TCHCableTrays = newBorder.SpatialFilter(allTCHCableTrays).OfType<Entity>().ToList(),
                     };
 
                     // 将获取到的灯线、非灯线Z坐标归零
@@ -97,6 +99,7 @@ namespace ThMEPLighting.Garage
                 Reset(allCenterLines, transformer);
                 Reset(allSideLines, transformer);
                 Reset(allLightBlks, transformer);
+                Reset(allTCHCableTrays, transformer);
                 Reset(allNumberTexts, transformer);
                 Reset(allLaneLines, transformer);
                 Reset(allJumpWires, transformer);
@@ -137,14 +140,13 @@ namespace ThMEPLighting.Garage
                 var results = new List<Entity>();
                 var filter = ThSelectionFilterTool.Build(dxfNames);
                 var psr = Active.Editor.GetSelection(options, filter);
-                if(psr.Status == PromptStatus.OK)
+                if (psr.Status == PromptStatus.OK)
                 {
                     psr.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
-                        
                         var newBorder = ThMEPFrameService.NormalizeEx(border);
-                        if(newBorder.Area>1.0)
+                        if (newBorder.Area > 1.0)
                         {
                             results.Add(newBorder);
                         }
@@ -152,7 +154,7 @@ namespace ThMEPLighting.Garage
                         {
                             // 进一步处理
                             newBorder = ThMEPFrameService.Rebuild(border, FrameExtendLength, FrameArcTesslateLength);
-                            if(newBorder.Area > 1.0)
+                            if (newBorder.Area > 1.0)
                             {
                                 results.Add(newBorder);
                             }
@@ -200,7 +202,7 @@ namespace ThMEPLighting.Garage
             .ToCollection();
         }
 
-        private static DBObjectCollection GetLaneLines(AcadDatabase acdb,List<string> layers)
+        private static DBObjectCollection GetLaneLines(AcadDatabase acdb, List<string> layers)
         {
             // 车道中心线
             return acdb.ModelSpace
@@ -224,6 +226,14 @@ namespace ThMEPLighting.Garage
                 .ToCollection();
         }
 
+        private static DBObjectCollection GetTCHCableTrays(AcadDatabase acdb)
+        {
+            // 单排线槽中心线
+            return acdb.ModelSpace
+                .Where(e => ThGarageLightUtils.IsTCHCableTray(e))
+                .ToCollection();
+        }
+
         private static DBObjectCollection GetJumpWires(AcadDatabase acdb)
         {
             // 跳线
@@ -233,7 +243,7 @@ namespace ThMEPLighting.Garage
             .ToCollection();
         }
 
-        private static void Transform(DBObjectCollection objs,ThMEPOriginTransformer transformer)
+        private static void Transform(DBObjectCollection objs, ThMEPOriginTransformer transformer)
         {
             objs.UpgradeOpen();
             transformer.Transform(objs);
@@ -303,8 +313,30 @@ namespace ThMEPLighting.Garage
         }
         private static List<Line> GetRegionLines(Entity region, DBObjectCollection dbObjs)
         {
-            return ThLaneLineEngine.Explode(region.SpatialFilter(dbObjs)).Cast<Line>().ToList();
+            return ThLaneLineEngine.Explode(region.SpatialFilter(dbObjs)).OfType<Line>().ToList();
         }
+
+        private static List<Line> GetRegionLaneLines(Entity region, DBObjectCollection dbObjs)
+        {
+            var dxCenterLines = GetRegionLines(region.BufferEx(-100.0), dbObjs);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dxCenterLines.ToCollection());
+            var results = new List<Line>();
+            dxCenterLines.ForEach(o =>
+            {
+                if (o.Length < 500.0)
+                {
+                    if (spatialIndex.SelectCrossingPolygon(o.StartPoint.CreateSquare(10.0)).Count == 1
+                     || spatialIndex.SelectCrossingPolygon(o.EndPoint.CreateSquare(10.0)).Count == 1)
+                    {
+                        return;
+                    }
+                }
+                results.Add(o);
+            });
+
+            return results;
+        }
+
         public static ThLightArrangeParameter GetUiParameters()
         {
             // From UI
@@ -331,7 +363,7 @@ namespace ThMEPLighting.Garage
             {
                 var centerLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.CenterLineParameter.LineType));
                 var laneLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.LaneLineBlockParameter.LineType));
-                var numberTextLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.NumberTextParameter.LineType));                
+                var numberTextLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.NumberTextParameter.LineType));
                 var sideLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.SideLineParameter.LineType));
                 var jumpWireLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.JumpWireParameter.LineType));
 
@@ -376,7 +408,7 @@ namespace ThMEPLighting.Garage
                 acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(arrangeParameter.LightNumberTextStyle), false);
             }
         }
-        public static void UnLockLayer(this Database db,List<string> layers)
+        public static void UnLockLayer(this Database db, List<string> layers)
         {
             using (var acadDb = AcadDatabase.Use(db))
             {

@@ -97,7 +97,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var floorDatas = InputDataConvert.FloorDataModels(floorGroupData);
                 var HEIGHT = vm.FaucetFloor;
                 var fireOffsetY = (HEIGHT > 3000 ? HEIGHT / 3 : HEIGHT / 2) - 500;
-                const double FIRE_HEIGHT = 700.0;
                 const double SPRAY_STEP = 440.0;
                 var SPAN_X = 2000.0;
                 if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.Any(x => x.IsHalfPlatform))
@@ -1911,25 +1910,35 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         {
                                                             if (j != 0 && j != refugeCount - 1)
                                                             {
-                                                                var px = getGeneralBsPt(i, j).OffsetXY(-510, -610);
+                                                                var px = getGeneralBsPt(i, j).OffsetXY(-510, vm.IsRoofRing ? 600.0 : -610.0);
                                                                 brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(210, -300)));
                                                                 lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -300), px.OffsetXY(0, 0)), "W-FRPT-HYDT-PIPE"));
                                                                 lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -300), px.OffsetXY(210, -300)), "W-FRPT-HYDT-PIPE"));
                                                                 lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(450, -300), px.OffsetXY(510, -300)), "W-FRPT-HYDT-PIPE"));
-                                                                vsels.Add(px.OffsetXY(510, -300));
-                                                                vkills.Add(px.OffsetXY(510, -300 + .1));
+                                                                if (vm.IsRoofRing)
+                                                                {
+                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(510, -600), px.OffsetXY(510, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                }
+                                                                else
+                                                                {
+                                                                    vsels.Add(px.OffsetXY(510, -300));
+                                                                    vkills.Add(px.OffsetXY(510, -300 + .1));
+                                                                }
                                                                 lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
                                                             }
                                                             else
                                                             {
                                                                 var px = getGeneralBsPt(i, j).OffsetY(-610);
-                                                                vsels.Add(px);
-                                                                vkills.Add(px.OffsetY(.1));
+                                                                if (!vm.IsRoofRing)
+                                                                {
+                                                                    vsels.Add(px);
+                                                                    vkills.Add(px.OffsetY(.1));
+                                                                }
                                                             }
                                                         }
                                                         if (j == 0)
                                                         {
-                                                            var px = getGeneralBsPt(i, j).OffsetXY(1500, -610 + 50);
+                                                            var px = getGeneralBsPt(i, j).OffsetXY(1500, (vm.IsRoofRing ? 600.0 : -610.0) + 50);
                                                             {
                                                                 var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
                                                                 if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
@@ -1937,7 +1946,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                         if (j != generalCount - 1)
                                                         {
-                                                            var dy = -610.0;
+                                                            var dy = vm.IsRoofRing ? 600.0 : -610.0;
                                                             var vecs = new List<Vector2d> { new Vector2d(300, dy) };
                                                             var bsPt = getGeneralBsPt(i, j);
                                                             var px = bsPt;
@@ -1949,14 +1958,19 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             bds.Add(drawValve(px.OffsetX(dx) + vecs[0].ToVector3d()));
                                                         }
                                                     }
-                                                    var seg = new GLineSegment(getGeneralBsPt(i, 0), getGeneralBsPt(i, generalCount - 1)).Offset(0, -610);
+                                                    var seg = new GLineSegment(getGeneralBsPt(i, 0), getGeneralBsPt(i, generalCount - 1)).Offset(0, vm.IsRoofRing ? 600.0 : -610.0);
                                                     drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                    if (vm.IsRoofRing)
+                                                    {
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(seg.StartPoint, seg.StartPoint.OffsetY(-600)), "W-FRPT-HYDT-PIPE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(seg.EndPoint, seg.EndPoint.OffsetY(-600)), "W-FRPT-HYDT-PIPE"));
+                                                    }
                                                 }
                                                 for (int j = 0; j < generalCount; j++)
                                                 {
                                                     if (j == 0 && rgi != floorRanges.Count - 1)
                                                     {
-                                                        var px = getGeneralBsPt(i, j).OffsetY(-610);
+                                                        var px = getGeneralBsPt(i, j).OffsetY(vm.IsRoofRing ? 600.0 : -610.0);
                                                         brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
                                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
                                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));

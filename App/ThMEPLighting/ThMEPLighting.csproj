@@ -130,6 +130,7 @@
     <Compile Include="FEI\ThEmgPilotLamp\ThFEILineExtension.cs" />
     <Compile Include="Garage\Engine\ThLaneLineExtractionEngine.cs" />
     <Compile Include="Garage\Engine\ThLaneLineExtractionVisitor.cs" />
+    <Compile Include="Garage\Model\ThConnector.cs" />
     <Compile Include="Garage\Model\ThLightingLinkInfo.cs" />
     <Compile Include="Garage\Service\Arrange\ThLightingArrangeService.cs" />
     <Compile Include="Garage\Service\Arrange\ThDoubleRowLightingLineService.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Garage\Service\Number\ThPassNumberService.cs" />
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
     <Compile Include="Garage\Service\ThCenterLineService.cs" />
+    <Compile Include="Garage\Service\ThDrawTCHCableTrayService.cs" />
     <Compile Include="Garage\Service\ThLightingCrossPointService.cs" />
     <Compile Include="Garage\Service\ThLightingLineCorrectionService.cs" />
     <Compile Include="Garage\Service\ThLineNodingService.cs" />
@@ -245,6 +247,7 @@
     <Compile Include="Common\Parkingillumination.cs" />
     <Compile Include="ParkingStall\Business\StallTextInsertor.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\ParkingGroupLightIllumination.cs" />
+    <Compile Include="ThMEPGarageLayoutCmd.cs" />
     <Compile Include="ViewModel\LightingViewModel.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
@@ -371,6 +374,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPTCH\ThMEPTCH.csproj">
+      <Project>{BA9B9213-0D44-4913-94C5-5DC6C0172B31}</Project>
+      <Name>ThMEPTCH</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

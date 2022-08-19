@@ -13,7 +13,12 @@ namespace ThMEPTCH.CAD
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            elements.AddRange(HandleTCHElement(dbObj, matrix));
+            elements.AddRange(HandleTCHElement(dbObj, matrix, 0));
+        }
+
+        public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix, int uid)
+        {
+            elements.AddRange(HandleTCHElement(dbObj, matrix, uid));
         }
 
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -31,18 +36,20 @@ namespace ThMEPTCH.CAD
             return true;
         }
 
-        private List<ThRawIfcBuildingElementData> HandleTCHElement(Entity tch, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleTCHElement(Entity tch, Matrix3d matrix, int uid)
         {
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(tch) && CheckLayerValid(tch))
             {
-                var archWindow = tch.Database.LoadWindowFromDb(tch.ObjectId, matrix);
-                results.Add(new ThRawIfcBuildingElementData()
+                var archWindow = tch.Database.LoadWindowFromDb(tch.ObjectId, matrix, uid);
+                if(archWindow.IsValid())
                 {
-
-                    Data = archWindow,
-                    Geometry = CreateOutline(archWindow),
-                });
+                    results.Add(new ThRawIfcBuildingElementData()
+                    {
+                        Data = archWindow,
+                        Geometry = CreateOutline(archWindow),
+                    });
+                }
             }
             return results;
         }

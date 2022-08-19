@@ -3,11 +3,14 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.Common
 {
@@ -43,7 +46,7 @@ namespace ThMEPLighting.Common
 
             return newPoly;
         }
-        public static DBObjectCollection SpatialFilter(this Entity border, DBObjectCollection dbObjs,double tesslateLength=10.0)
+        public static DBObjectCollection SpatialFilter(this Entity border, DBObjectCollection dbObjs, double tesslateLength = 10.0)
         {
             var oldLength = ThCADCoreNTSService.Instance.ArcTessellationLength;
             ThCADCoreNTSService.Instance.ArcTessellationLength = tesslateLength;
@@ -215,7 +218,7 @@ namespace ThMEPLighting.Common
             bool closeToStart = start.DistanceTo(lineSp) < start.DistanceTo(lineEp);
             return closeToStart ? lineEp : lineSp;
         }
-        
+
         public static List<Line> DistinctLines(List<Line> lines)
         {
             List<Line> resLines = new List<Line>();
@@ -299,7 +302,7 @@ namespace ThMEPLighting.Common
             return string.IsNullOrEmpty(match.Value) ? -1 : int.Parse(match.Value);
         }
 
-        public static bool IsLightCableCarrierCenterline(Entity e,List<string> layers)
+        public static bool IsLightCableCarrierCenterline(Entity e, List<string> layers)
         {
             return (e is Line || e is Polyline) && layers.Contains(e.Layer);
         }
@@ -317,6 +320,11 @@ namespace ThMEPLighting.Common
         public static bool IsSingleRowCabelTrunkingCenterline(Entity e)
         {
             return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.SingleRowCenterLineLayerName);
+        }
+
+        public static bool IsTCHCableTray(Entity e)
+        {
+            return e.IsTCHElement() && (e.Layer == ThGarageLightCommon.TCHCableTrayLayerName);
         }
 
         public static List<Line> FilterDistributedEdges(List<Line> edges, List<Line> dxLines)

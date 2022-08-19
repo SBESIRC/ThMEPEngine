@@ -1,119 +1,44 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPWSS.SprinklerConnect.Model;
-using ThMEPWSS.SprinklerConnect.Service;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Diagnostics;
+using ThMEPWSS.SprinklerDim.Model;
+using ThMEPWSS.SprinklerDim.Service;
 
 namespace ThMEPWSS.SprinklerDim.Model
 {
-    public class DimLinesGroup
-    {
-        public List<Point3d> Pts = new();
-        public List<int> tag = new();                      //在netlist中的编号
-    }
-
-
     public class ThSprinklerDimGroup
     {
-        public bool IsDim = new();               //标签
-        public List<Point3d> Pts = new();        //存储点的列表
-        public bool IsxAxis = false;             //记录标注的方向（如：值为true则代表是一列y值相同的点）
-        public double STol = 4800;
-        public long tag = 0;                     //记录标记方向上对应的值
+        public int pt { get; set; } = -1;
 
-        private static long GetValue(Point3d pt, bool isXAxis)
+        public List<int> PtsDimed { get; set; } = new List<int>();
+
+        private static bool IsDimed(List<Point3d> Pts, int id, List<int> colli, bool IsxAxis, double step,Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
-            if (isXAxis)
-                return (long)pt.X / 45;
-            else
-                return (long)pt.Y / 45;
+            bool isConflict1 = ThSprinklerDimensionOperateService.IsConflicted(Pts[id], Pts[colli[colli.Count - 1]], matrix, walls);
+            bool isConflict2 = ThSprinklerDimensionOperateService.IsConflicted(Pts[id], Pts[colli[0]], matrix, walls);
+            List<double> distance = new List<double>();
+            colli.ForEach(p => distance.Add(Pts[p].DistanceTo(Pts[id])));
+            double det = Math.Abs(ThCoordinateService.GetOriginalValue(Pts[id], IsxAxis) - ThCoordinateService.GetOriginalValue(Pts[colli[0]], IsxAxis));
+            if (colli.Contains(id)) return true;
+            else if (det < 45 && distance.Min() < 1.5 * step && !isConflict1 && !isConflict2) return true;
+            else return false;
         }
 
-        //获取该组到已经标注的标注线的最小距离
-        public double GetMinDis(List<Point3d> DimLine)
+        public void AddPt(int ipt, ThSprinklerNetGroup group, bool IsxAxis, double step, ThCADCoreNTSSpatialIndex walls)
         {
-            if (DimLine.Count == 0) return 0;
-            else if (DimLine.Count == 1)
-            {
-                List<double> dis = new();
-                foreach (Point3d pt in Pts) dis.Add(pt.DistanceTo(DimLine[0]));
-                return dis.Min();
-            }
-            else
-            {
-                DimLine = DimLine.OrderBy(p => GetValue(p, true)).ThenBy(q => GetValue(q, false)).ToList();
-                Line dim = new(DimLine[0], DimLine[DimLine.Count - 1]);
-                List<double> dis = new();
-                foreach (Point3d pt in Pts)
-                {
-                    var pt1 = dim.GetClosestPointTo(pt, true);
-                    dis.Add(pt.DistanceTo(pt1));
-                }
-                return dis.Min();
-            }
-        }
+            pt = ipt;
+            List<List<int>> anotherCollinearation = new List<List<int>>();
+            if (IsxAxis) group.XCollineationGroup.ForEach(p => anotherCollinearation.AddRange(p));
+            else group.YCollineationGroup.ForEach(p => anotherCollinearation.AddRange(p));
 
-        //从一个共线的点的列表中分出一个组（按照坐标从小到大的顺序，考虑STol），并将未存入的点返回
-        public List<Point3d> GetPoints(List<Point3d> pts)
-        {
-            pts = pts.OrderBy(p => GetValue(p, true)).ThenBy(q => GetValue(q, false)).ToList();
-            List<Point3d> pts1 = new();
-            if (pts.Count == 0) return null;
-            else if(pts.Count == 1)
+            foreach (List<int> p in anotherCollinearation)
             {
-                Pts.Add(pts[0]);
-                return null;
+                if (IsDimed(group.Pts, ipt, p, IsxAxis, step, group.Transformer, walls)) PtsDimed = p;
             }
-            else
-            {
-                Vector2d vc = new(GetValue(pts[pts.Count - 1], true) - GetValue(pts[0], true), GetValue(pts[pts.Count - 1], false) - GetValue(pts[0], false));
-                Vector2d vx = new(1, 0);
-                IsxAxis = !(vc.DotProduct(vx) == 0);
-                tag = GetValue(pts[0], IsxAxis);
-
-                Pts.Add(pts[0]);
-                for (int i = 0; i < pts.Count - 1; i++)
-                {
-                    if (pts[i].DistanceTo(pts[i + 1]) < STol)
-                    {
-                        Pts.Add(pts[i + 1]);
-                        continue;
-                    }
-                    pts1.Add(pts[i + 1]);
-                }
-                return pts1;
-            }
-        }
-
-        public bool Contains(Point3d pt)
-        {
-            if (pt == null) return false;
-            else
-            {
-                bool a = false;
-                foreach (Point3d ds in Pts)
-                {
-                    if ((int)pt.X == (int)ds.X && (int)pt.Y == (int)ds.Y && (int)pt.Z == (int)ds.Z)
-                    {
-                        a = true;
-                        break;
-                    }
-                }
-                return a;
-            }
-        }
-
-        //获取该组到某条点列表的垂足点
-        public Point3d GetProj(List<Point3d> DimLine)
-        {
-            DimLine = DimLine.OrderBy(p => GetValue(p, true)).ThenBy(q => GetValue(q, false)).ToList();
-            Line dim = new(DimLine[0], DimLine[DimLine.Count - 1]);
-            return dim.GetClosestPointTo(Pts[Pts.Count - 1], true);
         }
 
     }

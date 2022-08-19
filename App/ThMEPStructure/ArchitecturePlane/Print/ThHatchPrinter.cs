@@ -73,7 +73,7 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             }
             if (HatchConfig != null && polygon.Hatch != null)
             {
-                var hatchIds = polygon.Print(db, HatchConfig, OutlineConfig);
+                var hatchIds = polygon.Print(db, OutlineConfig, HatchConfig);
                 results.AddRange(hatchIds);
             }
             else if(OutlineConfig!=null && polygon!=null)

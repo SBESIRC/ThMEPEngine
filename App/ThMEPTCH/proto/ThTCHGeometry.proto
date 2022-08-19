@@ -1,0 +1,67 @@
+﻿syntax = "proto3";
+
+message ThTCHPoint3d {
+    // X coordinate
+    double x = 1;
+
+    // Y coordinate
+    double y = 2;
+
+    // Z coordinate
+    double z = 3;
+}
+
+message ThTCHVector3d {
+    // X
+    double x = 1;
+
+    // Y
+    double y = 2;
+
+    // Z
+    double z = 3;
+}
+
+message ThTCHMatrix3d {
+    // r0 c0
+    double data11 = 1;
+    // r0 c1
+    double data12 = 2;
+    // r0 c2
+    double data13 = 3;
+    // r0 c3
+    double data14 = 4;
+    // r1 c0
+    double data21 = 5;
+    // r1 c1
+    double data22 = 6;
+    // r1 c2
+    double data23 = 7;
+    // r1 c3
+    double data24 = 8;
+    // r2 c0
+    double data31 = 9;
+    // r2 c1
+    double data32 = 10;
+    // r2 c2
+    double data33 = 11;
+    // r2 c3
+    double data34 = 12;
+    // r3 c0
+    double data41 = 13;
+    // r3 c1
+    double data42 = 14;
+    // r3 c2
+    double data43 = 15;
+    // r3 c3
+    double data44 = 16;
+}
+
+message ThTCHSegment {
+    repeated uint32 index = 1;
+}
+
+message ThTCHPolyline {
+    repeated ThTCHPoint3d points = 1;
+    repeated ThTCHSegment segments = 2; 
+}

@@ -41,7 +41,7 @@ namespace ThMEPLighting.Garage
                 }
                 // 打开图层
                 var openLayers = new List<string>();
-                openLayers.AddRange(GetCommonLayers());                
+                openLayers.AddRange(GetCommonLayers());
                 openLayers.AddRange(arrangeParameter.LaneLineLayers);
                 openLayers.AddRange(ThCableTrayParameter.Instance.AllLayers);
                 acadDatabase.Database.OpenLayers(openLayers);
@@ -53,17 +53,17 @@ namespace ThMEPLighting.Garage
                 }
             }
         }
-       
+
         private ThLightArrangeParameter setInfo()
         {
-            var parameter =new ThLightArrangeParameter();
+            var parameter = new ThLightArrangeParameter();
             if (_UiConfigs != null)
             {
                 // 照度控制(单排or双排)
                 parameter.IsSingleRow = _UiConfigs.IlluminanceControl == "单排布置";
 
                 // 安装方式
-                if(_UiConfigs.InstallationMode == "线槽安装")
+                if (_UiConfigs.InstallationMode == "线槽安装")
                 {
                     parameter.InstallWay = InstallWay.CableTray;
                 }
@@ -104,7 +104,9 @@ namespace ThMEPLighting.Garage
                 parameter.LightNumberOfLoop = _UiConfigs.NumberOfCircuitsAutomaticCalculationOfNLoop;
                 parameter.LoopNumber = _UiConfigs.NumberOfCircuitsSpecifyTheNumberOfNPerCircuits;
                 parameter.DefaultStartNumber = _UiConfigs.StartingNumber;
-                parameter.Width = _UiConfigs.TrunkingWidth;
+                parameter.Height = Convert.ToDouble(_UiConfigs.Specification.Substring(_UiConfigs.Specification.IndexOf('*') + 1));
+                parameter.Width = Convert.ToDouble(_UiConfigs.Specification.Substring(0, _UiConfigs.Specification.IndexOf('*')));
+                parameter.IsTCHCableTray = _UiConfigs.IsTCHCableTray;
                 parameter.DoubleRowOffsetDis = _UiConfigs.DoubleRowSpacing;
                 parameter.Interval = _UiConfigs.LampSpacing;
 
@@ -125,10 +127,10 @@ namespace ThMEPLighting.Garage
                         break;
                     default:
                         var strs = _UiConfigs.BlockRatio.Split(':');
-                        if (strs.Length==2)
+                        if (strs.Length == 2)
                         {
                             double ratio = 0.0;
-                            if(double.TryParse(strs[1],out ratio))
+                            if (double.TryParse(strs[1], out ratio))
                             {
                                 parameter.PaperRatio = ratio;
                             }
@@ -138,7 +140,7 @@ namespace ThMEPLighting.Garage
                 parameter.LightNumberTextHeight *= parameter.PaperRatio / 100.0;
 
                 // 获取建筑车道线图层
-                parameter.LaneLineLayers = new List<string> { ThGarageLightCommon.DxCenterLineLayerName};
+                parameter.LaneLineLayers = new List<string> { ThGarageLightCommon.DxCenterLineLayerName };
             }
             return parameter;
         }

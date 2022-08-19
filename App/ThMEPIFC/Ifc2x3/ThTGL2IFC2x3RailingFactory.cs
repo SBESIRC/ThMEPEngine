@@ -15,8 +15,6 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcRailing>();
                 ret.Name = "TH Railing";
-                if (!string.IsNullOrEmpty(railing.Uuid))
-                    ret.GlobalId = new Xbim.Ifc2x3.UtilityResource.IfcGloballyUniqueId(railing.Uuid);
                 //create representation
                 var centerline = railing.Outline as Polyline;
                 var outlines = centerline.BufferFlatPL(railing.Width / 2.0);

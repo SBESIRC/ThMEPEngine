@@ -1,9 +1,11 @@
 ﻿using System;
 using Xbim.IO;
 using Xbim.Ifc;
-using System.Collections.Generic;
-using Xbim.Ifc2x3.SharedBldgElements;
 using ThMEPTCH.Model;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Xbim.Ifc2x3.ProductExtension;
+using Xbim.Ifc2x3.SharedBldgElements;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -32,17 +34,15 @@ namespace ThMEPIFC.Ifc2x3
                         walls.Add(wall);
                         foreach (var thtchdoor in thtchwall.Doors)
                         {
-                            var door = ThTGL2IFC2x3Factory.CreateDoor(Model, thtchdoor, wall, thtchwall, floor_origin);
-                            doors.Add(door);
+                            doors.Add(SetupDoor(Model, wall, thtchwall, thtchdoor, floor_origin));
                         }
                         foreach (var thtchwindow in thtchwall.Windows)
                         {
-                            var window = ThTGL2IFC2x3Factory.CreateWindow(Model, thtchwindow, wall, thtchwall, floor_origin);
-                            windows.Add(window);
+                            windows.Add(SetupWindow(Model, wall, thtchwall,thtchwindow, floor_origin));
                         }
                         foreach (var thtchhole in thtchwall.Openings)
                         {
-                            var hole = ThTGL2IFC2x3Factory.CreateHole(Model, thtchhole, wall, thtchwall, floor_origin);
+                            SetupHole(Model, wall, thtchhole, floor_origin);
                         }
                     }
                     foreach (var thtchcolumn in thtchstorey.Columns)
@@ -76,6 +76,30 @@ namespace ThMEPIFC.Ifc2x3
                 }
             }
         }
+
+        static public IfcDoor SetupDoor(IfcStore model, IfcWall ifcWall, ThTCHWall wall, ThTCHDoor door, Point3d floor_origin)
+        {
+            var ifcDoor = ThTGL2IFC2x3Factory.CreateDoor(model, door, floor_origin);
+            var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, wall, door, floor_origin);
+            ThTGL2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcDoor, ifcHole);
+            return ifcDoor;
+        }
+
+        static public IfcWindow SetupWindow(IfcStore model, IfcWall ifcWall, ThTCHWall wall, ThTCHWindow window, Point3d floor_origin)
+        {
+            var ifcWindow = ThTGL2IFC2x3Factory.CreateWindow(model, window, floor_origin);
+            var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, wall, window, floor_origin);
+            ThTGL2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcWindow, ifcHole);
+            return ifcWindow;
+        }
+
+        static public IfcOpeningElement SetupHole(IfcStore model, IfcWall ifcWall, ThTCHOpening hole, Point3d floor_origin)
+        {
+            var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, hole, floor_origin);
+            ThTGL2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcHole);
+            return ifcHole;
+        }
+
         static public void SaveIfcModel(IfcStore Model, string filepath)
         {
             if (Model != null)

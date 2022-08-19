@@ -25,22 +25,20 @@ namespace ThMEPLighting.Garage.Service
         /// </summary>
         private ThQueryLineService FirstQueryInstance { get; set; }
 
-        public ThFirstSecondPairService(
-            List<Line> firstLines, 
-            List<Line> secondLines,
-            double doubleRowOffsetDis)
+        public ThFirstSecondPairService(List<Line> firstLines, List<Line> secondLines, double doubleRowOffsetDis)
         {
             Pairs = new Dictionary<Line, List<Line>>();
             SecondSpatialIndex = ThGarageLightUtils.BuildSpatialIndex(secondLines);
             firstLines.ForEach(o =>
             {
                 var newLine = ThGarageLightUtils.NormalizeLaneLine(o);
-                var secondlines = Query(newLine.StartPoint, newLine.EndPoint, (doubleRowOffsetDis+1.0) * 2.0);
+                var secondlines = Query(newLine.StartPoint, newLine.EndPoint, (doubleRowOffsetDis + 10.0) * 2.0);
                 Pairs.Add(o, secondlines);
             });
 
             FirstQueryInstance = ThQueryLineService.Create(firstLines);
         }
+
         private List<Line> Query(Point3d sp, Point3d ep, double length)
         {
             //找到与first平行
@@ -48,11 +46,11 @@ namespace ThMEPLighting.Garage.Service
             var rectangle = ThDrawTool.ToRectangle(sp, ep, length);
             var objs = SecondSpatialIndex.SelectCrossingPolygon(rectangle);
             var vec = sp.GetVectorTo(ep);
-            var line = new Line(sp,ep);
+            var line = new Line(sp, ep);
             return objs
                 .Cast<Line>()
                 .Where(o => vec.IsParallelToEx(o.StartPoint.GetVectorTo(o.EndPoint)))
-                .Where(o=> line.HasCommon(o))
+                .Where(o => line.HasCommon(o))
                 .ToList();
         }
 
@@ -73,10 +71,10 @@ namespace ThMEPLighting.Garage.Service
             }
         }
 
-        public Line FindFirstByPt(Point3d pt,double range =20.0,bool isLink = false)
+        public Line FindFirstByPt(Point3d pt, double range = 20.0, bool isLink = false)
         {
             var firstLines = FirstQueryInstance.Query(pt, range, isLink);
-            return firstLines.Count>0 ? firstLines[0]:new Line();
+            return firstLines.Count > 0 ? firstLines[0] : new Line();
         }
 
         public List<Line> Intersection()
@@ -112,6 +110,7 @@ namespace ThMEPLighting.Garage.Service
             });
             return results;
         }
+
         public Point3d? FindSecondStart(Point3d start, double doubleRowOffsetDis, double tolerance = 5.0)
         {
             var firstLine = FindFirstByPt(start, tolerance, true);
@@ -131,6 +130,7 @@ namespace ThMEPLighting.Garage.Service
             }
             return null;
         }
+
         public Dictionary<Line, List<Line>> FindSecondLines(List<Line> firstLines)
         {
             var results = new Dictionary<Line, List<Line>>();

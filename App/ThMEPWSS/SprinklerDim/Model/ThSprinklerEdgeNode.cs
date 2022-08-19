@@ -8,22 +8,22 @@ namespace ThMEPWSS.SprinklerDim.Model
 {
     public class ThSprinklerEdgeNode
     {
-        public int EdgeIndex { get; set; }
+        public int NodeIndex { get; set; }
         public ThSprinklerEdgeNode Next { get; set; }
         public ThSprinklerEdgeNode(int edgeIndex)
         {
-            EdgeIndex = edgeIndex;
+            NodeIndex = edgeIndex;
         }
     }
 
     public class ThSprinklerVertexNode
     {
         //
-        public int NodeIndex { get; private set; }
+        public int PtIndex { get; private set; }
         public ThSprinklerEdgeNode FirstEdge { get; set; }
         public ThSprinklerVertexNode(int ptIndex)
         {
-            NodeIndex = ptIndex;
+            PtIndex = ptIndex;
         }
     }
 
@@ -61,11 +61,11 @@ namespace ThMEPWSS.SprinklerDim.Model
                 else
                 {
                     var p = tmp.FirstEdge;
-                    while (p.Next != null && p.EdgeIndex != toVertexIdx)
+                    while (p.Next != null && p.NodeIndex != toVertexIdx)
                     {
                         p = p.Next;
                     }
-                    if (p.Next == null && p.EdgeIndex != toVertexIdx)
+                    if (p.Next == null && p.NodeIndex != toVertexIdx)
                     {
                         p.Next = toAdd;
                     }
@@ -83,13 +83,34 @@ namespace ThMEPWSS.SprinklerDim.Model
         public int SearchNodeIndex(int ptIndex)
         {
             var idx = -1;
-            var vertexNode = SprinklerVertexNodeList.Where(x => x.NodeIndex == ptIndex);
+            var vertexNode = SprinklerVertexNodeList.Where(x => x.PtIndex == ptIndex);
             if (vertexNode.Count() > 0)
             {
                 idx = SprinklerVertexNodeList.IndexOf(vertexNode.First());
             }
 
             return idx;
+        }
+
+        public List<Line> GetAllLines(List<Point3d> pts)
+        {
+            var lines = new List<Line>();
+
+            for (int i = 0; i < SprinklerVertexNodeList.Count; i++)
+            {
+                var node = SprinklerVertexNodeList[i].FirstEdge;
+                while (node != null)
+                {
+                    var l = new Line(pts[SprinklerVertexNodeList[i].PtIndex], pts[SprinklerVertexNodeList[node.NodeIndex].PtIndex]);
+
+                    if (ContainLine(l, lines) == false)
+                    {
+                        lines.Add(l);
+                    }
+                    node = node.Next;
+                }
+            }
+            return lines;
         }
 
         public List<Line> Print(List<Point3d> pts)
@@ -101,7 +122,7 @@ namespace ThMEPWSS.SprinklerDim.Model
                 var node = SprinklerVertexNodeList[i].FirstEdge;
                 while (node != null)
                 {
-                    var l = new Line(pts[SprinklerVertexNodeList[i].NodeIndex], pts[SprinklerVertexNodeList[node.EdgeIndex].NodeIndex]);
+                    var l = new Line(pts[SprinklerVertexNodeList[i].PtIndex], pts[SprinklerVertexNodeList[node.NodeIndex].PtIndex]);
 
 
 
@@ -142,18 +163,18 @@ namespace ThMEPWSS.SprinklerDim.Model
 
                 if (tmp != null)
                 {
-                    if (tmp.EdgeIndex == toVertexIdx)
+                    if (tmp.NodeIndex == toVertexIdx)
                     {
                         SprinklerVertexNodeList[fromVertexIdx].FirstEdge = tmp.Next;
                     }
                     else
                     {
-                        while (tmp.Next != null && tmp.Next.EdgeIndex != toVertexIdx)
+                        while (tmp.Next != null && tmp.Next.NodeIndex != toVertexIdx)
                         {
                             tmp = tmp.Next;
                         }
 
-                        if (tmp.Next != null && tmp.Next.EdgeIndex == toVertexIdx)
+                        if (tmp.Next != null && tmp.Next.NodeIndex == toVertexIdx)
                         {
                             tmp.Next = tmp.Next.Next;
                         }
@@ -177,7 +198,7 @@ namespace ThMEPWSS.SprinklerDim.Model
 
                 while (tmp != null)
                 {
-                    if (tmp.EdgeIndex == toVertexIdx)
+                    if (tmp.NodeIndex == toVertexIdx)
                     {
                         return true;
                     }
@@ -198,7 +219,7 @@ namespace ThMEPWSS.SprinklerDim.Model
             var curEdge = SprinklerVertexNodeList[idx].FirstEdge;
             while (curEdge != null)
             {
-                edges.Add(curEdge.EdgeIndex);
+                edges.Add(curEdge.NodeIndex);
                 curEdge = curEdge.Next;
             }
 
@@ -213,10 +234,10 @@ namespace ThMEPWSS.SprinklerDim.Model
                 var curEdge = vertex.FirstEdge;
                 while (curEdge != null)
                 {
-                    if (edges.Contains(curEdge.EdgeIndex))
+                    if (edges.Contains(curEdge.NodeIndex))
                         return true;
                     else
-                        edges.Add(curEdge.EdgeIndex);
+                        edges.Add(curEdge.NodeIndex);
 
                     curEdge = curEdge.Next;
                 }
