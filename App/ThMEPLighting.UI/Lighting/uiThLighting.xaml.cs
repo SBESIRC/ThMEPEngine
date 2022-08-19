@@ -17,8 +17,9 @@ namespace TianHua.Lighting.UI
     /// </summary>
     public partial class uiThLighting : ThCustomWindow
     {
-        LightingViewModel UIConfigs = null;
         public static uiThLighting Instance = null;
+        private LightingViewModel UIConfigs = null;
+        private bool _cbIsTCHCableTrayChecked = false;
 
         static uiThLighting()
         {
@@ -221,7 +222,16 @@ namespace TianHua.Lighting.UI
 
         private void cbIsTCHCableTray_Checked(object sender, RoutedEventArgs e)
         {
-            // todo
+            if (!_cbIsTCHCableTrayChecked)
+            {
+                var showMsg = "本功能在未安装专版天正及参数化数据库补丁包的情况下会导致CAD崩溃，请确保已具备使用条件。";
+                var result = MessageBox.Show(showMsg, "天华-警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.OK)
+                {
+                    cbIsTCHCableTray.IsChecked = false;
+                }
+                _cbIsTCHCableTrayChecked = true;
+            }
         }
     }
 }
