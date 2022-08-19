@@ -16,28 +16,21 @@ namespace ThMEPWSS.SprinklerDim.Service
     public class ThSprinklerDimConflictService
     {
 
-        public static bool IsConflicted(Line line, ThCADCoreNTSSpatialIndex wallLinesSI, double tolerance = 200.0)
+        public static bool NeedToCutOff(Line line, ThCADCoreNTSSpatialIndex wallLinesSI, double tolerance = 200.0)
         {
             //穿图的墙线crossGraphLines
-            List<Line> crossGraphLines = new List<Line>();
-            DBObjectCollection dbSelect = wallLinesSI.SelectFence(line);
-            foreach (DBObject dbo in dbSelect)
-            {
-                crossGraphLines.Add((Line)dbo);
-            }
-
+            List<Line> crossGraphLines = ThDataTransformService.Change(ThGeometryOperationService.SelectFence(wallLinesSI, line));
             if (crossGraphLines.Count > 0)
             {
                 //把crossGraphLines转换为同方向
-                Vector3d dir = (crossGraphLines[0].StartPoint - crossGraphLines[0].EndPoint).GetNormal();
+                Vector3d dir = crossGraphLines[0].EndPoint - crossGraphLines[0].StartPoint;
                 for (int i = 1; i < crossGraphLines.Count; i++)
                 {
-                    Vector3d tDir = (crossGraphLines[i].StartPoint - crossGraphLines[i].EndPoint).GetNormal();
-                    if (dir.DotProduct(tDir) < 0)
+                    Vector3d tDir = crossGraphLines[i].EndPoint - crossGraphLines[i].StartPoint;
+                    if (!ThCoordinateService.IsTheSameDirrection(tDir, dir))
                     {
                         crossGraphLines[i] = new Line(crossGraphLines[i].EndPoint, crossGraphLines[i].StartPoint);
                     }
-
                 }
 
                 //图线两边的距离最大值，两边最大值中取最小值
@@ -65,32 +58,29 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-        public static bool IsDimCrossReference(Line dim, ThCADCoreNTSSpatialIndex referenceSI, double tolerance=10)
+        public static bool IsDimCrossBarrier(Line dim, ThCADCoreNTSSpatialIndex barrier, double tolerance=10)
         {
             if(dim.Length > tolerance)
             {
-                //穿标注的参考线crossDimLines 过滤平行线
-                List<Line> crossDimLines = new List<Line>();
-                DBObjectCollection dbSelect = referenceSI.SelectFence(dim);
-                foreach (DBObject dbo in dbSelect)
-                {
-                    Line line = (Line)dbo;
-                    if (ThCoordinateService.IsParalleled(dim, line) || line.Length < tolerance)
-                        continue;
-
-                    crossDimLines.Add(line);
-                }
+                //获取穿标注的参考线
+                List<Line> crossDimLines = ThDataTransformService.Change(ThGeometryOperationService.SelectFence(barrier, dim));
 
                 if (crossDimLines.Count > 0)
                 {
                     foreach (Line l in crossDimLines)
                     {
-                        Point3d p = dim.Intersection(l);
-
-                        if (p.DistanceTo(dim.StartPoint) < tolerance || p.DistanceTo(dim.EndPoint) < tolerance)
+                        // 过滤重合参考线
+                        if (l.Length < tolerance || ThCoordinateService.IsParalleled(dim, l))
                             continue;
-                        else
-                            return true;
+
+                        if (dim.LineIsIntersection(l))
+                        {
+                            Point3d p = dim.Intersection(l);
+                            if (p.DistanceTo(dim.StartPoint) < tolerance || p.DistanceTo(dim.EndPoint) < tolerance)
+                                continue;
+                            else
+                                return true;
+                        }
 
                     }
 
@@ -101,49 +91,51 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-        public static double GetOverlap(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, MPolygon room, double w1=1.0, double w2=1.0, double w3 = 1.0, double w4 = 1.0, double w5 = 100.0)
+        public static long GetOverlap(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, MPolygon room)
         {
-            double area1 = w1 * GetOverlapArea(dimensions, texts);
-            double area3 = w3 * GetOverlapArea(dimensions, dimedArea);
+            int w1 = 1, w2 = 1, w3 = 1, w4 = 1, w5 = 100;
 
-            double area2 = w2 * GetOverlapArea(dimensions, mixColumnWall);
+            long area1 = w1 * GetOverlapArea(dimensions, texts);
+            long area3 = w3 * GetOverlapArea(dimensions, dimedArea);
 
-            double area4 = w4 * GetDiffenceArea(dimensions, room);
+            long area2 = w2 * GetOverlapArea(dimensions, mixColumnWall);
 
-            double len = w5 * GetOverlapLength(dimensions, pipes);
+            long area4 = w4 * GetDiffenceArea(dimensions, room);
+
+            long len = w5 * GetOverlapLength(dimensions, pipes);
 
             return area1 + area2 + area3 + len + area4;
         }
 
 
-        private static double GetOverlapArea(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts)
+        private static long GetOverlapArea(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts)
         {
             if (texts.IsNull())
-                return 0.0;
+                return 0;
 
             List<Polyline> overlapTexts = new List<Polyline>();
             foreach (Polyline dimText in dimensions)
             {
-                overlapTexts.AddRange(ThGeometryOperationService.Intersection(ThDataTransformService.GetPolylines(texts.SelectCrossingPolygon(dimText)), dimText));
+                overlapTexts.AddRange(ThGeometryOperationService.Intersection(ThGeometryOperationService.SelectCrossingPolygon(texts, dimText), dimText));
             }
 
-            double area = 0;
+            long area = 0;
             foreach(Polyline overlap in overlapTexts)
             {
                 if (overlap.Closed)
                 {
-                    area += overlap.Area;
+                    area += (long)overlap.Area;
                 }
-                    
+          
             }
 
             return area;
         }
 
-        private static double GetOverlapArea(List<Polyline> dimensions, DBObjectCollection dimedArea)
+        private static long GetOverlapArea(List<Polyline> dimensions, DBObjectCollection dimedArea)
         {
             if (dimedArea.Count == 0)
-                return 0.0;
+                return 0;
 
             List<Polyline> overlapDims = new List<Polyline>();
             foreach (Polyline dimText in dimensions)
@@ -151,12 +143,12 @@ namespace ThMEPWSS.SprinklerDim.Service
                 overlapDims.AddRange(ThDataTransformService.GetPolylines(dimText.Intersection(dimedArea)));
             }
 
-            double area = 0;
+            long area = 0;
             foreach (Polyline overlap in overlapDims)
             {
                 if (overlap.Closed)
                 {
-                    area += overlap.Area;
+                    area += (long)overlap.Area;
                 }
 
             }
@@ -164,40 +156,40 @@ namespace ThMEPWSS.SprinklerDim.Service
             return area;
         }
 
-        private static double GetOverlapLength(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex pipes)
+        private static long GetOverlapLength(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex pipes)
         {
             if (pipes.IsNull())
-                return 0.0;
+                return 0;
 
             List<Polyline> overlapPipes = new List<Polyline>();
             foreach (Polyline dimText in dimensions)
             {
-                overlapPipes.AddRange(ThGeometryOperationService.Intersection(ThDataTransformService.GetPolylines(pipes.SelectCrossingPolygon(dimText)), dimText));
+                overlapPipes.AddRange(ThGeometryOperationService.Intersection(ThGeometryOperationService.SelectCrossingPolygon(pipes, dimText), dimText));
             }
 
-            double length = 0;
+            long length = 0;
             foreach(Polyline overlap in overlapPipes)
             {
-                length += overlap.Length;
+                length += (long)overlap.Length;
             }
 
             return length;
         }
 
-        private static double GetDiffenceArea(List<Polyline> dimensions, MPolygon room)
+        private static long GetDiffenceArea(List<Polyline> dimensions, MPolygon room)
         {
-            double area = 0;
+            long area = 0;
             List<Polyline> overlapDims = ThGeometryOperationService.Intersection(dimensions, room);
 
             foreach(Polyline d in dimensions)
             {
-                area = area + d.Area;
+                area = area + (long)d.Area;
             }
 
             foreach (Polyline o in overlapDims)
             {
                 if (o.Closed)
-                    area = area - o.Area;
+                    area = area - (long)o.Area;
             }
 
             return area;

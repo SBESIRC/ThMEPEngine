@@ -23,8 +23,8 @@ namespace ThMEPWSS.SprinklerDim.Engine
 
             foreach (var room in dataProcess.Room)
             {
-                try
-                {
+                //try
+                //{
                     var data = BuildRoomData(dataProcess, room, spIdx);
                     if (data.SprinklerPt.Count == 0)
                     {
@@ -33,12 +33,12 @@ namespace ThMEPWSS.SprinklerDim.Engine
                     var roomDim = LayoutDimForRoom(data, printTag);
 
                     dims.AddRange(roomDim);
-                }
-                catch (Exception ex)
-                {
-                    var a = ex.StackTrace;
-                    continue;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    var a = ex.StackTrace;
+                //    continue;
+                //}
             }
 
             return dims;
@@ -90,25 +90,50 @@ namespace ThMEPWSS.SprinklerDim.Engine
             // 给喷淋点分区
             var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(data.SprinklerPt, data.TchPipe, printTag, out var step);
 
-            netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, data.Room, out var roomsOut, printTag);
-            var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
+            //netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, data.Room, out var roomsOut, printTag);
+            //var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
 
-            List<Polyline> mixRoomWall = new List<Polyline>();
-            mixRoomWall.AddRange(data.Room);
-            mixRoomWall.AddRange(data.Wall);
+            //List<Polyline> mixRoomWall = new List<Polyline>();
+            //mixRoomWall.AddRange(data.Room);
+            //mixRoomWall.AddRange(data.Wall);
 
-            ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mixRoomWall, out var mixRoomWallSI, printTag);
-            ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
+            //ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mixRoomWall, out var mixRoomWallSI, printTag);
+            //ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
+
+            //// 区域标注喷淋点
+            //ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
+
+            //List<Polyline> mixColumnWall = new List<Polyline>();
+            //mixColumnWall.AddRange(data.Column);
+            //mixColumnWall.AddRange(data.Wall);
+
+            //// 生成靠参照物的标注点
+            //List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateReferenceDimensionPoint(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(data.AxisCurves), data.TchPipeText, ThDataTransformService.Change(data.TchPipe), printTag, step);
+
+
+            // 细致断成一块块的区
+            netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, data.RoomM, out var roomOut, printTag);
+            var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, printTag);
+
+            List<Polyline> mixRoomWall = data.Wall.Concat(ThDataTransformService.Change(data.RoomM)).ToList<Polyline>();
+            var mixRoomWallSI = ThDataTransformService.GenerateSpatialIndex(ThDataTransformService.Change(mixRoomWall));
+
+            ThSprinklerNetGroupListService.CutOffLinesCrossRoomOrWall(transNetList, mixRoomWall, mixRoomWallSI, printTag);
+
+
 
             // 区域标注喷淋点
+            ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
             ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
 
-            List<Polyline> mixColumnWall = new List<Polyline>();
-            mixColumnWall.AddRange(data.Column);
-            mixColumnWall.AddRange(data.Wall);
 
-            // 生成靠参照物的标注点
-            List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateReferenceDimensionPoint(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(data.AxisCurves), data.TchPipeText, ThDataTransformService.Change(data.TchPipe), printTag, step);
+
+            // 生成靠参照物的标注点 + 往外拉标注
+            List<Polyline> mixColumnWall = data.Column.Concat(data.Wall).ToList<Polyline>();
+
+            List<List<List<Point3d>>> dimPtsList = ThSprinklerDimExtensionService.GenerateReferenceDimensionPoint(transNetList, roomOut, mixColumnWall, data.AxisCurves, step, printTag, out var unDimedPts);
+            List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateDimensionDirectionAndDistance(dimPtsList, roomOut, data.TchPipeText, mixColumnWall, ThDataTransformService.Change(data.TchPipe), printTag);
+
 
             return dims;
         }

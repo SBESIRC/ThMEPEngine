@@ -106,7 +106,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             pts = ThCoordinateService.MakeTransformation(pts, matrix.Inverse());
             Line line = new Line(pts[0], pts[pts.Count - 1]);
 
-            return ThSprinklerDimConflictService.IsConflicted(line, walls);
+            return ThSprinklerDimConflictService.NeedToCutOff(line, walls);
         }
 
         /// <summary>

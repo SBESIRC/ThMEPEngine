@@ -11,7 +11,7 @@ namespace ThMEPWSS.SprinklerDim.Model
 {
     public class ThSprinklerDimGroup
     {
-        public int pt { get; set; } = new int();
+        public int pt { get; set; } = -1;
 
         public List<int> PtsDimed { get; set; } = new List<int>();
 
@@ -33,5 +33,6 @@ namespace ThMEPWSS.SprinklerDim.Model
                 if (IsDimed(Pts, ipt, p, IsxAxis, step)) PtsDimed = p;
             }
         }
+
     }
 }

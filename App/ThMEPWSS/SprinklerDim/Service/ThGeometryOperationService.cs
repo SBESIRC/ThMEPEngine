@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,11 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThGeometryOperationService
     {
-      
+        public static List<Polyline> Trim(List<Line> reference, MPolygon room)
+        {
+            return Trim(ThDataTransformService.Change(reference), room);
+        }
+
         public static List<Polyline> Trim(List<Polyline> reference, MPolygon room)
         {
             List<Polyline> referenceInShell = new List<Polyline>();
@@ -26,7 +31,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return referenceInRoom;
         }
 
-        public static List<Polyline> Trim(List<Polyline> reference, Polyline room, bool inverted=false)
+        private static List<Polyline> Trim(List<Polyline> reference, Polyline room, bool inverted=false)
         {
             List<Polyline> polylines = new List<Polyline>();
 
@@ -39,16 +44,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return polylines;
         }
 
-        public static bool Contains(MPolygon room, List<Polyline> dimTextBoxes)
-        {
-            foreach(Polyline dimTextBoxe in dimTextBoxes)
-            {
-                if(!room.Contains(dimTextBoxe))
-                    return false;
-            }
-
-            return true;
-        }
+       
 
         public static List<Polyline> Intersection(List<Polyline> reference, MPolygon room)
         {
@@ -88,6 +84,58 @@ namespace ThMEPWSS.SprinklerDim.Service
             return intersectPart;
         }
 
+
+
+        public static bool IsContained(MPolygon room, Point3d pt)
+        {
+            if (!ThCADCoreNTSPolygonExtension.Contains(room.Shell(), pt))
+            {
+                return false;
+            }
+
+            List<Polyline> holes = room.Holes();
+            foreach (Polyline hole in holes)
+            {
+                if (ThCADCoreNTSPolygonExtension.Contains(hole, pt))
+                    return false;
+            }
+
+            return true;
+        }
+
+
+
+
+        public static List<Polyline> SelectWindowPolygon(ThCADCoreNTSSpatialIndex spatialIndex, MPolygon room)
+        {
+            return ThDataTransformService.GetBothPolylinesAndLines(spatialIndex.SelectWindowPolygon(room));
+        }
+
+        public static List<Polyline> SelectFence(ThCADCoreNTSSpatialIndex spatialIndex, MPolygon room)
+        {
+            return SelectFence(spatialIndex, ThDataTransformService.Change(room));
+        }
+
+        public static List<Polyline> SelectFence(ThCADCoreNTSSpatialIndex linesSI, List<Polyline> boxes)
+        {
+            List<Polyline> fences = new List<Polyline>();   
+            foreach(Polyline box in boxes)
+            {
+                fences.AddRange(ThDataTransformService.GetBothPolylinesAndLines(linesSI.SelectFence(box))); // 仅相交
+            }
+
+            return fences;
+        }
+
+        public static List<Polyline> SelectFence(ThCADCoreNTSSpatialIndex spatialIndex, Line line)
+        {
+            return ThDataTransformService.GetBothPolylinesAndLines(spatialIndex.SelectFence(line));
+        }
+
+        public static List<Polyline> SelectCrossingPolygon(ThCADCoreNTSSpatialIndex reference, Polyline box)
+        {
+            return ThDataTransformService.GetBothPolylinesAndLines(reference.SelectCrossingPolygon(box)); // 相交或内部
+        }
 
 
     }

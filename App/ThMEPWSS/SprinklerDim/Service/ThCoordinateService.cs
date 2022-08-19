@@ -86,13 +86,27 @@ namespace ThMEPWSS.SprinklerDim.Service
             return false;
         }
 
-        /// <summary>
-        /// 获取标注文字的polyline外包框
-        /// </summary>
-        /// <param name="pts1"></param>
-        /// <param name="pts2"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
+        public static bool IsVertical(Vector3d l, Vector3d v)
+        {
+            if (Math.Abs(l.GetNormal().DotProduct(v.GetNormal())) < Math.Cos(Math.PI / 2 - Math.PI / 180))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsTheSameDirrection(Vector3d v1, Vector3d v2)
+        {
+            if(v1.DotProduct(v2) > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        
         public static Polyline GetDimTextPolyline(Point3d pts1, Point3d pts2, double distance)
         {
             double TextHeight = 300.0;

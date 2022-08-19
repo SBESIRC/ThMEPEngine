@@ -15,7 +15,7 @@ namespace ThMEPWSS.SprinklerDim.Model
         public List<Polyline> TchPipeText { get; private set; } = new List<Polyline>();
         public List<Polyline> Column { get; set; } = new List<Polyline>();
         public List<Polyline> Wall { get; set; } = new List<Polyline>();
-        public List<Polyline> Room { get; set; } = new List<Polyline>();
+       // public List<Polyline> Room { get; set; } = new List<Polyline>();
         public List<MPolygon> RoomM { get; set; } = new List<MPolygon>();
         public List<Line> AxisCurves { get; set; } = new List<Line>();
         public List<Point3d> SprinklerPt { get; set; } = new List<Point3d>();

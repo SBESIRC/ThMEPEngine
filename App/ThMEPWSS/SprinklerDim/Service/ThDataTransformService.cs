@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -61,17 +62,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             return polylines;
         }
 
-        public static List<MPolygon> GetPolygons(DBObjectCollection dboc)
-        {
-            List<MPolygon> mpolygons = new List<MPolygon>();
-            foreach (MPolygon p in dboc.OfType<MPolygon>())
-            {
-                mpolygons.Add(p);
-            }
-
-            return mpolygons;
-        }
-
         public static List<Point3d> GetPoints(List<Point3d> pts, List<int> idxs)
         {
             List<Point3d> line = new List<Point3d>();
@@ -115,29 +105,27 @@ namespace ThMEPWSS.SprinklerDim.Service
             return lines;
         }
 
-        public static List<Line> Change(MPolygon mPolygon)
+        public static List<Polyline> Change(List<MPolygon> mPolygons)
         {
-            List<Line> lines = new List<Line>();
+            List<Polyline> lines = new List<Polyline>();
 
-            lines.AddRange(Change(mPolygon.Shell()));
-            foreach(Polyline hole in mPolygon.Holes())
+            foreach (MPolygon mPolygon in mPolygons)
             {
-                lines.AddRange(Change(hole));
+                lines.AddRange(Change(mPolygon));
             }
 
             return lines;
         }
 
-        public static List<Line> Change(Polyline p)
+        public static List<Polyline> Change(MPolygon mPolygon)
         {
-            List<Line> lines = new List<Line>();
+            List<Polyline> lines = new List<Polyline>();
 
-            for (int i = 0; i < p.NumberOfVertices - 1; i++)
+            lines.Add(mPolygon.Shell());
+            foreach(Polyline hole in mPolygon.Holes())
             {
-                lines.Add(new Line(p.GetPoint3dAt(i), p.GetPoint3dAt(i + 1)));
+                lines.Add(hole);
             }
-            if (p.Closed)
-                lines.Add(new Line(p.GetPoint3dAt(0), p.GetPoint3dAt(p.NumberOfVertices - 1)));
 
             return lines;
         }
@@ -166,7 +154,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dboc;
         }
 
-        public static List<List<int>> Change(List<List<List<int>>> arrLists)
+        public static List<List<int>> Mix(List<List<List<int>>> arrLists)
         {
             List<List<int>> list = new List<List<int>>();
 
@@ -178,6 +166,27 @@ namespace ThMEPWSS.SprinklerDim.Service
             return list;
         }
 
+        public static List<int> Mix(List<List<int>> arrLists)
+        {
+            List<int> list = new List<int>();
+
+            foreach (List<int> l in arrLists)
+            {
+                list.AddRange(l);
+            }
+
+            return list;
+        }
+
+        public static List<int> GetDim(List<ThSprinklerDimGroup> dimGroup)
+        {
+            return dimGroup.Select(d => d.pt).ToList();
+        }
+
+        public static List<int> GetDimedPts(List<ThSprinklerDimGroup> dimGroup)
+        {
+            return Mix(dimGroup.Select(d => d.PtsDimed).ToList());
+        }
 
 
     }
