@@ -149,7 +149,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             {
                 int iPtIndex = one[one.Count - 1];
                 int jPtIndex = line[i];
-                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex) - line2.IndexOf(jPtIndex)) != 1) 
+                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex) - line2.IndexOf(jPtIndex)) != 1)
                 {
                     lines.Add(one);
                     one = new List<int> { jPtIndex };
@@ -174,18 +174,18 @@ namespace ThMEPWSS.SprinklerDim.Service
         public static List<List<List<int>>> DeletNullDimensions(List<Point3d> pts, List<List<List<int>>> dimensions, bool isXAxis)
         {
             List<List<List<int>>> Dimensions = new List<List<List<int>>>();
-            foreach(List<List<int>> dims in dimensions)
+            foreach (List<List<int>> dims in dimensions)
             {
                 List<List<int>> t = new List<List<int>>();
-                for (int k = 0; k < dims.Count; k++) 
+                for (int k = 0; k < dims.Count; k++)
                 {
-                    if(dims[k] != null)
+                    if (dims[k] != null)
                     {
                         dims[k].Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
                         List<int> one = new List<int> { dims[k][0] };
-                        for(int j = 1; j < dims[k].Count; j++)
+                        for (int j = 1; j < dims[k].Count; j++)
                         {
-                            if (pts[dims[k][j]].DistanceTo(pts[dims[k][j - 1]]) > 10)one.Add(dims[k][j]);
+                            if (pts[dims[k][j]].DistanceTo(pts[dims[k][j - 1]]) > 10) one.Add(dims[k][j]);
                         }
                         t.Add(one);
                     }
