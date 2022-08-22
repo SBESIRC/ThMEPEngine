@@ -425,6 +425,19 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
 
+                if (MatchPower(textString))
+                {
+                    var powerIndex1 = textString.IndexOf("kW");
+                    var powerIndex2 = textString.IndexOf("kw");
+                    var powerIndex3 = textString.IndexOf("KW");
+                    var powerIndex4 = textString.IndexOf("Kw");
+                    var powerIndex = powerIndex1 != -1 ? powerIndex1 : (powerIndex2 != -1 ? powerIndex2 : (powerIndex3 != -1 ? powerIndex3 : powerIndex4));
+                    if (powerIndex != -1)
+                    {
+                        index = textString.LastIndexOfAny(sourceInfo.ToCharArray(), powerIndex);
+                    }
+                }
+
                 if (index != -1)
                 {
                     textString = textString.Remove(index, sourceInfo.Count());

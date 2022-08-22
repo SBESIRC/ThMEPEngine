@@ -1,4 +1,7 @@
-﻿using TianHua.Electrical.PDS.Engine;
+﻿using System;
+using System.Linq;
+
+using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module;
 
@@ -8,6 +11,12 @@ namespace TianHua.Electrical.PDS.Service
     {
         public void Update()
         {
+            // Project未加载，此时不应该二次抓取数据
+            if (PDSProjectManagement._project.graphData.IsNull() || PDSProjectManagement._project.graphData.Graph.Vertices.Count() == 0)
+            {
+                return;
+            }
+
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
             var nodeMapList = engine.GetNodeMapList();

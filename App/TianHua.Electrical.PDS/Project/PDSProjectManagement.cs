@@ -21,7 +21,7 @@ namespace TianHua.Electrical.PDS.Project
 {
     public class PDSProjectManagement
     {
-        private static PDSProject _project { get { return PDSProject.Instance; } }
+        public static PDSProject _project { get { return PDSProject.Instance; } }
 
         /// <summary>
         /// 推送Data数据

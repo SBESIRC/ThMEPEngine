@@ -28,7 +28,7 @@ namespace TianHua.Electrical.PDS.Service
 
             //2.1、记录Node“交换”变化
             ComapreExChangeForNode(source, target);
-            
+
             //2.2、记录Node其他变化
             ComapreChangeIdForNode(source, target);
             CompareNodes(source, target);
@@ -60,7 +60,7 @@ namespace TianHua.Electrical.PDS.Service
                 var id = nodeB.Load.ID.LoadID;
                 if (IdToNodes.ContainsKey(id))
                 {
-                    if(IdToNodes[id].Count == 1 && IdToNodes[id].First().Item1 != null)
+                    if (IdToNodes[id].Count == 1 && IdToNodes[id].First().Item1 != null)
                     {
                         IdToNodes[id] = new List<Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>> { new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(IdToNodes[id].First().Item1, nodeB) };
                     }
@@ -238,7 +238,7 @@ namespace TianHua.Electrical.PDS.Service
                 return false;
             }
 
-            if(inEdgesA.Count == 0 && outEdgesA.Count == 0)
+            if (inEdgesA.Count == 0 && outEdgesA.Count == 0)
             {
                 return false;
             }
@@ -288,7 +288,7 @@ namespace TianHua.Electrical.PDS.Service
                     var curLine = new Tuple<string, string>(idToEdge.Value.First().Item1.Source.Load.ID.LoadID, idToEdge.Value.First().Item1.Target.Load.ID.LoadID);
                     if (line2lineId.ContainsKey(curLine))
                     {
-                        if(line2lineId[curLine] != null)
+                        if (line2lineId[curLine] != null)
                         {
                             line2lineId[curLine] = null;
                         }
@@ -310,11 +310,15 @@ namespace TianHua.Electrical.PDS.Service
                     continue;
                 }
                 var curEdge = idToEdge.Value.First().Item2;
+                if (curEdge == null)
+                {
+                    continue;
+                }
                 var curId = idToEdge.Key;
                 var tmpLine = new Tuple<string, string>(curEdge.Source.Load.ID.LoadID, curEdge.Target.Load.ID.LoadID);
                 if (line2lineId.ContainsKey(tmpLine))
                 {
-                    if(line2lineId[tmpLine] == null)
+                    if (line2lineId[tmpLine] == null)
                     {
                         continue;
                     }
@@ -548,7 +552,7 @@ namespace TianHua.Electrical.PDS.Service
         #region EDGE_STRUCTURE
         private void StructureForChangeEdgeID(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
-            var newEdge = CreatEdge(IdToNodes[edgeB.Source.Load.ID.LoadID].First().Item2, IdToNodes[edgeB.Target.Load.ID.LoadID].First().Item2,
+            var newEdge = CreateEdge(IdToNodes[edgeB.Source.Load.ID.LoadID].First().Item2, IdToNodes[edgeB.Target.Load.ID.LoadID].First().Item2,
                 edgeB.Circuit.ID.CircuitIDList, edgeB.Circuit.ID.CircuitNumber);
             var changIdTagA = new ThPDSProjectGraphEdgeIdChangeTag
             {
@@ -572,7 +576,7 @@ namespace TianHua.Electrical.PDS.Service
                 MoveFrom = true,
             };
             AddEdgeTag(edgeA, moveTagA);
-            var newEdge = CreatEdge(IdToNodes[edgeA.Source.Load.ID.LoadID].First().Item1, IdToNodes[edgeB.Target.Load.ID.LoadID].First().Item2,
+            var newEdge = CreateEdge(IdToNodes[edgeA.Source.Load.ID.LoadID].First().Item1, IdToNodes[edgeB.Target.Load.ID.LoadID].First().Item2,
                 edgeB.Circuit.ID.CircuitIDList, edgeB.Circuit.ID.CircuitNumber);
             newEdge.Tag = new ThPDSProjectGraphEdgeMoveTag
             {
@@ -583,7 +587,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void StructureForAddEdge(ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
-            var newEdge = CreatEdge(IdToNodes[edgeB.Source.Load.ID.CircuitNumber].First().Item1, IdToNodes[edgeB.Target.Load.ID.CircuitNumber].First().Item1,
+            var newEdge = CreateEdge(IdToNodes[edgeB.Source.Load.ID.CircuitNumber].First().Item1, IdToNodes[edgeB.Target.Load.ID.CircuitNumber].First().Item1,
                 edgeB.Circuit.ID.CircuitIDList, edgeB.Circuit.ID.CircuitNumber);
             newEdge.Tag = new ThPDSProjectGraphEdgeAddTag();
             graphA.AddEdge(newEdge);
@@ -660,7 +664,7 @@ namespace TianHua.Electrical.PDS.Service
         }
         #endregion
 
-        private ThPDSProjectGraphEdge CreatEdge(ThPDSProjectGraphNode source, ThPDSProjectGraphNode target, List<string> circuitId, string circuitNumber)
+        private ThPDSProjectGraphEdge CreateEdge(ThPDSProjectGraphNode source, ThPDSProjectGraphNode target, List<string> circuitId, string circuitNumber)
         {
             var newEdge = new ThPDSProjectGraphEdge(source, target)
             {
@@ -679,7 +683,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 node.Tag = cmpareTag;
             }
-            else if(cmpareTag is ThPDSProjectGraphNodeDataTag dataCmpTag)
+            else if (cmpareTag is ThPDSProjectGraphNodeDataTag dataCmpTag)
             {
                 if (node.Tag is ThPDSProjectGraphNodeDuplicateTag dupTag)
                 {
