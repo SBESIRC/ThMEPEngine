@@ -21,7 +21,20 @@ namespace TianHua.Electrical.PDS.Project
 {
     public class PDSProjectManagement
     {
-        public static PDSProject _project { get { return PDSProject.Instance; } }
+        private static PDSProject _project { get { return PDSProject.Instance; } }
+
+        /// <summary>
+        /// 判断项目是否加载，若未加载则返回false
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsProjectLoaded()
+        {
+            if (_project.graphData.IsNull() || _project.graphData.Graph.Vertices.Count() == 0)
+            {
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// 推送Data数据

@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Service
         public void Update()
         {
             // Project未加载，此时不应该二次抓取数据
-            if (PDSProjectManagement._project.graphData.IsNull() || PDSProjectManagement._project.graphData.Graph.Vertices.Count() == 0)
+            if (!PDSProjectManagement.IsProjectLoaded())
             {
                 return;
             }
