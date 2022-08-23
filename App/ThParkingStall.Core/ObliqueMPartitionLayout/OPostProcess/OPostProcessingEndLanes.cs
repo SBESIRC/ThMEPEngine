@@ -27,6 +27,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 for (int i = 0; i < lanes.Count; i++)
                 {
                     var lane = lanes[i];
+                    if (i == 27)
+                    {
+                        ;
+                    }
                     if (boundary.ClosestPoint(lane.P0).Distance(lane.P0) < 10)
                     {
                         var point = lane.P0;
@@ -656,7 +660,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             {
                 var segs = cara.GetEdges();
                 var seg = segs.OrderByDescending(e => e.Length).First();
-                if (seg.Length != MParkingPartitionPro.DisVertCarLength)
+                if (Math.Abs(seg.Length - MParkingPartitionPro.DisVertCarLength)>1)
                     hasvert = true;
                 if (IsParallelLine(seg, line))
                 {
@@ -669,7 +673,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             {
                 var segs = carb.GetEdges();
                 var seg = segs.OrderByDescending(e => e.Length).First();
-                if (seg.Length != MParkingPartitionPro.DisVertCarLength)
+                if (Math.Abs(seg.Length - MParkingPartitionPro.DisVertCarLength) > 1)
                     hasvert = true;
                 if (IsParallelLine(seg, line))
                 {
@@ -691,7 +695,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         private void Ogenerate_cars(List<LineString> Walls, List<LineSegment> lanes, LineSegment lane, Coordinate pton_wall, LineSegment carLine, Vector2D vec, Polygon boundary, MNTSSpatialIndex obspacialindex
             , MNTSSpatialIndex carspacialindex, ref List<InfoCar> cars, ref List<Polygon> pillars, bool isstartpoint = true)
         {
-            var partitionpro = new MParkingPartitionPro();
+            var partitionpro = new ObliqueMPartition();
             partitionpro.Walls = Walls;
             var ps = lane.ClosestPoint(carLine.P0, false);
             var pe = lane.ClosestPoint(carLine.P1, false);
@@ -706,6 +710,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             }
             //pe = pton_wall;
             var ls = LineSegmentSDL(ps, vec.Normalize(), 999999);
+            //ls = partitionpro.TranslateReservedConnection(ls, -vec.Normalize() * ls.Length / 2);
             ls = ls.Translation(-vec.Normalize() * ls.Length / 2);
             ls = SplitLine(ls, boundary).OrderBy(e => e.MidPoint.Distance(ps)).First();
             var buffer = ls.Buffer(10);
@@ -718,10 +723,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             else return;
             var carcrossded = carspacialindex.SelectCrossingGeometry(buffer).Cast<Polygon>().ToList();
             ls = SplitLine(ls, carcrossded, 1, true).OrderBy(e => e.MidPoint.Distance(ps)).First();
-            var perplanes = lanes.Where(e => IsPerpLine(ls, e)).Where(e => e.ClosestPoint(ps, false).Distance(ps) > 10).ToList();
+            var perplanes = lanes.Where(e => !IsParallelLine(ls, e)).Where(e => e.ClosestPoint(ps, false).Distance(ps) > 10).ToList();
             ls = SplitLine(ls, perplanes)
                 .OrderBy(e => e.MidPoint.Distance(ps)).First();
             var le = new LineSegment(ls);
+            //le = partitionpro.TranslateReservedConnection(le, new Vector2D(ps, pton_wall));
             le = le.Translation(new Vector2D(ps, pton_wall));
             var pl = PolyFromLines(ls, le);
 
@@ -731,6 +737,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             if (ClosestPointInVertLines(ls.P1, ls, lanes.ToArray()) < 10)
                 ls.P1 = ls.P1.Translation(-Vector(ls).Normalize() * VMStock.RoadWidth / 2);
             var vecmove = new Vector2D(ps, pe);
+
+            //ls=partitionpro.TranslateReservedConnection(ls, vecmove.Normalize() * 10);
+            //ls = partitionpro.TranslateReservedConnection(ls, -vecmove.Normalize() * VMStock.RoadWidth / 2);
             ls = ls.Translation(vecmove.Normalize() * 10);
             ls = ls.Translation(-vecmove.Normalize() * VMStock.RoadWidth / 2);
             partitionpro.Boundary = boundary;
@@ -743,7 +752,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 lsbuffer = ls.Buffer(MParkingPartitionPro.DisLaneWidth / 2 - 10);
             }
             catch { return; }
-            lsbuffer = lsbuffer.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck);
+            lsbuffer = lsbuffer.Scale(/*MParkingPartitionPro.ScareFactorForCollisionCheck*/0.999/*有精度问题？*/);
             if (carspacialindex.SelectCrossingGeometry(lsbuffer).Count > 0) return;
             pl = pl.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck);
             cars = cars.Where(e => e.Polyline.IntersectPoint(pl).Count() == 0).ToList();
