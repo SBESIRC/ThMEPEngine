@@ -98,6 +98,7 @@
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPerpModules.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPreProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
+    <Compile Include="ObliqueMPartitionLayout\PostProcess\PostProcessEntry.cs" />
     <Compile Include="OInterProcess\OGene.cs" />
     <Compile Include="OInterProcess\OInterParameter.cs" />
     <Compile Include="OInterProcess\ORamp.cs" />

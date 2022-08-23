@@ -32,6 +32,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using ThParkingStall.Core.ObliqueMPartitionLayout.PostProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -228,9 +229,11 @@ namespace ThMEPArchitecture.MultiProcess
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = OInterParameter.GetOSubAreas(solution);
-            subAreas.ForEach(s =>s.UpdateParkingCnts(true));
-            var ParkingStallCount = subAreas.Where(s =>s.Count>0).Sum(s =>s.Count);
-            foreach(var subArea in subAreas)
+            subAreas.ForEach(s => s.UpdateParkingCnts(true));
+            var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
+            PostProcessEntry postProcessEntry = new PostProcessEntry(subAreas);
+            //var obliqueMPartition = postProcessEntry.Execute();
+            foreach (var subArea in subAreas)
             {
                 MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
                 subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
