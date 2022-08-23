@@ -14,13 +14,13 @@ namespace ThMEPWSS.Command
         }
         public void Execute()
         {
+            ThInsertStoreyFrameService.ImportBlock();
             PromptPointResult result;
             do
             {
                 result = Active.Editor.GetPoint("\n选择要插入的基点位置");
                 if (result.Status == PromptStatus.OK)
-                {
-                    ThInsertStoreyFrameService.ImportBlock();
+                {                    
                     ThInsertStoreyFrameService.Insert(result.Value);
                 }
             } while (result.Status == PromptStatus.OK);

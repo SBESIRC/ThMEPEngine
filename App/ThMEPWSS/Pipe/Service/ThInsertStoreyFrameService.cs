@@ -19,6 +19,24 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
 
+        public static void ImportHouseTypeSplitLineLayer()
+        {
+            using (var currentDb = AcadDatabase.Active())
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.StoreyFrameDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWPipeCommon.HouseTypeSplitLineLayer), true);
+            }
+        }
+
+        public static void ImportCellSplitLineLayer()
+        {
+            using (var currentDb = AcadDatabase.Active())
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.StoreyFrameDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWPipeCommon.CellSplitLineLayer), true);
+            }
+        }
+
         public static void Insert(Point3d position)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

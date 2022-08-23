@@ -27,8 +27,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
         SprinklerCheckersUI uiSprinklerCheckers;
         SprinklerConnectionUI uiSprinklerConnection;
         FirstFloorDrainagePlaneUI floorDrainagePlaneUI;
+        uiStoreyFrame uiLCKX;
         public void Initialize()
         {
+            uiLCKX = null;
             uiFireHydrant = null;
             uiFlushPoint = null;
             uiSprinklerCheckers = null;
@@ -428,6 +430,20 @@ namespace TianHua.Plumbing.WPF.UI.UI
             config.WindowStartupLocation = System.Windows.
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModalWindow(config);
-        }        
+        }
+
+        /// <summary>
+        /// 楼层框线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THLCKXUI", CommandFlags.Modal)]
+        public void THLCKXUI()
+        {
+            if (uiLCKX != null && uiLCKX.IsLoaded)
+            {
+                return;
+            }
+            uiLCKX = new uiStoreyFrame();
+            AcadApp.ShowModelessWindow(uiLCKX);
+        }
     }
 }

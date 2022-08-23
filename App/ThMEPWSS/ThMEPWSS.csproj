@@ -471,6 +471,7 @@
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithMainLoopAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Test\DisplayTool.cs" />
+    <Compile Include="ViewModel\ThStoreyFrameVM.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyTankCmd.cs" />
