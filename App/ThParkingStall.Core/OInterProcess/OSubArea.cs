@@ -58,6 +58,7 @@ namespace ThParkingStall.Core.OInterProcess
                     obliqueMPartition.OutBoundary = Region;
                     obliqueMPartition.BuildingBoxes = new List<Polygon>();
                     obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(Buildings);
+                    obliqueMPartition.QuickCalculate = !IgnoreCache && VMStock.SpeedUpMode;
 #if DEBUG
                     var s = MDebugTools.AnalysisPolygon(obliqueMPartition.Boundary);
                     string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
