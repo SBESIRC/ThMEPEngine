@@ -8,6 +8,8 @@ using TianHua.Hvac.UI.SmokeProofSystemUI.SmokeProofEventMonitor;
 using TianHua.Hvac.UI.UI;
 using TianHua.Hvac.UI.FloorHeatingCoil;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
 
 namespace TianHua.Hvac.UI
 {
@@ -172,6 +174,10 @@ namespace TianHua.Hvac.UI
         [CommandMethod("TIANHUACAD", "THFJXX", CommandFlags.Modal)]
         public void THFJXX()
         {
+            using (var acdb = AcadDatabase.Active())
+            {
+                DbHelper.EnsureLayerOn("0");
+            }
             EQPMUIServices.Instance.ShowFanSelectUI("");
         }
         [CommandMethod("TIANHUACAD", "THFJEDITEX", CommandFlags.Modal)]
