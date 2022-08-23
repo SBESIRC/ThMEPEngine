@@ -31,7 +31,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return referenceInRoom;
         }
 
-        private static List<Polyline> Trim(List<Polyline> reference, Polyline room, bool inverted=false)
+        public static List<Polyline> Trim(List<Polyline> reference, Polyline room, bool inverted=false)
         {
             List<Polyline> polylines = new List<Polyline>();
 

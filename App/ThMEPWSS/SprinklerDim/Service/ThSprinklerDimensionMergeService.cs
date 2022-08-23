@@ -33,31 +33,20 @@ namespace ThMEPWSS.SprinklerDim.Service
             if (isXAxis) xAxis = new Vector3d(1, 0, 0);
             else xAxis = new Vector3d(0, 1, 0);
 
-            //不考虑点与点之间的合并
-            if (dim1.Count == 1 && dim2.Count == 1)
-                return false;
-            else if (dim1.Count == 0 || dim2.Count == 0)
-                return false;
-
-            double det = Math.Abs(ThCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis));
-            if (dim1.Count == 1 && dim2.Count != 1)
+            //dim1存长线，dim2存短线
+            if (dim1.Count < dim2.Count)
             {
-                Line line = new Line(pts[dim2[0]], pts[dim2[0]] + xAxis * 100);
-                Point3d droppt = line.GetClosestPointTo(pts[dim1[0]], true);
-                List<int> t = anothercollinearation.Where(p => p.Contains(dim1[0])).ToList()[0];
-                if (t.Count == 1) tolerance = 1.0 * step;                                        //仅仅当xy方向都为单点的时候放大tolerance
-                foreach (int j in t)
-                {
-                    if (droppt.DistanceTo(pts[j]) < det)
-                    {
-                        det = droppt.DistanceTo(pts[j]);
-                    }
-                }
-                double d1 = ThCoordinateService.GetOriginalValue(droppt, !isXAxis) - ThCoordinateService.GetOriginalValue(pts[t[0]], !isXAxis);
-                double d2 = ThCoordinateService.GetOriginalValue(droppt, !isXAxis) - ThCoordinateService.GetOriginalValue(pts[t[t.Count - 1]], !isXAxis);
-                if (d1 * d2 < 0) det = 0;
+                List<int> t = dim2;
+                dim2 = dim1;
+                dim1 = t;
             }
-            else if (dim2.Count == 1 && dim1.Count != 1)
+
+            //不考虑点与点之间的合并或者空列表
+            if (dim1.Count <= 1) return false;
+
+            //计算标注线间距
+            double det = Math.Abs(ThCoordinateService.GetOriginalValue(pts[dim1[0]], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], !isXAxis));
+            if (dim2.Count == 1)
             {
                 Line line = new Line(pts[dim1[0]], pts[dim1[0]] + xAxis * 100);
                 Point3d droppt = line.GetClosestPointTo(pts[dim2[0]], true);
@@ -78,22 +67,14 @@ namespace ThMEPWSS.SprinklerDim.Service
             if (det < tolerance)
             {
                 //判断是否碰撞
-                foreach (int i in dim1)
-                {
-                    if (dim2.Count == 1) break;
-                    Line line = new Line(pts[dim2[0]], pts[dim2[0]] + xAxis * 100);
-                    Point3d droppt = line.GetClosestPointTo(pts[i], true);
-                    if (IsConflicted(droppt, pts[i], matrix, walls) || IsConflicted(droppt, pts[dim2[0]], matrix, walls) || IsConflicted(droppt, pts[dim2[dim2.Count - 1]], matrix, walls))
-                        return false;
-                }
                 foreach (int i in dim2)
                 {
-                    if (dim1.Count == 1) break;
                     Line line = new Line(pts[dim1[0]], pts[dim1[0]] + xAxis * 100);
                     Point3d droppt = line.GetClosestPointTo(pts[i], true);
                     if (IsConflicted(droppt, pts[i], matrix, walls) || IsConflicted(droppt, pts[dim1[0]], matrix, walls) || IsConflicted(droppt, pts[dim1[dim1.Count - 1]], matrix, walls))
                         return false;
                 }
+                //判断STol
                 double distance1 = ThCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1]], isXAxis);
                 double distance2 = ThCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
                 double distance3 = ThCoordinateService.GetOriginalValue(pts[dim1[0]], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0]], isXAxis);
@@ -102,9 +83,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 if ((Math.Abs(distance1) < 1.5 * step || Math.Abs(distance2) < 1.5 * step) && Math.Min(Math.Abs(distance1), Math.Abs(distance2)) > 45) return true;
                 else if (distance3 * distance4 < 0) return true;
             }
-
             return false;
-
         }
 
         /// <summary>
@@ -150,25 +129,17 @@ namespace ThMEPWSS.SprinklerDim.Service
                                         if (IsConflicted(DropPt, pts[Dimension[i][j][0]], matrix, walls) || IsConflicted(DropPt, pts[Dimension[i][k][0]], matrix, walls) || DropPt.DistanceTo(line.GetClosestPointTo(pts[Dimension[i][j][0]], false)) > 1.5 * step) continue;
                                         else
                                         {
-                                            if (DropPt.DistanceTo(line.GetClosestPointTo(pts[Dimension[i][j][0]], false)) < 45)
-                                            {
-                                                Dimension[i][j] = null;
-                                                continue;
-                                            }
+                                            pts.Add(DropPt);
+                                            Dimension[i][k].Add(pts.Count - 1);
+                                            ficpts.Add(pts.Count - 1);
+                                            Dimension[i][j] = null;
+                                            List<Point3d> pts1 = pts;
+                                            if (IsxAxis) Dimension[i][k] = Dimension[i][k].OrderBy(p => pts1[p].X).ToList();
                                             else
                                             {
-                                                pts.Add(DropPt);
-                                                Dimension[i][k].Add(pts.Count - 1);
-                                                ficpts.Add(pts.Count - 1);
-                                                Dimension[i][j] = null;
-                                                List<Point3d> pts1 = pts;
-                                                if (IsxAxis) Dimension[i][k] = Dimension[i][k].OrderBy(p => pts1[p].X).ToList();
-                                                else
-                                                {
-                                                    Dimension[i][k] = Dimension[i][k].OrderBy(p => pts1[p].Y).ToList();
-                                                }
-                                                break;
+                                                Dimension[i][k] = Dimension[i][k].OrderBy(p => pts1[p].Y).ToList();
                                             }
+                                            break;
                                         }
                                     }
                                 }
@@ -222,11 +193,11 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="walls"></param>
         /// <param name="anothercollinearation"></param>
         /// <returns></returns>
-        public static List<int> GetMerged(ref List<Point3d> pts, List<int> currentdim1, List<List<int>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls, List<List<int>> anothercollinearation)
+
+        public static List<int> GetMerged(ref List<Point3d> pts, List<int> currentdim1, List<List<int>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged, ref List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls, List<List<int>> anothercollinearation)
         {
             List<int> MergedDims = currentdim1;
             isMerged[currentdim1[0]] = true;
-            List<Point3d> pts1 = pts;
 
             foreach (List<int> currentdim2 in group)
             {
@@ -256,43 +227,31 @@ namespace ThMEPWSS.SprinklerDim.Service
                         }
                         else
                         {
-                            bool isDimed = false;
-                            foreach (int p in currentdim1)
+                            foreach (int j in currentdim2)
                             {
-                                if (Math.Abs(ThCoordinateService.GetOriginalValue(pts1[p], isXAxis) - ThCoordinateService.GetOriginalValue(pts1[currentdim2[0]], isXAxis)) < 45)
+                                if (isXAxis)
                                 {
-                                    isDimed = true;
-                                    break;
+                                    pts.Add(new Point3d(pts[j].X, pts[currentdim1[0]].Y, 0));
+                                    MergedDims.Add(pts.Count - 1);
+                                    FicPts.Add(pts.Count - 1);
+                                }
+                                else
+                                {
+                                    pts.Add(new Point3d(pts[currentdim1[0]].X, pts[j].Y, 0));
+                                    MergedDims.Add(pts.Count - 1);
+                                    FicPts.Add(pts.Count - 1);
                                 }
                             }
-                            if (currentdim2.Count == 1 && isDimed) continue;
-                            else
-                            {
-                                foreach (int j in currentdim2)
-                                {
-                                    if (isXAxis)
-                                    {
-                                        pts.Add(new Point3d(pts[j].X, pts[currentdim1[0]].Y, 0));
-                                        MergedDims.Add(pts.Count - 1);
-                                        FicPts.Add(pts.Count - 1);
-                                    }
-                                    else
-                                    {
-                                        pts.Add(new Point3d(pts[currentdim1[0]].X, pts[j].Y, 0));
-                                        MergedDims.Add(pts.Count - 1);
-                                        FicPts.Add(pts.Count - 1);
-                                    }
-                                }
-                            }
-
                         }
+                        List<Point3d> pts1 = pts;
+                        MergedDims.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts1[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts1[y], isXAxis)));
                         MergedDims = GetMerged(ref pts, MergedDims, group, step, isXAxis, ref isMerged, ref FicPts, matrix, walls, anothercollinearation);
                         break;
                     }
                 }
             }
             return MergedDims;
-            }
         }
+    }
     
 }

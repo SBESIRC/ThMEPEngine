@@ -106,75 +106,60 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-        
-        public static Polyline GetDimTextPolyline(Point3d pts1, Point3d pts2, double distance)
+        public static Polyline GetDimWholePolyline(Point3d pts1, Point3d pts2, Vector3d ldir, double distance)
         {
-            double TextHeight = 300.0;
-            double EachCharWidth = 200.0;
             double Length = pts1.DistanceTo(pts2);
-            Vector3d line = pts2 - pts1;
-            Vector3d xAxis = new Vector3d(1, 0, 0);
-            Vector3d dir = line.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1)).GetNormal();
-            double angle = xAxis.GetAngleTo(line);
+            Vector3d dir = ldir.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1)).GetNormal();
             Point3d CentralPt = new Point3d();
 
-            if ((3 * Math.PI / 2 < angle && angle < 2 * Math.PI) || (angle >= 0 && angle <= Math.PI / 2))
+            double x1 = Math.Round(pts1.X, 1);
+            double x2 = Math.Round(pts2.X, 1);
+
+            if (x1 < x2)
             {
-                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (350 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (350 + distance) * dir.Y, 0);
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (275 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (275 + distance) * dir.Y, 0);
+            }
+            else if (x1 > x2)
+            {
+                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (-275 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (-275 + distance) * dir.Y, 0);
             }
             else
             {
-                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (350 - distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (350 - distance) * dir.Y, 0);
+                if (pts1.Y < pts2.Y) CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (275 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (275 + distance) * dir.Y, 0);
+                else CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (-275 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (-275 + distance) * dir.Y, 0);
             }
-
-            int CharNum = 1;
-            int t = (int)Length;
-            while (t > 10)
-            {
-                t /= 10;
-                CharNum += 1;
-            }
-            Polyline box = GenerateBox(CentralPt, line.GetNormal(), CharNum * EachCharWidth / 2.0, TextHeight / 2.0);
-
-            return box;
-        }
-
-        public static Polyline GetDimWholePolyline(Point3d pts1, Point3d pts2, double distance)
-        {
-            double Length = pts1.DistanceTo(pts2);
-            Vector3d line = pts2 - pts1;
-            Vector3d xAxis = new Vector3d(1, 0, 0);
-            Vector3d dir = line.RotateBy(Math.PI / 2, new Vector3d(0, 0, 1)).GetNormal();
-            double angle = xAxis.GetAngleTo(line);
-            Point3d CentralPt = new Point3d();
-
-            if ((3 * Math.PI / 2 < angle && angle < 2 * Math.PI) || (angle >= 0 && angle <= Math.PI / 2))
-            {
-                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (250 + distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (250 + distance) * dir.Y, 0);
-            }
-            else
-            {
-                CentralPt = new Point3d((pts1.X + pts2.X) / 2.0 + (-250 +distance) * dir.X, (pts1.Y + pts2.Y) / 2.0 + (-250 +distance) * dir.Y, 0);
-            }
-            Polyline box = GenerateBox(CentralPt, line.GetNormal(), Length / 2.0, 250);
+            Polyline box = GenerateBox(CentralPt, ldir.GetNormal(), Length / 2.0, 275);
 
             return box;
         }
 
         public static int IsTextBoxOverlap(Point3d pts1, Point3d pts2, double distance)
         {
-            Vector3d line = pts2 - pts1;
-            Vector3d xAxis = new Vector3d(1, 0, 0);
-            double angle = xAxis.GetAngleTo(line);
-            if ((3 * Math.PI / 2 < angle && angle < 2 * Math.PI) || (angle >= 0 && angle <= Math.PI / 2))
+            double x1 = Math.Round(pts1.X, 1);
+            double x2 = Math.Round(pts2.X, 1);
+
+            if (x1 < x2)
             {
                 if (distance > 0) return 0;
                 else return 1;
             }
-            else
+            else if(x1 > x2)
             {
                 if (distance < 0) return 0;
                 else return 1;
+            }
+            else
+            {
+                if (pts1.Y < pts2.Y)
+                {
+                    if (distance > 0) return 0;
+                    else return 1;
+                }
+                else
+                {
+                    if (distance < 0) return 0;
+                    else return 1;
+                }
             }
         }
 

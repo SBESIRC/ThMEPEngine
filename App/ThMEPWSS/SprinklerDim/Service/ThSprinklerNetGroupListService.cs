@@ -16,13 +16,13 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// 房间重新分隔出net group
         /// </summary>
         /// <param name="netList"></param>
-        /// <param name="roomList"></param>
+        /// <param name="roomsIn"></param>
         /// <returns></returns>
-        public static List<ThSprinklerNetGroup> ReGroupByRoom(List<ThSprinklerNetGroup> netList, List<MPolygon> roomList,out List<MPolygon> roomsOut, string printTag)
+        public static List<ThSprinklerNetGroup> ReGroupByRoom(List<ThSprinklerNetGroup> netList, List<MPolygon> roomsIn,out List<MPolygon> roomsOut, string printTag)
         {
             List<ThSprinklerNetGroup> newNetList = new List<ThSprinklerNetGroup>();
             roomsOut = new List<MPolygon>();
-            if (roomList.Count > 0)
+            if (roomsIn.Count > 0)
             {
                 foreach (ThSprinklerNetGroup net in netList)
                 {
@@ -31,9 +31,9 @@ namespace ThMEPWSS.SprinklerDim.Service
                     List<Point3d> singlePoints = net.GetSinglePoints(net.Pts);
 
                     // 房间框线框住的 线与散点 重新生成net group
-                    for (int i = 0; i < roomList.Count; i++)
+                    for (int i = 0; i < roomsIn.Count; i++)
                     {
-                        MPolygon room = roomList[i];
+                        MPolygon room = roomsIn[i];
                         if (room == null)
                             continue;
 
@@ -349,35 +349,35 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
 
             // test
-            List<Line> allLines = new List<Line>();
-            foreach (ThSprinklerNetGroup netGroup in transNetList)
-            {
-                List<Point3d> pts = ThCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
+            //List<Line> allLines = new List<Line>();
+            //foreach (ThSprinklerNetGroup netGroup in transNetList)
+            //{
+            //    List<Point3d> pts = ThCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
 
-                foreach(List<List<int>> collineation in netGroup.XCollineationGroup)
-                {
-                    foreach(List<int> line in collineation)
-                    {
-                        for (int i = 0; i < line.Count - 1; i++)
-                        {
-                            allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
-                        }
-                    }
-                }
+            //    foreach(List<List<int>> collineation in netGroup.XCollineationGroup)
+            //    {
+            //        foreach(List<int> line in collineation)
+            //        {
+            //            for (int i = 0; i < line.Count - 1; i++)
+            //            {
+            //                allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
+            //            }
+            //        }
+            //    }
 
-                foreach (List<List<int>> collineation in netGroup.YCollineationGroup)
-                {
-                    foreach (List<int> line in collineation)
-                    {
-                        for (int i = 0; i < line.Count - 1; i++)
-                        {
-                            allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
-                        }
-                    }
-                }
+            //    foreach (List<List<int>> collineation in netGroup.YCollineationGroup)
+            //    {
+            //        foreach (List<int> line in collineation)
+            //        {
+            //            for (int i = 0; i < line.Count - 1; i++)
+            //            {
+            //                allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
+            //            }
+            //        }
+            //    }
 
-            }
-            DrawUtils.ShowGeometry(allLines, string.Format("SSS-{0}-5Line", printTag), 4);
+            //}
+            //DrawUtils.ShowGeometry(allLines, string.Format("SSS-{0}-5Line", printTag), 4);
 
         }
 
@@ -509,7 +509,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             //for (int i = 0; i < transNetList.Count; i++)
             //{
             //    var net = transNetList[i];
-            //    List<Point3d> pts = ThChangeCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
+            //    List<Point3d> pts = ThCoordinateService.MakeTransformation(net.Pts, net.Transformer.Inverse());
             //    for (int j = 0; j < net.PtsGraph.Count; j++)
             //    {
             //        var lines = net.PtsGraph[j].Print(pts);

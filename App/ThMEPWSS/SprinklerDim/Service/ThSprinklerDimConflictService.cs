@@ -93,16 +93,15 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         public static long GetOverlap(List<Polyline> dimensions, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, MPolygon room)
         {
-            int w1 = 1, w2 = 1, w3 = 1, w4 = 1, w5 = 100;
+            int w1 = 3, w2 = 3, w3 = 3, w4 = 1, w5 = 100;
 
-            long area1 = w1 * GetOverlapArea(dimensions, texts);
-            long area3 = w3 * GetOverlapArea(dimensions, dimedArea);
+            long area1 = 3 * GetOverlapArea(dimensions, texts);
+            long area3 = 3 * GetOverlapArea(dimensions, dimedArea);
 
-            long area2 = w2 * GetOverlapArea(dimensions, mixColumnWall);
+            long area2 = 1 * GetOverlapArea(dimensions, mixColumnWall);
+            long area4 = 1 * GetDiffenceArea(dimensions, room);
 
-            long area4 = w4 * GetDiffenceArea(dimensions, room);
-
-            long len = w5 * GetOverlapLength(dimensions, pipes);
+            long len = 300 * GetOverlapLength(dimensions, pipes);
 
             return area1 + area2 + area3 + len + area4;
         }
@@ -164,7 +163,8 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<Polyline> overlapPipes = new List<Polyline>();
             foreach (Polyline dimText in dimensions)
             {
-                overlapPipes.AddRange(ThGeometryOperationService.Intersection(ThGeometryOperationService.SelectCrossingPolygon(pipes, dimText), dimText));
+                List<Polyline> crossOrInPipes = ThGeometryOperationService.SelectCrossingPolygon(pipes, dimText);
+                overlapPipes.AddRange(ThGeometryOperationService.Trim(crossOrInPipes, dimText, false));
             }
 
             long length = 0;

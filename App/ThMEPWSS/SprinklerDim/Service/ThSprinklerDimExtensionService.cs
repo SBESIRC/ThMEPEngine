@@ -53,7 +53,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         private static List<List<Point3d>> GenerateReferenceDimensionPoint(List<Point3d> pts, Matrix3d transformer, List<List<ThSprinklerDimGroup>> dims, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, bool isXAxis, double step, string printTag, out List<List<Point3d>> unDimedPts)
         {
-            // 从长到短排序
+            // 标注从长到短排序
             dims.Sort((x, y) => y.Count - x.Count);
 
             List<List<Point3d>> realDimPts = new List<List<Point3d>>();// 真实标注点
@@ -64,17 +64,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             {
                 List<int> dim = ThDataTransformService.GetDim(dg);
                 List<int> tDimedPts = ThDataTransformService.GetDimedPts(dg);
-
-
-                foreach (int i in dim)
-                {
-
-                    if (Math.Abs(pts[i].X - 845617.3) < 10 && Math.Abs(pts[i].Y - 401385.2) < 10)
-                    {
-                        int a = 0;
-                    }
-                }
-
 
                 Vector3d dir = ThCoordinateService.GetDirrection(transformer.Inverse(), isXAxis);
                 List<List<int>> allAvailableDims = new List<List<int>>();
@@ -146,12 +135,6 @@ namespace ThMEPWSS.SprinklerDim.Service
                 if (isFound)
                 {
                     List<Point3d> dimPts = ThDataTransformService.GetPoints(pts, tDim);
-
-                    // test
-                    //if (Math.Abs(dimPts[0].X - 849544.0) < 10)
-                    //{
-                    //    int k = 0;
-                    //}
 
                     dimPts.Add(pt);
                     dimPts.Sort((x, y) => ThCoordinateService.GetOriginalValue(x, isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(y, isXAxis)));
@@ -382,7 +365,6 @@ namespace ThMEPWSS.SprinklerDim.Service
         public static List<ThSprinklerDimension> GenerateDimensionDirectionAndDistance(List<List<List<Point3d>>> dimPtsList, List<MPolygon> rooms, List<Polyline> texts, List<Polyline> mixColumnWall, List<Polyline> pipes, string printTag)
         {
             List<ThSprinklerDimension> realDim = new List<ThSprinklerDimension>();
-
             for (int i = 0; i < rooms.Count; i++)
             {
                 List<List<Point3d>> dimPts = dimPtsList[i];
@@ -390,7 +372,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
                 ThCADCoreNTSSpatialIndex textsInRoom = ThDataTransformService.GenerateSpatialIndex(ThGeometryOperationService.Intersection(texts, room));
                 ThCADCoreNTSSpatialIndex mixColumnWallInRoom = ThDataTransformService.GenerateSpatialIndex(ThGeometryOperationService.Intersection(mixColumnWall, room));
-                ThCADCoreNTSSpatialIndex pipesInRoom = ThDataTransformService.GenerateSpatialIndex(ThGeometryOperationService.Intersection(pipes, room));
+                ThCADCoreNTSSpatialIndex pipesInRoom = ThDataTransformService.GenerateSpatialIndex(ThDataTransformService.Change(ThGeometryOperationService.Trim(pipes, room)));
                 DBObjectCollection dimedArea = new DBObjectCollection();
 
                 List<ThSprinklerDimension> dim = GenerateDimensionDirectionAndDistance(dimPts, room, textsInRoom, mixColumnWallInRoom, ref dimedArea, pipesInRoom, printTag);
@@ -402,17 +384,20 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         private static List<ThSprinklerDimension> GenerateDimensionDirectionAndDistance(List<List<Point3d>> dimPts, MPolygon rooms, ThCADCoreNTSSpatialIndex texts, ThCADCoreNTSSpatialIndex mixColumnWall, ref DBObjectCollection dimedArea, ThCADCoreNTSSpatialIndex pipes, string printTag)
         {
+            // 标注从长到短排序
+            dimPts.Sort((x, y) => y.Count - x.Count);
+
             List<ThSprinklerDimension> realDims = new List<ThSprinklerDimension>();
             foreach (List<Point3d> dim in dimPts)
             {
                 double distance = GetAdjustedDistance(dim, rooms, texts, mixColumnWall, ref dimedArea, pipes, printTag);
 
                 double op = distance > 0 ? 1 : -1;
-                Vector3d dirrection = (dim[1] - dim[0]).GetNormal().RotateBy(op*Math.PI / 2, new Vector3d(0, 0, 1));
+                Vector3d dirrection = (dim[dim.Count-1] - dim[0]).GetNormal().RotateBy(op*Math.PI / 2, new Vector3d(0, 0, 1));
 
                 realDims.Add(new ThSprinklerDimension(dim, dirrection, Math.Abs(distance)));
 
-             
+
                 // test
                 //if (distance > 0)
                 //{
@@ -490,14 +475,8 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             List<Polyline> textBoxes = new List<Polyline>();
 
-            // 文字框
-            //for (int i = 0; i < dimPts.Count - 1; i++)
-            //{
-            //    textBoxes.Add(ThCoordinateService.GetDimTextPolyline(dimPts[i], dimPts[i + 1], distance));
-            //}
-
             // 整框
-            textBoxes.Add(ThCoordinateService.GetDimWholePolyline(dimPts[0], dimPts[dimPts.Count-1], distance));
+            textBoxes.Add(ThCoordinateService.GetDimWholePolyline(dimPts[0], dimPts[dimPts.Count-1], (dimPts[1]- dimPts[0]).GetNormal(), distance));
 
             return textBoxes;
         }
