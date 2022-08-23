@@ -58,6 +58,31 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
             }
         }
+
+        public void GenerateLanesSuperFast()
+        {
+            SortLaneByDirection(IniLanes, LayoutMode, ParentDir);
+            for (int i = 0; i < IniLanes.Count; i++)
+            {
+                var _paras_module = new GenerateLaneParas();
+                var para_lanes_add = new List<LineSegment>();
+                var length_module = GenerateIntegralModuleLanesForUniqueLaneOptimizedByRealLength(ref _paras_module, i, ref para_lanes_add, true);
+                var _paras_adj = new GenerateLaneParas();
+                var length_adj = GenerateAdjacentLanesForUniqueLaneOptimizedByRealLength(ref _paras_adj, i);
+                if (Math.Max(length_module, length_adj) > 0)
+                {
+                    if (length_module >= length_adj)
+                    {
+                        RealizeGenerateLaneParas(_paras_module);
+                    }
+                    else
+                    {
+                        RealizeGenerateLaneParas(_paras_adj);
+                    }
+                }
+            }
+        }
+
         private void RealizeGenerateLaneParas(GenerateLaneParas paras)
         {
             if (paras.SetNotBeMoved != -1) IniLanes[paras.SetNotBeMoved].CanBeMoved = false;
