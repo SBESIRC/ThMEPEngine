@@ -135,7 +135,16 @@ namespace ThMEPArchitecture.MultiProcess
             Logger?.Information($"总运行时间: {_stopwatch.Elapsed.TotalSeconds}秒 \n");
             base.AfterExecute();
         }
-
+        public void RunDebug()
+        {
+            MPGAData.Load();
+            var dataWraper = MPGAData.dataWraper;
+            var genome = MPGAData.dataWraper.genome;
+            VMStock.Init(dataWraper);
+            InterParameter.Init(dataWraper);
+            InterParameter.MultiThread = false;
+            ProcessAndDisplay(genome);
+        }
         public void RunDirect(AcadDatabase acadDatabase)
         {
             var blks = InputData.SelectBlocks(acadDatabase);
@@ -167,7 +176,6 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
         }
-
         public void Run(AcadDatabase acadDatabase)
         {
             var blks = InputData.SelectBlocks(acadDatabase);

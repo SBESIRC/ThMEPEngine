@@ -351,7 +351,7 @@ namespace ThParkingStall.Core.OTools
             {
                 var connections = (SeglineIndex[i].Item1.Count == 0, SeglineIndex[i].Item2.Count == 0);
                 var splitter = splitters[i];
-                var vaildLane = splitter.GetVaildLane(connections, BoundarySpatialIndex, seglines[i].RoadWidth , BaseLineBoundary);
+                var vaildLane = splitter.GetVaildLane(connections, BoundarySpatialIndex, seglines[i].RoadWidth , null);
                 seglines[i].Splitter = splitter;
                 seglines[i].VaildLane = vaildLane;
             }

@@ -259,7 +259,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
             Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
-
             DisplayLogger?.Information($"预计代数: {IterationCount}\t");
             //DisplayLogger?.Information($"种群数量: {PopulationSize}\t");
             MCompute.Logger = Logger;

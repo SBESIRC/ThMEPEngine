@@ -204,6 +204,16 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("RoadWidth");
             }
         }
+        private int _WallLineThickness = 300;
+        public int WallLineThickness
+        {
+            get { return _WallLineThickness; }
+            set 
+            { 
+                _WallLineThickness = value;
+                RaisePropertyChanged("WallLineThickness");
+            }
+        }
         // 建筑物判断容差。将所有建筑物外扩3000做并集，在内缩3000即为建筑外包框
         private int _BuildingTolerance = 3000;
         public int BuildingTolerance
@@ -411,6 +421,16 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("VerticalSolution");
             }
         }
+        private bool _SpeedUpMode = false;
+        public bool SpeedUpMode
+        {
+            get { return _SpeedUpMode; }
+            set 
+            {
+                _SpeedUpMode = value;
+                RaisePropertyChanged("SpeedUpMode");
+            }
+        }
 
         private CommandRunSpeedEnum _CommandRunSpeed = CommandRunSpeedEnum.General;
         public CommandRunSpeedEnum CommandRunSpeed
@@ -606,6 +626,15 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
+        private static double _WallLineThickness =300;
+        public static double WallLineThickness
+        {
+            get 
+            { 
+                if(Setted) return _WallLineThickness;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
 
         //平行车位尺寸,长度
         private static int _ParallelSpotLength = 6000; //mm
@@ -755,6 +784,7 @@ namespace ThMEPArchitecture.ViewModel
         public static void Set(ParkingStallArrangementViewModel vm)
         {
             _RoadWidth = vm.RoadWidth;
+            _WallLineThickness = vm.WallLineThickness;
             _ParallelSpotLength = vm.ParallelSpotLength;
             _ParallelSpotWidth = vm.ParallelSpotWidth;
             _VerticalSpotLength = vm.VerticalSpotLength;

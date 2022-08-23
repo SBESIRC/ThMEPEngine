@@ -203,6 +203,9 @@ namespace ThParkingStall.Core.InterProcess
         private static double _SingleVertModulePlacementFactor;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public static double SingleVertModulePlacementFactor { get { return _SingleVertModulePlacementFactor; } }
+        //加速运算
+        private static bool _SpeedUpMode;
+        public static bool SpeedUpMode{get { return _SpeedUpMode; }}
         public static void Init(DataWraper datawraper)
         {
             _RunMode = datawraper.RunMode;
@@ -252,6 +255,8 @@ namespace ThParkingStall.Core.InterProcess
             _LayoutScareFactor_SingleVert = datawraper.LayoutScareFactor_SingleVert;
             //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
             _SingleVertModulePlacementFactor = datawraper.SingleVertModulePlacementFactor;
+            //加速运算模式
+            _SpeedUpMode = datawraper.SpeedUpMode;
         }
     }
 }

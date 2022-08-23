@@ -67,6 +67,8 @@ namespace ThParkingStall.Core.InterProcess
         public double LayoutScareFactor_SingleVert = 0.7;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public double SingleVertModulePlacementFactor = 1.0;
+        //加速运算
+        public bool SpeedUpMode = false;
         #endregion
         public Chromosome chromosome = null;//正交基因记录
         public Genome genome = null;//斜交基因记录

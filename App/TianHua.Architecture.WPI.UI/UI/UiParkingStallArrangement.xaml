@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.8)" SizeToContent="Height"
+              Title="车位自动排布(2.9)" SizeToContent="Height"
 
               Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
@@ -69,7 +69,10 @@
                         <Label>车道宽度：</Label>
                         <TextBox Width="40" Margin="29,5,5,5" Text="{Binding RoadWidth}"></TextBox>
                         <Label>mm</Label>
-                        
+
+                        <Label Margin=" 17,0,0,0">边界墙厚：</Label>
+                        <TextBox Width="40" Margin="15,5,5,5" Text="{Binding WallLineThickness}"></TextBox>
+                        <Label>mm</Label>
                     </StackPanel>
                     <StackPanel  Orientation="Horizontal">
                         <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding AllowLoopThroughEnd}">尽端环通</CheckBox>
@@ -158,6 +161,7 @@
                         <StackPanel >
                             <StackPanel Orientation="Horizontal">
                                 <Label>速度：</Label>
+                                <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding SpeedUpMode}">快速计算</CheckBox>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">极速(1分钟)</RadioButton>
