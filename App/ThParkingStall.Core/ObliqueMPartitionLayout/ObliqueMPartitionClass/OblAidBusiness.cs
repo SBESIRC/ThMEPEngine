@@ -23,54 +23,57 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             nonparallellines = nonparallellines.OrderBy(e => e.ClosestPoint(line.P0).Distance(line.P0));
             if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P0).Distance(line.P0) < 10)
             {
-                var start = res.P0;
-                var start_connected_line = nonparallellines.First();
-                var case_out2750 = false;
-                //偏移直线超出了边界2750的case
-                if (!Boundary.Contains(res.MidPoint))
+                if (!IsPerpLine(line, nonparallellines.First()))
                 {
-                    case_out2750 = true;
-                    start_connected_line = new LineSegment(start_connected_line);
-                    start_connected_line=start_connected_line.Scale(20);
-                    res = res.Translation(-vector.Normalize() * DisLaneWidth / 2);
-                    start = res.P0;
-                }
-
-                res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
-                var intersects = res.IntersectPoint(start_connected_line);
-                if (intersects.Count() > 0)
-                    res.P0 = intersects.First();
-                else
-                {
-                    var lninsectpointss = new List<Coordinate>();
-                    foreach (var l in IniLanes.Select(ln => ln.Line))
+                    var start = res.P0;
+                    var start_connected_line = nonparallellines.First();
+                    var case_out2750 = false;
+                    //偏移直线超出了边界2750的case
+                    if (!Boundary.Contains(res.MidPoint))
                     {
-                        lninsectpointss.AddRange(res.IntersectPoint(l));
+                        case_out2750 = true;
+                        start_connected_line = new LineSegment(start_connected_line);
+                        start_connected_line = start_connected_line.Scale(20);
+                        res = res.Translation(-vector.Normalize() * DisLaneWidth / 2);
+                        start = res.P0;
                     }
-                    lninsectpointss = lninsectpointss.Where(p => p.Distance(res.P1) > 100).ToList();
-                    if (lninsectpointss.Count() > 0)
+
+                    res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
+                    var intersects = res.IntersectPoint(start_connected_line);
+                    if (intersects.Count() > 0)
+                        res.P0 = intersects.First();
+                    else
                     {
-                        var pt = lninsectpointss.OrderBy(p => p.Distance(start)).First();
-                        if(start.Distance(pt)< disallow_away_inipoint)
-                            res.P0 = pt;
+                        var lninsectpointss = new List<Coordinate>();
+                        foreach (var l in IniLanes.Select(ln => ln.Line))
+                        {
+                            lninsectpointss.AddRange(res.IntersectPoint(l));
+                        }
+                        lninsectpointss = lninsectpointss.Where(p => p.Distance(res.P1) > 100).ToList();
+                        if (lninsectpointss.Count() > 0)
+                        {
+                            var pt = lninsectpointss.OrderBy(p => p.Distance(start)).First();
+                            if (start.Distance(pt) < disallow_away_inipoint)
+                                res.P0 = pt;
+                            else
+                                res.P0 = start;
+                        }
                         else
                             res.P0 = start;
                     }
-                    else
-                        res.P0 = start;
-                }
-                //偏移直线超出了边界2750的case
-                if (case_out2750)
-                {
-                    res = res.Translation(vector.Normalize() * DisLaneWidth / 2);
-                }
+                    //偏移直线超出了边界2750的case
+                    if (case_out2750)
+                    {
+                        res = res.Translation(vector.Normalize() * DisLaneWidth / 2);
+                    }
+                }     
             }
             else if(allow_extend_bound)
             {
                 var near_wall = false;
                 foreach (var wall in Walls)
                     if (wall.ClosestPoint(line.P0).Distance(line.P0) < 10) near_wall = true;
-                if (near_wall)
+                if (near_wall && Boundary.ClosestPoint(res.P0).Distance(res.P0)>10)
                 {
                     var start = res.P0;
                     res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
@@ -79,12 +82,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     {
                         var p_bound= intersects.OrderByDescending(P => P.Distance(res.P1)).First();
                         res.P0 = p_bound;
-                        //var extend_seg = new LineSegment(start, p_bound);
-                        //extend_seg = extend_seg.Translation(-vector);
-                        //if (Boundary.ClosestPoint(extend_seg.MidPoint).Distance(extend_seg.MidPoint) < 1 )
-                        //    res.P0 = p_bound;
-                        //else
-                        //    res.P0 = start;
                     }
                     else
                         res.P0 = start;
@@ -94,48 +91,51 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             nonparallellines = nonparallellines.OrderBy(e => e.ClosestPoint(line.P1).Distance(line.P1));
             if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P1).Distance(line.P1) < 10)
             {
-                var end = res.P1;
-                var end_connected_line = nonparallellines.First();
-                var case_out2750 = false;
-                //偏移直线超出了边界2750的case
-                if (!Boundary.Contains(res.MidPoint))
+                if (!IsPerpLine(line, nonparallellines.First()))
                 {
-                    case_out2750 = true;
-                    end_connected_line = new LineSegment(end_connected_line);
-                    end_connected_line = end_connected_line.Scale(20);
-                    res = res.Translation(-vector.Normalize() * DisLaneWidth / 2);
-                    end = res.P1;
-                }
-                res.P1 = res.P1.Translation(Vector(res).Normalize() * MaxLength);
-                var intersects = res.IntersectPoint(end_connected_line);
-                if (intersects.Count() > 0)
-                    res.P1 = intersects.First();
-                else
-                {
-                    var lninsectpointss = new List<Coordinate>();
-                    foreach (var l in IniLanes.Select(ln => ln.Line))
+                    var end = res.P1;
+                    var end_connected_line = nonparallellines.First();
+                    var case_out2750 = false;
+                    //偏移直线超出了边界2750的case
+                    if (!Boundary.Contains(res.MidPoint))
                     {
-                        lninsectpointss.AddRange(res.IntersectPoint(l));
+                        case_out2750 = true;
+                        end_connected_line = new LineSegment(end_connected_line);
+                        end_connected_line = end_connected_line.Scale(20);
+                        res = res.Translation(-vector.Normalize() * DisLaneWidth / 2);
+                        end = res.P1;
                     }
-                    lninsectpointss = lninsectpointss.Where(p => p.Distance(res.P0) > 100).ToList();
-                    if (lninsectpointss.Count() > 0)
+                    res.P1 = res.P1.Translation(Vector(res).Normalize() * MaxLength);
+                    var intersects = res.IntersectPoint(end_connected_line);
+                    if (intersects.Count() > 0)
+                        res.P1 = intersects.First();
+                    else
                     {
-                        var pt = lninsectpointss.OrderBy(p => p.Distance(end)).First();
-                        if (end.Distance(pt) < disallow_away_inipoint)
-                            res.P1 = pt;
+                        var lninsectpointss = new List<Coordinate>();
+                        foreach (var l in IniLanes.Select(ln => ln.Line))
+                        {
+                            lninsectpointss.AddRange(res.IntersectPoint(l));
+                        }
+                        lninsectpointss = lninsectpointss.Where(p => p.Distance(res.P0) > 100).ToList();
+                        if (lninsectpointss.Count() > 0)
+                        {
+                            var pt = lninsectpointss.OrderBy(p => p.Distance(end)).First();
+                            if (end.Distance(pt) < disallow_away_inipoint)
+                                res.P1 = pt;
+                            else
+                                res.P1 = end;
+                        }
                         else
                             res.P1 = end;
                     }
-                    else
-                        res.P1 = end;
-                }
-                //偏移直线超出了边界2750的case
-                if (case_out2750)
-                {
-                    res = res.Translation(vector.Normalize() * DisLaneWidth / 2);
+                    //偏移直线超出了边界2750的case
+                    if (case_out2750)
+                    {
+                        res = res.Translation(vector.Normalize() * DisLaneWidth / 2);
+                    }
                 }
             }
-            else if(allow_extend_bound)
+            else if(allow_extend_bound && Boundary.ClosestPoint(res.P1).Distance(res.P1) > 10)
             {
                 var near_wall = false;
                 foreach (var wall in Walls)
@@ -149,26 +149,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     {
                         var p_bound = intersects.OrderByDescending(P => P.Distance(res.P0)).First();
                         res.P1 = p_bound;
-                        //var extend_seg = new LineSegment(end, p_bound);
-                        //extend_seg = extend_seg.Translation(-vector);
-                        //if (Boundary.ClosestPoint(extend_seg.MidPoint).Distance(extend_seg.MidPoint) < 1 )
-                        //    res.P1 = p_bound;
-                        //else
-                        //    res.P1 = end;
                     }
                     else
                         res.P1 = end;
                 }
             }
-            //本身就比较长的车道，在该方向上偏移会超出边界 不能直接处理
-            //if (res.IntersectPoint(Boundary).Count() ==1)
-            //{
-            //    var intersectPt = res.IntersectPoint(Boundary).First();
-            //    if(!Boundary.Contains(res.P0))
-            //        res.P0=intersectPt;
-            //    else if(!Boundary.Contains(res.P1))
-            //        res.P1=intersectPt;
-            //}
             return res;
         }
         public Polygon BufferReservedConnection(LineSegment line, double dis)

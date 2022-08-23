@@ -162,7 +162,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double LayoutScareFactor_ParentDir = 3;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
-        public bool QuickCalculate = false;//快速计算
+        public bool QuickCalculate = true;//快速计算
 
         public enum LayoutDirection : int
         {
