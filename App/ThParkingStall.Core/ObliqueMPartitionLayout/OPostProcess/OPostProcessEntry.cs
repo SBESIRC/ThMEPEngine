@@ -11,11 +11,11 @@ using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
-namespace ThParkingStall.Core.ObliqueMPartitionLayout.PostProcess
+namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
 {
-    public class PostProcessEntry
+    public partial class OPostProcessEntry
     {
-        public PostProcessEntry(List<OSubArea> oSubAreas)
+        public OPostProcessEntry(List<OSubArea> oSubAreas)
         {
             OSubAreas = oSubAreas;
         }
@@ -24,11 +24,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.PostProcess
         {
             ObliqueMPartition obliqueMPartition = new ObliqueMPartition();
             Init();
-            MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary);
-            //MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
-            MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary);
-            MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref Cars);
-            MLayoutPostProcessing.RemoveInvalidPillars(ref Pillars, Cars);
+            OGenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary);
+            OGenerateCarsOntheEndofLanesByFillTheEndDistrict(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary);
+            OCheckLayoutDirectionInfoBeforePostProcessEndLanes(ref Cars);
+            ORemoveInvalidPillars(ref Pillars, Cars);
             return obliqueMPartition;
         }
 

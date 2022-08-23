@@ -32,7 +32,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using ThParkingStall.Core.ObliqueMPartitionLayout.PostProcess;
+using ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -231,7 +231,7 @@ namespace ThMEPArchitecture.MultiProcess
             var subAreas = OInterParameter.GetOSubAreas(solution);
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
             var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
-            PostProcessEntry postProcessEntry = new PostProcessEntry(subAreas);
+            //OPostProcessEntry postProcessEntry = new OPostProcessEntry(subAreas);
             //var obliqueMPartition = postProcessEntry.Execute();
             foreach (var subArea in subAreas)
             {
