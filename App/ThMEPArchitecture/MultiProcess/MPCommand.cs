@@ -97,13 +97,6 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
             .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
-            //Logger?.Information($"############################################");
-            //Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
-            //Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
-            //Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
-            //Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
-            //Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
-            //Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
             Utils.SetSeed();
             try
             {
@@ -212,7 +205,6 @@ namespace ThMEPArchitecture.MultiProcess
                 }
                 ProcessAndDisplay(orgSolution, i,stopWatch);
             }
-            
         }
 
         public void Run(AcadDatabase acadDatabase)

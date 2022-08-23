@@ -39,11 +39,10 @@ namespace ThMEPArchitecture.MultiProcess
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
     {
         public static string LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
-
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
         public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
-        DisplayInfo displayInfo;
+        List<DisplayInfo> displayInfos = new List<DisplayInfo>();
         public static Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
         public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
 
@@ -74,6 +73,15 @@ namespace ThMEPArchitecture.MultiProcess
             System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream2.Close();
             ParameterStock.Set(ParameterViewModel);
+            if (ParameterStock.LogMainProcess)
+            {
+                Logger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+                DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
+            .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+            }
             Utils.SetSeed();
             try
             {
@@ -105,7 +113,7 @@ namespace ThMEPArchitecture.MultiProcess
                             //RunWithAutoSegLine(currentDb);
                         }
                     }
-                    //TableTools.EraseOrgTable();
+                    TableTools.EraseOrgTable();
                     //TableTools.hideOrgTable();
                     if (saveDoc)
                         Active.Document.Save();
@@ -180,12 +188,19 @@ namespace ThMEPArchitecture.MultiProcess
         public void Run(AcadDatabase acadDatabase)
         {
             var blks = InputData.SelectBlocks(acadDatabase);
+            var displayPro = ProcessForDisplay.CreateSubProcess();
+            if (ParameterViewModel.ShowLogs)
+            {
+                displayPro.Start();
+            }
             //var block = InputData.SelectBlock(acadDatabase);//提取地库对象
             if (blks == null) return;
+            DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
             foreach (var blk in blks)
             {
                 ProcessTheBlock(blk);
             }
+            ShowDisplayInfo(blks.Count());
         }
 
         private void ProcessTheBlock(BlockReference block)
@@ -199,6 +214,8 @@ namespace ThMEPArchitecture.MultiProcess
             Logger?.Information("块名：" + blkName);
             Logger?.Information("文件名：" + DrawingName);
             Logger?.Information("用户名：" + Environment.UserName);
+            DisplayLogger?.Information("块名: " + blkName);
+            displayInfos.Add(new DisplayInfo(blkName));
             var layoutData = new OLayoutData(block, Logger, out bool succeed);
             if (!succeed) return;
             layoutData.ProcessSegLines();
@@ -218,6 +235,8 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     var GA_Engine = new OGAGenerator(ParameterViewModel);
                     GA_Engine.Logger = Logger;
+                    GA_Engine.DisplayLogger = DisplayLogger;
+                    GA_Engine.displayInfo = displayInfos.Last();
                     var Solution = GA_Engine.Run().First();
                     ProcessAndDisplay(Solution, i, stopWatch);
                 }
@@ -265,18 +284,14 @@ namespace ThMEPArchitecture.MultiProcess
                         OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
                     TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
                 }
-                if (displayInfo != null)
-                {
-                    displayInfo.FinalStalls = $"最大车位数: {ParkingStallCount} ";
-                    displayInfo.FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
-                    displayInfo.CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
-                }
+                 displayInfos.Last().FinalStalls = $"最大车位数: {ParkingStallCount} ";
+                 displayInfos.Last().FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
+                 displayInfos.Last().CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
             }
             DisplayParkingStall.MoveAddedEntities(moveDistance);
             //SubAreaParkingCnt.Clear();
             ReclaimMemory();
         }
-
         private void ShowTitle(int ParkingStallCount, double areaPerStall, double TotalSeconds)
         {
             string layer = "AI-总指标";
@@ -328,7 +343,27 @@ namespace ThMEPArchitecture.MultiProcess
                     .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
 
         }
-
+        private void ShowDisplayInfo(int blkCnt)
+        {
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------");
+            DisplayLogger2?.Information("地库总数：" + blkCnt);
+            DisplayLogger2?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分");
+            DisplayLogger2?.Information("----------------------");
+            foreach (var displayInfo in displayInfos)
+            {
+                DisplayLogger2?.Information(displayInfo.BlockName);
+                DisplayLogger2?.Information(displayInfo.FinalIterations);
+                DisplayLogger2?.Information(displayInfo.FinalStalls);
+                DisplayLogger2?.Information(displayInfo.FinalAveAreas);
+                DisplayLogger2?.Information(displayInfo.CostTime);
+                DisplayLogger2?.Information("----------------------");
+            }
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("----------------------------------------------");
+            DisplayLogger2?.Information("地库程序运行结束");
+        }
         private void ReclaimMemory()
         {
             GC.Collect();

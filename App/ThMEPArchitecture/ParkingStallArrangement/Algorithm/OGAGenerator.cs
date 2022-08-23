@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ThMEPArchitecture.MultiProcess;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ViewModel;
 using ThMEPEngineCore;
 using ThParkingStall.Core.IO;
@@ -51,7 +52,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         ParkingStallArrangementViewModel ParameterViewModel;
         public Serilog.Core.Logger Logger = null;
         public Serilog.Core.Logger DisplayLogger = null;
-
+        public DisplayInfo displayInfo = null;
         public int ProcessCount;
         //public List<Process> ProcList;//进程列表
         public List<List<Mutex>> MutexLists;//进程锁列表的列表
@@ -324,7 +325,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var rstLM = temp_list[1];
                     MutationL(rstLM);
                     pop.AddRange(rstLM);
-                    
                     Logger?.Information($"当前代用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
                     t_pre = stopWatch.Elapsed.TotalSeconds;
                     if (CurIteration % 3 == 0)
@@ -336,7 +336,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 else strConverged = $"已收敛";
                 Active.Editor.WriteMessage(strConverged);
                 Logger?.Information(strConverged);
-                //displayInfo.FinalIterations = "最终代数: " + (CurIteration - 1).ToString() + "(" + strConverged + ")";
+                if (displayInfo != null) displayInfo.FinalIterations = "最终代数: " + (CurIteration - 1).ToString() + "(" + strConverged + ")";
                 DisplayLogger?.Information("最终代数: " + (CurIteration - 1).ToString() + "\t");
                 DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
                 stopWatch.Stop();
