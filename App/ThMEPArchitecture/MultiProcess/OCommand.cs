@@ -248,7 +248,7 @@ namespace ThMEPArchitecture.MultiProcess
             var strBest = $"最大车位数{ParkingStallCount}\n";
             Logger?.Information(strBest);
             Active.Editor.WriteMessage(strBest);
-            //if (ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
+            if (ParameterViewModel.ShowSubAreaTitle) subAreas.ForEach(area => area.ShowText());
             if (stopWatch != null)
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
@@ -258,13 +258,13 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
 
                 if (ParameterViewModel.ShowTitle) ShowTitle(ParkingStallCount, areaPerStall, stopWatch.Elapsed.TotalSeconds);
-                //if (ParameterViewModel.ShowTable)
-                //{
-                //    var minY = OInterParameter.TotalArea.Coordinates.Min(c => c.Y);
-                //    var midX = (OInterParameter.TotalArea.Coordinates.Max(c => c.X) +
-                //        OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
-                //    TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
-                //}
+                if (ParameterViewModel.ShowTable)
+                {
+                    var minY = OInterParameter.TotalArea.Coordinates.Min(c => c.Y);
+                    var midX = (OInterParameter.TotalArea.Coordinates.Max(c => c.X) +
+                        OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
+                    TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
+                }
                 if (displayInfo != null)
                 {
                     displayInfo.FinalStalls = $"最大车位数: {ParkingStallCount} ";
