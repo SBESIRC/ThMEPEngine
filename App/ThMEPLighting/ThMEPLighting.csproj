@@ -144,6 +144,7 @@
     <Compile Include="Garage\Service\LayoutResult\ThCrossLightNodeLinker.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThCrossLinkCalculator.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThCutCableTrayUnlinkWireService.cs" />
+    <Compile Include="Garage\Service\LayoutResult\ThDoubleRowLinker.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLightNodeLinker.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLinkWireFilter.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThJumpWireDirectionCalculator.cs" />

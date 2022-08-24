@@ -261,7 +261,7 @@
                             SelectedItem="{Binding Specification, Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
                             ItemsSource="{Binding Specifications, Mode=OneWay, NotifyOnSourceUpdated=True}">
                             </ComboBox>
-                            <TextBlock>mm</TextBlock>
+                            <TextBlock Margin="2,0,0,0">mm</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="5,1,5,5">
                             <TextBlock>双排间距：</TextBlock>
@@ -269,12 +269,12 @@
                                      IsEnabled="{Binding ElementName=rbDoubleRow,
                                 Path=IsChecked,Mode=OneWay}">
                             </TextBox>
-                            <TextBlock>mm</TextBlock>
+                            <TextBlock Margin="2,0,0,0">mm</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="5,0,5,5">
                             <TextBlock>灯具间距：</TextBlock>
                             <TextBox Width="100" Text="{Binding LampSpacing}"></TextBox>
-                            <TextBlock>mm</TextBlock>
+                            <TextBlock Margin="2,0,0,0">mm</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="5,0,5,5">
                             <CheckBox Content="使用天正桥架（仅限专版天正）" Name="cbIsTCHCableTray" IsChecked= "{Binding IsTCHCableTray, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}" 
@@ -284,6 +284,7 @@
                     </StackPanel>
                     <Grid Margin="5" Grid.Column="1">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
@@ -353,28 +354,32 @@
                         <GroupBox Grid.Row="3">
                             <GroupBox.Header>回路数量</GroupBox.Header>
                             <StackPanel Orientation="Vertical">
-                                <RadioButton     Margin="5,5,0,0"  IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=自动计算}">
+                                <RadioButton x:Name="rbtAutoNumber" Margin="5,5,0,0"  IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=自动计算}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock>自动计算</TextBlock>
                                         <TextBox Width="30" Text="{Binding NumberOfCircuitsAutomaticCalculationOfNLoop}"></TextBox>
                                         <TextBlock>盏/回路</TextBlock>
                                     </StackPanel>
                                 </RadioButton>
-                                <RadioButton   Margin="5,5,0,0" IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=指定数量}">
+                                <RadioButton x:Name="rbtAssignNumber" Margin="5,5,0,0" IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=指定数量}">
                                     <StackPanel Orientation="Horizontal"  >
                                         <TextBlock>指定数量</TextBlock>
-                                        <TextBox Width="30" Text="{Binding NumberOfCircuitsSpecifyTheNumberOfNPerCircuits}"></TextBox>
+                                        <TextBox x:Name="tbCircuitNumber" Width="30" Text="{Binding NumberOfCircuitsSpecifyTheNumberOfNPerCircuits}"></TextBox>
                                         <TextBlock>个/回路</TextBlock>
                                     </StackPanel>
                                 </RadioButton>
                             </StackPanel>
                         </GroupBox>
-                        <StackPanel Grid.Row="4" VerticalAlignment="Top" Orientation="Vertical" Margin="0,30,0,0" Height="65">
+                        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="10,5,5,5">
+                            <CheckBox Content="双排双回路模式" Name="cbIsDoubleRowMode" IsChecked= "{Binding IsDoubleRow, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}" 
+                                      Checked="cbIsDoubleRowMode_Checked" Unchecked="cbIsDoubleRowMode_Unchecked"></CheckBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" VerticalAlignment="Top" Orientation="Vertical" Margin="0,10,0,0" Height="65">
                             <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Margin="5">
                                 <TextBlock Margin="0,0,5,0">起始编号：WL</TextBlock>
                                 <TextBox Width="40" Text="{Binding StartingNumber}" TextAlignment="Center"></TextBox>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5,5,5,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5,2,5,0">
                                 <Button Grid.Column="0" Margin="0,0,10,0" x:Name="btnCdzmVideo" Width="80" Height="25" Click="btnCdzmVideo_Click" >视频教程</Button>
                                 <Button Grid.Column="1" Margin="0,0,0,0" x:Name="btnCdzmLayout" Width="80" Height="25" Click="btnPlace_Click">布置</Button>
                             </StackPanel>

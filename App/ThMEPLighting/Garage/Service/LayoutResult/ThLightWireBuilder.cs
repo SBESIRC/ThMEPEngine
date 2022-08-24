@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
@@ -8,11 +9,12 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Garage.Model;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -58,7 +60,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             ObjIds = new ObjectIdList();
             ExtendLines = new List<Line>();
             Wires = new DBObjectCollection();
-            DefaultNumbers = new List<string>();            
+            DefaultNumbers = new List<string>();
             NumberTexts = new DBObjectCollection();
             DirectionConfig = new Dictionary<string, int>();
             CableTrayParameter = new ThCableTrayParameter();
@@ -109,16 +111,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var lights = BuildLightLines(lightNumber); // 创建灯线
             var wires = GetLinkWires(lightNumber);
             var lines = wires.OfType<Line>().ToCollection();
-            var others = wires.Difference(lines); 
+            var others = wires.Difference(lines);
             var results = lines.Break(lights);
             results = results.Union(others);
-            AddToLoopWireGroup(lightNumber, results,true); // 添加默认回路的线
+            AddToLoopWireGroup(lightNumber, results, true); // 添加默认回路的线
         }
 
         protected void CreateStraitLinkJumpWire(List<ThLightEdge> edges)
         {
             var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
             var lightNodeLinks = creator.CreateStraitLinkJumpWire(edges, DefaultNumbers);
+            if (ArrangeParameter.IsDoubleRow)
+            {
+                var links = creator.CreateStraitLinkJumpWire(ThDoubleRowLinker.DoubleRowMode(edges, ArrangeParameter.DoubleRowOffsetDis), DefaultNumbers);
+                lightNodeLinks.AddRange(links);
+            }
             lightNodeLinks.ForEach(l => AddToLoopWireGroup(l));
         }
 
@@ -252,7 +259,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             // 对存在交叉的线路进行短线，更偏向于Y轴的线路被更偏向于X轴的线路打断，短线间距300（弧线不打断）
             var breakService = new ThBreakLineService(currentUserCoordinateSystem);
-            return breakService.BreakByHeight(objs, length/2.0);
+            return breakService.BreakByHeight(objs, length / 2.0);
         }
         protected DBObjectCollection BreakWire(DBObjectCollection wires)
         {
@@ -345,11 +352,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             AddToLoopWireGroup(link.First.Number, link.JumpWires.ToCollection());
         }
 
-        protected void AddToLoopWireGroup(string lightNumber, DBObjectCollection objs,bool isForceReplace=false)
+        protected void AddToLoopWireGroup(string lightNumber, DBObjectCollection objs, bool isForceReplace = false)
         {
             if (LoopWireGroupDict.ContainsKey(lightNumber))
             {
-                if(isForceReplace)
+                if (isForceReplace)
                 {
                     LoopWireGroupDict[lightNumber] = objs;
                 }
@@ -459,6 +466,24 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     m.ColorIndex = (int)ColorIndex.BYLAYER;
                     m.Layer = CableTrayParameter.NumberTextParameter.Layer;
                     m.TextStyleId = acadDatabase.TextStyles.Element(ArrangeParameter.LightNumberTextStyle).Id;
+
+                    // 双排双回路模式，为不影响之前的代码结构，这里考虑在输出时偷梁换柱，在这里替换输出回路编号
+                    if (ArrangeParameter.IsDoubleRow)
+                    {
+                        switch (m.TextString)
+                        {
+                            case "WL01":
+                                break;
+                            case "WL02":
+                                break;
+                            case "WL03":
+                                m.TextString = "WL02";
+                                break;
+                            case "WL04":
+                                m.TextString = "WL01";
+                                break;
+                        }
+                    }
                 });
                 return objIds;
             }

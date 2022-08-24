@@ -47,6 +47,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return linker.LightLinks;
         }
 
+        public List<ThLightNodeLink> CreateStraitLinkJumpWire(List<ThLightNodeLink> lightLinks, List<string> defaultNumbers)
+        {
+            if (ArrangeParameter.ConnectMode == ConnectMode.Linear)
+            {
+                CreateCrossLinearLinkWire(lightLinks, defaultNumbers, OffsetDis2);
+            }
+            else
+            {
+                CreateCrossCircularLinkWire(lightLinks, defaultNumbers);
+            }
+            return lightLinks;
+        }
+
         public void CreateWireForStraitLink(List<ThLightNodeLink> links)
         {
             // 直线连接

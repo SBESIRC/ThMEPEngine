@@ -13,15 +13,15 @@ namespace ThMEPLighting.Garage.Service.Number
         private double DoubleRowOffsetDis { get; set; }
         private List<ThLightEdge> FirstEdges { get; set; }
         private List<ThLightEdge> SecondEdges { get; set; }
-        public ThPassNumberService(
-            List<ThLightEdge> firstEdges,
-            List<ThLightEdge> secondEdges,
-            int loopNumber,
-            double doubleRowOffsetDis)
+        private bool IsDoubleRow { get; set; }
+
+        public ThPassNumberService(List<ThLightEdge> firstEdges, List<ThLightEdge> secondEdges, int loopNumber, double doubleRowOffsetDis,
+            bool isDoubleRow)
         {
             LoopNumber = loopNumber;
             FirstEdges = firstEdges;
             SecondEdges = secondEdges;
+            IsDoubleRow = isDoubleRow;
             DoubleRowOffsetDis = doubleRowOffsetDis;
         }
         public void Pass()
@@ -78,7 +78,7 @@ namespace ThMEPLighting.Garage.Service.Number
 
                             if (findSecondNodes.Count() > 0)
                             {
-                                int secondLightIndex = m.GetIndex() + 1;
+                                var secondLightIndex = m.GetIndex() + 1;
                                 var secondNode = findSecondNodes.First();
                                 secondNode.Number = ThNumberService.FormatNumber(secondLightIndex, loopCharLength);
                             }

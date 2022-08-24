@@ -50,7 +50,7 @@ namespace ThMEPLighting.Garage.Engine
             Graphs = lightEdges.CreateGraphs();
             Graphs.ForEach(g =>
             {
-                g.Number(LoopNumber, true, base.DefaultStartNumber);
+                g.Number(LoopNumber, true, base.DefaultStartNumber, ArrangeParameter.IsDoubleRow);
             });
         }
         protected override void Preprocess(ThRegionBorder regionBorder )

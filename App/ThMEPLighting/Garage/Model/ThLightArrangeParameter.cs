@@ -10,6 +10,10 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public bool IsTCHCableTray { get; set; }
         /// <summary>
+        /// 是否选择双排双回路模式
+        /// </summary>
+        public bool IsDoubleRow { get; set; }
+        /// <summary>
         /// 灯间距
         /// </summary>
         public double Interval { get; set; } = 2700;

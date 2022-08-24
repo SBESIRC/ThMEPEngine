@@ -26,7 +26,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
         public List<ThLightGraphService> Graphs { get; protected set; }
         #endregion
         public ThLightingArrangeService(
-            ThRegionBorder regionBorder, 
+            ThRegionBorder regionBorder,
             ThLightArrangeParameter arrangeParameter)
         {
             RegionBorder = regionBorder;
@@ -50,7 +50,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             // 编号
             var firstGraphs = firstLightEdges.CreateGraphs();
             // 为1号线编号
-            firstGraphs.ForEach(f => f.Number1(this.LoopNumber, false, ArrangeParameter.DefaultStartNumber));
+            firstGraphs.ForEach(f => f.Number1(this.LoopNumber, false, ArrangeParameter.DefaultStartNumber, ArrangeParameter.IsDoubleRow));
             // 把1号线编号,传递到2号线
             PassNumber(firstGraphs.SelectMany(g => g.GraphEdges).ToList(), secondLightEdges);
 
@@ -60,7 +60,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             Graphs.AddRange(secondGraphs);
         }
         protected void CreateDistributePointEdges(
-            List<ThLightEdge> firstLightEdges, 
+            List<ThLightEdge> firstLightEdges,
             List<ThLightEdge> secondLightEdges)
         {
             // 创建带布点的边n
@@ -76,8 +76,8 @@ namespace ThMEPLighting.Garage.Service.Arrange
         }
         private DBObjectCollection GetBeams()
         {
-           if( ArrangeParameter.LayoutMode == LayoutMode.SpanBeam || 
-                ArrangeParameter.LayoutMode == LayoutMode.AvoidBeam)
+            if (ArrangeParameter.LayoutMode == LayoutMode.SpanBeam ||
+                 ArrangeParameter.LayoutMode == LayoutMode.AvoidBeam)
             {
                 return RegionBorder.Beams.Select(o => o.Outline).ToCollection();
             }
@@ -99,15 +99,14 @@ namespace ThMEPLighting.Garage.Service.Arrange
             }
         }
 
-        protected void PassNumber(List<ThLightEdge> firstEdges,List<ThLightEdge> secondEdges)
+        protected void PassNumber(List<ThLightEdge> firstEdges, List<ThLightEdge> secondEdges)
         {
             // 把1号线的编号传递到2号线
-            var passNumberService = new ThPassNumberService(
-                firstEdges,secondEdges,LoopNumber,
-                ArrangeParameter.DoubleRowOffsetDis);
+            var passNumberService = new ThPassNumberService(firstEdges, secondEdges, LoopNumber, ArrangeParameter.DoubleRowOffsetDis,
+                ArrangeParameter.IsDoubleRow);
             passNumberService.Pass();
         }
-        
+
         protected List<ThLightEdge> BuildEdges(List<Line> lines, EdgePattern edgePattern)
         {
             var edges = new List<ThLightEdge>();

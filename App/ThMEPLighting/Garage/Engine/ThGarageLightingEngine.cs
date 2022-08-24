@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using AcHelper;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
@@ -194,8 +193,7 @@ namespace ThMEPLighting.Garage.Engine
         private Dictionary<string, int> JumpWireDirectionConfig(int defaultStartNumber, bool isSingleRow, int loopNumber)
         {
             var results = new Dictionary<string, int>();
-            var directionConfig = ThJumpWireDirectionConfig.JumpWireDirectionConfig(
-                defaultStartNumber, isSingleRow, loopNumber);
+            var directionConfig = ThJumpWireDirectionConfig.JumpWireDirectionConfig(defaultStartNumber, isSingleRow, loopNumber);
             foreach (var item in directionConfig)
             {
                 var number = item.Key.GetLightNumber(2);

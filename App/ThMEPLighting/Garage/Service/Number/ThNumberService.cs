@@ -6,14 +6,14 @@ using System.Collections.Generic;
 namespace ThMEPLighting.Garage.Service.Number
 {
     public static class ThNumberService
-    {        
-        public static void Number(this ThLightGraphService graph,int loopNumber,bool isSingleRowNumber,int defaultStartNumber)
+    {
+        public static void Number(this ThLightGraphService graph, int loopNumber, bool isSingleRowNumber, int defaultStartNumber, bool isDoubleRow)
         {
             if (graph == null || graph.Links.Count == 0)
             {
                 return;
             }
-            foreach(var linkPath in graph.Links)
+            foreach (var linkPath in graph.Links)
             {
                 var findStartIndex = ThFindStartIndexService.Find(graph, linkPath, loopNumber, isSingleRowNumber, defaultStartNumber);
                 if (!findStartIndex.IsFind)
@@ -48,7 +48,7 @@ namespace ThMEPLighting.Garage.Service.Number
                     i = j - 1;
                     //对当前直段编号
 
-                    if(isSingleRowNumber)
+                    if (isSingleRowNumber)
                     {
                         var numberInstance = ThSingleRowLightNumber.Build(edges, loopNumber, startIndex, defaultStartNumber);
                         startIndex = numberInstance.LastIndex; //下一段的起始序号
@@ -62,7 +62,7 @@ namespace ThMEPLighting.Garage.Service.Number
             }
         }
 
-        public static void Number1(this ThLightGraphService graph, int loopNumber, bool isSingleRowNumber, int defaultStartNumber)
+        public static void Number1(this ThLightGraphService graph, int loopNumber, bool isSingleRowNumber, int defaultStartNumber, bool isDoubleRow)
         {
             if (graph == null || graph.Links.Count == 0)
             {
@@ -91,7 +91,7 @@ namespace ThMEPLighting.Garage.Service.Number
             }
         }
 
-        public static string FormatNumber(int index,int loopCharLength)
+        public static string FormatNumber(int index, int loopCharLength)
         {
             var number = index.ToString().PadLeft(loopCharLength, '0');
             return ThGarageLightCommon.LightNumberPrefix + number;
