@@ -1,10 +1,12 @@
 ﻿using AcHelper;
 using DotNetARX;
 using Linq2Acad;
+using ThMEPEngineCore;
 using AcHelper.Commands;
 using System.Windows.Input;
 using Autodesk.AutoCAD.DatabaseServices;
 using CommunityToolkit.Mvvm.Input;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -49,14 +51,36 @@ namespace TianHua.Mep.UI.ViewModel
 
         private void DrawRoomOutline()
         {
-            SetFocusToDwgView();
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THKJHZ");
+            if (AcadApp.DocumentManager.Count > 0)
+            {
+                SetFocusToDwgView();
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    acdb.Database.CreateAIRoomOutlineLayer();
+                    acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
         }
 
         private void DrawRoomSplitline()
         {
-            SetFocusToDwgView();
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THKJFG");
+            if (AcadApp.DocumentManager.Count > 0)
+            {
+                SetFocusToDwgView();
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    acdb.Database.CreateAIRoomSplitlineLayer();
+                    acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
         }
 
         private void PickRoomOutline()

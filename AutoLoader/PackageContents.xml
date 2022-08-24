@@ -60,8 +60,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJSQ" Global="THKJSQ" />
-                <Command Local="THKJHZ" Global="THKJSQ" />
-                <Command Local="THKJFG" Global="THKJSQ" />
                 <Command Local="THKJZX" Global="THKJZX" />
                 <Command Local="THKJMCTQ" Global="THKJMCTQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
@@ -87,8 +85,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJSQ" Global="THKJSQ" />
-                <Command Local="THKJHZ" Global="THKJSQ" />
-                <Command Local="THKJFG" Global="THKJSQ" />
                 <Command Local="THKJZX" Global="THKJZX" />
                 <Command Local="THKJMCTQ" Global="THKJMCTQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
