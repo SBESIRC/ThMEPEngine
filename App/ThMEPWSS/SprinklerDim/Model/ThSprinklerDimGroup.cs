@@ -28,7 +28,7 @@ namespace ThMEPWSS.SprinklerDim.Model
             else return false;
         }
 
-        public void AddPt(int ipt, ThSprinklerNetGroup group, bool IsxAxis, double step, ThCADCoreNTSSpatialIndex walls)
+        public ThSprinklerDimGroup(int ipt, ThSprinklerNetGroup group, bool IsxAxis, double step, ThCADCoreNTSSpatialIndex walls)
         {
             pt = ipt;
             List<List<int>> anotherCollinearation = new List<List<int>>();
@@ -41,5 +41,10 @@ namespace ThMEPWSS.SprinklerDim.Model
             }
         }
 
+        public ThSprinklerDimGroup(int ipt,List<int> iPtsDimed)
+        {
+            pt = ipt;
+            PtsDimed = iPtsDimed;
+        }
     }
 }
