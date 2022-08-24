@@ -71,6 +71,7 @@
         public const string FIRE_DAMPER = "防火阀";
 
         public const string HIDING_LAYER = "AI-提资比对";
+        public const string NOTE_LAYER = "AI-圈注";
 
         public const string LINE_TYPE_HIDDEN = "HIDDEN";
         public const string LINE_TYPE_CONTINUOUS = "CONTINUOUS";

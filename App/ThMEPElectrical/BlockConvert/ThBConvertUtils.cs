@@ -278,7 +278,7 @@ namespace ThMEPElectrical.BlockConvert
             using (var db = AcadDatabase.Use(database))
             {
                 // 创建云线
-                var layerId = db.Database.CreateAILayer("AI-圈注", 1);
+                var layerId = CreateAILayer(database, ThBConvertCommon.NOTE_LAYER);
                 ObjectId revcloud = ObjectId.Null;
                 var buffer = obb.Buffer(300.0 * scale);
                 var objId = db.ModelSpace.Add(buffer[0] as Entity);
@@ -310,6 +310,23 @@ namespace ThMEPElectrical.BlockConvert
                 revcloudObj.LayerId = layerId;
                 revcloudObj.Linetype = linetype;
                 revcloudObj.ColorIndex = colorIndex;
+            }
+        }
+
+        /// <summary>
+        /// 创建并设置图层
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="layer"></param>
+        /// <returns></returns>
+        private static ObjectId CreateAILayer(Database database, string layer)
+        {
+            using (var db = AcadDatabase.Use(database))
+            {
+                var layerId = db.Database.CreateAILayer(layer, 1);
+                var ltr = db.Layers.ElementOrDefault(layer, true);
+                ltr.IsPlottable = false;
+                return layerId;
             }
         }
     }
