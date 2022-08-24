@@ -810,7 +810,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         break;
                     }
                 }
-                if (cond_found == 0) return false;
+                if (cond_found == 0)
+                {
+                    return false;
+                }
             }
             foreach (var a in texts2)
             {
@@ -823,7 +826,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         break;
                     }
                 }
-                if (cond_found == 0) return false;
+                if (cond_found == 0)
+                {
+                    return false;
+                }
             }
             return true;
         }
