@@ -7,8 +7,13 @@ import "ThTCHBuiltElementData.proto";
 message ThTCHWallData {
     ThTCHBuiltElementData build_element = 1;
 
-    repeated ThTCHDoorData doors = 2;
-    repeated ThTCHWindowData windows = 3;
-    repeated ThTCHOpeningData openings = 4;
+    double left_width = 2;
+    double right_width = 3;
+    ThTCHPoint3d start_point = 4;
+    ThTCHPoint3d end_point = 5;
+
+    repeated ThTCHDoorData doors = 6;
+    repeated ThTCHWindowData windows = 7;
+    repeated ThTCHOpeningData openings = 8;
 }
 

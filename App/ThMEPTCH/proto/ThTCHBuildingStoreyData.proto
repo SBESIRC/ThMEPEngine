@@ -2,13 +2,29 @@
 import "ThTCHRootData.proto";
 import "ThTCHWallData.proto";
 import "ThTCHDoorData.proto";
+import "ThTCHGeometry.proto";
 import "ThTCHWindowData.proto";
 import "ThTCHOpeningData.proto";
 
 message ThTCHBuildingStoreyData {
     ThTCHRootData root = 1;
-    repeated ThTCHWallData walls = 2;
-    repeated ThTCHDoorData doors = 3;
-    repeated ThTCHWindowData windows = 4;
-    repeated ThTCHOpeningData openings = 5;
+
+    // 编号
+    string number = 2;
+    
+    // 层高
+    double height = 3;
+
+    // 标高
+    double elevation = 4;
+
+    // 图框名称
+    string usage = 5;
+
+    // 楼层基点
+    ThTCHPoint3d origin = 6;
+
+    repeated ThTCHWallData walls = 7;
+    repeated ThTCHDoorData doors = 8;
+    repeated ThTCHWindowData windows = 9;
 }
