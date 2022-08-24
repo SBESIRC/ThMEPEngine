@@ -160,7 +160,8 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     nodeIdVisit[idA] = true;
                     nodeIdVisit[idB] = true;
-                    if (NodesSameEnvironment(IdToNodes[idA].First().Item1, IdToNodes[idB].First().Item2, graphA, graphB)
+                    if (!SourceNodesSameEnvirinment(IdToNodes[idA].First().Item1, IdToNodes[idB].First().Item1, graphA)
+                        && NodesSameEnvironment(IdToNodes[idA].First().Item1, IdToNodes[idB].First().Item2, graphA, graphB)
                         && NodesSameEnvironment(IdToNodes[idB].First().Item1, IdToNodes[idA].First().Item2, graphA, graphB))
                     {
                         DataChangeForNode(IdToNodes[idA].First().Item1, IdToNodes[idB].First().Item2);
@@ -216,6 +217,54 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         /// <summary>
+        /// 判断两个节点是否拥有相同的上下级连接关系，若是，则返回true
+        /// </summary>
+        /// <param name="nodeA"></param>
+        /// <param name="nodeB"></param>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        private bool SourceNodesSameEnvirinment(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB, PDSGraph graph)
+        {
+            var inEdgesA = graph.InEdges(nodeA).ToHashSet();
+            var inEdgesB = graph.InEdges(nodeB).ToHashSet();
+            if (inEdgesA.Count != inEdgesB.Count)
+            {
+                return false;
+            }
+            var outEdgesA = graph.OutEdges(nodeA).ToHashSet();
+            var outEdgesB = graph.OutEdges(nodeB).ToHashSet();
+            if (outEdgesA.Count != outEdgesB.Count)
+            {
+                return false;
+            }
+
+            if (inEdgesA.Count == 0 && outEdgesA.Count == 0)
+            {
+                // 特殊情况，提前返回
+                return true;
+            }
+
+            //入边相等判断
+            var inEdgesIdA = new HashSet<string>();
+            var inEdgesIdB = new HashSet<string>();
+            inEdgesA.ForEach(e => inEdgesIdA.Add(e.Circuit.ID.CircuitNumber));
+            inEdgesB.ForEach(e => inEdgesIdB.Add(e.Circuit.ID.CircuitNumber));
+
+            //子结点相等判断
+            var outNodesIdA = new HashSet<string>();
+            var outNodesIdB = new HashSet<string>();
+            outEdgesA.ForEach(e => outNodesIdA.Add(e.Target.Load.ID.LoadID));
+            outEdgesB.ForEach(e => outNodesIdB.Add(e.Target.Load.ID.LoadID));
+
+            // 上下文环境完全相同，则认为没有发生交换
+            if (inEdgesIdA.SetEquals(inEdgesIdB) && outNodesIdA.SetEquals(outNodesIdB))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// 比较两个结点的上下文(父子结点以及出入边)是否完全一致
         /// </summary>
         /// <param name="nodeA"></param>
@@ -248,18 +297,6 @@ namespace TianHua.Electrical.PDS.Service
             var inEdgesIdB = new HashSet<string>();
             inEdgesA.ForEach(e => inEdgesIdA.Add(e.Circuit.ID.CircuitNumber));
             inEdgesB.ForEach(e => inEdgesIdB.Add(e.Circuit.ID.CircuitNumber));
-
-            //子结点相等判断
-            var outNodesIdA = new HashSet<string>();
-            var outNodesIdB = new HashSet<string>();
-            outEdgesA.ForEach(e => outNodesIdA.Add(e.Target.Load.ID.LoadID));
-            outEdgesB.ForEach(e => outNodesIdB.Add(e.Target.Load.ID.LoadID));
-
-            // 上下文环境完全相同，则认为没有发生交换
-            if (inEdgesIdA.SetEquals(inEdgesIdB) && outNodesIdA.SetEquals(outNodesIdB))
-            {
-                return false;
-            }
             foreach (var inEdgeIdA in inEdgesIdA)
             {
                 if (!inEdgesIdB.Contains(inEdgeIdA))
@@ -267,6 +304,12 @@ namespace TianHua.Electrical.PDS.Service
                     return false;
                 }
             }
+
+            //子结点相等判断
+            var outNodesIdA = new HashSet<string>();
+            var outNodesIdB = new HashSet<string>();
+            outEdgesA.ForEach(e => outNodesIdA.Add(e.Target.Load.ID.LoadID));
+            outEdgesB.ForEach(e => outNodesIdB.Add(e.Target.Load.ID.LoadID));
             foreach (var outNodeIdA in outNodesIdA)
             {
                 if (!outNodesIdB.Contains(outNodeIdA))
