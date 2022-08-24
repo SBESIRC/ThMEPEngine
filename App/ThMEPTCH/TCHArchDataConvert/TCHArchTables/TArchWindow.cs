@@ -1,27 +1,23 @@
 ﻿namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
+    public enum WindowTypeEnum
+    {
+        /// <summary>
+        /// 普通窗
+        /// </summary>
+        Window = 0,
+        /// <summary>
+        /// 百叶窗
+        /// </summary>
+        Shutter = 1,
+        /// <summary>
+        /// 偏心窗
+        /// </summary>
+        Eccentric = 2,
+    };
+
     public class TArchWindow:TArchEntity
     {
-        /*
-        CREATE TABLE TArchWindow(
-    ID INT64,
-    BasePointX DOUBLE,
-    BasePointY DOUBLE,
-    BasePointZ DOUBLE,
-    Width DOUBLE,
-    Height DOUBLE,
-    SillHeight DOUBLE,
-    Number CHAR,
-    Kind INT64,
-    SubKind CHAR,
-    TextLayer CHAR,
-    TextStyle CHAR,
-    StyleID CHAR,
-    dThickness DOUBLE,
-    TextPointX DOUBLE,
-    TextPointY DOUBLE,
-    TextPointZ DOUBLE
-);*/
         public string Number { get; set; }
         public double TextPointZ { get; set; }
         public double TextPointX { get; set; }
@@ -37,6 +33,7 @@
         public int Kind { get; set; }
         public string SubKind { get; set; }
         public double Rotation { get; set; }
+        public WindowTypeEnum WindowType { get; set; }
         public override bool IsValid()
         {
             return Width > 1.0 && Thickness > 1.0;

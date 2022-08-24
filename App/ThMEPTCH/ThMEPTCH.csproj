@@ -82,6 +82,7 @@
     <Compile Include="CAD\ThTArchWindowExtension.cs" />
     <Compile Include="CAD\ThTCHBuildingElementExtractionEngine.cs" />
     <Compile Include="CAD\ThTCHArchWallExtractionVisitor.cs" />
+    <Compile Include="CAD\ThTCHDbCommon.cs" />
     <Compile Include="CAD\ThTCHDbExtension.cs" />
     <Compile Include="CAD\ThTCHDoorExtractionVisitor.cs" />
     <Compile Include="CAD\ThTCHEntityExtension.cs" />

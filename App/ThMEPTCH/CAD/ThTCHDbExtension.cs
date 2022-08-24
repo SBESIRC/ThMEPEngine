@@ -24,6 +24,11 @@ namespace ThMEPTCH.CAD
                 {
                     switch ((DxfCode)tv.TypeCode)
                     {
+                        case (DxfCode)1:
+                            {
+                                door.OperationType = GetOperationType(tv);
+                            }
+                            break;
                         case (DxfCode)10:
                             {
                                 var pt = (Point3d)tv.Value;
@@ -45,6 +50,11 @@ namespace ThMEPTCH.CAD
                         case (DxfCode)50:
                             {
                                 door.Rotation = (double)tv.Value;
+                            }
+                            break;
+                        case (DxfCode)70:
+                            {
+                                door.Swing = GetSwing(tv);
                             }
                             break;
                         case (DxfCode)148:
@@ -75,6 +85,11 @@ namespace ThMEPTCH.CAD
                 {
                     switch ((DxfCode)tv.TypeCode)
                     {
+                        case (DxfCode)1:
+                            {
+                                window.WindowType = GetWindowType(tv);
+                            }
+                            break;
                         case (DxfCode)10:
                             {
                                 var pt = (Point3d)tv.Value;
@@ -173,7 +188,7 @@ namespace ThMEPTCH.CAD
                 {
                     // 标识信息
                     Id = (ulong)ThMEPDbUniqueIdService.UniqueId(tch, uid, matrix),
-                    
+
                     // 几何信息
                     StartPointX = transCurve.StartPoint.X,
                     StartPointY = transCurve.StartPoint.Y,
@@ -204,6 +219,30 @@ namespace ThMEPTCH.CAD
             Interop.AttachUnmanagedObject(rb, InvokeTool.acdbEntGet(ref name), true);
 
             return rb;
+        }
+        private static DoorTypeOperationEnum GetOperationType(TypedValue tv)
+        {
+            var name = Convert.ToString(tv.Value);
+            if (ThTCHDbCommon.DoorTypeOperationMapping.ContainsKey(name))
+            {
+                return ThTCHDbCommon.DoorTypeOperationMapping[name];
+            }
+            throw new NotSupportedException();
+        }
+
+        private static WindowTypeEnum GetWindowType(TypedValue tv)
+        {
+            var name = Convert.ToString(tv.Value);
+            if (ThTCHDbCommon.WindowTypeMapping.ContainsKey(name))
+            {
+                return ThTCHDbCommon.WindowTypeMapping[name];
+            }
+            throw new NotSupportedException();
+        }
+
+        private static SwingEnum GetSwing(TypedValue tv)
+        {
+            return (SwingEnum)Convert.ToUInt16(tv.Value);
         }
 
         private static Curve GetCurve(ObjectId tch)
