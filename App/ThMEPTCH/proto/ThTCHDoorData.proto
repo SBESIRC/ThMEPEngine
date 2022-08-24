@@ -1,7 +1,21 @@
 ﻿syntax = "proto3";
 import "ThTCHBuiltElementData.proto";
 
-message ThTCHDoorData {
-    ThTCHBuiltElementData build_element = 1;
+enum DoorTypeOperation {
+    SWING = 0;
+    SLIDING = 1;
 }
 
+enum DoorSwing{
+    SWING_RIGHT_IN  = 0;
+    SWING_LEFT_IN   = 1;
+    SWING_LEFT_OUT  = 2;
+    SWING_RIGHT_OUT = 3;
+}
+
+message ThTCHDoorData {
+    ThTCHBuiltElementData build_element = 1;
+
+    DoorSwing swing = 2;
+    DoorTypeOperation operation = 3;
+}

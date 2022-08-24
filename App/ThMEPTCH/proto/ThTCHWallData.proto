@@ -1,4 +1,5 @@
 ﻿syntax = "proto3";
+import "ThTCHGeometry.proto";
 import "ThTCHDoorData.proto";
 import "ThTCHWindowData.proto";
 import "ThTCHOpeningData.proto";

@@ -9,19 +9,19 @@ import "ThTCHOpeningData.proto";
 message ThTCHBuildingStoreyData {
     ThTCHRootData root = 1;
 
-    // 编号
+    // number
     string number = 2;
     
-    // 层高
+    // height
     double height = 3;
 
-    // 标高
+    // elevation
     double elevation = 4;
 
-    // 图框名称
+    // title block name
     string usage = 5;
 
-    // 楼层基点
+    // base point
     ThTCHPoint3d origin = 6;
 
     repeated ThTCHWallData walls = 7;
