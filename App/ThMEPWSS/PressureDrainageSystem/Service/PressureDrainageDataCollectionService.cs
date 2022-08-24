@@ -612,7 +612,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 ConnectBrokenLine(lines,/*pts*/new List<Point3d>() { }).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
                 var objs = new DBObjectCollection();
                 mergedLines.ForEach(o => objs.Add(o));
-                var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
+                //ThLaneLineMergeExtension.Merge会出现奇奇怪怪的结果
+                //var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
+                var processedLines = mergedLines;
                 RemoveDuplicatedAndInvalidLanes(ref processedLines);
                 processedLines = ConnectPerpLineInTolerance(processedLines, 100);
                 JoinLines(processedLines);

@@ -173,8 +173,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             List<List<Horizontal>> groupedlines = new ();
             List<Horizontal> lines = new();
             horizontalLines./*Where(e => e.Line.Length > 1).*/ForEach(o => lines.Add(o));
+            int count = 0;
             while (lines.Count > 0)
             {
+                count++;
                 List<Horizontal> linesOri = new ();
                 List<Horizontal> linesTest = new ();
                 lines.ForEach(o => linesTest.Add(o));
@@ -195,7 +197,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 _totalPipeLineUnitsByLayerByUnit[layer].Add(pipelineUnit);
             }
         }
-       
+
         /// <summary>
         /// 完善根据排水横管关系建立的排水单元组
         /// </summary>
@@ -805,11 +807,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     vec = vec.Negate();
                     Matrix3d mat = Matrix3d.Displacement(vec);
                     for (int j = 0; j < _totalPipeLineUnitsByLayerByUnit[i].Count; j++)
-                    {
+                    {                  
                         double cond_QuitCycle = 0;
                         var unit = _totalPipeLineUnitsByLayerByUnit[i][j];
                         var originalHors = unit.OriginalHorizontalPipes;
-                        if (originalHors == null) continue;
+                        if (originalHors == null)
+                        {
+                            if (i == layerNumber - 1)
+                                continue;
+                            else
+                            {
+                                unit.OriginalHorizontalPipes = new List<Horizontal>();
+                                originalHors = new List<Horizontal>();
+                            }
+                        }
                         var originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
                         originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(originalHors.Select(e => e.Line.Buffer(1)).ToCollection());
                         for (int k = 0; k < _pipeLineSystemUnits.Count; k++)
@@ -857,10 +868,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                     if (!curPipe.CanUsedToJudgeCrossLayer) continue;
                                     if (curPipe.IsGenerated) continue;
                                     var piperec = curPipe.Circle.Center.CreateSquare(curPipe.Circle.Diameter * 2);
-                                    if (originalHorsSpacialIndex.SelectCrossingPolygon(piperec).Count > 0)
+                                    if (originalHorsSpacialIndex.SelectCrossingPolygon(piperec).Count > 0 || originalHorsSpacialIndex.SelectAll().Count==0)
                                     {
                                         foreach (var parPipe in _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes)
-                                        {
+                                        {                                    
                                             var cond_distance = curPipe.Circle.Center.TransformBy(mat).DistanceTo(parPipe.Circle.Center) < tolSearchVertPipe;
                                             var id_curpipe = curPipe.Identifier == null ? "" : curPipe.Identifier;
                                             var id_parpipe = parPipe.Identifier == null ? "" : parPipe.Identifier;

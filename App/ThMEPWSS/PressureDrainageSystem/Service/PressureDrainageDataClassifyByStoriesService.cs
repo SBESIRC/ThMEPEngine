@@ -88,7 +88,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
 
                 for (int j = 0; j < floorNumber; j++)
                 {
-                    var s = Utils.PressureDrainageUtils.AnalysisPointList(CollectDataService.CollectedData.SubmergedPumps.Select(e => ((Extents3d)(e.Extents.Bounds)).MaxPoint).ToList());
+                    //var s = Utils.PressureDrainageUtils.AnalysisPointList(CollectDataService.CollectedData.SubmergedPumps.Select(e => ((Extents3d)(e.Extents.Bounds)).MaxPoint).ToList());
                     if (Algorithms.IsPointIn(extendList[j], pump.Extents.GetCenter()))
                     {
                         cond_QuitCycle += 1;
