@@ -109,6 +109,7 @@
     <Compile Include="FloorHeatingCoil\Heating\RegionModel.cs" />
     <Compile Include="FloorHeatingCoil\Heating\Run.cs" />
     <Compile Include="FloorHeatingCoil\Heating\Tools.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\UserInteraction.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingCoilSetting.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingRoom.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />

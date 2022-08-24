@@ -111,6 +111,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public double TotalLength = -1;
         public double Independent = 0;
 
+        //输出结果
+        public List<Polyline> ResultPolys = new List<Polyline>();
+
         //
         public List<int> DoorList = new List<int>();
 

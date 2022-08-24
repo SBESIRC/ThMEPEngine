@@ -15,6 +15,8 @@ using Dreambuild.AutoCAD;
 
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
+using ThMEPHVAC.FloorHeatingCoil.Data;
+using ThMEPHVAC.FloorHeatingCoil.Model;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
@@ -33,20 +35,153 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         
 
 
+        ///接口临时变量
+        public int MainRegionId = -1;
+        public List<List<Connection>> RegionConnection;
+        public List<List<int>> RegionGraphList;
+        public List<Polyline> RegionObbs;
+
+        //C
+        public int LeftRightIndex = 0;
+
+
         public UserInteraction() 
         {
             
         }
 
-        public void Pipeline() 
+
+        //输入
+
+        //List<List<int>>
+        public void PipelineA(ThRoomSetModel roomSet) 
         {
+            RawData singleRawdata = new RawData(roomSet);
+            DataPreprocess dataPreprocess = new DataPreprocess(singleRawdata);
+            dataPreprocess.Pipeline();
+            RegionConnection = dataPreprocess.RegionConnection;
+            MainRegionId = dataPreprocess.MainRegionId;
+            RegionObbs = dataPreprocess.RegionObbs;
+            if (MainRegionId == -1) 
+            {
+                MainRegionId = 0;
+            }
+
+            BuildRegionGraphList();
+        }
+
+        public void BuildRegionGraphList() 
+        {
+            List<int> remainRegion = new List<int>();
+            for (int i = 0; i < RegionObbs.Count; i++) 
+            {
+                remainRegion.Add(i);
+            }
+
+            List<int> tmpList = new List<int>();
+            Queue<int> regionQ = new Queue<int>();
+            regionQ.Enqueue(MainRegionId);
+            tmpList.Add(MainRegionId);
+            remainRegion.Remove(MainRegionId);
+            while (regionQ.Count > 0) 
+            {
+                int nowId = regionQ.Dequeue();
+                for (int i = 0; i < RegionConnection[nowId].Count; i++) 
+                {
+                    int newId = RegionConnection[nowId][i].RegionId;
+                    if (remainRegion.Contains(newId)) 
+                    {
+                        tmpList.Add(newId);
+                        remainRegion.Remove(newId);
+                        regionQ.Enqueue(newId);
+                    }
+                }
+            }
+            RegionGraphList.Add(tmpList);
+            
+           
+            while (remainRegion.Count > 0) 
+            {
+                tmpList = new List<int>();
+                Queue<int> regionQ2 = new Queue<int>();
+                regionQ2.Enqueue(remainRegion[0]);
+                tmpList.Add(remainRegion[0]);
+                remainRegion.RemoveAt(0);
+
+
+                while (regionQ2.Count > 0)
+                {
+                    int nowId = regionQ2.Dequeue();
+                    for (int i = 0; i < RegionConnection[nowId].Count; i++)
+                    {
+                        int newId = RegionConnection[nowId][i].RegionId;
+                        if (remainRegion.Contains(newId))
+                        {
+                            tmpList.Add(newId);
+                            remainRegion.Remove(newId);
+                            regionQ2.Enqueue(newId);
+                        }
+                    }
+                }
+                RegionGraphList.Add(tmpList);
+            }
+        }
+
+        public void PipelineB(ThRoomSetModel roomSet) 
+        {
+            //数据处理
+            RawData singleRawdata = new RawData(roomSet);
+            DataPreprocess dataPreprocess = new DataPreprocess(singleRawdata);
+            dataPreprocess.Pipeline();
+
+            //分配
+
+
+            //if (!Parameter.PublicRegionConstraint &&
+            //    !Parameter.AuxiliaryRoomConstraint &&
+            //    !Parameter.IndependentRoomConstraint)
+            //{
+            //    DistributionService distributionService = new DistributionService();
+            //    distributionService.Pipeline();
+            //}
+            //else { }
+
+            //DistributionService2 distributionService2 = new DistributionService2();
+            //distributionService2.Pipeline();
+
+            DistributionService3 distributionService3 = new DistributionService3();
+            distributionService3.Pipeline();
+
+            //寻找出入口
+            FindPointService findPointService = new FindPointService();
+            findPointService.Pipeline();
+
+            //
+            DrawPipe drawPipe = new DrawPipe();
+            drawPipe.Pipeline();
+        }
+
+        public void PipelineC() 
+        {
+            LeftRightIndex = 0;
+            //Update
             CreateTmpPipeList();
             CreateNowTree();
             CompleteTmpPipeList();
             SaveResults();
+
+            //管道分配
+            DistributionService3 distributionService3 = new DistributionService3();
+            distributionService3.Pipeline();
+
+            //寻找出入口
+            FindPointService findPointService = new FindPointService();
+            findPointService.Pipeline();
+
+            //绘制管道
+            DrawPipe drawPipe = new DrawPipe();
+            drawPipe.Pipeline();
         }
-
-
 
         public void CreateTmpPipeList() 
         {
@@ -159,6 +294,51 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 TmpPipeList[i].Regularization(SingleTopoTree, RegionToNode);
             }
+
+            GetTopoTreeNodeLeftRightIndex(SingleTopoTree, RegionToNode, SingleTopoTree[0]);
+            TmpPipeList = PipeListReSort(TmpPipeList, SingleTopoTree, RegionToNode);
+        }
+
+        public void GetTopoTreeNodeLeftRightIndex(List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree, TopoTreeNode topoTree)
+        {
+            int left = -1;
+            int right = -1;
+            for (int i = 0; i < topoTree.ChildIdList.Count; i++)
+            {
+                int childRegionId = topoTree.ChildIdList[i];
+                TopoTreeNode childTree = treeList[regionToTree[childRegionId]];
+                GetTopoTreeNodeLeftRightIndex(treeList, regionToTree, childTree);
+
+                if (left != -1)
+                {
+                    left = Math.Min(childTree.LeftTopoIndex, left);
+                }
+                else
+                {
+                    left = childTree.LeftTopoIndex;
+                }
+                right = Math.Max(childTree.RightTopoIndex, right);
+            }
+
+            if (topoTree.ChildIdList.Count == 0)
+            {
+                left = LeftRightIndex;
+                right = LeftRightIndex;
+                LeftRightIndex++;
+            }
+
+            topoTree.LeftTopoIndex = left;
+            topoTree.RightTopoIndex = right;
+        }
+
+        public List<TmpPipe> PipeListReSort(List<TmpPipe> tmpPipes, List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree)
+        {
+            tmpPipes.Sort((a, b) =>
+            {
+                return TmpPipe.GetLeftRight(a, b, treeList, regionToTree);
+            });
+
+            return tmpPipes;
         }
 
         ////保存结果

@@ -65,6 +65,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
 
         }
+
+        public void Clear() 
+        {
+            RegionIndex = null;
+            RegionList = null;
+            DoorList = null;
+            DoorToDoorDistanceMap = null;
+            RegionConnection = null;
+            PipeList = null;
+            DoorPipeToPointMap = null;
+        }
     }
 
     class PublicValue

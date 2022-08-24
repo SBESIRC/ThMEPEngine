@@ -1250,6 +1250,25 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             ProcessedData.DoorToDoorDistanceMap = DoorToDoorDistanceMap;
             ProcessedData.RegionConnection = RegionConnection;
         }
+
+
+
+
+        //接口
+        public void PipelineA() 
+        {
+            //读入数据
+            ReadPureData();
+            MainRegionId = FindMainRegion();
+
+            //处理障碍物
+            //RemoveObstacles();
+
+            //寻找连通性
+            FindConnectivity1(RegionObbs, Door1Obbs);
+            FindConnectivity2(RegionObbs, Door2Obbs, Door2Line);
+        }
+
     }
 
     class Connection 

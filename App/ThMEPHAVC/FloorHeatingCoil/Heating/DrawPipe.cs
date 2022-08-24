@@ -491,7 +491,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void SaveResults()
         {
-
+            for (int i = 0; i < FilletedPipeList.Count; i++) 
+            {
+                SinglePipeList[i].ResultPolys.Add(FilletedPipeList[i]);
+            }
         }
     }
 

@@ -126,7 +126,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     intersectWayCalculator.Calculate(i, true);
                 for (int i = pipe_inputs.Count - 1; i > main_index; --i)
                     intersectWayCalculator.Calculate(i, false);
-                intersectWayCalculator.Calculate(main_index, true);
+                if(main_index>=0)
+                    intersectWayCalculator.Calculate(main_index, true);
             }
             shortest_way = intersectWayCalculator.shortest_way;
             // 保存非主导管线计算结果

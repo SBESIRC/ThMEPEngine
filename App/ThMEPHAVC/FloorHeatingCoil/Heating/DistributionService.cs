@@ -66,6 +66,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //优化
             Optimization();
 
+            //排序测试
+            GetTopoTreeNodeLeftRightIndex(SingleTopoTree, RegionToNode ,SingleTopoTree[0]);
+            TmpPipeList = PipeListReSort(TmpPipeList, SingleTopoTree, RegionToNode);
+
             //保存结果
             SaveResults();
 
@@ -1169,8 +1173,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 int childRegionId = topoTree.ChildIdList[i];
                 TopoTreeNode childTree = treeList[regionToTree[childRegionId]];
                 GetTopoTreeNodeLeftRightIndex(treeList, regionToTree, childTree);
-                left = Math.Min(childTree.LeftTopoIndex, left);
-                right = Math.Min(childTree.RightTopoIndex, left);
+
+                if (left != -1)
+                {
+                    left = Math.Min(childTree.LeftTopoIndex, left);
+                }
+                else 
+                {
+                    left = childTree.LeftTopoIndex;
+                }
+                right = Math.Max(childTree.RightTopoIndex, right);
             }
 
             if (topoTree.ChildIdList.Count == 0) 
@@ -1184,12 +1196,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             topoTree.RightTopoIndex = right;
         }
 
-        public void PipeListReSort(List<TmpPipe> tmpPipes, List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree) 
+        public List<TmpPipe> PipeListReSort(List<TmpPipe> tmpPipes, List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree) 
         {
             tmpPipes.Sort((a,b) =>
             {
                 return TmpPipe.GetLeftRight(a,b,treeList,regionToTree);
             });
+
+            return tmpPipes;
         }
     }
 

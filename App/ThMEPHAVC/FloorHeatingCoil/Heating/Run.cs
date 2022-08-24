@@ -57,8 +57,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 //}
                 //else { }
 
-                //DistributionService2 distributionService2 = new DistributionService2();
-                //distributionService2.Pipeline();
+                //DistributionService distributionService = new DistributionService();
+                //distributionService.Pipeline();
 
                 DistributionService3 distributionService3 = new DistributionService3();
                 distributionService3.Pipeline();
