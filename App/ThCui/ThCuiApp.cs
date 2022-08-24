@@ -208,8 +208,10 @@ namespace TianHua.AutoCAD.ThCui
                 case "W":
                     Process.Start("https://short.yunxuetang.cn/sWkg6fbU");
                     break;
-                case "A":
                 case "S":
+                    Process.Start("https://short.yunxuetang.cn/WY9DyqRy");
+                    break;
+                case "A":
                 default:
                     break;
             }

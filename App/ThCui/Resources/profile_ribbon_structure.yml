@@ -13,7 +13,7 @@ panels:
       - text: ""
         items:
           - text: "视频教程"
-            attributes: { "IsVisible": false, "IsEnabled": false }
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlPRECONDITION"
     name: "PRECONDITION"
