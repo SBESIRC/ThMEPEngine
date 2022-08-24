@@ -67,16 +67,20 @@ namespace ThMEPWSS.Pipe.Service
                     ThTagParametersService.blockCollection.Add(acadDatabase.Element<BlockReference>(o.ObjectId));
                 });
                 Read(engine.Elements.Cast<ThWStoreys>().Select(o => o.ObjectId).ToObjectIdCollection());
-            }           
+            }
         }
         private static List<Tuple<string, string>> GetSortList(List<Tuple<string, string>> names)
         {
-            for (int i=0;i< names.Count-1;i++)
+            for (int i = 0; i < names.Count - 1; i++)
             {
-                for(int j=i;j< names.Count;j++)
+                for (int j = i; j < names.Count; j++)
                 {
-                    Tuple<string, string> value = Tuple.Create("","");
-                    if (int.Parse(names[i].Item1.Trim('B'))< int.Parse(names[j].Item1.Trim('B')))
+                    Tuple<string, string> value = Tuple.Create("", "");
+                    var numerical_i = double.Parse(names[i].Item1.Trim(new char[] { 'B', 'M' }));
+                    numerical_i = names[i].Item1.Contains("M") ? numerical_i + 0.5 : numerical_i;
+                    var numerical_j = double.Parse(names[j].Item1.Trim(new char[] { 'B', 'M' }));
+                    numerical_j = names[j].Item1.Contains("M") ? numerical_j + 0.5 : numerical_j;
+                    if (numerical_i < numerical_j)
                     {
                         value = names[i];
                         names[i] = names[j];
@@ -87,7 +91,7 @@ namespace ThMEPWSS.Pipe.Service
             return names;
         }
 
-        private static List<Tuple<string,string>> DivideCharacter(List<string> names,string floor)
+        private static List<Tuple<string, string>> DivideCharacter(List<string> names, string floor)
         {
             var dividesNames = new List<Tuple<string, string>>();
             foreach (string name in names)
