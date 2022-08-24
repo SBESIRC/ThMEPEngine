@@ -25,7 +25,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
         SprinklerCheckersUI uiSprinklerCheckers;
-        SprinklerConnectionUI uiSprinklerConnection;
         FirstFloorDrainagePlaneUI floorDrainagePlaneUI;
         uiStoreyFrame uiLCKX;
         public void Initialize()

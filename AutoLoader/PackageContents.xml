@@ -438,6 +438,7 @@
                 <Command Local="THXHSYH" Global="THXHSYH" />
                 <Command Local="THHXDYZC" Global="THHXDYZC" />
                 <Command Local="THDXJSXT" Global="THDXJSXT" />
+                <Command Local="THLCKXUI" Global="THLCKXUI" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -471,6 +472,7 @@
                 <Command Local="THXHSYH" Global="THXHSYH" />
                 <Command Local="THHXDYZC" Global="THHXDYZC" />
                 <Command Local="THDXJSXT" Global="THDXJSXT" />
+                <Command Local="THLCKXUI" Global="THLCKXUI" />
             </Commands>
         </ComponentEntry>
     </Components>
