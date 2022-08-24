@@ -1,62 +1,75 @@
-﻿using System.Windows.Input;
-using AcHelper;
-using AcHelper.Commands;
+﻿using AcHelper;
 using Linq2Acad;
-using ThCADExtension;
-using Autodesk.AutoCAD.DatabaseServices;
-using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using CommunityToolkit.Mvvm.Input;
+using DotNetARX;
+using AcHelper.Commands;
+using System.Windows.Input;
 using ThMEPWSS.Pipe;
-using ThMEPWSS.Command;
+using ThMEPWSS.Pipe.Service;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPWSS.ViewModel
 {
-    public class ThStoreyFrameVM 
+    public class ThStoreyFrameVM : ObservableObject
     {
         public ThStoreyFrameVM()
         {
-            //
+            DrawCellSplitLineCmd = new RelayCommand(DrawCellSplit);
+            InsertStoreyFrameCmd = new RelayCommand(InsertStoreyFrame);
+            DrawHouseTypeSplitLineCmd = new RelayCommand(DrawHouseTypeSplitLine);
         }
-        public ICommand InsertStoreyFrameCmd => new RelayCommand(InsertStoreyFrame);
-        
+
+        public ICommand DrawCellSplitLineCmd { get; }
+        public ICommand InsertStoreyFrameCmd { get; }
+        public ICommand DrawHouseTypeSplitLineCmd { get; }
+
         private void InsertStoreyFrame()
         {
-            if(acadApp.DocumentManager.Count>0)
+            if (acadApp.DocumentManager.Count > 0)
             {
                 SetFocusToDwgView();
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THLCKX");
-            }            
+            }
         }
-
-        public ICommand DrawHouseTypeSplitLineCmd => new RelayCommand(DrawHouseTypeSplitLine);
 
         private void DrawHouseTypeSplitLine()
         {
             if (acadApp.DocumentManager.Count > 0)
             {
                 SetFocusToDwgView();
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THHTSL");
-            } 
-        }
 
-        public ICommand DrawCellSplitLineCmd => new RelayCommand(DrawCellSplit);
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    ThInsertStoreyFrameService.ImportHouseTypeSplitLineLayer();
+                    acdb.Database.SetCurrentLayer(ThWPipeCommon.HouseTypeSplitLineLayer);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
+        }
 
         private void DrawCellSplit()
         {
             if (acadApp.DocumentManager.Count > 0)
             {
                 SetFocusToDwgView();
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THCSL");
-            }           
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    ThInsertStoreyFrameService.ImportCellSplitLineLayer();
+                    acdb.Database.SetCurrentLayer(ThWPipeCommon.CellSplitLineLayer);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
         }
+
         private void SetFocusToDwgView()
         {
-            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
-#if ACAD2012
-            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
-#else
             Active.Document.Window.Focus();
-#endif
         }
     }
 }
