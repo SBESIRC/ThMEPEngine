@@ -1,26 +1,19 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using Google.Protobuf.Collections;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
+using GeometryExtensions;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPTCH.proto
+namespace ThMEPTCH.CAD
 {
-    /// <summary>
-    /// Google-ProtoBuf 扩展
-    /// </summary>
-    public static class GoogleProtoBufExtensions
+    public static class ThTCHPolylineExtension
     {
         public static ThTCHPolyline ToTCHPolyline(this Polyline polyline)
         {
             ThTCHPolyline tchPolyline = new ThTCHPolyline();
-            if(polyline.IsNull())
+            if (polyline.IsNull())
                 return tchPolyline;
             tchPolyline.Points.Add(polyline.StartPoint.ToTCHPoint());
             var segments = new PolylineSegmentCollection(polyline);
@@ -30,7 +23,7 @@ namespace ThMEPTCH.proto
                 var segment = segments[k];
                 var tchSegment = new ThTCHSegment();
                 tchSegment.Index.Add(ptIndex);
-                if(k == segments.Count - 1 && polyline.Closed)
+                if (k == segments.Count - 1 && polyline.Closed)
                 {
                     tchSegment.Index.Add(0);
                     tchPolyline.Segments.Add(tchSegment);
@@ -80,8 +73,8 @@ namespace ThMEPTCH.proto
                 {
                     var list = segment.Index.ToList();
                     var arc = ThArcExtension.CreateArcWith3PointsOrder(
-                        tchPolyline.Points[int.Parse(list[0].ToString())].ToPoint3d(), 
-                        tchPolyline.Points[int.Parse(list[1].ToString())].ToPoint3d(), 
+                        tchPolyline.Points[int.Parse(list[0].ToString())].ToPoint3d(),
+                        tchPolyline.Points[int.Parse(list[1].ToString())].ToPoint3d(),
                         tchPolyline.Points[int.Parse(list[2].ToString())].ToPoint3d());
                     p.AddVertexAt(index++, tchPolyline.Points[int.Parse(list[0].ToString())].ToPoint2d(), arc.GetArcBulge(arc.StartPoint), 0, 0);
                 }
@@ -103,6 +96,7 @@ namespace ThMEPTCH.proto
         {
             return new Point2d(point.X, point.Y);
         }
+
         public static Point3d ToPoint3d(this ThTCHPoint3d point)
         {
             return new Point3d(point.X, point.Y, point.Z);

@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
-using ThMEPTCH.proto;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
 

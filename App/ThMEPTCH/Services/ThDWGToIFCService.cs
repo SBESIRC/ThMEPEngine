@@ -12,7 +12,6 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
 using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
-using ThMEPTCH.proto;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
