@@ -77,9 +77,9 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     Tuple<string, string> value = Tuple.Create("", "");
                     var numerical_i = double.Parse(names[i].Item1.Trim(new char[] { 'B', 'M' }));
-                    numerical_i = names[i].Item1.Contains("M") ? numerical_i + 0.5 : numerical_i;
+                    numerical_i = names[i].Item1.Contains("M") ? numerical_i - 0.5 : numerical_i;
                     var numerical_j = double.Parse(names[j].Item1.Trim(new char[] { 'B', 'M' }));
-                    numerical_j = names[j].Item1.Contains("M") ? numerical_j + 0.5 : numerical_j;
+                    numerical_j = names[j].Item1.Contains("M") ? numerical_j - 0.5 : numerical_j;
                     if (numerical_i < numerical_j)
                     {
                         value = names[i];
