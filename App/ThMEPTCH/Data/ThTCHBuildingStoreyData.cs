@@ -110,7 +110,7 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   public const int NumberFieldNumber = 2;
   private string number_ = "";
   /// <summary>
-  /// 编号
+  /// number
   /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -125,7 +125,7 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   public const int HeightFieldNumber = 3;
   private double height_;
   /// <summary>
-  /// 层高
+  /// height
   /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -140,7 +140,7 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   public const int ElevationFieldNumber = 4;
   private double elevation_;
   /// <summary>
-  /// 标高
+  /// elevation
   /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -155,7 +155,7 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   public const int UsageFieldNumber = 5;
   private string usage_ = "";
   /// <summary>
-  /// 图框名称
+  /// title block name
   /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -170,7 +170,7 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   public const int OriginFieldNumber = 6;
   private global::ThTCHPoint3d origin_;
   /// <summary>
-  /// 楼层基点
+  /// base point
   /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]

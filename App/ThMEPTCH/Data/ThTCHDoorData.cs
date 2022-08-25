@@ -23,17 +23,37 @@ public static partial class ThTCHDoorDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChNUaFRDSERvb3JEYXRhLnByb3RvGhtUaFRDSEJ1aWx0RWxlbWVudERhdGEu",
-          "cHJvdG8iPgoNVGhUQ0hEb29yRGF0YRItCg1idWlsZF9lbGVtZW50GAEgASgL",
-          "MhYuVGhUQ0hCdWlsdEVsZW1lbnREYXRhYgZwcm90bzM="));
+          "cHJvdG8igAEKDVRoVENIRG9vckRhdGESLQoNYnVpbGRfZWxlbWVudBgBIAEo",
+          "CzIWLlRoVENIQnVpbHRFbGVtZW50RGF0YRIZCgVzd2luZxgCIAEoDjIKLkRv",
+          "b3JTd2luZxIlCglvcGVyYXRpb24YAyABKA4yEi5Eb29yVHlwZU9wZXJhdGlv",
+          "biorChFEb29yVHlwZU9wZXJhdGlvbhIJCgVTV0lORxAAEgsKB1NMSURJTkcQ",
+          "ASpbCglEb29yU3dpbmcSEgoOU1dJTkdfUklHSFRfSU4QABIRCg1TV0lOR19M",
+          "RUZUX0lOEAESEgoOU1dJTkdfTEVGVF9PVVQQAhITCg9TV0lOR19SSUdIVF9P",
+          "VVQQA2IGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHBuiltElementDataReflection.Descriptor, },
-        new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHDoorData), global::ThTCHDoorData.Parser, new[]{ "BuildElement" }, null, null, null, null)
+        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::DoorTypeOperation), typeof(global::DoorSwing), }, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHDoorData), global::ThTCHDoorData.Parser, new[]{ "BuildElement", "Swing", "Operation" }, null, null, null, null)
         }));
   }
   #endregion
 
 }
+#region Enums
+public enum DoorTypeOperation {
+  [pbr::OriginalName("SWING")] Swing = 0,
+  [pbr::OriginalName("SLIDING")] Sliding = 1,
+}
+
+public enum DoorSwing {
+  [pbr::OriginalName("SWING_RIGHT_IN")] SwingRightIn = 0,
+  [pbr::OriginalName("SWING_LEFT_IN")] SwingLeftIn = 1,
+  [pbr::OriginalName("SWING_LEFT_OUT")] SwingLeftOut = 2,
+  [pbr::OriginalName("SWING_RIGHT_OUT")] SwingRightOut = 3,
+}
+
+#endregion
+
 #region Messages
 public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -70,6 +90,8 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThTCHDoorData(ThTCHDoorData other) : this() {
     buildElement_ = other.buildElement_ != null ? other.buildElement_.Clone() : null;
+    swing_ = other.swing_;
+    operation_ = other.operation_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -91,6 +113,30 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
     }
   }
 
+  /// <summary>Field number for the "swing" field.</summary>
+  public const int SwingFieldNumber = 2;
+  private global::DoorSwing swing_ = global::DoorSwing.SwingRightIn;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::DoorSwing Swing {
+    get { return swing_; }
+    set {
+      swing_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "operation" field.</summary>
+  public const int OperationFieldNumber = 3;
+  private global::DoorTypeOperation operation_ = global::DoorTypeOperation.Swing;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::DoorTypeOperation Operation {
+    get { return operation_; }
+    set {
+      operation_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -107,6 +153,8 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
       return true;
     }
     if (!object.Equals(BuildElement, other.BuildElement)) return false;
+    if (Swing != other.Swing) return false;
+    if (Operation != other.Operation) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -115,6 +163,8 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
   public override int GetHashCode() {
     int hash = 1;
     if (buildElement_ != null) hash ^= BuildElement.GetHashCode();
+    if (Swing != global::DoorSwing.SwingRightIn) hash ^= Swing.GetHashCode();
+    if (Operation != global::DoorTypeOperation.Swing) hash ^= Operation.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -137,6 +187,14 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
       output.WriteRawTag(10);
       output.WriteMessage(BuildElement);
     }
+    if (Swing != global::DoorSwing.SwingRightIn) {
+      output.WriteRawTag(16);
+      output.WriteEnum((int) Swing);
+    }
+    if (Operation != global::DoorTypeOperation.Swing) {
+      output.WriteRawTag(24);
+      output.WriteEnum((int) Operation);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -151,6 +209,14 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
       output.WriteRawTag(10);
       output.WriteMessage(BuildElement);
     }
+    if (Swing != global::DoorSwing.SwingRightIn) {
+      output.WriteRawTag(16);
+      output.WriteEnum((int) Swing);
+    }
+    if (Operation != global::DoorTypeOperation.Swing) {
+      output.WriteRawTag(24);
+      output.WriteEnum((int) Operation);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -163,6 +229,12 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
     int size = 0;
     if (buildElement_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(BuildElement);
+    }
+    if (Swing != global::DoorSwing.SwingRightIn) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Swing);
+    }
+    if (Operation != global::DoorTypeOperation.Swing) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Operation);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -181,6 +253,12 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
         BuildElement = new global::ThTCHBuiltElementData();
       }
       BuildElement.MergeFrom(other.BuildElement);
+    }
+    if (other.Swing != global::DoorSwing.SwingRightIn) {
+      Swing = other.Swing;
+    }
+    if (other.Operation != global::DoorTypeOperation.Swing) {
+      Operation = other.Operation;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -204,6 +282,14 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
           input.ReadMessage(BuildElement);
           break;
         }
+        case 16: {
+          Swing = (global::DoorSwing) input.ReadEnum();
+          break;
+        }
+        case 24: {
+          Operation = (global::DoorTypeOperation) input.ReadEnum();
+          break;
+        }
       }
     }
   #endif
@@ -224,6 +310,14 @@ public sealed partial class ThTCHDoorData : pb::IMessage<ThTCHDoorData>
             BuildElement = new global::ThTCHBuiltElementData();
           }
           input.ReadMessage(BuildElement);
+          break;
+        }
+        case 16: {
+          Swing = (global::DoorSwing) input.ReadEnum();
+          break;
+        }
+        case 24: {
+          Operation = (global::DoorTypeOperation) input.ReadEnum();
           break;
         }
       }
