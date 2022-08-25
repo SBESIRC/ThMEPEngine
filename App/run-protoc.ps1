@@ -19,7 +19,7 @@ Task Compile {
     foreach($proto in Get-ChildItem "$path" -Recurse -Include "*.proto") {
         exec {
             if ($script:out -eq "csharp") {
-                & $protoc --csharp_out=".\" (Get-Item $proto).Name
+                & $protoc --csharp_out="..\Data\" (Get-Item $proto).Name
             } elseif ($script:out -eq "ruby") {
                 & $protoc --ruby_out=".\" (Get-Item $proto).Name
             }

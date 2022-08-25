@@ -89,6 +89,15 @@
     <Compile Include="CAD\ThTCHWindowExtractionVisitor.cs" />
     <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
+    <Compile Include="Data\ThTCHBuildingData.cs" />
+    <Compile Include="Data\ThTCHBuildingStoreyData.cs" />
+    <Compile Include="Data\ThTCHBuiltElementData.cs" />
+    <Compile Include="Data\ThTCHDoorData.cs" />
+    <Compile Include="Data\ThTCHGeometry.cs" />
+    <Compile Include="Data\ThTCHOpeningData.cs" />
+    <Compile Include="Data\ThTCHRootData.cs" />
+    <Compile Include="Data\ThTCHWallData.cs" />
+    <Compile Include="Data\ThTCHWindowData.cs" />
     <Compile Include="Model\SurrogateModel\Matrix3DSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Point3DCollectionSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Point3DSurrogate.cs" />
@@ -119,6 +128,7 @@
     <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Model\ThTCHWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="proto\GoogleProtoBufExtensions.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThMEPTCHTool.cs" />
     <Compile Include="Services\ThTCHArchDBService.cs" />

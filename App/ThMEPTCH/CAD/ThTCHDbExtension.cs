@@ -237,7 +237,7 @@ namespace ThMEPTCH.CAD
             {
                 return ThTCHDbCommon.WindowTypeMapping[name];
             }
-            throw new NotSupportedException();
+            return WindowTypeEnum.Window;
         }
 
         private static SwingEnum GetSwing(TypedValue tv)

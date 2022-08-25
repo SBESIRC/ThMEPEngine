@@ -58,6 +58,9 @@
     <Compile Include="ThTGL2IFCDWGService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf">
+      <Version>3.21.5</Version>
+    </PackageReference>
     <PackageReference Include="Xbim.Essentials">
       <Version>5.1.341</Version>
     </PackageReference>

@@ -14,6 +14,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.Services;
 using ThMEPTCH.Model.SurrogateModel;
 using CADApp = Autodesk.AutoCAD.ApplicationServices;
+using Google.Protobuf;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace ThMEPIFC
 {
@@ -390,6 +393,74 @@ namespace ThMEPIFC
             catch
             {
                 Active.Database.GetEditor().WriteMessage($"合模失败!");
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THSUPush", CommandFlags.Modal)]
+        public void THSUPush()
+        {
+            var isDB = (Convert.ToInt16(CADApp.Application.GetSystemVariable("USERR3")) == 1);
+            var filePath = "";
+            if (isDB)
+            {
+                // 拾取天正 DB文件
+                filePath = OpenDBFile();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+            }
+            var startDate = System.DateTime.Now;
+            // 读入并解析TGL XML文件
+            var service = new ThDWGToIFCService(filePath);
+            var project = service.DWGToProjectData(true, false);
+            if (project == null)
+            {
+                return;
+            }
+            try
+            {
+                CancellationTokenSource CTS = new CancellationTokenSource();
+                CancellationToken Token = CTS.Token;
+                //这里有一个小坑，只有设置了PipeOptions.Asynchronous，管道才会接受取消令牌的取消请求，不然不会生效
+                var pipeServer = new NamedPipeServerStream("THSUPush_TestPipe", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                Task task = new Task(() =>
+                {
+                    try
+                    {
+                        pipeServer.WaitForConnection();
+                        project.WriteTo(pipeServer);
+
+                        pipeServer.Close();
+                        pipeServer.Dispose();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //线程被外部取消，说明等待连接超时
+                        pipeServer.Dispose();
+                    }
+                }, Token);
+                task.Start();
+                task.Wait(10000);
+                if (task.Status == TaskStatus.Running)
+                {
+                    CTS.Cancel();
+                    pipeServer.Close();
+                    pipeServer.Dispose();
+                    Active.Database.GetEditor().WriteMessage("未连接到SU ！\r\n");
+                }
+                else if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    Active.Database.GetEditor().WriteMessage("已成功发送数据至SU！\r\n");
+                }
+                else
+                {
+                    Active.Database.GetEditor().WriteMessage("其他异常 ！\r\n");
+                }
+            }
+            catch (IOException ioEx)
+            {
+                Active.Database.GetEditor().WriteMessage("Server 异常\r\n");
             }
         }
 
