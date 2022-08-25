@@ -245,7 +245,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                     {
                                         Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
                                         line.Layer = "AI-辅助";
-                                        line.Linetype = "DASH";
+                                        try
+                                        {
+                                            line.Linetype = "DASH";
+                                        }
+                                        catch { }
                                         line.ColorIndex = 123;//低饱和度蓝
                                         line.TransformBy(ucsmat);
                                         line.AddToCurrentSpace();
@@ -593,7 +597,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         Point3d pt = line.EndPoint.TransformBy(mat);
                         var k = new Line(line.StartPoint.TransformBy(ucsmat), line.EndPoint.TransformBy(ucsmat).TransformBy(Matrix3d.Displacement(vec_move)));
                         k.Layer = "AI-辅助";
-                        k.Linetype = "DASH";
+                        try { k.Linetype = "DASH"; }
+                        catch { }
                         k.ColorIndex = 13;//低饱和度梅红
                         k.AddToCurrentSpace();
                     }

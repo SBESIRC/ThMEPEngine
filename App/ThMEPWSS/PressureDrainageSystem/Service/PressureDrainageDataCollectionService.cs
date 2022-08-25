@@ -608,7 +608,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 this.CollectedData.SubmergedPumps.ForEach(o => pts.Add(o.Extents.Centroid()));
                 List<Line> mergedLines = new();
                 lines.ForEach(o => mergedLines.Add(o));
-                var s = AnalysisLineList(lines);
                 ConnectBrokenLine(lines,/*pts*/new List<Point3d>() { }).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
                 var objs = new DBObjectCollection();
                 mergedLines.ForEach(o => objs.Add(o));
