@@ -235,7 +235,8 @@ namespace TianHua.Hvac.UI
         }
         #endregion
 
-        [CommandMethod("TIANHUACAD", "THDNPG", CommandFlags.Modal)]
+        #region 地暖盘管
+        [CommandMethod("TIANHUACAD", "ThFloorHeatingCoilUI", CommandFlags.Modal)]
         public void THDNPG()
         {
             if (uiFloorHeatingCoil.Instance != null && uiFloorHeatingCoil.Instance.IsLoaded)
@@ -251,5 +252,6 @@ namespace TianHua.Hvac.UI
                 System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(uiFloorHeatingCoil.Instance);
         }
+        #endregion
     }
 }

@@ -54,6 +54,5 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         {
             Marks.ForEach(o => Transformer.Reset(o.Geometry));
         }
-
     }
 }

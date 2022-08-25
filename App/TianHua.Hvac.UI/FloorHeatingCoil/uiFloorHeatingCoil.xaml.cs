@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
     /// </summary>
     public partial class uiFloorHeatingCoil : ThCustomWindow
     {
-        FloorHeatingCoilViewModel CoilViewModel;
+        ThFloorHeatingCoilViewModel CoilViewModel;
         public static uiFloorHeatingCoil Instance;
 
         static uiFloorHeatingCoil()
@@ -44,41 +45,35 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
             this.MutexName = "THDNPG";
             if (CoilViewModel == null)
             {
-                CoilViewModel = new FloorHeatingCoilViewModel();
+                CoilViewModel = new ThFloorHeatingCoilViewModel();
             }
             DataContext = CoilViewModel;
         }
 
         private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            CoilViewModel.CleanSelectFrameAndData();
             e.Cancel = true;
             this.Hide();
         }
-
-        private void btnLayout_Click(object sender, RoutedEventArgs e)
+    }
+   
+    public class TrueFalseConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            FocusToCAD();
-            SaveSetting();
-
-            using (var cmd = new ThFloorHeatingCmd())
+            var s = (int)value;
+            return s == int.Parse(parameter.ToString());
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isChecked = (bool)value;
+            if (!isChecked)
             {
-                cmd.Execute();
+                return null;
             }
-        }
-
-        private void SaveSetting()
-        {
-            ThFloorHeatingCoilSetting.Instance.WithUI = true;
-        }
-
-        void FocusToCAD()
-        {
-            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
-#if ACAD2012
-                    Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
-#else
-            Active.Document.Window.Focus();
-#endif
+            return int.Parse(parameter.ToString());
         }
     }
+
 }

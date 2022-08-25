@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NetTopologySuite.Geometries;
+
+using Linq2Acad;
+using AcHelper;
+using DotNetARX;
 using NFox.Cad;
+
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
@@ -19,12 +23,11 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
 
 using ThMEPHVAC.Service;
 using ThMEPHVAC.FloorHeatingCoil.Model;
 using ThMEPHVAC.FloorHeatingCoil.Service;
-using Linq2Acad;
-using AcHelper;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Data
 {
@@ -37,13 +40,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public List<Polyline> FurnitureObstacleDataTemp { get; set; } = new List<Polyline>();
         public List<Line> RoomSeparateLine { get; set; } = new List<Line>();
         public List<BlockReference> WaterSeparatorData { get; set; } = new List<BlockReference>();
-        public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
-        public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
+        public List<BlockReference> BathRadiatorData { get; set; } = new List<BlockReference>();
+
+        //public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
+        //public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
 
         //----private
         private List<Polyline> Door { get; set; } = new List<Polyline>();
         private List<MPolygon> RoomBoundary { get; set; } = new List<MPolygon>();
         private List<ThFloorHeatingWaterSeparator> WaterSeparator { get; set; } = new List<ThFloorHeatingWaterSeparator>();
+        private List<ThFloorHeatingBathRadiator> BathRadiator { get; set; } = new List<ThFloorHeatingBathRadiator>();
         private List<Polyline> FurnitureObstacle { get; set; } = new List<Polyline>();
 
         //----output
@@ -56,17 +62,31 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         }
 
-        public void ProcessData()
+        //public void ProcessDataWithFrame()
+        //{
+        //    ProcessDoorData();
+        //    ProcessRoomData();
+        //    ProcessFurnitureObstacle();
+        //    ProcessWaterSeparator();
+        //    ProcessBathRadiator();
+        //    CleanSeparateLine();
+        //    GenerateLineToRoomBoundary();
+        //    var separateRooms = SeparateRoomWithLine();
+        //    CreateRoomSet(separateRooms);
+        //}
+
+        public void ProcessDataWithRoom(List<Polyline> selectFrames)
         {
             ProcessDoorData();
             ProcessRoomData();
             ProcessFurnitureObstacle();
             ProcessWaterSeparator();
+            ProcessBathRadiator();
+            SelectObjInRoom(selectFrames);
             CleanSeparateLine();
-
-            ProcessSeparateLine();
+            GenerateLineToRoomBoundary();
             var separateRooms = SeparateRoomWithLine();
-            CreateRoomSet(separateRooms);
+            CreateRoomSetInRoomFrames(separateRooms);
         }
 
         private void ProcessDoorData()
@@ -89,12 +109,21 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 }
             }
         }
+
         private void ProcessWaterSeparator()
         {
             foreach (var waterSeparator in WaterSeparatorData)
             {
                 var w = new ThFloorHeatingWaterSeparator(waterSeparator);
                 WaterSeparator.Add(w);
+            }
+        }
+        private void ProcessBathRadiator()
+        {
+            foreach (var bathRadiator in BathRadiatorData)
+            {
+                var b = new ThFloorHeatingBathRadiator(bathRadiator);
+                BathRadiator.Add(b);
             }
         }
 
@@ -160,10 +189,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         }
 
-        private void ProcessSeparateLine()
-        {
-            GenerateLineToRoomBoundary();
-        }
+        //private void ProcessSeparateLine()
+        //{
+        //    GenerateLineToRoomBoundary();
+        //}
 
         private void GenerateLineToRoomBoundary()
         {
@@ -282,38 +311,38 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             return newLine;
         }
 
-        private static double GetSuggestDist(Polyline room, List<DBText> roomSuggestDist)
-        {
-            var dist = 0;
-            var text = roomSuggestDist.Where(x => room.Contains(x.Position)).FirstOrDefault();
-            dist = ThGeomUtil.GetNumberInText(text);
-            return dist;
-        }
+        //private static double GetSuggestDist(Polyline room, List<DBText> roomSuggestDist)
+        //{
+        //    var dist = 0;
+        //    var text = roomSuggestDist.Where(x => room.Contains(x.Position)).FirstOrDefault();
+        //    dist = ThGeomUtil.GetNumberInText(text);
+        //    return dist;
+        //}
 
-        private List<MPolygon> SeparateRoomWithLineOri()
-        {
-            var boundary = new List<LineString>();
+        //private List<MPolygon> SeparateRoomWithLineOri()
+        //{
+        //    var boundary = new List<LineString>();
 
-            foreach (var room in RoomBoundary)
-            {
-                var bound = room.Shell().ToNTSLineString();
-                var holes = room.Holes().Select(x => x.ToNTSLineString());
-                boundary.Add(bound);
-                boundary.AddRange(holes);
-            }
+        //    foreach (var room in RoomBoundary)
+        //    {
+        //        var bound = room.Shell().ToNTSLineString();
+        //        var holes = room.Holes().Select(x => x.ToNTSLineString());
+        //        boundary.Add(bound);
+        //        boundary.AddRange(holes);
+        //    }
 
-            var separate = RoomSeparateLine.Select(x => x.ExtendLine(50)).ToList();
-            //DrawUtils.ShowGeometry(separate, "l0sepExtend", 1);
-            boundary.AddRange(separate.Select(x => x.ToNTSLineString()));
-            var separateRoom = boundary.GetPolygons();
-            var rooms = separateRoom.Select(x => x.ToDbEntity()).OfType<Entity>().ToList();
+        //    var separate = RoomSeparateLine.Select(x => x.ExtendLine(50)).ToList();
+        //    //DrawUtils.ShowGeometry(separate, "l0sepExtend", 1);
+        //    boundary.AddRange(separate.Select(x => x.ToNTSLineString()));
+        //    var separateRoom = boundary.GetPolygons();
+        //    var rooms = separateRoom.Select(x => x.ToDbEntity()).OfType<Entity>().ToList();
 
-            var newRoom = new List<MPolygon>();
-            newRoom.AddRange(rooms.OfType<MPolygon>());
-            newRoom.AddRange(rooms.OfType<Polyline>().Select(x => ThMPolygonTool.CreateMPolygon(x)));
+        //    var newRoom = new List<MPolygon>();
+        //    newRoom.AddRange(rooms.OfType<MPolygon>());
+        //    newRoom.AddRange(rooms.OfType<Polyline>().Select(x => ThMPolygonTool.CreateMPolygon(x)));
 
-            return newRoom;
-        }
+        //    return newRoom;
+        //}
 
         private List<Entity> SeparateRoomWithLine()
         {
@@ -329,7 +358,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             var sbService = new ThRoomSuperBoundaryProcessService();
             var separateSpaceObj = sbService.ProcessBoundary(obj, WithUI);
             var separateSpace = separateSpaceObj.OfType<Polyline>().ToList();
-            DrawUtils.ShowGeometry(separateSpace, "l0separateSpace", 1);
+            //DrawUtils.ShowGeometry(separateSpace, "l0separateSpace", 1);
 
             //清除太小的面
             separateSpace = separateSpace.Where(x => x.Area > Tol_Area).ToList();
@@ -338,9 +367,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             //清除重复
             var spIdx = new ThCADCoreNTSSpatialIndex(spaceObj);
             var areaObj = spIdx.SelectAll();
-           
+
             //造空间
-            ThMEPEngineCore.Service.ThNTSBufferService bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
+            var bufferService = new ThNTSBufferService();
             for (int i = 0; i < areaObj.Count; i++)
             {
                 areaObj[i] = bufferService.Buffer(areaObj[i] as Entity, -1);
@@ -403,50 +432,112 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             }
         }
 
-        private void CreateRoomSet(List<Entity> separateRoom)
+        //private void CreateRoomSet(List<Entity> separateRoom)
+        //{
+        //    var markExtractor = InputExtractors.Where(o => o is ThFloorHeatingRoomMarkExtractor).First() as ThFloorHeatingRoomMarkExtractor;
+
+        //    var objSelect = new DBObjectCollection();
+        //    Door.ForEach(x => objSelect.Add(x));
+        //    WaterSeparator.ForEach(x => objSelect.Add(x.OBB));
+        //    FurnitureObstacle.ForEach(x => objSelect.Add(x));
+        //    separateRoom.ForEach(x => objSelect.Add(x));
+        //    RoomSeparateLine.ForEach(x => objSelect.Add(x));
+
+        //    var objIndex = new ThCADCoreNTSSpatialIndex(objSelect);
+
+        //    foreach (var frame in RoomSetFrame)
+        //    {
+        //        var selectObj = objIndex.SelectCrossingPolygon(frame);
+        //        var door = Door.Where(x => selectObj.Contains(x)).ToList();
+        //        var waterSeparator = WaterSeparator.Where(x => selectObj.Contains(x.OBB)).FirstOrDefault();
+        //        var obstacle = FurnitureObstacle.Where(x => selectObj.Contains(x));
+        //        var room = separateRoom.Where(x => selectObj.Contains(x)).ToList();
+        //        var roomSeparateline = RoomSeparateLine.Where(x => selectObj.Contains(x));
+
+        //        //var hasHoleRoom = CreateRoomModel(room, markExtractor, RoomSuggestDist, out var roomList);
+        //        var hasHoleRoom = CreateRoomModel(room, out var roomList);
+
+        //        var roomset = new ThRoomSetModel();
+        //        roomset.Frame = frame;
+        //        roomset.Door.AddRange(door);
+        //        roomset.WaterSeparator = waterSeparator;
+        //        roomset.FurnitureObstacle.AddRange(obstacle);
+        //        roomset.RoomSeparateLine.AddRange(roomSeparateline);
+        //        roomset.Room.AddRange(roomList);
+        //        roomset.HasHoleRoom = hasHoleRoom;
+
+        //        if (roomset.HasHoleRoom == false)
+        //        {
+        //            RoomSet.Add(roomset);
+        //        }
+        //        else
+        //        {
+        //            WarningRoomSet.Add(roomset);
+        //        }
+        //    }
+        //}
+
+        private void CreateRoomSetInRoomFrames(List<Entity> separateRoom)
         {
-            var markExtractor = InputExtractors.Where(o => o is ThFloorHeatingRoomMarkExtractor).First() as ThFloorHeatingRoomMarkExtractor;
+            //var markExtractor = InputExtractors.Where(o => o is ThFloorHeatingRoomMarkExtractor).First() as ThFloorHeatingRoomMarkExtractor;
 
-            var objSelect = new DBObjectCollection();
-            Door.ForEach(x => objSelect.Add(x));
-            WaterSeparator.ForEach(x => objSelect.Add(x.OBB));
-            FurnitureObstacle.ForEach(x => objSelect.Add(x));
-            separateRoom.ForEach(x => objSelect.Add(x));
-            RoomSeparateLine.ForEach(x => objSelect.Add(x));
+            //var hasHoleRoom = CreateRoomModel(separateRoom, markExtractor, RoomSuggestDist, out var roomList);
+            var hasHoleRoom = CreateRoomModel(separateRoom, out var roomList);
+            var roomset = new ThRoomSetModel();
+            roomset.Door.AddRange(Door);
+            roomset.WaterSeparator = WaterSeparator.FirstOrDefault();
+            roomset.BathRadiators.AddRange(BathRadiator);
+            roomset.FurnitureObstacle.AddRange(FurnitureObstacle);
+            roomset.RoomSeparateLine.AddRange(RoomSeparateLine);
+            roomset.Room.AddRange(roomList);
+            roomset.HasHoleRoom = hasHoleRoom;
 
-            var objIndex = new ThCADCoreNTSSpatialIndex(objSelect);
-
-            foreach (var frame in RoomSetFrame)
+            if (roomset.HasHoleRoom == false)
             {
-                var selectObj = objIndex.SelectCrossingPolygon(frame);
-                var door = Door.Where(x => selectObj.Contains(x)).ToList();
-                var waterSeparator = WaterSeparator.Where(x => selectObj.Contains(x.OBB)).FirstOrDefault();
-                var obstacle = FurnitureObstacle.Where(x => selectObj.Contains(x));
-                var room = separateRoom.Where(x => selectObj.Contains(x)).ToList();
-                var roomSeparateline = RoomSeparateLine.Where(x => selectObj.Contains(x));
-
-                var hasHoleRoom = CreateRoomModel(room, markExtractor, RoomSuggestDist, out var roomList);
-
-                var roomset = new ThRoomSetModel();
-                roomset.Frame = frame;
-                roomset.Door.AddRange(door);
-                roomset.WaterSeparator = waterSeparator;
-                roomset.FurnitureObstacle.AddRange(obstacle);
-                roomset.RoomSeparateLine.AddRange(roomSeparateline);
-                roomset.Room.AddRange(roomList);
-
-                if (hasHoleRoom == false)
-                {
-                    RoomSet.Add(roomset);
-                }
-                else
-                {
-                    WarningRoomSet.Add(roomset);
-                }
+                RoomSet.Add(roomset);
             }
+            else
+            {
+                WarningRoomSet.Add(roomset);
+            }
+
         }
 
-        private static bool CreateRoomModel(List<Entity> room, ThFloorHeatingRoomMarkExtractor markExtractor, List<DBText> roomSuggestDist, out List<ThFloorHeatingRoom> RoomList)
+        //private static bool CreateRoomModel(List<Entity> room, ThFloorHeatingRoomMarkExtractor markExtractor, List<DBText> roomSuggestDist, out List<ThFloorHeatingRoom> RoomList)
+        //{
+        //    var hasHoles = false;
+        //    RoomList = new List<ThFloorHeatingRoom>();
+        //    foreach (var r in room)
+        //    {
+        //        Polyline roomboundary = null;
+        //        if (r is Polyline rpl)
+        //        {
+        //            roomboundary = rpl;
+        //        }
+        //        if (r is MPolygon rmpl)
+        //        {
+        //            roomboundary = rmpl.Shell();
+        //            if (rmpl.Holes().Count > 0)
+        //            {
+        //                hasHoles = true;
+        //            }
+        //        }
+
+        //        var roomModel = new ThFloorHeatingRoom(roomboundary);
+        //        var markInRoom = markExtractor.Marks.Where(x => roomboundary.Contains(x.Geometry)).ToList();
+        //        var markString = markInRoom.Select(x => x.Text).Distinct().ToList();
+        //        roomModel.SetName(markString);
+
+        //        //这里有问题，如果一个大厅被分割了但是suggest只有一个
+        //        var suggestDist = GetSuggestDist(roomboundary, roomSuggestDist);
+        //        roomModel.SetSuggestDist(suggestDist);
+        //        RoomList.Add(roomModel);
+        //    }
+        //    return hasHoles;
+        //}
+
+
+        private static bool CreateRoomModel(List<Entity> room, out List<ThFloorHeatingRoom> RoomList)
         {
             var hasHoles = false;
             RoomList = new List<ThFloorHeatingRoom>();
@@ -467,17 +558,86 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 }
 
                 var roomModel = new ThFloorHeatingRoom(roomboundary);
-                var markInRoom = markExtractor.Marks.Where(x => roomboundary.Contains(x.Geometry)).ToList();
-                var markString = markInRoom.Select(x => x.Text).Distinct().ToList();
-                roomModel.SetName(markString);
+                //var markInRoom = markExtractor.Marks.Where(x => roomboundary.Contains(x.Geometry)).ToList();
+                //var markString = markInRoom.Select(x => x.Text).Distinct().ToList();
+                //roomModel.SetName(markString);
 
-                //这里有问题，如果一个大厅被分割了但是suggest只有一个
-                var suggestDist = GetSuggestDist(roomboundary, roomSuggestDist);
-                roomModel.SetSuggestDist(suggestDist);
+                ////这里有问题，如果一个大厅被分割了但是suggest只有一个
+                //var suggestDist = GetSuggestDist(roomboundary, roomSuggestDist);
+                //roomModel.SetSuggestDist(suggestDist);
                 RoomList.Add(roomModel);
             }
             return hasHoles;
         }
+
+
+
+        /// <summary>
+        /// 先根据所选房间选择门，集分水器，散热器，障碍物，分割线，房间
+        /// 不包括房间tag和房间盘管间距建议
+        /// </summary>
+        /// <param name="selectFrames"></param>
+        private void SelectObjInRoom(List<Polyline> selectFrames)
+        {
+            //var markExtractor = InputExtractors.Where(o => o is ThFloorHeatingRoomMarkExtractor).First() as ThFloorHeatingRoomMarkExtractor;
+
+            var objSelect = new DBObjectCollection();
+            Door.ForEach(x => objSelect.Add(x));
+            WaterSeparator.ForEach(x => objSelect.Add(x.OBB));
+            BathRadiator.ForEach(x => objSelect.Add(x.OBB));
+            FurnitureObstacle.ForEach(x => objSelect.Add(x));
+            RoomSeparateLine.ForEach(x => objSelect.Add(x));
+            RoomBoundary.ForEach(x => objSelect.Add(x));
+
+            var objIndex = new ThCADCoreNTSSpatialIndex(objSelect);
+
+            var tempDoor = new List<Polyline>();
+            var tempWaterSeparator = new List<ThFloorHeatingWaterSeparator>();
+            var tempBathRadiator = new List<ThFloorHeatingBathRadiator>();
+            var tempFurnitureObstacle = new List<Polyline>();
+            var tempRoomSeparatorLine = new List<Line>();
+            var tempRoomBoundary = new List<MPolygon>();
+
+            foreach (var frame in selectFrames)
+            {
+                var selectObj = objIndex.SelectCrossingPolygon(frame);
+                tempDoor.AddRange(Door.Where(x => selectObj.Contains(x)));
+                tempWaterSeparator.AddRange(WaterSeparator.Where(x => selectObj.Contains(x.OBB)));
+                tempBathRadiator.AddRange(BathRadiator.Where(x => selectObj.Contains(x.OBB)));
+                tempFurnitureObstacle.AddRange(FurnitureObstacle.Where(x => selectObj.Contains(x)));
+                tempRoomSeparatorLine.AddRange(RoomSeparateLine.Where(x => selectObj.Contains(x)));
+                tempRoomBoundary.AddRange(RoomBoundary.Where(x => selectObj.Contains(x)));
+            }
+
+
+            Door.Clear();
+            WaterSeparator.Clear();
+            BathRadiator.Clear();
+            FurnitureObstacle.Clear();
+            RoomSeparateLine.Clear();
+            RoomBoundary.Clear();
+
+            Door.AddRange(tempDoor.Distinct());
+            WaterSeparator.AddRange(tempWaterSeparator.Distinct());
+            BathRadiator.AddRange(tempBathRadiator.Distinct());
+            FurnitureObstacle.AddRange(tempFurnitureObstacle.Distinct());
+            RoomSeparateLine.AddRange(tempRoomSeparatorLine.Distinct());
+            RoomBoundary.AddRange(tempRoomBoundary.Distinct());
+        }
+
+
+        public static void GetSuggestData(BlockReference blk, out double route, out double suggestDist, out double totalLength)
+        {
+            var rValue = blk.ObjectId.GetAttributeInBlockReference (ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route);
+            var dValue = blk.ObjectId.GetAttributeInBlockReference(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Dist);
+            var lValue = blk.ObjectId.GetAttributeInBlockReference(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length);
+
+            route = ThFloorHeatingCoilUtilServices.GetNumberFromString(rValue);
+            suggestDist = ThFloorHeatingCoilUtilServices.GetNumberFromString(dValue);
+            totalLength = ThFloorHeatingCoilUtilServices.GetNumberFromString(lValue);
+
+        }
+
 
         public void ProjectOntoXYPlane()
         {
@@ -495,6 +655,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                     DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirStartPt, "l1waterDir", 1, l: 50);
 
                 }
+
+                roomset.BathRadiators.ForEach(b => b.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l1radiator", 1, r: 30)));
+                roomset.BathRadiators.ForEach(b => DrawUtils.ShowGeometry(b.StartPts[0], b.DirLine, "l1radiatorDir", 1, l: 50));
+
                 roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l1obstacle", 1));
                 roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l1room", 30));
                 roomset.RoomSeparateLine.ForEach(x => DrawUtils.ShowGeometry(x, "l1roomSeparator", 1));
@@ -509,6 +673,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                     DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirLine, "l1wwaterDir", 1, l: 50);
                     DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirStartPt, "l1wwaterDir", 1, l: 50);
                 }
+                roomset.BathRadiators.ForEach(b => b.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l1wradiator", 1, r: 30)));
+                roomset.BathRadiators.ForEach(b => DrawUtils.ShowGeometry(b.StartPts[0], b.DirLine, "l1wradiatorDir", 1, l: 50));
+
                 roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l1wobstacle", 1));
                 roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l1wroom", 30));
                 roomset.RoomSeparateLine.ForEach(x => DrawUtils.ShowGeometry(x, "l1wroomSeparator", 1));

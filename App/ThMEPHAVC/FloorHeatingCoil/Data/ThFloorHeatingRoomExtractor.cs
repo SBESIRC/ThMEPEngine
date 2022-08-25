@@ -36,19 +36,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             roomOutlineExtraction.ExtractFromMS(database);
             roomOutlineExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
 
-            ////获取本地的房间标注
-            //var roomMarkExtraction = new ThAIRoomMarkExtractionEngine();
-            //roomMarkExtraction.ExtractFromMS(database);
-            //roomMarkExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
-
             var newPts = Transformer.Transform(pts);
             var roomEngine = new ThAIRoomOutlineRecognitionEngine();
             roomEngine.Recognize(roomOutlineExtraction.Results, newPts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            //var markEngine = new ThAIRoomMarkRecognitionEngine();
-            //markEngine.Recognize(roomMarkExtraction.Results, newPts);
-            //var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
-
+           
             //对于起、终点间距小于一定距离的，做缝合
             for (int i = 0; i < rooms.Count; i++)
             {

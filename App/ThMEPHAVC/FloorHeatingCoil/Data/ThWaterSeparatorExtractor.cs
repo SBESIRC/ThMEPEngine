@@ -10,11 +10,11 @@ using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Data
 {
-    public class ThWaterSeparatorExtractor : ThExtractService
+    public class ThBlockReferenceExtractor : ThExtractService
     {
         public List<BlockReference> Blocks { get; set; }
         public string BlockName { get; set; }
-        public ThWaterSeparatorExtractor()
+        public ThBlockReferenceExtractor()
         {
             BlockName = "";
             Blocks = new List<BlockReference>();
