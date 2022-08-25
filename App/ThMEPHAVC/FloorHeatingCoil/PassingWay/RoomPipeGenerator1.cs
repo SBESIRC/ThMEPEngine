@@ -558,7 +558,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         var inner_poly = PassageWayUtils.BuildPolyline(inner_coords);
                         coords.Add(coords.First());
                         var shell_poly = PassageWayUtils.BuildPolyline(coords);
-                        inner_poly = PassageWayUtils.Buffer(inner_poly, -1).First();
+                        var small_inner = PassageWayUtils.Buffer(inner_poly, -1);
+                        if (small_inner.Count == 0)
+                        {
+                            inner_poly.Dispose();
+                            shell_poly.Dispose();
+                            return;
+                        }
+                        inner_poly = small_inner.First();
                         if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
                         {
                             inner_coords.RemoveAt(inner_coords.Count - 1);

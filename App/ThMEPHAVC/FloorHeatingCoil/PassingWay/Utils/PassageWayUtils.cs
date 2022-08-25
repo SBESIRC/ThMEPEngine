@@ -115,10 +115,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
         /// <param name="p">目标点</param>
         /// <param name="points">多边形边界点集</param>
         /// <returns></returns>
-        public static int GetSegIndexOnPolygon(Point3d p, List<Point3d> points)
+        public static int GetSegIndexOnPolygon(Point3d p, List<Point3d> points, double eps = 2)
         {
             for (int j = 0; j < points.Count; j++)
-                if (PointOnSegment(p,points[j],points[(j+1)%points.Count]) || points[(j+1) % points.Count].DistanceTo(p) < 5)
+                if (PointOnSegment(p, points[j], points[(j + 1) % points.Count], eps) || points[(j + 1) % points.Count].DistanceTo(p) < 5) 
                     return j;
             return -1;
         }
@@ -128,10 +128,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
         /// <param name="p">目标点</param>
         /// <param name="points">多段线（或首尾点相同的多边形）的点集序列</param>
         /// <returns></returns>
-        public static int GetSegIndexOnPolyline(Point3d p,List<Point3d> points)
+        public static int GetSegIndexOnPolyline(Point3d p, List<Point3d> points, double eps = 2)
         {
             for (int j = 0; j < points.Count - 1; j++)
-                if (PointOnSegment(p, points[j], points[j + 1])) 
+                if (PointOnSegment(p, points[j], points[j + 1], eps))  
                     return j;
             return -1;
         }

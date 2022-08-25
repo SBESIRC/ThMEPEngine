@@ -19,20 +19,20 @@ namespace ThMEPHVAC.FloorHeatingCoil
             var inter = a.Intersect(b, Intersect.OnBothOperands).ToHashSet();
             var points = PassageWayUtils.GetPolyPoints(a);
             var s = PassageWayUtils.GetPointIndex(b.StartPoint, points, 1e-3);
-            if (s == -1) s = PassageWayUtils.GetSegIndexOnPolyline(b.StartPoint, points);
+            if (s == -1) s = PassageWayUtils.GetSegIndexOnPolyline(b.StartPoint, points, 1e-3);
             if (s != -1)
                 inter.Add(b.StartPoint);
             var e = PassageWayUtils.GetPointIndex(b.EndPoint, points, 1e-3);
-            if (e == -1) e = PassageWayUtils.GetSegIndexOnPolyline(b.EndPoint, points);
+            if (e == -1) e = PassageWayUtils.GetSegIndexOnPolyline(b.EndPoint, points, 1e-3);
             if (e != -1)
                 inter.Add(b.EndPoint);
             points = PassageWayUtils.GetPolyPoints(b);
             s = PassageWayUtils.GetPointIndex(a.StartPoint, points, 1e-3);
-            if (s == -1) s = PassageWayUtils.GetSegIndexOnPolyline(a.StartPoint, points);
+            if (s == -1) s = PassageWayUtils.GetSegIndexOnPolyline(a.StartPoint, points, 1e-3);
             if (s != -1)
                 inter.Add(a.StartPoint);
             e = PassageWayUtils.GetPointIndex(a.EndPoint, points, 1e-3);
-            if (e == -1) e = PassageWayUtils.GetSegIndexOnPolyline(a.EndPoint, points);
+            if (e == -1) e = PassageWayUtils.GetSegIndexOnPolyline(a.EndPoint, points, 1e-3);
             if (e != -1)
                 inter.Add(b.EndPoint);
             return inter.ToList();

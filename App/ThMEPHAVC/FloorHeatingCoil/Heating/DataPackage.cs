@@ -66,7 +66,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         }
 
-        public void Clear() 
+        public static void Clear() 
         {
             RegionIndex = null;
             RegionList = null;
@@ -89,15 +89,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //用户输入设定
         static public double TotalLength = 115000;
 
-        static public double SuggestDistanceWall = 100;
-        static public double SuggestDistanceRoom = 250;
+        static public double SuggestDistanceWall = 100;      //推荐靠墙间距
+        static public double SuggestDistanceRoom = 250;      //推荐管道间距
         static public double PipeSpaceing = 50;              //集水器管间距
         static public double KeyRoomShortSide = 2000;        //什么样的房间被认定为单独只出一根管道
 
         //用户输入模式
-        static public bool IndependentRoomConstraint = true;
-        static public bool PublicRegionConstraint = true;
-        static public bool AuxiliaryRoomConstraint = true;
+        static public bool IndependentRoomConstraint = true;  //独立房间回路
+        static public bool PublicRegionConstraint = true;     //公区约束
+        static public bool AuxiliaryRoomConstraint = true;    //附属房间经过主房间之后是否能够和其他回路相连
+        static public int PrivatePublicMode = 0;    // 0：自动/公建  1：住宅  2：自动
 
         //
         static public double SuggestDistancePass = 600;

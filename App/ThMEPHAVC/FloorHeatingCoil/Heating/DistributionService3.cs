@@ -41,6 +41,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public Dictionary<int, List<SubScheme>> RegionSchemeMap = new Dictionary<int, List<SubScheme>>();
         //public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
         public List<SinglePipe> SinglePipeList = new List<SinglePipe>();
+        
+        //判别左右
+        int LeftRightIndex = 0;
 
         public DistributionService3()
         {
@@ -51,6 +54,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             //构造当前用到的树
             CreateNowTree();
+            GetTopoTreeNodeLeftRightIndex(SingleTopoTree, RegionToNode, SingleTopoTree[0]);
 
             //分配管道
             Distribute();
@@ -154,7 +158,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     TopoTreeNode nowNode = SingleTopoTree[topoIndex];
                     int regionId = nowNode.NodeId;
 
-                    if (regionId == 0)
+                    if (regionId == 1)
                     {
                         int stop = 0;
                     }
@@ -885,6 +889,23 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return flag;
         }
 
+        public bool IsPipeIndexExchange2(TmpPipe pipe1, TmpPipe pipe2, int isLeftOld)
+        {
+            bool flag = false;
+
+            int isLeftNow = 1;
+
+            int anwser = TmpPipe.GetLeftRight(pipe1, pipe2, SingleTopoTree, RegionToNode);
+            if (anwser < 0) isLeftNow = 1;
+            else isLeftNow = -1;
+
+            if (isLeftNow * isLeftOld < 0)
+            {
+                flag = true;
+            }
+            return flag;
+        }
+
         public void MoveTest(int nowIndex, int nowAdjacentPipe, int regionId, ref int move, ref List<TmpPipe> testPipesList, ref double newMinLength)
         {
             TmpPipe nowPipe = testPipesList[nowIndex];
@@ -901,7 +922,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 newNowPipe.Regularization(SingleTopoTree, RegionToNode);
                 newAdPipe.Regularization(SingleTopoTree, RegionToNode);
 
-                if (!IsPipeIndexExchange(newNowPipe, newAdPipe, nowAdjacentPipe - nowIndex))
+                if (!IsPipeIndexExchange2(newNowPipe, newAdPipe, nowAdjacentPipe - nowIndex))
                 {
                     testPipesList[nowIndex] = newNowPipe;
                     testPipesList[nowAdjacentPipe] = newAdPipe;
@@ -1216,5 +1237,37 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return distante;
         }
 
-    }
+
+        public void GetTopoTreeNodeLeftRightIndex(List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree, TopoTreeNode topoTree)
+        {
+            int left = -1;
+            int right = -1;
+            for (int i = 0; i < topoTree.ChildIdList.Count; i++)
+            {
+                int childRegionId = topoTree.ChildIdList[i];
+                TopoTreeNode childTree = treeList[regionToTree[childRegionId]];
+                GetTopoTreeNodeLeftRightIndex(treeList, regionToTree, childTree);
+
+                if (left != -1)
+                {
+                    left = Math.Min(childTree.LeftTopoIndex, left);
+                }
+                else
+                {
+                    left = childTree.LeftTopoIndex;
+                }
+                right = Math.Max(childTree.RightTopoIndex, right);
+            }
+
+            if (topoTree.ChildIdList.Count == 0)
+            {
+                left = LeftRightIndex;
+                right = LeftRightIndex;
+                LeftRightIndex++;
+            }
+
+            topoTree.LeftTopoIndex = left;
+            topoTree.RightTopoIndex = right;
+        }
+    }   
 }

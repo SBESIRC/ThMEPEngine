@@ -26,6 +26,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             points = SmoothUtils.SmoothPoints(points);
             var si = PassageWayUtils.GetPointIndex(start, points);
             var ei = PassageWayUtils.GetPointIndex(end, points);
+
+            if (si == -1 || ei == -1) return shell;
+
             if ((ei + 1) % points.Count != si)
             {
                 var tmp = si;

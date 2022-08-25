@@ -24,37 +24,37 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
     {
         public List<SingleRegion> RegionList = ProcessedData.RegionList;
         public List<SingleDoor> DoorList = ProcessedData.DoorList;
-        public List<SinglePipe> SinglePipeList = ProcessedData.PipeList;
+        public List<SinglePipe> SinglePipeList = new List<SinglePipe>();
 
 
         ////成员变量
         public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
-        public List<TopoTreeNode> SingleTopoTree;
+        public List<TopoTreeNode> SingleTopoTree = new List<TopoTreeNode>();
         Dictionary<int, int> RegionToNode = new Dictionary<int, int>();
         public Dictionary<int, int> ChildFatherMap = new Dictionary<int, int>();
-        
+
 
 
         ///接口临时变量
         public int MainRegionId = -1;
-        public List<List<Connection>> RegionConnection;
-        public List<List<int>> RegionGraphList;
-        public List<Polyline> RegionObbs;
+        public List<List<Connection>> RegionConnection = new List<List<Connection>>();
+        public List<List<int>> RegionGraphList = new List<List<int>>();
+        public List<Polyline> RegionObbs = new List<Polyline>();
 
         //C
         public int LeftRightIndex = 0;
 
 
-        public UserInteraction() 
+        public UserInteraction()
         {
-            
+
         }
 
 
         //输入
 
         //List<List<int>>
-        public void PipelineA(ThRoomSetModel roomSet) 
+        public void PipelineA(ThRoomSetModel roomSet)
         {
             RawData singleRawdata = new RawData(roomSet);
             DataPreprocess dataPreprocess = new DataPreprocess(singleRawdata);
@@ -62,7 +62,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             RegionConnection = dataPreprocess.RegionConnection;
             MainRegionId = dataPreprocess.MainRegionId;
             RegionObbs = dataPreprocess.RegionObbs;
-            if (MainRegionId == -1) 
+            if (MainRegionId == -1)
             {
                 MainRegionId = 0;
             }
@@ -70,10 +70,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             BuildRegionGraphList();
         }
 
-        public void BuildRegionGraphList() 
+        public void BuildRegionGraphList()
         {
             List<int> remainRegion = new List<int>();
-            for (int i = 0; i < RegionObbs.Count; i++) 
+            for (int i = 0; i < RegionObbs.Count; i++)
             {
                 remainRegion.Add(i);
             }
@@ -83,13 +83,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             regionQ.Enqueue(MainRegionId);
             tmpList.Add(MainRegionId);
             remainRegion.Remove(MainRegionId);
-            while (regionQ.Count > 0) 
+            while (regionQ.Count > 0)
             {
                 int nowId = regionQ.Dequeue();
-                for (int i = 0; i < RegionConnection[nowId].Count; i++) 
+                for (int i = 0; i < RegionConnection[nowId].Count; i++)
                 {
                     int newId = RegionConnection[nowId][i].RegionId;
-                    if (remainRegion.Contains(newId)) 
+                    if (remainRegion.Contains(newId))
                     {
                         tmpList.Add(newId);
                         remainRegion.Remove(newId);
@@ -98,9 +98,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
             RegionGraphList.Add(tmpList);
-            
-           
-            while (remainRegion.Count > 0) 
+
+
+            while (remainRegion.Count > 0)
             {
                 tmpList = new List<int>();
                 Queue<int> regionQ2 = new Queue<int>();
@@ -127,7 +127,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
-        public void PipelineB(ThRoomSetModel roomSet) 
+        public void PipelineB(ThRoomSetModel roomSet)
         {
             //数据处理
             RawData singleRawdata = new RawData(roomSet);
@@ -161,7 +161,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             drawPipe.Pipeline();
         }
 
-        public void PipelineC() 
+        public void PipelineC()
         {
             LeftRightIndex = 0;
             //Update
@@ -169,10 +169,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             CreateNowTree();
             CompleteTmpPipeList();
             SaveResults();
-
-            //管道分配
-            DistributionService3 distributionService3 = new DistributionService3();
-            distributionService3.Pipeline();
 
             //寻找出入口
             FindPointService findPointService = new FindPointService();
@@ -183,16 +179,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             drawPipe.Pipeline();
         }
 
-        public void CreateTmpPipeList() 
+        public void CreateTmpPipeList()
         {
-            int maxIndex = RegionList.FindByMax(x => x.MainPipe[0]).MainPipe[0];
+            int maxIndex = RegionList.FindByMax(x => x.MainPipe[0]).MainPipe[0]+1;
 
-            for (int i = 0; i < maxIndex; i++)
+            for (int i = 0; i < maxIndex ; i++)
             {
                 TmpPipeList.Add(new TmpPipe(0));
             }
 
-            for (int i = 0; i < RegionList.Count; i++) 
+            for (int i = 0; i < RegionList.Count; i++)
             {
                 int mainPipeId = RegionList[i].MainPipe[0];
                 TmpPipeList[mainPipeId].DomainIdList.Add(i);
@@ -260,10 +256,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     for (int j = 0; j < TmpPipeList.Count; i++)
                     {
-                        for (int k = 0; k < parentList.Count; k++) 
+                        for (int k = 0; k < parentList.Count; k++)
                         {
                             int nowParent = parentList[k];
-                            if (TmpPipeList[j].DomainIdList.Contains(nowParent) && TmpPipeList[j].DomainIdList.Contains(i)) 
+                            if (TmpPipeList[j].DomainIdList.Contains(nowParent) && TmpPipeList[j].DomainIdList.Contains(i))
                             {
                                 if (nowRegionFix == 0)
                                 {
@@ -288,9 +284,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
-        public void CompleteTmpPipeList() 
+        public void CompleteTmpPipeList()
         {
-            for (int i = 0; i < TmpPipeList.Count; i++) 
+            for (int i = 0; i < TmpPipeList.Count; i++)
             {
                 TmpPipeList[i].Regularization(SingleTopoTree, RegionToNode);
             }
@@ -346,6 +342,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             List<TmpPipe> tmpPipeList = TmpPipeList;
 
+            //清空原始数据
+            for (int i = 0; i < RegionList.Count; i++) 
+            {
+                RegionList[i].PassingPipeList.Clear();            
+            }
+
+            for (int i = 0; i < DoorList.Count; i++)
+            {
+                DoorList[i].PipeIdList.Clear();
+            }
+
+
             for (int i = 0; i < tmpPipeList.Count; i++)
             {
                 TmpPipe nowPipe = tmpPipeList[i];
@@ -375,30 +383,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     int regionId = nowPipe.RegionIdList[j];
                     RegionList[regionId].PassingPipeList.Add(i);
                 }
-
-                //保存主导的区域
-                for (int j = 0; j < nowPipe.DomainIdList.Count; j++)
-                {
-                    int regionId = nowPipe.DomainIdList[j];
-                    RegionList[regionId].MainPipe.Add(i);
-                }
             }
 
             //记录管道
             ProcessedData.PipeList = SinglePipeList;
-
-            //记录主入口
-            for (int i = 0; i < RegionList.Count; i++)
-            {
-                for (int j = 0; j < RegionList[i].EntranceMap.Count; j++)
-                {
-                    if (RegionList[i].EntranceMap[RegionList[i].FatherRegion[j]].PipeIdList.Count != 0)
-                    {
-                        RegionList[i].MainEntrance = RegionList[i].EntranceMap[RegionList[i].FatherRegion[j]];
-                        break;
-                    }
-                }
-            }
         }
     }
 }

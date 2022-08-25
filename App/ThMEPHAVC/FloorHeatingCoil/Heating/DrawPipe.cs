@@ -25,6 +25,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<SinglePipe> SinglePipeList = ProcessedData.PipeList;
         public Dictionary<Tuple<int, int>, PipePoint> DoorPipeToPointMap = ProcessedData.DoorPipeToPointMap;
         public Dictionary<int, Dictionary<int, List<Polyline>>> PipePolyListMap = new Dictionary<int, Dictionary<int, List<Polyline>>>();
+        public Dictionary<int, Dictionary<int, List<Polyline>>> PipeCenterLineListMap = new Dictionary<int, Dictionary<int, List<Polyline>>>();
         public Dictionary<int, List<Polyline>> RegionPipePolyMap = new Dictionary<int, List<Polyline>>();
         public Dictionary<int, Polyline> PipeTotalPolyMap = new Dictionary<int, Polyline>();
 
@@ -60,6 +61,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 Dictionary<int, List<Polyline>> keyValuePairs = new Dictionary<int, List<Polyline>>();
                 PipePolyListMap.Add(i, keyValuePairs);
+
+                Dictionary<int, List<Polyline>> keyValuePairs2 = new Dictionary<int, List<Polyline>>();
+                PipeCenterLineListMap.Add(i, keyValuePairs2);
             }
         }
 
@@ -73,7 +77,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
 
                 int mode = 0;
-                if (i == 0) mode = 0;
+                if (i == 0) mode = Parameter.PrivatePublicMode;
 
                 SingleRegion nowRegion = RegionList[i];
 
@@ -116,7 +120,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     //// calculate pipeline
 
-                    RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist*2, Parameter.SuggestDistanceWall);
+                    RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(nowRegion.ClearedPl, pipeInList ,nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall);
                     roomPipeGenerator.CalculatePipeline();
                     // show result
                     //var show = roomPipeGenerator.skeleton;
@@ -132,6 +136,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     List<Polyline> newList = new List<Polyline>();
                     newList.Add(output.shape);
                     regionPolyMap.Add(i, newList);
+
+                    var regionCenterMap = PipeCenterLineListMap[newPipeId];
+                    regionCenterMap.Add(i, output.skeleton);
                 }
                 else
                 {
@@ -320,7 +327,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //绘制
                     //PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pins, pouts, pins_buffer, pouts_buffer, main_index);
 
-                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, 600, Parameter.SuggestDistanceWall,mode);
+                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index,nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall,mode);
                     passagePipeGenerator.CalculatePipeline();
                     List<PipeOutput> nowOutputList = passagePipeGenerator.outputs;
                     nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l4PassingPipe", x.pipe_id % 7 + 1, 30));
@@ -335,6 +342,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         List<Polyline> newList = new List<Polyline>();
                         newList.Add(nowOutputList[n].shape);
                         regionPolyMap.Add(i, newList);
+
+                        var regionCenterMap = PipeCenterLineListMap[pipeId];
+                        regionCenterMap.Add(i, nowOutputList[n].skeleton);
                     }
 
                     //后处理
@@ -373,7 +383,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
-        public void GetConnector()
+        public void GetConnector2()
         {
             for (int i = 0; i < SinglePipeList.Count; i++)
             {
@@ -411,6 +421,108 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     PipePolyListMap[i][upRegionId].Add(pl);
                 }
             }
+        }
+
+        public void GetConnector()
+        {
+            for (int i = 0; i < SinglePipeList.Count; i++)
+            {
+                PipeFixPointList.Add(i, new List<Point3d>());
+                SinglePipe sp = SinglePipeList[i];
+                for (int j = 0; j < sp.DoorList.Count; j++)
+                {
+                    int doorId = sp.DoorList[j];
+                    int upRegionId = DoorList[doorId].UpstreamRegion.RegionId;
+                    int downRegionId = DoorList[doorId].DownstreamRegion.RegionId;
+
+                    if (doorId == 14)
+                    {
+                        int stop = 0;
+                    }
+
+                    if (doorId == 0) continue;
+                    List<Point3d> ppList = DoorPipeToPointMap[new Tuple<int, int>(doorId, i)].PointList;
+
+                    PipeFixPointList[i].Add(ppList[0]);
+                    PipeFixPointList[i].Add(ppList[1]);
+
+                    double internalDistanceHalf = (ppList[0] - ppList[2]).Length / 2;
+                    Point3d centerLeft = ppList[0] + (ppList[2] - ppList[0]) / 2;
+                    Point3d centerRight = ppList[1] + (ppList[3] - ppList[1]) / 2;
+
+                    Polyline upPl = PipePolyListMap[i][upRegionId][0];
+                    Polyline downPl = PipePolyListMap[i][downRegionId][0];
+
+                    double upBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[0], ppList[1], upPl);
+                    double downBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[2], ppList[3], downPl);
+                    Polyline pl = PolylineProcessService.CreateRectangle3(centerLeft, centerRight, upBufferLength, downBufferLength);
+
+                    DBObjectCollection a = new DBObjectCollection();
+                    a.Add(upPl as DBObject);
+                    List<Polyline> overlap = pl.Intersection(a).OfType<Polyline>().ToList();
+                    if (overlap.Count == 0)
+                    {
+                        Polyline center = PipeCenterLineListMap[i][upRegionId][0];
+                        Polyline otherConnector = GetOtherConnector(ppList[0], ppList[1], center, upRegionId);
+                        List<Polyline> listToUnion = new List<Polyline>();
+                        listToUnion.Add(pl);
+                        listToUnion.Add(otherConnector);
+
+                        pl = listToUnion.ToCollection().UnionPolygons(false).Cast<Polyline>().First();
+                    }
+                    DrawUtils.ShowGeometry(pl, "l3ChaTou", 200, 30);
+                    PipePolyListMap[i][upRegionId].Add(pl);
+                }
+            }
+        }
+
+        public Polyline GetOtherConnector(Point3d left, Point3d right, Polyline centerLine, int regionId)
+        {
+            Polyline newChatou = new Polyline();
+
+            var coords = PassageWayUtils.GetPolyPoints(centerLine);
+            Point3d centerPt = left + (right - left) * 0.5;
+
+            double minDis = 10000000;
+            Point3d closePoint = new Point3d();
+            for (int i = 0; i < coords.Count; i++)
+            {
+                double nowDis = centerPt.DistanceTo(coords[i]);
+                if (nowDis < minDis)
+                {
+                    minDis = nowDis;
+                    closePoint = coords[i];
+                }
+            }
+
+            Vector3d dir = (right - left).GetNormal();
+            Vector3d dirOut = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
+
+            double dx = closePoint.X - centerPt.X;
+            double dy = closePoint.Y - centerPt.Y;
+            Point3d newPoint = new Point3d();
+            if (Math.Abs(dirOut.X) > 0.7)
+            {
+                newPoint = new Point3d(centerPt.X + dx, centerPt.Y, centerPt.Z);
+            }
+            else
+            {
+                newPoint = new Point3d(centerPt.X, centerPt.Y + dy, centerPt.Z);
+            }
+            List<Point3d> ptList = new List<Point3d>();
+            ptList.Add(centerPt);
+            ptList.Add(newPoint);
+            ptList.Add(closePoint);
+
+            List<double> buff = new List<double>();
+            buff.Add((right - left).Length * 0.5);
+            buff.Add(RegionList[regionId].SuggestDist * 0.5);
+
+            BufferPoly bp = new BufferPoly(ptList, buff);
+            newChatou = bp.Buffer();
+            DrawUtils.ShowGeometry(newChatou, "l5OtherChaTou", 200, 30);
+
+            return newChatou;
         }
 
         public void DrawWholePipe()

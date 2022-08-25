@@ -8,7 +8,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
     {
     }
 
-    class SingleRegion
+    public class SingleRegion
     {
         //自身属性
         public int RegionId = -1;
@@ -16,7 +16,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public double SuggestDist = 200;
         public Polyline ClearedPl = new Polyline();
         public double UsedPipeLength = 0;
-        
+
         //固定类型判别
         public int RegionType = -1;    //0:过道     1:附属房间    2:大房间;
         public int IsPublicRegion = 0; //0:非公区   1:小的公区    2:公区;
@@ -30,14 +30,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<SingleRegion> ChildRegion = new List<SingleRegion>();
         public Dictionary<SingleRegion, SingleDoor> EntranceMap = new Dictionary<SingleRegion, SingleDoor>();
         public Dictionary<SingleRegion, SingleDoor> ExportMap = new Dictionary<SingleRegion, SingleDoor>();
-        public SingleDoor MainEntrance ;
+        public SingleDoor MainEntrance;
 
 
         //管道属性
         public List<int> PassingPipeList = new List<int>();
         public List<int> MainPipe = new List<int>();
 
-        public SingleRegion(int regionId, Polyline originalPl,double suggestDist)
+        public SingleRegion(int regionId, Polyline originalPl, double suggestDist)
         {
             RegionId = regionId;
             OriginalPl = originalPl;
@@ -51,7 +51,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
     }
 
-    class SingleDoor
+    public class SingleDoor
     {
         //
         public int DoorId = -1;
@@ -88,7 +88,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public int DoorNum = 0;
         public int LeftDoorNum = 0;
 
-        public SingleDoor(int doorId, SingleRegion up, SingleRegion down,Polyline originalPl,int doorType) 
+        public SingleDoor(int doorId, SingleRegion up, SingleRegion down, Polyline originalPl, int doorType)
         {
             DoorId = doorId;
             UpstreamRegion = up;
@@ -97,7 +97,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             DoorType = doorType;
         }
 
-        public void SetRecInfo() 
+        public void SetRecInfo()
         {
             PolylineProcessService.GetRecInfo(OriginalPl, ref Center, ref ShortDir, ref LongSide, ref ShortSide);
         }

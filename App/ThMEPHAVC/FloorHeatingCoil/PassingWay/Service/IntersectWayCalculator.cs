@@ -410,6 +410,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         buff = equispaced_buffers[index][j];
                         break;
                     }
+                    if (equispaced_lines[index][j].GetClosestPointTo(p, false).DistanceTo(p) < buff - equispaced_buffers[index][j])
+                    {
+                        buff = equispaced_buffers[index][j];
+                        break;
+                    }
                 }
                 if (i == points.Count - 2 && points[i + 1].DistanceTo(pipe_inputs[index].pout) < 1)
                     buff = pipe_inputs[index].out_buffer;

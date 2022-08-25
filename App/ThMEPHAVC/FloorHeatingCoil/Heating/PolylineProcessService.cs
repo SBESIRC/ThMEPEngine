@@ -1000,6 +1000,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             points = SmoothUtils.SmoothPoints(points);
             var si = PassageWayUtils.GetPointIndex(fixList[0], points);
             var ei = PassageWayUtils.GetPointIndex(fixList[1], points);
+
+            if (si == -1 || ei == -1) return originPl;
+
             if ((ei + 1) % points.Count != si)
             {
                 var tmp = si;
