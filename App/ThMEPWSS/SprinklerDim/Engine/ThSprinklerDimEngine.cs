@@ -142,7 +142,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
             // 生成靠参照物的标注点 + 往外拉标注
             List<Polyline> mixColumnWall = data.Column.Concat(data.Wall).ToList<Polyline>();
 
-            List<List<Point3d>> dimPtsList = ThSprinklerDimExtensionService.FindReferencePoint(transNetList, roomOut, mixColumnWall, data.AxisCurves, step, printTag, out var unDimedPts);
+            List<List<Point3d>> dimPtsList = ThSprinklerDimExtensionService.FindReferencePoint(transNetList, roomOut, mixColumnWall, data.AxisCurves, step, printTag, out var xUnDimedPts, out var yUnDimedPts);
             List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateDimensionDirectionAndDistance(dimPtsList, roomOut, data.TchPipeText, mixColumnWall, ThDataTransformService.Change(data.TchPipe), printTag);
 
             return dims;

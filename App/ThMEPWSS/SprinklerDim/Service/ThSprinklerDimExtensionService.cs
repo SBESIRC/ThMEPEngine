@@ -25,10 +25,11 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="printTag"></param>
         /// <param name="step"></param>
         /// <returns></returns>
-        public static List<List<List<Point3d>>> FindReferencePoint(List<ThSprinklerNetGroup> transNetList, List<MPolygon> rooms, List<Polyline> mixColumnWall, List<Line> axisCurves, double step, string printTag, out List<List<Point3d>> unDimedPts)
+        public static List<List<List<Point3d>>> FindReferencePoint(List<ThSprinklerNetGroup> transNetList, List<MPolygon> rooms, List<Polyline> mixColumnWall, List<Line> axisCurves, double step, string printTag, out List<Point3d> xUnDimedPts, out List<Point3d> yUnDimedPts)
         {
             List<List<List<Point3d>>> dimPtsList = new List<List<List<Point3d>>>();
-            unDimedPts = new List<List<Point3d>>();
+            xUnDimedPts = new List<Point3d>();
+            yUnDimedPts = new List<Point3d>();
 
             for (int i = 0; i < transNetList.Count; i++)
             {
@@ -42,22 +43,23 @@ namespace ThMEPWSS.SprinklerDim.Service
                 List<List<int>> xCollineation = ThDataTransformService.Mix(transNet.XCollineationGroup);
                 List<List<int>> yCollineation = ThDataTransformService.Mix(transNet.YCollineationGroup);
 
-                List<List<Point3d>> xDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.XDimension, xCollineation, columnWallRoomSI, axisCurvesSI, true, step, printTag, out var xUnDimedPts);
-                List<List<Point3d>> yDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.YDimension, yCollineation, columnWallRoomSI, axisCurvesSI, false, step, printTag, out var yUnDimedPts);
+                List<List<Point3d>> xDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.XDimension, xCollineation, columnWallRoomSI, axisCurvesSI, true, step, printTag, out var xUnDimed);
+                List<List<Point3d>> yDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.YDimension, yCollineation, columnWallRoomSI, axisCurvesSI, false, step, printTag, out var yUnDimed);
 
                 dimPtsList.Add(xDimPts.Concat(yDimPts).ToList());
 
-                unDimedPts.AddRange(xUnDimedPts);
-                unDimedPts.AddRange(yUnDimedPts);
+                xUnDimedPts.AddRange(xUnDimed);
+                yUnDimedPts.AddRange(yUnDimed);
             }
             
             return dimPtsList;
         }
 
-        public static List<List<Point3d>> FindReferencePoint(List<ThSprinklerNetGroup> transNetList, MPolygon room, List<Polyline> mixColumnWall, List<Line> axisCurves, double step, string printTag, out List<List<Point3d>> unDimedPts)
+        public static List<List<Point3d>> FindReferencePoint(List<ThSprinklerNetGroup> transNetList, MPolygon room, List<Polyline> mixColumnWall, List<Line> axisCurves, double step, string printTag, out List<Point3d> xUnDimedPts, out List<Point3d> yUnDimedPts)
         {
             List<List<Point3d>> dimPtsList = new List<List<Point3d>>();
-            unDimedPts = new List<List<Point3d>>();
+            xUnDimedPts = new List<Point3d>();
+            yUnDimedPts = new List<Point3d>();
 
             ThCADCoreNTSSpatialIndex columnWallRoomSI = GetReferanceSpatialIndex(mixColumnWall, room);
             ThCADCoreNTSSpatialIndex axisCurvesSI = ThDataTransformService.GenerateSpatialIndex(ThDataTransformService.Change(ThGeometryOperationService.Trim(axisCurves, room)));
@@ -70,68 +72,64 @@ namespace ThMEPWSS.SprinklerDim.Service
                 List<List<int>> xCollineation = ThDataTransformService.Mix(transNet.XCollineationGroup);
                 List<List<int>> yCollineation = ThDataTransformService.Mix(transNet.YCollineationGroup);
 
-                List<List<Point3d>> xDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.XDimension, xCollineation, columnWallRoomSI, axisCurvesSI, true, step, printTag, out var xUnDimedPts);
-                List<List<Point3d>> yDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.YDimension, yCollineation, columnWallRoomSI, axisCurvesSI, false, step, printTag, out var yUnDimedPts);
+                List<List<Point3d>> xDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.XDimension, xCollineation, columnWallRoomSI, axisCurvesSI, true, step, printTag, out var xUnDimed);
+                List<List<Point3d>> yDimPts = FindReferencePointForNetGroup(pts, transNet.Transformer, transNet.YDimension, yCollineation, columnWallRoomSI, axisCurvesSI, false, step, printTag, out var yUnDimed);
 
                 dimPtsList.AddRange(xDimPts);
                 dimPtsList.AddRange(yDimPts);
 
-                unDimedPts.AddRange(xUnDimedPts);
-                unDimedPts.AddRange(yUnDimedPts);
+                xUnDimedPts.AddRange(xUnDimed);
+                yUnDimedPts.AddRange(yUnDimed);
             }
 
             return dimPtsList;
         }
 
-        private static List<List<Point3d>> FindReferencePointForNetGroup(List<Point3d> pts, Matrix3d transformer, List<List<ThSprinklerDimGroup>> dims, List<List<int>> anotherCollineation, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, bool isXAxis, double step, string printTag, out List<List<Point3d>> unDimedLines)
+        private static List<List<Point3d>> FindReferencePointForNetGroup(List<Point3d> pts, Matrix3d transformer, List<List<ThSprinklerDimGroup>> dims, List<List<int>> anotherCollineation, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, bool isXAxis, double step, string printTag, out List<Point3d> unDimedPts)
         {
             // 标注从长到短排序
             dims.Sort((x, y) => y.Count - x.Count);
 
             List<List<Point3d>> dimedLines = new List<List<Point3d>>(); // 已找到参照物的标注线
-            unDimedLines = new List<List<Point3d>>(); // 未找到参照物的标注线
+            unDimedPts = new List<Point3d>(); // 未找到参照物的标注线
             List<Point3d> dimedPts = new List<Point3d>(); //被管住的找到room、wall、column、axis curve的点
             
 
             foreach (List<ThSprinklerDimGroup> dg in dims)
             {
                 List<int> dim = ThDataTransformService.GetDim(dg);
+                List<Point3d> dimedPtsToBeAdded = ThDataTransformService.GetPoints(pts, ThDataTransformService.GetDimedPts(dg));
                 Vector3d dir = ThCoordinateService.GetDirrection(transformer.Inverse(), isXAxis);
 
                 List<Point3d> dimLine = new List<Point3d>();
                 if(dim.Count == 1) // 标注为点
                 {
                     List<List<Point3d>> allAvailableDims = GetAllAvailableDims(pts, dim[0], anotherCollineation);
-                    dimLine = FindReferencePointForSinglePoint(allAvailableDims, dir, roomWallColumn, axisCurves, dimedPts, isXAxis, step, printTag);
+                    dimLine = FindReferencePointForSinglePoint(allAvailableDims, dir, roomWallColumn, axisCurves, dimedPts, dimedPtsToBeAdded, isXAxis, step, printTag);
                 }
                 else // 标注为线
                 {
                     dim.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
                     List<Point3d> dimPts = ThDataTransformService.GetPoints(pts, dim);
-                    dimLine = FindReferencePointForLine(dimPts, dir, roomWallColumn, axisCurves, dimedPts, isXAxis, step, printTag);
+                    dimLine = FindReferencePointForLine(dimPts, dir, roomWallColumn, axisCurves, dimedPts, dimedPtsToBeAdded, isXAxis, step, printTag);
                 }
 
                 if(dimLine != null && dimLine.Count > 1)// 找到
                 {
-                    dimedPts.AddRange(ThDataTransformService.GetPoints(pts, ThDataTransformService.GetDimedPts(dg)));
                     dimedLines.Add(dimLine);
                 }
                 else  // 没找到
                 {
-                    List<Point3d> dimPts = ThDataTransformService.GetPoints(pts, dim);
-                    unDimedLines.Add(dimPts);
-
+                    unDimedPts.AddRange(dimedPtsToBeAdded);
 
                     // test
-                    List<Line> lineList = new List<Line>();
-                    for (int i = 0; i < dimPts.Count - 1; i++)
+                    for (int i = 0; i < dimedPtsToBeAdded.Count; i++)
                     {
-                        lineList.Add(new Line(dimPts[i], dimPts[i + 1]));
-
-                        DrawUtils.ShowGeometry(dimPts[i], string.Format("SSS-{0}-7UnDim", printTag), 1, 50, 500);
+                        if (isXAxis) // x 大红
+                            DrawUtils.ShowGeometry(dimedPtsToBeAdded[i], string.Format("SSS-{0}-7UnDimX", printTag), 1, 50, 500);
+                        else  // y 玫红
+                            DrawUtils.ShowGeometry(dimedPtsToBeAdded[i], string.Format("SSS-{0}-7UnDimY", printTag), 6, 50, 500);
                     }
-                    DrawUtils.ShowGeometry(dimPts[dimPts.Count - 1], string.Format("SSS-{0}-7UnDim", printTag), 1, 50, 500);
-                    DrawUtils.ShowGeometry(lineList, string.Format("SSS-{0}-7UnDim", printTag), 1, 35);
                     /////////////////////////
 
 
@@ -143,7 +141,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
 
         
-        private static List<Point3d> FindReferencePointForSinglePoint( List<List<Point3d>> allAvailableDims, Vector3d dir, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, List<Point3d> dimedPts, bool isXAxis, double step, string printTag)
+        private static List<Point3d> FindReferencePointForSinglePoint( List<List<Point3d>> allAvailableDims, Vector3d dir, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, List<Point3d> dimedPts, List<Point3d> dimedPtsToBeAdded, bool isXAxis, double step, string printTag)
         {
             int tag = 0;
 
@@ -157,12 +155,19 @@ namespace ThMEPWSS.SprinklerDim.Service
                 referencePoint = FindReferencePointForSinglePoint(allAvailableDims, dir, axisCurves, roomWallColumn, isXAxis, step, printTag);
             }
 
+            
+            if(referencePoint.Type != 3)
+            {
+                // 找到room、wall、column、axis curve被管住的点
+                dimedPts.AddRange(dimedPtsToBeAdded);
+            }
             // 已标注的点
-            if (referencePoint.Type == 3)
+            else if (referencePoint.Type == 3)
             {
                 tag = 2;
                 referencePoint = GetReferencePtCloseToDimedPts(allAvailableDims, dir, dimedPts, roomWallColumn, step);
             }
+
 
             if (referencePoint.Type != 3) // 找到
             {
@@ -208,18 +213,24 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             referencePts.Add(GetReferencePtCloseToReferenceForSprinklerLine(allAvailableDims[0], dir, reference, barrier, step));
             referencePts.Add(GetReferencePtCloseToReferenceForSprinklerLine(allAvailableDims[allAvailableDims.Count - 1], dir, reference, barrier, step));
-            ThSprinklerDimReferencePoint referencePoint = GetOptimalReferencePoint(referencePts);
+            ThSprinklerDimReferencePoint referencePointSide = GetOptimalReferencePoint(referencePts);
 
-            if (referencePoint.Type == 3)
+            for (int i = 1; i < allAvailableDims.Count - 1; i++)
             {
-                for (int i = 1; i < allAvailableDims.Count - 1; i++)
-                {
-                    var d = allAvailableDims[i];
-                    referencePts.Add(GetReferencePtCloseToReferenceForSprinklerLine(d, dir, reference, barrier, step));
-                }
+                var d = allAvailableDims[i];
+                referencePts.Add(GetReferencePtCloseToReferenceForSprinklerLine(d, dir, reference, barrier, step));
+            }
+            ThSprinklerDimReferencePoint referencePointMid = GetOptimalReferencePoint(referencePts);
+
+            if(referencePointSide.VerticalDistance == referencePointMid.VerticalDistance)
+            {
+                return referencePointSide;
+            }
+            else
+            {
+                return referencePointSide.VerticalDistance < referencePointMid.VerticalDistance ? referencePointSide : referencePointMid;
             }
 
-            return GetOptimalReferencePoint(referencePts);
         }
 
 
@@ -228,43 +239,24 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             List<ThSprinklerDimReferencePoint> referencePts = new List<ThSprinklerDimReferencePoint>();
 
-            referencePts.Add(GetReferencePtCloseToDimedPts(allAvailableDims[0], dir, dimedPts, barrier, step));
-            referencePts.Add(GetReferencePtCloseToDimedPts(allAvailableDims[allAvailableDims.Count - 1], dir, dimedPts, barrier, step));
-            ThSprinklerDimReferencePoint referencePoint = GetOptimalReferencePoint(referencePts);
-
-            if (referencePoint.Type == 3)
+            for (int i = 0; i < allAvailableDims.Count; i++)
             {
-                for (int i = 1; i < allAvailableDims.Count - 1; i++)
-                {
-                    var d = allAvailableDims[i];
-                    referencePts.Add(GetReferencePtCloseToDimedPts(d, dir, dimedPts, barrier, step));
-                }
+                referencePts.Add(GetReferencePtCloseToDimedPts(allAvailableDims[i], dir, dimedPts, barrier, step));
             }
 
             return GetOptimalReferencePoint(referencePts);
         }
 
-        private static ThSprinklerDimReferencePoint GetReferencePtCloseToDimedPts( List<Point3d> dim, Vector3d dir, List<Point3d> dimedPts, ThCADCoreNTSSpatialIndex barrier, double step, double tolerance = 50)
+        private static ThSprinklerDimReferencePoint GetReferencePtCloseToDimedPts(List<Point3d> dim, Vector3d dir, List<Point3d> dimedPts, ThCADCoreNTSSpatialIndex barrier, double step)
         {
             List<ThSprinklerDimReferencePoint> referencePts = new List<ThSprinklerDimReferencePoint>();
-            referencePts.Add(GetReferencePtCloseToDimedPts(dim[0], -dir, dimedPts, barrier, step));
-            referencePts.Add(GetReferencePtCloseToDimedPts(dim[dim.Count - 1], dir, dimedPts, barrier, step));
-            ThSprinklerDimReferencePoint referencePoint = GetOptimalReferencePoint(referencePts);
-            if (referencePoint.Type != 3)
-            {
-                return referencePoint;
-            }
-            else
-            {
-                referencePts.Clear();
-                for (int i = 0; i < dim.Count - 1; i++)
-                {
-                    referencePts.Add(GetReferencePtCloseToDimedPts(dim[i], dir, dimedPts, barrier, step));
-                }
 
-                return GetOptimalReferencePoint(referencePts);
-
+            for (int i = 0; i < dim.Count; i++)
+            {
+                referencePts.Add(GetReferencePtCloseToDimedPts(dim[i], dir, dimedPts, barrier, step));
             }
+
+            return GetOptimalReferencePoint(referencePts);
         }
 
         private static ThSprinklerDimReferencePoint GetReferencePtCloseToDimedPts(Point3d dim, Vector3d dir, List<Point3d> dimedPts, ThCADCoreNTSSpatialIndex barrier, double step, double tolerance = 50)
@@ -279,7 +271,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 double dimensionDistance = dim.DistanceTo(referencePt);
                 double verticalDistance = pt2.DistanceTo(referencePt);
 
-                if (tolerance < dimensionDistance && dimensionDistance < step && verticalDistance < 1500 && ThCoordinateService.IsTheSameDirrection(referencePt-dim, dir))
+                if (tolerance < dimensionDistance && dimensionDistance < step && verticalDistance < step)
                 //if (tolerance < dimensionDistance && dimensionDistance < step && verticalDistance < 1500 && !IsDimCrossReference(pt, pt1, barrier) && !IsDimCrossReference(pt, pt2, barrier))
                 {
                     referencePts.Add(new ThSprinklerDimReferencePoint(2, dim, referencePt, dimensionDistance, verticalDistance));
@@ -292,7 +284,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
 
 
-        private static List<Point3d> FindReferencePointForLine(List<Point3d> dim, Vector3d dir, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, List<Point3d> dimedPts, bool isXAxis, double step, string printTag)
+        private static List<Point3d> FindReferencePointForLine(List<Point3d> dim, Vector3d dir, ThCADCoreNTSSpatialIndex roomWallColumn, ThCADCoreNTSSpatialIndex axisCurves, List<Point3d> dimedPts, List<Point3d> dimedPtsToBeAdded, bool isXAxis, double step, string printTag)
         {
             int tag = 0;
             // 房间框线、墙、柱
@@ -305,6 +297,11 @@ namespace ThMEPWSS.SprinklerDim.Service
                 referencePoint = GetReferencePtCloseToReferenceForSprinklerLine(dim, dir, axisCurves, roomWallColumn, step);
             }
 
+            if (referencePoint.Type != 3)
+            {
+                // 找到room、wall、column、axis curve被管住的点
+                dimedPts.AddRange(dimedPtsToBeAdded);
+            }
             // 标注点小于3的找已标注的点
             if (referencePoint.Type == 3 && dim.Count < 3)
             {
@@ -352,8 +349,8 @@ namespace ThMEPWSS.SprinklerDim.Service
         private static ThSprinklerDimReferencePoint GetReferencePtCloseToReferenceForSprinklerLine(List<Point3d> dim, Vector3d dir, ThCADCoreNTSSpatialIndex reference, ThCADCoreNTSSpatialIndex barrier, double step)
         {
             List<ThSprinklerDimReferencePoint> referencePts = new List<ThSprinklerDimReferencePoint>();
-            referencePts.Add(GetReferencePtCloseToReferenceForSprinklerPt(dim[0], -dir, reference, barrier, step));
-            referencePts.Add(GetReferencePtCloseToReferenceForSprinklerPt(dim[dim.Count - 1], dir, reference, barrier, step));
+            referencePts.Add(GetReferencePtCloseToReferenceForSprinklerPt(dim[0], -dir, true, reference, barrier, step));
+            referencePts.Add(GetReferencePtCloseToReferenceForSprinklerPt(dim[dim.Count - 1], dir, true, reference, barrier, step));
             ThSprinklerDimReferencePoint referencePoint = GetOptimalReferencePoint(referencePts);
             if (referencePoint.Type != 3)
             {
@@ -362,9 +359,9 @@ namespace ThMEPWSS.SprinklerDim.Service
             else
             {
                 referencePts.Clear();
-                for (int i = 0; i < dim.Count - 1; i++)
+                for (int i = 0; i < dim.Count; i++)
                 {
-                    referencePts.Add(GetReferencePtCloseToReferenceForSprinklerPt(dim[i], dir, reference, barrier, step));
+                    referencePts.Add(GetReferencePtCloseToReferenceForSprinklerPt(dim[i], dir, false, reference, barrier, step));
                 }
 
                 return GetOptimalReferencePoint(referencePts);
@@ -373,7 +370,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
         
-        private static ThSprinklerDimReferencePoint GetReferencePtCloseToReferenceForSprinklerPt(Point3d ptInDim, Vector3d dir, ThCADCoreNTSSpatialIndex reference, ThCADCoreNTSSpatialIndex barrier, double step, double tolerance=50.0)
+        private static ThSprinklerDimReferencePoint GetReferencePtCloseToReferenceForSprinklerPt(Point3d ptInDim, Vector3d dir, bool IsCheckSameDir, ThCADCoreNTSSpatialIndex reference, ThCADCoreNTSSpatialIndex barrier, double step, double tolerance=50.0)
         {
             // 选出与box相交及其内部的线
             Polyline box = ThCoordinateService.GenerateBox(ptInDim, dir, step, step);
@@ -402,10 +399,10 @@ namespace ThMEPWSS.SprinklerDim.Service
                     Point3d referencePt = referenceDim.GetClosestPointTo(ptInReference, true);
 
                     //if (referencePt.DistanceTo(ptInDim) > tolerance && ThCoordinateService.IsTheSameDirrection(referencePt - ptInDim, dir) && !IsDimCrossReference(ptInDim, referencePt, barrier) && !IsDimCrossReference(ptInReference, referencePt, barrier))
-                    if (referencePt.DistanceTo(ptInDim) > tolerance && ThCoordinateService.IsTheSameDirrection(referencePt - ptInDim, dir))
+                    if (referencePt.DistanceTo(ptInDim) > tolerance && (!IsCheckSameDir || ThCoordinateService.IsTheSameDirrection(referencePt - ptInDim, dir)))
                     {
                         if (ptInReference.Equals(ptInReferenceExtension)) // 与参照物相交
-                            referencePts.Add(new ThSprinklerDimReferencePoint(1, ptInDim, referencePt, referencePt.DistanceTo(ptInDim), referencePt.DistanceTo(ptInReference)));
+                            referencePts.Add(new ThSprinklerDimReferencePoint(1, ptInDim, referencePt, referencePt.DistanceTo(ptInDim), 0));
                         else
                             referencePts.Add(new ThSprinklerDimReferencePoint(2, ptInDim, referencePt, referencePt.DistanceTo(ptInDim), referencePt.DistanceTo(ptInReference)));
                     }

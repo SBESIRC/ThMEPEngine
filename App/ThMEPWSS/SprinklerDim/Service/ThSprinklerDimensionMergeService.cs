@@ -115,7 +115,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                                 {
                                     List<int> t = new List<int> { Dimension[i][k][0].pt };
                                     double det = GetNeareastDistance(pts, t, Dimension[i][j][0].PtsDimed, IsxAxis);
-                                    if (det < 1.5 * step && 45 < det)
+                                    if (det < 1.0 * step && 45 < det)
                                     {
                                         List<Point3d> pts1 = pts;
                                         Line line = new Line(pts[Dimension[i][k][0].pt], pts[Dimension[i][k][0].pt] + 100 * xAxis);
