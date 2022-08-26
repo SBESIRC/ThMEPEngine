@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using QuikGraph;
 using System.ComponentModel;
+using System.Collections.Generic;
+
+using QuikGraph;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Electrical.PDS.Model
@@ -27,6 +28,8 @@ namespace TianHua.Electrical.PDS.Model
         FeederBusbar = 7,
         [Description("虚拟负载")]
         VirtualLoad = 8,
+        [Description("标准箱")]
+        StandardPanel = 8,
     }
 
     public class ThPDSCircuitGraphNode : IEquatable<ThPDSCircuitGraphNode>
@@ -36,12 +39,14 @@ namespace TianHua.Electrical.PDS.Model
             Loads = new List<ThPDSLoad>();
             LightingCableTray = new ThPDSLightingCableTray();
             HasWarning = false;
+            IsStandardPanel = false;
         }
 
         public PDSNodeType NodeType { get; set; }
         public List<ThPDSLoad> Loads { get; set; }
         public ThPDSLightingCableTray LightingCableTray { get; set; }
         public bool HasWarning { get; set; }
+        public bool IsStandardPanel { get; set; }
 
         public bool Equals(ThPDSCircuitGraphNode other)
         {

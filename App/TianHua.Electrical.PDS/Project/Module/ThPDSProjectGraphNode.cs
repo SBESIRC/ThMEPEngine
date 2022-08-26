@@ -14,12 +14,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         public ThPDSLoad Load { get; set; }
         public PDSNodeType Type { get; set; }
         public NodeDetails Details { get; set; }
+        public bool IsStandardPanel { get; set; }
         public ThPDSProjectGraphNodeTag Tag { get; set; }
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
             Type = PDSNodeType.Empty;
             Details = new NodeDetails();
+            IsStandardPanel = false;
         }
 
         /// <summary>

@@ -220,6 +220,7 @@ namespace TianHua.Electrical.PDS.Engine
             var unionEngine = new ThPDSGraphUnionEngine(EdgeMapList);
             unionEngine.GraphUnion(graphList, cableTrayNode);
             unionEngine.SplitSeriesConnection();
+            unionEngine.RecognizeStandards();
             unionEngine.UnionSubstation(SubstationList);
             return unionEngine.UnionGraph;
         }

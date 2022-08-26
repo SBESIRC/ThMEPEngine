@@ -174,6 +174,7 @@ namespace TianHua.Electrical.PDS.Project
             var newNode = new ThPDSProjectGraphNode();
             newNode.Type = node.NodeType;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
+            newNode.IsStandardPanel = node.IsStandardPanel;
             var load = node.Loads[0];
             if (node.Loads.Count > 1)
             {

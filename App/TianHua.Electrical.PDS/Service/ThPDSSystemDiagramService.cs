@@ -27,6 +27,7 @@ namespace TianHua.Electrical.PDS.Service
     {
         private ProjectGraph Graph { get; set; }
         private List<ThPDSProjectGraphNode> Nodes { get; set; }
+        private List<ThPDSProjectGraphNode> CacheStandardNodes { get; set; }
         public ThPDSSystemDiagramService()
         {
 
@@ -41,6 +42,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             Graph = graph;
             Nodes = new List<ThPDSProjectGraphNode> { node };
+            CacheStandardNodes = new List<ThPDSProjectGraphNode>();
             Draw();
         }
 
@@ -53,6 +55,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             Graph = graph;
             Nodes = nodes;
+            CacheStandardNodes = new List<ThPDSProjectGraphNode>();
             Draw();
         }
 
@@ -64,6 +67,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             Graph = graph;
             Nodes = Graph.Vertices.ToList();
+            CacheStandardNodes = new List<ThPDSProjectGraphNode>();
             Draw();
         }
 
@@ -97,16 +101,34 @@ namespace TianHua.Electrical.PDS.Service
                 var anotherStartPoint = new Point3d(basePoint.X + 36300 * scaleFactor, basePoint.Y, 0);
                 var residue = ThPDSCommon.INNER_TOLERANCE - 1000.0;
 
-                foreach (var thisNode in Nodes.Distinct())
+                foreach (var node in Nodes.Distinct())
                 {
-                    if (!Graph.Vertices.Contains(thisNode))
+                    if (!Graph.Vertices.Contains(node))
                     {
                         continue;
                     }
 
-                    if (thisNode.Type != PDSNodeType.DistributionBox)
+                    if (!(node.Type == PDSNodeType.DistributionBox || node.Type == PDSNodeType.StandardPanel))
                     {
                         continue;
+                    }
+
+                    var thisNode = node;
+                    // 针对标准箱，记录其上级
+                    if (node.IsStandardPanel)
+                    {
+                        var standardPanel = Graph.Vertices.Where(o => o.Type.Equals(PDSNodeType.StandardPanel))
+                            .Where(o => o.Load.ID.LoadID.Equals(node.Load.ID.LoadID)).FirstOrDefault();
+                        if (standardPanel == null || CacheStandardNodes.Contains(standardPanel))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            CacheStandardNodes.Add(standardPanel);
+                            standardPanel.Details = node.Details;
+                            thisNode = standardPanel;
+                        }
                     }
 
                     var enterType = thisNode.Details.CircuitFormType.CircuitFormType.GetDescription();

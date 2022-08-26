@@ -306,6 +306,70 @@ namespace TianHua.Electrical.PDS.Engine
         }
 
         /// <summary>
+        /// 识别标准箱并标注
+        /// </summary>
+        public void RecognizeStandards()
+        {
+            RecognizeStandards(ThPDSLoadTypeCat_2.ElectricalControlPanel);
+            RecognizeStandards(ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
+        }
+
+        private void RecognizeStandards(ThPDSLoadTypeCat_2 loadType)
+        {
+            var acOutNodes = UnionGraph.Vertices.Where(node => node.NodeType.Equals(PDSNodeType.DistributionBox))
+                .Where(node => node.Loads[0].LoadTypeCat_2.Equals(loadType)).ToList();
+            StandardHandle(acOutNodes);
+        }
+
+        private void StandardHandle(List<ThPDSCircuitGraphNode> outNodes)
+        {
+            if (outNodes.Count > 1)
+            {
+                var sort = StandardSort(outNodes);
+                sort.ForEach(nodes =>
+                {
+                    if (nodes.Count > 1)
+                    {
+                        nodes.ForEach(node => node.IsStandardPanel = true);
+
+                        // 创建新的标准箱节点
+                        var newNode = new ThPDSCircuitGraphNode();
+                        newNode.NodeType = PDSNodeType.StandardPanel;
+                        newNode.LightingCableTray = nodes[0].LightingCableTray.Clone();
+                        newNode.Loads = new List<ThPDSLoad> { nodes[0].Loads[0].Clone() };
+                        for (var i = 1; i < nodes.Count; i++)
+                        {
+                            newNode.Loads[0].ID.CircuitIDList.Add(nodes[i].Loads[0].ID.CircuitIDList.Last());
+                            newNode.Loads[0].ID.SourcePanelIDList.Add(nodes[i].Loads[0].ID.SourcePanelIDList.Last());
+                        }
+                        UnionGraph.AddVertex(newNode);
+                    }
+                });
+            }
+        }
+
+        private List<List<ThPDSCircuitGraphNode>> StandardSort(List<ThPDSCircuitGraphNode> outNodes)
+        {
+            var dictionary = new Dictionary<string, List<ThPDSCircuitGraphNode>>();
+            outNodes.ForEach(node =>
+            {
+                if (string.IsNullOrEmpty(node.Loads[0].ID.LoadID))
+                {
+                    return;
+                }
+                if (dictionary.ContainsKey(node.Loads[0].ID.LoadID))
+                {
+                    dictionary[node.Loads[0].ID.LoadID].Add(node);
+                }
+                else
+                {
+                    dictionary.Add(node.Loads[0].ID.LoadID, new List<ThPDSCircuitGraphNode> { node });
+                }
+            });
+            return dictionary.Select(pair => pair.Value).ToList();
+        }
+
+        /// <summary>
         /// 判断图中是否已包含该节点，若包含则返回true
         /// </summary>
         /// <param name="graph"></param>

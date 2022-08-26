@@ -114,7 +114,7 @@ namespace TianHua.Electrical.PDS.Model
         {
             get
             {
-                if (!string.IsNullOrEmpty(SourcePanelID))
+                if (!string.IsNullOrEmpty(SourcePanelID) && !string.IsNullOrEmpty(CircuitID))
                 {
                     return SourcePanelID + "-" + CircuitID;
                 }
