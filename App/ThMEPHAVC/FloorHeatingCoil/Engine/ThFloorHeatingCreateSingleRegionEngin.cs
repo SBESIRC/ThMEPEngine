@@ -27,7 +27,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
 {
     public class ThFloorHeatingCreateSingleRegionEngin
     {
-        public static void CreateSR(ThFloorHeatingCoilViewModel vm,List<BlockReference> RoomSuggestData)
+        public static void CreateSR(ThFloorHeatingCoilViewModel vm, List<BlockReference> RoomSuggestData)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -45,10 +45,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
                 transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
-
+                dataQuery.Print();
                 if (CheckValidDataSet(dataQuery.RoomSet))
                 {
-                    PairRoomWithRoomSuggest(ref dataQuery.RoomSet, RoomSuggestData);
+                    PairRoomWithRoomSuggest(ref dataQuery.RoomSet, RoomSuggestData, vm.SuggestDistDefualt);
 
                     ThFloorHeatingCoilUtilServices.PassUserParameter(vm);
                     var createSR = new UserInteraction();
@@ -57,7 +57,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
             }
         }
 
-        private static void PairRoomWithRoomSuggest(ref List<ThRoomSetModel> roomSet, List<BlockReference> roomSuggest)
+        private static void PairRoomWithRoomSuggest(ref List<ThRoomSetModel> roomSet, List<BlockReference> roomSuggest, double suggestDistDefualt)
         {
             var roomset = roomSet[0];
             foreach (var room in roomset.Room)
@@ -70,7 +70,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
                 }
                 else
                 {
-                    room.SetSuggestDist(ThFloorHeatingCommon.DefaultValue_SuggestDist);
+                    room.SetSuggestDist(suggestDistDefualt);
                 }
             }
         }
@@ -98,9 +98,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
 
     public class ThFloorHeatingUpdateSingleRegionEngine
     {
-        public static bool PairSingleRegionWithRoomSuggest(List<BlockReference> roomSuggest, ref List<SingleRegion> singleRegion)
+        public static bool PairSingleRegionWithRoomSuggest(List<BlockReference> roomSuggest, ref List<SingleRegion> singleRegion, double suggestDistDefualt)
         {
             var needUpdateSR = false;
+
+            var noRoomSuggestRegion = new List<SingleRegion>();
 
             foreach (var sr in singleRegion)
             {
@@ -130,7 +132,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
                 }
                 else
                 {
+                    noRoomSuggestRegion.Add(sr);
+                }
+            }
 
+            if (needUpdateSR == true)
+            {
+                //只有发现需要更新的时候，匹配不到的块才清空，否则全自动且有房间没放，就一直会刷新了
+                foreach (var sr in noRoomSuggestRegion)
+                {
+                    sr.MainPipe.Clear();
+                    sr.SuggestDist = suggestDistDefualt;
                 }
             }
 

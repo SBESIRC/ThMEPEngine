@@ -60,9 +60,9 @@
                                     <RowDefinition Height="auto" ></RowDefinition>
                                     <RowDefinition Height="auto" ></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <cus:ImageButton Grid.Row="0" Margin="20 0 20 10" Content="自动提取"/>
-                                <cus:ImageButton Grid.Row="1" Margin="20 0 20 10" Content="绘房间" />
-                                <cus:ImageButton Grid.Row="2" Margin="20 0 20 0" Content="绘门"/>
+                                <cus:ImageButton Grid.Row="0" Margin="20 0 20 10" Content="自动提取" Command="{Binding PickRoomOutlineCmd}"/>
+                                <cus:ImageButton Grid.Row="1" Margin="20 0 20 10" Content="绘房间" Command="{Binding DrawRoomOutlineCmd}" />
+                                <cus:ImageButton Grid.Row="2" Margin="20 0 20 0" Content="绘门" Command="{Binding DrawDoorOutlineCmd}"/>
                             </Grid>
                         </StackPanel>
                         <cus:ImageButton Grid.Column="1" Margin="10 0 20 0" Content="检查连通性" Command="{Binding CheckRoomConnectivityCmd}" />
@@ -82,7 +82,7 @@
                         <Label Grid.Column="0" Grid.Row="0" Margin="0 0 0 10" Content="1）图层图块配置"/>
                         <cus:ImageButton Grid.Column="1" Grid.Row="0" Margin="10 0 20 10" Content="设置"/>
                         <Label Grid.Column="0" Grid.Row="1"  Content="2）手绘框线"/>
-                        <cus:ImageButton Grid.Column="1" Grid.Row="1" Margin="10 0 20 0" Content="绘制"/>
+                        <cus:ImageButton Grid.Column="1" Grid.Row="1" Margin="10 0 20 0" Content="绘制" Command="{Binding DrawObstacleCmd}"/>
                     </Grid>
                 </StackPanel>
                 <Label Grid.Row="5" Content="参数指定"/>
@@ -101,17 +101,17 @@
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" >
                                     <Label Content="回路数："/>
-                                    <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False"  Text="{Binding RouteNum,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+                                    <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding RouteNum,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
                                     <Label Content="路"/>
                                 </StackPanel>
-                                <StackPanel Grid.Row="1" Orientation="Horizontal" >
+                                <StackPanel IsEnabled="False" Grid.Row="1" Orientation="Horizontal" >
                                     <Label Content="管间距："/>
-                                    <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" ></cus:InputTextBox>
+                                    <cus:InputTextBox  TextBoxInputType="InputInteger" NumCanMinus="False" ></cus:InputTextBox>
                                     <Label Content="mm"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
-                        <cus:ImageButton Grid.Column="1" Margin="10 0 20 0" Content="插入"/>
+                        <cus:ImageButton Grid.Column="1" Margin="10 0 20 0" Content="插入" Command="{Binding InsertWaterSeparatorCmd}"/>
                     </Grid>
                 </StackPanel>
                 <Label Grid.Row="8" Content="2.卫生间散热器(可无)"/>
@@ -123,14 +123,14 @@
                 </StackPanel>
                 <StackPanel Grid.Row="10" Orientation="Horizontal">
                     <Label Content="3.伸缩缝（分割房间用）"/>
-                    <cus:ImageButton Content="绘制"/>
+                    <cus:ImageButton Content="绘制" Command="{Binding DrawRoomSeparatorCmd}"/>
                 </StackPanel>
                 <Label Grid.Row="11" Content="各区域盘管间距指定（可无）"/>
                 <StackPanel Grid.Row="12" Orientation="Horizontal">
                     <Label Content="盘管间距："/>
                     <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDist,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
                     <Label Content="mm"/>
-                    <cus:ImageButton Content="插入"/>
+                    <cus:ImageButton Content="插入" Command="{Binding InsertSuggestBlkCmd}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="13" Orientation="Horizontal">
                     <Label Content="缺省间距："/>
@@ -195,7 +195,7 @@
                     <RadioButton GroupName="rbWSConnectMode" Content="住宅模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
                     <RadioButton GroupName="rbWSConnectMode" Content="公建模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
                 </StackPanel>
-                <cus:ImageButton Grid.Row="10" Margin="20 10 20 10" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>
+                <cus:ImageButton IsEnabled="False"  Grid.Row="10" Margin="20 10 20 10" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>
 
                 <cus:ImageButton Grid.Row="11" Margin="20 0 20 10" Content="生成地暖平面" Command="{Binding ShowRouteCmd}"/>
                 <StackPanel Grid.Row="12" Orientation="Horizontal">

@@ -236,7 +236,7 @@ namespace TianHua.Hvac.UI
         #endregion
 
         #region 地暖盘管
-        [CommandMethod("TIANHUACAD", "ThFloorHeatingCoilUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THDNPG", CommandFlags.Modal)]
         public void THDNPG()
         {
             if (uiFloorHeatingCoil.Instance != null && uiFloorHeatingCoil.Instance.IsLoaded)

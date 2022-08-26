@@ -23,6 +23,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public static string Layer_RoomSetFrame = "AI-套型";
         public static string Layer_RoomSuggest = "AI-房间功能";
         public static string Layer_Coil = "AI-地暖盘管";
+        public static string Layer_WaterSeparator = "H-EQUP-HEAT";
 
         public static string BlkName_WaterSeparator = "AI-集分水器";
         public static string BlkName_WaterSeparator2 = "AI-地暖分集水器";
@@ -32,7 +33,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         public static Dictionary<string, string> BlkLayerDict = new Dictionary<string, string>() {
                                             {BlkName_RoomSuggest,Layer_RoomSuggest },
-                                             { BlkName_ShowRoute, Layer_RoomSuggest}
+                                             { BlkName_ShowRoute, Layer_RoomSuggest},
+            { BlkName_WaterSeparator2,Layer_WaterSeparator},
                                                                 };
 
         public static string BlkSettingAttrName_WaterSeparator = "设备宽度";

@@ -7,8 +7,12 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using AcHelper;
 using DotNetARX;
 using Linq2Acad;
+using Dreambuild.AutoCAD;
+using ThCADExtension;
+
 
 namespace ThMEPHVAC.FloorHeatingCoil.Service
 {
@@ -20,9 +24,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             {
                 var attNameValues = BuildRootSuggestAttr(route, suggestDist, length);
 
+                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
                 var blkName = insertBlkName;
                 var pt = insertPt;
-                double rotateAngle = 0;//TransformBy(Active.Editor.UCS2WCS());
+                double rotateAngle = angle;//TransformBy(Active.Editor.UCS2WCS());
                 var scale = 1;
                 var layerName = ThFloorHeatingCommon.BlkLayerDict[insertBlkName];
                 var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
@@ -79,13 +85,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
         private static Dictionary<string, string> BuildRootSuggestAttr(int route, double suggestDist, double lenth)
         {
             var attNameValues = new Dictionary<string, string>();
-            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route, string.Format("HL{0}", route));
-            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Dist, string.Format("A={0}", suggestDist));
-            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length, string.Format("L≈{0}m", lenth));
+            var routeS = route == -1 ? "*" : route.ToString();
+            var sdS = suggestDist == -1 ? "*" : suggestDist.ToString();
+            var lengthS = lenth == -1 ? "*" : lenth.ToString();
+
+            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route, string.Format("HL{0}", routeS));
+            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Dist, string.Format("A={0}", sdS));
+            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length, string.Format("L≈{0}m", lengthS));
 
             return attNameValues;
         }
-
 
         public static void ShowConnectivity(List<Polyline> roomgraph, int colorIndex)
         {
@@ -107,12 +116,85 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     hatch.CreateHatch(HatchPatternType.PreDefined, "SOLID", true);
                     hatch.AppendLoop(HatchLoopTypes.Outermost, ids);
                     hatch.EvaluateHatch(true);
-                 
+
                 }
 
             }
         }
 
+        public static void InsertBlk(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+                var blkName = insertBlkName;
+                var pt = insertPt;
+                double rotateAngle = angle;//TransformBy(Active.Editor.UCS2WCS());
+                var scale = 1;
+                var layerName = ThFloorHeatingCommon.BlkLayerDict[insertBlkName];
+                var attNameValues = new Dictionary<string, string>();
+                var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                                          layerName,
+                                          blkName,
+                                          pt,
+                                          new Scale3d(scale),
+                                          rotateAngle,
+                                          attNameValues);
+
+                foreach (var dyn in dynValue)
+                {
+                    objId.SetDynBlockValue(dyn.Key, dyn.Value);
+                }
+            }
+        }
+
+
+        public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames)
+        {
+            //插入模版图块时调用了WblockCloneObjects方法。需要之后做QueueForGraphicsFlush更新transaction。并且最后commit此transaction
+            //参考
+            //https://adndevblog.typepad.com/autocad/2015/01/using-wblockcloneobjects-copied-modelspace-entities-disappear-in-the-current-drawing.html
+
+            using (Transaction transaction = database.TransactionManager.StartTransaction())
+            {
+                LoadBlockLayerToDocumentWithoutTrans(database, blockNames, layerNames);
+                transaction.TransactionManager.QueueForGraphicsFlush();
+                transaction.Commit();
+            }
+        }
+
+        private static void LoadBlockLayerToDocumentWithoutTrans(Database database, List<string> blockNames, List<string> layerNames)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            {
+                //解锁0图层，后面块有用0图层的
+                DbHelper.EnsureLayerOn("0");
+                DbHelper.EnsureLayerOn("DEFPOINTS");
+            }
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                foreach (var item in blockNames)
+                {
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+                    var block = blockDb.Blocks.ElementOrDefault(item);
+                    if (null == block)
+                        continue;
+                    currentDb.Blocks.Import(block, true);
+                }
+                foreach (var item in layerNames)
+                {
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+                    var layer = blockDb.Layers.ElementOrDefault(item);
+                    if (null == layer)
+                        continue;
+                    currentDb.Layers.Import(layer, true);
+                }
+            }
+        }
 
     }
 }

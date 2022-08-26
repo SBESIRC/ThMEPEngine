@@ -34,7 +34,7 @@ namespace ThMEPHVAC
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-
+                ThFloorHeatingCoilSetting.Instance.WithUI = false;
                 var blkNameDict = new Dictionary<string, List<string>> {
                     {"单盆洗手台",new List<string> {"A-Toilate-1"} }
                                 };

@@ -10,11 +10,16 @@ using System.Globalization;
 
 using CommunityToolkit.Mvvm.Input;
 using AcHelper;
+using AcHelper.Commands;
+using Linq2Acad;
+using DotNetARX;
 using ThControlLibraryWPF.ControlUtils;
 
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
+using ThMEPEngineCore;
 using ThMEPHVAC.FloorHeatingCoil.Cmd;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
 
@@ -36,7 +41,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        private int _IndependentRoomConstraint { get; set; } 
+        private int _IndependentRoomConstraint { get; set; }
         public int IndependentRoomConstraint
         {
             get { return _IndependentRoomConstraint; }
@@ -47,7 +52,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        private int _AuxiliaryRoomConstraint { get; set; } 
+        private int _AuxiliaryRoomConstraint { get; set; }
         public int AuxiliaryRoomConstraint
         {
             get { return _AuxiliaryRoomConstraint; }
@@ -58,7 +63,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        private int _PrivatePublicMode { get; set; } 
+        private int _PrivatePublicMode { get; set; }
         public int PrivatePublicMode
         {
             get { return _PrivatePublicMode; }
@@ -69,7 +74,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        private int _TotalLenthConstraint { get; set; } 
+        private int _TotalLenthConstraint { get; set; }
         public int TotalLenthConstraint
         {
             get { return _TotalLenthConstraint; }
@@ -93,7 +98,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        private int _SuggestDist { get; set; } 
+        private int _SuggestDist { get; set; }
         public int SuggestDist
         {
             get { return _SuggestDist; }
@@ -114,7 +119,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
-        
+
         #endregion
 
         #region Data Flow
@@ -135,7 +140,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         {
             SelectFrame = new ObservableCollection<Polyline>();
             PublicRegionConstraint = 1;
-            IndependentRoomConstraint = 0;
+            IndependentRoomConstraint = 1;
             AuxiliaryRoomConstraint = 1;
             PrivatePublicMode = 1;
             TotalLenthConstraint = 120;
@@ -176,6 +181,97 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             ProcessedData.Clear();
         }
 
+        public ICommand PickRoomOutlineCmd => new RelayCommand(PickRoomOutline);
+        private void PickRoomOutline()
+        {
+            FocusToCAD();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THEROC");
+        }
+        public ICommand DrawRoomOutlineCmd => new RelayCommand(DrawRoomOutline);
+        private void DrawRoomOutline()
+        {
+            if (AcadApp.DocumentManager.Count > 0)
+            {
+                FocusToCAD();
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    acdb.Database.CreateAIRoomOutlineLayer();
+                    acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
+        }
+
+        public ICommand DrawDoorOutlineCmd => new RelayCommand(DrawDoorOutline);
+        private void DrawDoorOutline()
+        {
+            if (AcadApp.DocumentManager.Count > 0)
+            {
+                FocusToCAD();
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    acdb.Database.CreateAIDoorLayer();
+                    acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.DOOR);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
+        }
+
+        public ICommand DrawObstacleCmd => new RelayCommand(DrawObstacle);
+        private void DrawObstacle()
+        {
+            if (AcadApp.DocumentManager.Count > 0)
+            {
+                FocusToCAD();
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_Obstacle, 1);
+                    acdb.Database.SetCurrentLayer(ThFloorHeatingCommon.Layer_Obstacle);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
+        }
+
+        public ICommand DrawRoomSeparatorCmd => new RelayCommand(DrawRoomSeparator);
+        private void DrawRoomSeparator()
+        {
+            if (AcadApp.DocumentManager.Count > 0)
+            {
+                FocusToCAD();
+
+                using (var docLock = Active.Document.LockDocument())
+                using (var acdb = AcadDatabase.Active())
+                {
+                    acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_RoomSeparate , 2);
+                    acdb.Database.SetCurrentLayer(ThFloorHeatingCommon.Layer_RoomSeparate);
+                }
+
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
+            }
+        }
+
+        public ICommand InsertWaterSeparatorCmd => new RelayCommand(InsertWaterSeparator);
+        private void InsertWaterSeparator()
+        {
+            FocusToCAD();
+            ThFloorHeatingSubCmd.InsertWaterSeparatorBlk(this);
+        }
+
+        public ICommand InsertSuggestBlkCmd => new RelayCommand(InsertSuggestBlk);
+        private void InsertSuggestBlk()
+        {
+            FocusToCAD();
+            ThFloorHeatingSubCmd.InsertSuggestBlk(this);
+        }
 
         #endregion
 

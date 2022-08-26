@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
     public class ThFloorHeatingRoom
-    {   
+    {
         public Polyline RoomBoundary { get; private set; }
         public List<string> Name { get; private set; }
         public double SuggestDist { get; private set; }

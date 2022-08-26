@@ -127,7 +127,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 var needUpdateSR = false;
                 if (ProcessedData.RegionList.Count > 0)
                 {
-                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest(roomSuggest, ref ProcessedData.RegionList);
+                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest(roomSuggest, ref ProcessedData.RegionList, vm.SuggestDistDefualt);
                 }
 
                 if (needUpdateSR == true)
@@ -137,7 +137,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     updateSR.PipelineC();
                 }
 
-                //ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ref roomSuggest, ProcessedData.RegionList);
+                ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ref roomSuggest, ProcessedData.RegionList);
             }
         }
 
