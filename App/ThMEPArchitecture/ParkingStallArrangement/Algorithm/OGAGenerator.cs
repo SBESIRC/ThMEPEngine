@@ -22,7 +22,6 @@ using ThParkingStall.Core.IO;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
 using ThParkingStall.Core.OTools;
-using ThParkingStall.Core.Tools;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -140,7 +139,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return score;
         }
         #region 第一代初始化
-        private Genome RandomCreateChromosome(bool useSpecialGene = true)
+
+        private Genome RandomCreateChromosome()
         {
             var center = OInterParameter.TotalArea.Centroid;
             var solution = new Genome();
@@ -148,7 +148,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 double relativeValue;
                 var maxDist = segLine.MaxValue - segLine.MinValue;
-                if (RandDouble() > GoldenRatio && useSpecialGene)
+                if (RandDouble() > GoldenRatio)
                 {
                     relativeValue = RandomSpecialNumber(maxDist);//随机特殊解
                 }
@@ -197,15 +197,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return solutions;
         }
 
-        public List<Genome> CreateFirstPopulation2()
-        {
-            var solutions = new List<Genome>();
-            while (solutions.Count < PopulationSize)
-            {
-                solutions.Add(RandomCreateChromosome());
-            }
-            return solutions;
-        }
         #endregion
         #region 随机函数
         //输入0~maxDist的数，返回正（相对于最小值）或负数（相对于最大值）
@@ -448,70 +439,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             return rst;
         }
-        private List<Genome> Selection2(List<Genome> inputSolution, out int maxNums)
-        {
-            Logger?.Information("进行选择");
-            //Logger?.Information("已计算SubArea个数：" + SubAreaParkingCnt.CachedPartitionCnt.Count.ToString());
-#if DEBUG
-            CalculateSP(inputSolution);
-#else
-            CalculateMP(inputSolution);
-#endif
-            List<Genome> sorted;
-            if (ParameterStock.BorderlineMoveRange == 0)
-            {
-                sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
-                maxNums = sorted.First().ParkingStallCount;
-            }
-            else
-            {
-                inputSolution.ForEach(s => GetScore(s, 1));
-                sorted = inputSolution.OrderBy(s => s.score).ToList();
-                var scores = inputSolution.Select(s => s.score).OrderBy(l => l).ToList();
-                maxNums = sorted.First().ParkingStallCount;
-                var strScore = $"当前分数：";
-                for (int k = 0; k < sorted.Count; ++k)
-                {
-                    strScore += string.Format("{0:N2}", (scores[k]));
-                    strScore += " ";
-                }
-                Logger?.Information(strScore);
-
-                var strArea = $"当前面积：";
-                for (int k = 0; k < sorted.Count; ++k)
-                {
-                    strArea += string.Format("{0:N2}", (sorted[k].Area));
-                    strArea += " ";
-                }
-                Logger?.Information(strArea);
-            }
-            var strCnt = $"当前车位数：";
-            for (int k = 0; k < sorted.Count; ++k)
-            {
-                strCnt += sorted[k].ParkingStallCount.ToString();
-                strCnt += " ";
-            }
-            Logger?.Information(strCnt);
-            var maxCnt = sorted[0].ParkingStallCount;
-            DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
-            var areaPerStall = ParameterStock.TotalArea / maxCnt;
-            DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
-            //System.Diagnostics.Debug.WriteLine(strCnt);
-            var rst = new List<Genome>();
-            // SelectionSize 锦标赛选择
-            var selectionSize = 2;
-            for (int i = 0; i < PopulationSize; ++i)
-            {
-                var idxs = RandChoice(inputSolution.Count, selectionSize);
-                var ordered = inputSolution.Slice(idxs).OrderBy(g => g.score);
-                Genome selected;
-                if (ParameterStock.BorderlineMoveRange == 0) selected = ordered.Last();
-                else selected = ordered.First();
-                rst.Add(selected);
-            }
-            return rst;
-        }
-
         private void CalculateSP(List<Genome> inputSolution)
         {
             foreach (var solution in inputSolution)
@@ -688,32 +615,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     {
                         return new List<List<Genome>> { rstSM, rstLM };
                     }
-                }
-            }
-        }
-
-        private List<Genome>CreateNextGeneration2(List<Genome> solutions)
-        {
-            var result = new List<Genome>();
-            for(int i = 0; i < PopulationSize; i++)
-            {
-                var selected = RandChoice(solutions.Count, 2);
-                Crossover(solutions[selected.First()],solutions[selected.Last()]);
-                
-            }
-            return null;
-        }
-        private void Mutation(Genome genome)
-        {
-
-            foreach(var genType in genome.OGenes.Keys)
-            {
-                for(int i = 0;i < genome.OGenes[genType].Count;i++)
-                {
-                    var orgValue = genome.OGenes[genType][i].dDNAs.First().Value;
-                    double minVal = OInterParameter.InitSegLines[i].MinValue;
-                    double maxVal = OInterParameter.InitSegLines[i].MaxValue;
-                    var std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
                 }
             }
         }
