@@ -1,9 +1,13 @@
 ﻿using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Windows;
+using Tianhua.Platform3D.UI.UI;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace Tianhua.Platform3D.UI
 {
     public class Platform3DUIApp : IExtensionApplication
     {
+        PaletteSet mainPaletteSet = null;
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -23,6 +27,20 @@ namespace Tianhua.Platform3D.UI
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+        }
+        [CommandMethod("TIANHUACAD", "TH3D", CommandFlags.Modal)]
+        public void ThTH3D()
+        {
+            if (mainPaletteSet == null)
+            {
+                mainPaletteSet = new PaletteSet("天华三维设计面板");
+                var mainUControl = new PlatformMainUI();
+                mainPaletteSet.AddVisual("", mainUControl);
+            }
+            mainPaletteSet.KeepFocus = true;
+            mainPaletteSet.Visible = true;
+            mainPaletteSet.DockEnabled = DockSides.Left;
+            mainPaletteSet.Dock = DockSides.Left;
         }
     }
 }
