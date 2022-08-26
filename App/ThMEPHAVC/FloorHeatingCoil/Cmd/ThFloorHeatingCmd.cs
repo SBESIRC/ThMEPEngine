@@ -137,7 +137,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     updateSR.PipelineC();
                 }
 
-                ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ref roomSuggest, ProcessedData.RegionList);
+                //ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ref roomSuggest, ProcessedData.RegionList);
             }
         }
 

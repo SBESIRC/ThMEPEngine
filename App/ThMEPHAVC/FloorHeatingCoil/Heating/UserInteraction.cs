@@ -181,7 +181,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void CreateTmpPipeList()
         {
-            int maxIndex = RegionList.FindByMax(x => x.MainPipe[0]).MainPipe[0]+1;
+            int maxIndex = RegionList.FindByMax(x => x.MainPipe[0]).MainPipe[0] + 1;
+            int minIndex = RegionList.FindByMin(x => x.MainPipe[0]).MainPipe[0];
+
+            for (int i = 0; i < RegionList.Count; i++) 
+            {
+                RegionList[i].MainPipe[0] = RegionList[i].MainPipe[0] - minIndex;
+            }
+            maxIndex = maxIndex - minIndex;
 
             for (int i = 0; i < maxIndex ; i++)
             {
@@ -238,6 +245,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         childIdList.Add(childRegionId);
                         //
                         topoIdQueue.Enqueue(RegionToNode[childRegionId]);
+                        
+                        //
+                        RegionList[childRegionId].MainEntrance = RegionList[regionId].ExportMap[RegionList[childRegionId]];
                     }
                 }
                 SingleTopoTree[topoIndex].ChildIdList = childIdList;
@@ -254,7 +264,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     List<int> parentList = new List<int>();
                     RegionList[i].FatherRegion.ForEach(x => parentList.Add(x.RegionId));
 
-                    for (int j = 0; j < TmpPipeList.Count; i++)
+                    for (int j = 0; j < TmpPipeList.Count; j++)
                     {
                         for (int k = 0; k < parentList.Count; k++)
                         {
@@ -382,6 +392,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     int regionId = nowPipe.RegionIdList[j];
                     RegionList[regionId].PassingPipeList.Add(i);
+                }
+
+                //更新mainpipe
+                for (int j = 0; j < nowPipe.DomainIdList.Count; j++)
+                {
+                    int regionId = nowPipe.DomainIdList[j];
+                    RegionList[regionId].MainPipe[0] = i;
                 }
             }
 

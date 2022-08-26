@@ -85,9 +85,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             ////根据全局参数修改数据
             Parameter.TotalLength = 120000;
             
-            Parameter.AuxiliaryRoomConstraint = false;
+            Parameter.AuxiliaryRoomConstraint = true;
             Parameter.IndependentRoomConstraint = false;
-            Parameter.PublicRegionConstraint = false;
+            Parameter.PublicRegionConstraint = true;
 
             Parameter.SuggestDistanceWall = 100;
             Parameter.SuggestDistanceRoom = 250;

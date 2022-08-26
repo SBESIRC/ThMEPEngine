@@ -518,6 +518,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             buff.Add((right - left).Length * 0.5);
             buff.Add(RegionList[regionId].SuggestDist * 0.5);
 
+            if (centerPt == newPoint) 
+            {
+                ptList.RemoveAt(0);
+                buff.RemoveAt(0);
+            }
+
+
             BufferPoly bp = new BufferPoly(ptList, buff);
             newChatou = bp.Buffer();
             DrawUtils.ShowGeometry(newChatou, "l5OtherChaTou", 200, 30);
@@ -542,8 +549,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     tmpPolyList[j].Closed = true;
                     //DrawUtils.ShowGeometry(tmpPolyList[i], "l4Why", 5, 30);
                 }
-                var pl = tmpPolyList.ToArray().ToCollection().UnionPolygons(false).Cast<Polyline>().First();
 
+                Polyline pl = new Polyline();
+                var plList2 = tmpPolyList.ToArray().ToCollection().UnionPolygons(false).Cast<Polyline>().ToList();
+
+                if (plList2.Count > 0) 
+                {
+                    pl = plList2.First();
+                }
+            
                 WholePipeList.Add(pl);
                 DrawUtils.ShowGeometry(pl, "l3WholePipe", 0, 30);
                 
@@ -585,6 +599,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             for (int i = 0; i < WholePipeList.Count; i++) 
             {
+                if (WholePipeList[i] == new Polyline() || WholePipeList[i].Area == 0)
+                {
+                    continue;
+                }
                 var nowPipeInfo  = DoorPipeToPointMap[new Tuple<int, int>(0, i)];
                 Point3d pt0 = nowPipeInfo.PointList[2];
                 Point3d pt1 = nowPipeInfo.PointList[3];
