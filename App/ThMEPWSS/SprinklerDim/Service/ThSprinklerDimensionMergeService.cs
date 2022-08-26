@@ -35,6 +35,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             if (isXAxis) xAxis = new Vector3d(1, 0, 0);
             else xAxis = new Vector3d(0, 1, 0);
 
+            //dim1存长线，dim2存短线
             if (dim1.Count < dim2.Count)
             {
                 List<ThSprinklerDimGroup> t = dim2;
@@ -68,22 +69,14 @@ namespace ThMEPWSS.SprinklerDim.Service
             if (det < tolerance)
             {
                 //判断是否碰撞
-                foreach (ThSprinklerDimGroup i in dim1)
-                {
-                    if (dim2.Count == 1) break;
-                    Line line = new Line(pts[dim2[0].pt], pts[dim2[0].pt] + xAxis * 100);
-                    Point3d droppt = line.GetClosestPointTo(pts[i.pt], true);
-                    if (IsConflicted(droppt, pts[i.pt], matrix, walls) || IsConflicted(droppt, pts[dim2[0].pt], matrix, walls) || IsConflicted(droppt, pts[dim2[dim2.Count - 1].pt], matrix, walls))
-                        return false;
-                }
                 foreach (ThSprinklerDimGroup i in dim2)
                 {
-                    if (dim1.Count == 1) break;
                     Line line = new Line(pts[dim1[0].pt], pts[dim1[0].pt] + xAxis * 100);
                     Point3d droppt = line.GetClosestPointTo(pts[i.pt], true);
                     if (IsConflicted(droppt, pts[i.pt], matrix, walls) || IsConflicted(droppt, pts[dim1[0].pt], matrix, walls) || IsConflicted(droppt, pts[dim1[dim1.Count - 1].pt], matrix, walls))
                         return false;
                 }
+
                 double distance1 = ThCoordinateService.GetOriginalValue(pts[dim1[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1].pt], isXAxis);
                 double distance2 = ThCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0].pt], isXAxis);
                 double distance3 = ThCoordinateService.GetOriginalValue(pts[dim1[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0].pt], isXAxis);

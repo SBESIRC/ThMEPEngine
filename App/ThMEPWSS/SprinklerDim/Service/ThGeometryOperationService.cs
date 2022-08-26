@@ -138,5 +138,22 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
+        public static List<Polyline> RemoveOverlap(List<Polyline> polylines)
+        {
+            List<Polyline> tPolylines = new List<Polyline>();
+            foreach (Polyline polyline in polylines)
+            {
+                tPolylines.AddRange(ThDataTransformService.GetPolylines(polyline.Buffer(-1)));
+            }
+
+            List<Polyline> newPolylines = new List<Polyline>();
+            foreach (Polyline polyline in tPolylines)
+            {
+                newPolylines.AddRange(ThDataTransformService.GetPolylines(polyline.Buffer(1)));
+            }
+
+            return newPolylines;
+        }
+
     }
 }

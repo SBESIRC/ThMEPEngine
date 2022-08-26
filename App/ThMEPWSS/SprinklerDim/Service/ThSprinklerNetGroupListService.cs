@@ -349,35 +349,35 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
 
             // test
-            //List<Line> allLines = new List<Line>();
-            //foreach (ThSprinklerNetGroup netGroup in transNetList)
-            //{
-            //    List<Point3d> pts = ThCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
+            List<Line> allLines = new List<Line>();
+            foreach (ThSprinklerNetGroup netGroup in transNetList)
+            {
+                List<Point3d> pts = ThCoordinateService.MakeTransformation(netGroup.Pts, netGroup.Transformer.Inverse());
 
-            //    foreach(List<List<int>> collineation in netGroup.XCollineationGroup)
-            //    {
-            //        foreach(List<int> line in collineation)
-            //        {
-            //            for (int i = 0; i < line.Count - 1; i++)
-            //            {
-            //                allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
-            //            }
-            //        }
-            //    }
+                foreach (List<List<int>> collineation in netGroup.XCollineationGroup)
+                {
+                    foreach (List<int> line in collineation)
+                    {
+                        for (int i = 0; i < line.Count - 1; i++)
+                        {
+                            allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
+                        }
+                    }
+                }
 
-            //    foreach (List<List<int>> collineation in netGroup.YCollineationGroup)
-            //    {
-            //        foreach (List<int> line in collineation)
-            //        {
-            //            for (int i = 0; i < line.Count - 1; i++)
-            //            {
-            //                allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
-            //            }
-            //        }
-            //    }
+                foreach (List<List<int>> collineation in netGroup.YCollineationGroup)
+                {
+                    foreach (List<int> line in collineation)
+                    {
+                        for (int i = 0; i < line.Count - 1; i++)
+                        {
+                            allLines.Add(new Line(pts[line[i]], pts[line[i + 1]]));
+                        }
+                    }
+                }
 
-            //}
-            //DrawUtils.ShowGeometry(allLines, string.Format("SSS-{0}-5Line", printTag), 4);
+            }
+            DrawUtils.ShowGeometry(allLines, string.Format("SSS-{0}-5Line", printTag), 4);
 
         }
 

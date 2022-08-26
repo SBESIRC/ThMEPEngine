@@ -91,50 +91,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                 ptsy.ForEach(p => DrawUtils.ShowGeometry(p, string.Format("SSS-Dimension-{0}-{1}-clastery", printTag, i), 3, 35));
                 List<Point3d> ds = ThCoordinateService.MakeTransformation(transNetList[i].Pts, transNetList[i].Transformer.Inverse());
                 FicPts[i].ForEach(p => DrawUtils.ShowGeometry(ds[p], string.Format("SSS-Dimension-{0}-{1}-ficPoints", printTag, i), 0, 35));
-
             }
 
-        }
-
-        private static List<int> GetEdgeDimensions(List<Point3d> pts, List<List<int>> group, out List<int> dims, double step, bool isXAxis)
-        {
-            List<int> EdgeDim = new List<int>();
-            dims = new List<int>();
-
-            List<int> minDim = group[0];
-            List<int> maxDim = group[group.Count - 1];
-            List<int> longestDim = GetLongestLine(group);
-
-            if (minDim.Count > longestDim.Count / 2.0 && minDim.Count > maxDim.Count)
-            {
-                dims = minDim;
-                EdgeDim.AddRange(minDim);
-            }
-            else if (maxDim.Count > longestDim.Count / 2.0 && maxDim.Count > minDim.Count)
-            {
-                dims = longestDim;
-                EdgeDim.AddRange(longestDim);
-            }
-            else if (maxDim.Count > longestDim.Count / 2.0 && maxDim.Count == minDim.Count)
-            {
-                if (!isXAxis)
-                {
-                    dims = minDim;
-                    EdgeDim.AddRange(minDim);
-                }
-                else
-                {
-                    dims = maxDim;
-                    EdgeDim.AddRange(maxDim);
-                }
-            }
-            else
-            {
-                dims = longestDim;
-                EdgeDim.AddRange(longestDim);
-            }
-
-            return EdgeDim;
         }
 
         /// <summary>

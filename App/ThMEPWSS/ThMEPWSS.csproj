@@ -229,6 +229,7 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
     <Compile Include="Engine\ThTCHWaterIndicatorRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Data\ThSprinklerDimDataProcessService.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerDimReferencePoint.cs" />
     <Compile Include="SprinklerDim\Data\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Engine\ThSprinklerDimEngine.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimension.cs" />
