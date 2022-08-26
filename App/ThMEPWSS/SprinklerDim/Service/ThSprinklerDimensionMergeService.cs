@@ -31,28 +31,20 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <returns></returns>
         public static bool CanMerge(List<Point3d> pts, List<ThSprinklerDimGroup> dim1, List<ThSprinklerDimGroup> dim2, bool isXAxis, double step, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls, double tolerance = 400.0)
         {
-            Vector3d xAxis = new Vector3d();
-            if (isXAxis) xAxis = new Vector3d(1, 0, 0);
-            else xAxis = new Vector3d(0, 1, 0);
-
-            //dim1存长线，dim2存短线
-            if (dim1.Count < dim2.Count)
-            {
-                List<ThSprinklerDimGroup> t = dim2;
-                dim2 = dim1;
-                dim1 = t;
-            }
+            Vector3d xAxis = isXAxis ? new Vector3d(1, 0, 0) : new Vector3d(0, 1, 0);
+            List<ThSprinklerDimGroup> BaseLine = dim1.Count < dim2.Count ? dim2 : dim1;
+            List<ThSprinklerDimGroup> DimensionToBeMerged = dim1.Count >= dim2.Count ? dim2 : dim1;
 
             //不考虑点与点之间的合并或者空列表
-            if (dim1.Count <= 1) return false;
+            if (BaseLine.Count <= 1) return false;
 
             //计算标注线间距
-            double det = Math.Abs(ThCoordinateService.GetOriginalValue(pts[dim1[0].pt], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0].pt], !isXAxis));
-            if (dim2.Count == 1)
+            double det = Math.Abs(ThCoordinateService.GetOriginalValue(pts[BaseLine[0].pt], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[0].pt], !isXAxis));
+            if (DimensionToBeMerged.Count == 1)
             {
-                Line line = new Line(pts[dim1[0].pt], pts[dim1[0].pt] + xAxis * 100);
-                Point3d droppt = line.GetClosestPointTo(pts[dim2[0].pt], true);
-                List<int> t = dim2[0].PtsDimed;
+                Line line = new Line(pts[BaseLine[0].pt], pts[BaseLine[0].pt] + xAxis * 100);
+                Point3d droppt = line.GetClosestPointTo(pts[DimensionToBeMerged[0].pt], true);
+                List<int> t = DimensionToBeMerged[0].PtsDimed;
                 if (t.Count == 1) tolerance = 1.0 * step;                                        //仅仅当xy方向都为单点的时候放大tolerance
                 foreach (int j in t)
                 {
@@ -69,18 +61,18 @@ namespace ThMEPWSS.SprinklerDim.Service
             if (det < tolerance)
             {
                 //判断是否碰撞
-                foreach (ThSprinklerDimGroup i in dim2)
+                foreach (ThSprinklerDimGroup i in DimensionToBeMerged)
                 {
-                    Line line = new Line(pts[dim1[0].pt], pts[dim1[0].pt] + xAxis * 100);
+                    Line line = new Line(pts[BaseLine[0].pt], pts[BaseLine[0].pt] + xAxis * 100);
                     Point3d droppt = line.GetClosestPointTo(pts[i.pt], true);
-                    if (IsConflicted(droppt, pts[i.pt], matrix, walls) || IsConflicted(droppt, pts[dim1[0].pt], matrix, walls) || IsConflicted(droppt, pts[dim1[dim1.Count - 1].pt], matrix, walls))
+                    if (IsConflicted(droppt, pts[i.pt], matrix, walls) || IsConflicted(droppt, pts[BaseLine[0].pt], matrix, walls) || IsConflicted(droppt, pts[BaseLine[BaseLine.Count - 1].pt], matrix, walls))
                         return false;
                 }
 
-                double distance1 = ThCoordinateService.GetOriginalValue(pts[dim1[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1].pt], isXAxis);
-                double distance2 = ThCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0].pt], isXAxis);
-                double distance3 = ThCoordinateService.GetOriginalValue(pts[dim1[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[0].pt], isXAxis);
-                double distance4 = ThCoordinateService.GetOriginalValue(pts[dim1[dim1.Count - 1].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[dim2[dim2.Count - 1].pt], isXAxis);
+                double distance1 = ThCoordinateService.GetOriginalValue(pts[BaseLine[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[DimensionToBeMerged.Count - 1].pt], isXAxis);
+                double distance2 = ThCoordinateService.GetOriginalValue(pts[BaseLine[BaseLine.Count - 1].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[0].pt], isXAxis);
+                double distance3 = ThCoordinateService.GetOriginalValue(pts[BaseLine[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[0].pt], isXAxis);
+                double distance4 = ThCoordinateService.GetOriginalValue(pts[BaseLine[BaseLine.Count - 1].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[DimensionToBeMerged.Count - 1].pt], isXAxis);
 
                 if ((Math.Abs(distance1) < 1.5 * step || Math.Abs(distance2) < 1.5 * step) && Math.Min(Math.Abs(distance1), Math.Abs(distance2)) > 45) return true;
                 else if (distance3 * distance4 < 0) return true;
@@ -167,7 +159,6 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <returns></returns>
         public static List<List<ThSprinklerDimGroup>> MergeDimension(ref List<Point3d> pts, List<List<ThSprinklerDimGroup>> group, double step, bool isXAxis, out List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
-            List<Point3d> pts1 = pts;
             List<int> FicPts1 = new List<int>();
             Dictionary<int, bool> isMerged = new Dictionary<int, bool>();
             foreach (List<ThSprinklerDimGroup> j in group) isMerged.Add(j[0].pt, false);
@@ -197,33 +188,32 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="walls"></param>
         /// <param name="anothercollinearation"></param>
         /// <returns></returns>
-
-        public static List<ThSprinklerDimGroup> GetMerged(ref List<Point3d> pts, List<ThSprinklerDimGroup> currentdim1, List<List<ThSprinklerDimGroup>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
+        public static List<ThSprinklerDimGroup> GetMerged(ref List<Point3d> pts, List<ThSprinklerDimGroup> currentdim, List<List<ThSprinklerDimGroup>> group, double step, bool isXAxis, ref Dictionary<int, bool> isMerged,ref List<int> FicPts, Matrix3d matrix, ThCADCoreNTSSpatialIndex walls)
         {
-            List<ThSprinklerDimGroup> MergedDims = currentdim1;
-            isMerged[currentdim1[0].pt] = true;
+            List<ThSprinklerDimGroup> MergedDims = currentdim;
+            isMerged[currentdim[0].pt] = true;
 
-            foreach (List<ThSprinklerDimGroup> currentdim2 in group)
+            foreach (List<ThSprinklerDimGroup> DimensionToBeMerged in group)
             {
-                if (CanMerge(pts, currentdim1, currentdim2, isXAxis, step, matrix, walls) && !currentdim1.Equals(currentdim2))
+                if (CanMerge(pts, currentdim, DimensionToBeMerged, isXAxis, step, matrix, walls) && !currentdim.Equals(DimensionToBeMerged))
                 {
-                    if (!isMerged[currentdim2[0].pt])
+                    if (!isMerged[DimensionToBeMerged[0].pt])
                     {
-                        isMerged[currentdim2[0].pt] = true;
-                        if (currentdim2.Count > currentdim1.Count)
+                        isMerged[DimensionToBeMerged[0].pt] = true;
+                        if (DimensionToBeMerged.Count > currentdim.Count)
                         {
-                            MergedDims = currentdim2;
-                            foreach (ThSprinklerDimGroup j in currentdim1)
+                            MergedDims = DimensionToBeMerged;
+                            foreach (ThSprinklerDimGroup j in currentdim)
                             {
                                 if (isXAxis)
                                 {
-                                    pts.Add(new Point3d(pts[j.pt].X, pts[currentdim2[0].pt].Y, 0));
+                                    pts.Add(new Point3d(pts[j.pt].X, pts[DimensionToBeMerged[0].pt].Y, 0));
                                     MergedDims.Add(new ThSprinklerDimGroup(pts.Count - 1, j.PtsDimed));
                                     FicPts.Add(pts.Count - 1);
                                 }
                                 else
                                 {
-                                    pts.Add(new Point3d(pts[currentdim2[0].pt].X, pts[j.pt].Y, 0));
+                                    pts.Add(new Point3d(pts[DimensionToBeMerged[0].pt].X, pts[j.pt].Y, 0));
                                     MergedDims.Add(new ThSprinklerDimGroup(pts.Count - 1, j.PtsDimed));
                                     FicPts.Add(pts.Count - 1);
                                 }
@@ -231,17 +221,17 @@ namespace ThMEPWSS.SprinklerDim.Service
                         }
                         else
                         {
-                            foreach (ThSprinklerDimGroup j in currentdim2)
+                            foreach (ThSprinklerDimGroup j in DimensionToBeMerged)
                             {
                                 if (isXAxis)
                                 {
-                                    pts.Add(new Point3d(pts[j.pt].X, pts[currentdim1[0].pt].Y, 0));
+                                    pts.Add(new Point3d(pts[j.pt].X, pts[currentdim[0].pt].Y, 0));
                                     MergedDims.Add(new ThSprinklerDimGroup(pts.Count - 1, j.PtsDimed));
                                     FicPts.Add(pts.Count - 1);
                                 }
                                 else
                                 {
-                                    pts.Add(new Point3d(pts[currentdim1[0].pt].X, pts[j.pt].Y, 0));
+                                    pts.Add(new Point3d(pts[currentdim[0].pt].X, pts[j.pt].Y, 0));
                                     MergedDims.Add(new ThSprinklerDimGroup(pts.Count - 1, j.PtsDimed));
                                     FicPts.Add(pts.Count - 1);
                                 }

@@ -218,46 +218,46 @@ namespace ThMEPWSS.SprinklerDim.Service
             CheckDimensions(dim, anotherCollineation, ref isDimensioned);
             while (isDimensioned.Contains(false))
             {
-                List<int> tDim1 = new List<int>();
-                List<int> tDim2 = new List<int>();
-                List<ThSprinklerDimGroup> Dim1 = new List<ThSprinklerDimGroup>();
-                List<ThSprinklerDimGroup> Dim2 = new List<ThSprinklerDimGroup>();
+                List<int> DimedPtNotRemovedIndex = new List<int>();
+                List<int> DimedPtRemovedIndex = new List<int>();
+                List<ThSprinklerDimGroup> DimedPtNotRemoved = new List<ThSprinklerDimGroup>();
+                List<ThSprinklerDimGroup> DimedPtRemoved = new List<ThSprinklerDimGroup>();
 
                 for (int i = 0; i < anotherCollineation.Count; i++)
                 {
                     if (!isDimensioned[i])
                     {
                         List<int> tDim = GetLongestDimension(anotherCollineation[i], collineation, anotherCollineation, isDimensioned);
-                        if (DeleteIsDimed(tDim, anotherCollineation, isDimensioned).Count > tDim2.Count)
+                        if (DeleteIsDimed(tDim, anotherCollineation, isDimensioned).Count > DimedPtRemovedIndex.Count)
                         {
                             List<ThSprinklerDimGroup> t1 = new List<ThSprinklerDimGroup>();
                             List<ThSprinklerDimGroup> t2 = new List<ThSprinklerDimGroup>();
-                            tDim1 = tDim;
-                            tDim1.ForEach(p => t1.Add(new ThSprinklerDimGroup(p, anotherCollineation.Where(q => q.Contains(p)).ToList()[0])));
-                            tDim2 = DeleteIsDimed(tDim, anotherCollineation, isDimensioned);
-                            tDim2.ForEach(p => t2.Add(new ThSprinklerDimGroup(p, anotherCollineation.Where(q => q.Contains(p)).ToList()[0])));
-                            Dim1 = t1;
-                            Dim2 = t2;
+                            DimedPtNotRemovedIndex = tDim;
+                            DimedPtNotRemovedIndex.ForEach(p => t1.Add(new ThSprinklerDimGroup(p, anotherCollineation.Where(q => q.Contains(p)).ToList()[0])));
+                            DimedPtRemovedIndex = DeleteIsDimed(tDim, anotherCollineation, isDimensioned);
+                            DimedPtRemovedIndex.ForEach(p => t2.Add(new ThSprinklerDimGroup(p, anotherCollineation.Where(q => q.Contains(p)).ToList()[0])));
+                            DimedPtNotRemoved = t1;
+                            DimedPtRemoved = t2;
                         }
 
                     }
                 }
 
-                double Prop = (double)tDim2.Count / tDim1.Count;
+                double Prop = (double)DimedPtRemoved.Count / DimedPtNotRemoved.Count;
                 if (Prop <= 0.5)
                 {
-                    if (Dim2.Count != 0)
+                    if (DimedPtRemoved.Count != 0)
                     {
-                        resDims.AddRange(SeperateLine(group.Pts, Dim2, tDim1, isXAxis, step));
-                        CheckDimensions(tDim2, anotherCollineation, ref isDimensioned);
+                        resDims.AddRange(SeperateLine(group.Pts, DimedPtRemoved, DimedPtNotRemovedIndex, isXAxis, step));
+                        CheckDimensions(DimedPtRemovedIndex, anotherCollineation, ref isDimensioned);
                     }
                 }
                 else
                 {
-                    if (Dim1.Count != 0)
+                    if (DimedPtNotRemoved.Count != 0)
                     {
-                        resDims.Add(Dim1);
-                        CheckDimensions(tDim1, anotherCollineation, ref isDimensioned);
+                        resDims.Add(DimedPtNotRemoved);
+                        CheckDimensions(DimedPtNotRemovedIndex, anotherCollineation, ref isDimensioned);
                     }
                 }
             }

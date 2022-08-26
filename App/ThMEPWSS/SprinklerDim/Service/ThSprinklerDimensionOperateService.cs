@@ -117,7 +117,6 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="dim"></param>
         /// <param name="isNotDimensioned"></param>
         /// <returns></returns>
-
         public static double GetNeareastDistance(List<Point3d> pts, List<int> dim, List<int> isNotDimensioned,bool IsxAxis)
         {
             int d1 = dim[0];
@@ -142,18 +141,18 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="isXAxis"></param>
         /// <param name="step"></param>
         /// <returns></returns>
-        public static List<List<ThSprinklerDimGroup>> SeperateLine(List<Point3d> pts, List<ThSprinklerDimGroup> line, List<int> line2, bool isXAxis, double step)
+        public static List<List<ThSprinklerDimGroup>> SeperateLine(List<Point3d> pts, List<ThSprinklerDimGroup> DimedPtRemoved, List<int> DimedPtNotRemovedIndex, bool isXAxis, double step)
         {
-            line.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x.pt], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y.pt], isXAxis)));
+            DimedPtRemoved.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x.pt], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y.pt], isXAxis)));
             List<List<ThSprinklerDimGroup>> lines = new List<List<ThSprinklerDimGroup>>();
-            line2.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+            DimedPtNotRemovedIndex.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
 
-            List<ThSprinklerDimGroup> one = new List<ThSprinklerDimGroup> { line[0] };
-            for (int i = 1; i < line.Count; i++)
+            List<ThSprinklerDimGroup> one = new List<ThSprinklerDimGroup> { DimedPtRemoved[0] };
+            for (int i = 1; i < DimedPtRemoved.Count; i++)
             {
                 ThSprinklerDimGroup iPtIndex = one[one.Count - 1];
-                ThSprinklerDimGroup jPtIndex = line[i];
-                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex.pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex.pt], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex.pt) - line2.IndexOf(jPtIndex.pt)) != 1)
+                ThSprinklerDimGroup jPtIndex = DimedPtRemoved[i];
+                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex.pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex.pt], isXAxis) > 1.5 * step || Math.Abs(DimedPtNotRemovedIndex.IndexOf(iPtIndex.pt) - DimedPtNotRemovedIndex.IndexOf(jPtIndex.pt)) != 1)
                 {
                     lines.Add(one);
                     one = new List<ThSprinklerDimGroup> { jPtIndex };
