@@ -13,22 +13,16 @@ namespace ThMEPTCH.Model
         {
 
         }
-        public ThTCHBeam(Point3d startPt, Point3d endPt, double width, double height)
+        public ThTCHBeam(double width, double length, double height, Vector3d xvector, Point3d origin)
         {
             Init();
             Width = width;
+            Length = length;
             Height = height;
-            Length = startPt.DistanceTo(endPt);
-            XVector = (endPt - startPt).GetNormal();
-            Origin = startPt + XVector.MultiplyBy(Length / 2);
+            XVector = xvector;
+            Origin = origin;
         }
-        public ThTCHBeam(Polyline outPline, double height)
-        {
-            Init();
-            XVector = Vector3d.XAxis;
-            Outline = outPline;
-            Height = height;
-        }
+
         void Init()
         {
             ExtrudedDirection = Vector3d.ZAxis;
@@ -38,21 +32,7 @@ namespace ThMEPTCH.Model
         {
             if (this == null)
                 return null;
-            ThTCHBeam cloneBeam = null;
-            if (Outline != null)
-            {
-                if (this.Outline is Polyline polyline)
-                {
-                    var cloneLine = polyline.Clone() as Polyline;
-                    cloneBeam = new ThTCHBeam(cloneLine, this.Height);
-                }
-            }
-            else
-            {
-                var sp = this.Origin - this.XVector.MultiplyBy(Length / 2);
-                var ep = this.Origin + this.XVector.MultiplyBy(Length/2);
-                cloneBeam = new ThTCHBeam(sp, ep, this.Width, this.Height);
-            }
+            ThTCHBeam cloneBeam = new ThTCHBeam(Width, Length, Height, XVector, Origin);
             if (cloneBeam != null)
             {
                 cloneBeam.Uuid = this.Uuid;

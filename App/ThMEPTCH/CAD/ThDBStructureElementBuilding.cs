@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.AFASRegion.Utls;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 using ThMEPTCH.TCHArchDataConvert.THStructureEntity;
 
@@ -89,6 +90,8 @@ namespace ThMEPTCH.CAD
 
             var beams = BuildBeam(beamLines, beamMarks);
 
+            ExtensionBeam(beams);
+
             var slabs = BuildSlab(beams, result.Select(o => o.Outline).ToList(), slabLines, slabHatchLines, slabHoleHatchLines, slabBTHs);
 
             //using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
@@ -108,7 +111,7 @@ namespace ThMEPTCH.CAD
         private List<THStructureSlab> BuildSlab(List<THStructureBeam> beams, List<Polyline> structs, List<Polyline> SlabPLs, List<Polyline> slabHatchLines, List<Polyline> slabHoleHatchLines, List<THStructureSlabBTH> slabBTHs)
         {
             List<THStructureSlab> result = new List<THStructureSlab>();
-            var OptimizeBeamLines = beams.SelectMany(o => CreateBeamLines(o)).SelectMany(o => CreateOptimizeBeamLine(o));
+            var OptimizeBeamLines = beams.Select(o => CreateBeamLines(o)).SelectMany(o => CreateOptimizeBeamLine(o));
             var objs = OptimizeBeamLines.Union(structs).Union(SlabPLs).ToCollection();
             List<Polyline> areas = objs.PolygonsEx().Cast<Entity>().OfType<Polyline>().Where(o => o.Area > 100000).ToList();
             var inwardAreas = areas.SelectMany(o => o.Buffer(-10).OfType<Polyline>());
@@ -165,6 +168,60 @@ namespace ThMEPTCH.CAD
             }
             return result;
         }
+
+        /// <summary>
+        /// 延伸梁(梁-梁相交处成模时改为延伸处理)
+        /// </summary>
+        /// <param name="beams"></param>
+        private void ExtensionBeam(List<THStructureBeam> beams)
+        {
+            var specialIndex = new ThCADCoreNTSSpatialIndex(beams.Select(o => o.Outline).ToCollection());
+            foreach (var beam in beams)
+            {
+                var beamCenterLine = CreateBeamLines(beam);
+                var newStartPt = beamCenterLine.StartPoint;
+                var newEndPt = beamCenterLine.EndPoint;
+                bool HaveChanges = false;
+                //为一端去创建探针
+                var probe = beamCenterLine.EndPoint + beam.XVector * 10;
+                var space = probe.CreateSquare(30);
+                var objs = specialIndex.SelectFence(space);
+                objs.Remove(beam.Outline);
+                if (objs.Count == 1)
+                {
+                    var intersectBeam = beams.First(o => o.Outline.Equals(objs[0]));
+                    if (!beam.XVector.IsParallelWithTolerance(intersectBeam.XVector, 30))
+                    {
+                        HaveChanges = true;
+                        var intersectPts = beamCenterLine.IntersectWithEx(intersectBeam.Outline, Intersect.ExtendThis);
+                        newEndPt = intersectPts.Cast<Point3d>().OrderByDescending(o => o.DistanceTo(newStartPt)).First();
+                    }
+                }
+
+                //另一端探针
+                probe = beamCenterLine.StartPoint - beam.XVector * 10;
+                space = probe.CreateSquare(30);
+                objs = specialIndex.SelectFence(space);
+                objs.Remove(beam.Outline);
+                if (objs.Count == 1)
+                {
+                    var intersectBeam = beams.First(o => o.Outline.Equals(objs[0]));
+                    if (!beam.XVector.IsParallelWithTolerance(intersectBeam.XVector, 30))
+                    {
+                        HaveChanges = true;
+                        var intersectPts = beamCenterLine.IntersectWithEx(intersectBeam.Outline, Intersect.ExtendThis);
+                        newStartPt = intersectPts.Cast<Point3d>().OrderByDescending(o => o.DistanceTo(newEndPt)).First();
+                    }
+                }
+
+                if(HaveChanges)
+                {
+                    beam.Origin = new Point3d((newStartPt.X + newEndPt.X) / 2, (newStartPt.Y + newEndPt.Y) / 2, 0);
+                    beam.Length = newStartPt.DistanceTo(newEndPt);
+                }
+            }
+        }
+
         private List<THStructureBeam> BuildBeam(List<Line> lines, List<THStructureDBText> beamMarks)
         {
             List<THStructureBeam> result = new List<THStructureBeam>();
@@ -212,6 +269,10 @@ namespace ThMEPTCH.CAD
                             THStructureBeam structureBeam = new THStructureBeam();
                             structureBeam.Outline = miniRectangle;
                             structureBeam.Height = beamHeight;
+                            structureBeam.Width = beamWidth;
+                            structureBeam.XVector = (line.EndPoint- line.StartPoint).GetNormal();
+                            structureBeam.Length = miniRectangle.GetAllLinesInPolyline().Max(o => o.Length);
+                            structureBeam.Origin = miniRectangle.GetRectangleCenterPt();
                             structureBeam.RelativeBG = beamBGInfo.IsNull() ? 0.0 : (beamBGInfo.Content.Contains('-') ? -1 : 1) * double.Parse(beamBGInfo.Content.Substring(4, beamBGInfo.Content.Length - 5)) * 1000;
                             structureBeam.Uuid = line.Handle.Value;
                             result.Add(structureBeam);
@@ -245,16 +306,15 @@ namespace ThMEPTCH.CAD
             return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
         }
 
-        private List<Line> CreateBeamLines(THStructureBeam beam)
+        private Line CreateBeamLines(THStructureBeam beam)
         {
-            var lines = beam.Outline.GetAllLinesInPolyline();
-            return lines.OrderByDescending(o => o.Length).Take(4).ToList();
+            return new Line(beam.Origin - beam.XVector * beam.Length / 2, beam.Origin + beam.XVector * beam.Length / 2);
         }
 
         private List<Entity> CreateOptimizeBeamLine(Line beamLine)
         {
             var result = new List<Entity>();
-            var lineExtend = beamLine.ExtendLine(10.0);
+            var lineExtend = beamLine.ExtendLine(200.0);
             result.Add(lineExtend);
             result.AddRange(CreateHook(lineExtend));
             return result;
