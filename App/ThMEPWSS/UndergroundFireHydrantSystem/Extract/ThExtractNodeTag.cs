@@ -80,15 +80,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var offset2 = new Point3d(offset2x, offset2y, 0);
                 var pt1 = offset1.TransformBy(br.BlockTransform);
                 var pt2 = offset2.TransformBy(br.BlockTransform);
-
+                
                 var ptEx1 = new Point3dEx();
                 var ptEx2 = new Point3dEx();
                 foreach (var pt in fireHydrantSysIn.PtDic.Keys)
                 {
                     if(fireHydrantSysIn.PtDic[pt].Count == 3)
                     {
-                        var dist1 = pt._pt.DistanceTo(pt1);
-                        var dist2 = pt._pt.DistanceTo(pt2);
+                        var dist1 = Math.Abs(pt._pt.X-pt1.X) + Math.Abs(pt._pt.Y - pt1.Y);
+                        var dist2 = Math.Abs(pt._pt.X - pt2.X) + Math.Abs(pt._pt.Y - pt2.Y);
                         if (dist1 < minDist1)
                         {
                             ptEx1 = pt;
