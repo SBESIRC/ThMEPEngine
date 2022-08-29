@@ -352,14 +352,7 @@ namespace ThMEPWSS.Pipe.Model
             {
                 foreach (var floor in ParseFloorNums(item.Floor))
                 {
-                    if (floor == 1)
-                    {
-                        dic[floor] = 0;
-                    }
-                    else
-                    {
-                        dic[floor] = item.Height;//(item.Height / 1000.0).ToString("0.00");
-                    }
+                    dic[floor] = item.Height;//(item.Height / 1000.0).ToString("0.00");
                 }
             }
             var floorHeightDic = new Dictionary<string, string>();
@@ -370,9 +363,9 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     floorHeight = 0;
                 }
-                else if (dic.ContainsKey(floor))
+                else if (dic.ContainsKey(floor-1))
                 {
-                    floorHeight += dic[floor];
+                    floorHeight += dic[floor-1];
                 }
                 else
                 {
