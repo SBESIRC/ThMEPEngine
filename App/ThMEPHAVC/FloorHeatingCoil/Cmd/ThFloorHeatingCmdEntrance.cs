@@ -59,6 +59,12 @@ namespace ThMEPHVAC
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
 
                 dataQuery.Print();
+
+                var roomSuggest = ThFloorHeatingDataFactory.GetRoomSuggestData(acadDatabase.Database);
+                var roomPlSuggestDict = ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest);
+                ThFloorHeatingCoilUtilServices.PairRoomWithRoomSuggest(ref dataQuery.RoomSet, roomPlSuggestDict, 200);
+
+                dataQuery.RoomSet[0].Room.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.RoomBoundary.GetCenter(), x.SuggestDist.ToString(), "l0roomSuggest", hight: 200));
                 //dataQuery.Reset(transformer);
 
             }

@@ -133,6 +133,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
+
+        public Dictionary<Polyline, BlockReference> roomPlSuggestDict { get; set; }
         #endregion
 
 
@@ -147,6 +149,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             RouteNum = 5;
             SuggestDist = 250;
             SuggestDistDefualt = 200;
+            roomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
         }
 
 
@@ -179,6 +182,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         {
             SelectFrame.Clear();
             ProcessedData.Clear();
+            roomPlSuggestDict.Clear();
         }
 
         public ICommand PickRoomOutlineCmd => new RelayCommand(PickRoomOutline);
@@ -251,7 +255,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 using (var docLock = Active.Document.LockDocument())
                 using (var acdb = AcadDatabase.Active())
                 {
-                    acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_RoomSeparate , 2);
+                    acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_RoomSeparate, 2);
                     acdb.Database.SetCurrentLayer(ThFloorHeatingCommon.Layer_RoomSeparate);
                 }
 

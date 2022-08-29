@@ -84,5 +84,57 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
 
         }
+
+        public static void PairRoomWithRoomSuggest(ref List<ThRoomSetModel> roomSet, Dictionary<Polyline, BlockReference> roomPlSuggestDict, double suggestDistDefualt)
+        {
+            var roomset = roomSet[0];
+            foreach (var room in roomset.Room)
+            {
+                var suggest = roomPlSuggestDict[room.RoomBoundary];
+                if (suggest != null)
+                {
+                    ThFloorHeatingDataProcessService.GetSuggestData(suggest, out var route, out var suggestDist, out var length);
+                    room.SetSuggestDist(suggestDist);
+                }
+                else
+                {
+                    room.SetSuggestDist(suggestDistDefualt);
+                }
+            }
+        }
+
+        public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest)
+        {
+            var roomSuggestDict = new Dictionary<Polyline, BlockReference>();
+            foreach (var room in roomList)
+            {
+                roomSuggestDict.Add(room.RoomBoundary, null);
+                var roomCenter = room.RoomBoundary.GetCenter();
+                var suggestInRoom = roomSuggest.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
+                if (suggestInRoom.Any())
+                {
+                    roomSuggestDict[room.RoomBoundary] = suggestInRoom.First();
+                }
+                else
+                {
+                    var suggestInOriRoom = roomSuggest.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
+                    if (suggestInOriRoom.Any())
+                    {
+                        var minDist = 2000.0;
+                        foreach (var suggest in suggestInOriRoom)
+                        {
+                            var dist = suggest.Position.DistanceTo(roomCenter);
+                            if (dist <= minDist)
+                            {
+                                minDist = dist;
+                                roomSuggestDict[room.RoomBoundary] = suggest;
+                            }
+                        }
+                    }
+                }
+            }
+            return roomSuggestDict;
+
+        }
     }
 }

@@ -195,8 +195,8 @@
                     <RadioButton GroupName="rbWSConnectMode" Content="住宅模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
                     <RadioButton GroupName="rbWSConnectMode" Content="公建模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
                 </StackPanel>
-                <cus:ImageButton IsEnabled="False"  Grid.Row="10" Margin="20 10 20 10" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>
-
+                <!--<cus:ImageButton IsEnabled="False"  Grid.Row="10" Margin="20 10 20 10" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>-->
+                <cus:ImageButton  Grid.Row="10" Margin="20 10 20 10" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>
                 <cus:ImageButton Grid.Row="11" Margin="20 0 20 10" Content="生成地暖平面" Command="{Binding ShowRouteCmd}"/>
                 <StackPanel Grid.Row="12" Orientation="Horizontal">
                     <Label Content="{Binding SelectFrame.Count }" ContentStringFormat="已选择房间数：{0}" />

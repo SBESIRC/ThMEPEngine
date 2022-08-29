@@ -87,6 +87,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             GenerateLineToRoomBoundary();
             var separateRooms = SeparateRoomWithLine();
             CreateRoomSetInRoomFrames(separateRooms);
+            PairRoomSetWithOriginalRoom();
         }
 
         private void ProcessDoorData()
@@ -536,7 +537,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         //    return hasHoles;
         //}
 
-
         private static bool CreateRoomModel(List<Entity> room, out List<ThFloorHeatingRoom> RoomList)
         {
             var hasHoles = false;
@@ -558,6 +558,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 }
 
                 var roomModel = new ThFloorHeatingRoom(roomboundary);
+                //roomModel.SetOriginalBoundary();
+
                 //var markInRoom = markExtractor.Marks.Where(x => roomboundary.Contains(x.Geometry)).ToList();
                 //var markString = markInRoom.Select(x => x.Text).Distinct().ToList();
                 //roomModel.SetName(markString);
@@ -569,8 +571,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             }
             return hasHoles;
         }
-
-
 
         /// <summary>
         /// 先根据所选房间选择门，集分水器，散热器，障碍物，分割线，房间
@@ -625,10 +625,55 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             RoomBoundary.AddRange(tempRoomBoundary.Distinct());
         }
 
+        private void PairRoomSetWithOriginalRoom()
+        {
+            foreach (var rooms in RoomSet)
+            {
+                foreach (var room in rooms.Room)
+                {
+                    var pl = room.RoomBoundary;
+                    var oriPls = RoomBoundary.Where(x => x.Contains(pl) || x.IsIntersects(pl));
+                    if (oriPls.Any())
+                    {
+                        var arearadioMax = 0.0;
+                        Polyline pairOriPl = null;
+
+                        foreach (var oriPl in oriPls)
+                        {
+                            var obj = new DBObjectCollection();
+                            obj.Add(oriPl);
+                            var intersect = pl.Intersection(obj);
+
+                            foreach (var inter in intersect)
+                            {
+                                var arearadio = 0.0;
+                                if (inter is Polyline interPl)
+                                {
+                                    arearadio = interPl.Area / pl.Area;
+                                }
+                                else if (inter is MPolygon interMpl)
+                                {
+                                    arearadio = interMpl.Area / pl.Area;
+                                }
+                                if (arearadio > arearadioMax && arearadio > 0.9)
+                                {
+                                    arearadioMax = arearadio;
+                                    pairOriPl = oriPl.Shell();
+                                }
+                            }
+                            if (pairOriPl != null)
+                            {
+                                room.SetOriginalBoundary(pairOriPl);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         public static void GetSuggestData(BlockReference blk, out double route, out double suggestDist, out double totalLength)
         {
-            var rValue = blk.ObjectId.GetAttributeInBlockReference (ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route);
+            var rValue = blk.ObjectId.GetAttributeInBlockReference(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route);
             var dValue = blk.ObjectId.GetAttributeInBlockReference(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Dist);
             var lValue = blk.ObjectId.GetAttributeInBlockReference(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length);
 
@@ -637,7 +682,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             totalLength = ThFloorHeatingCoilUtilServices.GetNumberFromString(lValue);
 
         }
-
 
         public void ProjectOntoXYPlane()
         {

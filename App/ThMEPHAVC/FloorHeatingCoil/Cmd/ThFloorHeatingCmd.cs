@@ -118,16 +118,26 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var roomSuggest = ThFloorHeatingDataFactory.GetRoomSuggestData(acadDatabase.Database);
-
                 if (ProcessedData.RegionList == null || ProcessedData.RegionList.Count == 0)
                 {
-                    ThFloorHeatingCreateSingleRegionEngin.CreateSR(vm, roomSuggest);
+                    var dataQuery = ThFloorHeatingCreateSingleRegionEngin.CreateSRData(vm);
+                    dataQuery.Print();
+
+                    if (ThFloorHeatingCreateSingleRegionEngin.CheckValidDataSet(dataQuery.RoomSet))
+                    {
+                        vm.roomPlSuggestDict = ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest);
+                        ThFloorHeatingCoilUtilServices.PairRoomWithRoomSuggest(ref dataQuery.RoomSet, vm.roomPlSuggestDict, vm.SuggestDistDefualt);
+
+                        ThFloorHeatingCoilUtilServices.PassUserParameter(vm);
+                        var createSR = new UserInteraction();
+                        createSR.PipelineB(dataQuery.RoomSet[0]);
+                    }
                 }
 
                 var needUpdateSR = false;
                 if (ProcessedData.RegionList.Count > 0)
                 {
-                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest(roomSuggest, ref ProcessedData.RegionList, vm.SuggestDistDefualt);
+                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest( ref ProcessedData.RegionList, vm.roomPlSuggestDict, vm.SuggestDistDefualt);
                 }
 
                 if (needUpdateSR == true)
@@ -137,7 +147,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     updateSR.PipelineC();
                 }
 
-                ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ref roomSuggest, ProcessedData.RegionList);
+                ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock( ProcessedData.RegionList, vm.roomPlSuggestDict);
             }
         }
 
@@ -230,7 +240,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 length = Math.Round(length / 1000, MidpointRounding.AwayFromZero);
 
                 var insertPt = selectRegion.ClearedPl.GetCenter();
-                ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route, suggestDist, length, ThFloorHeatingCommon.BlkName_ShowRoute);
+                ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route + 1, suggestDist, length, ThFloorHeatingCommon.BlkName_ShowRoute);
             }
         }
         private void CleanPreviousPrintCoil()

@@ -426,6 +426,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 output_coords = SmoothUtils.SmoothPoints(output_coords);
             }
         }
+
         void DealWithLeaveShell(BufferTreeNode node)
         {
             if (node.depth >= 2)
@@ -436,17 +437,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (inner_buffers.Count == 1)
                 {
                     var inner_buffer = inner_buffers[0];
-                    PassageShowUtils.ShowEntity(inner_buffer, node.depth % 2 + 3);
+                    //PassageShowUtils.ShowEntity(inner_buffer, node.depth % 2 + 3);
                     var inner_coords = PassageWayUtils.GetPolyPoints(inner_buffer);
                     if (inner_coords.Count == 4)
                     {
-                        if (node.IsCW == -1) 
+                        if (node.IsCW == -1)
                             inner_coords.Reverse(1, inner_coords.Count - 1);
                         if (node.depth % 2 == 0)
                         {
                             var dp = inner_coords[3] - inner_coords[0];
                             // 去除最后两段
-                            if (dp.Length < buffer * (buffer_coefficent - 0.5)) 
+                            if (dp.Length < buffer * (buffer_coefficent - 0.5))
                                 return;
                             // 去除最后一段，倒数第二段均匀分布
                             if (dp.Length < buffer)
@@ -460,13 +461,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             {
                                 dp = inner_coords[0] - inner_coords[1];
                                 // 去除最后一段，倒数第二段不做处理
-                                if (dp.Length < buffer * (buffer_coefficent - 0.5)-1)
+                                if (dp.Length < buffer * (buffer_coefficent - 0.5) - 1)
                                 {
                                     inner_coords[0] += dp.GetNormal() * buffer / 2;
                                     inner_coords[3] += dp.GetNormal() * buffer / 2;
                                 }
                                 // 最后一段均匀处理
-                                else if (dp.Length < buffer / 2 * buffer_coefficent) 
+                                else if (dp.Length < buffer / 2 * buffer_coefficent)
                                 {
                                     inner_coords[0] = inner_coords[1] + dp.GetNormal() * ((dp.Length + buffer / 2) / 2);
                                     inner_coords[3] = inner_coords[2] + dp.GetNormal() * ((dp.Length + buffer / 2) / 2);
@@ -492,7 +493,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             inner_coords.Reverse(1, inner_coords.Count - 1);
                             var dp = inner_coords[1] - inner_coords[0];
                             // 去除最后两段
-                            if (dp.Length < buffer * (buffer_coefficent - 0.5)-1)
+                            if (dp.Length < buffer * (buffer_coefficent - 0.5) - 1)
                                 return;
                             // 去除最后一段，倒数第二段均匀分布
                             if (dp.Length < buffer / 2 * buffer_coefficent)
@@ -506,7 +507,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             {
                                 dp = inner_coords[0] - inner_coords[3];
                                 // 去除最后一段，倒数第二段不做处理
-                                if (dp.Length < buffer * (buffer_coefficent - 0.5)-1)
+                                if (dp.Length < buffer * (buffer_coefficent - 0.5) - 1)
                                 {
                                     inner_coords[0] += dp.GetNormal() * buffer / 2;
                                     inner_coords[1] += dp.GetNormal() * buffer / 2;
@@ -581,6 +582,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
             }
         }
+
         /// <summary>
         /// 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  4、当前轮廓上的点距离上一个点大于buffer/2*buffer_coefficent
         /// </summary>

@@ -11,6 +11,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
     public class ThFloorHeatingRoom
     {
         public Polyline RoomBoundary { get; private set; }
+        public Polyline OriginalBoundary { get; private set; }
         public List<string> Name { get; private set; }
         public double SuggestDist { get; private set; }
 
@@ -19,6 +20,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             RoomBoundary = room;
             Name = new List<string>();
             SuggestDist = ThFloorHeatingCommon.DefaultValue_SuggestDist;
+
         }
 
         public void SetName(List<string> name)
@@ -35,7 +37,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-
+        public void SetOriginalBoundary(Polyline originalBoundary)
+        {
+            OriginalBoundary = originalBoundary;
+        }
 
 
     }
