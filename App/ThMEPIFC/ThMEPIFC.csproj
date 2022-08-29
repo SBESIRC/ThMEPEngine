@@ -49,6 +49,7 @@
     <Compile Include="Ifc2x3\ThTGL2IFC2x3Builder.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3Factory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3GeExtension.cs" />
+    <Compile Include="ThMEPIFCExportCmds.cs" />
     <Compile Include="ThMEPIFCInternalCmds.cs" />
     <Compile Include="THModelMergeService.cs" />
     <Compile Include="ThTGL2GeoFileService.cs" />

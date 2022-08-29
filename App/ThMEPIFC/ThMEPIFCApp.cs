@@ -43,32 +43,6 @@ namespace ThMEPIFC
             //  Etc.
         }
 
-        [CommandMethod("TIANHUACAD", "THTGL2IFC", CommandFlags.Modal)]
-        public void THTGL2IFC()
-        {
-            // 拾取TGL XML文件
-            var tgl = OpenTGLXMLFile();
-            if (string.IsNullOrEmpty(tgl))
-            {
-                return;
-            }
-
-            // 读入并解析TGL XML文件
-            var service = new ThTGLXMLService();
-            var project = service.LoadXML(tgl);
-            if (project == null)
-            {
-                return;
-            }
-
-            // 读入DWG数据
-            var dwgService = new ThTGL2IFCDWGService();
-            dwgService.LoadDWG(Active.Database, project);
-
-            // 转换并保存IFC数据
-            ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
-            Tgl2IfcService.GenerateIfcModelAndSave(project, Path.ChangeExtension(tgl, "ifc"));
-        }
         [CommandMethod("TIANHUACAD", "THDB2IFC", CommandFlags.Modal)]
         public void THDBL2IFC()
         {
@@ -168,41 +142,6 @@ namespace ThMEPIFC
                         endDate - dwgDBDate,
                         endDate - startDate);
                 Active.Database.GetEditor().WriteMessage(msg);
-            }
-        }
-        [CommandMethod("TIANHUACAD", "THTGL2DWG", CommandFlags.Modal)]
-        public void THTGL2DWG()
-        {
-            // 拾取TGL XML文件
-            var tgl = OpenTGLXMLFile();
-            if (string.IsNullOrEmpty(tgl))
-            {
-                return;
-            }
-
-            // 读入并解析TGL XML文件
-            var service = new ThTGLXMLService();
-            var project = service.LoadXML(tgl);
-            if (project == null)
-            {
-                return;
-            }
-
-            // 读入DWG数据
-            var dwgService = new ThTGL2IFCDWGService();
-            dwgService.LoadDWG(Active.Database, project);
-
-            // 输出三维实体
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                foreach (var storey in project.Site.Building.Storeys)
-                {
-                    foreach (var slab in storey.Slabs)
-                    {
-                        acadDatabase.ModelSpace.Add(slab.CreateSlabSolid(Point3d.Origin));
-                    }
-
-                }
             }
         }
 
@@ -311,41 +250,6 @@ namespace ThMEPIFC
                 {
                     Active.Database.GetEditor().WriteMessage($"合模失败!");
                 }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THDWG2IFC", CommandFlags.Modal)]
-        public void THDWG2IFC()
-        {
-            var ifcFilePath = "";
-            //选择保存路径
-            ifcFilePath = SaveFilePath("ifc");
-            if (string.IsNullOrEmpty(ifcFilePath))
-            {
-                return;
-            }
-            if (File.Exists(ifcFilePath))
-                File.Delete(ifcFilePath);
-
-            // 读入并解析TGL XML文件
-            var service = new ThDWGToIFCService(string.Empty);
-            var project = service.DWGToProject(false, false);
-            if (project == null)
-            {
-                return;
-            }
-            Stopwatch sw = new Stopwatch();
-            // 转换并保存IFC数据
-            ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
-            Tgl2IfcService.GenerateIfcModelAndSave(project, ifcFilePath);
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                //string msg = string.Format(
-                //"读取DB数据楼层信息，分层组合数据时间：{0},分出组合数据转换IfcModel时间：{1},总时间：{2}",
-                //(dwgDBDate - startDate).TotalSeconds,
-                //(endDate - dwgDBDate).TotalSeconds,
-                //(endDate - startDate).TotalSeconds);
-                //Active.Database.GetEditor().WriteMessage(msg);
             }
         }
 
@@ -464,14 +368,6 @@ namespace ThMEPIFC
             }
         }
 
-        private string OpenTGLXMLFile()
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = ".xml"; // Default file extension
-            dlg.Filter = "TGL XML|*.xml"; // Filter files by extension
-            var result = dlg.ShowDialog();
-            return (result == DialogResult.OK) ? dlg.FileName : string.Empty;
-        }
         private string OpenDBFile()
         {
             OpenFileDialog dlg = new OpenFileDialog();
