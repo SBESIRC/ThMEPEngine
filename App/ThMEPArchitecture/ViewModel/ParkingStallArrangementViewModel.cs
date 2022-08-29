@@ -55,6 +55,35 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("UseMultiProcess");
             }
         }
+        //斜交模式
+        private bool _ObliqueMode = false;
+        public bool ObliqueMode
+        {
+            get { return _ObliqueMode; }
+            set
+            {
+                _ObliqueMode = value;
+                if (value)
+                {
+                    IterationCount = 100;
+                    PopulationCount = 32;
+                    MaxTimespan = 30;
+                }
+                else
+                {
+                    IterationCount = 60;
+                    PopulationCount = 80;
+                    MaxTimespan = 30;
+                }
+                RaisePropertyChanged("ObliqueMode");
+                RaisePropertyChanged("NormalMode");
+            }
+        }
+        public bool NormalMode 
+        { 
+            get { return !_ObliqueMode; }
+        }
+
         //补充分区线
         private bool _AddBoundSegLines = true;
         public bool AddBoundSegLines
@@ -446,10 +475,16 @@ namespace ThMEPArchitecture.ViewModel
                     PopulationCount = 30;
                     MaxTimespan = 10;
                 }
-                else if(value == CommandRunSpeedEnum.General)
+                else if(value == CommandRunSpeedEnum.General&&NormalMode)
                 {
                     IterationCount = 60;
                     PopulationCount = 80;
+                    MaxTimespan = 30;
+                }
+                else if(value == CommandRunSpeedEnum.General && ObliqueMode)
+                {
+                    IterationCount = 100;
+                    PopulationCount = 32;
                     MaxTimespan = 30;
                 }
                 else if(value == CommandRunSpeedEnum.Slow)//slow
@@ -536,6 +571,82 @@ namespace ThMEPArchitecture.ViewModel
             {
                 _TargetParkingCntMax = value;
                 RaisePropertyChanged("TargetParkingCntMax");
+            }
+        }
+        //变异概率
+        private double _MutationRate = 0.382;
+        public double MutationRate
+        {
+            get
+            { return _MutationRate; }
+            set
+            {
+                _MutationRate = value;
+                RaisePropertyChanged("MutationRate");
+            }
+        }
+        //基因变异概率
+        private double _GeneMutationRate = 0.382;
+        public double GeneMutationRate
+        {
+            get
+            { return _GeneMutationRate; }
+            set
+            {
+                _GeneMutationRate = value;
+                RaisePropertyChanged("GeneMutationRate");
+            }
+        }
+        
+        //特殊基因比例
+        private double _SpecialGeneProp = 0.382;
+        public double SpecialGeneProp
+        {
+            get
+            { return _SpecialGeneProp; }
+            set
+            {
+                _SpecialGeneProp = value;
+                RaisePropertyChanged("SpecialGeneProp");
+            }
+        }
+
+        //精英比例
+        private double _EliteProp = 0.2;
+        public double EliteProp
+        {
+            get
+            { return _EliteProp; }
+            set
+            {
+                _EliteProp = value;
+                RaisePropertyChanged("EliteProp");
+            }
+        }
+
+        //小变异比例
+        private double _SMProp = 0.382;
+        public double SMProp
+        {
+            get
+            { return _SMProp; }
+            set
+            {
+                _SMProp = value;
+                RaisePropertyChanged("SMProp");
+            }
+        }
+
+        //小变异比例
+        private double _SelectionRate = 0.382;
+        public double SelectionRate
+        {
+            get
+            { return _SelectionRate; }
+            set
+            {
+                _SelectionRate = value;
+                RaisePropertyChanged("SelectionRate");
             }
         }
 

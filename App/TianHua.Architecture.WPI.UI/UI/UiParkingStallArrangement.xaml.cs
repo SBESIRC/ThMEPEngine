@@ -60,7 +60,14 @@ namespace TianHua.Architecture.WPI.UI.UI
             //                    thread.IsBackground = true;
             //                    thread.Start();
             //                });
-
+            if (_ViewModel.ObliqueMode)
+            {
+                using (var cmd = new ThOArrangementCmd(_ViewModel))
+                {
+                    cmd.Execute();
+                    return;
+                }
+            }
 
             if (_ViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
             {

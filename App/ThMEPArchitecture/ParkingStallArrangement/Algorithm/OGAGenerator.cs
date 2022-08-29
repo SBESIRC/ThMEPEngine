@@ -36,8 +36,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int MaxCount = 10;//出现相同车位数的最大次数
         double MutationRate;
         double GeneMutationRate;
+        double SpecialGeneProp;//特殊基因比例
 
+        double EliteProp;//精英比例
         int Elite_popsize;
+
+        double SMProp;//小变异比例
+        int SMsize;//小变异数量
         int Max_SelectionSize;
         double EliminateRate;
         double GoldenRatio;
@@ -81,19 +86,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             MutexLists = new List<List<Mutex>>();
             MaxTime = parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
 
-            MutationRate = 1 - GoldenRatio;//变异因子,0.382
-            GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
+            MutationRate = parameterViewModel.MutationRate;//变异因子,0.382
+            SpecialGeneProp = parameterViewModel.SpecialGeneProp;
 
-            SelectionRate = 1 - GoldenRatio;//保留因子0.382
+            GeneMutationRate = parameterViewModel.GeneMutationRate;//基因变异因子0.382,保持迭代过程中变异基因的比例
+
+            SelectionRate = parameterViewModel.SelectionRate;//保留因子0.382
             SelectionSize = Math.Max(2, (int)(SelectionRate * PopulationSize));
 
             //InputsF
             ParameterViewModel = parameterViewModel;
 
             // Run2 添加参数
-            Elite_popsize = Math.Max((int)(PopulationSize * 0.2), 1);//精英种群数量,种群数要大于3
+            EliteProp = parameterViewModel.EliteProp;
+            Elite_popsize = Math.Max((int)(PopulationSize * EliteProp), 1);//精英种群数量,种群数要大于3
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
             Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
+            SMProp = parameterViewModel.SMProp;
+            SMsize = Math.Max(1, (int)(SMProp * PopulationSize));//小变异比例
 
             TargetParkingCntMin = parameterViewModel.TargetParkingCntMin;
             TargetParkingCntMax = parameterViewModel.TargetParkingCntMax;
@@ -148,7 +158,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 double relativeValue;
                 var maxDist = segLine.MaxValue - segLine.MinValue;
-                if (RandDouble() > GoldenRatio)
+                if (RandDouble() < SpecialGeneProp)
                 {
                     relativeValue = RandomSpecialNumber(maxDist);//随机特殊解
                 }
@@ -593,7 +603,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             List<int> index;
             int j = Elite_popsize;
-            int SMsize = SelectionSize;// small mutation size,0.382 of total population size
+            //int SMsize = SelectionSize;// small mutation size,0.382 of total population size
             while (true)
             {
                 // 随机两两生成后代
@@ -678,7 +688,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 var orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
                                 double newValue;
                                 var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
-                                if (RandDouble() < GoldenRatio)
+                                if (RandDouble() > SpecialGeneProp)
                                 {
                                     if(orgValue > 0)//变异出的值也大于0
                                     {

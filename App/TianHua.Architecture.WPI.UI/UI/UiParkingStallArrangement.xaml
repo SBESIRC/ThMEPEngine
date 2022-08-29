@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.9)" SizeToContent="Height"
+              Title="车位自动排布(3.0)" SizeToContent="Height"
 
               Width="460" MaxWidth="550"  MaxHeight="800" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
@@ -21,8 +21,8 @@
             <StackPanel >
                 <StackPanel Orientation="Horizontal">
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
-                    <!--<CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiProcess}">多核心加速(beta)</CheckBox>-->
-                    <Button Name="oRun" Margin="100,0,0,0" Width="180" Height="25" FontSize="16" FontWeight="Bold" Click="oDirect_Click">斜交无迭代速排（测试）</Button>
+                    <CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding ObliqueMode}">斜交模式(beta)</CheckBox>
+                    <!--<Button Name="oRun" Margin="100,0,0,0" Width="180" Height="25" FontSize="16" FontWeight="Bold" Click="oDirect_Click">斜交无迭代速排（测试）</Button>-->
                 </StackPanel >
                 <StackPanel Orientation="Vertical">
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
@@ -33,7 +33,7 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding NormalMode}" >
                     <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}" Width="210">
                         <CheckBox Margin="5,5,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">仅生成分区线</CheckBox>
@@ -137,7 +137,7 @@
             </StackPanel>
             <StackPanel >
                 <Label FontSize="16" FontWeight="Bold">多方案：</Label>
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding NormalMode}">
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding AutoSolution}">自动</CheckBox>
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding HorizontalSolution}">优先横向</CheckBox>
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding VerticalSolution}">优先纵向</CheckBox>
@@ -146,7 +146,7 @@
             <StackPanel Orientation="Vertical" Visibility="{Binding AdvancedSettingVisibility}">
                 <StackPanel Orientation="Horizontal">
                     <Label FontSize="16" FontWeight="Bold">运算参数设置：</Label>
-                    <Button Name="oIteration" Margin="100,0,0,0" Width="180" Height="25" FontSize="16" FontWeight="Bold" Click="oIteration_Click">斜交迭代排布（测试）</Button>
+                    <!--<Button Name="oIteration" Margin="100,0,0,0" Width="180" Height="25" FontSize="16" FontWeight="Bold" Click="oIteration_Click">斜交迭代排布（测试）</Button>-->
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="边界迭代范围"/>
@@ -156,6 +156,23 @@
                     <Label Content="~"/>
                     <TextBox Width="30" Margin="0,5,5,5" Text="{Binding TargetParkingCntMax}"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="大变异中变异比例"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding MutationRate}"/>
+                    <Label Content="特殊基因比例"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SpecialGeneProp}"/>
+                    <Label Content="基因变异几率"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding GeneMutationRate}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="精英比例"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding EliteProp}"/>
+                    <Label Content="小变异比例"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SMProp}"/>
+                    <Label Content="选择比例"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SelectionRate}"/>
+                </StackPanel>
+
                 <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
                     <StackPanel>
                         <StackPanel >
