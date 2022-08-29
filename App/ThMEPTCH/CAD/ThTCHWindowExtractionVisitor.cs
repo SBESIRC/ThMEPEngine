@@ -56,10 +56,10 @@ namespace ThMEPTCH.CAD
 
         private Polyline CreateOutline(TArchWindow window)
         {
-            var doorEntity = DBToTHEntityCommon.TArchWindowToEntityWindow(window, new Vector3d(0, 0, 0));
-            if (doorEntity.OutLine != null)
+            var doorEntity = DBToTHEntityCommon.TArchWindowToEntityWindow(window);
+            if (doorEntity.Outline != null)
             {
-                return doorEntity.OutLine.Shell();
+                return doorEntity.Outline.Shell();
             }
             else
             {

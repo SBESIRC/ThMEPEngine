@@ -5,28 +5,23 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
 {
     class WindowEntity : THArchEntityBase
     {
-        public Point3d MidPoint { get; set; }
-        public Point3d TextPoint { get; set; }
+        public Point3d BasePoint { get; set; }
         public double Rotation { get; set; }
         public double Thickness { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
-        public double MinZ
-        {
-            get
-            {
-                return MidPoint.Z;
-            }
-        }
-        public double WallMaxZ
-        {
-            get
-            {
-                return MidPoint.Z + Height;
-            }
-        }
         public WindowEntity(TArchEntity archEntity):base(archEntity)
         {
+        }
+
+        public override void TransformBy(Matrix3d transform)
+        {
+            base.TransformBy(transform);
+            if (DBArchEntity is TArchWindow window)
+            {
+                Rotation = window.Rotation;
+                BasePoint = window.BasePoint;
+            }
         }
     }
 }

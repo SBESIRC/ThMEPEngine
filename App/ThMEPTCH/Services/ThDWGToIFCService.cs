@@ -89,9 +89,9 @@ namespace ThMEPTCH.Services
                 var floorEntitys = FloorEntitys(floor.FloorOutLine, out List<FloorCurveEntity> curveEntities);
                 var moveVector = Point3d.Origin - floor.FloorOrigin;
                 Matrix3d matrix = Matrix3d.Displacement(moveVector);
-                var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntiy).Cast<TArchWall>().ToList();
-                var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntiy).Cast<TArchDoor>().ToList();
-                var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntiy).Cast<TArchWindow>().ToList();
+                var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntity).Cast<TArchWall>().ToList();
+                var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntity).Cast<TArchDoor>().ToList();
+                var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntity).Cast<TArchWindow>().ToList();
                 var walls = entityConvert.WallDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
 
                 //structure
@@ -316,9 +316,9 @@ namespace ThMEPTCH.Services
                 var floorEntitys = FloorEntitys(floor.FloorOutLine, out List<FloorCurveEntity> curveEntities);
                 var moveVector = Point3d.Origin - floor.FloorOrigin;
                 Matrix3d matrix = Matrix3d.Displacement(moveVector);
-                var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntiy).Cast<TArchWall>().ToList();
-                var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntiy).Cast<TArchDoor>().ToList();
-                var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntiy).Cast<TArchWindow>().ToList();
+                var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntity).Cast<TArchWall>().ToList();
+                var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntity).Cast<TArchDoor>().ToList();
+                var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntity).Cast<TArchWindow>().ToList();
                 var walls = entityConvert.WallDataDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
                 floor.FloorEntitys.AddRange(walls);
 
@@ -707,14 +707,14 @@ namespace ThMEPTCH.Services
             var addTArchColl = new DBObjectCollection();
             foreach (var item in allTArchEntitys)
             {
-                var thEntity = DBToTHEntityCommon.DBArchToTHArch(item, new Vector3d(0, 0, 0));
+                var thEntity = DBToTHEntityCommon.DBArchToTHArch(item);
                 if (thEntity == null)
                     continue;
                 entityBases.Add(thEntity);
-                if (null == thEntity.OutLine)
+                if (null == thEntity.Outline)
                     continue;
-                addTArchColl.Add(thEntity.OutLine);
-                entityDic.Add(thEntity.OutLine, thEntity);
+                addTArchColl.Add(thEntity.Outline);
+                entityDic.Add(thEntity.Outline, thEntity);
             }
             spatialIndex = new ThCADCoreNTSSpatialIndex(addTArchColl);
             addTArchColl.Clear();

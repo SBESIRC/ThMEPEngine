@@ -1,4 +1,5 @@
-﻿using ThMEPTCH.Services;
+﻿using Autodesk.AutoCAD.Geometry;
+using ThMEPTCH.Services;
 
 namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
@@ -73,6 +74,11 @@ namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
                 var length = ThMEPTCHTool.DistanceTo(StartPointX, StartPointY, StartPointZ, EndPointX, EndPointY, EndPointZ);
                 return length > 1.0 && width > 1.0;
             }
+        }
+
+        public override void TransformBy(Matrix3d transform)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

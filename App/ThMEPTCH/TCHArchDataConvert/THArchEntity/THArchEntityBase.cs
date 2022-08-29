@@ -1,20 +1,23 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 
 namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
 {
-    abstract class THArchEntityBase
+    public abstract class THArchEntityBase
     {
-        public string Id { get; }
         public ulong DBId { get; }
-        public MPolygon OutLine { get; set; }
-        public TArchEntity DBArchEntiy { get; }
+        public MPolygon Outline { get; set; }
+        public TArchEntity DBArchEntity { get; }
         public THArchEntityBase(TArchEntity dbEntity)
         {
-            Id = Guid.NewGuid().ToString();
             DBId = dbEntity.Id;
-            DBArchEntiy = dbEntity;
+            DBArchEntity = dbEntity;
+        }
+        public virtual void TransformBy(Matrix3d transform)
+        {
+            Outline.TransformBy(transform);
+            DBArchEntity.TransformBy(transform);
         }
     }
 }

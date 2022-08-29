@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
     public abstract class TArchEntity
     {
         public ulong Id { get; set; }
-        public string StyleID { get; set; }
-        public string LineType { get; set; }
-        public string Layer { get; set; }
-        public virtual bool IsValid() => true;
+        public abstract bool IsValid();
+        public abstract void TransformBy(Matrix3d transform);
     }
 }

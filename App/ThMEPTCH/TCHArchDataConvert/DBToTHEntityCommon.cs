@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
+using ThMEPTCH.CAD;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
 
@@ -12,14 +13,14 @@ namespace ThMEPTCH.TCHArchDataConvert
 {
     class DBToTHEntityCommon
     {
-        public static THArchEntityBase DBArchToTHArch(TArchEntity dbArchEntity, Vector3d moveOffSet) 
+        public static THArchEntityBase DBArchToTHArch(TArchEntity dbArchEntity) 
         {
             if (dbArchEntity is TArchWall archWall)
-                return TArchWallToEntityWall(archWall, 0, 0, 0, 0, moveOffSet);
+                return TArchWallToEntityWall(archWall, 0, 0, 0, 0, new Vector3d(0,0,0));
             else if (dbArchEntity is TArchDoor archDoor)
-                return TArchDoorToEntityDoor(archDoor, moveOffSet);
+                return TArchDoorToEntityDoor(archDoor);
             else if (dbArchEntity is TArchWindow archWindow)
-                return TArchWindowToEntityWindow(archWindow, moveOffSet);
+                return TArchWindowToEntityWindow(archWindow);
             return null;
         }
         public static WallEntity TArchWallToEntityWall(TArchWall arch, double leftSpOffSet, double leftEpOffSet, double rightSpOffSet, double rightEpOffSet,Vector3d moveOffSet)
@@ -97,8 +98,8 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var temp = segments.Join(new Tolerance(2, 2));
                 var newPLine = temp.First().ToPolyline();
                 //newPLine.Closed = false;
-                wallEntity.OutLine = ThMPolygonTool.CreateMPolygon(newPLine, new List<Curve> { });
-                wallEntity.OutLine.Elevation = z;
+                wallEntity.Outline = ThMPolygonTool.CreateMPolygon(newPLine, new List<Curve> { });
+                wallEntity.Outline.Elevation = z;
             }
             else
             {
@@ -122,77 +123,49 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var temp = segments.Join(new Tolerance(2, 2));
                 var newPLine = temp.First().ToPolyline();
                 //newPLine.Closed = false;
-                wallEntity.OutLine = ThMPolygonTool.CreateMPolygon(newPLine, new List<Curve> { });
-                wallEntity.OutLine.Elevation = z;
+                wallEntity.Outline = ThMPolygonTool.CreateMPolygon(newPLine, new List<Curve> { });
+                wallEntity.Outline.Elevation = z;
 
             }
             return wallEntity;
         }
-        public static DoorEntity TArchDoorToEntityDoor(TArchDoor arch, Vector3d moveOffSet)
+
+        public static DoorEntity TArchDoorToEntityDoor(TArchDoor arch)
         {
-            DoorEntity entity = new DoorEntity(arch);
-            var spX = Math.Floor(arch.BasePointX);
-            var spY = Math.Floor(arch.BasePointY);
-            var textX = Math.Floor(arch.TextPointX);
-            var textY = Math.Floor(arch.TextPointY);
-            entity.MidPoint = new Point3d(spX, spY, 0)+ moveOffSet;
-            entity.TextPoint = new Point3d(textX, textY, arch.TextPointZ)+ moveOffSet;
-            entity.Rotation = arch.Rotation;
-            var normal = Vector3d.ZAxis;
-            var dir = Vector3d.XAxis.RotateBy(entity.Rotation, normal);
-            var leftDir = normal.CrossProduct(dir).GetNormal();
-            var sp = entity.MidPoint - dir.MultiplyBy(arch.Width / 2);
-            var ep = entity.MidPoint + dir.MultiplyBy(arch.Width / 2);
-            var spLeft = sp + leftDir.MultiplyBy(arch.Thickness / 2);
-            var spRight = sp - leftDir.MultiplyBy(arch.Thickness / 2);
-            var epLeft = ep + leftDir.MultiplyBy(arch.Thickness / 2);
-            var epRight = ep - leftDir.MultiplyBy(arch.Thickness / 2);
-            var segments = new PolylineSegmentCollection();
-            segments.Add(new PolylineSegment(spLeft.ToPoint2D(), spRight.ToPoint2D()));
-            segments.Add(new PolylineSegment(spRight.ToPoint2D(), epRight.ToPoint2D()));
-            segments.Add(new PolylineSegment(epRight.ToPoint2D(), epLeft.ToPoint2D()));
-            segments.Add(new PolylineSegment(epLeft.ToPoint2D(), spLeft.ToPoint2D()));
-            var temp = segments.Join(new Tolerance(2, 2));
-            var outPLine = temp.First().ToPolyline();
-            outPLine.Closed = true;
-            entity.OutLine = ThMPolygonTool.CreateMPolygon(outPLine, new List<Curve> { });
-            entity.Width = arch.Width;
-            entity.Height = arch.Height;
-            entity.Thickness = arch.Thickness;
+            var entity = new DoorEntity(arch)
+            {
+                Width = arch.Width,
+                Height = arch.Height,
+                Rotation = arch.Rotation,
+                Thickness = arch.Thickness,
+                BasePoint = arch.BasePoint,
+                Outline = GetDoorOutline(arch),
+            };
             return entity;
         }
-        public static WindowEntity TArchWindowToEntityWindow(TArchWindow arch, Vector3d moveOffSet)
+        private static MPolygon GetDoorOutline(TArchDoor arch)
         {
-            var entity = new WindowEntity(arch);
-            var spX = Math.Floor(arch.BasePointX);
-            var spY = Math.Floor(arch.BasePointY);
-            var textX = Math.Floor(arch.TextPointX);
-            var textY = Math.Floor(arch.TextPointY);
-            entity.MidPoint = new Point3d(spX, spY, arch.BasePointZ)+ moveOffSet;
-            entity.TextPoint = new Point3d(textX, textY, arch.TextPointZ)+ moveOffSet;
-            entity.Rotation = arch.Rotation;
-            var normal = Vector3d.ZAxis;
-            var dir = Vector3d.XAxis.RotateBy(entity.Rotation, normal);
-            var leftDir = normal.CrossProduct(dir).GetNormal();
-            var sp = entity.MidPoint - dir.MultiplyBy(arch.Width / 2);
-            var ep = entity.MidPoint + dir.MultiplyBy(arch.Width / 2);
-            var spLeft = sp + leftDir.MultiplyBy(arch.Thickness / 2);
-            var spRight = sp - leftDir.MultiplyBy(arch.Thickness / 2);
-            var epLeft = ep + leftDir.MultiplyBy(arch.Thickness / 2);
-            var epRight = ep - leftDir.MultiplyBy(arch.Thickness / 2);
-            var segments = new PolylineSegmentCollection();
-            segments.Add(new PolylineSegment(spLeft.ToPoint2D(), spRight.ToPoint2D()));
-            segments.Add(new PolylineSegment(spRight.ToPoint2D(), epRight.ToPoint2D()));
-            segments.Add(new PolylineSegment(epRight.ToPoint2D(), epLeft.ToPoint2D()));
-            segments.Add(new PolylineSegment(epLeft.ToPoint2D(), spLeft.ToPoint2D()));
-            var temp = segments.Join(new Tolerance(2, 2));
-            var outPLine = temp.First().ToPolyline();
-            outPLine.Closed = true;
-            entity.OutLine = ThMPolygonTool.CreateMPolygon(outPLine, new List<Curve> { });
-            entity.Width = arch.Width;
-            entity.Height = arch.Height;
-            entity.Thickness = arch.Thickness;
+            // 用MPolygon处理带洞的场景
+            return ThMPolygonTool.CreateMPolygon(arch.Profile());
+        }
+
+        public static WindowEntity TArchWindowToEntityWindow(TArchWindow arch)
+        {
+            var entity = new WindowEntity(arch)
+            {
+                Width = arch.Width,
+                Height = arch.Height,
+                Rotation = arch.Rotation,
+                Thickness = arch.Thickness,
+                BasePoint = arch.BasePoint,
+                Outline = GetWindowOutline(arch),
+            };
             return entity;
+        }
+        private static MPolygon GetWindowOutline(TArchWindow arch)
+        {
+            // 用MPolygon处理带洞的场景
+            return ThMPolygonTool.CreateMPolygon(arch.Profile());
         }
     }
 }
