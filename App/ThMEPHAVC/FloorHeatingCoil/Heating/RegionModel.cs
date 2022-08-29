@@ -31,6 +31,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public Dictionary<SingleRegion, SingleDoor> EntranceMap = new Dictionary<SingleRegion, SingleDoor>();
         public Dictionary<SingleRegion, SingleDoor> ExportMap = new Dictionary<SingleRegion, SingleDoor>();
         public SingleDoor MainEntrance;
+        
 
 
         //管道属性

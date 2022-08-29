@@ -47,7 +47,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             GetDrawnPipe();
 
             GetConnector();
-
+            
             DrawWholePipe();
 
             Fillet();

@@ -25,7 +25,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<SingleRegion> RegionList = ProcessedData.RegionList;
         public List<SingleDoor> DoorList = ProcessedData.DoorList;
         public List<SinglePipe> SinglePipeList = new List<SinglePipe>();
-
+        public DoorToDoorDistance[,] DoorToDoorDistanceMap = ProcessedData.DoorToDoorDistanceMap;
 
         ////成员变量
         public List<TmpPipe> TmpPipeList = new List<TmpPipe>();
@@ -181,11 +181,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void CreateTmpPipeList()
         {
-            int maxIndex = RegionList.FindByMax(x => x.MainPipe[0]).MainPipe[0] + 1;
-            int minIndex = RegionList.FindByMin(x => x.MainPipe[0]).MainPipe[0];
+            List<int> indexList = new List<int>();
+            for (int i = 0; i < RegionList.Count; i++) 
+            {
+                if (RegionList[i].MainPipe!= null && RegionList[i].MainPipe.Count> 0 && RegionList[i].MainPipe[0] >= 1) {
+                    indexList.Add(RegionList[i].MainPipe[0]);
+                }
+            }
+            int maxIndex = indexList.FindByMax(x => x) + 1;
+            int minIndex = indexList.FindByMin(x => x);
 
             for (int i = 0; i < RegionList.Count; i++) 
             {
+                if(RegionList[i].MainPipe!=null && RegionList[i].MainPipe.Count > 0)
                 RegionList[i].MainPipe[0] = RegionList[i].MainPipe[0] - minIndex;
             }
             maxIndex = maxIndex - minIndex;
@@ -197,8 +205,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             for (int i = 0; i < RegionList.Count; i++)
             {
-                int mainPipeId = RegionList[i].MainPipe[0];
-                TmpPipeList[mainPipeId].DomainIdList.Add(i);
+                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0)
+                {
+                    int mainPipeId = RegionList[i].MainPipe[0];
+                    TmpPipeList[mainPipeId].DomainIdList.Add(i);
+                }
             }
         }
 
@@ -303,6 +314,62 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             GetTopoTreeNodeLeftRightIndex(SingleTopoTree, RegionToNode, SingleTopoTree[0]);
             TmpPipeList = PipeListReSort(TmpPipeList, SingleTopoTree, RegionToNode);
+
+
+            //清空原始数据
+            for (int i = 0; i < RegionList.Count; i++)
+            {
+                RegionList[i].PassingPipeList.Clear();
+            }
+
+            List<double> lengthList = new List<double>(new double[TmpPipeList.Count]);
+            for (int i = 0; i < TmpPipeList.Count; i++)
+            {
+                TmpPipe nowPipe = TmpPipeList[i];
+
+                //保存经过的区域
+                for (int j = 0; j < nowPipe.RegionIdList.Count; j++)
+                {
+                    int regionId = nowPipe.RegionIdList[j];
+                    RegionList[regionId].PassingPipeList.Add(i);
+                }
+
+                //更新mainpipe
+                for (int j = 0; j < nowPipe.DomainIdList.Count; j++)
+                {
+                    int regionId = nowPipe.DomainIdList[j];
+                    RegionList[regionId].MainPipe[0] = i;
+                }
+
+                lengthList[i] = ComputePipeTreeLength(nowPipe);
+            }
+
+
+            //清空原始数据
+            for (int i = 0; i < RegionList.Count; i++)
+            {
+                if (RegionList[i].MainPipe == null || RegionList[i].MainPipe.Count == 0) 
+                {
+                    List<int> newList = RegionList[i].PassingPipeList.OrderBy(x => lengthList[x]).ToList();
+                    if (newList.Count > 0) 
+                    {
+                        //放入数据
+                        int newIndex = newList.First();
+                        RegionList[i].MainPipe = new List<int>();
+                        RegionList[i].MainPipe.Add(newIndex);
+
+
+                        //更新Pipe
+                        TmpPipe getPipe = TmpPipeList[newIndex];
+                        getPipe.DomainIdList.Add(i);
+                        if (!getPipe.RegionIdList.Contains(i))
+                        {
+                            getPipe.RegionIdList.Add(i);
+                        }
+                        lengthList[newIndex] = ComputePipeTreeLength(getPipe);
+                    }
+                }
+            }
         }
 
         public void GetTopoTreeNodeLeftRightIndex(List<TopoTreeNode> treeList, Dictionary<int, int> regionToTree, TopoTreeNode topoTree)
@@ -402,8 +469,60 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
 
+
+
+
+
             //记录管道
             ProcessedData.PipeList = SinglePipeList;
         }
+
+        public double ComputePipeTreeLength(TmpPipe tmpPipe)
+        {
+            double totalLength = 0;
+            Queue<int> idQueue = new Queue<int>();
+            idQueue.Enqueue(0);
+            while (idQueue.Count > 0)
+            {
+                int nowRegion = idQueue.Dequeue();
+                PipeTreeNode nowNode = tmpPipe.PipeTreeList[tmpPipe.RegionToPipeTree[nowRegion]];
+                int topoId = RegionToNode[nowRegion];
+                int upUpDoorId = SingleTopoTree[topoId].UpDoorId;
+
+                if (tmpPipe.DomainIdList.Contains(nowRegion))
+                {
+                    totalLength += RegionList[nowRegion].UsedPipeLength;
+                }
+
+                if (nowNode.ChildRegionIdList.Count == 1)
+                {
+                    int childId = nowNode.ChildRegionIdList[0];
+                    idQueue.Enqueue(childId);
+                    int childTopoId = RegionToNode[childId];
+                    int upDoorId = SingleTopoTree[childTopoId].UpDoorId;
+                    totalLength += DoorToDoorDistanceMap[upDoorId, upUpDoorId].EstimatedDistance * 2;
+                }
+                else
+                {
+                    double maxLength = 0;
+                    foreach (int childId in nowNode.ChildRegionIdList)
+                    {
+                        idQueue.Enqueue(childId);
+                        int childTopoId = RegionToNode[childId];
+                        int upDoorId = SingleTopoTree[childTopoId].UpDoorId;
+
+                        double nowLength = DoorToDoorDistanceMap[upDoorId, upUpDoorId].EstimatedDistance * 2;
+                        if (nowLength > maxLength)
+                        {
+                            maxLength = nowLength;
+                        }
+                    }
+                    totalLength += maxLength;
+                }
+            }
+            return totalLength;
+        }
+
+
     }
 }
