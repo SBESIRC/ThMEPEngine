@@ -112,7 +112,7 @@ namespace ThCADExtension
 
         public static Matrix3d MultipleTransformFroms(double scale, Vector3d xDir, Point3d origin)
         {
-            var rotation = xDir.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis);
+            var rotation = Vector3d.XAxis.GetAngleTo(xDir, Vector3d.ZAxis);
             return MultipleTransformFroms(scale, rotation, origin.GetAsVector());
         }
     }
