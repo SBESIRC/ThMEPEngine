@@ -282,16 +282,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var initSingnals = new List<Mutex>();
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                initSingnals.Add(CreateMutex("Mutex", idx, false));
-                var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
-                //var proc = CreateSubProcess(idx, true, ParameterStock.ThreadCount);
+                var initSingnal = CreateMutex("Mutex", idx);
+                initSingnals.Add(initSingnal);
+                initSingnal.ReleaseMutex();
+                //var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
+                var proc = CreateSubProcess(idx, true, ParameterStock.ThreadCount);
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
             }
             MutexLists.Add(currentMutexList);
             ProcList.ForEach(proc => proc.Start());
-
+            Thread.Sleep(100);
             try
             {
                 //MutexEndList.ForEach(mutex => mutex.ReleaseMutex());
