@@ -545,6 +545,7 @@
                 <Command Local="THFJXX" Global="THFJXX" />
                 <Command Local="THFYJS" Global="THFYJS" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
+                <Command Local="THDNPG" Global="THDNPG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -571,6 +572,7 @@
                 <Command Local="THFJXX" Global="THFJXX" />
                 <Command Local="THFYJS" Global="THFYJS" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
+                <Command Local="THDNPG" Global="THDNPG" />
             </Commands>
         </ComponentEntry>
     </Components>
