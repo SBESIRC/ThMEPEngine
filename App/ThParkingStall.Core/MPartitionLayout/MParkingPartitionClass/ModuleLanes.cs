@@ -868,11 +868,14 @@ namespace ThParkingStall.Core.MPartitionLayout
                         var generate_line = para.Line;
                         var pt_on_generate_lane = generate_line.MidPoint;
                         var pt_on_iniLane = lane.ClosestPoint(pt_on_generate_lane);
-                        var split_lane = new LineSegment(pt_on_generate_lane, pt_on_iniLane);
-                        var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
-                        tmpLanesToAdd.Add(new Lane(split_lane, split_vec));
-                        tmpLanesToAdd.Add(new Lane(split_lane, -split_vec));
-                        generate_split_lanes.Add(split_lane);
+                        if (pt_on_iniLane.Distance(lane.ClosestPoint(pt_on_generate_lane, true)) < 1)
+                        {
+                            var split_lane = new LineSegment(pt_on_generate_lane, pt_on_iniLane);
+                            var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
+                            tmpLanesToAdd.Add(new Lane(split_lane, split_vec));
+                            tmpLanesToAdd.Add(new Lane(split_lane, -split_vec));
+                            generate_split_lanes.Add(split_lane);
+                        }
                     }                   
                 }
                 paras.LanesToAdd.AddRange(tmpLanesToAdd);
