@@ -180,12 +180,14 @@ namespace TianHua.Lighting.UI
         private void rbSingleRow_Checked(object sender, RoutedEventArgs e)
         {
             UIConfigs.LampSpacing = 2700;
-
+            cbIsDoubleRowMode.IsChecked = false;
+            cbIsDoubleRowMode.IsEnabled = false;
         }
 
         private void rbDoubleRow_Checked(object sender, RoutedEventArgs e)
         {
             UIConfigs.LampSpacing = 5400;
+            cbIsDoubleRowMode.IsEnabled = true;
         }
 
         private void btnExtractLaneLine_Click(object sender, RoutedEventArgs e)
@@ -232,6 +234,23 @@ namespace TianHua.Lighting.UI
                 }
                 _cbIsTCHCableTrayChecked = true;
             }
+        }
+
+        private void cbIsDoubleRowMode_Checked(object sender, RoutedEventArgs e)
+        {
+            rbtAutoNumber.IsChecked = false;
+            rbtAssignNumber.IsChecked = true;
+            UIConfigs.NumberOfCircuitsSpecifyTheNumberOfNPerCircuits = 4;
+            rbtAutoNumber.IsEnabled = false;
+            rbtAssignNumber.IsEnabled = false;
+        }
+
+        private void cbIsDoubleRowMode_Unchecked(object sender, RoutedEventArgs e)
+        {
+            rbtAutoNumber.IsEnabled = true;
+            rbtAssignNumber.IsEnabled = true;
+            rbtAutoNumber.IsChecked = true;
+            rbtAssignNumber.IsChecked = false;
         }
     }
 }

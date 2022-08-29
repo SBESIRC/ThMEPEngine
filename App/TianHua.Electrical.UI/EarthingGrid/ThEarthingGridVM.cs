@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
 using ThMEPElectrical.Command;
 using ThMEPElectrical.EarthingGrid.Service;
+using AcHelper.Commands;
 
 namespace TianHua.Electrical.UI.EarthingGrid
 {
@@ -45,7 +46,7 @@ namespace TianHua.Electrical.UI.EarthingGrid
                     ThEarthingGridDataService.Instance.AIAreaInternalColorIndex);
                 acdb.Database.SetCurrentLayer(ThEarthingGridDataService.Instance.AIAreaInternalLayer);
                 acdb.Database.SetLayerColor(ThEarthingGridDataService.Instance.AIAreaInternalLayer, 1);
-                Active.Document.SendStringToExecute("_Pline ", true, false, true);
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
         public void DrawOutterOutline()
@@ -58,7 +59,7 @@ namespace TianHua.Electrical.UI.EarthingGrid
                     ThEarthingGridDataService.Instance.AIAreaExternalColorIndex);
                 acdb.Database.SetCurrentLayer(ThEarthingGridDataService.Instance.AIAreaExternalLayer);
                 acdb.Database.SetLayerColor(ThEarthingGridDataService.Instance.AIAreaExternalLayer, 2);
-                Active.Document.SendStringToExecute("_Pline ", true, false, true);
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
         public void DrawEarthingGrid()

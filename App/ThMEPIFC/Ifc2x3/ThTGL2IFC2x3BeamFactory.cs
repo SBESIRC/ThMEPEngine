@@ -17,12 +17,13 @@ namespace ThMEPIFC.Ifc2x3
                 var ret = model.Instances.New<IfcBeam>();
 
                 //create representation
-                var profile = GetProfile(model, beam);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, beam.ExtrudedDirection, beam.Height);
+                var profile = model.ToIfcRectangleProfileDef(beam.Width, beam.Height);
+                profile.ProfileName = $"Rec_{beam.Width}*{beam.Height}";
+                var solid = model.ToIfcExtrudedAreaSolid(profile, beam.ExtrudedDirection, beam.Length);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
-                var transform = GetTransfrom(beam, floor_origin);
+                var transform = Matrix3d.Rotation(System.Math.PI / 2, Vector3d.ZAxis, Point3d.Origin).PreMultiplyBy(Matrix3d.Rotation(System.Math.PI / 2, Vector3d.YAxis, Point3d.Origin).PreMultiplyBy(Matrix3d.Displacement(new Vector3d(-beam.Length / 2, 0, beam.Height / 2))).PreMultiplyBy(GetTransfrom(beam, floor_origin)));
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
 
                 // add properties
@@ -52,23 +53,7 @@ namespace ThMEPIFC.Ifc2x3
         private static Matrix3d GetTransfrom(ThTCHBeam beam, Point3d floor_origin)
         {
             var offset = floor_origin.GetAsVector();
-            if (beam.Outline is Polyline pline)
-            {
-                offset += beam.ExtrudedDirection.MultiplyBy(pline.Elevation);
-            }
             return ThMatrix3dExtension.MultipleTransformFroms(1.0, beam.XVector, beam.Origin + offset);
-        }
-
-        private static IfcProfileDef GetProfile(IfcStore model, ThTCHBeam beam)
-        {
-            if (beam.Outline is Polyline pline)
-            {
-                return model.ToIfcArbitraryClosedProfileDef(pline);
-            }
-            else
-            {
-                return model.ToIfcRectangleProfileDef(beam.Length, beam.Width);
-            }
         }
     }
 }

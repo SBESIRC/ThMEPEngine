@@ -24,6 +24,19 @@ namespace TianHua.Electrical.PDS.Project
         private static PDSProject _project { get { return PDSProject.Instance; } }
 
         /// <summary>
+        /// 判断项目是否加载，若未加载则返回false
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsProjectLoaded()
+        {
+            if (_project.graphData.IsNull() || _project.graphData.Graph.Vertices.Count() == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// 推送Data数据
         /// </summary>
         public static void PushGraphData(DwgGraph graph, List<THPDSSubstation> substationList)
@@ -161,6 +174,7 @@ namespace TianHua.Electrical.PDS.Project
             var newNode = new ThPDSProjectGraphNode();
             newNode.Type = node.NodeType;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
+            newNode.IsStandardPanel = node.IsStandardPanel;
             var load = node.Loads[0];
             if (node.Loads.Count > 1)
             {

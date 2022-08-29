@@ -107,6 +107,7 @@ namespace ThMEPLighting.Garage
                 parameter.Height = Convert.ToDouble(_UiConfigs.Specification.Substring(_UiConfigs.Specification.IndexOf('*') + 1));
                 parameter.Width = Convert.ToDouble(_UiConfigs.Specification.Substring(0, _UiConfigs.Specification.IndexOf('*')));
                 parameter.IsTCHCableTray = _UiConfigs.IsTCHCableTray;
+                parameter.IsDoubleRow = _UiConfigs.IsDoubleRow;
                 parameter.DoubleRowOffsetDis = _UiConfigs.DoubleRowSpacing;
                 parameter.Interval = _UiConfigs.LampSpacing;
 

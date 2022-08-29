@@ -121,7 +121,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private void CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
         {
-            var results = new DBObjectCollection();
+            CreateSingleRowJumpWireEx(graphs);
+        }
+
+        private void CreateSingleRowJumpWireEx(List<ThLightGraphService> graphs)
+        {
             graphs.ForEach(g =>
             {
                 var sameLinks = FindLightNodeLinkOnSamePath(g.Links);

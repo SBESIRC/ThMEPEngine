@@ -1,6 +1,7 @@
 ﻿using System;
 
 using AcHelper;
+using AcHelper.Commands;
 using Autodesk.AutoCAD.ApplicationServices;
 using DotNetARX;
 using Linq2Acad;
@@ -52,7 +53,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 acadDatabase.Database.CreateAIMainPipeLayer();
                 acadDatabase.Database.SetCurrentLayer(ThWSSCommon.Sprinkler_Connect_MainPipe);
                 Active.Editor.WriteMessage($"请绘制不接支管的主管");
-                Active.Document.SendStringToExecute("_Pline ", true, false, true);
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
 
@@ -63,7 +64,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 acadDatabase.Database.CreateAISubMainPipeLayer();
                 acadDatabase.Database.SetCurrentLayer(ThWSSCommon.Sprinkler_Connect_SubMainPipe);
                 Active.Editor.WriteMessage($"请绘制连接支管的主管");
-                Active.Document.SendStringToExecute("_Pline ", true, false, true);
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
     }

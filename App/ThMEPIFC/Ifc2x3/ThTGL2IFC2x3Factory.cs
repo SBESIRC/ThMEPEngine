@@ -96,6 +96,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     s.Name = storey.Number;
                     s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
+                    s.Elevation = storey.Elevation;
                 });
                 // setup aggregation relationship
                 var ifcRel = model.Instances.New<IfcRelAggregates>();

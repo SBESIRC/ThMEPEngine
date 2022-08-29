@@ -14,7 +14,7 @@ namespace ThMEPLighting.Garage.Service.Number
         /// 作为下一段的起始序号
         /// </summary>
         public int LastIndex { get; private set; }
-        
+
         private ThDoubleRowLightNumber(List<ThLightEdge> edges, int loopNumber, int startIndex, int defaultStartNumber)
         {
             Edges = edges;
@@ -23,9 +23,9 @@ namespace ThMEPLighting.Garage.Service.Number
             DefaultStartNumber = defaultStartNumber;
             LoopCharLength = loopNumber.GetLoopCharLength();
         }
-        public static ThDoubleRowLightNumber Build(List<ThLightEdge> edges, int loopNumber,int startIndex, int defaultStartNumber)
+        public static ThDoubleRowLightNumber Build(List<ThLightEdge> edges, int loopNumber, int startIndex, int defaultStartNumber)
         {
-            var instance = new ThDoubleRowLightNumber(edges, loopNumber,startIndex, defaultStartNumber);
+            var instance = new ThDoubleRowLightNumber(edges, loopNumber, startIndex, defaultStartNumber);
             instance.Build();
             return instance;
         }
@@ -37,9 +37,9 @@ namespace ThMEPLighting.Garage.Service.Number
             });
             LastIndex = StartIndex;
         }
-        private int Build(ThLightEdge lightEdge,int startIndex)
+        private int Build(ThLightEdge lightEdge, int startIndex)
         {
-            if(!lightEdge.IsDX)
+            if (!lightEdge.IsDX)
             {
                 var code = startIndex.ToString().PadLeft(LoopCharLength, '0');
                 lightEdge.LightNodes[0].Number = ThGarageLightCommon.LightNumberPrefix + code;
@@ -50,15 +50,15 @@ namespace ThMEPLighting.Garage.Service.Number
                 int currentIndex = startIndex;
                 for (int i = 0; i < lightEdge.LightNodes.Count; i++)
                 {
-                    lightEdge.LightNodes[i].Number = ThNumberService.FormatNumber(currentIndex, LoopCharLength); 
+                    lightEdge.LightNodes[i].Number = ThNumberService.FormatNumber(currentIndex, LoopCharLength);
                     currentIndex = NextIndex(LoopNumber, currentIndex, DefaultStartNumber);
                 }
                 return currentIndex;
             }
-        }       
-        public static int NextIndex(int loopNumber , int preIndex,int defaultStartNumber)
+        }
+        public static int NextIndex(int loopNumber, int preIndex, int defaultStartNumber)
         {
-            if(preIndex == (defaultStartNumber + (loopNumber-1)*2))
+            if (preIndex == (defaultStartNumber + (loopNumber - 1) * 2))
             {
                 return defaultStartNumber;
             }

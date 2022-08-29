@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
@@ -124,6 +125,110 @@ namespace ThMEPTCH.TCHArchDataConvert
                         continue;
                     resList.Add(keyValue.Value);
                 }
+            }
+            return resList;
+        }
+
+        public List<ThTCHWallData> WallDataDoorWindowRelation(List<TArchWall> walls, List<TArchDoor> doors, List<TArchWindow> windows, Vector3d moveOffSet)
+        {
+            var wallDataDic = new Dictionary<MPolygon, ThTCHWallData>();
+            wallEntityDic = new Dictionary<MPolygon, WallEntity>();
+            wallCurveDic = new Dictionary<Curve, WallEntity>();
+            var addDBColl = new DBObjectCollection();
+            foreach (var item in walls)
+            {
+                var entity = DBToTHEntityCommon.TArchWallToEntityWall(item, 0, 0, 0, 0, moveOffSet);
+                wallEntityDic.Add(entity.OutLine, entity);
+                if (entity.WallCenterCurve != null &&(entity.WallCenterCurve is Line || entity.WallCenterCurve is Arc))
+                    wallCurveDic.Add(entity.WallCenterCurve, entity);
+                addDBColl.Add(entity.OutLine);
+            }
+            var wallCurves = wallCurveDic.Select(c => c.Key).ToList();
+            foreach (var keyValue in wallEntityDic)
+            {
+                var entity = keyValue.Value;
+                double spLeftOffSet = 0.0;
+                double epLeftOffSet = 0.0;
+                double spRightOffSet = 0.0;
+                double epRightOffSet = 0.0;
+                if (null != entity.WallCenterCurve)
+                {
+                    if (entity.WallCenterCurve is Line line)
+                        spLeftOffSet = GetWallPointOffSet(line, wallCurves, out epLeftOffSet, out spRightOffSet, out epRightOffSet);
+                    else if (entity.WallCenterCurve is Arc arc)
+                        spLeftOffSet = GetWallPointOffSet(arc, wallCurves, out epLeftOffSet, out spRightOffSet, out epRightOffSet);
+                }
+                if (Math.Abs(spLeftOffSet)>0.001 || Math.Abs(epLeftOffSet)>0.001 || Math.Abs(spRightOffSet)>0.001 || Math.Abs(epRightOffSet)>0.001)
+                {
+                    var dbWall = walls.Find(c => c.Id == entity.DBId);
+                    var tempEntity = DBToTHEntityCommon.TArchWallToEntityWall(dbWall, spLeftOffSet, epLeftOffSet, spRightOffSet, epRightOffSet, moveOffSet);
+                    if (tempEntity.OutLine != null && tempEntity.OutLine.Area>100)
+                        wallDataDic.Add(entity.OutLine, WallDataEntityToTCHWall(tempEntity));
+                }
+                else
+                {
+                    if (entity.OutLine != null && entity.OutLine.Area > 100)
+                        wallDataDic.Add(entity.OutLine, WallDataEntityToTCHWall(entity));
+
+                }
+            }
+
+            spatialIndex = new ThCADCoreNTSSpatialIndex(addDBColl);
+
+            var doorDic = new Dictionary<MPolygon, ThTCHDoorData>();
+            var doorEntityDic = new Dictionary<MPolygon, DoorEntity>();
+            foreach (var item in doors)
+            {
+                var entity = DBToTHEntityCommon.TArchDoorToEntityDoor(item, moveOffSet);
+                doorDic.Add(entity.OutLine, DoorEntityToTCHDoorData(entity));
+                doorEntityDic.Add(entity.OutLine, entity);
+            }
+
+            var windowDic = new Dictionary<MPolygon, ThTCHWindowData>();
+            var windowEntityDic = new Dictionary<MPolygon, WindowEntity>();
+            foreach (var item in windows)
+            {
+                var entity = DBToTHEntityCommon.TArchWindowToEntityWindow(item, moveOffSet);
+                windowDic.Add(entity.OutLine, WindowEntityToTCHWindowData(entity));
+                windowEntityDic.Add(entity.OutLine, entity);
+            }
+
+            foreach (var item in doorDic)
+            {
+                var crossPLines = spatialIndex.SelectCrossingPolygon(item.Key).Cast<MPolygon>().ToList();
+                var doorEntity = doorEntityDic[item.Key];
+                foreach (var outLine in crossPLines)
+                {
+                    var wall = wallDataDic[outLine];
+                    var wallEntity = wallEntityDic[outLine];
+                    var copyDoor = item.Value.Clone();
+                    copyDoor.BuildElement.Root.GlobalId += wallEntity.DBId.ToString();
+                    wall.Doors.Add(copyDoor);
+                }
+            }
+            foreach (var item in windowDic)
+            {
+                var crossPLines = spatialIndex.SelectCrossingPolygon(item.Key).Cast<MPolygon>().ToList();
+                var windowEntity = windowEntityDic[item.Key];
+                foreach (var outLine in crossPLines)
+                {
+                    var wall = wallDataDic[outLine];
+                    var wallEntity = wallEntityDic[outLine];
+                    var copyWindow = item.Value.Clone();
+                    copyWindow.BuildElement.Root.GlobalId += wallEntity.DBId.ToString();
+                    wall.Windows.Add(copyWindow);
+                }
+            }
+            var resList = new List<ThTCHWallData>();
+            foreach (var keyValue in wallDataDic)
+            {
+                //if (keyValue.Value.BuildElement.Outline is Polyline polyline)
+                //{
+                //    if (polyline.Area < 100)
+                //        continue;
+                //    resList.Add(keyValue.Value);
+                //}
+                resList.Add(keyValue.Value);
             }
             return resList;
         }
@@ -298,16 +403,59 @@ namespace ThMEPTCH.TCHArchDataConvert
             //var newWall = new ThTCHWall(entity.StartPoint,entity.EndPoint,entity.RightWidth+entity.LeftWidth, entity.WallHeight);
             return newWall;
         }
+
+        ThTCHWallData WallDataEntityToTCHWall(WallEntity entity)
+        {
+            var pl = entity.OutLine.Shell();
+            pl.Closed = false;
+            pl.Elevation = entity.OutLine.Elevation;
+            var newWall = new ThTCHWallData();
+            newWall.BuildElement = new ThTCHBuiltElementData();
+            newWall.BuildElement.Outline = pl.ToTCHPolyline();
+            newWall.BuildElement.Height = entity.WallHeight;
+            newWall.BuildElement.Width = entity.LeftWidth + entity.RightWidth;
+            newWall.BuildElement.Root = new ThTCHRootData();
+            newWall.BuildElement.Root.GlobalId = projectId + entity.DBId;
+            newWall.BuildElement.Origin = new ThTCHPoint3d() { X= 0, Y= 0, Z = 0 };
+            newWall.BuildElement.XVector = new ThTCHVector3d() { X= 0, Y= 0, Z = 0 };
+            return newWall;
+        }
+
         ThTCHDoor DoorEntityToTCHDoor(DoorEntity entity)
         {
             var newDoor = new ThTCHDoor(entity.MidPoint, entity.Width,entity.Height,entity.Thickness,entity.Rotation);
             newDoor.Uuid = projectId + entity.DBId.ToString();
             return newDoor;
         }
+
+        ThTCHDoorData DoorEntityToTCHDoorData(DoorEntity entity)
+        {
+            var newDoor = new ThTCHDoorData();
+            newDoor.BuildElement = new ThTCHBuiltElementData();
+            newDoor.BuildElement.Width = entity.Width;
+            newDoor.BuildElement.Origin = entity.MidPoint.ToTCHPoint();
+            newDoor.BuildElement.Height = entity.Height;
+            newDoor.BuildElement.Root = new ThTCHRootData();
+            newDoor.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();
+            return newDoor;
+        }
+
         ThTCHWindow WindowEntityToTCHWindow(WindowEntity entity)
         {
             var newWindow = new ThTCHWindow(entity.MidPoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
             newWindow.Uuid = projectId + entity.DBId;
+            return newWindow;
+        }
+
+        ThTCHWindowData WindowEntityToTCHWindowData(WindowEntity entity)
+        {
+            var newWindow = new ThTCHWindowData();
+            newWindow.BuildElement = new ThTCHBuiltElementData();
+            newWindow.BuildElement.Width = entity.Width;
+            newWindow.BuildElement.Origin = entity.MidPoint.ToTCHPoint();
+            newWindow.BuildElement.Height = entity.Height;
+            newWindow.BuildElement.Root = new ThTCHRootData();
+            newWindow.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();
             return newWindow;
         }
     }

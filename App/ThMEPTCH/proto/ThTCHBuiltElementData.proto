@@ -10,12 +10,10 @@ message ThTCHBuiltElementData {
     double width = 3;
     double height = 4;
 
-    // geometry location 
-    double z_offset = 5;
-    ThTCHPoint3d origin = 6;
-    ThTCHVector3d x_vector = 7;
-    ThTCHVector3d extruded_direction = 8;
+    // geometry location
+    ThTCHPoint3d origin = 5;
+    ThTCHVector3d x_vector = 6;
 
     // geometry profile
-    optional ThTCHPolyline outline = 9;
+    optional ThTCHPolyline outline = 7;
 }

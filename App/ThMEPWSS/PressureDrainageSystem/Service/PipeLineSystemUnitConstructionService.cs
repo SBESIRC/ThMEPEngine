@@ -173,8 +173,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             List<List<Horizontal>> groupedlines = new ();
             List<Horizontal> lines = new();
             horizontalLines./*Where(e => e.Line.Length > 1).*/ForEach(o => lines.Add(o));
+            int count = 0;
             while (lines.Count > 0)
             {
+                count++;
                 List<Horizontal> linesOri = new ();
                 List<Horizontal> linesTest = new ();
                 lines.ForEach(o => linesTest.Add(o));
@@ -195,7 +197,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 _totalPipeLineUnitsByLayerByUnit[layer].Add(pipelineUnit);
             }
         }
-       
+
         /// <summary>
         /// 完善根据排水横管关系建立的排水单元组
         /// </summary>
@@ -212,13 +214,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     for (int j = 0; j < verticalPipes.Count; j++)
                     {
-                        if (verticalPipes[j].Circle.ToRectangle().Contains(horLine.Line.StartPoint) || verticalPipes[j].Circle.ToRectangle().Contains(horLine.Line.EndPoint))
+                        var rec = verticalPipes[j].Circle.ToRectangle();
+                        rec.Scale(verticalPipes[j].Circle.Center,0.8);
+                        if (rec.Contains(horLine.Line.StartPoint) || rec.Contains(horLine.Line.EndPoint))
                         {
+                            var pop = Utils.PressureDrainageUtils.AnalysisPointList(_totalPipeLineUnitsByLayerByUnit[layer][1].VerticalPipes.Select(e => e.Circle.Center).ToList());
                             _totalPipeLineUnitsByLayerByUnit[layer][i].VerticalPipes.Add(verticalPipes[j]);
                             verticalPipes.RemoveAt(j);
                             j--;
                         }                      
-                        else if (horLine.Line.IsIntersects(verticalPipes[j].Circle.Center.CreateSquare(verticalPipes[j].Circle.Diameter)))
+                        else if (horLine.Line.IsIntersects(verticalPipes[j].Circle.Center.CreateSquare(verticalPipes[j].Circle.Diameter/2)))
                         {
                             var old_condition = horLine.Line.GetClosestPointTo(verticalPipes[j].Circle.Center, false).DistanceTo(verticalPipes[j].Circle.Center) < tolPipeToLine;
                             _totalPipeLineUnitsByLayerByUnit[layer][i].VerticalPipes.Add(verticalPipes[j]);
@@ -363,105 +368,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
             return;
-            //以下为老代码-20220615
-            //if (layer == 0)
-            //{
-            //    foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
-            //    {
-            //        foreach (var pipe in unit.VerticalPipes)
-            //        {
-            //            if (pipe.Label != null && pipe.Label.Contains(RoofCrossedId))
-            //            {
-            //                pipe.isUnitStart = true;
-            //                double cond_QuitCycle = 0;
-            //                foreach (var k in unit.VerticalPipes)
-            //                {
-            //                    if (k.AppendedDrainWell != null)
-            //                    {
-            //                        unit.DrainMode = 2;//穿顶板进水井
-            //                        cond_QuitCycle += 1;
-            //                        break;
-            //                    }
-            //                }
-            //                if (cond_QuitCycle == 0)
-            //                {
-            //                    unit.DrainMode = 1;//穿顶板
-            //                }
-            //                break;
-            //            }
-            //        }
-            //        if (unit.DrainMode != 1 && unit.DrainMode != 2)
-            //        {
-            //            var connectedLines = unit.HorizontalPipes.Select(e => e.Clone() as Line).ToList();
-            //            var walls = Modeldatas.WallLines;
-            //            var boundaries = Modeldatas.Boundaries;
-            //            foreach (var line in connectedLines)
-            //            {
-            //                foreach (var bound in boundaries)
-            //                {
-            //                    if (line.IntersectWithEx(bound).Count > 0)
-            //                    {
-            //                        unit.DrainMode = 3;//穿外墙
-            //                        break;
-            //                    }
-            //                }
-            //                if (unit.DrainMode == 3) break;
-            //            }
-            //            if (unit.DrainMode != 3 && connectedLines.Count > 0)
-            //            {
-            //                if (unit.VerticalPipes.Count > 0)
-            //                {
-            //                    double tol_extend = 200000;
-            //                    Line far_line = connectedLines[0];
-            //                    double max_dis = connectedLines[0].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
-            //                    if (connectedLines.Count > 1)
-            //                    {
-            //                        for (int i = 1; i < connectedLines.Count; i++)
-            //                        {
-            //                            double dis = connectedLines[i].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
-            //                            if (dis > max_dis)
-            //                            {
-            //                                max_dis = dis;
-            //                                far_line = connectedLines[i];
-            //                            }
-            //                        }
-            //                    }
-            //                    if (far_line.StartPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center) > far_line.EndPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center))
-            //                    {
-            //                        far_line = new Line(far_line.EndPoint, far_line.StartPoint);
-            //                    }
-            //                    Point3d far_ptstart = far_line.EndPoint;
-            //                    far_line.Extend(false, tol_extend);
-            //                    far_line = new Line(far_ptstart, far_line.EndPoint);
-            //                    bool crossed_inner_wall = false;
-            //                    foreach (var bound in walls)
-            //                    {
-            //                        if (far_line.IntersectWithEx(bound).Count > 0)
-            //                        {
-            //                            crossed_inner_wall = true;
-            //                            break;
-            //                        }
-            //                    }
-            //                    if (crossed_inner_wall) unit.DrainMode = 4;
-            //                    else unit.DrainMode = 3;
-            //                }
-            //                //foreach (var line in connectedLines)
-            //                //{
-            //                //    foreach (var bound in walls)
-            //                //    {
-            //                //        if (line.IntersectWithEx(bound).Count > 0)
-            //                //        {
-            //                //            unit.DrainMode = 4;//穿侧墙
-            //                //            break;
-            //                //        }
-            //                //    }
-            //                //    if (unit.DrainMode == 4) break;
-            //                //}
-            //            }
-            //        }
-            //        unit.DrainMode = unit.DrainMode == 0 ? 4 : unit.DrainMode;//暂时默认其它方式均为穿外墙
-            //    }
-            //}
         }
 
         /// <summary>
@@ -805,11 +711,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     vec = vec.Negate();
                     Matrix3d mat = Matrix3d.Displacement(vec);
                     for (int j = 0; j < _totalPipeLineUnitsByLayerByUnit[i].Count; j++)
-                    {
+                    {                  
                         double cond_QuitCycle = 0;
                         var unit = _totalPipeLineUnitsByLayerByUnit[i][j];
                         var originalHors = unit.OriginalHorizontalPipes;
-                        if (originalHors == null) continue;
+                        if (originalHors == null)
+                        {
+                            if (i == layerNumber - 1)
+                                continue;
+                            else
+                            {
+                                unit.OriginalHorizontalPipes = new List<Horizontal>();
+                                originalHors = new List<Horizontal>();
+                            }
+                        }
                         var originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
                         originalHorsSpacialIndex = new ThCADCoreNTSSpatialIndex(originalHors.Select(e => e.Line.Buffer(1)).ToCollection());
                         for (int k = 0; k < _pipeLineSystemUnits.Count; k++)
@@ -857,16 +772,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                     if (!curPipe.CanUsedToJudgeCrossLayer) continue;
                                     if (curPipe.IsGenerated) continue;
                                     var piperec = curPipe.Circle.Center.CreateSquare(curPipe.Circle.Diameter * 2);
-                                    if (originalHorsSpacialIndex.SelectCrossingPolygon(piperec).Count > 0)
+                                    if (originalHorsSpacialIndex.SelectCrossingPolygon(piperec).Count > 0 || originalHorsSpacialIndex.SelectAll().Count==0)
                                     {
                                         foreach (var parPipe in _pipeLineSystemUnits[k].PipeLineUnits[i - 1].VerticalPipes)
-                                        {
+                                        {                                    
                                             var cond_distance = curPipe.Circle.Center.TransformBy(mat).DistanceTo(parPipe.Circle.Center) < tolSearchVertPipe;
                                             var id_curpipe = curPipe.Identifier == null ? "" : curPipe.Identifier;
                                             var id_parpipe = parPipe.Identifier == null ? "" : parPipe.Identifier;
                                             var cond_match_mark = id_curpipe.Equals(id_parpipe);
                                             if (cond_distance && cond_match_mark)
-                                            {
+                                            {                                             
                                                 cond_QuitCycle += 1;
                                                 if (_pipeLineSystemUnits[k].PipeLineUnits.Count == i)
                                                 {
@@ -1615,7 +1530,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     for (int j = 0; j < linesTest.Count; j++)
                     {
-                        if (IsIntersected(linesOri[i].Line, linesTest[j].Line, 200, verticalPipes,submergedPumps))
+                        if (IsIntersected(linesOri[i].Line, linesTest[j].Line, 150, verticalPipes,submergedPumps) && linesOri[i].Line.Layer.Equals(linesTest[j].Line.Layer))
                         {
                             cond_QuitCycle += 1;
                             linesToAdd.Add(linesTest[j]);

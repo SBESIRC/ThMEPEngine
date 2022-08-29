@@ -522,6 +522,17 @@ namespace ThMEPLighting.ViewModel
             }
         }
 
+        bool _IsDoubleRow = false;
+        public bool IsDoubleRow
+        {
+            get => _IsDoubleRow;
+            set
+            {
+                _IsDoubleRow = value;
+                OnPropertyChanged("IsDoubleRow");
+            }
+        }
+
         #endregion
         string _EvacuationInstructions = "优先壁装";
         public string EvacuationInstructions

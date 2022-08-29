@@ -31,9 +31,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<Polyline> SenitaryTerminalOBBTemp { get; set; } = new List<Polyline>();
         public List<Line> RoomSeparateLine { get; set; } = new List<Line>();
-        public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
+        //public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
         public List<BlockReference> WaterSeparator { get; set; } = new List<BlockReference>();
-        public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
+        public List<BlockReference> BathRadiator { get; set; } = new List<BlockReference>();
+        //public List<BlockReference> RoomRouteSuggestBlk { get; set; } = new List<BlockReference>();
+        //   public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
 
         public ThFloorHeatingDataFactory()
         {
@@ -44,16 +46,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             ExtractFurnitureObstacle(database, framePts);
             ExtractFurnitureObstacleTemp(database, framePts);
             ExtractRoomSeparateLine(database, framePts);
-            ExtractRoomSuggestDist(database, framePts);
+            //ExtractRoomSuggestDist(database, framePts);
             ExtractWaterSeparator(database, framePts);
-            ExtractRoomSetFrame(database, framePts);
+            ExtractBathRadiator(database, framePts);
+            //ExtractRoomSetFrame(database, framePts);
+        }
+
+        public static List<BlockReference> GetRoomSuggestData(Database database)
+        {
+            var list = ExtractAssignRoute(database, new Point3dCollection());
+            return list;
         }
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
         {
-            //var manger = Extract(database); // visitor manager,提取的是原始数据
-            //MoveToOrigin(manger, Transformer); // 移动到原点
-
             Extractors = new List<ThExtractorBase>()
             {
                 new ThFloorHeatingDoorExtractor()
@@ -62,13 +68,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                     Transformer = Transformer,
                     //VisitorManager = manger,
                 },
-                new ThFloorHeatingRoomExtractor ()
+                new ThFloorHeatingRoomExtractor()
                 {
                     IsWithHole = true,
                     UseDb3Engine = true,
                     Transformer = Transformer,
                 },
-                new ThFloorHeatingRoomMarkExtractor ()
+                new ThFloorHeatingRoomMarkExtractor()
                 {
                     Transformer = Transformer,
                 }
@@ -155,72 +161,56 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         private void ExtractWaterSeparator(Database database, Point3dCollection framePts)
         {
-            var extractService = new ThWaterSeparatorExtractor()
+            var extractService = new ThBlockReferenceExtractor()
             {
-                BlockName = ThFloorHeatingCommon.BlkName_WaterSeparator,
+                BlockName = ThFloorHeatingCommon.BlkName_WaterSeparator2,
             };
             extractService.Extract(database, framePts);
             WaterSeparator.AddRange(extractService.Blocks);
         }
 
-        private void ExtractRoomSuggestDist(Database database, Point3dCollection framePts)
+        private void ExtractBathRadiator(Database database, Point3dCollection framePts)
         {
-            var extractService = new ThExtractTextService()
+            var extractService = new ThBlockReferenceExtractor()
             {
-                ElementLayer = ThFloorHeatingCommon.Layer_RoomSuggestDist,
+                BlockName = ThFloorHeatingCommon.BlkName_BathRadiator,
             };
             extractService.Extract(database, framePts);
-            RoomSuggestDist.AddRange(extractService.Texts.OfType<DBText>());
+            BathRadiator.AddRange(extractService.Blocks);
         }
 
-        private void ExtractRoomSetFrame(Database database, Point3dCollection framePts)
+        private static List<BlockReference> ExtractAssignRoute(Database database, Point3dCollection framePts)
         {
-            var extractService = new ThExtractPolylineService()
+            var extractService = new ThBlockReferenceExtractor()
             {
-                ElementLayer = ThFloorHeatingCommon.Layer_RoomSetFrame,
+                BlockName = ThFloorHeatingCommon.BlkName_RoomSuggest,
             };
             extractService.Extract(database, framePts);
-            RoomSetFrame.AddRange(extractService.Polys);
+            var RoomRouteSuggestBlk = extractService.Blocks.ToList();
+            return RoomRouteSuggestBlk;
         }
 
 
-        private void MoveToOrigin(ThBuildingElementVisitorManager vm, ThMEPOriginTransformer transformer)
-        {
-            vm.DB3ArchWallVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.DB3ShearWallVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.DB3ColumnVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.ColumnVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.ShearWallVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.DB3WindowVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.DB3CurtainWallVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.DB3DoorStoneVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            vm.DB3DoorMarkVisitor.Results.ForEach(o =>
-            {
-                if (o is ThRawDoorMark doorMark)
-                {
-                    transformer.Transform(doorMark.Data as Entity);
-                }
-                transformer.Transform(o.Geometry);
-            });
-        }
+        //private void ExtractRoomSuggestDist(Database database, Point3dCollection framePts)
+        //{
+        //    var extractService = new ThExtractTextService()
+        //    {
+        //        ElementLayer = ThFloorHeatingCommon.Layer_RoomSuggestDist,
+        //    };
+        //    extractService.Extract(database, framePts);
+        //    RoomSuggestDist.AddRange(extractService.Texts.OfType<DBText>());
+        //}
 
-        private ThBuildingElementVisitorManager Extract(Database database)
-        {
-            //识别门需要柱墙窗
-            var visitors = new ThBuildingElementVisitorManager(database);
-            var extractor = new ThBuildingElementExtractorEx();
-            extractor.Accept(visitors.DB3ArchWallVisitor);
-            extractor.Accept(visitors.DB3ShearWallVisitor);
-            extractor.Accept(visitors.ShearWallVisitor);
-            extractor.Accept(visitors.DB3ColumnVisitor);
-            extractor.Accept(visitors.ColumnVisitor);
-            extractor.Accept(visitors.DB3WindowVisitor);
-            extractor.Accept(visitors.DB3CurtainWallVisitor);
-            extractor.Accept(visitors.DB3DoorStoneVisitor);
-            extractor.Accept(visitors.DB3DoorMarkVisitor);
-            extractor.Extract(database);
-            return visitors;
-        }
+        //private void ExtractRoomSetFrame(Database database, Point3dCollection framePts)
+        //{
+        //    var extractService = new ThExtractPolylineService()
+        //    {
+        //        ElementLayer = ThFloorHeatingCommon.Layer_RoomSetFrame,
+        //    };
+        //    extractService.Extract(database, framePts);
+        //    RoomSetFrame.AddRange(extractService.Polys);
+        //}
+
         private List<string> QueryBlkNames(string category)
         {
             var blkName = new List<string>();

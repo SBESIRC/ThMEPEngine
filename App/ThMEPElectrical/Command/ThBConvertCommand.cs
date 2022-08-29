@@ -136,9 +136,9 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
-                foreach (var objid in selectionResult.Value.GetObjectIds())
+                foreach (var objId in selectionResult.Value.GetObjectIds())
                 {
-                    currentDb.Element<BlockReference>(objid, true).Erase();
+                    currentDb.Element<BlockReference>(objId, true).Erase();
                 }
             }
         }
@@ -197,6 +197,9 @@ namespace ThMEPElectrical.Command
 
                 // 设置图层状态
                 ltr.IsFrozen = true;
+
+                // 设置非打印图层
+                ltr.IsPlottable = false;
             }
         }
     }

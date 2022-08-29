@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+
 using Linq2Acad;
 using QuikGraph;
 using Dreambuild.AutoCAD;
@@ -44,7 +45,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 安装位置
             var location = texts.Where(t => t.TextString == ThPDSCommon.LOCATION).First();
-            location.TextString = node.Load.Location.StoreyNumber;
+            if (node.Type.Equals(PDSNodeType.StandardPanel))
+            {
+                location.TextString = "";
+            }
+            else
+            {
+                location.TextString = node.Load.Location.StoreyNumber;
+            }
 
             // 安装方式
             var installMethod = texts.Where(t => t.TextString == ThPDSCommon.INSTALLMETHOD).First();
@@ -64,19 +72,47 @@ namespace TianHua.Electrical.PDS.Diagram
             var circuitTexts = texts.Where(t => t.TextString.Equals(ThPDSCommon.ENTER_CIRCUIT_ID))
                 .OrderByDescending(t => t.Position.Y)
                 .ToList();
-            var circuitNumbers = ThPDSCircuitNumberSeacher.Seach(node, graph);
-            if (circuitNumbers.Count == circuitTexts.Count)
+            if (node.Type.Equals(PDSNodeType.StandardPanel))
             {
-                for (var i = 0; i < circuitNumbers.Count; i++)
+                var i = 0;
+                var circuitNumbers = ThPDSCircuitNumberSeacher.Seach(node).OrderBy(o => o).ToList();
+                for (; i < circuitNumbers.Count || i < circuitTexts.Count; i++ )
                 {
-                    circuitTexts[i].TextString = circuitNumbers[i];
+                    if (i < circuitNumbers.Count && i < circuitTexts.Count)
+                    {
+                        circuitTexts[0].TextString = circuitNumbers[i];
+                    }
+                    else if(i < circuitNumbers.Count)
+                    {
+                        var dbText = circuitTexts[0].Clone() as DBText;
+                        var offset = Matrix3d.Displacement(new Vector3d(0, -350 * i, 0));
+                        dbText.TransformBy(offset);
+                        activeDb.ModelSpace.Add(dbText);
+                        tableObjs.Add(dbText);
+                        dbText.TextString = circuitNumbers[i];
+                    }
+                    else if (i < circuitTexts.Count)
+                    {
+                        circuitTexts[i].Erase();
+                    }
                 }
             }
             else
             {
-                for (var i = 0; i < circuitTexts.Count; i++)
+                var circuitNumbers = ThPDSCircuitNumberSeacher.Seach(node, graph);
+                if (circuitNumbers.Count == circuitTexts.Count)
                 {
-                    circuitTexts[i].Erase();
+                    for (var i = 0; i < circuitNumbers.Count; i++)
+                    {
+                        circuitTexts[i].TextString = circuitNumbers[i];
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < circuitTexts.Count; i++)
+                    {
+                        circuitTexts[i].Erase();
+                    }
                 }
             }
 

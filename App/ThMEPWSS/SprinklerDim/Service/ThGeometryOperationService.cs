@@ -31,7 +31,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return referenceInRoom;
         }
 
-        private static List<Polyline> Trim(List<Polyline> reference, Polyline room, bool inverted=false)
+        public static List<Polyline> Trim(List<Polyline> reference, Polyline room, bool inverted=false)
         {
             List<Polyline> polylines = new List<Polyline>();
 
@@ -137,6 +137,23 @@ namespace ThMEPWSS.SprinklerDim.Service
             return ThDataTransformService.GetBothPolylinesAndLines(reference.SelectCrossingPolygon(box)); // 相交或内部
         }
 
+
+        public static List<Polyline> RemoveOverlap(List<Polyline> polylines)
+        {
+            List<Polyline> tPolylines = new List<Polyline>();
+            foreach (Polyline polyline in polylines)
+            {
+                tPolylines.AddRange(ThDataTransformService.GetPolylines(polyline.Buffer(-1)));
+            }
+
+            List<Polyline> newPolylines = new List<Polyline>();
+            foreach (Polyline polyline in tPolylines)
+            {
+                newPolylines.AddRange(ThDataTransformService.GetPolylines(polyline.Buffer(1)));
+            }
+
+            return newPolylines;
+        }
 
     }
 }

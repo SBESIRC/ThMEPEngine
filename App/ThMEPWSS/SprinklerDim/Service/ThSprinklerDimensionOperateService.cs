@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -116,17 +117,19 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="dim"></param>
         /// <param name="isNotDimensioned"></param>
         /// <returns></returns>
-        public static double GetNeareastDistance(List<Point3d> pts, List<int> dim, List<int> isNotDimensioned)
+        public static double GetNeareastDistance(List<Point3d> pts, List<int> dim, List<int> isNotDimensioned,bool IsxAxis)
         {
-            Line dimline = new Line(pts[dim[0]], pts[dim[dim.Count - 1]]);
-            Point3d Dropfoot = dimline.GetClosestPointTo(pts[isNotDimensioned[0]], true);
-            List<double> distance = new List<double>();
-            foreach (int i in isNotDimensioned)
+            int d1 = dim[0];
+            List<double> det = new List<double>();
+            List<double> absdet = new List<double>();
+            foreach (int id in isNotDimensioned)
             {
-                distance.Add(pts[i].DistanceTo(Dropfoot));
+                det.Add(ThCoordinateService.GetOriginalValue(pts[id], !IsxAxis) - ThCoordinateService.GetOriginalValue(pts[d1], !IsxAxis));
             }
-
-            return distance.Min();
+            det.Sort();
+            det.ForEach(p => absdet.Add(Math.Abs(p)));
+            if (det[0] * det[det.Count - 1] < 0) return 0;
+            else return absdet.Min();
         }
 
         /// <summary>
@@ -138,21 +141,21 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="isXAxis"></param>
         /// <param name="step"></param>
         /// <returns></returns>
-        public static List<List<int>> SeperateLine(List<Point3d> pts, List<int> line, List<int> line2, bool isXAxis, double step)
+        public static List<List<ThSprinklerDimGroup>> SeperateLine(List<Point3d> pts, List<ThSprinklerDimGroup> DimedPtRemoved, List<int> DimedPtNotRemovedIndex, bool isXAxis, double step)
         {
-            line.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
-            List<List<int>> lines = new List<List<int>>();
-            line2.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
+            DimedPtRemoved.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x.pt], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y.pt], isXAxis)));
+            List<List<ThSprinklerDimGroup>> lines = new List<List<ThSprinklerDimGroup>>();
+            DimedPtNotRemovedIndex.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
 
-            List<int> one = new List<int> { line[0] };
-            for (int i = 1; i < line.Count; i++)
+            List<ThSprinklerDimGroup> one = new List<ThSprinklerDimGroup> { DimedPtRemoved[0] };
+            for (int i = 1; i < DimedPtRemoved.Count; i++)
             {
-                int iPtIndex = one[one.Count - 1];
-                int jPtIndex = line[i];
-                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex], isXAxis) > 1.5 * step || Math.Abs(line2.IndexOf(iPtIndex) - line2.IndexOf(jPtIndex)) != 1)
+                ThSprinklerDimGroup iPtIndex = one[one.Count - 1];
+                ThSprinklerDimGroup jPtIndex = DimedPtRemoved[i];
+                if (ThCoordinateService.GetOriginalValue(pts[jPtIndex.pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex.pt], isXAxis) > 1.5 * step || Math.Abs(DimedPtNotRemovedIndex.IndexOf(iPtIndex.pt) - DimedPtNotRemovedIndex.IndexOf(jPtIndex.pt)) != 1)
                 {
                     lines.Add(one);
-                    one = new List<int> { jPtIndex };
+                    one = new List<ThSprinklerDimGroup> { jPtIndex };
                 }
                 else
                 {
@@ -171,21 +174,21 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="dimensions"></param>
         /// <param name="isXAxis"></param>
         /// <returns></returns>
-        public static List<List<List<int>>> DeletNullDimensions(List<Point3d> pts, List<List<List<int>>> dimensions, bool isXAxis)
+        public static List<List<List<ThSprinklerDimGroup>>> DeletNullDimensions(List<Point3d> pts, List<List<List<ThSprinklerDimGroup>>> dimensions, bool isXAxis)
         {
-            List<List<List<int>>> Dimensions = new List<List<List<int>>>();
-            foreach (List<List<int>> dims in dimensions)
+            List<List<List<ThSprinklerDimGroup>>> Dimensions = new List<List<List<ThSprinklerDimGroup>>>();
+            foreach (List<List<ThSprinklerDimGroup>> dims in dimensions)
             {
-                List<List<int>> t = new List<List<int>>();
+                List<List<ThSprinklerDimGroup>> t = new List<List<ThSprinklerDimGroup>>();
                 for (int k = 0; k < dims.Count; k++)
                 {
                     if (dims[k] != null)
                     {
-                        dims[k].Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], isXAxis)));
-                        List<int> one = new List<int> { dims[k][0] };
+                        dims[k].Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x.pt], isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y.pt], isXAxis)));
+                        List<ThSprinklerDimGroup> one = new List<ThSprinklerDimGroup> { dims[k][0] };
                         for (int j = 1; j < dims[k].Count; j++)
                         {
-                            if (pts[dims[k][j]].DistanceTo(pts[dims[k][j - 1]]) > 10) one.Add(dims[k][j]);
+                            if (pts[dims[k][j].pt].DistanceTo(pts[dims[k][j - 1].pt]) > 10) one.Add(dims[k][j]);
                         }
                         t.Add(one);
                     }

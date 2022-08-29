@@ -85,7 +85,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 #endif
                 //递归搜索
                 var flag = dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
-                if (flag) return true;
+                //if (flag) return true;
                 //删除不符合要求的点
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);

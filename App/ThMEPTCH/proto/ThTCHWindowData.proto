@@ -1,6 +1,14 @@
 ﻿syntax = "proto3";
 import "ThTCHBuiltElementData.proto";
 
+enum WindowType {
+    Window = 0;
+    Shutter = 1;
+    Eccentric = 2;
+}
+
 message ThTCHWindowData {
     ThTCHBuiltElementData build_element = 1;
+
+    WindowType type = 2;
 }

@@ -810,7 +810,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         break;
                     }
                 }
-                if (cond_found == 0) return false;
+                if (cond_found == 0)
+                {
+                    return false;
+                }
             }
             foreach (var a in texts2)
             {
@@ -823,7 +826,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         break;
                     }
                 }
-                if (cond_found == 0) return false;
+                if (cond_found == 0)
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -918,6 +924,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                     if (bool1 && bool2)
                     {
                         Line line = new Line(point, ptmp1);
+                        line.Layer = testLine.Layer;
                         connectedLines.Add(line);
                         emilinatedSelfLines.Insert(i, lines[i]);
                         break;
@@ -933,6 +940,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                     if (bool1 && bool2)
                     {
                         Line line = new Line(point, ptmp2);
+                        line.Layer = testLine.Layer;
                         connectedLines.Add(line);
                         emilinatedSelfLines.Insert(i, lines[i]);
                         break;
@@ -986,6 +994,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 }
                 if (count_on_line > 1) continue;
                 Line line = new Line(point, p);
+                line.Layer = testLine.Layer;
                 connectedLines.Add(line);
                 emilinatedSelfLines.Insert(i, lines[i]);
                 break;
@@ -1053,14 +1062,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         {
                             var p = lines[j].StartPoint.DistanceTo(lines[i].EndPoint) <= lines[j].EndPoint.DistanceTo(lines[i].EndPoint) ?
                                 lines[j].StartPoint : lines[j].EndPoint;
-                            lines[i] = new Line(p, lines[i].EndPoint);
+                            var lin= new Line(p, lines[i].EndPoint);
+                            lin.Layer = lines[i].Layer;
+                            lines[i] = lin;
                         }
                         if (lines[j].GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint) < 0.001
                             && lines[j].GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint) > 0.001)
                         {
                             var p = lines[j].StartPoint.DistanceTo(lines[i].StartPoint) <= lines[j].EndPoint.DistanceTo(lines[i].StartPoint) ?
                                 lines[j].StartPoint : lines[j].EndPoint;
-                            lines[i] = new Line(lines[i].StartPoint, p);
+                            var lin= new Line(lines[i].StartPoint, p);
+                            lin.Layer= lines[i].Layer;
+                            lines[i] = lin;
                         }
                     }
                 }
@@ -1111,28 +1124,36 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                     {
                         if (lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < tol)
                         {
-                            lines[j] = new Line(lines[i].EndPoint, lines[j].EndPoint);
+                            var lin= new Line(lines[i].EndPoint, lines[j].EndPoint);
+                            lin.Layer = lines[i].Layer;
+                            lines[j] = lin;
                             lines.RemoveAt(i);
                             i--;
                             break;
                         }
                         else if (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < tol)
                         {
-                            lines[j] = new Line(lines[i].EndPoint, lines[j].StartPoint);
+                            var lin= new Line(lines[i].EndPoint, lines[j].StartPoint);
+                            lin.Layer = lines[i].Layer;
+                            lines[j] = lin;
                             lines.RemoveAt(i);
                             i--;
                             break;
                         }
                         else if (lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < tol)
                         {
-                            lines[j] = new Line(lines[i].StartPoint, lines[j].EndPoint);
+                            var lin= new Line(lines[i].StartPoint, lines[j].EndPoint);
+                            lin.Layer = lines[i].Layer;
+                            lines[j] = lin;
                             lines.RemoveAt(i);
                             i--;
                             break;
                         }
                         else if (lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < tol)
                         {
-                            lines[j] = new Line(lines[i].StartPoint, lines[j].StartPoint);
+                            var lin= new Line(lines[i].StartPoint, lines[j].StartPoint);
+                            lin.Layer = lines[i].Layer;
+                            lines[j] = lin;
                             lines.RemoveAt(i);
                             i--;
                             break;
@@ -1159,7 +1180,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 if (pts.Count == 0) continue;
                 else
                 {
-                    var res = SplitLine(line, pts);
+                    var res = SplitLine(line, pts).Select(e => { e.Layer = line.Layer;return e; });
                     lines.AddRange(res);
                     lines.RemoveAt(i);
                     i--;
@@ -1305,6 +1326,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         {
                             var p = vertline.GetClosestPointTo(lines[i].StartPoint, true);
                             var ad_line = new Line(lines[i].StartPoint, p);
+                            try
+                            {
+                                ad_line.Layer = lines[i].Layer;
+                            }
+                            catch (Exception ex)
+                            {
+                                ;
+                            }
                             addlines.Add(ad_line);
                         }
                     }
@@ -1320,6 +1349,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         {
                             var p = vertline.GetClosestPointTo(lines[i].EndPoint, true);
                             var ad_line = new Line(lines[i].EndPoint, p);
+                            try
+                            {
+                                ad_line.Layer = lines[i].Layer;
+                            }
+                            catch (Exception ex)
+                            {
+                                ;
+                            }
                             addlines.Add(ad_line);
                         }
                     }

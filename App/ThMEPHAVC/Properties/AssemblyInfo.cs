@@ -33,12 +33,13 @@ using System.Runtime.InteropServices;
 //可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.39.0")]
-[assembly: AssemblyFileVersion("1.9.39.0")]
+[assembly: AssemblyVersion("1.9.40.0")]
+[assembly: AssemblyFileVersion("1.9.40.0")]
 
 [assembly: CommandClass(typeof(ThMEPHVAC.ThMEPHAVCApp))]
 [assembly: CommandClass(typeof(ThMEPHVAC.ThLoadCalculationSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPHVAC.ThHAVCIndoorFanCmds))]
-[assembly: CommandClass(typeof(ThMEPHVAC.ThFloorHeatingCmds))]
+[assembly: CommandClass(typeof(ThMEPHVAC.ThFloorHeatingCmdEntrance))]
 [assembly: CommandClass(typeof(ThMEPHVAC.ThSmokeProofSystemCmd))]
+[assembly: CommandClass(typeof(ThMEPHVAC.test))]
 

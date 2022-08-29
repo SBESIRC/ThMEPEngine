@@ -1,5 +1,6 @@
 ﻿using System;
 using AcHelper;
+using AcHelper.Commands;
 using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
@@ -26,7 +27,7 @@ namespace TianHua.Hvac.UI.Command
                 ImportLayer();
                 CreateLayer();
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.WaterPipeRoute);
-                Active.Document.SendStringToExecute("_Pline ", true, false, true);
+                CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
 

@@ -2,13 +2,29 @@
 import "ThTCHRootData.proto";
 import "ThTCHWallData.proto";
 import "ThTCHDoorData.proto";
+import "ThTCHGeometry.proto";
 import "ThTCHWindowData.proto";
 import "ThTCHOpeningData.proto";
 
 message ThTCHBuildingStoreyData {
     ThTCHRootData root = 1;
-    repeated ThTCHWallData walls = 2;
-    repeated ThTCHDoorData doors = 3;
-    repeated ThTCHWindowData windows = 4;
-    repeated ThTCHOpeningData openings = 5;
+
+    // number
+    string number = 2;
+    
+    // height
+    double height = 3;
+
+    // elevation
+    double elevation = 4;
+
+    // title block name
+    string usage = 5;
+
+    // base point
+    ThTCHPoint3d origin = 6;
+
+    repeated ThTCHWallData walls = 7;
+    repeated ThTCHDoorData doors = 8;
+    repeated ThTCHWindowData windows = 9;
 }

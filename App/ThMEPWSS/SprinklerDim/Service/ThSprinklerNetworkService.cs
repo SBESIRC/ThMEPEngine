@@ -116,7 +116,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <returns></returns>
         public static double GetDTLength(List<Line> dtOrthogonalSeg)
         {
-            var length = 2000.0;
+            var length = 2600.0;
 
             var group = dtOrthogonalSeg.GroupBy(x => Math.Round(x.Length / 100, MidpointRounding.AwayFromZero));
             var dict = group.OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Select(x => x.Length).ToList());
@@ -136,10 +136,10 @@ namespace ThMEPWSS.SprinklerDim.Service
             if (list.Count > 0)
             {
                 var ave = list.Average();
-                if (ave > 2000)
-                {
+                //if (ave > 2000)
+                //{
                     length = ave;
-                }
+                //}
             }
 
             return length;

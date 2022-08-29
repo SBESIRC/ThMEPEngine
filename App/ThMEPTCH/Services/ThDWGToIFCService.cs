@@ -3,11 +3,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
 using ThMEPTCH.CAD;
@@ -49,7 +51,7 @@ namespace ThMEPTCH.Services
             }
         }
         
-        public List<THStructureEntity> GetDBEntities()
+        public List<THStructureEntity> GetDBStructureEntities()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -79,7 +81,7 @@ namespace ThMEPTCH.Services
             thBuilding.Uuid = prjId + "Building";
             var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = null != archDBData? archDBData.AllTArchEntitys(): GetArchEntities();
-            var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBEntities();
+            var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities();
             InitFloorDBEntity(allEntitys, allDBEntitys);
             var entityConvert = new TCHDBEntityConvert(prjId);
             foreach (var floor in floorOrigin)
@@ -170,11 +172,13 @@ namespace ThMEPTCH.Services
             }
 
             var floorData = GetBlockElevtionValue(floorOrigin);
+            var PreviousHeight = floorData.FirstOrDefault().Elevation;
             foreach (var floor in floorData)
             {
                 var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
                 if (levelEntitys == null)
                     continue;
+                bool isTopFloor = Math.Abs(PreviousHeight - floor.Elevation) > 500;
                 var buildingStorey = new ThTCHBuildingStorey();
                 buildingStorey.Uuid = prjId + floor.Num.ToString()+"F";
                 buildingStorey.Number = floor.Num.ToString();
@@ -182,9 +186,10 @@ namespace ThMEPTCH.Services
                 buildingStorey.Elevation = floor.Elevation;
                 buildingStorey.Useage = floor.FloorName;
                 buildingStorey.Origin = new Point3d(0, 0, floor.Elevation);
-                //buildingStorey.Properties.Add("FloorNo", floor.Num.ToString());
-                //buildingStorey.Properties.Add("Height", floor.LevelHeight.ToString());
-                //buildingStorey.Properties.Add("StdFlrNo", floor.Num.ToString());
+                buildingStorey.Properties.Add("FloorNo", floor.Num.ToString());
+                buildingStorey.Properties.Add("Height", floor.LevelHeight.ToString());
+                buildingStorey.Properties.Add("StdFlrNo", floor.Num.ToString());
+                PreviousHeight = floor.Elevation + floor.LevelHeight;
                 ThTCHBuildingStorey memoryStory = null;
                 if (isMemoryStory)
                 {
@@ -227,13 +232,30 @@ namespace ThMEPTCH.Services
                         var copyItem = item.Clone() as ThTCHBeam;
                         if (Math.Abs(copyItem.Height) > 10)
                         {
-                            (copyItem.Outline as Polyline).Elevation = floor.LevelHeight + item.ZOffSet - item.Height;
-                            copyItem.Height = item.Height;
                             copyItem.ZOffSet = floor.LevelHeight + item.ZOffSet - item.Height;
+                            copyItem.Origin = copyItem.Origin + Vector3d.ZAxis.MultiplyBy(copyItem.ZOffSet);
                         }
                         beams.Add(copyItem);
                     }
-
+                    if (isTopFloor && beams.Count > 0)
+                    {
+                        var beamDic = beams.ToDictionary(key => CreatBeamOutLine(key), value => value);
+                        var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(beamDic.Keys.ToCollection());
+                        foreach (var wall in walls)
+                        {
+                            var pl = (wall.Outline as Polyline).Buffer(20)[0] as Polyline;
+                            var objs = beamSpatialIndex.SelectFence(pl);
+                            if (objs.Count > 0)
+                                wall.Height = Math.Min(wall.Height, objs.Cast<Polyline>().Max(o => beamDic[o].ZOffSet + beamDic[o].Height));
+                        }
+                        foreach (var column in columns)
+                        {
+                            var pl = (column.Outline as Polyline).Buffer(20)[0] as Polyline;
+                            var objs = beamSpatialIndex.SelectFence(pl);
+                            if (objs.Count > 0)
+                                column.Height = Math.Min(column.Height, objs.Cast<Polyline>().Max(o => beamDic[o].ZOffSet + beamDic[o].Height));
+                        }
+                    }
                     var slabs = levelEntitys.FloorEntitys.OfType<ThTCHSlab>().ToList();
                     buildingStorey.Slabs.AddRange(slabs);
                     var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailing>().ToList();
@@ -255,6 +277,160 @@ namespace ThMEPTCH.Services
             thPrj.Site = thSite;
             return thPrj;
         }
+
+        private Polyline CreatBeamOutLine(ThTCHBeam beam)
+        {
+            var result = new Polyline();
+            var vector = beam.XVector.GetPerpendicularVector().GetNormal();
+            result.AddVertexAt(0, (beam.Origin - beam.XVector * beam.Length / 2  - vector * beam.Width /2).ToPoint2D(), 0, 0, 0);
+            result.AddVertexAt(0, (beam.Origin + beam.XVector * beam.Length / 2  - vector * beam.Width /2).ToPoint2D(), 0, 0, 0);
+            result.AddVertexAt(0, (beam.Origin + beam.XVector * beam.Length / 2  + vector * beam.Width /2).ToPoint2D(), 0, 0, 0);
+            result.AddVertexAt(0, (beam.Origin - beam.XVector * beam.Length / 2  + vector * beam.Width /2).ToPoint2D(), 0, 0, 0);
+            result.Closed = true;
+            return result;
+        }
+
+        public ThTCHBuildingData DWGToProjectData(bool isMemoryStory,bool railingToRegion)
+        {
+            string prjId = "";
+            string prjName = "测试项目";
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                prjName = Active.DocumentName;
+                prjId = Active.Document.UnmanagedObject.ToString();
+            }
+            var thTCHBuildingData = new ThTCHBuildingData();
+            thTCHBuildingData.Root = new ThTCHRootData()
+            {
+                GlobalId = prjId,
+                Name = prjName,
+                Description = "TCHBuilding"
+            };
+            var floorOrigin = GetFloorBlockPolylines();
+            var allEntitys = null != archDBData? archDBData.AllTArchEntitys(): GetArchEntities();
+            var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities();
+            InitFloorDBEntity(allEntitys, allDBEntitys);
+            var entityConvert = new TCHDBEntityConvert(prjId);
+            foreach (var floor in floorOrigin)
+            {
+                var floorEntitys = FloorEntitys(floor.FloorOutLine, out List<FloorCurveEntity> curveEntities);
+                var moveVector = Point3d.Origin - floor.FloorOrigin;
+                Matrix3d matrix = Matrix3d.Displacement(moveVector);
+                var thisFloorWalls = floorEntitys.OfType<WallEntity>().Select(c => c.DBArchEntiy).Cast<TArchWall>().ToList();
+                var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntiy).Cast<TArchDoor>().ToList();
+                var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntiy).Cast<TArchWindow>().ToList();
+                var walls = entityConvert.WallDataDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
+                floor.FloorEntitys.AddRange(walls);
+
+                var allSlabs = new List<ThTCHSlab>();
+                var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailing>();
+                var railingColls = new DBObjectCollection();
+                foreach (var item in curveEntities)
+                {
+                    if (item.EntitySystem.Contains("楼板"))
+                    {
+                        if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
+                        {
+                            var slab = CreateSlab(slab1, matrix);
+                            slab.Uuid = prjId + item.Id;
+                            allSlabs.Add(slab);
+                        }
+                    }
+                    else if (item.EntitySystem.Contains("栏杆"))
+                    {
+                        if (item.EntityCurve is Polyline polyline)
+                        {
+                            var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
+                            railingColls.Add(pLine);
+                            var railing = CreateRailing(pLine);
+                            if (railingToRegion)
+                            {
+                                var centerline = railing.Outline as Polyline;
+                                var outlines = centerline.BufferFlatPL(railing.Width / 2.0);
+                                railing.Outline = outlines[0] as Polyline;
+                            }
+                            railing.Height = ralingHeight;
+                            railing.Uuid = prjId + item.Id;
+                            thisRailingEntitys.Add(pLine, railing);
+                        }
+                    }
+                }
+                //用墙的索引找栏杆没有找到
+                var railingSpatialIndex = new ThCADCoreNTSSpatialIndex(railingColls);
+                List<Polyline> hisPLines = new List<Polyline>();
+                foreach (var wall in walls)
+                {
+                    if (wall.BuildElement.Height < 10 || wall.BuildElement.Height > 2000)
+                        continue;
+                    if (hisPLines.Count == thisRailingEntitys.Count)
+                        break;
+                    var crossRailings = railingSpatialIndex.SelectCrossingPolygon(wall.BuildElement.Outline.ToPolyline()).OfType<Polyline>().ToList();
+                    if (crossRailings.Count < 1)
+                        continue;
+                    foreach (var polyline in crossRailings)
+                    {
+                        if (hisPLines.Any(c => c == polyline))
+                            continue;
+                        var railing = thisRailingEntitys[polyline];
+                        (railing.Outline as Polyline).Elevation = (wall.BuildElement.Outline.ToPolyline()).Elevation + wall.BuildElement.Height;
+                        railing.ZOffSet = wall.BuildElement.Height;
+                        railing.Height = 800;
+                    }
+                }
+                floor.FloorEntitys.AddRange(allSlabs);
+                floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
+            }
+
+            var floorData = GetBlockElevtionValue(floorOrigin);
+            foreach (var floor in floorData)
+            {
+                var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
+                if (levelEntitys == null)
+                    continue;
+                var buildingStorey = new ThTCHBuildingStoreyData();
+                buildingStorey.Root = new ThTCHRootData();
+                buildingStorey.Root.GlobalId = prjId + floor.Num.ToString()+"F";
+                buildingStorey.Root.Name = floor.Num.ToString()+"F";
+                buildingStorey.Root.Description = floor.FloorName;
+                buildingStorey.Number = floor.Num.ToString();
+                buildingStorey.Height = floor.LevelHeight;
+                buildingStorey.Elevation = floor.Elevation;
+                buildingStorey.Usage = floor.FloorName;
+                buildingStorey.Origin = new ThTCHPoint3d() { X = 0, Y = 0, Z = floor.Elevation};
+                ThTCHBuildingStoreyData memoryStory = null;
+                if (isMemoryStory)
+                {
+                    foreach (var item in thTCHBuildingData.Storeys)
+                    {
+                        if (item.Usage != floor.FloorName)
+                            continue;
+                        if (Math.Abs(item.Height - floor.LevelHeight) < 1)
+                        {
+                            memoryStory = item;
+                        }
+                    }
+                }
+                if (null != memoryStory)
+                {
+
+                }
+                else
+                {
+                    var walls = new List<ThTCHWallData>();
+                    foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHWallData>().ToList())
+                    {
+                        var copyItem = item.Clone();
+                        if (Math.Abs(copyItem.BuildElement.Height) < 10)
+                            copyItem.BuildElement.Height = floor.LevelHeight;
+                        walls.Add(copyItem);
+                    }
+                    buildingStorey.Walls.AddRange(walls);
+                }
+                thTCHBuildingData.Storeys.Add(buildingStorey);
+            }
+            return thTCHBuildingData;
+        }
+
         private void CalcFloorSlab(List<Polyline> slabPolylines,List<DBText> slabTexts,List<MText> slabMTexts) 
         {
             slabPolylines = slabPolylines.OrderBy(c => c.Area).ToList();
@@ -625,6 +801,21 @@ namespace ThMEPTCH.Services
             return slab;
         }
 
+        ThTCHWallData WallEntityToTCHWallData(string projectId, THStructureWall wall, Matrix3d matrix)
+        {
+            var pl = wall.Outline.Clone() as Polyline;
+            pl.TransformBy(matrix);
+            //pl.Closed = false;
+            pl.Elevation = 0.0;
+            var newWall = new ThTCHWallData();
+            newWall.BuildElement = new ThTCHBuiltElementData()
+            {
+                Outline = pl.ToTCHPolyline(),
+                Root = new ThTCHRootData() { GlobalId = projectId + wall.Uuid },
+            };
+            return newWall;
+        }
+
         ThTCHWall WallEntityToTCHWall(string projectId, THStructureWall wall, Matrix3d matrix)
         {
             var pl = wall.Outline.Clone() as Polyline;
@@ -646,17 +837,12 @@ namespace ThMEPTCH.Services
             newColumn.Uuid = projectId + column.Uuid;
             return newColumn;
         }
-        
         ThTCHBeam BeamEntityToTCHBeam(string projectId, THStructureBeam beam, Matrix3d matrix)
         {
-            var pl = beam.Outline.Clone() as Polyline;
-            pl.TransformBy(matrix);
-            //pl.Closed = false;
-            pl.Elevation = 0.0;
-            var newBeam = new ThTCHBeam(pl, -1);
+            var origin = beam.Origin.TransformBy(matrix);
+            var newBeam = new ThTCHBeam(beam.Width, beam.Length, beam.Height, beam.XVector, origin);
             newBeam.Uuid = projectId + beam.Uuid;
             newBeam.ZOffSet = beam.RelativeBG;
-            newBeam.Height = beam.Height;
             return newBeam;
         }
 

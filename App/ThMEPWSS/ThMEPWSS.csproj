@@ -229,6 +229,7 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
     <Compile Include="Engine\ThTCHWaterIndicatorRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Data\ThSprinklerDimDataProcessService.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerDimReferencePoint.cs" />
     <Compile Include="SprinklerDim\Data\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="SprinklerDim\Engine\ThSprinklerDimEngine.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimension.cs" />
@@ -471,6 +472,7 @@
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithMainLoopAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Test\DisplayTool.cs" />
+    <Compile Include="ViewModel\ThStoreyFrameVM.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyTankCmd.cs" />

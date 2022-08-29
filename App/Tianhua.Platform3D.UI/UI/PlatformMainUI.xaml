@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="Tianhua.Platform3D.UI.UI.PlatformMainUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+             xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="62"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="#F2F2F2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="70"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Style="{x:Null}" Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <Image Source="../Resources/Images/catalogue.png" Height="16" Width="16" Margin="5,0,5,0"></Image>
+                    <Label Style="{x:Null}" Content="项目"></Label>
+                    <Label Style="{x:Null}" Content=">"></Label>
+                    <Label Style="{x:Null}" Content="子项"></Label>
+                    <Label Style="{x:Null}" Content=">"></Label>
+                    <Label Style="{x:Null}" Content="专业"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <Image Source="../Resources/Images/user.png" Height="20" Width="20" Margin="5,0,5,0"></Image>
+                    <Label Style="{x:Null}" Content="未登录"></Label>
+                </StackPanel>
+            </StackPanel>
+
+            <Image Grid.Column="1" Source="../Resources/Images/show.png" Height="62" Width="62" Margin="5,0,5,0"></Image>
+        </Grid>
+        <Grid Grid.Row="1">
+            <hc:TabControl x:Name="tabTopFunction"
+                           Style="{StaticResource TabControlInLine}" Background="White" Foreground="#B5B5B5"
+                           ShowOverflowButton="False" 
+                           ShowScrollButton="False" 
+                           IsScrollable="False"
+                           ItemsSource="{Binding FunctionTableItems}">
+                <hc:TabControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type hc:TabItem}" BasedOn="{StaticResource TabItemInLine }">
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#B5B5B5"></SolidColorBrush>
+                            <SolidColorBrush x:Key="PrimaryBrush" Color="#555555"></SolidColorBrush>
+                        </Style.Resources>
+                        <Setter Property="Header" Value="{Binding TabItemName}"  />
+                        <Setter Property="Content" Value="{Binding UControl}"/>
+                        <Setter Property="Background" Value="#F2F2F2"></Setter>
+                        <Setter Property="BorderBrush" Value="#555555"/>
+                        <Setter Property="FontWeight" Value="ExtraBold"/>
+                        <Setter Property="FontSize" Value="14"></Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="FontWeight" Value="Black"></Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </hc:TabControl.ItemContainerStyle>
+            </hc:TabControl>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Border Style="{x:Null}" BorderThickness="0,1,0,0" BorderBrush="Black" VerticalAlignment="Top"></Border>
+            <Grid Height="35" Margin="0,5,0,0" VerticalAlignment="Top">
+                <Label Style="{x:Null}" Content="属性栏" VerticalContentAlignment="Center"></Label>
+                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="属性复制" ></Button>
+                    <Button Content="快速选择" Margin="10,0,10,0"></Button>
+                </WrapPanel>
+
+            </Grid>
+            <DataGrid Style="{x:Null}" Grid.Row="1" Background="Transparent" Margin="5" 
+                      HeadersVisibility="All" BorderBrush="Black" BorderThickness="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="属性名" Width="1*"></DataGridTextColumn>
+                    <DataGridTextColumn Header="属性值" Width="2*"></DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</UserControl>

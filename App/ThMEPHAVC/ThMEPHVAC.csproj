@@ -83,6 +83,8 @@
     <Compile Include="FanPipeAlgorithm\tool.cs" />
     <Compile Include="FanPipeAlgorithm\total_graph.cs" />
     <Compile Include="FloorHeatingCoil\Cmd\ThFloorHeatingCmd.cs" />
+    <Compile Include="FloorHeatingCoil\Cmd\ThFloorHeatingCmdEntrance.cs" />
+    <Compile Include="FloorHeatingCoil\Cmd\ThFloorHeatingSubCmd.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThCleanEntityService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThFloorHeatingDataFactory.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThFloorHeatingDataProcessService.cs" />
@@ -94,11 +96,57 @@
     <Compile Include="FloorHeatingCoil\Data\ThRoomSuperBoundaryProcessService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThWaterSeparatorExtractor.cs" />
+    <Compile Include="FloorHeatingCoil\Engine\ThFloorHeatingCreateSingleRegionEngin.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\AdjustPolyline.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\ClearSingleBuffer.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DataPackage.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DataPreprocess.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DistributionService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DistributionService2.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DistributionService3.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\DrawPipe.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\EstimateService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\ExhaustiveDistribution.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\FindPointService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\PolylineProcessService.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\RegionModel.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\Run.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\Tools.cs" />
+    <Compile Include="FloorHeatingCoil\Heating\UserInteraction.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingCoilSetting.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingRoom.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingWaterSeparator.cs" />
     <Compile Include="FloorHeatingCoil\Model\ThRoomSetModel.cs" />
+    <Compile Include="FloorHeatingCoil\Model\ThFloorHeatingCoilViewModel.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\data\PipeInput.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\data\PipeOutput.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\MainPipeGet.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\MainPipeGet2.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\MainPipeGet3.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\model\BufferPoly.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\model\BufferTreeNode.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\model\PipeSegment.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\model\RectBox.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\PassagePipeGenerator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\RoomPipeGenerator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\RoomPipeGenerator1.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\DirectionWayCalculator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\EquispacedWayCalculator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\IntersectWayCalculator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\MainPipeBuffer.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\MainRegionCalculator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\PassageDataPreprocessor.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Service\StartRoomCalculator.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\test.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\CenterLineUtils.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\FilletUtils.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\IntersectUtils.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\PassageShowUtils.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\PassageWayUtils.cs" />
+    <Compile Include="FloorHeatingCoil\PassingWay\Utils\SmoothUtils.cs" />
     <Compile Include="FloorHeatingCoil\Service\LineStringEx.cs" />
+    <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCoilInsertService.cs" />
+    <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCoilUtilServices.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThMEPHVACCommonUtils.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThSelectFrameUtil.cs" />
     <Compile Include="FloorHeatingCoil\ThFloorHeatingCommon.cs" />
@@ -303,7 +351,6 @@
     <Compile Include="TCH\ThTCHCommonTables.cs" />
     <Compile Include="TCH\ThTCHDrawFactory.cs" />
     <Compile Include="TCH\ThTCHService.cs" />
-    <Compile Include="ThFloorHeatingCmds.cs" />
     <Compile Include="ThHAVCIndoorFanCmds.cs" />
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
@@ -402,6 +449,9 @@
     </When>
   </Choose>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.0.0</Version>
+    </PackageReference>
     <PackageReference Include="QuikGraph">
       <Version>2.5.0</Version>
     </PackageReference>
@@ -410,4 +460,19 @@
     <Folder Include="SmokeProofSystem\MarkEngine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(Configuration)==Debug-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Debug-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

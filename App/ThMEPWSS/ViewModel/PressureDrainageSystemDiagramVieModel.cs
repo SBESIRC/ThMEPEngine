@@ -98,11 +98,97 @@ namespace ThMEPWSS.Diagram.ViewModel
                     MessageBox.Show("框选区域没有标准楼层");
                     return;
                 }
-                FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
+                FloorNumList = CreateFloorNumList(FloorNum);
                 FloorAreaList = CreateFloorAreaList(storeysRecEngine.Elements);
                 undpdsfloorListDatas.Reverse();
                 return;
             }
+        }
+        public static List<List<int>> CreateFloorNumList(List<string> FloorNum) //提取每张图纸的楼层号
+        {
+            var FNumSplit = new List<string[]>();
+            foreach (var f in FloorNum)
+            {
+                FNumSplit.Add(f.Split(','));
+            }
+
+            var FloorNumList = new List<List<double>>();
+
+            foreach (var f in FNumSplit)
+            {
+                var fiNum = new List<double>();
+                for (int i = 0; i < f.Length; i++)
+                {
+                    if (f[i].Trim().StartsWith("-"))
+                    {
+                        continue;
+                    }
+                    if (f[i].Contains('-'))
+                    {
+                        var start = Convert.ToInt32(f[i].Split('-')[0]);
+                        var end = Convert.ToInt32(f[i].Split('-')[1]);
+                        for (int j = start; j <= end; j++)
+                        {
+                            var hasNum = false;
+                            foreach (var fi in FNumSplit)
+                            {
+                                if (fi.Contains(Convert.ToString(j)))
+                                {
+                                    hasNum = true;
+                                    break;
+                                }
+                            }
+                            if (!hasNum)
+                            {
+                                fiNum.Add(j);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var num = double.Parse(f[i].Trim(new char[] { 'B', 'M' }));
+                        if (f[i].Contains("M"))
+                            num -= 0.5;
+                        fiNum.Add(num);
+                    }
+                }
+                if (fiNum.Count != 0)
+                {
+                    FloorNumList.Add(fiNum);
+                }
+            }
+            var modifiedList = new List<List<int>>();
+            var floornums = new List<double>();
+            FloorNumList.ForEach(e => floornums.Add(e[0]));
+            while (true)
+            {
+                if (floornums.Select(e => e.ToString()).Where(x => x.Contains(".5")).Count() == 0)
+                    break;
+                else
+                {
+                    for (int i = 0; i < floornums.Count; i++)
+                    {
+                        if (floornums[i].ToString().Contains(".5"))
+                        {
+                            for (int j = 0; j < floornums.Count; j++)
+                            {
+                                if (floornums[j] > floornums[i])
+                                    floornums[j] += 1;
+                                else if (i == j)
+                                {
+                                    floornums[j] += 0.5;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            foreach (var num in floornums)
+            {
+                modifiedList.Add(new List<int>() { (int)num });
+            }
+            return modifiedList;
         }
         /// <summary>
         /// 框选提资表

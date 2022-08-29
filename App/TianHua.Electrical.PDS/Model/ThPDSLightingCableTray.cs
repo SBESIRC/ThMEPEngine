@@ -1,5 +1,6 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System;
+
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -20,6 +21,14 @@ namespace TianHua.Electrical.PDS.Model
         {
             OnLightingCableTray = false;
             CableTray = null;
+        }
+
+        public ThPDSLightingCableTray Clone()
+        {
+            var info = new ThPDSLightingCableTray();
+            info.OnLightingCableTray = OnLightingCableTray;
+            info.CableTray = CableTray == null ? null : CableTray.Clone() as Curve;
+            return info;
         }
     }
 }

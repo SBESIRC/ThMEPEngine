@@ -180,16 +180,119 @@ namespace ThMEPIFC
         public IfcStore ModelMerge(string filePath, ThTCHProject tchProject)
         {
             var bigModel = IfcStore.Open(filePath);
-            var smallModel = ThTGL2IFC2x3Factory.CreateAndInitModel("ThTGL2IFCProject", tchProject.Uuid);
-            if (smallModel != null)
+            if (tchProject != null)
             {
-                ThTGL2IFC2x3Builder.BuildIfcModel(smallModel, tchProject);
-                return ModelMerge(bigModel, smallModel);
+                return ModelMerge(bigModel, tchProject);
             }
             else
             {
                 return null;
             }
+        }
+
+        public IfcStore ModelMerge(IfcStore bigModel, ThTCHProject tchProject)
+        {
+            var bigProject = bigModel.Instances.FirstOrDefault<Xbim.Ifc2x3.Kernel.IfcProject>();
+            var bigBuildings = bigProject.Sites.FirstOrDefault()?.Buildings.FirstOrDefault() as Xbim.Ifc2x3.ProductExtension.IfcBuilding;
+            //处理95%
+            List<Tuple<int, double, double>> StoreyDic = new List<Tuple<int, double, double>>();
+            foreach (Xbim.Ifc2x3.ProductExtension.IfcBuildingStorey BuildingStorey in bigBuildings.BuildingStoreys)
+            {
+                double Storey_Elevation = BuildingStorey.Elevation.Value;
+                double Storey_Height = double.Parse(((BuildingStorey.PropertySets.FirstOrDefault().PropertySetDefinitions.FirstOrDefault() as Xbim.Ifc2x3.Kernel.IfcPropertySet).HasProperties.FirstOrDefault(o => o.Name == "Height") as Xbim.Ifc2x3.PropertyResource.IfcPropertySingleValue).NominalValue.Value.ToString());
+                StoreyDic.Add((int.Parse(BuildingStorey.Name.ToString()), Storey_Elevation, Storey_Height).ToTuple());
+            }
+            StoreyDic = StoreyDic.OrderBy(x => x.Item1).ToList();
+            //处理5%
+            foreach (ThTCHBuildingStorey BuildingStorey in tchProject.Site.Building.Storeys)
+            {
+                var bigStorey = StoreyDic.FirstOrDefault(o => o.Item1.ToString() == BuildingStorey.Number);
+                if (bigStorey.IsNull())
+                {
+                    var Storey_z = BuildingStorey.Elevation;
+                    bigStorey = StoreyDic.FirstOrDefault(o => Math.Abs(o.Item2 - Storey_z) <= 200);
+                    if (bigStorey.IsNull())
+                    {
+                        if (Math.Abs(Storey_z - (StoreyDic.Last().Item2 + StoreyDic.Last().Item3)) <= 200)
+                        {
+                            //楼层高度 = 最顶层的标高 + 最顶层的层高，说明这个是新的一层
+                            var storeyNo = StoreyDic.Last().Item1 + 1;
+                            StoreyDic.Add((storeyNo, Storey_z, 0.0).ToTuple());
+                            bigStorey = StoreyDic.Last();
+                        }
+                        else if (Storey_z < StoreyDic.First().Item2)
+                        {
+                            var storeyNo = StoreyDic.First().Item1 - 1;
+                            if (storeyNo == 0)
+                            {
+                                storeyNo--;
+                            }
+                            StoreyDic.Insert(0, (storeyNo, Storey_z, StoreyDic.First().Item2 - Storey_z).ToTuple());
+                            bigStorey = StoreyDic.First();
+                        }
+                        else if (Storey_z > (StoreyDic.Last().Item2 + StoreyDic.Last().Item3))
+                        {
+                            var storeyNo = StoreyDic.Last().Item1 + 1;
+                            StoreyDic.Add((storeyNo, Storey_z, 0.0).ToTuple());
+                            bigStorey = StoreyDic.Last();
+                        }
+                        else
+                        {
+                            bigStorey = StoreyDic.FirstOrDefault(o => Storey_z - o.Item2 > -200);
+                        }
+                    }
+                }
+                var storeyName = bigStorey.Item1.ToString().Replace('-', 'B');
+                var storey = bigBuildings.BuildingStoreys.FirstOrDefault(o => o.Name==storeyName) as Xbim.Ifc2x3.ProductExtension.IfcBuildingStorey;
+                if (storey.IsNull())
+                {
+                    BuildingStorey.Number = storeyName;
+                    storey = ThTGL2IFC2x3Factory.CreateStorey(bigModel, bigBuildings, BuildingStorey);
+                }
+                var CreatWalls = new List<Xbim.Ifc2x3.SharedBldgElements.IfcWall>();
+                var CreatSlabs = new List<Xbim.Ifc2x3.SharedBldgElements.IfcSlab>();
+                var CreatBeams = new List<Xbim.Ifc2x3.SharedBldgElements.IfcBeam>();
+                var CreatColumns = new List<Xbim.Ifc2x3.SharedBldgElements.IfcColumn>();
+                var floor_origin = BuildingStorey.Origin;
+                foreach (var thtchwall in BuildingStorey.Walls)
+                {
+                    var wall = ThTGL2IFC2x3Factory.CreateWall(bigModel, thtchwall, floor_origin);
+                    CreatWalls.Add(wall);
+                }
+                foreach (var thtchbeam in BuildingStorey.Beams)
+                {
+                    var beam = ThTGL2IFC2x3Factory.CreateBeam(bigModel, thtchbeam, floor_origin);
+                    CreatBeams.Add(beam);
+                }
+                foreach (var thtchcolumn in BuildingStorey.Columns)
+                {
+                    var column = ThTGL2IFC2x3Factory.CreateColumn(bigModel, thtchcolumn, floor_origin);
+                    CreatColumns.Add(column);
+                }
+                foreach (var thtchslab in BuildingStorey.Slabs)
+                {
+                    var slab = ThTGL2IFC2x3Factory.CreateMeshSlab(bigModel, thtchslab, floor_origin);
+                    if (null !=slab)
+                        CreatSlabs.Add(slab);
+                }
+                
+                using (var txn = bigModel.BeginTransaction("relContainEntitys2Storey"))
+                {
+                    //for ifc2x3
+                    var relContainedIn = bigModel.Instances.New<Xbim.Ifc2x3.ProductExtension.IfcRelContainedInSpatialStructure>();
+                    storey.ContainsElements.Append<Xbim.Ifc2x3.Interfaces.IIfcRelContainedInSpatialStructure>(relContainedIn);
+
+                    relContainedIn.RelatingStructure = storey;
+                    relContainedIn.RelatedElements.AddRange(CreatWalls);
+                    relContainedIn.RelatedElements.AddRange(CreatSlabs);
+                    relContainedIn.RelatedElements.AddRange(CreatBeams);
+                    relContainedIn.RelatedElements.AddRange(CreatColumns);
+                    txn.Commit();
+                }
+            }
+
+            //返回
+            return bigModel;
         }
     }
 }
