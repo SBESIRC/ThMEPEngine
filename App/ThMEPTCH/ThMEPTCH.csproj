@@ -69,6 +69,10 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="Services\THDBFFLBuilder.cs" />
+    <Compile Include="CAD\THDBFFLExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBFFLMarkExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBRailingExtractionVisitor.cs" />
     <Compile Include="CAD\THDBSlabHatchExtractionVisitor.cs" />
     <Compile Include="CAD\THDBSlabBTHExtractionVisitor.cs" />
     <Compile Include="CAD\THDBSlabPLExtractionVisitor.cs" />
@@ -129,6 +133,7 @@
     <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Model\ThTCHWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ThDWGToIFCModels.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThMEPTCHTool.cs" />
     <Compile Include="Services\ThTCHArchDBService.cs" />
