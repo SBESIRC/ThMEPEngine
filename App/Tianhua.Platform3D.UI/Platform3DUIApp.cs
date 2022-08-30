@@ -1,5 +1,7 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
+using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
+using Tianhua.Platform3D.UI.EventMonitor;
 using Tianhua.Platform3D.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -17,6 +19,7 @@ namespace Tianhua.Platform3D.UI
             //  Loading some dependents explicitly which are not taken care of automatically;
             //  Subscribing to some events which are important for the whole session;
             //  Etc.
+            PlatformAddEvents();
         }
 
         public void Terminate()
@@ -42,5 +45,15 @@ namespace Tianhua.Platform3D.UI
             mainPaletteSet.DockEnabled = DockSides.Left;
             mainPaletteSet.Dock = DockSides.Left;
         }
+        #region 平台CAD相关事件
+        private void PlatformAddEvents() 
+        {
+            AcadApp.DocumentManager.DocumentActivated += ObjectSelectEvent.DocumentManager_DocumentActivated;
+        }
+        private void PlatformRemoveEvents()
+        {
+
+        }
+        #endregion
     }
 }

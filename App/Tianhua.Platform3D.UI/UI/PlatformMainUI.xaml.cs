@@ -34,6 +34,7 @@ namespace Tianhua.Platform3D.UI.UI
         private void PlatformMainUI_Loaded(object sender, RoutedEventArgs e)
         {
             InitMainViewModel();
+            InitPropertyViewModel();
         }
 
         private void InitMainViewModel() 
@@ -45,6 +46,11 @@ namespace Tianhua.Platform3D.UI.UI
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("组装", null));
             tabTopFunction.DataContext = mainViewModel;
             tabTopFunction.SelectedIndex = 2;
+        }
+
+        private void InitPropertyViewModel() 
+        {
+            propGrid.DataContext = PropertiesViewModel.Instacne;
         }
     }
 }
