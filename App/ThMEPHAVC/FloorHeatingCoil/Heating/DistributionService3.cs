@@ -213,7 +213,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //公区判别
             if (nowRegion.IsPublicRegion == 1) tmpPipe.IsPublicPipe = 1;
 
-
+            //散热器判别
+            if (ProcessedData.RadiatorRegion == regionId) tmpPipe.Dead2 = 1;
 
             subScheme.TmpPipeList.Add(tmpPipe);
 
@@ -305,6 +306,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                 //if (pipe1.IsPublicPipe != pipe2.IsPublicPipe) return false;
             }
+
+            //散热器判别
+            if (Parameter.HaveRadiator)
+            {
+                if (pipe1.Dead2 == 1 || pipe2.Dead2 == 1) return false;
+            }
+
+
             return true;
         }
 
@@ -787,6 +796,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 if (RegionList[regionId].IsPublicRegion != getPipe.IsPublicPipe) return false;
             }
+
+            //散热器判别
+            if (Parameter.HaveRadiator)
+            {
+                if (getPipe.Dead2 == 1 || providePipe.Dead2 == 1) return false;
+            }
+
 
             //微小优化判别
             int maxLevelRegionId = getPipe.DomainIdList.OrderByDescending(x => RegionList[x].Level).First();

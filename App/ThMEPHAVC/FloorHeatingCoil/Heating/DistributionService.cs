@@ -1226,7 +1226,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public double HaveAuxiliaryRoom = 0;
         public double IsPublicPipe = 0;  
         public double Dead = 0;  //
-
+        public double Dead2 = 0; //散热器
         //可生成的属性
         public List<int> RegionIdList = new List<int>();
         public List<int> DoorIdList = new List<int>();

@@ -67,6 +67,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
+        public void GetRadiatorPipe()
+        {
+
+
+        }
+
         public void GetDrawnPipe()
         {
             for (int i = 0; i < RegionList.Count; i++)
@@ -75,6 +81,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     int stop = 5;
                 }
+
+
+                if (i == ProcessedData.RadiatorRegion) 
+                {
+                    GetRadiatorPipe();
+                    continue;
+                }
+
 
                 int mode = 0;
                 if (i == 0) mode = Parameter.PrivatePublicMode;

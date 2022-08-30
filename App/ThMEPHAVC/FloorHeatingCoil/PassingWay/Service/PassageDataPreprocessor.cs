@@ -116,6 +116,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         int CheckMode(int mode)
         {
+            // 散热器房间
+            if (main_has_output && pipe_inputs.Count == 1)
+                return 2;
             // 用户指定按照集水器模式布置
             if (mode == 1) 
                 return 1;

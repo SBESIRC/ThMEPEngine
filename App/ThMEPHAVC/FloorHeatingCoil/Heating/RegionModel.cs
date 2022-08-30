@@ -6,6 +6,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
     class RegionModel
     {
+
     }
 
     public class SingleRegion
@@ -23,6 +24,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         //可变类型判别
         public int IsDeadRoom = 0; //是否是要单独连一根的房间
+        public int IsRadiatorRoom = 0;
 
         //拓扑属性
         public int Level = -1;

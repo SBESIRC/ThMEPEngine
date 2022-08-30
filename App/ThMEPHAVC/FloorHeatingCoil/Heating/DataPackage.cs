@@ -51,6 +51,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
     {
         //空间索引
         public static ThCADCoreNTSSpatialIndex RegionIndex;
+        public static int RadiatorRegion = -1;
+        public static List<Point3d> RadiatorPointList = new List<Point3d>();
 
         //清理后的polyline
         static public List<SingleRegion> RegionList = new List<SingleRegion>();
@@ -99,6 +101,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public bool PublicRegionConstraint = true;     //公区约束
         static public bool AuxiliaryRoomConstraint = true;    //附属房间经过主房间之后是否能够和其他回路相连
         static public int PrivatePublicMode = 0;    // 0：自动/公建  1：住宅  2：自动
+
+        //识别得到状态
+        static public bool HaveRadiator = false;
 
         //
         static public double SuggestDistancePass = 600;

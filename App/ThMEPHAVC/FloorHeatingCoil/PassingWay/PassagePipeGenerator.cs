@@ -60,11 +60,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 CalculateMainShortestWay();
                 CalculateMainWay();
             }
-            else
+            else if (mode == 1) 
             {
                 StartRoomCalculator startRoomCalculator = new StartRoomCalculator(region, pipe_inputs);
                 startRoomCalculator.CalculatePipeline();
                 this.outputs = startRoomCalculator.outputs;
+            }
+            else if (mode == 2)
+            {
+                HeatingRoomCalculator heatingRoomCalculator = new HeatingRoomCalculator(region, pipe_inputs[0], buffer, room_buffer);
+                heatingRoomCalculator.Calculate();
+                this.outputs.Add(heatingRoomCalculator.output);
             }
         }
         void CalculateDirectionWay()
