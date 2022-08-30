@@ -1,0 +1,18 @@
+﻿<cus:ThCustomWindow x:Class="Tianhua.Platform3D.UI.UI.TextInputUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:s="clr-namespace:System;assembly=mscorlib"             
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+                    Title=""                    
+                    SizeToContent="WidthAndHeight"
+                    ResizeMode="NoResize"
+             mc:Ignorable="d">
+    <StackPanel Orientation="Horizontal" Margin="5">
+        <Label Name="lblStoreyName" Content="{Binding InputTip,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox x:Name="tbStoreyName" Width="200" Text="{Binding InputValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        <Button Margin="10,0,0,0" TabIndex="1" x:Name="btnOK" Content="确  定" Width="60" Click="btnOK_Click"/>
+    </StackPanel>
+</cus:ThCustomWindow>

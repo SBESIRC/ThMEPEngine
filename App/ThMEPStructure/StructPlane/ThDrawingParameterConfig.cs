@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using ThMEPStructure.Common;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPStructure.StructPlane
 {
@@ -13,7 +14,7 @@ namespace ThMEPStructure.StructPlane
             IsAllStorey = true;
             DrawingScale = "1:100";
             FileFormatOption = "IFC";
-            Storeies = new List<StoreyInfo>();
+            Storeies = new List<ThIfcStoreyInfo>();
             DefaultSlabThick = 100.0;            
             DrawingType = ThStructurePlaneCommon.StructurePlanName;
             DrawingScales = new List<string> { "1:100", "1:150" };
@@ -22,7 +23,7 @@ namespace ThMEPStructure.StructPlane
         {
         }
         public List<string> DrawingScales { get; private set; }
-        public List<StoreyInfo> Storeies { get; set; }
+        public List<ThIfcStoreyInfo> Storeies { get; set; }
 
         /// <summary>
         /// 图纸比例
@@ -85,7 +86,7 @@ namespace ThMEPStructure.StructPlane
             return "";
         }
 
-        private List<StoreyInfo> SortByStdFlrNo(List<StoreyInfo> storeys)
+        private List<ThIfcStoreyInfo> SortByStdFlrNo(List<ThIfcStoreyInfo> storeys)
         {
             return storeys.OrderBy(o =>
             {
@@ -106,9 +107,9 @@ namespace ThMEPStructure.StructPlane
         /// </summary>
         /// <param name="storyes"></param>
         /// <returns></returns>
-        private Dictionary<string, List<StoreyInfo>> GroupByStdFlrNo(List<StoreyInfo> storyes)
+        private Dictionary<string, List<ThIfcStoreyInfo>> GroupByStdFlrNo(List<ThIfcStoreyInfo> storyes)
         {
-            var groupDict = new Dictionary<string, List<StoreyInfo>>();
+            var groupDict = new Dictionary<string, List<ThIfcStoreyInfo>>();
             var groups = storyes
                 .Where(o => !string.IsNullOrEmpty(o.StdFlrNo))
                 .GroupBy(o => o.StdFlrNo);
@@ -118,7 +119,7 @@ namespace ThMEPStructure.StructPlane
             }
             return groupDict;
         }
-        private Dictionary<string, string> GetStdFloorNoDisplayName(Dictionary<string, List<StoreyInfo>> stdFlrNoGroup)
+        private Dictionary<string, string> GetStdFloorNoDisplayName(Dictionary<string, List<ThIfcStoreyInfo>> stdFlrNoGroup)
         {
             var result = new Dictionary<string, string>();
             foreach (var item in stdFlrNoGroup)

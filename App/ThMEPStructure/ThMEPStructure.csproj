@@ -198,7 +198,6 @@
     <Compile Include="StructPlane\Service\ThBeamLineCleaner.cs" />
     <Compile Include="StructPlane\Service\ThBeamLineClipper.cs" />
     <Compile Include="StructPlane\Service\ThAdjustShortBeamLTypeService.cs" />
-    <Compile Include="Common\ThParseStoreyService.cs" />
     <Compile Include="StructPlane\Service\ThGeneratedBeamMarkFilter.cs" />
     <Compile Include="StructPlane\Service\ThSlabFilter.cs" />
     <Compile Include="StructPlane\Service\ThColliearLineGrouper.cs" />

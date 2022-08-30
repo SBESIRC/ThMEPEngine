@@ -265,6 +265,7 @@
     <Compile Include="Model\ThIfcContext.cs" />
     <Compile Include="Model\ThIfcObjectDefinition.cs" />
     <Compile Include="Model\ThIfcProject.cs" />
+    <Compile Include="Model\ThIfcStoreyInfo.cs" />
     <Compile Include="Model\ThIfcTextNodeData.cs" />
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
@@ -479,6 +480,7 @@
     <Compile Include="Service\ThNTSMakeValidService.cs" />
     <Compile Include="Service\ThNTSSimplifyService.cs" />
     <Compile Include="Service\ThNTSSpatialIndexExService.cs" />
+    <Compile Include="Service\ThParseStoreyService.cs" />
     <Compile Include="Service\ThPCArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThPolygonCleanService.cs" />
     <Compile Include="Service\ThRectangleConverter.cs" />

@@ -1,0 +1,35 @@
+﻿<cus:ThCustomWindow x:Class="Tianhua.Platform3D.UI.UI.StoreyNameInputUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:s="clr-namespace:System;assembly=mscorlib"             
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+                    Title=""                    
+                    SizeToContent="WidthAndHeight"
+                    ResizeMode="NoResize"
+             mc:Ignorable="d">
+    <StackPanel Orientation="Vertical">
+        <GroupBox Margin="3,0">
+            <GroupBox.Header>
+                输入起始楼层编号
+            </GroupBox.Header>
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <Label Content="输入楼层名：" />
+                <ComboBox Name ="cbWallLocation" Width="60" Grid.Row="2" Grid.Column="1" TabIndex="1"
+                              ItemsSource="{Binding Prefixes,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Prefix,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                <cus:InputTextBox Margin="5,0" TextBoxInputType="InputInteger" x:Name="tbStoreyNumber" Width="80" TabIndex="2"
+                                  Text="{Binding InputValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="F" />
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <CheckBox Margin="5,0,170,0" VerticalAlignment="Center" TabIndex="3" x:Name="chkAscending" Content="升序" 
+                      Visibility="{Binding IsChkAscendingVisible,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                      IsThreeState="False"  IsChecked="{Binding IsAscending,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Margin="0,0,5,0" VerticalAlignment="Center" TabIndex="4" x:Name="btnOK" Content="确  定" Width="60" Click="btnOK_Click"/>
+        </StackPanel>
+    </StackPanel>
+</cus:ThCustomWindow>

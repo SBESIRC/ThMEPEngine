@@ -250,5 +250,22 @@ namespace ThCADExtension
             str = str.Replace(" ", "");
             return str;
         }
+
+        public static bool IsDouble(string value)
+        {
+            string pattern = @"^[-+]?\d*[.]?\d*$";
+            return Regex.IsMatch(value, pattern);
+        }
+
+        public static bool IsPositiveInteger(string value)
+        {
+            string pattern = @"^\d+$";
+            return Regex.IsMatch(value, pattern);
+        }
+        public static bool IsInteger(string value)
+        {
+            string pattern = @"^[+-]?\d+$";
+            return Regex.IsMatch(value, pattern);
+        }
     }
 }

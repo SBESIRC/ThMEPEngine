@@ -1,19 +1,23 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model;
 
-namespace ThMEPStructure.Common
+namespace ThMEPEngineCore.Service
 {
+    /// <summary>
+    /// 解析*.storeyes.txt
+    /// </summary>
     public class ThParseStoreyService
     {
-        public List<StoreyInfo> ParseFromTxt(string txtFileName)
+        public static List<ThIfcStoreyInfo> ParseFromTxt(string txtFileName)
         {
-            var storyes = new List<StoreyInfo>();
+            var storyes = new List<ThIfcStoreyInfo>();
             var lines = ReadAllLines(txtFileName);
             int j = 0;
             for (int i = 0; i < lines.Length; i++)
             {
-                var storeyInfo = new StoreyInfo();
+                var storeyInfo = new ThIfcStoreyInfo();
                 for (j = i; j < lines.Length; j++)
                 {
                     if (lines[j].Trim() == "------------------------------------")
@@ -32,12 +36,12 @@ namespace ThMEPStructure.Common
             return storyes;
         }
 
-        public List<StoreyInfo> ParseFromJson(string jsonFileName)
+        public List<ThIfcStoreyInfo> ParseFromJson(string jsonFileName)
         {
             throw new NotImplementedException();
         }
 
-        private void SetValue(string key,string value, StoreyInfo info)
+        private static void SetValue(string key,string value, ThIfcStoreyInfo info)
         {
             switch(key)
             {
@@ -68,7 +72,7 @@ namespace ThMEPStructure.Common
             }
         }
 
-        private List<string> Split(string content,char separator)
+        private static List<string> Split(string content,char separator)
         {
             var results = new List<string>();   
             foreach(string item in content.Split(separator))
@@ -79,21 +83,9 @@ namespace ThMEPStructure.Common
         }
 
         
-        private string[] ReadAllLines(string txtFileName)
+        private static string[] ReadAllLines(string txtFileName)
         {
             return File.ReadAllLines(txtFileName);
         }
-    }
-
-    public class StoreyInfo
-    {
-        public string StoreyName { get; set; } ="";
-        public string Elevation { get; set; } = "";
-        public string Top_Elevation { get; set; } = "";
-        public string Bottom_Elevation { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string FloorNo { get; set; } = "";
-        public string Height { get; set; } = "";
-        public string StdFlrNo { get; set; } = "";
     }
 }

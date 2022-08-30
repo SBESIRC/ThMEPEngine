@@ -6,6 +6,8 @@ using System.IO;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.SVG;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using ThMEPStructure.Common;
 using ThMEPStructure.StructPlane;
 using ThMEPStructure.StructPlane.Service;
@@ -61,6 +63,8 @@ namespace TianHua.Structure.WPF.UI.Command
             var storeyFile = GetStoreyFileName(fileName);
             // 把楼层文件的解析的成果
             ThDrawingParameterConfig.Instance.Storeies = ReadStoreys(storeyFile);
+            // 序列化以当前名结尾的Storey.json
+
 
             // 打开成图参数设置
             var parameterUI = new DrawingParameterSetUI();
@@ -105,10 +109,16 @@ namespace TianHua.Structure.WPF.UI.Command
             return Path.Combine(fi.DirectoryName, storeyFileName);
         }
 
-        private List<StoreyInfo> ReadStoreys(string fileName)
+        private List<ThIfcStoreyInfo> ReadStoreys(string fileName)
         {
-            var parser = new ThParseStoreyService();
-            return parser.ParseFromTxt(fileName);
+            if(File.Exists(fileName))
+            {
+                return ThParseStoreyService.ParseFromTxt(fileName);
+            }
+            else
+            {
+                return new List<ThIfcStoreyInfo>();
+            }
         }
 
         private string SelectFile()

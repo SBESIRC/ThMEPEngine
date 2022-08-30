@@ -39,7 +39,7 @@ namespace Tianhua.Platform3D.UI.UI
         private void InitMainViewModel() 
         {
             mainViewModel = new MainFunctionViewModel();
-            mainViewModel.FunctionTableItems.Add(new FunctionTabItem("楼层", null));
+            mainViewModel.FunctionTableItems.Add(new FunctionTabItem("楼层", new StoreyElevationSetUI()));
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("轴网", null));
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("设计", null));
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("组装", null));
