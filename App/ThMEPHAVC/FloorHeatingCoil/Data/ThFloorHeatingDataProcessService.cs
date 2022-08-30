@@ -701,7 +701,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                 }
 
                 roomset.BathRadiators.ForEach(b => b.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l1radiator", 1, r: 30)));
-                roomset.BathRadiators.ForEach(b => DrawUtils.ShowGeometry(b.StartPts[0], b.DirLine, "l1radiatorDir", 1, l: 50));
 
                 roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l1obstacle", 1));
                 roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l1room", 30));
@@ -718,7 +717,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                     DrawUtils.ShowGeometry(roomset.WaterSeparator.StartPts[0], roomset.WaterSeparator.DirStartPt, "l1wwaterDir", 1, l: 50);
                 }
                 roomset.BathRadiators.ForEach(b => b.StartPts.ForEach(x => DrawUtils.ShowGeometry(x, "l1wradiator", 1, r: 30)));
-                roomset.BathRadiators.ForEach(b => DrawUtils.ShowGeometry(b.StartPts[0], b.DirLine, "l1wradiatorDir", 1, l: 50));
 
                 roomset.FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l1wobstacle", 1));
                 roomset.Room.ForEach(x => DrawUtils.ShowGeometry(x.RoomBoundary, "l1wroom", 30));

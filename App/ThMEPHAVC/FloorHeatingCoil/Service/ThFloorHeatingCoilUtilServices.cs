@@ -83,6 +83,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.PrivatePublicMode = vm.PrivatePublicMode;
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
 
+          //  Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
+
+
+
         }
 
         public static void PairRoomWithRoomSuggest(ref List<ThRoomSetModel> roomSet, Dictionary<Polyline, BlockReference> roomPlSuggestDict, double suggestDistDefualt)

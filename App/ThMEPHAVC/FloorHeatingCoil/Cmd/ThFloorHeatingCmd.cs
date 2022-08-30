@@ -135,9 +135,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 }
 
                 var needUpdateSR = false;
-                if (ProcessedData.RegionList.Count > 0)
+                if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
                 {
-                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest( ref ProcessedData.RegionList, vm.roomPlSuggestDict, vm.SuggestDistDefualt);
+                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest(ref ProcessedData.RegionList, vm.roomPlSuggestDict, vm.SuggestDistDefualt);
                 }
 
                 if (needUpdateSR == true)
@@ -147,7 +147,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     updateSR.PipelineC();
                 }
 
-                ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock( ProcessedData.RegionList, vm.roomPlSuggestDict);
+                if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
+                {
+                    ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ProcessedData.RegionList, vm.roomPlSuggestDict);
+                }
             }
         }
 
@@ -191,7 +194,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     cmd.SubExecute();
                 }
             }
-            if (ProcessedData.PipeList.Count > 0)
+            if (ProcessedData.PipeList != null && ProcessedData.PipeList.Count > 0)
             {
                 PrintCoil();
                 PrintCoilBlk();

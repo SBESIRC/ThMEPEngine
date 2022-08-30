@@ -120,6 +120,49 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
+        //---------sub setting------
+        private int _ConvexEdgeTol { get; set; }
+        public int ConvexEdgeTol
+        {
+            get { return _ConvexEdgeTol; }
+            set
+            {
+                _ConvexEdgeTol = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private int _MainRoomEdgeTol { get; set; }
+        public int MainRoomEdgeTol
+        {
+            get { return _MainRoomEdgeTol; }
+            set
+            {
+                _MainRoomEdgeTol = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private int _SuggestDistWall { get; set; }
+        public int SuggestDistWall
+        {
+            get { return _SuggestDistWall; }
+            set
+            {
+                _SuggestDistWall = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private int _FilletRadius { get; set; }
+        public int FilletRadius
+        {
+            get { return _FilletRadius; }
+            set
+            {
+                _FilletRadius = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         #endregion
 
         #region Data Flow
@@ -150,6 +193,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             SuggestDist = 250;
             SuggestDistDefualt = 200;
             roomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
+            ConvexEdgeTol = 150;
+            MainRoomEdgeTol = 2000;
+            SuggestDistWall = 100;
+            FilletRadius = 80;
         }
 
 

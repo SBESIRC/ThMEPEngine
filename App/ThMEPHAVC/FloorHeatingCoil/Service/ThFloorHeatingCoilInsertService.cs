@@ -91,7 +91,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
             attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route, string.Format("HL{0}", routeS));
             attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Dist, string.Format("A={0}", sdS));
-            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length, string.Format("L≈{0}m", lengthS));
+            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length, string.Format("L={0}m", lengthS));
 
             return attNameValues;
         }
