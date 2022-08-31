@@ -206,107 +206,104 @@ namespace ThMEPStructure.StructPlane
             SetLayerOrder(floorObjIds);
             bool hasHatch = floorObjIds.IsIncludeHatch();
 
-            // 成块            
-            floorObjIds.ForEach(o =>
+            // 成块
+            using (var acadDb = AcadDatabase.Active())
             {
-                var blkName = GetDrawingBlkName();
-                var blkIds = FilterBlockObjIds(o); // 要打块的元素
-                var blkObjs = Clone(blkIds);
-                var blockId = BuildBlock(blkObjs, blkName);
-                if (blockId != ObjectId.Null)
+                floorObjIds.ForEach(o =>
                 {
-                    InsertBlock("0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
-                    Erase(blkIds);
-                }
-            });
+                    var blkName = GetDrawingBlkName();
+                    var blkIds = FilterBlockObjIds(acadDb,o); // 要打块的元素
+                    var blkObjs = Clone(acadDb,blkIds);
+                    var blockId = BuildBlock(acadDb,blkObjs, blkName);
+                    if (blockId != ObjectId.Null)
+                    {
+                        var blkId  = InsertBlock(acadDb,"0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
+                        var blkEntity = acadDb.Element<Entity>(blkId, true);
+                        ThCADExtension.ThHyperLinkTool.Add(blkEntity,"Major: Structure");
+                        Erase(acadDb,blkIds);
+                    }
+                    o.OfType<ObjectId>().Where(x => !x.IsErased && x.IsValid).ForEach(x =>
+                      {
+                          var entity = acadDb.Element<Entity>(x, true);
+                          ThCADExtension.ThHyperLinkTool.Clear(entity); 
+                          ThCADExtension.ThHyperLinkTool.Add(entity, "Major: Structure");
+                      });
+                });
+            }
+                
             if (hasHatch)
             {
                 Active.Document.SendCommand("HatchToBack" + "\n");
             }
         }
 
-        private DBObjectCollection Clone(ObjectIdCollection objIds)
+        private DBObjectCollection Clone(AcadDatabase acadDb, ObjectIdCollection objIds)
         {
-            using (var acadDb = AcadDatabase.Active())
+            var results = new DBObjectCollection();
+            objIds.OfType<ObjectId>().ForEach(o =>
             {
-                var results = new DBObjectCollection();
-                objIds.OfType<ObjectId>().ForEach(o =>
-                {
-                    var entity = acadDb.Element<Entity>(o, true);
-                    results.Add(entity.Clone() as Entity);
-                });
-                return results;
-            }
+                var entity = acadDb.Element<Entity>(o, true);
+                results.Add(entity.Clone() as Entity);
+            });
+            return results;
         }
 
-        private ObjectId InsertBlock(string layer,string blkName,Point3d position,Scale3d scale,double rotateAng)
+        private ObjectId InsertBlock(AcadDatabase acadDb,string layer,string blkName,Point3d position,Scale3d scale,double rotateAng)
         {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                return acadDb.CurrentSpace.ObjectId.InsertBlockReference(layer, blkName, position, scale, rotateAng);
-            }
+            return acadDb.CurrentSpace.ObjectId.InsertBlockReference(layer, blkName, position, scale, rotateAng);
         }
 
-        private void Erase(ObjectIdCollection objIds)
+        private void Erase(AcadDatabase acadDb, ObjectIdCollection objIds)
         {
-            using (var acadDb = AcadDatabase.Active())
+            objIds.OfType<ObjectId>().ForEach(o =>
             {
-                objIds.OfType<ObjectId>().ForEach(o =>
-                {
-                    var entity = acadDb.Element<Entity>(o,true);
-                    entity.Erase();
-                });
-            }
+                var entity = acadDb.Element<Entity>(o, true);
+                entity.Erase();
+            });
         }
 
-        private ObjectIdCollection FilterBlockObjIds(ObjectIdCollection floorObjIds)
+        private ObjectIdCollection FilterBlockObjIds(AcadDatabase acadDb,ObjectIdCollection floorObjIds)
         {
-            using (var acadDb = AcadDatabase.Active())
+            var blkIds = new ObjectIdCollection();
+            if (floorObjIds.Count == 0)
             {
-                var blkIds = new ObjectIdCollection();
-                if (floorObjIds.Count == 0)
-                {
-                    return blkIds;
-                }
-                floorObjIds.OfType<ObjectId>().ForEach(o =>
-                {
-                    var entity = acadDb.Element<Entity>(o);
-                    if (entity.Layer == ThPrintLayerManager.BeamLayerName ||
-                    entity.Layer == ThPrintLayerManager.BelowColumnLayerName ||
-                    entity.Layer == ThPrintLayerManager.BelowColumnHatchLayerName ||
-                    entity.Layer == ThPrintLayerManager.ColumnLayerName ||
-                    entity.Layer == ThPrintLayerManager.ColumnHatchLayerName ||
-                    entity.Layer == ThPrintLayerManager.BelowShearWallLayerName ||
-                    entity.Layer == ThPrintLayerManager.BelowShearWallHatchLayerName ||
-                    entity.Layer == ThPrintLayerManager.ShearWallLayerName ||
-                    entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName)
-                    {
-                        blkIds.Add(o);
-                    }
-                });               
                 return blkIds;
             }
+            floorObjIds.OfType<ObjectId>().ForEach(o =>
+            {
+                var entity = acadDb.Element<Entity>(o);
+                if (entity.Layer == ThPrintLayerManager.BeamLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.ColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowShearWallLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowShearWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ShearWallLayerName ||
+                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName)
+                {
+                    blkIds.Add(o);
+                }
+            });
+            return blkIds;
         }
 
-        private ObjectId BuildBlock(DBObjectCollection objs,string blkName)
+        private ObjectId BuildBlock(AcadDatabase acadDb, DBObjectCollection objs,string blkName)
         {
-            using (var acadDb = AcadDatabase.Active())
+            if (objs.Count == 0 || string.IsNullOrEmpty(blkName))
             {
-                if (objs.Count == 0 || string.IsNullOrEmpty(blkName))
-                {
-                    return ObjectId.Null;
-                }
-                var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId,true);
-                var btr = new BlockTableRecord()
-                {
-                    Explodable = false,
-                    Name = blkName,                    
-                };
-                objs.OfType<Entity>().ForEach(o => btr.AppendEntity(o));
-                var blkId = bt.Add(btr);
-                acadDb.Database.TransactionManager.AddNewlyCreatedDBObject(btr,true);
-                return blkId;
+                return ObjectId.Null;
             }
+            var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId, true);
+            var btr = new BlockTableRecord()
+            {
+                Explodable = false,
+                Name = blkName,
+            };
+            objs.OfType<Entity>().ForEach(o => btr.AppendEntity(o));
+            var blkId = bt.Add(btr);
+            acadDb.Database.TransactionManager.AddNewlyCreatedDBObject(btr, true);
+            return blkId;
         }
 
         private void SetLayerOrder(List<ObjectIdCollection> floorObjIds)

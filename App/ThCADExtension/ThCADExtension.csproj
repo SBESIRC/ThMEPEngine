@@ -54,6 +54,7 @@
     <Compile Include="ThEnumExtension.cs" />
     <Compile Include="ThExtents3dExtension.cs" />
     <Compile Include="ThBlockImageTool.cs" />
+    <Compile Include="ThHyperLinkTool.cs" />
     <Compile Include="ThLineExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />
