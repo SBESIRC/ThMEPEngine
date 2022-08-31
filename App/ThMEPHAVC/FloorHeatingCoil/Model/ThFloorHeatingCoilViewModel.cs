@@ -22,7 +22,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore;
 using ThMEPHVAC.FloorHeatingCoil.Cmd;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
-
+using ThMEPHVAC.FloorHeatingCoil.Service;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
@@ -97,7 +97,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
-
+       
+        private ObservableCollection<int> _RouteNumList { get; set; }
+        public ObservableCollection<int> RouteNumList
+        {
+            get { return _RouteNumList; }
+            set
+            {
+                _RouteNumList = value;
+                this.RaisePropertyChanged();
+            }
+        }
         private int _SuggestDist { get; set; }
         public int SuggestDist
         {
@@ -177,7 +187,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        public Dictionary<Polyline, BlockReference> roomPlSuggestDict { get; set; }
+        public Dictionary<Polyline, BlockReference> RoomPlSuggestDict { get; set; }
         #endregion
 
 
@@ -190,9 +200,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             PrivatePublicMode = 1;
             TotalLenthConstraint = 120;
             RouteNum = 5;
+            RouteNumList = new ObservableCollection<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
             SuggestDist = 250;
             SuggestDistDefualt = 200;
-            roomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
+            RoomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
             ConvexEdgeTol = 150;
             MainRoomEdgeTol = 2000;
             SuggestDistWall = 100;
@@ -229,7 +240,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         {
             SelectFrame.Clear();
             ProcessedData.Clear();
-            roomPlSuggestDict.Clear();
+            RoomPlSuggestDict.Clear();
         }
 
         public ICommand PickRoomOutlineCmd => new RelayCommand(PickRoomOutline);
@@ -248,7 +259,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 using (var docLock = Active.Document.LockDocument())
                 using (var acdb = AcadDatabase.Active())
                 {
-                    acdb.Database.CreateAIRoomOutlineLayer();
+                    //acdb.Database.CreateAIRoomOutlineLayer();
+                    var layerList = new List<string> { ThMEPEngineCoreLayerUtils.ROOMOUTLINE };
+                    ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acdb.Database, new List<string>(), layerList);
                     acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
                 }
 
@@ -266,7 +279,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 using (var docLock = Active.Document.LockDocument())
                 using (var acdb = AcadDatabase.Active())
                 {
-                    acdb.Database.CreateAIDoorLayer();
+                    //acdb.Database.CreateAIDoorLayer();
+                    var layerList = new List<string> { ThMEPEngineCoreLayerUtils.DOOR };
+                    ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acdb.Database, new List<string>(), layerList);
                     acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.DOOR);
                 }
 
@@ -284,7 +299,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 using (var docLock = Active.Document.LockDocument())
                 using (var acdb = AcadDatabase.Active())
                 {
-                    acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_Obstacle, 1);
+                    //acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_Obstacle, 1);
+                    var layerList = new List<string> { ThFloorHeatingCommon.Layer_Obstacle };
+                    ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acdb.Database, new List<string>(), layerList);
                     acdb.Database.SetCurrentLayer(ThFloorHeatingCommon.Layer_Obstacle);
                 }
 
@@ -302,7 +319,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 using (var docLock = Active.Document.LockDocument())
                 using (var acdb = AcadDatabase.Active())
                 {
-                    acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_RoomSeparate, 2);
+                    //acdb.Database.CreateAILayer(ThFloorHeatingCommon.Layer_RoomSeparate, 2);
+                    var layerList = new List<string> { ThFloorHeatingCommon.Layer_RoomSeparate };
+                    ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acdb.Database, new List<string>(), layerList);
                     acdb.Database.SetCurrentLayer(ThFloorHeatingCommon.Layer_RoomSeparate);
                 }
 

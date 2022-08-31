@@ -16,6 +16,7 @@ using ThCADExtension;
 
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 using ThMEPHVAC.FloorHeatingCoil.Cmd;
 using ThMEPHVAC.FloorHeatingCoil.Data;
@@ -40,10 +41,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             var dataQuery = new ThFloorHeatingDataProcessService()
             {
                 WithUI = ThFloorHeatingCoilSetting.Instance.WithUI,
+                Transformer = transformer,
                 InputExtractors = dataFactory.Extractors,
                 FurnitureObstacleData = dataFactory.SanitaryTerminal,
                 RoomSeparateLine = dataFactory.RoomSeparateLine,
-                //RoomSuggestDist = dataFactory.RoomSuggestDist,
                 WaterSeparatorData = dataFactory.WaterSeparator,
                 BathRadiatorData = dataFactory.BathRadiator,
                 FurnitureObstacleDataTemp = dataFactory.SenitaryTerminalOBBTemp,
@@ -83,7 +84,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.PrivatePublicMode = vm.PrivatePublicMode;
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
 
-          //  Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
+            //  Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
 
 
 
@@ -107,7 +108,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="roomList">近原点</param>
+        /// <param name="roomSuggest">远端，需要先trans，做完reset方便之后update和插入</param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest, ThMEPOriginTransformer transformer)
         {
             var roomSuggestDict = new Dictionary<Polyline, BlockReference>();
             foreach (var room in roomList)
@@ -117,7 +124,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                 var suggestInRoom = roomSuggest.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
                 if (suggestInRoom.Any())
                 {
-                    roomSuggestDict[room.RoomBoundary] = suggestInRoom.First();
+                    var suggest = suggestInRoom.OrderBy(x => x.Position.DistanceTo(roomCenter)).First();
+                    roomSuggestDict[room.RoomBoundary] = suggest;
                 }
                 else
                 {
@@ -140,5 +148,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             return roomSuggestDict;
 
         }
+
+        public static List<BlockReference> GetRoomSuggestData(Database database)
+        {
+            //var extractService = new ThBlockReferenceExtractor()
+            var extractService = new ThExtractBlockReferenceService()
+            {
+                BlockName = ThFloorHeatingCommon.BlkName_RoomSuggest,
+            };
+            extractService.Extract(database, new Point3dCollection());
+            var RoomRouteSuggestBlk = extractService.Blocks.ToList();
+
+            return RoomRouteSuggestBlk;
+        }
+
     }
 }

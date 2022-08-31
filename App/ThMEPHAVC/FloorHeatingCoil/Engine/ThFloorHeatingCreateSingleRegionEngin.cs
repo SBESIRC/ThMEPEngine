@@ -41,7 +41,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
                     return new ThFloorHeatingDataProcessService();
                 }
 
-                var transformer = ThMEPHVACCommonUtils.GetTransformer(selectFrames[0].Vertices());
+                var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
                 transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
@@ -120,6 +120,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Engine
                             needUpdateSR = true;
                             sr.MainPipe.Add((int)route);
                         }
+                    }
+                    else
+                    {
+                        //如果重新分配但用户有的没指定，待考虑
+                        //noRoomSuggestRegion.Add(sr);
                     }
                 }
                 else

@@ -46,17 +46,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             ExtractFurnitureObstacle(database, framePts);
             ExtractFurnitureObstacleTemp(database, framePts);
             ExtractRoomSeparateLine(database, framePts);
-            //ExtractRoomSuggestDist(database, framePts);
             ExtractWaterSeparator(database, framePts);
             ExtractBathRadiator(database, framePts);
-            //ExtractRoomSetFrame(database, framePts);
         }
 
-        public static List<BlockReference> GetRoomSuggestData(Database database)
-        {
-            var list = ExtractAssignRoute(database, new Point3dCollection());
-            return list;
-        }
+       
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
         {
@@ -161,9 +155,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         private void ExtractWaterSeparator(Database database, Point3dCollection framePts)
         {
-            var extractService = new ThBlockReferenceExtractor()
+            //var extractService = new ThBlockReferenceExtractor()
+            var extractService = new ThExtractBlockReferenceService()
             {
-                BlockName = ThFloorHeatingCommon.BlkName_WaterSeparator2,
+                BlockName = ThFloorHeatingCommon.BlkName_WaterSeparator,
             };
             extractService.Extract(database, framePts);
             WaterSeparator.AddRange(extractService.Blocks);
@@ -171,45 +166,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         private void ExtractBathRadiator(Database database, Point3dCollection framePts)
         {
-            var extractService = new ThBlockReferenceExtractor()
+            //var extractService = new ThBlockReferenceExtractor()
+            var extractService = new ThExtractBlockReferenceService()
             {
                 BlockName = ThFloorHeatingCommon.BlkName_BathRadiator,
             };
             extractService.Extract(database, framePts);
             BathRadiator.AddRange(extractService.Blocks);
         }
-
-        private static List<BlockReference> ExtractAssignRoute(Database database, Point3dCollection framePts)
-        {
-            var extractService = new ThBlockReferenceExtractor()
-            {
-                BlockName = ThFloorHeatingCommon.BlkName_RoomSuggest,
-            };
-            extractService.Extract(database, framePts);
-            var RoomRouteSuggestBlk = extractService.Blocks.ToList();
-            return RoomRouteSuggestBlk;
-        }
-
-
-        //private void ExtractRoomSuggestDist(Database database, Point3dCollection framePts)
-        //{
-        //    var extractService = new ThExtractTextService()
-        //    {
-        //        ElementLayer = ThFloorHeatingCommon.Layer_RoomSuggestDist,
-        //    };
-        //    extractService.Extract(database, framePts);
-        //    RoomSuggestDist.AddRange(extractService.Texts.OfType<DBText>());
-        //}
-
-        //private void ExtractRoomSetFrame(Database database, Point3dCollection framePts)
-        //{
-        //    var extractService = new ThExtractPolylineService()
-        //    {
-        //        ElementLayer = ThFloorHeatingCommon.Layer_RoomSetFrame,
-        //    };
-        //    extractService.Extract(database, framePts);
-        //    RoomSetFrame.AddRange(extractService.Polys);
-        //}
 
         private List<string> QueryBlkNames(string category)
         {
@@ -218,5 +182,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             BlockNameDict.TryGetValue(category, out blkName);
             return blkName;
         }
+
     }
 }

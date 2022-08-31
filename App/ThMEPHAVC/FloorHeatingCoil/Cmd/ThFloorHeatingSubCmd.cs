@@ -34,6 +34,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var blkList = new List<string> { };
+                var layerList = new List<string> { ThFloorHeatingCommon.Layer_RoomSetFrame };
+                ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
                 var selectFrames = ThSelectFrameUtil.SelectPolyline();
 
@@ -64,7 +67,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             {
                 var graph = roomGraph[i];
                 var roomPl = graph.Select(x => roomSet.Room[x].RoomBoundary.Clone() as Polyline).ToList();
-                ThFloorHeatingCoilInsertService.ShowConnectivity(roomPl, i % 6);
+                ThFloorHeatingCoilInsertService.ShowConnectivity(roomPl, ThFloorHeatingCommon.Layer_RoomSetFrame, i % 6);
             }
         }
 
@@ -97,18 +100,22 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var blkList = new List<string> { ThFloorHeatingCommon.BlkName_WaterSeparator2 };
-                var layerList = new List<string> { ThFloorHeatingCommon.Layer_WaterSeparator };
+                var blkList = new List<string> { ThFloorHeatingCommon.BlkName_WaterSeparator };
+                var layerList = new List<string> { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_WaterSeparator] };
                 ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
                 var ppo = Active.Editor.GetPoint("\n选择插入点");
                 if (ppo.Status == PromptStatus.OK)
                 {
                     var wcsPt = ppo.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                    double length = (vm.RouteNum * 2 + 1) * 50;
-                    var dynDic = new Dictionary<string, object>() { { ThFloorHeatingCommon.BlkSettingAttrName_WaterSeparator, length } };
+                    //  double length = (vm.RouteNum * 2 + 1) * 50;
+                    var routeNum = string.Format("{0}路", vm.RouteNum);
+                    var dynDic = new Dictionary<string, object>() {
+                        { ThFloorHeatingCommon.BlkSettingAttrName_WaterSeparator, routeNum } ,
 
-                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_WaterSeparator2, dynDic);
+                    };
+
+                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_WaterSeparator, dynDic);
                 }
             }
         }
@@ -119,7 +126,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blkList = new List<string> { ThFloorHeatingCommon.BlkName_RoomSuggest };
-                var layerList = new List<string> { ThFloorHeatingCommon.Layer_RoomSuggest };
+                var layerList = new List<string> { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_RoomSuggest] };
                 ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
                 var ppo = Active.Editor.GetPoint("\n选择插入点");

@@ -12,10 +12,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using ThCADCore.NTS;
 using AcHelper;
+using NFox.Cad;
 using Dreambuild.AutoCAD;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 using ThMEPHVAC.FloorHeatingCoil.Cmd;
 using ThMEPHVAC.FloorHeatingCoil.Data;
@@ -65,7 +67,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     return;
                 }
 
-                var transformer = ThMEPHVACCommonUtils.GetTransformer(selectFrames[0].Vertices());
+                var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
                 transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 var dataFactory = new ThFloorHeatingDataFactory()
@@ -75,7 +77,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 };
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
-
                 dataQuery.Print();
 
                 //过程写在这里
@@ -117,39 +118,63 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var roomSuggest = ThFloorHeatingDataFactory.GetRoomSuggestData(acadDatabase.Database);
-                if (ProcessedData.RegionList == null || ProcessedData.RegionList.Count == 0)
+                try
                 {
-                    var dataQuery = ThFloorHeatingCreateSingleRegionEngin.CreateSRData(vm);
-                    dataQuery.Print();
+                    var blkList = new List<string> { ThFloorHeatingCommon.BlkName_RoomSuggest,
+                                                     ThFloorHeatingCommon.BlkName_WaterSeparator,
+                                                    ThFloorHeatingCommon.BlkName_BathRadiator,
+                                                    ThFloorHeatingCommon.BlkName_ShowRoute,};
 
-                    if (ThFloorHeatingCreateSingleRegionEngin.CheckValidDataSet(dataQuery.RoomSet))
+                    var layerList = new List<string> { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_RoomSuggest] };
+                    ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
+
+                    var roomSuggest = ThFloorHeatingCoilUtilServices.GetRoomSuggestData(acadDatabase.Database);
+                    if (ProcessedData.RegionList == null || ProcessedData.RegionList.Count == 0)
                     {
-                        vm.roomPlSuggestDict = ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest);
-                        ThFloorHeatingCoilUtilServices.PairRoomWithRoomSuggest(ref dataQuery.RoomSet, vm.roomPlSuggestDict, vm.SuggestDistDefualt);
+                        var dataQuery = ThFloorHeatingCreateSingleRegionEngin.CreateSRData(vm);
+                        dataQuery.Print();
 
+                        if (ThFloorHeatingCreateSingleRegionEngin.CheckValidDataSet(dataQuery.RoomSet))
+                        {
+                            vm.RoomPlSuggestDict = ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest, dataQuery.Transformer);
+                            ThFloorHeatingCoilUtilServices.PairRoomWithRoomSuggest(ref dataQuery.RoomSet, vm.RoomPlSuggestDict, vm.SuggestDistDefualt);
+
+                            ThFloorHeatingCoilUtilServices.PassUserParameter(vm);
+                            var createSR = new UserInteraction();
+                            createSR.PipelineB(dataQuery.RoomSet[0]);
+                        }
+                    }
+
+                    var needUpdateSR = false;
+                    if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
+                    {
+                        needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest(ref ProcessedData.RegionList, vm.RoomPlSuggestDict, vm.SuggestDistDefualt);
+                    }
+
+                    if (needUpdateSR == true)
+                    {
                         ThFloorHeatingCoilUtilServices.PassUserParameter(vm);
-                        var createSR = new UserInteraction();
-                        createSR.PipelineB(dataQuery.RoomSet[0]);
+                        var updateSR = new UserInteraction();
+                        updateSR.PipelineC();
+                    }
+
+                    if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
+                    {
+                        ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ProcessedData.RegionList, vm.RoomPlSuggestDict);
                     }
                 }
-
-                var needUpdateSR = false;
-                if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
+                catch (System.Exception ex)
                 {
-                    needUpdateSR = ThFloorHeatingUpdateSingleRegionEngine.PairSingleRegionWithRoomSuggest(ref ProcessedData.RegionList, vm.roomPlSuggestDict, vm.SuggestDistDefualt);
-                }
-
-                if (needUpdateSR == true)
-                {
-                    ThFloorHeatingCoilUtilServices.PassUserParameter(vm);
-                    var updateSR = new UserInteraction();
-                    updateSR.PipelineC();
-                }
-
-                if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
-                {
-                    ThFloorHeatingUpdateSingleRegionEngine.UpdateSRSuggestBlock(ProcessedData.RegionList, vm.roomPlSuggestDict);
+                    if (ex.Message == ThFloorHeatingCommon.Error_privateOneDoor)
+                    {
+                        Active.Editor.WriteMessage(string.Format("\n{0}\n", ex.Message));
+                        vm.CleanSelectFrameAndData();
+                        return;
+                    }
+                    else
+                    {
+                        throw ex;
+                    }
                 }
             }
         }
@@ -187,25 +212,33 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
         private void ThFlootingHeatingShowRouteExecute()
         {
-            if (ProcessedData.PipeList == null || ProcessedData.PipeList.Count == 0)
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                using (var cmd = new ThFloorHeatingDistributeCmd(vm))
-                {
-                    cmd.SubExecute();
-                }
-            }
-            if (ProcessedData.PipeList != null && ProcessedData.PipeList.Count > 0)
-            {
-                PrintCoil();
-                PrintCoilBlk();
+                var blkList = new List<string> { ThFloorHeatingCommon.BlkName_ShowRoute };
+                var layerList = new List<string> { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_ShowRoute], ThFloorHeatingCommon.Layer_Coil };
+                ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
-                vm.CleanSelectFrameAndData();
+                if (ProcessedData.PipeList == null || ProcessedData.PipeList.Count == 0)
+                {
+                    using (var cmd = new ThFloorHeatingDistributeCmd(vm))
+                    {
+                        cmd.SubExecute();
+                    }
+                }
+                if (ProcessedData.PipeList != null && ProcessedData.PipeList.Count > 0)
+                {
+                    PrintCoil();
+                    PrintCoilBlk();
+
+                    vm.CleanSelectFrameAndData();
+                }
             }
         }
 
         private void PrintCoil()
         {
-            CleanPreviousPrintCoil();
+            //CleanPreviousPrintCoil();
 
             var pipes = ProcessedData.PipeList.SelectMany(x => x.ResultPolys).Distinct().ToList();
             var printPipe = new List<Polyline>();
@@ -216,12 +249,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 printPipe.Add(cp);
             }
 
-            ThFloorHeatingCoilInsertService.InsertCoil(printPipe, true);
+            ThFloorHeatingCoilInsertService.InsertCoil(printPipe, ThFloorHeatingCommon.Layer_Coil, true);
         }
 
         private void PrintCoilBlk()
         {
-            CleanPreviousPrintCoilBlk();
+            //CleanPreviousPrintCoilBlk();
 
             foreach (var pipe in ProcessedData.PipeList)
             {
@@ -246,13 +279,60 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route + 1, suggestDist, length, ThFloorHeatingCommon.BlkName_ShowRoute);
             }
         }
+
         private void CleanPreviousPrintCoil()
         {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var selectFrame = vm.SelectFrame.ToList();
+
+                var extractService = new ThExtractPolylineService()
+                {
+                    ElementLayer = ThFloorHeatingCommon.Layer_Coil,
+                };
+                extractService.Extract(acadDatabase.Database, new Point3dCollection());
+                var RoomRouteSuggestBlk = extractService.Polys.ToList();
+            }
+
 
         }
         private void CleanPreviousPrintCoilBlk()
         {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                //extract
+                //var extractService = new ThBlockReferenceExtractor()
+                var extractService = new ThExtractBlockReferenceService()
+                {
+                    BlockName = ThFloorHeatingCommon.BlkName_ShowRoute,
+                };
+                extractService.Extract(acadDatabase.Database, new Point3dCollection());
+                var showRouteBlk = extractService.Blocks.ToList();
 
+                //select
+                var obj = showRouteBlk.ToCollection();
+                var idx = new ThCADCoreNTSSpatialIndex(obj);
+
+                var selectBlk = new List<BlockReference>();
+                var selectFrame = vm.SelectFrame.ToList();
+
+                foreach (var frame in selectFrame)
+                {
+                    var selectobj = idx.SelectCrossingPolygon(frame);
+                    selectBlk.AddRange(selectobj.OfType<BlockReference>());
+                }
+                selectBlk = selectBlk.Distinct().ToList();
+
+                //remove
+                foreach (var blk in selectBlk)
+                {
+                    blk.UpgradeOpen();
+                    blk.Erase();
+                    blk.DowngradeOpen();
+                }
+            }
         }
     }
 }
