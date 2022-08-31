@@ -18,6 +18,8 @@ namespace ThMEPTCH.TCHDrawServices
         public List<ThTCHTee> Tees;
         public List<ThTCHCross> Crosses;
 
+        protected override string CmdName => "TH2T20";
+
         public TCHDrawCableTrayService()
         {
             CableTrays = new List<ThTCHCableTray>();
@@ -34,8 +36,6 @@ namespace ThMEPTCH.TCHDrawServices
             ClearDataTables.Add("TelecTee");
             ClearDataTables.Add("TelecCross");
         }
-
-        protected override string CmdName => "TH2T20";
 
         protected override void WriteModelToTCHDatabase()
         {

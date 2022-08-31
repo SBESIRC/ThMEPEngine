@@ -1,32 +1,42 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using AcHelper;
+using NFox.Cad;
+using Linq2Acad;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
 using ThCADCore.NTS;
+using ThMEPWSS.Pipe;
 using ThCADExtension;
+using ThMEPTCH.Model;
+using ThMEPWSS.ViewModel;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThMEPTCH.TCHDrawServices;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
 using ThMEPWSS.HydrantConnectPipe.Service;
-using ThMEPWSS.Pipe;
 using ThMEPWSS.UndergroundSpraySystem.General;
+using NPOI.SS.Formula.Functions;
+using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
+using ThMEPWSS.Model;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
     public class ThHydrantConnectPipeCmd : ThMEPBaseCommand, IDisposable
     {
         private ThHydrantConnectPipeConfigInfo ConfigInfo;
+
         public ThHydrantConnectPipeCmd(ThHydrantConnectPipeConfigInfo configInfo)
         {
             ConfigInfo = configInfo;
         }
+
         public string BlockFilePath
         {
             get
@@ -35,6 +45,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 return path;
             }
         }
+
         public void ImportBlockFile()
         {
             using (AcadDatabase blockDb = AcadDatabase.Open(BlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
@@ -54,7 +65,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 }
                 if (blockDb.Layers.Contains("W-FRPT-HYDT-PIPE-AI"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-PIPE-AI"),true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-PIPE-AI"), true);
                 }
                 if (blockDb.Layers.Contains("W-FRPT-HYDT-EQPM"))
                 {
@@ -64,7 +75,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-DIMS"), true);
                 }
-
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
@@ -73,10 +83,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 DbHelper.EnsureLayerOn("W-FRPT-HYDT-DIMS");
             }
         }
-        public void Dispose()
-        {
-        }
-        override public void SubExecute()
+
+        public override void SubExecute()
         {
             try
             {
@@ -112,8 +120,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
                     var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓
                     var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
-                    
-                    if(hydrantPipes.Count == 0 || hydrants.Count == 0)
+
+                    if (hydrantPipes.Count == 0 || hydrants.Count == 0)
                     {
                         Active.Editor.WriteMessage("找不到立管或者消火栓！\n");
                         return;
@@ -122,8 +130,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var otherPileLines = ThHydrantDataManager.GetOtherPipeLineList(range);//获取其他管线
                     var hydrantValve = ThHydrantDataManager.GetHydrantValve(range);//获取蝶阀
                     var pipeMark = ThHydrantDataManager.GetHydrantPipeMark(range);//获取管径标记
-                    List<Line> loopLines = new List<Line>();
-                    List<Line> branchLines = new List<Line>();
+                    var loopLines = new List<Line>();
+                    var branchLines = new List<Line>();
                     ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, startPt, range);//获取环管和支路
                     var pathService = new ThCreateHydrantPathService();
                     foreach (var shearWall in shearWalls)
@@ -164,9 +172,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                         var toDeleteLine = new List<Line>();
                         foreach (var hydrant in hydrants)
                         {
-                            if(ThHydrantConnectPipeUtils.HydrantIsContainPipe1(hydrant, hydrantPipes))
+                            if (ThHydrantConnectPipeUtils.HydrantIsContainPipe1(hydrant, hydrantPipes))
                             {
-                                foreach(var l in branchLines)
+                                foreach (var l in branchLines)
                                 {
                                     double dist = l.DistanceToPoint(hydrant.FireHydrantPipe.PipePosition);
                                     if (dist < 100.0)
@@ -183,7 +191,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     else
                     {
                         List<ThHydrantPipe> tmpPipes = new List<ThHydrantPipe>();
-                        while(hydrantPipes.Count != 0)
+                        while (hydrantPipes.Count != 0)
                         {
                             var pipe = hydrantPipes.Last();
                             hydrantPipes.Remove(pipe);
@@ -238,18 +246,72 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                         }
                     }
 
-                    foreach (var brLine in brLines)
+                    var isTchPipe = false;
+                    var system = "消防";
+                    switch (ConfigInfo.isTchPipe)
                     {
-                        if (ConfigInfo.isSetupValve)
+                        case OutputType.CAD:
+                            break;
+                        case OutputType.TCH:
+                            isTchPipe = true;
+                            break;
+                        case OutputType.ByMainRing:
+                            isTchPipe = ThExtractHYDTPipeService.TCHPipeInfo.HasTCHPipe;
+                            system = ThExtractHYDTPipeService.TCHPipeInfo.System;
+                            break;
+                    }
+                    if (isTchPipe)
+                    {
+                        var service = new TCHDrawTwtPipeService();
+                        foreach (var brLine in brLines)
                         {
-                            brLine.InsertValve(database, otherPileLines, ConfigInfo.strMapScale);
+                            var docScale = 100;
+                            switch (ConfigInfo.strMapScale)
+                            {
+                                case "1:100":
+                                    docScale = 100;
+                                    break;
+                                case "1:150":
+                                    docScale = 150;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            foreach (var line in brLine.DrawLineList)
+                            {
+                                service.Pipes.Add(CreateThTCHTwtPipe(line, docScale, ConfigInfo.isMarkSpecif, system));
+                            }
+                            if (ConfigInfo.isSetupValve)
+                            {
+                                var lines = brLine.BranchPolyline.ToLines();
+                                if (lines.Count > 0)
+                                {
+                                    var location = brLine.InsertValve(database, lines, otherPileLines, ConfigInfo.strMapScale, true);
+                                    service.Valves.Add(CreateThTCHTwtPipeValve(location, docScale, system));
+                                }
+                            }
                         }
+                        service.DrawExecute(true, false);
+                    }
+                    else 
+                    {
+                        foreach (var brLine in brLines)
+                        {
+                            if (ConfigInfo.isSetupValve)
+                            {
+                                var lines = brLine.BranchPolyline.ToLines();
+                                if (lines.Count > 0)
+                                {
+                                    brLine.InsertValve(database, lines, otherPileLines, ConfigInfo.strMapScale);
+                                }
+                            }
 
-                        if (ConfigInfo.isMarkSpecif)
-                        {
-                            brLine.InsertPipeMark(database, ConfigInfo.strMapScale);
+                            if (ConfigInfo.isMarkSpecif)
+                            {
+                                brLine.InsertPipeMark(database, ConfigInfo.strMapScale);
+                            }
+                            brLine.Draw(database);
                         }
-                        brLine.Draw(database);
                     }
 
                     pathService.Clear();
@@ -275,7 +337,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             var tmpBox = l.Buffer(10);
             var retLines = new List<Line>();
             foreach (var temp in tmpLines)
-            { 
+            {
                 //判断tmpline和l是否连接
                 if (tmpBox.Contains(temp.StartPoint) || tmpBox.Contains(temp.EndPoint))
                 {
@@ -291,7 +353,67 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             retLines.AddRange(retLines1);
             return retLines;
         }
+
+        private ThTCHTwtPipe CreateThTCHTwtPipe(Line line, double docScale, bool showDim, string system)
+        {
+            var tchPipe = new ThTCHTwtPipe();
+            tchPipe.StartPtID = new ThTCHTwtPoint
+            {
+                Point = line.StartPoint,
+            };
+            tchPipe.EndPtID = new ThTCHTwtPoint
+            {
+                Point = line.EndPoint,
+            };
+            tchPipe.System = system;
+            tchPipe.Material = "镀锌钢管";
+            tchPipe.DnType = "DN";
+            tchPipe.Dn = 65.0;
+            tchPipe.Gradient = 0.0;
+            tchPipe.Weight = 3.5;
+            tchPipe.HideLevel = 0;
+            tchPipe.DocScale = docScale;
+            tchPipe.DimID = new ThTCHTwtPipeDimStyle
+            {
+                ShowDim = showDim,
+                DnStyle = DnStyle.Type1,
+                GradientStyle = GradientStyle.NoDimension,
+                LengthStyle = LengthStyle.NoDimension,
+                ArrangeStyle = false,
+                DelimiterStyle = DelimiterStyle.Blank,
+                SortStyle = SortStyle.Type0,
+            };
+            return tchPipe;
+        }
+
+        private ThTCHTwtPipeValve CreateThTCHTwtPipeValve(Point3d blockPosition, double docScale, string system)
+        {
+            var valve = new ThTCHTwtPipeValve();
+            valve.LocationID = new ThTCHTwtPoint
+            {
+                Point = blockPosition,
+            };
+            valve.DirectionID = new ThTCHTwtVector
+            {
+                Vector = new Vector3d(1, 0, 0),
+            };
+            valve.BlockID = new ThTCHTwtBlock
+            {
+                Type = "VALVE",
+                Number = "00000856",
+            };
+            //valve.PipeID = tchPipe;
+            valve.System = system;
+            valve.Length = 240.0;
+            valve.Width = 180.0;
+            valve.InterruptWidth = 200.0;
+            valve.DocScale = docScale;
+            return valve;
+        }
+
+        public void Dispose()
+        {
+            //
+        }
     }
-
-
 }

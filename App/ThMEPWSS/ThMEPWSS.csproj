@@ -98,6 +98,7 @@
     <Compile Include="DrainageADPrivate\Model\ThSaniterayTerminal.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADCommon.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADPrivateCmds.THHXDYZC.cs" />
+    <Compile Include="HydrantConnectPipe\Command\ThHydrantConnectPipeConnectCmd.cs" />
     <Compile Include="HydrantLayout\Data\ThHandleConflictService.cs" />
     <Compile Include="HydrantLayout\Data\ThCleanEntityService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantDoorExtractor.cs" />
@@ -215,6 +216,7 @@
     <Compile Include="Model\ThFireHydrant.cs" />
     <Compile Include="Model\ThPSPMParameter.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
+    <Compile Include="Model\ThTCHPipeInfo.cs" />
     <Compile Include="PressureDrainageSystem\Service\DrwaingServiesAssistant.cs" />
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmd.cs" />

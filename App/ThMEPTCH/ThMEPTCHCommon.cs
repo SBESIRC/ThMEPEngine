@@ -2,7 +2,7 @@
 {
     class ThMEPTCHCommon
     {
-        public const string TCHTableName_TwtPoint = "TwtPoint"; //水系统中的点信息表
+        public const string TCHTableName_TwtPoint = "TwtPoint";//水系统中的点信息表
         public const string TCHTableName_TwtVector = "TwtVector";//水系统中向量信息表
         public const string TCHTableName_TwtBlock = "TwtBlock";//水系统中块信息表
         public const string TCHTableName_TwtEquipment = "TwtEquipment";//水系统中通用设备信息
@@ -20,5 +20,9 @@
         public const string TCHTableName_TelecElbow = "TelecElbow";//电力弯通表
         public const string TCHTableName_TelecTee = "TelecTee";//电力三通表
         public const string TCHTableName_TelecCross = "TelecCross";//电力四通表
+
+        public const string TCHTableName_TwtPipeDimStyle = "TwtPipeDimStyle"; //水管标注样式
+        public const string TCHTableName_TwtPipe = "TwtPipe"; //水管
+        public const string TCHTableName_TwtPipeValve = "TwtPipeValve"; //水管
     }
 }

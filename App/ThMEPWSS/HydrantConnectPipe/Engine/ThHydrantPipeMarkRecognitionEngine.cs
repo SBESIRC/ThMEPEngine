@@ -7,8 +7,6 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
@@ -26,7 +24,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
                 var results = acadDatabase.ModelSpace.OfType<BlockReference>().Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName())).ToCollection();
 
                 var map = new Dictionary<BlockReference, Polyline>();
-                results.Cast<BlockReference>().ForEach(b => map.Add(b, b.ToOBB(b.BlockTransform)));
+                results.OfType<BlockReference>().ForEach(b => map.Add(b, b.ToOBB(b.BlockTransform)));
 
                 var obbs = map.Values.ToCollection();
                 //var center = selectArea.Envelope().CenterPoint();
@@ -37,7 +35,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(obbs);
                 var querys = spatialIndex.SelectCrossingPolygon(newPts);
 
-                DBobj = map.Where(o => querys.Contains(o.Value)).Select(o=>o.Key).ToCollection();
+                DBobj = map.Where(o => querys.Contains(o.Value)).Select(o => o.Key).ToCollection();
             }
         }
         public List<ThHydrantPipeMark> GetPipeMarks()

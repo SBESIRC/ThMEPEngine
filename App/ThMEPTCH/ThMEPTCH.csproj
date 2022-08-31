@@ -115,6 +115,8 @@
     <Compile Include="Model\ThTCHCross.cs" />
     <Compile Include="Model\ThTCHElbow.cs" />
     <Compile Include="Model\ThTCHElement.cs" />
+    <Compile Include="Model\ThTCHTwtBlock.cs" />
+    <Compile Include="Model\ThTCHTwtPipe.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
     <Compile Include="Model\ThTCHSlabDescendingData.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />
@@ -129,6 +131,10 @@
     <Compile Include="Model\ThTCHTelecClapboard.cs" />
     <Compile Include="Model\ThTCHTelecInterface.cs" />
     <Compile Include="Model\ThTCHTelecObject.cs" />
+    <Compile Include="Model\ThTCHTwtPipeDimStyle.cs" />
+    <Compile Include="Model\ThTCHTwtPipeValve.cs" />
+    <Compile Include="Model\ThTCHTwtPoint.cs" />
+    <Compile Include="Model\ThTCHTwtVector.cs" />
     <Compile Include="Model\ThTCHVerticalPipe.cs" />
     <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Model\ThTCHWindow.cs" />
@@ -160,6 +166,7 @@
     <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlabHatch.cs" />
     <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureWall.cs" />
     <Compile Include="TCHDrawServices\TCHDrawCableTrayService.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawTwtPipeService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSymbMultiLeaderService.cs" />
@@ -176,6 +183,9 @@
     <Compile Include="TCHTables\TCHTgSymbMultiLeader.cs" />
     <Compile Include="TCHTables\TCHTwtBlock.cs" />
     <Compile Include="TCHTables\TCHTwtEquipment.cs" />
+    <Compile Include="TCHTables\TCHTwtPipe.cs" />
+    <Compile Include="TCHTables\TCHTwtPipeDimStyle.cs" />
+    <Compile Include="TCHTables\TCHTwtPipeValve.cs" />
     <Compile Include="TCHTables\TCHTwtPoint.cs" />
     <Compile Include="TCHTables\TCHTwtSprinkler.cs" />
     <Compile Include="TCHTables\TCHTwtVector.cs" />
