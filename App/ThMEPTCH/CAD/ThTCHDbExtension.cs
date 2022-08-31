@@ -221,7 +221,7 @@ namespace ThMEPTCH.CAD
             {
                 return ThTCHDbCommon.DoorTypeOperationMapping[name];
             }
-            throw new NotSupportedException();
+            return DoorTypeOperationEnum.SWING;
         }
 
         private static WindowTypeEnum GetWindowType(TypedValue tv)
