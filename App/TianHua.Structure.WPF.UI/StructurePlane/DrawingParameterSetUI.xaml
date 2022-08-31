@@ -57,6 +57,14 @@
                              PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
+                <Label Content="楼层间距："/>
+                <TextBox Name="tbFloorSpacing" Width="60" Height="20"
+                             Text="{Binding Model.FloorSpacing,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             InputMethod.IsInputMethodEnabled="False"
+                             PreviewKeyDown="TextBox_PreviewKeyDown"
+                             PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
                 <Label Content="绘图比例："/>
                 <ComboBox Name="cbDrawingScale" Width="60" Height="20"
                           ItemsSource="{Binding DrawingScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"

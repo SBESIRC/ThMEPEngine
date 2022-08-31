@@ -16,9 +16,8 @@ namespace ThMEPStructure.ArchitecturePlane.Print
         }
         private static bool ImportDoorWindowTemplate(Database database)
         {
-            var doorWindowTemplateDwgPath = ThCADCommon.ArchitectureDoorWindowTemplatePath();
-            var fileInfo = new FileInfo(doorWindowTemplateDwgPath);
-            if(!fileInfo.Exists)
+            var doorWindowTemplateDwgPath = ThCADCommon.ArchitectureDoorWindowTemplatePath();            
+            if(!File.Exists(doorWindowTemplateDwgPath))
             {
                 return false;
             }
@@ -67,9 +66,8 @@ namespace ThMEPStructure.ArchitecturePlane.Print
         }
         private static bool ImportPlaneTemplate(Database database)
         {
-            var planeTemplateDwgPath = ThCADCommon.ArchitectureTemplatePath();
-            var fileInfo = new FileInfo(planeTemplateDwgPath);
-            if (!fileInfo.Exists)
+            var planeTemplateDwgPath = ThCADCommon.ArchitectureTemplatePath();            
+            if (!File.Exists(planeTemplateDwgPath))
             {
                 return false;
             }

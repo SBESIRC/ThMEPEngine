@@ -6,6 +6,7 @@ using ThMEPEngineCore.Model;
 using ThMEPStructure.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPStructure.StructPlane.Service;
+using System.Linq;
 
 namespace ThMEPStructure.StructPlane.Print
 {
@@ -44,6 +45,12 @@ namespace ThMEPStructure.StructPlane.Print
             _flrBottomEle = _docProperties.GetFloorBottomElevation();
         }
         public abstract void Print(Database database);
+        public void ClearObjIds()
+        {
+            ObjIds = ObjIds.OfType<ObjectId>()
+                .Where(o => !o.IsNull && o.IsValid && !o.IsErased)
+                .ToObjectIdCollection();
+        }
         protected ObjectIdCollection PrintUpperColumn(AcadDatabase acadDb, ThGeometry column)
         {
             var outlineConfig = ThColumnPrinter.GetUpperColumnConfig();

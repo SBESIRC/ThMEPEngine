@@ -7,6 +7,7 @@ using ThMEPStructure.Model.Printer;
 using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using ThMEPStructure.Common;
 using Autodesk.AutoCAD.Geometry;
+using System.Linq;
 
 namespace ThMEPStructure.ArchitecturePlane.Print
 {
@@ -35,6 +36,12 @@ namespace ThMEPStructure.ArchitecturePlane.Print
             FlrBottomEle = DocProperties.GetFloorBottomElevation();
         }
         public abstract void Print(Database database);
+        public void ClearObjIds()
+        {
+            ObjIds = ObjIds.OfType<ObjectId>()
+                .Where(o => !o.IsNull && o.IsValid && !o.IsErased)
+                .ToObjectIdCollection();
+        }
         protected ObjectIdCollection PrintCommon(Database database,Curve curve)
         {
             var config = ThCommonPrinter.GetCommonConfig();

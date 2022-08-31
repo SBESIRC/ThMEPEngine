@@ -245,9 +245,9 @@ namespace ThMEPStructure.ArchitecturePlane
         {
             svgFiles.ForEach(svgFile =>
             {
-                var fi = new FileInfo(svgFile);
-                if (fi.Exists)
+                if (File.Exists(svgFile))
                 {
+                    var fi = new FileInfo(svgFile);
                     fi.Delete();
                 }
             });

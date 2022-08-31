@@ -31,6 +31,20 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
                 RaisePropertyChanged("DefaultSlabThick");
             }
         }
+        private double floorSpacing;
+
+        /// <summary>
+        /// 楼层间距
+        /// </summary>
+        public double FloorSpacing
+        {
+            get => floorSpacing;
+            set
+            {
+                floorSpacing = value;
+                RaisePropertyChanged("FloorSpacing");
+            }
+        }
         private string storey = "";
         /// <summary>
         /// 楼层
@@ -78,11 +92,11 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
         }
 
         private void Load()
-        {
-            this.storey = ThDrawingParameterConfig.Instance.Storey;
+        {      
             storey = ThDrawingParameterConfig.Instance.Storey;
             drawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
             defaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;
+            floorSpacing = ThDrawingParameterConfig.Instance.FloorSpacing;
             storeySelectOption = ThDrawingParameterConfig.Instance.IsAllStorey ? StoreySelectOps.All : StoreySelectOps.Single;
             drawingTypeOption = Convert(ThDrawingParameterConfig.Instance.DrawingType);
         }
@@ -91,6 +105,7 @@ namespace TianHua.Structure.WPF.UI.StructurePlane
         {
             ThDrawingParameterConfig.Instance.Storey = storey;
             ThDrawingParameterConfig.Instance.DrawingScale = drawingScale;
+            ThDrawingParameterConfig.Instance.FloorSpacing = floorSpacing; 
             ThDrawingParameterConfig.Instance.DefaultSlabThick = defaultSlabThick;
             ThDrawingParameterConfig.Instance.IsAllStorey = storeySelectOption == StoreySelectOps.All;
             ThDrawingParameterConfig.Instance.DrawingType = Convert(drawingTypeOption);

@@ -103,8 +103,7 @@ namespace ThMEPStructure.Common
         {
             get
             {
-                var fi = new FileInfo(IfcFilePath);
-                if(fi.Exists)
+                if(File.Exists(IfcFilePath))
                 {
                     return Path.GetFileNameWithoutExtension(IfcFilePath);
                 }
@@ -190,8 +189,7 @@ namespace ThMEPStructure.Common
             }
             else
             {
-                var dirInfo = new DirectoryInfo(SvgSavePath);
-                if (!dirInfo.Exists)
+                if (!Directory.Exists(SvgSavePath))
                 {
                     SvgSavePath = SvgDefaultSavePath;
                 }
@@ -203,8 +201,7 @@ namespace ThMEPStructure.Common
             }
             else
             {
-                var dirInfo = new DirectoryInfo(LogSavePath);
-                if (!dirInfo.Exists)
+                if (!Directory.Exists(LogSavePath))
                 {
                     LogSavePath = LogDefaultSavePath;
                 }
@@ -248,13 +245,11 @@ namespace ThMEPStructure.Common
             {
                 return false;
             }
-            var fileInfo1 = new FileInfo(IfcFilePath);
-            if(!fileInfo1.Exists)
+            if(!File.Exists(IfcFilePath))
             {
                 return false;
             }
-            var fileinfo2 = new FileInfo(ExeFilePath);
-            if (!fileinfo2.Exists)
+            if (!File.Exists(ExeFilePath))
             {
                 return false;
             }

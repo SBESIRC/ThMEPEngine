@@ -203,7 +203,9 @@ namespace ThMEPStructure.Common
                 var dict = new Dictionary<string, ObjectIdCollection>();
                 floorObjIds.ForEach(o =>
                 {
-                    o.OfType<ObjectId>().ForEach(e =>
+                    o.OfType<ObjectId>()
+                    .Where(x=>!x.IsErased)
+                    .ForEach(e =>
                     {
                         var entity = acadDb.Element<Entity>(e, true);
 

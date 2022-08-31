@@ -198,6 +198,7 @@ namespace ThMEPStructure.StructPlane
             {
                 svgFiles.ForEach(o => printers.Add(PrintWallColumnDrawing(o, flrIndexDict[o])));
             }
+            printers.ForEach(o => o.ClearObjIds());
             var floorObjIds = printers.Select(o => o.ObjIds).ToList();
             InsertBasePoint();
 
@@ -447,10 +448,10 @@ namespace ThMEPStructure.StructPlane
         private void Erase(List<string> svgFiles)
         {
             svgFiles.ForEach(svgFile =>
-            {
-                var fi = new FileInfo(svgFile);
-                if(fi.Exists)
+            {                
+                if(File.Exists(svgFile))
                 {
+                    var fi = new FileInfo(svgFile);
                     fi.Delete();
                 }
             });

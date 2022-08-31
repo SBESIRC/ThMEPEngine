@@ -76,7 +76,8 @@ namespace TianHua.Structure.WPF.UI.Command
                 generator.SetDrawingType(ThDrawingParameterConfig.Instance.DrawingType); // 把成图类型传入到Generator
                 printParameter.DrawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
                 printParameter.DefaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;
-                if(ThDrawingParameterConfig.Instance.IsAllStorey)
+                printParameter.FloorSpacing = ThDrawingParameterConfig.Instance.FloorSpacing;
+                if (ThDrawingParameterConfig.Instance.IsAllStorey)
                 {
                     generator.SetStdFlrNo("");
                 }
@@ -104,9 +105,16 @@ namespace TianHua.Structure.WPF.UI.Command
 
         private string GetStoreyFileName(string ifcFileName)
         {
-            var fi = new FileInfo(ifcFileName);
-            var storeyFileName = Path.GetFileNameWithoutExtension(ifcFileName) + ".storeys.txt";
-            return Path.Combine(fi.DirectoryName, storeyFileName);
+            if(File.Exists(ifcFileName))
+            {
+                var fi = new FileInfo(ifcFileName);
+                var storeyFileName = Path.GetFileNameWithoutExtension(ifcFileName) + ".storeys.txt";
+                return Path.Combine(fi.DirectoryName, storeyFileName);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         private List<ThIfcStoreyInfo> ReadStoreys(string fileName)

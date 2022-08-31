@@ -15,7 +15,8 @@ namespace ThMEPStructure.StructPlane
             DrawingScale = "1:100";
             FileFormatOption = "IFC";
             Storeies = new List<ThIfcStoreyInfo>();
-            DefaultSlabThick = 100.0;            
+            DefaultSlabThick = 100.0;
+            FloorSpacing = 100000;
             DrawingType = ThStructurePlaneCommon.StructurePlanName;
             DrawingScales = new List<string> { "1:100", "1:150" };
         }
@@ -33,6 +34,10 @@ namespace ThMEPStructure.StructPlane
         /// 默认板厚
         /// </summary>
         public double DefaultSlabThick { get; set; }
+        /// <summary>
+        /// 楼层间距
+        /// </summary>
+        public double FloorSpacing { get; set; }
         /// <summary>
         /// 楼层
         /// 显示在UI的楼层名称
