@@ -1,6 +1,6 @@
 ﻿using ThMEPEngineCore.Model;
 
-namespace TianHua.Platform3D.UI.Model
+namespace ThMEPIFC.Model
 {
     public class ThEditStoreyInfo : ThIfcStoreyInfo
     {

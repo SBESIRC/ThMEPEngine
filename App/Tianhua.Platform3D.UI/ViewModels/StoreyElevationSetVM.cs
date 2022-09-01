@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Windows;
-using ThMEPEngineCore.IO.JSON;
-using TianHua.Platform3D.UI.Model;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using ThMEPIFC.Model;
+using ThMEPIFC.Service;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Platform3D.UI.ViewModels
@@ -150,31 +150,30 @@ namespace TianHua.Platform3D.UI.ViewModels
 
         private bool Serialize(string fileName, Dictionary<string, ObservableCollection<ThEditStoreyInfo>> buildingStoreys)
         {
-            bool isSuccess = false;
-            try
-            {
-                var storeyConfigName = GetStoreyConfigFileName();
-                string jsonString = JsonHelper.SerializeObject(buildingStoreys, Newtonsoft.Json.Formatting.Indented);
-                File.WriteAllText(fileName, jsonString);
-                isSuccess = true;
-            }
-            catch
-            {
-                //
-            }
-            return isSuccess;
+            return ThIfcStoreyParseTool.Serialize(fileName, ConvertTo(buildingStoreys));
         }
 
         private Dictionary<string, ObservableCollection<ThEditStoreyInfo>> DeSerialize(string fileName)
         {
+            return ConvertTo(ThIfcStoreyParseTool.DeSerialize(fileName));
+        }
+
+        private Dictionary<string, ObservableCollection<ThEditStoreyInfo>> ConvertTo(Dictionary<string, List<ThEditStoreyInfo>> buildingStoreys)
+        {
             var results = new Dictionary<string, ObservableCollection<ThEditStoreyInfo>>();
-            try
+            foreach(var item in buildingStoreys)
             {
-                var jsonString =  File.ReadAllText(fileName);
-                results = JsonHelper.DeserializeJsonToObject<Dictionary<string, ObservableCollection<ThEditStoreyInfo>>>(jsonString);
+                results.Add(item.Key, new ObservableCollection<ThEditStoreyInfo>(item.Value));
             }
-            catch
+            return results;
+        }
+
+        private Dictionary<string, List<ThEditStoreyInfo>> ConvertTo(Dictionary<string, ObservableCollection<ThEditStoreyInfo>> buildingStoreys)
+        {
+            var results = new Dictionary<string, List<ThEditStoreyInfo>>();
+            foreach (var item in buildingStoreys)
             {
+                results.Add(item.Key, item.Value.ToList());
             }
             return results;
         }

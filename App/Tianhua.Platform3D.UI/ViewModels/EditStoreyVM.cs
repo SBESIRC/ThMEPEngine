@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using ThCADExtension;
-using TianHua.Platform3D.UI.Model;
+using ThMEPIFC.Model;
+using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.IO;
 
 namespace TianHua.Platform3D.UI.ViewModels
 {
@@ -198,6 +200,30 @@ namespace TianHua.Platform3D.UI.ViewModels
                 }
             }
             return null;
+        }
+        public string GetCurrentDwgPath()
+        {
+            var activeDocName = GetActiveDocName();
+            if (File.Exists(activeDocName))
+            {
+                var fileInfo = new FileInfo(activeDocName);
+                return fileInfo.Directory.FullName;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        private string GetActiveDocName()
+        {
+            if (acadApp.DocumentManager.Count > 0)
+            {
+                return acadApp.DocumentManager.MdiActiveDocument.Name;
+            }
+            else
+            {
+                return "";
+            }
         }
     }
 }

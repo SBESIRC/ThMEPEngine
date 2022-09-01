@@ -42,7 +42,9 @@
     <Compile Include="Ifc2x3\ThTGL2IFC2x3WallFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3WindowFactory.cs" />
     <Compile Include="IfcStoreToEngineFile.cs" />
+    <Compile Include="Model\ThEditStoreyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ThIfcStoreyParseTool.cs" />
     <Compile Include="ThMEPIFCApp.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3DbExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3BrepExtension.cs" />
@@ -98,6 +100,7 @@
       <Name>ThMEPTCH</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

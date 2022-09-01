@@ -1,17 +1,17 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.EditorInput;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using System.Collections.Generic;
+using AcHelper;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using TianHua.Platform3D.UI.Model;
+using ThMEPIFC.Model;
+using Autodesk.AutoCAD.EditorInput;
 using TianHua.Platform3D.UI.ViewModels;
+using Microsoft.Win32;
 
 namespace Tianhua.Platform3D.UI.UI
 {
@@ -21,8 +21,7 @@ namespace Tianhua.Platform3D.UI.UI
         public EditStoreyUI(EditStoreyVM vm)
         {
             InitializeComponent();
-            this.WindowStartupLocation = System.Windows.
-                WindowStartupLocation.CenterScreen;
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this._vm = vm;
             this.DataContext = this._vm;
             this.Topmost = true;
@@ -51,17 +50,18 @@ namespace Tianhua.Platform3D.UI.UI
 
         private void btnLoadStorey_Click(object sender, RoutedEventArgs e)
         {
-            var opts = new PromptOpenFileOptions("\n选择要单体楼层信息文件")
-            {
-                Filter = "单体楼层信息文件(*.storeys.txt) (*.txt)|*.txt",
-            };
+            var fileDialog = new OpenFileDialog();
+            fileDialog.Title = "选择楼层信息文件";
+            fileDialog.Filter = "楼层信息文件 (*.storeys.txt) (*.txt)|*.txt";
+            fileDialog.InitialDirectory = _vm.GetCurrentDwgPath();
+            fileDialog.RestoreDirectory = true;
+            fileDialog.Multiselect = false;
 
-            var pfnr =  Active.Editor.GetFileNameForOpen(opts);
-            if (pfnr.Status == PromptStatus.OK)
+            if (fileDialog.ShowDialog(this)==true)
             {
-                var storeyFileName = pfnr.StringResult;
+                var storeyFileName = fileDialog.FileName;
                 var storeyInfos = ThParseStoreyService.ParseFromTxt(storeyFileName);
-                if(storeyInfos.Count>0)
+                if (storeyInfos.Count > 0)
                 {
                     var editStoreyInfos = storeyInfos.Select(o =>
                     {
@@ -81,10 +81,6 @@ namespace Tianhua.Platform3D.UI.UI
                     _vm.InitSource(editStoreyInfos);
                     UpdateDataGridDataSource();
                 }
-            }
-            else
-            {
-                return;
             }
         }
 
