@@ -6,6 +6,7 @@ using ThMEPWSS.Common;
 using ThCADCore.NTS;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
 {
@@ -18,13 +19,17 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<Line> _floorSpliteLines;
         List<double> _floorSpliteX;
         List<RoomModel> _cretateFloorRooms;
-        public PipeLabelText(FloorFramed spliterfloor, double spliterY) 
+        List<Polyline> _roomTypeSplitLines = new List<Polyline>();//楼层框定户型分隔线
+        Polyline _floorFramedBound { get; set; }
+        public PipeLabelText(FloorFramed spliterfloor, double spliterY, List<Polyline> roomTypeSplitLines)
         {
             _spliteFloor = spliterfloor;
             _floorSpliteY = spliterY;
             _floorSpliteLines = FramedReadUtil.FloorFrameSpliteLines(spliterfloor);
             _floorSpliteX = _floorSpliteLines.Select(c => c.StartPoint.X).ToList();
             _cretateFloorRooms = new List<RoomModel>();
+            _roomTypeSplitLines = new List<Polyline>(roomTypeSplitLines);
+            _floorFramedBound = spliterfloor.outPolyline;
         }
         public void InitFloorData(FloorFramed layerFloor, List<RoomModel> thisFloorRooms)
         {
@@ -118,25 +123,36 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         Dictionary<int, List<CreateBlockInfo>> GetPipeAreaInfo(List<CreateBlockInfo> thisFloorPipes)
         {
             var pipeArea = new Dictionary<int, List<CreateBlockInfo>>();
-            List<double> spliteX = GetSpliteXBySpliteFloor();
-            double floorStartX = _createFloor.floorBlock.Position.X;
-            double floorEndX = floorStartX + _createFloor.width;
-            List<double> floorSpaceX = new List<double>();
-            floorSpaceX.Add(floorStartX);
-            floorSpaceX.Add(floorEndX);
-            foreach (var x in spliteX)
+            //List<double> spliteX = GetSpliteXBySpliteFloor();
+            //double floorStartX = _createFloor.floorBlock.Position.X;
+            //double floorEndX = floorStartX + _createFloor.width;
+            //List<double> floorSpaceX = new List<double>();
+            //floorSpaceX.Add(floorStartX);
+            //floorSpaceX.Add(floorEndX);
+            //foreach (var x in spliteX)
+            //{
+            //    if (x <= floorStartX || x >= floorEndX)
+            //        continue;
+            //    floorSpaceX.Add(x);
+            //}
+            //floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
+            //for (int i = 0; i < floorSpaceX.Count - 1; i++)
+            //{
+            //    double minX = floorSpaceX[i];
+            //    double maxX = floorSpaceX[i + 1];
+            //    //获取该区域内的立管
+            //    var spacePipes = thisFloorPipes.Where(c => c.createPoint.X > minX && c.createPoint.X < maxX).ToList();
+            //    if (spacePipes == null || spacePipes.Count < 1)
+            //        continue;
+            //    pipeArea.Add(i, spacePipes);
+            //}
+
+            //提取到属于该楼层框的户型分割线
+            _roomTypeSplitLines = _roomTypeSplitLines.Where(e => _floorFramedBound.Contains(ThCADExtension.ThCurveExtension.GetMidpoint(e)) || _floorFramedBound.IntersectWithEx(e).Count > 0).ToList();
+            var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
+            for (int i = 0; i < floorSpceRegions.Count; i++)
             {
-                if (x <= floorStartX || x >= floorEndX)
-                    continue;
-                floorSpaceX.Add(x);
-            }
-            floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
-            for (int i = 0; i < floorSpaceX.Count - 1; i++)
-            {
-                double minX = floorSpaceX[i];
-                double maxX = floorSpaceX[i + 1];
-                //获取该区域内的立管
-                var spacePipes = thisFloorPipes.Where(c => c.createPoint.X > minX && c.createPoint.X < maxX).ToList();
+                var spacePipes = thisFloorPipes.Where(c => floorSpceRegions[i].Contains(c.createPoint)).ToList();
                 if (spacePipes == null || spacePipes.Count < 1)
                     continue;
                 pipeArea.Add(i, spacePipes);

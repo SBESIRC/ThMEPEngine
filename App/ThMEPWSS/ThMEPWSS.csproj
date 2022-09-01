@@ -59,6 +59,7 @@
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\CoordinateTransformation.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\FloorFramedSpliter.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\TangentPipeConvertion.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\TangentSymbMultiLeaderConvertion.cs" />
     <Compile Include="DrainageSystemAG\Models\StruParameters.cs" />
