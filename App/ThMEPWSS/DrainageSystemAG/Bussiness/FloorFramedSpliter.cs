@@ -116,7 +116,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             p.Closed = closed;
             return p;
         }
-        static Polyline PolyFromLine(Line a)
+        public static Polyline PolyFromLine(Line a)
         {
             Polyline p = new Polyline();
             p.AddVertexAt(0, a.StartPoint.ToPoint2d(), 0, 0, 0);

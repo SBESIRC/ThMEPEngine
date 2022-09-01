@@ -381,8 +381,10 @@ namespace ThMEPWSS.Command
             //获取户型分割线
             using (var adb = AcadDatabase.Active())
             {
-                var entities = adb.ModelSpace.OfType<Polyline>().Where(e => e.Layer.Equals("AI-户型分割线"));
-                _roomTypeSplitLines.AddRange(entities);
+                var plys = adb.ModelSpace.OfType<Polyline>().Where(e => e.Layer.Equals("AI-户型分割线"));
+                _roomTypeSplitLines.AddRange(plys);
+                var lines = adb.ModelSpace.OfType<Line>().Where(e => e.Layer.Equals("AI-户型分割线"));
+                _roomTypeSplitLines.AddRange(lines.Select(e => FloorFramedSpliter.PolyFromLine(e)));
             }
         }
         void RoofPipeLabelLayout() 

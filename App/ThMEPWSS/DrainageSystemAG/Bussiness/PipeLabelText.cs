@@ -123,39 +123,45 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         Dictionary<int, List<CreateBlockInfo>> GetPipeAreaInfo(List<CreateBlockInfo> thisFloorPipes)
         {
             var pipeArea = new Dictionary<int, List<CreateBlockInfo>>();
-            //List<double> spliteX = GetSpliteXBySpliteFloor();
-            //double floorStartX = _createFloor.floorBlock.Position.X;
-            //double floorEndX = floorStartX + _createFloor.width;
-            //List<double> floorSpaceX = new List<double>();
-            //floorSpaceX.Add(floorStartX);
-            //floorSpaceX.Add(floorEndX);
-            //foreach (var x in spliteX)
-            //{
-            //    if (x <= floorStartX || x >= floorEndX)
-            //        continue;
-            //    floorSpaceX.Add(x);
-            //}
-            //floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
-            //for (int i = 0; i < floorSpaceX.Count - 1; i++)
-            //{
-            //    double minX = floorSpaceX[i];
-            //    double maxX = floorSpaceX[i + 1];
-            //    //获取该区域内的立管
-            //    var spacePipes = thisFloorPipes.Where(c => c.createPoint.X > minX && c.createPoint.X < maxX).ToList();
-            //    if (spacePipes == null || spacePipes.Count < 1)
-            //        continue;
-            //    pipeArea.Add(i, spacePipes);
-            //}
-
             //提取到属于该楼层框的户型分割线
             _roomTypeSplitLines = _roomTypeSplitLines.Where(e => _floorFramedBound.Contains(ThCADExtension.ThCurveExtension.GetMidpoint(e)) || _floorFramedBound.IntersectWithEx(e).Count > 0).ToList();
-            var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
-            for (int i = 0; i < floorSpceRegions.Count; i++)
+            if (_roomTypeSplitLines.Count >= 1)
             {
-                var spacePipes = thisFloorPipes.Where(c => floorSpceRegions[i].Contains(c.createPoint)).ToList();
-                if (spacePipes == null || spacePipes.Count < 1)
-                    continue;
-                pipeArea.Add(i, spacePipes);
+                var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
+                for (int i = 0; i < floorSpceRegions.Count; i++)
+                {
+                    var spacePipes = thisFloorPipes.Where(c => floorSpceRegions[i].Contains(c.createPoint)).ToList();
+                    if (spacePipes == null || spacePipes.Count < 1)
+                        continue;
+                    pipeArea.Add(i, spacePipes);
+                }
+            }
+            else
+            {
+                //支持老版
+                List<double> spliteX = GetSpliteXBySpliteFloor();
+                double floorStartX = _createFloor.floorBlock.Position.X;
+                double floorEndX = floorStartX + _createFloor.width;
+                List<double> floorSpaceX = new List<double>();
+                floorSpaceX.Add(floorStartX);
+                floorSpaceX.Add(floorEndX);
+                foreach (var x in spliteX)
+                {
+                    if (x <= floorStartX || x >= floorEndX)
+                        continue;
+                    floorSpaceX.Add(x);
+                }
+                floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
+                for (int i = 0; i < floorSpaceX.Count - 1; i++)
+                {
+                    double minX = floorSpaceX[i];
+                    double maxX = floorSpaceX[i + 1];
+                    //获取该区域内的立管
+                    var spacePipes = thisFloorPipes.Where(c => c.createPoint.X > minX && c.createPoint.X < maxX).ToList();
+                    if (spacePipes == null || spacePipes.Count < 1)
+                        continue;
+                    pipeArea.Add(i, spacePipes);
+                }
             }
             return pipeArea;
         }

@@ -127,48 +127,54 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
 
             //提取到属于该楼层框的户型分割线
             _roomTypeSplitLines = _roomTypeSplitLines.Where(e => _floorFramedBound.Contains(ThCADExtension.ThCurveExtension.GetMidpoint(e)) || _floorFramedBound.IntersectWithEx(e).Count > 0).ToList();
-            var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
-            for (int i = 0; i < floorSpceRegions.Count; i++)
+            if (_roomTypeSplitLines.Count >= 1)
             {
-                double minX = floorSpaceX[i];
-                double maxX = floorSpaceX[i + 1];
-                //获取该区域内的立管
-                var spacePipes = allPipeLabels.Where(c => floorSpceRegions[i].Contains(c.BasePoint)).ToList();
-                if (spacePipes == null || spacePipes.Count < 1)
-                    continue;
-                var tmpBaseElements = createBasicElements;
-                var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
-                tmpBaseElements = createBasicElements.Except(tmpBaseElements).ToList();
-                if (null != addText && addText.Count > 0)
+                var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
+                for (int i = 0; i < floorSpceRegions.Count; i++)
                 {
-                    if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                    double minX = floorSpaceX[i];
+                    double maxX = floorSpaceX[i + 1];
+                    //获取该区域内的立管
+                    var spacePipes = allPipeLabels.Where(c => floorSpceRegions[i].Contains(c.BasePoint)).ToList();
+                    if (spacePipes == null || spacePipes.Count < 1)
+                        continue;
+                    var tmpBaseElements = createBasicElements;
+                    var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
+                    tmpBaseElements = createBasicElements.Except(tmpBaseElements).ToList();
+                    if (null != addText && addText.Count > 0)
                     {
-                        addText.ForEach(e => e.ConvertToTCHElement = true);
+                        if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                        {
+                            addText.ForEach(e => e.ConvertToTCHElement = true);
+                        }
+                        allTexts.AddRange(addText);
                     }
-                    allTexts.AddRange(addText);
                 }
             }
-
-            //for (int i = 0; i < floorSpaceX.Count - 1; i++)
-            //{
-            //    double minX = floorSpaceX[i];
-            //    double maxX = floorSpaceX[i + 1];
-            //    //获取该区域内的立管
-            //    var spacePipes = allPipeLabels.Where(c => c.BasePoint.X > minX && c.BasePoint.X < maxX).ToList();
-            //    if (spacePipes == null || spacePipes.Count < 1)
-            //        continue;
-            //    var tmpBaseElements = createBasicElements;
-            //    var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
-            //    tmpBaseElements= createBasicElements.Except(tmpBaseElements).ToList();
-            //    if (null != addText && addText.Count > 0)
-            //    {
-            //        if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
-            //        {
-            //            addText.ForEach(e => e.ConvertToTCHElement = true);
-            //        }
-            //        allTexts.AddRange(addText);
-            //    }
-            //}
+            else
+            {
+                //支持老版
+                for (int i = 0; i < floorSpaceX.Count - 1; i++)
+                {
+                    double minX = floorSpaceX[i];
+                    double maxX = floorSpaceX[i + 1];
+                    //获取该区域内的立管
+                    var spacePipes = allPipeLabels.Where(c => c.BasePoint.X > minX && c.BasePoint.X < maxX).ToList();
+                    if (spacePipes == null || spacePipes.Count < 1)
+                        continue;
+                    var tmpBaseElements = createBasicElements;
+                    var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
+                    tmpBaseElements = createBasicElements.Except(tmpBaseElements).ToList();
+                    if (null != addText && addText.Count > 0)
+                    {
+                        if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                        {
+                            addText.ForEach(e => e.ConvertToTCHElement = true);
+                        }
+                        allTexts.AddRange(addText);
+                    }
+                }
+            }
             if (createBasicElements.Count > 0)
                 createBasics.AddRange(createBasicElements);
             return allTexts;
