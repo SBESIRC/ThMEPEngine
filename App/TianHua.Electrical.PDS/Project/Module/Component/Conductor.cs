@@ -505,25 +505,69 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="conductorCrossSectionalArea"></param>
         private void CalculateCrossSectionalArea(double conductorCrossSectionalArea)
         {
-            if (conductorCrossSectionalArea <= 16)
+            if (conductorCrossSectionalArea <= 2.5)
             {
-                this.PECrossSectionalArea = conductorCrossSectionalArea;
+                this.PECrossSectionalArea = 2.5;
+            }
+            else if (conductorCrossSectionalArea <= 4)
+            {
+                this.PECrossSectionalArea = 4;
+            }
+            else if (conductorCrossSectionalArea <= 6)
+            {
+                this.PECrossSectionalArea = 6;
+            }
+            else if (conductorCrossSectionalArea <= 10)
+            {
+                this.PECrossSectionalArea = 10;
+            }
+            else if (conductorCrossSectionalArea <= 16)
+            {
+                this.PECrossSectionalArea = 16;
+            }
+            else if (conductorCrossSectionalArea <= 25)
+            {
+                this.PECrossSectionalArea = 16;
             }
             else if (conductorCrossSectionalArea <= 35)
             {
                 this.PECrossSectionalArea = 16;
             }
-            else if (conductorCrossSectionalArea <= 400)
+            else if (conductorCrossSectionalArea <= 50)
             {
-                this.PECrossSectionalArea = conductorCrossSectionalArea / 2;
+                this.PECrossSectionalArea = 25;
             }
-            else if (conductorCrossSectionalArea <= 800)
+            else if (conductorCrossSectionalArea <= 70)
             {
-                this.PECrossSectionalArea = 200;
+                this.PECrossSectionalArea = 35;
+            }
+            else if (conductorCrossSectionalArea <= 95)
+            {
+                this.PECrossSectionalArea = 50;
+            }
+            else if (conductorCrossSectionalArea <= 120)
+            {
+                this.PECrossSectionalArea = 70;
+            }
+            else if (conductorCrossSectionalArea <= 150)
+            {
+                this.PECrossSectionalArea = 95;
+            }
+            else if (conductorCrossSectionalArea <= 185)
+            {
+                this.PECrossSectionalArea = 95;
+            }
+            else if (conductorCrossSectionalArea <= 240)
+            {
+                this.PECrossSectionalArea = 120;
+            }
+            else if (conductorCrossSectionalArea <= 300)
+            {
+                this.PECrossSectionalArea = 150;
             }
             else
             {
-                this.PECrossSectionalArea = conductorCrossSectionalArea / 4;
+                this.PECrossSectionalArea = 150;
             }
             if (AllMotor)
             {
@@ -611,33 +655,68 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
                 else
                 {
-                    bool IsBasement = floorNumber.Contains('B') || StoreyTypeString.Contains("大屋面") || StoreyTypeString.Contains("小屋面") || StoreyTypeString.Contains("裙房");
-                    var phapeNum = phase == ThPDSPhase.一相 ? "1P" : "3P";
-                    var CableCondiutConfigs = (IsWire ? CableCondiutConfiguration.CondiutInfos : CableCondiutConfiguration.CableInfos).Where(o => (IsWire || o.FireCoating == Refractory) && o.Phase == phapeNum);
-                    var CableCondiutConfig = CableCondiutConfigs.First(o => o.WireSphere >= ConductorCrossSectionalArea);
-                    if (IsBasement)
+                    if (this.IsControlCircuit)
                     {
-                        this.PipeMaterial = config.UndergroundMaterial;
-                        this.PipeDiameter = CableCondiutConfig.DIN_SC;
-                    }
-                    else
-                    {
-                        var SmallDiameterMaterial = fireLoad ? config.FireOnTheGroundSmallDiameterMaterial : config.NonFireOnTheGroundSmallDiameterMaterial;
-                        var LargeDiameterMaterial = fireLoad ? config.FireOnTheGroundLargeDiameterMaterial :
-                            config.NonFireOnTheGroundLargeDiameterMaterial;
-                        this.PipeMaterial = SmallDiameterMaterial;
-                        if (PipeMaterial == PipeMaterial.JDG && CableCondiutConfig.DIN_JDG > 0)
+                        bool IsBasement = floorNumber.Contains('B') || StoreyTypeString.Contains("大屋面") || StoreyTypeString.Contains("小屋面") || StoreyTypeString.Contains("裙房");
+                        var phapeNum = phase == ThPDSPhase.一相 ? "1P" : "3P";
+                        var CableCondiutConfigs = IsWire ? CableCondiutConfiguration.RYJ : CableCondiutConfiguration.KYJY;
+                        var CableCondiutConfig = CableCondiutConfigs.First(o => o.WireSphere >= ConductorCrossSectionalArea);
+                        if (IsBasement)
                         {
-                            this.PipeDiameter = CableCondiutConfig.DIN_JDG;
-                        }
-                        else if (PipeMaterial == PipeMaterial.PC && CableCondiutConfig.DIN_PC > 0)
-                        {
-                            this.PipeDiameter = CableCondiutConfig.DIN_PC;
+                            this.PipeMaterial = config.UndergroundMaterial;
+                            this.PipeDiameter = CableCondiutConfig.DIN_SC;
                         }
                         else
                         {
-                            this.PipeMaterial = LargeDiameterMaterial;
+                            var SmallDiameterMaterial = fireLoad ? config.FireOnTheGroundSmallDiameterMaterial : config.NonFireOnTheGroundSmallDiameterMaterial;
+                            var LargeDiameterMaterial = fireLoad ? config.FireOnTheGroundLargeDiameterMaterial :
+                                config.NonFireOnTheGroundLargeDiameterMaterial;
+                            this.PipeMaterial = SmallDiameterMaterial;
+                            if (PipeMaterial == PipeMaterial.JDG && CableCondiutConfig.DIN_JDG > 0)
+                            {
+                                this.PipeDiameter = CableCondiutConfig.DIN_JDG;
+                            }
+                            else if (PipeMaterial == PipeMaterial.PC && CableCondiutConfig.DIN_PC > 0)
+                            {
+                                this.PipeDiameter = CableCondiutConfig.DIN_PC;
+                            }
+                            else
+                            {
+                                this.PipeMaterial = LargeDiameterMaterial;
+                                this.PipeDiameter = CableCondiutConfig.DIN_SC;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bool IsBasement = floorNumber.Contains('B') || StoreyTypeString.Contains("大屋面") || StoreyTypeString.Contains("小屋面") || StoreyTypeString.Contains("裙房");
+                        var phapeNum = phase == ThPDSPhase.一相 ? "1P" : "3P";
+                        var CableCondiutConfigs = (IsWire ? CableCondiutConfiguration.CondiutInfos : CableCondiutConfiguration.CableInfos).Where(o => (IsWire || o.FireCoating == Refractory) && o.Phase == phapeNum);
+                        var CableCondiutConfig = CableCondiutConfigs.First(o => o.WireSphere >= ConductorCrossSectionalArea);
+                        if (IsBasement)
+                        {
+                            this.PipeMaterial = config.UndergroundMaterial;
                             this.PipeDiameter = CableCondiutConfig.DIN_SC;
+                        }
+                        else
+                        {
+                            var SmallDiameterMaterial = fireLoad ? config.FireOnTheGroundSmallDiameterMaterial : config.NonFireOnTheGroundSmallDiameterMaterial;
+                            var LargeDiameterMaterial = fireLoad ? config.FireOnTheGroundLargeDiameterMaterial :
+                                config.NonFireOnTheGroundLargeDiameterMaterial;
+                            this.PipeMaterial = SmallDiameterMaterial;
+                            if (PipeMaterial == PipeMaterial.JDG && CableCondiutConfig.DIN_JDG > 0)
+                            {
+                                this.PipeDiameter = CableCondiutConfig.DIN_JDG;
+                            }
+                            else if (PipeMaterial == PipeMaterial.PC && CableCondiutConfig.DIN_PC > 0)
+                            {
+                                this.PipeDiameter = CableCondiutConfig.DIN_PC;
+                            }
+                            else
+                            {
+                                this.PipeMaterial = LargeDiameterMaterial;
+                                this.PipeDiameter = CableCondiutConfig.DIN_SC;
+                            }
                         }
                     }
                 }

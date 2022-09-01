@@ -278,6 +278,10 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return componentFactory.CreatBreaker();
                 }
+                else if (type.Equals(typeof(Contactor)))
+                {
+                    return componentFactory.CreatContactor();
+                }
                 else
                 {
                     //暂未支持的元器件类型
@@ -480,12 +484,12 @@ namespace TianHua.Electrical.PDS.Project
                     Conductor = componentFactory.CreatConductor(),
                 };
             }
-            else if (edge.Source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
+            else if (edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.EmergencyLightingDistributionPanel)
             {
                 //消防应急照明回路
                 edge.Target.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L;
-                if (edge.Target.Details.LoadCalculationInfo.HighPower < 1)
-                    edge.Target.Details.LoadCalculationInfo.HighPower = 1;
+                if (edge.Source.Details.LoadCalculationInfo.HighPower != 1)
+                    edge.Source.Details.LoadCalculationInfo.HighPower = 1;
                 edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
             else if (edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ElectricalMeterPanel)

@@ -959,6 +959,13 @@ namespace TianHua.Electrical.PDS.Project.Module
                 {
                     newEdge.Details.CircuitForm.ReviseBreaker()?.SetBreakerType(ComponentType.组合式RCD);
                 }
+                if (CircuitCreatorInfo.SubmenuOptions.Contains("接触器"))
+                {
+                    if (newEdge.Details.CircuitForm is Circuit.RegularCircuit regularCircuit)
+                    {
+                        regularCircuit.reservedComponent2 = newEdge.ComponentSelection(typeof(Contactor), newEdge.Details.CircuitForm.CircuitFormType);
+                    }
+                }
                 var conductors = newEdge.Details.CircuitForm.GetCircuitConductors();
                 conductors.ForEach(o =>
                 {
@@ -974,6 +981,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                 graph.AddEdge(newEdge);
                 //Step 7:检查回路
                 newEdge.Source.CheckWithNode();
+                //Step 8:检查控制回路
+                new List<ThPDSProjectGraphEdge> { newEdge }.CalculateSecondaryCircuit();
                 return newEdge;
 
             }
@@ -1544,7 +1553,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         var lighting = eligibleEdges.Where(o => !o.Target.Load.FireLoad);//WL
                         var emergencyLighting = eligibleEdges.Where(o => o.Target.Load.FireLoad);//WLE
 
-                        var fireEmergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.FireEmergencyLighting);//WFEL
+                        var fireEmergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.FireEmergencyLighting || o.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel);//WFEL
                         var socket = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Socket);//WS
                         var otherEdges = edges.Except(emergencyPowerEquipment).Except(powerEquipment).Except(lighting).Except(emergencyLighting).Except(fireEmergencyLighting).Except(socket);
                         var otherOnePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.一相);
