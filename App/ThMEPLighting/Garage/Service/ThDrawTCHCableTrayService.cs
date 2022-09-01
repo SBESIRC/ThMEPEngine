@@ -13,6 +13,7 @@ using ThMEPTCH.Model;
 using ThMEPEngineCore.CAD;
 using ThMEPTCH.TCHDrawServices;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service
@@ -27,7 +28,8 @@ namespace ThMEPLighting.Garage.Service
         private Vector3d Normal = new Vector3d(0, 0, 1);
 
         // 输入在连接点处打断的桥架
-        public void Draw(List<Line> cableTrays)
+        // 需要在近似原点附近处理
+        public void Draw(List<Line> cableTrays, ThMEPOriginTransformer transformer)
         {
             // 断线处理
             var collection = cableTrays.ToCollection();
@@ -47,10 +49,10 @@ namespace ThMEPLighting.Garage.Service
                 EndPointSearch(startResult, false, spatialIndex, elbowInputs, teeInputs, crossInputs);
             });
 
-            DrawCableTray(service.CableTrays, spatialIndex.SelectAll().OfType<Line>().ToList());
-            DrawElbow(service.Elbows, elbowInputs);
-            DrawTee(service.Tees, teeInputs);
-            DrawCross(service.Crosses, crossInputs);
+            DrawCableTray(service.CableTrays, spatialIndex.SelectAll().OfType<Line>().ToList(), transformer);
+            DrawElbow(service.Elbows, elbowInputs, transformer);
+            DrawTee(service.Tees, teeInputs, transformer);
+            DrawCross(service.Crosses, crossInputs, transformer);
             service.DrawExecute(true, false);
         }
 
@@ -142,7 +144,7 @@ namespace ThMEPLighting.Garage.Service
             return cableTrayCopy;
         }
 
-        private void DrawCableTray(List<ThTCHCableTray> tchCableTrays, List<Line> cableTrays)
+        private void DrawCableTray(List<ThTCHCableTray> tchCableTrays, List<Line> cableTrays, ThMEPOriginTransformer transformer)
         {
             foreach (var cableTray in cableTrays)
             {
@@ -152,14 +154,14 @@ namespace ThMEPLighting.Garage.Service
                 };
                 var startInterface = new ThTCHTelecInterface
                 {
-                    Position = cableTray.StartPoint,
+                    Position = transformer.Reset(cableTray.StartPoint),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = new Vector3d(1, 0, 0),
                 };
                 var endInterface = new ThTCHTelecInterface
                 {
-                    Position = cableTray.EndPoint,
+                    Position = transformer.Reset(cableTray.EndPoint),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = new Vector3d(1, 0, 0),
@@ -185,7 +187,7 @@ namespace ThMEPLighting.Garage.Service
             }
         }
 
-        private void DrawElbow(List<ThTCHElbow> tchElbows, List<ElbowInput> elbowInputs)
+        private void DrawElbow(List<ThTCHElbow> tchElbows, List<ElbowInput> elbowInputs, ThMEPOriginTransformer transformer)
         {
             foreach (var elbowInput in elbowInputs)
             {
@@ -199,14 +201,14 @@ namespace ThMEPLighting.Garage.Service
                 };
                 var startInterface2 = new ThTCHTelecInterface
                 {
-                    Position = elbowInput.IntersectPoint + Width * 1.5 * elbowInput.FirstDirection,
+                    Position = transformer.Reset(elbowInput.IntersectPoint + Width * 1.5 * elbowInput.FirstDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = -elbowInput.FirstDirection,
                 };
                 var endInterface2 = new ThTCHTelecInterface
                 {
-                    Position = elbowInput.IntersectPoint + Width * 1.5 * elbowInput.SecondDirection,
+                    Position = transformer.Reset(elbowInput.IntersectPoint + Width * 1.5 * elbowInput.SecondDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = elbowInput.SecondDirection,
@@ -222,7 +224,7 @@ namespace ThMEPLighting.Garage.Service
                     Length = 2 * Width,
                     Cover = false,
                     Clapboard = clapboard2,
-                    MidPosition = elbowInput.IntersectPoint,
+                    MidPosition = transformer.Reset(elbowInput.IntersectPoint),
                     MajInterfaceId = startInterface2,
                     MinInterfaceId = endInterface2,
                 };
@@ -231,7 +233,7 @@ namespace ThMEPLighting.Garage.Service
             }
         }
 
-        private void DrawTee(List<ThTCHTee> tchTees, List<TeeInput> teeInputs)
+        private void DrawTee(List<ThTCHTee> tchTees, List<TeeInput> teeInputs, ThMEPOriginTransformer transformer)
         {
             foreach (var teeInput in teeInputs)
             {
@@ -245,21 +247,21 @@ namespace ThMEPLighting.Garage.Service
                 };
                 var startInterface = new ThTCHTelecInterface
                 {
-                    Position = teeInput.IntersectPoint + Width * 1.5 * teeInput.FirstDirection,
+                    Position = transformer.Reset(teeInput.IntersectPoint + Width * 1.5 * teeInput.FirstDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = -teeInput.FirstDirection,
                 };
                 var endInterface = new ThTCHTelecInterface
                 {
-                    Position = teeInput.IntersectPoint + Width * 1.5 * teeInput.SecondDirection,
+                    Position = transformer.Reset(teeInput.IntersectPoint + Width * 1.5 * teeInput.SecondDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = teeInput.SecondDirection,
                 };
                 var endInterface2 = new ThTCHTelecInterface
                 {
-                    Position = teeInput.IntersectPoint + Width * 1.5 * teeInput.ThirdDirection,
+                    Position = transformer.Reset(teeInput.IntersectPoint + Width * 1.5 * teeInput.ThirdDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = teeInput.ThirdDirection,
@@ -276,7 +278,7 @@ namespace ThMEPLighting.Garage.Service
                     Length2 = 2 * Width,
                     Cover = false,
                     Clapboard = clapboard,
-                    MidPosition = teeInput.IntersectPoint,
+                    MidPosition = transformer.Reset(teeInput.IntersectPoint),
                     MajInterfaceId = startInterface,
                     MinInterfaceId = endInterface,
                     Min2InterfaceId = endInterface2,
@@ -286,7 +288,7 @@ namespace ThMEPLighting.Garage.Service
             }
         }
 
-        private void DrawCross(List<ThTCHCross> tchCrosses, List<CrossInput> crossInputs)
+        private void DrawCross(List<ThTCHCross> tchCrosses, List<CrossInput> crossInputs, ThMEPOriginTransformer transformer)
         {
             foreach (var crossInput in crossInputs)
             {
@@ -300,28 +302,28 @@ namespace ThMEPLighting.Garage.Service
                 };
                 var startInterface = new ThTCHTelecInterface
                 {
-                    Position = crossInput.IntersectPoint + Width * 1.5 * crossInput.FirstDirection,
+                    Position = transformer.Reset(crossInput.IntersectPoint + Width * 1.5 * crossInput.FirstDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = -crossInput.FirstDirection,
                 };
                 var endInterface = new ThTCHTelecInterface
                 {
-                    Position = crossInput.IntersectPoint + Width * 1.5 * crossInput.SecondDirection,
+                    Position = transformer.Reset(crossInput.IntersectPoint + Width * 1.5 * crossInput.SecondDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = crossInput.SecondDirection,
                 };
                 var endInterface2 = new ThTCHTelecInterface
                 {
-                    Position = crossInput.IntersectPoint + Width * 1.5 * crossInput.ThirdDirection,
+                    Position = transformer.Reset(crossInput.IntersectPoint + Width * 1.5 * crossInput.ThirdDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = crossInput.ThirdDirection,
                 };
                 var endInterface3 = new ThTCHTelecInterface
                 {
-                    Position = crossInput.IntersectPoint + Width * 1.5 * crossInput.ForthDirection,
+                    Position = transformer.Reset(crossInput.IntersectPoint + Width * 1.5 * crossInput.ForthDirection),
                     Breadth = Width,
                     Normal = Normal,
                     Direction = crossInput.ForthDirection,
@@ -337,7 +339,7 @@ namespace ThMEPLighting.Garage.Service
                     Length = 3 * Width,
                     Cover = false,
                     Clapboard = clapboard,
-                    MidPosition = crossInput.IntersectPoint,
+                    MidPosition = transformer.Reset(crossInput.IntersectPoint),
                     InclineFit = false,
                     MajInterfaceId = startInterface,
                     MinInterfaceId = endInterface,
