@@ -1,0 +1,8 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThSUComponentData.proto";
+
+message ThSUBuildingElementData {
+    ThTCHRootData root = 1;
+    ThSUComponentData component = 2;
+}

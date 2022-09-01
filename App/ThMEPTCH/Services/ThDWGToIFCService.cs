@@ -292,7 +292,7 @@ namespace ThMEPTCH.Services
             return result;
         }
 
-        public ThTCHBuildingData DWGToProjectData(bool isMemoryStory, bool railingToRegion)
+        public ThTCHProjectData DWGToProjectData(bool isMemoryStory, bool railingToRegion)
         {
             string prjId = "";
             string prjName = "测试项目";
@@ -301,13 +301,19 @@ namespace ThMEPTCH.Services
                 prjName = Active.DocumentName;
                 prjId = Active.Document.UnmanagedObject.ToString();
             }
-            var thTCHBuildingData = new ThTCHBuildingData();
-            thTCHBuildingData.Root = new ThTCHRootData()
+            var thPrj = new ThTCHProjectData();
+            thPrj.Root = new ThTCHRootData()
             {
                 GlobalId = prjId,
                 Name = prjName,
-                Description = "TCHBuilding"
+                Description = "ThTCHProjectData"
             };
+            var thSite = new ThTCHSiteData();
+            thSite.Root = new ThTCHRootData();
+            thSite.Root.GlobalId = prjId + "site";
+            var thTCHBuildingData = new ThTCHBuildingData();
+            thTCHBuildingData.Root = new ThTCHRootData();
+            thTCHBuildingData.Root.GlobalId = prjId + "Building";
             LoadCustomElements();
             var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
@@ -394,7 +400,7 @@ namespace ThMEPTCH.Services
                 buildingStorey.Root = new ThTCHRootData();
                 buildingStorey.Root.GlobalId = prjId + floor.Num.ToString() + "F";
                 buildingStorey.Root.Name = floor.Num.ToString() + "F";
-                buildingStorey.Root.Description = floor.FloorName;
+                buildingStorey.Root.Description = "ThDefinition" + floor.FloorName;
                 buildingStorey.Number = floor.Num.ToString();
                 buildingStorey.Height = floor.LevelHeight;
                 buildingStorey.Elevation = floor.Elevation;
@@ -431,7 +437,9 @@ namespace ThMEPTCH.Services
                 }
                 thTCHBuildingData.Storeys.Add(buildingStorey);
             }
-            return thTCHBuildingData;
+            thSite.Buildings.Add(thTCHBuildingData);
+            thPrj.Site = thSite;
+            return thPrj;
         }
 
         private List<FloorCurveEntity> BuildFloorSlab(List<FloorCurveEntity> data, DBObjectCollection textColl)

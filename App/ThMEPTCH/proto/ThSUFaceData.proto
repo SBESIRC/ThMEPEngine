@@ -1,0 +1,6 @@
+syntax = "proto3";
+import "ThSUGeometry.proto";
+
+message ThSUFaceData {
+    ThSUPolygonMesh mesh = 1;
+}

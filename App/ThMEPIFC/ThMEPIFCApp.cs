@@ -333,7 +333,12 @@ namespace ThMEPIFC
                     try
                     {
                         pipeServer.WaitForConnection();
-                        project.WriteTo(pipeServer);
+                        //project.WriteTo(pipeServer);
+                        var bytes = project.ToByteArray();
+                        var newBytes = new byte[bytes.Length + 10];
+                        newBytes[0] = 1;
+                        bytes.CopyTo(newBytes, 10);
+                        pipeServer.Write(newBytes, 0, newBytes.Length);
 
                         pipeServer.Close();
                         pipeServer.Dispose();

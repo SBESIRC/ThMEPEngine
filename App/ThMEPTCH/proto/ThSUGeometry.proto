@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "ThTCHGeometry.proto";
+
+message ThSUPolygon {
+    repeated int32 indices = 1;
+}
+
+message ThSUPolygonMesh {
+    repeated ThTCHPoint3d points = 1;
+    repeated ThSUPolygon polygons = 2;
+}
+
