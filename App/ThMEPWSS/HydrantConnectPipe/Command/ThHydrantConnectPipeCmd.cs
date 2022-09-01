@@ -22,9 +22,7 @@ using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
 using ThMEPWSS.HydrantConnectPipe.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using NPOI.SS.Formula.Functions;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
-using ThMEPWSS.Model;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
@@ -293,7 +291,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                         }
                         service.DrawExecute(true, false);
                     }
-                    else 
+                    else
                     {
                         foreach (var brLine in brLines)
                         {
@@ -375,7 +373,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             tchPipe.DocScale = docScale;
             tchPipe.DimID = new ThTCHTwtPipeDimStyle
             {
-                ShowDim = showDim,
+                ShowDim = showDim && line.Length > 1000.0,
                 DnStyle = DnStyle.Type1,
                 GradientStyle = GradientStyle.NoDimension,
                 LengthStyle = LengthStyle.NoDimension,
