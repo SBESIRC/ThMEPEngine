@@ -17,18 +17,24 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using static ThMEPWSS.PressureDrainageSystem.Service.PressureDrainageSystemDiagramService;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
+using static ThMEPWSS.PressureDrainageSystem.Utils.BusinessDebug;
+using static ThMEPWSS.PressureDrainageSystem.DebugTools;
+using System.IO;
+
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public class PipeLineSystemUnitConstructionService
     {
-        public PipeLineSystemUnitConstructionService(PressureDrainageModelData modeldatas)
+        public PipeLineSystemUnitConstructionService(PressureDrainageModelData modeldatas, bool debug)
         {
             Modeldatas = modeldatas;
+            Debug = debug;
         }
         public PressureDrainageModelData Modeldatas { get; }
-        private List<PipeLineSystemUnitClass> _pipeLineSystemUnits = new ();
-        private List<List<PipeLineUnit>> _totalPipeLineUnitsByLayerByUnit = new ();
-        
+        private List<PipeLineSystemUnitClass> _pipeLineSystemUnits = new();
+        private List<List<PipeLineUnit>> _totalPipeLineUnitsByLayerByUnit = new();
+        private bool Debug { get; set; }
+
         const string RoofCrossedId = "顶板";
         
         /// <summary>
@@ -163,12 +169,70 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
-
+        List<Horizontal> GetGroupHorizontals(Horizontal test,ref List<Horizontal> lines)
+        {
+            var res = new List<Horizontal>();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (!test.Line.Layer.Equals(lines[i].Line.Layer))
+                    continue;
+                if (IsIntersectedPipeLines(test.Line, lines[i].Line))
+                {
+                    res.Add(lines[i]);
+                }
+            }
+            lines = lines.Except(res).ToList();
+            if (res.Count > 0)
+            {
+                var list = new List<Horizontal>(res);
+                foreach (var e in list)
+                {
+                    res.AddRange(GetGroupHorizontals(e,ref lines));
+                }
+            }
+            return res;
+        }
+        private void GroupPipeLineUnitByGroupedHorizontalPipe(List<Horizontal> horizontalLines, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps, int layer)
+        {
+            List<List<Horizontal>> groupedlines = new();
+            List<Horizontal> lines = new();
+            horizontalLines.ForEach(o => lines.Add(o));
+            int count = 0;
+            while (true)
+            {
+                count++;
+                if (lines.Count == 0)
+                    break;
+                var group = new List<Horizontal>();
+                group.Add(lines[0]);
+                lines.RemoveAt(0);
+                group.AddRange(GetGroupHorizontals(group[0],ref lines));
+                groupedlines.Add(group);
+            }
+            if (Debug)
+            {
+                var debuginfos = ShowGroupHorizontals(groupedlines);
+                var mode = FileMode.Append;
+                if (layer == 0)
+                    mode = FileMode.Create;
+                LogDebugInfos(debuginfos, "groupHorizontals.txt", mode);
+            }
+            for (int i = 0; i < groupedlines.Count; i++)
+            {
+                PipeLineUnit pipelineUnit = new();
+                pipelineUnit.HorizontalPipes = new();
+                foreach (var line in groupedlines[i])
+                {
+                    pipelineUnit.HorizontalPipes.Add(line);
+                }
+                _totalPipeLineUnitsByLayerByUnit[layer].Add(pipelineUnit);
+            }
+        }
         /// <summary>
         /// 通过排水横管的位置关系建立部分排水单元组
         /// </summary>
         /// <param name="horizontalLines"></param>
-        private void GroupPipeLineUnitByGroupedHorizontalPipe(List<Horizontal> horizontalLines, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps, int layer)
+        private void GroupPipeLineUnitByGroupedHorizontalPipeDiscard(List<Horizontal> horizontalLines, List<VerticalPipeClass> verticalPipes, List<SubmergedPumpClass> submergedPumps, int layer)
         {
             List<List<Horizontal>> groupedlines = new ();
             List<Horizontal> lines = new();
@@ -339,6 +403,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 far_line = new Line(far_line.EndPoint, far_line.StartPoint);
                             }
                             Point3d far_ptstart = far_line.EndPoint;
+                            var test_p = far_line.StartPoint;
                             far_line.Extend(false, tol_extend);
                             far_line = new Line(far_ptstart, far_line.EndPoint);
                             bool crossed_inner_wall = false;
@@ -350,7 +415,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                     break;
                                 }
                             }
-                            if (!crossed_inner_wall)
+                            var next_to_bound = false;
+                            foreach (var bound in boundaries)
+                            {
+                                if (bound.GetClosestPointTo(test_p, false).DistanceTo(test_p) <= 10000)
+                                    next_to_bound = true;
+                            }
+                            if (!crossed_inner_wall && next_to_bound)
                             {
                                 unit.DrainMode = ((int)PipeLineUnit.UnitDrainMode.CROSSOUTDOOR);//穿外墙
                             }

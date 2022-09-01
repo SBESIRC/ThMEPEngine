@@ -9,18 +9,20 @@ namespace ThMEPWSS.PressureDrainage.Model
     {
         private PressureDrainageModelData _modeldatas;
         private List<PipeLineSystemUnitClass> _pipeLineSystemUnits;
-        public ThPressureDrainageSystemDiagram(PressureDrainageModelData modeldatas)
+        private bool Debug = false;
+        public ThPressureDrainageSystemDiagram(PressureDrainageModelData modeldatas, bool debug)
         {
             _modeldatas = modeldatas;
+            Debug = debug;
         }
         public void Init()
         {
-            var pplSysUnitConstrServ = new PipeLineSystemUnitConstructionService(_modeldatas);
-            _pipeLineSystemUnits= pplSysUnitConstrServ.ConstructPipeLineSystemUnits();
+            var pplSysUnitConstrServ = new PipeLineSystemUnitConstructionService(_modeldatas,Debug);
+            _pipeLineSystemUnits = pplSysUnitConstrServ.ConstructPipeLineSystemUnits();
         }
         public void Draw(Point3d refpt)
         {
-            var dwgPDrainSysDiagServ = new PressureDrainageSystemDiagramService(_pipeLineSystemUnits,_modeldatas,refpt);
+            var dwgPDrainSysDiagServ = new PressureDrainageSystemDiagramService(_pipeLineSystemUnits, _modeldatas, refpt, Debug);
             dwgPDrainSysDiagServ.Draw();
         }
     }

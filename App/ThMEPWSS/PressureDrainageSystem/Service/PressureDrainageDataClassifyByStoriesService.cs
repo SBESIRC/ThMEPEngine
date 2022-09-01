@@ -163,16 +163,22 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 //删除在边界附近的可疑线段，不认为是内墙
                 if (Modeldatas.Boundaries.Count > 0)
                 {
-                    var bound = Modeldatas.Boundaries.OrderByDescending(e => e.Area).First().BufferPL(5000).Cast<Polyline>().OrderBy(e => e.Area).First();
-                    for (int i = 0; i < Modeldatas.WallLines.Count; i++)
+                    var bounds = Modeldatas.Boundaries.OrderByDescending(e => e.Area).First().BufferPL(5000).Cast<Polyline>().ToList();
+                    bounds = bounds.OrderByDescending(e => e.Area).ToList();
+                    if (bounds.Count >= 2)
                     {
-                        var pl = Modeldatas.WallLines[i];
-                        if (pl.Intersects(bound) || !bound.Contains(pl.GetMidpoint()))
+                        var bound = bounds[1];
+                        for (int i = 0; i < Modeldatas.WallLines.Count; i++)
                         {
-                            Modeldatas.WallLines.RemoveAt(i);
-                            i--;
+                            var pl = Modeldatas.WallLines[i];
+                            if (pl.Intersects(bound) || !bound.Contains(pl.GetMidpoint()))
+                            {
+                                Modeldatas.WallLines.RemoveAt(i);
+                                i--;
+                            }
                         }
                     }
+
                 }
                 //objConcaveHull.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objWalls.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);

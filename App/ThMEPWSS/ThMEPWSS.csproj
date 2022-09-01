@@ -216,8 +216,12 @@
     <Compile Include="Model\ThFireHydrant.cs" />
     <Compile Include="Model\ThPSPMParameter.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
+    <Compile Include="PressureDrainageSystem\DebugTools.cs" />
     <Compile Include="Model\ThTCHPipeInfo.cs" />
     <Compile Include="PressureDrainageSystem\Service\DrwaingServiesAssistant.cs" />
+    <Compile Include="PressureDrainageSystem\Service\HorizontalPipeCollection.cs" />
+    <Compile Include="PressureDrainageSystem\Utils\BusinessDebug.cs" />
+    <Compile Include="PressureDrainageSystem\Utils\GeoExtension.cs" />
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmd.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmdEntrance.THPLBZ.cs" />

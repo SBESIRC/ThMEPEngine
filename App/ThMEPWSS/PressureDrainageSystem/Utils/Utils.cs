@@ -42,7 +42,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             entity.LineWeight = lineWeight;
             return;
         }
-       
+      
         /// <summary>
         /// 定义DBText在CAD图纸中的图层、颜色、线宽等属性
         /// </summary>
@@ -112,7 +112,50 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             }
             return s;
         }
-
+        public static bool IsIntersectedPipeLines(Line a, Line b)
+        {
+            double tol = 20;
+            double tol_parallel = 1000;
+            var pt_on_a = a.GetClosestPointTo(b.StartPoint, false);
+            var pt_on_b = b.GetClosestPointTo(pt_on_a, false);
+            var distance = pt_on_a.DistanceTo(pt_on_b);
+            pt_on_a = a.GetClosestPointTo(b.EndPoint, false);
+            pt_on_b = b.GetClosestPointTo(pt_on_a, false);
+            var distance_b = pt_on_a.DistanceTo(pt_on_b);
+            distance = Math.Min(distance, distance_b);
+            //不考虑四通的情况
+            if (distance == 0)
+            {
+                //相交
+                var intersected_points = a.IntersectWithEx(b).Cast<Point3d>().ToList();
+                if (intersected_points.Count == 1)
+                {
+                    var intersected_point = intersected_points[0];
+                    var endpoints = new List<Point3d>() { a.StartPoint, a.EndPoint, b.StartPoint, b.EndPoint };
+                    endpoints = endpoints.OrderBy(p => p.DistanceTo(intersected_point)).ToList();
+                    var dis = endpoints.First().DistanceTo(intersected_point);
+                    if (dis <= tol)
+                        return true;
+                }
+                return false;
+            }
+            else if (distance <= tol)
+            {
+                return true;
+            }
+            else if (distance <= tol_parallel)
+            {
+                //平行，可连接的情况
+                var isparallel = IsParallelLine(a, b);
+                if (isparallel)
+                {
+                    if (a.GetClosestPointTo(b.StartPoint, true).DistanceTo(b.StartPoint) < 1)
+                        return true;
+                }
+                return false;
+            }
+            return false;
+        }
         /// <summary>
         /// 判断两直线是否相交
         /// </summary>
@@ -179,6 +222,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 }
                 int cond_QuitCycle = 0;
                 double dis5= 1000;
+                //ptstest两条直线相互距离最近的两个端点
                 foreach (var j in ptstest)
                 {
                     foreach (var k in pts)
@@ -195,6 +239,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                     }
                 }
                 bool parallel = TestLineParallel(line1, line2, 0);
+                //两条直线相互距离最近的两个端点距离小于150 返回相交
                 if (Math.Min(dis1, dis2) < tol)
                 {
                     return true;
@@ -1055,6 +1100,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             {
                 for (int j = i + 1; j < lines.Count; j++)
                 {
+                    if (!lines[i].Layer.Equals(lines[j].Layer)) continue;
                     if (IsParallelLine(lines[i], lines[j]) && lines[j].GetClosestPointTo(lines[i].GetMidpoint(), true).DistanceTo(lines[i].GetMidpoint()) < 0.001)
                     {
                         if (lines[j].GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint) < 0.001
@@ -1062,7 +1108,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         {
                             var p = lines[j].StartPoint.DistanceTo(lines[i].EndPoint) <= lines[j].EndPoint.DistanceTo(lines[i].EndPoint) ?
                                 lines[j].StartPoint : lines[j].EndPoint;
-                            var lin= new Line(p, lines[i].EndPoint);
+                            var lin = new Line(p, lines[i].EndPoint);
                             lin.Layer = lines[i].Layer;
                             lines[i] = lin;
                         }
@@ -1071,8 +1117,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                         {
                             var p = lines[j].StartPoint.DistanceTo(lines[i].StartPoint) <= lines[j].EndPoint.DistanceTo(lines[i].StartPoint) ?
                                 lines[j].StartPoint : lines[j].EndPoint;
-                            var lin= new Line(lines[i].StartPoint, p);
-                            lin.Layer= lines[i].Layer;
+                            var lin = new Line(lines[i].StartPoint, p);
+                            lin.Layer = lines[i].Layer;
                             lines[i] = lin;
                         }
                     }
@@ -1085,6 +1131,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             {
                 for (int j = i + 1; j < lines.Count; j++)
                 {
+                    if (!lines[i].Layer.Equals(lines[j].Layer)) continue;
                     if (IsSubLine(lines[i], lines[j]))
                     {
                         lines.RemoveAt(i);
@@ -1101,6 +1148,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             {
                 for (int j = i + 1; j < lines.Count; j++)
                 {
+                    if (!lines[i].Layer.Equals(lines[j].Layer)) continue;
                     bool isSimilarDuplicated = IsParallelLine(lines[i], lines[j]) && lines[j].GetClosestPointTo(lines[i].GetMidpoint(), false).DistanceTo(lines[i].GetMidpoint()) < tol
                         && Math.Abs(lines[j].GetClosestPointTo(lines[i].StartPoint, false).DistanceTo(lines[i].StartPoint) - lines[j].GetClosestPointTo(lines[i].EndPoint, false).DistanceTo(lines[i].EndPoint)) < 1;
                     if (isSimilarDuplicated)
@@ -1120,6 +1168,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             {
                 for (int j = i + 1; j < lines.Count; j++)
                 {
+                    if (!lines[i].Layer.Equals(lines[j].Layer)) continue;
                     if (IsParallelLine(lines[i], lines[j]) && !IsSubLine(lines[i], lines[j]))
                     {
                         if (lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < tol)
@@ -1367,6 +1416,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             RemoveDuplicatedLines(lines);
             return lines;
         }
+        public static List<Line> ConnectBrokenLine(List<Line> lines)
+        {
+            var res = new List<Line>();
+            double tol_connected = 1000;
+            return res;
+        }
+
         /// <summary>
         /// 连接认为是一条直线的存在间距的两条直线
         /// </summary>

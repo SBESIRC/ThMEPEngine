@@ -135,6 +135,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public Horizontal(Line line, bool isInitialLine = true)
         {
             Line = line;
+
             IsInitialLine = isInitialLine;
         }
         public Horizontal()

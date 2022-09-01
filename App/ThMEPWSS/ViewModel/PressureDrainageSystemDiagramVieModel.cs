@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         public List<List<Point3dCollection>> FloorAreaList;//楼层区域
         public List<List<int>> FloorNumList;//楼层列表
         private List<string> undpdsfloorListDatas { get; set; }//楼层表
+        public Polyline SelectedBound { get; set; }
         public List<string> UndpdsFloorListDatas
         {
             get { return undpdsfloorListDatas; }
@@ -98,11 +100,22 @@ namespace ThMEPWSS.Diagram.ViewModel
                     MessageBox.Show("框选区域没有标准楼层");
                     return;
                 }
+                SelectedBound = PolyFromPoints(SelectedArea.Cast<Point3d>().ToArray());
                 FloorNumList = CreateFloorNumList(FloorNum);
                 FloorAreaList = CreateFloorAreaList(storeysRecEngine.Elements);
                 undpdsfloorListDatas.Reverse();
                 return;
             }
+        }
+        static Polyline PolyFromPoints(Point3d[] points, bool closed = true)
+        {
+            Polyline p = new Polyline();
+            for (int i = 0; i < points.Length; i++)
+            {
+                p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
+            }
+            p.Closed = closed;
+            return p;
         }
         public static List<List<int>> CreateFloorNumList(List<string> FloorNum) //提取每张图纸的楼层号
         {

@@ -14,18 +14,22 @@ using ThMEPEngineCore.CAD;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using static DotNetARX.UCSTools;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
+using static ThMEPWSS.PressureDrainageSystem.Utils.BusinessDebug;
+using static ThMEPWSS.PressureDrainageSystem.DebugTools;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public partial class PressureDrainageSystemDiagramService
     {
-        public PressureDrainageSystemDiagramService(List<PipeLineSystemUnitClass> pipeLineSystemUnits, PressureDrainageModelData modeldatas, Point3d insertPt)
+        public PressureDrainageSystemDiagramService(List<PipeLineSystemUnitClass> pipeLineSystemUnits, PressureDrainageModelData modeldatas, Point3d insertPt,bool debug)
         {
             PipeLineSystemUnits = pipeLineSystemUnits;
             InsertPt = insertPt;
             Modeldatas = modeldatas;
+            Debug=debug;
         }
         public List<PipeLineSystemUnitClass> PipeLineSystemUnits { get; set; }
         public Point3d InsertPt { get; set; }
+        private bool Debug = false;
         public PressureDrainageModelData Modeldatas { get; set; }
 
         public List<Entity> entities = new();//用全局变量来承接每个排水系统中的元素
@@ -201,6 +205,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 double heightDisTofloorLine = 590;//固定值        
                 ptloc = ptloc.TransformBy(Matrix3d.Displacement(new Vector3d(widthDisTofloorLineStartPt, -heightDisTofloorLine, 0)));
                 int effectiveUnitsCount = 0;//有效的排水系统单元数
+                if (Debug)
+                {
+                    try
+                    {
+                        LogDebugInfos(ShowPipeLineSystemUnits(PipeLineSystemUnits), "PipeLineSystemUnits.txt");
+                    }
+                    catch (Exception ex) { }
+                }
                 for (int i = 0; i < PipeLineSystemUnits.Count; i++)
                 {
                     try
@@ -1390,7 +1402,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 Point3d ptlocText3 = line2.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(0, -dislocText3, 0)));
                 DBText dBText2 = new DBText();
                 string str_tmp1 = pump.Location.Contains("梯") ? "电梯基坑" : "电缆沟";
-                string str1 = str_tmp1 + "预埋镀锌钢管，管内底平基坑底";
+                string str1 = str_tmp1 + "预埋XXX管，管内底平基坑底";
                 DefinePropertiesOfCADDBTexts(dBText2, "W-NOTE", str1, ptlocText2, textHeight, TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
                 tmpBTexts.Add(dBText2);
                 DBText dBText3 = new DBText();

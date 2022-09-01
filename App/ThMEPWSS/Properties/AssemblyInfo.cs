@@ -46,4 +46,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPWSS.ThDrainageADPrivateCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThFirstFloorDrainningPlaneSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPWSS.SprinklerDim.Cmd.ThSprinklerDimCmdEntrance))]
+[assembly: CommandClass(typeof(ThMEPWSS.PressureDrainageSystem.DebugCommand))]
 [assembly: CommandClass(typeof(ThMEPWSS.HydrantConnectPipe.Command.ThHydrantConnectPipeConnectCmd))]
