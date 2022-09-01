@@ -308,28 +308,6 @@
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPIFC, 2016 version-->
-    <Components>
-        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
-            <Commands GroupName="TIANHUACAD">
-                <Command Local="THJGHM" Global="THJGHM" />
-                <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2Push" Global="THDB2Push" />
-            </Commands>
-        </ComponentEntry>
-    </Components>
-    <!--Assembly App, ThMEPIFC, 2018 version-->
-    <Components>
-        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
-            <Commands GroupName="TIANHUACAD">
-                <Command Local="THJGHM" Global="THJGHM" />
-                <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2Push" Global="THDB2Push" />
-            </Commands>
-        </ComponentEntry>
-    </Components>
     <!--Assembly App, TianHua.Mep.UI, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />

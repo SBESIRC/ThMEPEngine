@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA BIM Design Platform" NameChs="天华BIM设计平台" Description="AutoCAD Plugin for TIANHUA BIM Design Platform" DescriptionChs="天华BIM设计平台AutoCAD客户端" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{8855F34B-3A5B-4DC7-A2BE-FC611CC07C12}" UpgradeCode="{5108574F-42CB-42CF-A3F5-90A80EA8C29D}">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
+    <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
+    <!--Assembly App, CUI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThPlatform3DCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for platform CUI" AppName="ThPlatform3DCui" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, CUI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThPlatform3DCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for platform CUI" AppName="ThPlatform3DCui" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPIFC, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THJGHM" Global="THJGHM" />
+                <Command Local="THDB2IFC" Global="THDB2IFC" />
+                <Command Local="THDB2Push" Global="THDB2Push" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPIFC, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPIFC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for IFC support" AppName="ThMEPIFC" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THJGHM" Global="THJGHM" />
+                <Command Local="THDB2IFC" Global="THDB2IFC" />
+                <Command Local="THDB2Push" Global="THDB2Push" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThPlatform3D, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThPlatform3D.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform" AppName="ThPlatform3D" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThPlatform3D, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThPlatform3D.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform" AppName="ThPlatform3D" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThPlatform3D.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/Tianhua.Platform3D.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform UI" AppName="ThPlatform3DUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThPlatform3D.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/Tianhua.Platform3D.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform UI" AppName="ThPlatform3DUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+</ApplicationPackage>

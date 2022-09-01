@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_Debug" Guid="{5C16B101-5862-4B31-BD9F-7DAED222C6FA}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Platform3D_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThDotNetARX.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_CUI_Debug" Guid="{8AB7D5CF-9214-47D8-8312-527355EF68B0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Platform3D_CUI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\CADExtension.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_UI_Debug" Guid="{E7D0F273-C129-48A2-96B3-D83E726930F2}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Platform3D_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThCADExtension.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_Debug" Guid="{2985DE6E-0A10-41B2-A79B-6F359833680D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Platform3D_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThPlatform3D.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_CUI_Debug" Guid="{C5FDAC8C-5CB7-41AF-A734-D62D9CCCB048}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Platform3D_CUI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThPlatform3DCui.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_UI_Debug" Guid="{3358F5CD-14F8-4AF2-A4A4-ED2C983A9A79}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Platform3D_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Tianhua.Platform3D.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_Release" Guid="{C3456404-16AE-4ADF-807B-30ED3B031E2F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Platform3D_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThPlatform3D.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_CUI_Release" Guid="{98FB65EC-4529-4104-BCA1-E1A206528034}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Platform3D_CUI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThPlatform3DCui.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_UI_Release" Guid="{761F0294-ADA0-4442-A797-3D915A03FE62}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Platform3D_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Tianhua.Platform3D.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_Release" Guid="{68D53AD7-BD31-4185-B992-12CF8A81F5F8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Platform3D_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThPlatform3D.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_CUI_Release" Guid="{7E0A0750-25CF-40BE-A064-6F9466D6C2FB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Platform3D_CUI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThPlatform3DCui.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_UI_Release" Guid="{01E57BE1-14FB-4AAA-A782-3D7FE41F9E08}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Platform3D_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Tianhua.Platform3D.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppPlatform3DWin64">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_CUI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_CUI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_UI_Debug" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_CUI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Platform3D_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_CUI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Platform3D_UI_Release" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

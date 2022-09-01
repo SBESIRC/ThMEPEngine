@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" Guid="{CA1DEC51-0672-4CD0-93C5-BEFBA62C8D66}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NTS" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" Guid="{293A5C43-F325-44D0-AF08-5E45386E8CC4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NTS_Features" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.Features.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_IO_GEOJSON" Guid="{C0AD6725-BA40-481F-A7F2-B25394B62178}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NTS_IO_GEOJSON" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NewtonsoftJson" Guid="{2F5BF772-D1E8-40C3-990B-CF838BD9B1AD}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NewtonsoftJson" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Newtonsoft.Json.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader" Guid="{14614297-78A9-4742-A349-642FB5F6DF5D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ExcelDataReader" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExcelDataReader.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader_DataSet" Guid="{C39B5BFA-68A0-4D35-80F3-1A654989CA47}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ExcelDataReader_DataSet" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExcelDataReader.DataSet.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_EPPlus" Guid="{3FAA31FA-A133-402D-8F7D-9830686B7519}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_EPPlus" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\EPPlus.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_RestSharp" Guid="{4B6F9DCC-76DB-4F59-8EF3-5FD682F427BB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_RestSharp" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\RestSharp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI" Guid="{78DEDE36-D93D-4957-9400-98425503CB70}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OOXML" Guid="{FD72640C-4CCD-4A02-942D-0CA35E701A84}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_OOXML" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXml4Net" Guid="{58070562-270A-40A1-AB3D-249D3E77E772}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_OpenXml4Net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXmlFormats" Guid="{7EDE923C-AD0C-4BCE-9949-B5B6C7E4ABFE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_OpenXmlFormats" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OpenXmlFormats.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_SharpZipLib" Guid="{D6FAFD72-50F2-4E2A-BB8C-914CF547EE0C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_SharpZipLib" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ICSharpCode.SharpZipLib.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" Guid="{8C652120-3621-4D2E-A7B6-601D2671F84F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\BouncyCastle.Crypto.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" Guid="{056FEBB6-D081-44F2-BC03-839D26103B9F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_HandyControl" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\HandyControl.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" Guid="{6A25E43F-4001-4EDE-8F4A-C3035CA8B578}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" Guid="{01C2577D-1C09-4E50-94F7-E2EE3931CE6F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" Guid="{732ADBED-EF32-4ECF-B354-4AFB6F76FB09}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.EF6.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" Guid="{3834D299-4DC9-41A1-90E9-FD551F150744}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.Linq.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" Guid="{930D0C04-E01B-4418-A046-A4E3BEB54938}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" Guid="{C045E474-EFEC-4944-81F4-2A579DC8C55F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.Core.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" Guid="{C0139CB1-7B8E-41A3-9511-0104A1DF117A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\x64\SQLite.Interop.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" Guid="{128EC573-1A96-43FB-AB86-78E188A765FC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NTS" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" Guid="{AB5497B1-35EC-4580-A4AB-7E97C445684D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NTS_Features" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.Features.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_IO_GEOJSON" Guid="{9826E8CA-7A1C-4810-849E-A34BEAB8423A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NTS_IO_GEOJSON" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.IO.GeoJSON.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NewtonsoftJson" Guid="{1A093549-D84A-4FFD-9F23-211EC4652F59}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NewtonsoftJson" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Newtonsoft.Json.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader" Guid="{C77233CF-E4D6-4592-B71B-BE1816789F64}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ExcelDataReader" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExcelDataReader.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader_DataSet" Guid="{398A2505-1366-4AB4-9832-DFA2923293D7}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ExcelDataReader_DataSet" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExcelDataReader.DataSet.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_EPPlus" Guid="{8E6F9E68-4140-44D3-87D7-EF99EE351C2E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_EPPlus" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\EPPlus.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_RestSharp" Guid="{FD073763-60D8-481D-9BB9-9ED5F59F77D2}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_RestSharp" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\RestSharp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI" Guid="{54B1A037-A482-4DEB-8F59-A276E5D0C023}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OOXML" Guid="{EEB65415-9F0B-430F-BEE3-66214B6EF096}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_OOXML" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXml4Net" Guid="{4C1426F1-7BCB-4FAC-9501-007BADC2CE1C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_OpenXml4Net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXmlFormats" Guid="{BE9E459C-3A62-4BD7-A543-3974DA1BD662}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_OpenXmlFormats" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OpenXmlFormats.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_SharpZipLib" Guid="{4074185D-F5DD-4C30-9562-DFFD5A499620}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_SharpZipLib" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ICSharpCode.SharpZipLib.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" Guid="{5FFD528A-A8A1-4E4C-86C6-11BBD7338259}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\BouncyCastle.Crypto.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" Guid="{9E9D1387-A225-49AD-BC5C-B85EE983A7FE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_HandyControl" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\HandyControl.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" Guid="{E2DE622E-9412-4675-A132-3E9306E147D3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" Guid="{EE1F503C-7D1A-49FE-B045-7B82952082B1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" Guid="{E09E78B0-4222-4E0D-A51E-825790C896EF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.EF6.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" Guid="{E9E52840-90BF-4772-A660-9D4005559495}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.Linq.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" Guid="{1BEE96BB-4898-403A-8AAD-1FFAECE0BC30}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" Guid="{E166DBB6-B5AB-4C46-A6EF-BDE78DF2B897}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.Core.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" Guid="{D0B9CF88-98D0-49A8-A47B-D33382BF4CA8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\x64\SQLite.Interop.dll" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppExternal">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_IO_GEOJSON" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NewtonsoftJson" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader_DataSet" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_EPPlus" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_RestSharp" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OOXML" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXml4Net" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXmlFormats" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_SharpZipLib" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_IO_GEOJSON" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NewtonsoftJson" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ExcelDataReader_DataSet" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_EPPlus" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_RestSharp" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OOXML" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXml4Net" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_OpenXmlFormats" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_SharpZipLib" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
+</Wix>
