@@ -37,17 +37,29 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                       return e;
               }).ToList();
             modified_spliter = modified_spliter.Where(e => e.Length > 0).ToList();
-            //起始点终点按x坐标升序排序
+            //起始点终点按y坐标降序排序
             modified_spliter = modified_spliter.Select(e =>
               {
-                  if (e.StartPoint.X <= e.EndPoint.X)
+                  if (e.StartPoint.Y > e.EndPoint.Y)
                       return e;
-                  else
+                  else if(e.StartPoint.Y < e.EndPoint.Y)
                   {
                       var points=e.Vertices().Cast<Point3d>().ToList();
                       points.Reverse();
                       var pl = PolyFromPoints(points.ToArray(), false);
                       return pl;
+                  }
+                  else
+                  {
+                      if (e.StartPoint.X <= e.EndPoint.X)
+                          return e;
+                      else
+                      {
+                          var points = e.Vertices().Cast<Point3d>().ToList();
+                          points.Reverse();
+                          var pl = PolyFromPoints(points.ToArray(), false);
+                          return pl;
+                      }
                   }
               }).ToList();
             var edge_up = bound.GetEdges().OrderByDescending(e => e.GetMidpoint().Y).First();
