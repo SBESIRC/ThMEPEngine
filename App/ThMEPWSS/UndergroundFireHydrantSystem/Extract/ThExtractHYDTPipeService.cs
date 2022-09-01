@@ -44,7 +44,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         private string SystemMap(string layer)
         {
-            return "消防";
+            return layer switch
+            {
+                "W-FRPT-HYDT-PIPE" => "消防",
+                "W-FRPT-HYDT-PIPE-0" => "消防转输管",
+                "W-FRPT-HYDT-PIPE-1" => "消火栓1区",
+                "W-FRPT-HYDT-PIPE-2" => "消火栓2区",
+                "W-FRPT-HYDT-PIPE-3" => "消火栓3区",
+                "W-FRPT-HYDT-PIPE-预留1" => "消防预留管线1",
+                "W-FRPT-HYDT-PIPE-预留2" => "消防预留管线2",
+                "W-FRPT-HYDT-PIPE-XW" => "室外消火栓管",
+                _ => "消防",
+            };
         }
     }
 }
