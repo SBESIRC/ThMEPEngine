@@ -43,7 +43,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             outUserPoly = _outUserPoly;
             rooms = _rooms;
             paramSetting = _paramSetting;
-            frame = HandleStructService.GetMaxFrame(rooms.Select(x => x.Key).ToList(), mainSewagePipes, mainRainPipes);
+            frame = HandleStructService.GetMaxFrame(rooms.Select(x => x.Key).ToList(), verticalPipesModel, mainSewagePipes, mainRainPipes);
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
             wallPolys = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>().ToList();
             originTransformer = _originTransformer;

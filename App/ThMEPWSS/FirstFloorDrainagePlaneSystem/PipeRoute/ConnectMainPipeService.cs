@@ -49,7 +49,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             {
                 return resRoutes;
             }
-            var roomFrame = HandleStructService.GetMaxFrame(deepRooms.Select(x => x.Key.Key).ToList(), new List<Polyline>(), new List<Polyline>());
+            var roomFrame = HandleStructService.GetMaxFrame(deepRooms.Select(x => x.Key.Key).ToList(), mainPipes, new List<Polyline>(), new List<Polyline>());
             var pipeDic = ClassifyPipeByOutFrame(needOutFrames, mainPipes, roomFrame);
             var gridInfo = ClassifyGridInfo();
             var roomWallPolys = wallPolys.Where(x => x.Intersects(roomFrame) || roomFrame.Contains(x)).ToList();

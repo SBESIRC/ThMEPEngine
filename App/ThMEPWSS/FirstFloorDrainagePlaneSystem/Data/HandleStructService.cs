@@ -21,11 +21,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="mainSewagePipes"></param>
         /// <param name="mainRainPipes"></param>
         /// <returns></returns>
-        public static Polyline GetMaxFrame(List<Polyline> rooms, List<Polyline> mainSewagePipes, List<Polyline> mainRainPipes)
+        public static Polyline GetMaxFrame(List<Polyline> rooms, List<VerticalPipeModel> verticalPipesModel, List<Polyline> mainSewagePipes, List<Polyline> mainRainPipes)
         {
             var allPts = rooms.SelectMany(x => GeometryUtils.GetAllPolylinePts(x)).ToList();
             allPts.AddRange(mainSewagePipes.SelectMany(x => GeometryUtils.GetAllPolylinePts(x)));
             allPts.AddRange(mainRainPipes.SelectMany(x => GeometryUtils.GetAllPolylinePts(x)));
+            allPts.AddRange(verticalPipesModel.Select(x => x.Position));
             allPts = allPts.OrderBy(x => x.X).ToList();
             double minX = allPts.First().X;
             double maxX = allPts.Last().X;

@@ -85,6 +85,8 @@
     <Compile Include="Command\ThDrawOutDoorCmd.cs" />
     <Compile Include="Command\ThLayoutOverflowTunnelCmd.cs" />
     <Compile Include="Command\ThLayoutRainwaterInletCmd.cs" />
+    <Compile Include="Command\ThLayoutRainFloorDrainCmd.cs" />
+    <Compile Include="Command\ThLayoutSewageFloorDrainCmd.cs" />
     <Compile Include="Converter\BeamRecognizeSourceBooleanConverter.cs" />
     <Compile Include="Converter\DrainSettingConverter.cs" />
     <Compile Include="Converter\FloorTypeToBoolConverter.cs" />
