@@ -13,7 +13,7 @@
              mc:Ignorable="d">    
     <StackPanel Orientation="Vertical" Margin="3,3">
         <StackPanel Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Left" >
-            <!--<Button Margin="10,0,0,0" TabIndex="1" x:Name="btnInitStorey" Content="初始化楼层" Width="80" Click="btnInitStorey_Click"></Button>-->
+            <Button Margin="0,0,0,0" TabIndex="1" x:Name="btnInitStorey" Content="初始化楼层" Width="80" Click="btnInitStorey_Click"></Button>
             <Button Margin="10,0,0,0" TabIndex="1" x:Name="btnLoadStorey" Content="加载楼层" Width="80" Click="btnLoadStorey_Click"></Button>
             <Button Margin="10,0,0,0" TabIndex="1" x:Name="btnUpdateStoreyName" Content="重置楼层名" Width="80" Click="btnUpdateStoreyName_Click"></Button>
             <Button Margin="5,0,0,0" TabIndex="2" x:Name="btnInsertStorey" Content="插入楼层" Width="60" Click="btnInsertStorey_Click"></Button>

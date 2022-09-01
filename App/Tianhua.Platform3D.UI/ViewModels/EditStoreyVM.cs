@@ -98,14 +98,15 @@ namespace TianHua.Platform3D.UI.ViewModels
             }
         }
 
-        public void UpdateRelatePaperName(int index,string paperName)
+        public void UpdateRelatePaperName(int index,List<PaperItem> items)
         {
             for (int i = 0; i < Source.Count; i++)
             {
                 if (i == index)
                 {
                     var storeyInfo = Source[i];
-                    storeyInfo.PaperName = paperName;
+                    storeyInfo.PaperName = string.Join(",",items.Select(o=>o.Name));
+                    storeyInfo.PaperFrameHandle = string.Join(",", items.Select(o => o.PaperFrameHandle));
                 }
             }
         }

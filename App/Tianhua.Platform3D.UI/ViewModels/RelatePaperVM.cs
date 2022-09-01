@@ -5,6 +5,7 @@ using AcHelper;
 using Linq2Acad;
 using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace TianHua.Platform3D.UI.ViewModels
 {
@@ -28,8 +29,8 @@ namespace TianHua.Platform3D.UI.ViewModels
             Items = new ObservableCollection<PaperItem>();
 
             // 获取Cad中图框
-            var paperNames = GetPaperNames();
-            paperNames.ForEach(o => Items.Add(new PaperItem(o)));
+            var paperNames = GetPaperItems();
+            paperNames.ForEach(o => Items.Add(o));
         }
 
         public void SetValue(string name,bool isSelected)
@@ -44,34 +45,38 @@ namespace TianHua.Platform3D.UI.ViewModels
             }
         }
 
-        public List<string> GetSelectItemNames()
+        public List<PaperItem> GetSelectItemNames()
         {
-            return Items.OfType<PaperItem>().Where(o=>o.IsSelected).Select(o=>o.Name).Distinct().ToList();
+            return Items.OfType<PaperItem>().Where(o=>o.IsSelected).ToList();
         }
 
-        private List<string> GetPaperNames()
+        private List<PaperItem> GetPaperItems()
         {
             using (var docLock = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
-                return acadDb.ModelSpace.OfType<BlockReference>()
-                    .Where(o => IsPaperFrameBlk(o.GetEffectiveName()))
-                    .Select(o =>
-                    {
-                        var attributes = o.ObjectId.GetAttributesInBlockReferenceEx();
-                        var equalAttributes = attributes.Where(x => x.Key == _frameNameAttributeKey);
-                        if (equalAttributes.Count()==1)
-                        {
-                            return equalAttributes.First().Value;
-                        }
-                        else
-                        {
-                            return "";
-                        }
-                    })
-                    .Where(o => !string.IsNullOrEmpty(o))
-                    .Distinct()
-                    .ToList();
+                var results = new List<PaperItem>();
+                acadDb.ModelSpace.OfType<BlockReference>()
+                   .Where(o => IsPaperFrameBlk(o.GetEffectiveName()))
+                   .ForEach(o =>
+                   {
+                       var attributes = o.ObjectId.GetAttributesInBlockReferenceEx();
+                       var equalAttributes = attributes.Where(x => x.Key == _frameNameAttributeKey);
+                       if (equalAttributes.Count() == 1)
+                       {
+                           var attrValue = equalAttributes.First().Value;
+                           if(!string.IsNullOrEmpty(attrValue))
+                           {
+                               var handle = o.Handle.Value.ToString();
+                               bool isExisted = results.Where(x => x.PaperFrameHandle == handle).Any();
+                               if (!isExisted)
+                               {
+                                   results.Add(new PaperItem(equalAttributes.First().Value, handle));
+                               }
+                           }                           
+                       }
+                   });                    
+                return results;
             }
         }
 
@@ -82,13 +87,15 @@ namespace TianHua.Platform3D.UI.ViewModels
     }
     public class PaperItem
     {
+        public string PaperFrameHandle { get; set; } = "";
         public string Name { get; set; } = "";
         public bool IsSelected { get; set; }
 
-        public PaperItem(string name)
+        public PaperItem(string name,string paperFrameHandle)
         {
             this.Name = name;
             this.IsSelected = false;
+            PaperFrameHandle = paperFrameHandle;
         }
     }
 }

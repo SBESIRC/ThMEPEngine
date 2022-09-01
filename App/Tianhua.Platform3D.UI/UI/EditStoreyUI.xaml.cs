@@ -238,12 +238,11 @@ namespace Tianhua.Platform3D.UI.UI
             relatePaperUI.ShowDialog();
             if(relatePaperUI.IsSuccess)
             {
-                var selectPaperNames = relatePaperVm.GetSelectItemNames();
-                var joinPaperName = string.Join(",", selectPaperNames);
+                var selectPaperNames = relatePaperVm.GetSelectItemNames();               
                 foreach (var item in this.datagrid1.SelectedItems)
                 {
                     var rowIndex = this.datagrid1.Items.IndexOf(item);
-                    _vm.UpdateRelatePaperName(rowIndex, joinPaperName);
+                    _vm.UpdateRelatePaperName(rowIndex, selectPaperNames);
                 }
                 UpdateDataGridDataSource();
             }

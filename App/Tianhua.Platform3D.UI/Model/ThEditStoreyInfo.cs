@@ -4,6 +4,19 @@ namespace TianHua.Platform3D.UI.Model
 {
     public class ThEditStoreyInfo : ThIfcStoreyInfo
     {
+        private string _paperFrameHandle = "";
+        /// <summary>
+        /// 图框句柄
+        /// </summary>
+        public string PaperFrameHandle
+        {
+            get => _paperFrameHandle;
+            set
+            {
+                _paperFrameHandle = value;
+            }
+        }
+
         private string _paperName = "";
         /// <summary>
         /// 图纸名称
