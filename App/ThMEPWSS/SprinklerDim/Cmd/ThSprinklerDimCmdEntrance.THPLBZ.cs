@@ -67,9 +67,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
             }
         }
 
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThSprinklerDimNoUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THPLBZ", CommandFlags.Modal)]
         public void ThSprinklerDimNoUI()
         {
             using (var cmd = new ThSprinklerDimCmd())

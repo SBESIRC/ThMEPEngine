@@ -203,6 +203,7 @@
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THXHSYH" Global="-THXHSYH" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
+                <Command Local="-THPLBZ" Global="-THPLBZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -225,6 +226,7 @@
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THXHSYH" Global="-THXHSYH" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
+                <Command Local="-THPLBZ" Global="-THPLBZ" />
             </Commands>
         </ComponentEntry>
     </Components>
