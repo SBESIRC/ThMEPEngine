@@ -42,7 +42,7 @@ namespace ThMEPArchitecture.MultiProcess
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
         public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
-        List<DisplayInfo> displayInfos = new List<DisplayInfo>();
+        List<DisplayInfo> displayInfos;
         public static Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
         public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
 
@@ -192,6 +192,7 @@ namespace ThMEPArchitecture.MultiProcess
             if (ParameterViewModel.ShowLogs)
             {
                 displayPro.Start();
+                displayInfos = new List<DisplayInfo>();
             }
             //var block = InputData.SelectBlock(acadDatabase);//提取地库对象
             if (blks == null) return;
@@ -284,9 +285,12 @@ namespace ThMEPArchitecture.MultiProcess
                         OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
                     TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
                 }
-                 displayInfos.Last().FinalStalls = $"最大车位数: {ParkingStallCount} ";
-                 displayInfos.Last().FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
-                 displayInfos.Last().CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
+                if(displayInfos != null)
+                {
+                    displayInfos.Last().FinalStalls = $"最大车位数: {ParkingStallCount} ";
+                    displayInfos.Last().FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
+                    displayInfos.Last().CostTime = $"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n";
+                }
             }
             DisplayParkingStall.MoveAddedEntities(moveDistance);
             //SubAreaParkingCnt.Clear();

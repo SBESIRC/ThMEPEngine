@@ -69,6 +69,9 @@ namespace ThParkingStall.Core.OInterProcess
                     fs.Close();
 #endif
                     obliqueMPartition.Process(true);
+                    var lane_segs=obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
+                    var car_plys=obliqueMPartition.Cars.Select(e =>e.Polyline).ToList();
+                    var column_plys = obliqueMPartition.Pillars;
                     //MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
                     //mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
                     Count = obliqueMPartition.Cars.Count;

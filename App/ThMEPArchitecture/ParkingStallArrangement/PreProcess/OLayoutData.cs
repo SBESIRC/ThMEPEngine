@@ -24,7 +24,7 @@ using ThParkingStall.Core.Tools;
 
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 using SegLineEx = ThParkingStall.Core.OTools.SegLineEx;
-
+using ThMEPArchitecture.ParkingStallArrangement.General;
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
     public class OLayoutData
@@ -291,6 +291,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         {
             var bufferDistance = (ParameterStock.RoadWidth / 2) - SegLineEx.SegTol;
             var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            //Geometry obbs =new MultiPolygon(BuildingBounds.Select(b=>b.GetObb()).ToArray());
+            //var convexHull =(Polygon) obbs.ConvexHull();
+            //var borders = obbs.Get<Polygon>(true);
+            //while(borders.Count!=1)
+            //{
+            //    obbs = obbs.Buffer(bufferDistance, MitreParam);
+            //    borders = obbs.Get<Polygon>(true);
+            //}
+            //var maxMindist = obbs.Max(b_this =>obbs.Min(b_other => { if (b_other.Disjoint(b_this)) 
+            //        return b_other.Distance(b_this); else return double.MaxValue; } ))+10;
+            //var init_border = new MultiPolygon(obbs.ToArray()).Buffer(maxMindist,MitreParam).Union().Get<Polygon>(true).OrderBy(p =>p.Area).Last();
+            //var init_border = borders.First().Union(convexHull).Get<Polygon>(true).OrderBy(p =>p.Area).Last();
+            //var init_border = GetInitBound(BuildingBounds);
+            //init_border.ToDbMPolygon().AddToCurrentSpace();
+            //convexHull.ToDbMPolygon().AddToCurrentSpace();
+            //BuildingBounds.ForEach(p => p.GetObb().ToDbMPolygon().AddToCurrentSpace());
+            //BuildingBounds.ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
             var bufferedWallLine = WallLine.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
             BaseLineBoundary = bufferedWallLine.Difference( new MultiPolygon(BuildingBounds.ToArray())).
                 Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
@@ -306,6 +323,109 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             InnerBoundSPIndex = new MNTSSpatialIndex(innerBounds);
             //outerBounds.ForEach(b => b.ToDbMPolygon(3, "外边界").AddToCurrentSpace());
             //innerBounds.ForEach(b => b.ToDbMPolygon(4, "内边界").AddToCurrentSpace());
+        }
+
+        private Polygon _GetInitBound(List<Polygon> BuildingBounds)
+        {
+            var obbs = BuildingBounds.Select(b => b.GetObb());
+            var convexHull = (Polygon)(new MultiPolygon( obbs.ToArray()).ConvexHull());
+            var obbIndex = new MNTSSpatialIndex(obbs);
+            var outerObbs = new List<Polygon>();
+            var outerSets = new HashSet<Polygon>();
+            foreach (var coor in convexHull.Coordinates)
+            {
+                var pt = coor.ToPoint();
+                var buffered = pt.Buffer(0.1);
+                var selectedobbs = obbIndex.SelectCrossingGeometry(buffered).Cast<Polygon>();
+                var tempObj = selectedobbs.OrderBy(b => b.Distance(pt)).First();
+                if (!outerSets.Contains(tempObj))
+                {
+                    outerSets.Add(tempObj);
+                    outerObbs.Add(tempObj);
+                }
+                //selectedobbs.ForEach
+                //    (obb => { if (!outerSets.Contains(obb)) { outerSets.Add(obb); outerObbs.Add(obb); } });
+            }
+            //var bufferdistances = new List<double>();
+            //for(int i = 0; i < outerObbs.Count; i++)
+            //{
+            //    var lastIndex = i - 1 + outerObbs.Count;
+            //    var nextIndex = i + 1;
+            //    var current = outerObbs[i];
+            //    var next = outerObbs[nextIndex % outerObbs.Count];
+            //    var last = outerObbs[lastIndex % outerObbs.Count];
+            //    bufferdistances.Add(1+Math.Max(current.Distance(last), current.Distance(next))/2);
+            //}
+            //for(int i = 0; i < outerObbs.Count; i++)
+            //{
+            //    outerObbs[i] = outerObbs[i].Buffer(bufferdistances[i], MitreParam).Get<Polygon>(true).First();
+            //}
+
+            for (int i = 0; i < outerObbs.Count; i++)
+            {
+                var nextIndex = i + 1;
+                var current = outerObbs[i];
+                var next = outerObbs[nextIndex % outerObbs.Count];
+                var nearestPts = next.Coordinates.Select(c => c.ToPoint()).OrderBy(p => p.Distance(current)).Take(2).Cast<Geometry>().ToList();
+                nearestPts.Add(current);
+                outerObbs[i] = new GeometryCollection(nearestPts.ToArray()).GetObb().Buffer(0.1, MitreParam).Get<Polygon>(true).OrderBy(p => p.Area).Last();
+            }
+
+            //for (int i = 0; i < outerObbs.Count; i++)
+            //{
+            //    var nextIndex = i + 1;
+            //    var current = outerObbs[i];
+            //    var next = outerObbs[nextIndex % outerObbs.Count];
+            //    outerObbs[i] =current.Union(next).GetObb();
+            //}
+            var unioned = new MultiPolygon(outerObbs.ToArray()).Union().Get<Polygon>(true).OrderBy(p=>p.Area).Last();
+            return unioned;
+        }
+
+        private Polygon GetInitBound(List<Polygon> BuildingBounds)
+        {
+            var convexHull = new MultiPolygon(BuildingBounds.Select(b =>b.GetObb()).ToArray()).ConvexHull() as Polygon;
+            var coors = convexHull.Coordinates.Take(convexHull.Coordinates.Count()-1).ToList();
+            for(int i = 0; i < coors.Count; i++)
+            {
+                var lastIndex = i - 1 + coors.Count;
+                var nextIndex = i + 1;
+                var current = coors[i];
+                var next = coors[nextIndex % coors.Count];
+                var last = coors[lastIndex % coors.Count];
+                if (current.Distance(last) < 100 || current.Distance(next) < 100) continue;
+                var pts = new List<Coordinate> { current,new Coordinate((current.X+next.X)/2,(current.Y+next.Y)/2),
+                    new Coordinate((current.X + last.X) / 2, (current.Y + last.Y) / 2) };
+                var envelop = new MultiPoint(pts.Select(coor => coor.ToPoint()).ToArray()).Envelope as Polygon;
+                envelop.ToDbMPolygon().AddToCurrentSpace();
+            }
+
+            var new_coors = new List<Coordinate>();
+            for (int i = 0; i < coors.Count; i++)
+            {
+                new_coors.Add(RandomCoor());
+            }
+            var lines = new List<LineSegment>();
+            for(int i = 0; i < new_coors.Count; i++)
+            {
+                var nextIndex = i + 1;
+                var current = new_coors[i];
+                var next = new_coors[nextIndex % new_coors.Count];
+                lines.Add(new LineSegment(current, next));  
+                current.ToPoint().ToDbPoint().AddToCurrentSpace();
+            }
+            lines.GetPolygons().OrderBy(p => p.Area).Last().ToDbMPolygon().AddToCurrentSpace();
+
+
+            return convexHull;
+        }
+        private Coordinate RandomCoor()
+        {
+            var lb = -10000;
+            var ub = 10000;
+            var x = General.Utils.RandDouble() *(ub-lb) + lb;
+            var y = General.Utils.RandDouble() *(ub-lb) + lb;
+            return new Coordinate(x, y);
         }
 
         #endregion

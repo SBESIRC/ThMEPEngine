@@ -24,7 +24,7 @@ namespace ThParkingStall.Core.OInterProcess
         public ORamp(SegLine segLine, Polygon area)
         {
             var segLineStr = segLine.Splitter.GetLineString();
-            InsertPt = area.Shell.Intersection(segLineStr).Get<Point>().First();
+            InsertPt = area.Shell.Intersection(segLineStr).Coordinates.First().ToPoint();
             var outSidePart = segLineStr.Difference(area).Centroid;
             var vector = new Vector2D(InsertPt.Coordinate, outSidePart.Coordinate).Normalize();
             Vector = (vector.X,vector.Y);

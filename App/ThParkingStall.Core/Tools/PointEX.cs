@@ -72,5 +72,13 @@ namespace ThParkingStall.Core.Tools
             if (PosDirection) return coordinates.Any(c => (c.X + c.Y) > (coor.X + coor.Y));
             else return coordinates.Any(c => (c.X + c.Y) < (coor.X + coor.Y));
         }
+
+        public static Coordinate RotateToXAxis(this Coordinate c, double angle)
+        {
+            var newX = c.X * Math.Cos(angle) - c.Y * Math.Sin(angle);
+            var newY = c.X * Math.Sin(angle) + c.Y * Math.Cos(angle);
+
+            return new Coordinate(newX, newY);
+        }
     }
 }
