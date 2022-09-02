@@ -83,7 +83,7 @@ namespace ThMEPTCH.TCHXmlDataConvert.TCHEntityToThIfc
         void SetPropertiesValue( TCH_OPENING xmlEntity, ThTCHElement ifcElement) 
         {
             ifcElement.Uuid = xmlEntity.Object_ID.value;
-            ifcElement.Useage = GetLinkWallIds(xmlEntity);
+            ifcElement.Usage = GetLinkWallIds(xmlEntity);
             ifcElement.Properties.Add(xmlEntity.Open_ang.name, xmlEntity.Open_ang.value);
             ifcElement.Properties.Add(xmlEntity.Property.name, xmlEntity.Property.value);
             ifcElement.Properties.Add(xmlEntity.RoataeAngle.name, xmlEntity.RoataeAngle.value);

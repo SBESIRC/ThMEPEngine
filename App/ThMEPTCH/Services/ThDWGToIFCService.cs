@@ -211,7 +211,7 @@ namespace ThMEPTCH.Services
                 buildingStorey.Number = floor.Num.ToString();
                 buildingStorey.Height = floor.LevelHeight;
                 buildingStorey.Elevation = floor.Elevation;
-                buildingStorey.Useage = floor.FloorName;
+                buildingStorey.Usage = floor.FloorName;
                 buildingStorey.Origin = new Point3d(0, 0, floor.Elevation);
                 buildingStorey.Properties.Add("FloorNo", floor.Num.ToString());
                 buildingStorey.Properties.Add("Height", floor.LevelHeight.ToString());
@@ -222,7 +222,7 @@ namespace ThMEPTCH.Services
                 {
                     foreach (var item in thBuilding.Storeys)
                     {
-                        if (!string.IsNullOrEmpty(item.MemoryStoreyId) || item.Useage != floor.FloorName)
+                        if (!string.IsNullOrEmpty(item.MemoryStoreyId) || item.Usage != floor.FloorName)
                             continue;
                         if (Math.Abs(item.Height - floor.LevelHeight) < 1)
                         {
