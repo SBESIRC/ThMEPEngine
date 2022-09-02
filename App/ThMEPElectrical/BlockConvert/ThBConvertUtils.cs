@@ -319,7 +319,7 @@ namespace ThMEPElectrical.BlockConvert
         /// <param name="database"></param>
         /// <param name="layer"></param>
         /// <returns></returns>
-        private static ObjectId CreateAILayer(Database database, string layer)
+        public static ObjectId CreateAILayer(Database database, string layer)
         {
             using (var db = AcadDatabase.Use(database))
             {

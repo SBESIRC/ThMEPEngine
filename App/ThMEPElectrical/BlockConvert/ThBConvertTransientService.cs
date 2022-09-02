@@ -30,7 +30,7 @@ namespace ThMEPElectrical.BlockConvert
             _bufferService = new ThNTSBufferService();
         }
 
-        public void AddTransient(ThBConvertCompareModel model, double scale)
+        public bool AddTransient(ThBConvertCompareModel model, double scale)
         {
             using (var docLock = Active.Document.LockDocument())
             using (var activeDb = AcadDatabase.Active())
@@ -39,36 +39,45 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     if (model.SourceId != ObjectId.Null && model.TargetId != ObjectId.Null)
                     {
-                        Highlight(activeDb, new List<ObjectId> { model.SourceId, model.TargetId }, scale);
+                        return Highlight(activeDb, new List<ObjectId> { model.SourceId, model.TargetId }, scale);
                     }
                     else if (model.SourceId != ObjectId.Null && model.TargetId == ObjectId.Null)
                     {
-                        Highlight(activeDb, new List<ObjectId> { model.SourceId }, scale);
+                        return Highlight(activeDb, new List<ObjectId> { model.SourceId }, scale);
                     }
                     else if (model.SourceId == ObjectId.Null && model.TargetId != ObjectId.Null)
                     {
-                        Highlight(activeDb, new List<ObjectId> { model.TargetId }, scale);
+                        return Highlight(activeDb, new List<ObjectId> { model.TargetId }, scale);
                     }
                     else if (model.TargetIdList.Count > 0)
                     {
-                        Highlight(activeDb, model.TargetIdList, scale);
+                        return Highlight(activeDb, model.TargetIdList, scale);
                     }
                 }
+                return false;
             }
         }
 
-        private void Highlight(AcadDatabase activeDb, List<ObjectId> objectIds, double scale)
+        private bool Highlight(AcadDatabase activeDb, List<ObjectId> objectIds, double scale)
         {
             ClearTransientGraphics();
             for (var i = 0; i < objectIds.Count; i++)
             {
                 var obb = ThBConvertObbService.BlockObb(activeDb, objectIds[i], scale);
-                var buffer = obb.Buffer(100.0).OfType<DbPolyline>().First().GeometricExtents;
+                if (obb.Area > 1.0)
+                {
+                    var buffer = obb.Buffer(100.0).OfType<DbPolyline>().First().GeometricExtents;
 
-                // 高亮
-                var extents = new Extents3d(buffer.MinPoint, buffer.MaxPoint).ToRectangle();
-                AddToTransient(extents);
+                    // 高亮
+                    var extents = new Extents3d(buffer.MinPoint, buffer.MaxPoint).ToRectangle();
+                    AddToTransient(extents);
+                }
+                else
+                {
+                    return false;
+                }
             }
+            return true;
         }
 
         private void AddToTransient(DbPolyline poly)

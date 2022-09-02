@@ -21,19 +21,19 @@ namespace ThMEPElectrical.BlockConvert
             {
                 if (model.Database == activeDb.Database)
                 {
-                    if (model.SourceId != ObjectId.Null && model.TargetId != ObjectId.Null)
+                    if (model.SourceId != ObjectId.Null && model.TargetId != ObjectId.Null && !model.SourceId.IsErased)
                     {
                         Zoom(model.SourceId);
                     }
-                    else if (model.SourceId != ObjectId.Null && model.TargetId == ObjectId.Null)
+                    else if (model.SourceId != ObjectId.Null && model.TargetId == ObjectId.Null && !model.SourceId.IsErased)
                     {
                         Zoom(model.SourceId);
                     }
-                    else if (model.SourceId == ObjectId.Null && model.TargetId != ObjectId.Null)
+                    else if (model.SourceId == ObjectId.Null && model.TargetId != ObjectId.Null && !model.TargetId.IsErased)
                     {
                         Zoom(model.TargetId);
                     }
-                    else if (model.TargetIdList.Count > 0)
+                    else if (model.TargetIdList.Count > 0 && !model.TargetIdList[0].IsErased)
                     {
                         Zoom(model.TargetIdList[0]);
                     }

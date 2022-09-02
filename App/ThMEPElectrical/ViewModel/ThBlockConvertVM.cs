@@ -168,9 +168,16 @@ namespace ThMEPElectrical.ViewModel
             var model = CompareModels.Where(o => o.Guid.Equals(info.Guid)).FirstOrDefault();
             if (model != null)
             {
-                TransientService.AddTransient(model, Parameter.BlkScaleValue / 100.0);
-                var zoomService = new ThBConvertZoomService();
-                zoomService.Zoom(model);
+                var added = TransientService.AddTransient(model, Parameter.BlkScaleValue / 100.0);
+                if (added)
+                {
+                    var zoomService = new ThBConvertZoomService();
+                    zoomService.Zoom(model);
+                }
+                else
+                {
+                    IgnoreChange(new List<string> { model.Guid });
+                }
             }
         }
 
