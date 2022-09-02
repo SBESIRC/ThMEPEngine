@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:tControl ="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d">
@@ -24,7 +25,7 @@
         <Grid Grid.Row="0" Background="#F2F2F2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="70"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <StackPanel Style="{x:Null}" Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
@@ -40,8 +41,19 @@
                     <Label Style="{x:Null}" Content="未登录"></Label>
                 </StackPanel>
             </StackPanel>
-
-            <Image Grid.Column="1" Source="../Resources/Images/show.png" Height="62" Width="62" Margin="5,0,5,0"></Image>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <tControl:ImageButton Name="btnPushToSU" Width="30" Height="30" ImageTextLocation="ImageOnly" ToolTip="数据推送到SU"
+                                      ImageHeight="30" ImageWidth="30"
+                                      BorderThickness="0"
+                                      NormalImage="../Resources/Images/suIcon.png"
+                                      Click="btnPushToSU_Click"></tControl:ImageButton>
+                <tControl:ImageButton Name="btnPushToViewer" Width="30" Height="30" ImageTextLocation="ImageOnly" ToolTip="数据推送到Viewer"
+                                      ImageHeight="30" ImageWidth="30"
+                                      BorderThickness="0"
+                                      Margin="5,0,5,0"
+                                      NormalImage="../Resources/Images/show.png" Click="btnPushToViewer_Click"></tControl:ImageButton>
+            </StackPanel>
+            
         </Grid>
         <Grid Grid.Row="1">
             <hc:TabControl x:Name="tabTopFunction"

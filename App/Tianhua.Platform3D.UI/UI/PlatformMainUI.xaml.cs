@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AcHelper;
+using AcHelper.Commands;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Tianhua.Platform3D.UI.ViewModels;
 using hControl = HandyControl.Controls;
 
@@ -52,5 +42,22 @@ namespace Tianhua.Platform3D.UI.UI
         {
             propGrid.DataContext = PropertiesViewModel.Instacne;
         }
+        #region 页面相应事件
+        private void btnPushToSU_Click(object sender, RoutedEventArgs e)
+        {
+            SendCommand("THSUPush");
+        }
+
+        private void btnPushToViewer_Click(object sender, RoutedEventArgs e)
+        {
+            SendCommand("THDB2Push");
+        }
+        private void SendCommand(string cmdName) 
+        {
+            if (Active.Document == null)
+                return;
+            CommandHandlerBase.ExecuteFromCommandLine(false, cmdName);
+        }
+        #endregion
     }
 }

@@ -157,6 +157,9 @@
   <ItemGroup>
     <Resource Include="Resources\Images\show.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\suIcon.png" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
