@@ -62,6 +62,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" Guid="{C045E474-EFEC-4944-81F4-2A579DC8C55F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.Core.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{73447F36-3568-443F-8668-67185F7BF5A9}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Google.Protobuf.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -129,6 +132,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" Guid="{E166DBB6-B5AB-4C46-A6EF-BDE78DF2B897}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.Core.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{0C814A86-4D61-4D76-9194-C79341F83A2A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Google.Protobuf.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -161,6 +167,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" />
@@ -182,6 +189,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

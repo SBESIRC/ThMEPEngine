@@ -17,6 +17,7 @@
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppSystem" />
             <ComponentGroupRef Id="ProductComponentsAppXBim" />
+            <ComponentGroupRef Id="ProductComponentsWPF" />
             <ComponentGroupRef Id="ProductComponentsAppMicrosoft" />
             <ComponentGroupRef Id="ProductComponentsAppPlatform3DWin64" />
         </Feature>
