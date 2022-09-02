@@ -255,7 +255,7 @@ namespace ThMEPStructure.StructPlane.Service
             return results.OfType<Curve>().ToCollection();
         }
 
-        public static DBObjectCollection CollinearMerge(this DBObjectCollection lines)
+        public static DBObjectCollection CollinearMerge(this HashSet<DBObject> lines)
         {
             var grouper = new ThColliearLineGrouper(lines);
             var groups = grouper.Group();
@@ -263,7 +263,7 @@ namespace ThMEPStructure.StructPlane.Service
             return groups.Select(g => Create(g)).ToCollection();
         }
 
-        private static Line Create(DBObjectCollection colliearLines)
+        private static Line Create(HashSet<DBObject> colliearLines)
         {
             var ptPair = ThGeometryTool.GetCollinearMaxPts(colliearLines.OfType<Line>().ToList());
             return new Line(ptPair.Item1, ptPair.Item2);

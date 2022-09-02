@@ -14,30 +14,35 @@ namespace ThMEPStructure.StructPlane.Service
     internal class ThColliearLineGrouper
     {
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        private DBObjectCollection Lines { get; set; }
+        private HashSet<DBObject> _lines { get; set; }
         private double ColliearTolerance = 1.0;
         private double ExtendTolerance = 1.0;
-        public ThColliearLineGrouper(DBObjectCollection lines)
+        private double _diagonal = 0.0; // lines范围的对角线长度
+
+        public ThColliearLineGrouper(HashSet<DBObject> lines)
         {
-            Lines= lines;
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(lines);
+            _lines = lines;
+            var lineObjs = lines.ToCollection();
+            var extents = CalculateRange(lineObjs);
+            _diagonal = CalculateDiagonal(extents) + 2.0;
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(lineObjs);
         }
 
-        public List<DBObjectCollection> Group()
+        public List<HashSet<DBObject>> Group()
         {
-            var results = new List<DBObjectCollection>();
-            // 按共线分组
-            var lineGroups = GroupByRectangle(Lines, ColliearTolerance * 2);
+            var results = new List<HashSet<DBObject>>();
+            // 按共线分组            
+            var lineGroups = GroupByRectangle(ColliearTolerance * 2, _diagonal);
             // 再对组内的线按连接关系分组
             lineGroups.ForEach(g => results.AddRange(GroupByLink(g, ExtendTolerance)));
             return results;
         }
 
-        private List<DBObjectCollection> GroupByLink(DBObjectCollection lines,double extendTolerance=3.0)
+        private List<HashSet<DBObject>> GroupByLink(HashSet<DBObject> lines,double extendTolerance=3.0)
         {
-            var results = new List<DBObjectCollection>();
+            var results = new List<HashSet<DBObject>>();
             // 获取组内每根线的相邻物体
-            var groups = new List<DBObjectCollection>();
+            var groups = new List<HashSet<DBObject>>();
             lines.OfType<Line>().ForEach(l =>
             {
                 var dir = l.LineDirection();
@@ -45,7 +50,8 @@ namespace ThMEPStructure.StructPlane.Service
                 var newEp = l.EndPoint + dir.MultiplyBy(extendTolerance);
                 var objs = Query(newSp, newEp, ColliearTolerance * 2)
                 .OfType<DBObject>()
-                .Where(o => lines.Contains(o)).ToCollection();
+                .Where(o => lines.Contains(o))
+                .OfType<DBObject>().ToHashSet();
                 groups.Add(objs);
             });
 
@@ -61,13 +67,7 @@ namespace ThMEPStructure.StructPlane.Service
                     if(IsIntersect(firstGroup, groups[i]))
                     {
                         isIslated = false;
-                        groups[i].OfType<DBObject>().ForEach(e =>
-                        {
-                            if (!firstGroup.Contains(e))
-                            {
-                                firstGroup.Add(e);
-                            }
-                        });
+                        firstGroup.Union(groups[i]);
                         groups.RemoveAt(i);
                         i--;
                     }
@@ -84,10 +84,10 @@ namespace ThMEPStructure.StructPlane.Service
             return results;
         }
 
-        private bool IsIntersect(DBObjectCollection first,DBObjectCollection second)
+        private bool IsIntersect(HashSet<DBObject> first,HashSet<DBObject> second)
         {
             // first 和 second 是否有交集
-            foreach(DBObject obj in first)
+            foreach (DBObject obj in first)
             {
                 if(second.Contains(obj))
                 {
@@ -97,27 +97,23 @@ namespace ThMEPStructure.StructPlane.Service
             return false;
         }
 
-        private List<DBObjectCollection> GroupByRectangle(DBObjectCollection lines,double width)
+        private List<HashSet<DBObject>> GroupByRectangle(double width,double diagonal)
         {
-            var results = new List<DBObjectCollection>();
-            var extents = CalculateRange(lines);
-            var diagonal = CalculateDiagonal(extents) + 2.0;
-            while(lines.Count>0)
+            var results = new List<HashSet<DBObject>>();
+            while (_lines.Count > 0)
             {
-                var first = lines.OfType<Line>().First();                
+                var first = _lines.OfType<Line>().First();
                 var direction = first.LineDirection();
                 var midPt = first.StartPoint.GetMidPt(first.EndPoint);
                 var newSp = midPt - direction.MultiplyBy(diagonal);
                 var newEp = midPt + direction.MultiplyBy(diagonal);
-                var tempDict = lines.Convert();
                 var parallelGroups = Query(newSp, newEp, width)
-                    .OfType<Line>().Where(second=> tempDict.ContainsKey(second))
+                    .OfType<Line>().Where(second => _lines.Contains(second))
                     .OfType<Line>().Where(second => IsApproximateCollinear(first, second, width / 2.0))
-                    .ToCollection();
+                    .OfType<DBObject>().ToHashSet();
                 results.Add(parallelGroups);
-                parallelGroups.OfType<DBObject>().ForEach(o => lines.Remove(o));
+                parallelGroups.OfType<DBObject>().ForEach(o => _lines.Remove(o));
             }
-
             return results;
         }
 

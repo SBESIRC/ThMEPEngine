@@ -70,7 +70,9 @@ namespace ThMEPStructure.StructPlane.Service
             var beamGroups = GroupBeamByLineType(linearBeamGeos);
             beamGroups.ForEach(g =>
             {
-                var beamLines = g.Select(o => o.Boundary).OfType<Line>().Where(o=>o.Length>0.0).ToCollection();
+                var beamLines = g.Select(o => o.Boundary)
+                .OfType<Line>().Where(o=>o.Length>0.0)
+                .OfType<DBObject>().ToHashSet();
                 var newBeamLines = beamLines.CollinearMerge();
                 newBeamLines.OfType<Line>().ForEach(l => results.Add(ThGeometry.Create(l, Clone(g.First().Properties))));
             });
