@@ -796,9 +796,9 @@ namespace ThMEPTCH.Services
                 var configs = storeyConfig.Where(o => o.PaperName.Equals(name));
                 configs.ForEach(config =>
                 {
-                    var heigth = double.Parse(config.Height);
+                    var heigth = config.Height;
                     var storeyName = config.StoreyName;
-                    var elevation = config.Bottom_Elevation == "" ? 0 : double.Parse(config.Bottom_Elevation);
+                    var elevation = config.Bottom_Elevation;
                     var floorNum = CalculateFloorNumber(storeyName);
                     res.Add(floorNum, new LevelElevation { Num = floorNum.ToString(), Elevation = elevation, LevelHeight = heigth, FloorName = name });
                 });

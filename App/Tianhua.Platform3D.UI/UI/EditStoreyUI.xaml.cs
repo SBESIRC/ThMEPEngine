@@ -154,7 +154,7 @@ namespace Tianhua.Platform3D.UI.UI
                         foreach(var item in this.datagrid1.SelectedItems)
                         {
                             var rowIndex = this.datagrid1.Items.IndexOf(item);
-                            _vm.UpdateHeight(rowIndex, height.ToString());
+                            _vm.UpdateHeight(rowIndex, height);
                         }
                         _vm.CalculateBuildingStoreyElevation();
                         UpdateDataGridDataSource();
@@ -175,7 +175,7 @@ namespace Tianhua.Platform3D.UI.UI
                 var textInputVM = new TextInputVM(new List<string>())
                 {
                     InputTip = "请输入首层标高（毫米）",
-                    InputValue = firstStorey.Bottom_Elevation,
+                    InputValue = firstStorey.Bottom_Elevation.ToString(),
                 };
                 var textInputUI = new TextInputUI(textInputVM);
                 textInputUI.Owner = this;
@@ -195,7 +195,7 @@ namespace Tianhua.Platform3D.UI.UI
                     }
                     else
                     {
-                        firstStorey.Bottom_Elevation = newInputValue;
+                        firstStorey.Bottom_Elevation = ThStringTools.ConvertTo(newInputValue);
                         _vm.CalculateBuildingStoreyElevation();
                         UpdateDataGridDataSource();
                     }

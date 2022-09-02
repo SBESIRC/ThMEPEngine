@@ -68,12 +68,12 @@ namespace TianHua.Platform3D.UI.ViewModels
             if(isSortBtmElevation)
             {
                 // 按层底标高排序
-                storeyInfos = storeyInfos.OrderBy(o => o.Bottom_Elevation_Value).ToList();
+                storeyInfos = storeyInfos.OrderBy(o => o.Bottom_Elevation).ToList();
             }
             if(isUpdateStoreyName)
             {
                 // 根据与0值最小的设为首层
-                var firstStorey = storeyInfos.OrderBy(o => Math.Abs(o.Bottom_Elevation_Value)).First();
+                var firstStorey = storeyInfos.OrderBy(o => Math.Abs(o.Bottom_Elevation)).First();
                 var firstStoreyIndex = storeyInfos.IndexOf(firstStorey);
                 for (int i=0;i< firstStoreyIndex;i++)
                 {
@@ -88,7 +88,7 @@ namespace TianHua.Platform3D.UI.ViewModels
             Source = new ObservableCollection<ThEditStoreyInfo>(storeyInfos);
         }
 
-        public void UpdateHeight(int index,string height)
+        public void UpdateHeight(int index,double height)
         {
             for(int i =0;i<Source.Count;i++)
             {
@@ -173,16 +173,16 @@ namespace TianHua.Platform3D.UI.ViewModels
             {
                 var currentLevel = Source[i];
                 var upLevel = Source[i + 1];
-                var currentBottomElevation = upLevel.Bottom_Elevation_Value - currentLevel.Height_Value;
-                currentLevel.Bottom_Elevation = currentBottomElevation.ToString();
+                var currentBottomElevation = upLevel.Bottom_Elevation - currentLevel.Height;
+                currentLevel.Bottom_Elevation = currentBottomElevation;
             }
             // 调整首层以上的标高
             for (int i = firstStoreyIndex + 1; i < Source.Count; i++)
             {
                 var currentLevel = Source[i];
                 var downLevel = Source[i - 1];
-                var currentBottomElevation = downLevel.Bottom_Elevation_Value + downLevel.Height_Value;
-                currentLevel.Bottom_Elevation = currentBottomElevation.ToString();
+                var currentBottomElevation = downLevel.Bottom_Elevation + downLevel.Height;
+                currentLevel.Bottom_Elevation = currentBottomElevation;
             }
         }
 

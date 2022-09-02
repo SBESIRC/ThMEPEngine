@@ -267,5 +267,21 @@ namespace ThCADExtension
             string pattern = @"^[+-]?\d+$";
             return Regex.IsMatch(value, pattern);
         }
+        public static double ConvertTo(string value)
+        {
+            if(string.IsNullOrEmpty(value))
+            {
+                return 0.0;
+            }
+            var newVal = value.Trim();
+            if (!string.IsNullOrEmpty(newVal) && IsDouble(newVal))
+            {
+                return double.Parse(newVal);
+            }
+            else
+            {
+                return 0.0;
+            }
+        }
     }
 }

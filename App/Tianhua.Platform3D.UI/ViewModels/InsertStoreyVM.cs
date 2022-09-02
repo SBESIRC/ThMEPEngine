@@ -617,7 +617,7 @@ namespace TianHua.Platform3D.UI.ViewModels
             {                
                 for (int i = 1; i <= _count; i++)
                 {
-                    results.Add(new ThEditStoreyInfo() { StoreyName = prefixStr + (startIndex + i) + "F", Height = Height.ToString()});
+                    results.Add(new ThEditStoreyInfo() { StoreyName = prefixStr + (startIndex + i) + "F", Height = Height});
                 }
             }
             return results;

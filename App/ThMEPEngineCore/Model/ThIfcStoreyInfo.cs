@@ -1,40 +1,52 @@
 ﻿using System;
-using ThCADExtension;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcStoreyInfo
     {
+        private string _id = "";
+        private double _height;
+        private double _top_Elevation;
+        private double _bottom_Elevation;
         public ThIfcStoreyInfo()
         {
-            Id = Guid.NewGuid().ToString();
+            _id = Guid.NewGuid().ToString();
         }
-        public string Id { get; private set; } = "";
-        public string StoreyName { get; set; } = "";
-        public string Elevation { get; set; } = "";
-        public string Top_Elevation { get; set; } = "";
-        public string Bottom_Elevation { get; set; } = "";
-        public string Description { get; set; } = "";
+        public string Id => _id;
         public string FloorNo { get; set; } = "";
-        public string Height { get; set; } = "";
         public string StdFlrNo { get; set; } = "";
-
-        public double Height_Value => ConvertToDouble(Height);
-        public double Elevation_Value => ConvertToDouble(Elevation);
-        public double Top_Elevation_Value => ConvertToDouble(Top_Elevation);
-        public double Bottom_Elevation_Value => ConvertToDouble(Bottom_Elevation);
-
-        private double ConvertToDouble(string doubleVal)
+        public string StoreyName { get; set; } = "";
+        public string Description { get; set; } = "";
+        /// <summary>
+        /// 表示标高
+        /// </summary>
+        public double Elevation { get; set; }
+        public double Top_Elevation
         {
-            var newDoubleVal = doubleVal.Trim();
-            if (!string.IsNullOrEmpty(newDoubleVal) && ThStringTools.IsDouble(newDoubleVal))
+            get => _top_Elevation;
+            set
             {
-                return double.Parse(newDoubleVal);
-            }
-            else
-            {
-                return 0.0;
+                _top_Elevation=value;
+                _bottom_Elevation = _top_Elevation - _height;
             }
         }
+        public double Bottom_Elevation
+        {
+            get => _bottom_Elevation;
+            set
+            {
+                _bottom_Elevation = value;
+                _top_Elevation = _bottom_Elevation + _height;
+            }
+        }
+        public double Height 
+        {
+            get => _height;
+            set
+            {
+                _height=value;
+                _top_Elevation = _bottom_Elevation + _height;
+            }
+        }       
     }
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Service
 {
@@ -49,13 +50,13 @@ namespace ThMEPEngineCore.Service
                     info.StoreyName = value;
                     break;
                 case "elevation":
-                    info.Elevation = value;
+                    info.Elevation = ThStringTools.ConvertTo(value);
                     break;
                 case "top_elevation":
-                    info.Top_Elevation = value;
+                    info.Top_Elevation = ThStringTools.ConvertTo(value);
                     break;
                 case "bottom_elevation":
-                    info.Bottom_Elevation = value;  
+                    info.Bottom_Elevation = ThStringTools.ConvertTo(value);  
                     break;
                 case "description":
                     info.Description = value;
@@ -64,7 +65,7 @@ namespace ThMEPEngineCore.Service
                     info.FloorNo = value;
                     break;
                 case "Height":
-                    info.Height = value;
+                    info.Height = ThStringTools.ConvertTo(value);
                     break;
                 case "StdFlrNo":
                     info.StdFlrNo = value;
