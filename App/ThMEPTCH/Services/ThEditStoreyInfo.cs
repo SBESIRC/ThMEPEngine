@@ -1,6 +1,6 @@
 ﻿using ThMEPEngineCore.Model;
 
-namespace ThMEPIFC.Model
+namespace ThMEPTCH.Services
 {
     public class ThEditStoreyInfo : ThIfcStoreyInfo
     {

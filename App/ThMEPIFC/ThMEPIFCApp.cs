@@ -274,7 +274,7 @@ namespace ThMEPIFC
 
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(string.Empty);
-            var project = service.DWGToProject(false, false);
+            var project = service.DWGToProject(false, false,true);
             if (project == null)
             {
                 return;

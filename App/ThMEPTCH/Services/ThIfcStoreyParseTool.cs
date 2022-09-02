@@ -1,9 +1,8 @@
 ﻿using System.IO;
-using System.Collections.Generic;
-using ThMEPIFC.Model;
 using ThMEPEngineCore.IO.JSON;
+using System.Collections.Generic;
 
-namespace ThMEPIFC.Service
+namespace ThMEPTCH.Services
 {
     public class ThIfcStoreyParseTool
     {

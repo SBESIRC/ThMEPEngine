@@ -8,10 +8,10 @@ using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using ThMEPIFC.Model;
 using Autodesk.AutoCAD.EditorInput;
 using TianHua.Platform3D.UI.ViewModels;
 using Microsoft.Win32;
+using ThMEPTCH.Services;
 
 namespace Tianhua.Platform3D.UI.UI
 {

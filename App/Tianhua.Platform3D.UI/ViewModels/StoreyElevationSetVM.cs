@@ -3,9 +3,8 @@ using System.Linq;
 using System.Windows;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using ThMEPIFC.Model;
-using ThMEPIFC.Service;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPTCH.Services;
 
 namespace TianHua.Platform3D.UI.ViewModels
 {

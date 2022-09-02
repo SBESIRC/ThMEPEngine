@@ -134,6 +134,10 @@
       <Project>{0b054b6c-a6d2-4b89-b19f-e12fc2b3ccd3}</Project>
       <Name>ThMEPIFC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPTCH\ThMEPTCH.csproj">
+      <Project>{BA9B9213-0D44-4913-94C5-5DC6C0172B31}</Project>
+      <Name>ThMEPTCH</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HandyControl">

@@ -21,7 +21,7 @@ namespace ThMEPTCH.CAD
 
         public override bool IsBuildElement(Entity e)
         {
-            return e is BlockReference;
+            return !e.Is95PercentStructureElement() && e is BlockReference;
         }
 
         public override bool CheckLayerValid(Entity e)

@@ -27,7 +27,7 @@ namespace ThMEPTCH.CAD
 
         public override bool IsBuildElement(Entity e)
         {
-            return e is DBText;
+            return !e.Is95PercentStructureElement() && e is DBText;
         }
 
         public override bool CheckLayerValid(Entity e)

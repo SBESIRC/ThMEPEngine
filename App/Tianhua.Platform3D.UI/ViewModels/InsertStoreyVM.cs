@@ -3,7 +3,7 @@ using System.Linq;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using ThMEPIFC.Model;
+using ThMEPTCH.Services;
 
 namespace TianHua.Platform3D.UI.ViewModels
 {

@@ -64,14 +64,29 @@ namespace ThMEPTCH.Services
             }
         }
 
-        public ThTCHProject DWGToProject(bool isMemoryStory, bool railingToRegion)
+        private Dictionary<string, List<ThEditStoreyInfo>> GetStoreyJsonFile(string dwgFullName)
+        {
+            var path = Path.GetDirectoryName(dwgFullName);
+            var fileName = Path.GetFileNameWithoutExtension(dwgFullName);
+            var jsonPath = Path.Combine(path, fileName + ".StoreyInfo.json");
+            return ThIfcStoreyParseTool.DeSerialize(jsonPath);
+        }
+
+        public ThTCHProject DWGToProject(bool isMemoryStory, bool railingToRegion,bool isSelectFloor = false)
         {
             string prjId = "";
             string prjName = "测试项目";
+            var jsonConfig = new Dictionary<string, List<ThEditStoreyInfo>>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 prjName = Active.DocumentName;
                 prjId = Active.Document.UnmanagedObject.ToString();
+                jsonConfig =  GetStoreyJsonFile(Active.Document.Name);
+            }
+            if (jsonConfig.Count == 0)
+            {
+                Active.Database.GetEditor().WriteMessage("未找到项目文件对应的楼层配置，请检查。");
+                return null;
             }
             var thPrj = new ThTCHProject();
             thPrj.Uuid = prjId;
@@ -80,8 +95,12 @@ namespace ThMEPTCH.Services
             thSite.Uuid = prjId + "site";
             var thBuilding = new ThTCHBuilding();
             thBuilding.Uuid = prjId + "Building";
+            var floorOrigin = GetFloorBlockPolylines(isSelectFloor);
+            if(floorOrigin.Count < 1)
+            {
+                return null;
+            }
             LoadCustomElements();
-            var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
             var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities();
             InitFloorDBEntity(allEntitys, allDBEntitys);
@@ -173,7 +192,13 @@ namespace ThMEPTCH.Services
                 floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
             }
 
-            var floorData = GetBlockElevtionValue(floorOrigin);
+            var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
+            //var floorData = GetBlockElevtionValue(floorOrigin);
+            if(floorData.Count < 1)
+            {
+                Active.Database.GetEditor().WriteMessage("未能找到相对应的楼层数据信息，请检查。");
+                return null;
+            }
             var PreviousHeight = floorData.FirstOrDefault().Elevation;
             foreach (var floor in floorData)
             {
@@ -292,14 +317,21 @@ namespace ThMEPTCH.Services
             return result;
         }
 
-        public ThTCHProjectData DWGToProjectData(bool isMemoryStory, bool railingToRegion)
+        public ThTCHProjectData DWGToProjectData(bool isMemoryStory, bool railingToRegion, bool isSelectFloor = false)
         {
             string prjId = "";
             string prjName = "测试项目";
+            var jsonConfig = new Dictionary<string, List<ThEditStoreyInfo>>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 prjName = Active.DocumentName;
                 prjId = Active.Document.UnmanagedObject.ToString();
+                jsonConfig =  GetStoreyJsonFile(Active.Document.Name);
+            }
+            if (jsonConfig.Count == 0)
+            {
+                Active.Database.GetEditor().WriteMessage("未找到项目文件对应的楼层配置，请检查。");
+                return null;
             }
             var thPrj = new ThTCHProjectData();
             thPrj.Root = new ThTCHRootData()
@@ -314,8 +346,12 @@ namespace ThMEPTCH.Services
             var thTCHBuildingData = new ThTCHBuildingData();
             thTCHBuildingData.Root = new ThTCHRootData();
             thTCHBuildingData.Root.GlobalId = prjId + "Building";
+            var floorOrigin = GetFloorBlockPolylines(isSelectFloor);
+            if (floorOrigin.Count < 1)
+            {
+                return null;
+            }
             LoadCustomElements();
-            var floorOrigin = GetFloorBlockPolylines();
             var allEntitys = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
             var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities();
             InitFloorDBEntity(allEntitys, allDBEntitys);
@@ -390,7 +426,8 @@ namespace ThMEPTCH.Services
                 floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
             }
 
-            var floorData = GetBlockElevtionValue(floorOrigin);
+            //var floorData = GetBlockElevtionValue(floorOrigin);
+            var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
             foreach (var floor in floorData)
             {
                 var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
@@ -581,27 +618,55 @@ namespace ThMEPTCH.Services
             }
         }
 
-        private List<FloorBlock> GetFloorBlockPolylines()
+        private List<FloorBlock> GetFloorBlockPolylines(bool isSelectFloor)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var floorBlocks = new List<BlockReference>();
                 var originBlocks = new List<BlockReference>();
-                acdb.ModelSpace.OfType<BlockReference>()
-                    .Where(o => !o.BlockTableRecord.IsNull)
-                    .ForEach(o =>
+                if (isSelectFloor)
+                {
+                    //选择区域
+                    Active.Editor.WriteLine("\n请选择楼层块");
+                    var result = Active.Editor.GetSelection();
+                    if (result.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
                     {
-                        var name = ThMEPXRefService.OriginalFromXref(o.GetEffectiveName());
-                        if (name.ToLower().StartsWith("thape") && name.EndsWith("inner"))
+                        return new List<FloorBlock>();
+                    }
+                    foreach (ObjectId obj in result.Value.GetObjectIds())
+                    {
+                        Entity e = acdb.Element<Entity>(obj);
+                        if (e is BlockReference b && !b.BlockTableRecord.IsNull)
                         {
-                            floorBlocks.Add(o);
+                            var name = ThMEPXRefService.OriginalFromXref(b.GetEffectiveName());
+                            if (name.ToLower().StartsWith("thape") && name.EndsWith("inner"))
+                            {
+                                floorBlocks.Add(b);
+                            }
+                            else if (name == "BASEPOINT")
+                            {
+                                originBlocks.Add(b);
+                            }
                         }
-                        else if (name == "BASEPOINT")
+                    }
+                }
+                else
+                {
+                    acdb.ModelSpace.OfType<BlockReference>()
+                        .Where(o => !o.BlockTableRecord.IsNull)
+                        .ForEach(o =>
                         {
-                            originBlocks.Add(o);
-                        }
-                    });
-
+                            var name = ThMEPXRefService.OriginalFromXref(o.GetEffectiveName());
+                            if (name.ToLower().StartsWith("thape") && name.EndsWith("inner"))
+                            {
+                                floorBlocks.Add(o);
+                            }
+                            else if (name == "BASEPOINT")
+                            {
+                                originBlocks.Add(o);
+                            }
+                        });
+                }
                 var floorOrigins = new List<FloorBlock>();
                 foreach (var floor in floorBlocks)
                 {
@@ -719,6 +784,33 @@ namespace ThMEPTCH.Services
             //res.Add(new LevelElevtion { Num = 27, Elevtion = 84050, LevelHeight = 3150, FloorName = "BZ4" });
 
             return res;
+        }
+        
+        List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
+        {
+            var res = new Dictionary<int, LevelElevation>();
+            var storeyConfig = jsonConfigs.First().Value;//经过确认，暂时认为只有一栋楼不考虑多楼情况，支取First
+            foreach (var floor in floorBlocks)
+            {
+                var name = floor.FloorName;
+                var configs = storeyConfig.Where(o => o.PaperName.Equals(name));
+                configs.ForEach(config =>
+                {
+                    var heigth = double.Parse(config.Height);
+                    var storeyName = config.StoreyName;
+                    var elevation = config.Bottom_Elevation == "" ? 0 : double.Parse(config.Bottom_Elevation);
+                    var floorNum = CalculateFloorNumber(storeyName);
+                    res.Add(floorNum, new LevelElevation { Num = floorNum.ToString(), Elevation = elevation, LevelHeight = heigth, FloorName = name });
+                });
+            }
+            return res.OrderBy(o => o.Key).Select(o => o.Value).ToList();
+        }
+
+        int CalculateFloorNumber(string floorName)
+        {
+            bool IsBasement = false;
+            IsBasement = floorName[0] == 'B';
+            return IsBasement ? -1 : 1 * int.Parse(floorName.Replace("B", "").Replace("F", ""));
         }
         void InitFloorDBEntity(List<TArchEntity> allTArchEntitys, List<THStructureEntity> allDBEntitys)
         {
