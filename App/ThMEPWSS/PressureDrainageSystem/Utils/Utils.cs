@@ -114,7 +114,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         }
         public static bool IsIntersectedPipeLines(Line a, Line b)
         {
-            double tol = 20;
+            double tol = 80;
             double tol_parallel = 1000;
             var pt_on_a = a.GetClosestPointTo(b.StartPoint, false);
             var pt_on_b = b.GetClosestPointTo(pt_on_a, false);
