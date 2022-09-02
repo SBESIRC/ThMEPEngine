@@ -354,14 +354,17 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.Command
             U0 /= cnt;
             var DN = Tool.GetDN(U0, Ng);
             //var DN = PipeDiameterCompute();
+            if(DN!="")
+            {
+                var Position = insertPt.OffsetXY(9500 - 500, floorHeight * highestFloor + 925 + flag * 561);
+                var angle = 0;
 
-            var Position = insertPt.OffsetXY(9500-500, floorHeight * highestFloor +925 +flag * 561);
-            var angle = 0;
-            
-            var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
-            Position, new Scale3d(1, 1, 1), angle);
+                var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
+                Position, new Scale3d(1, 1, 1), angle);
 
-            objID.SetDynBlockValue("可见性", DN);
+                objID.SetDynBlockValue("可见性", DN);
+            }
+
         }
     }
 }

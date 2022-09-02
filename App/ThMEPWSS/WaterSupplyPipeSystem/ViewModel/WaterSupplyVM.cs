@@ -84,7 +84,32 @@ namespace ThMEPWSS.Diagram.ViewModel
                 int maxFloor = 1;
                 FloorNumList = ThWCompute.CreateFloorNumList(FloorNum,ref maxFloor);
                 MaxFloor = maxFloor;
-                FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
+
+                var areaSegs = acadDatabase.ModelSpace.OfType<Polyline>().Where(o => o.Layer == "AI-单元分割线").ToList();
+                if(areaSegs.Count()>0)
+                {
+                    FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements, areaSegs);
+                    int maxArea = 0;
+                    foreach(var floor in FloorAreaList)
+                    {
+                        if(floor.Count>maxArea)
+                        {
+                            maxArea = floor.Count;
+                        }
+                    }
+                    for(int i =0; i < FloorAreaList.Count;i++)
+                    {
+                        var cnt = FloorAreaList[i].Count;
+                        for(int j =0; j < maxArea-cnt;j++)
+                        {
+                            FloorAreaList[i].Add(new Point3dCollection());
+                        }
+                    }
+                }
+                else
+                {
+                    FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
+                }
 
                 var AreaNums = 0;
                 var roomBuilder = new ThRoomBuilderEngine();
