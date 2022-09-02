@@ -29,6 +29,12 @@
     <Compile Include="ThCuiAssemblyService.cs" />
     <Compile Include="ThPlatform3DCuiApp.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

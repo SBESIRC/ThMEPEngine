@@ -1,4 +1,7 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
+using System.Reflection;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
 
 namespace ThPlatform3DCui
 {
@@ -27,6 +30,13 @@ namespace ThPlatform3DCui
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+        }
+
+        [CommandMethod("TIANHUACAD", "TH3DVERSION", CommandFlags.Modal)]
+        public void TH3DVERSION()
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            Active.Editor.WriteLine("当前版本号：" + asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
         }
     }
 }
