@@ -67,16 +67,7 @@ namespace TianHua.Structure.WPF.UI
             {
                 cmd.Execute();
             }
-        }
-
-        [CommandMethod("TIANHUACAD", "THSMBT", CommandFlags.Modal)]
-        public void THSMBT()
-        {
-            using (var cmd = new ThStructurePlaneCmd())
-            {
-                cmd.Execute();
-            }
-        }
+        }        
 
         [CommandMethod("TIANHUACAD", "THTSDP", CommandFlags.Modal)]
         public void THTSDP()

@@ -30,6 +30,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThStructurePlaneCmd.cs" />
+    <Compile Include="Converter\EnumBooleanConverter.cs" />
     <Compile Include="EventMonitor\ObjectSelectEvent.cs" />
     <Compile Include="Platform3DUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -37,6 +39,16 @@
     <Compile Include="PropertyServices\ITHProperty.cs" />
     <Compile Include="PropertyServices\PropertyAttribute.cs" />
     <Compile Include="PropertyServices\PropertyService.cs" />
+    <Compile Include="StructurePlane\DrawingParameterSetModel.cs" />
+    <Compile Include="StructurePlane\DrawingParameterSetUI.xaml.cs">
+      <DependentUpon>DrawingParameterSetUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StructurePlane\DrawingParameterSetVM.cs" />
+    <Compile Include="StructurePlane\FileFormatSelectModel.cs" />
+    <Compile Include="StructurePlane\FileFormatSelectorUI.xaml.cs">
+      <DependentUpon>FileFormatSelectorUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StructurePlane\FileFormatSelectVM.cs" />
     <Compile Include="UI\BuildingStoreyTableUI.xaml.cs">
       <DependentUpon>BuildingStoreyTableUI.xaml</DependentUpon>
     </Compile>
@@ -64,6 +76,7 @@
     <Compile Include="UI\TextInputUI.xaml.cs">
       <DependentUpon>TextInputUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Validations\GreaterThanZeroRule.cs" />
     <Compile Include="ViewModels\EditStoreyVM.cs" />
     <Compile Include="ViewModels\FunctionTabItem.cs" />
     <Compile Include="ViewModels\InitStoreyVM.cs" />
@@ -76,6 +89,14 @@
     <Compile Include="ViewModels\TextInputVM.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="StructurePlane\DrawingParameterSetUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="StructurePlane\FileFormatSelectorUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\BuildingStoreyTableUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -137,6 +158,10 @@
     <ProjectReference Include="..\ThMEPTCH\ThMEPTCH.csproj">
       <Project>{BA9B9213-0D44-4913-94C5-5DC6C0172B31}</Project>
       <Name>ThMEPTCH</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThPlatform3D\ThPlatform3D.csproj">
+      <Project>{b3c054d6-679a-49c4-9902-cadccf20d5f6}</Project>
+      <Name>ThPlatform3D</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

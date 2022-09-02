@@ -1,6 +1,6 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.Runtime;
+﻿using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
+using Tianhua.Platform3D.UI.Command;
 using Tianhua.Platform3D.UI.EventMonitor;
 using Tianhua.Platform3D.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -45,6 +45,16 @@ namespace Tianhua.Platform3D.UI
             mainPaletteSet.DockEnabled = DockSides.Left;
             mainPaletteSet.Dock = DockSides.Left;
         }
+
+        [CommandMethod("TIANHUACAD", "THSMBTUI", CommandFlags.Modal)]
+        public void THSMBTUI()
+        {
+            using (var cmd = new ThStructurePlaneCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         #region 平台CAD相关事件
         private void PlatformAddEvents() 
         {
