@@ -114,33 +114,84 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
         /// <param name="roomList">近原点</param>
         /// <param name="roomSuggest">远端，需要先trans，做完reset方便之后update和插入</param>
         /// <returns></returns>
+        //public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest, ThMEPOriginTransformer transformer)
+        //{
+        //    var roomSuggestDict = new Dictionary<Polyline, BlockReference>();
+        //    foreach (var room in roomList)
+        //    {
+        //        roomSuggestDict.Add(room.RoomBoundary, null);
+        //        var roomCenter = room.RoomBoundary.GetCenter();
+        //        var suggestInRoom = roomSuggest.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
+        //        if (suggestInRoom.Any())
+        //        {
+        //            var suggest = suggestInRoom.OrderBy(x => x.Position.DistanceTo(roomCenter)).First();
+        //            roomSuggestDict[room.RoomBoundary] = suggest;
+        //        }
+        //        else
+        //        {
+        //            var suggestInOriRoom = roomSuggest.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
+        //            if (suggestInOriRoom.Any())
+        //            {
+        //                var minDist = 2000.0;
+        //                foreach (var suggest in suggestInOriRoom)
+        //                {
+        //                    var dist = suggest.Position.DistanceTo(roomCenter);
+        //                    if (dist <= minDist)
+        //                    {
+        //                        minDist = dist;
+        //                        roomSuggestDict[room.RoomBoundary] = suggest;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return roomSuggestDict;
+
+        //}
+
+
         public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest, ThMEPOriginTransformer transformer)
         {
             var roomSuggestDict = new Dictionary<Polyline, BlockReference>();
+            var suggestListClone = new List<BlockReference>();
+            var roomSearchOriginal = new List<ThFloorHeatingRoom>();
+
+            suggestListClone.AddRange(roomSuggest);
+
             foreach (var room in roomList)
             {
                 roomSuggestDict.Add(room.RoomBoundary, null);
                 var roomCenter = room.RoomBoundary.GetCenter();
-                var suggestInRoom = roomSuggest.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
+                var suggestInRoom = suggestListClone.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
                 if (suggestInRoom.Any())
                 {
                     var suggest = suggestInRoom.OrderBy(x => x.Position.DistanceTo(roomCenter)).First();
                     roomSuggestDict[room.RoomBoundary] = suggest;
+
                 }
                 else
                 {
-                    var suggestInOriRoom = roomSuggest.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
-                    if (suggestInOriRoom.Any())
+                    roomSearchOriginal.Add(room);
+                }
+
+            }
+
+            suggestListClone = suggestListClone.Except(roomSuggestDict.Select(x => x.Value)).ToList();
+
+            foreach (var room in roomSearchOriginal)
+            {
+                var suggestInOriRoom = suggestListClone.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
+                var roomCenter = room.RoomBoundary.GetCenter();
+                if (suggestInOriRoom.Any())
+                {
+                    var minDist = 2000.0;
+                    foreach (var suggest in suggestInOriRoom)
                     {
-                        var minDist = 2000.0;
-                        foreach (var suggest in suggestInOriRoom)
+                        var dist = suggest.Position.DistanceTo(roomCenter);
+                        if (dist <= minDist)
                         {
-                            var dist = suggest.Position.DistanceTo(roomCenter);
-                            if (dist <= minDist)
-                            {
-                                minDist = dist;
-                                roomSuggestDict[room.RoomBoundary] = suggest;
-                            }
+                            minDist = dist;
+                            roomSuggestDict[room.RoomBoundary] = suggest;
                         }
                     }
                 }
@@ -148,6 +199,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             return roomSuggestDict;
 
         }
+
+
 
         public static List<BlockReference> GetRoomSuggestData(Database database)
         {

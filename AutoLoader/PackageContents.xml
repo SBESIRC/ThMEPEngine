@@ -316,6 +316,7 @@
                 <Command Local="THLPZ" Global="THLPZ" />
                 <Command Local="THFJKX2" Global="THFJKX2" />
                 <Command Local="THKXBD" Global="THKXBD" />
+                <Command Local="THEROC" Global="THEROC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -327,6 +328,7 @@
                 <Command Local="THLPZ" Global="THLPZ" />
                 <Command Local="THFJKX2" Global="THFJKX2" />
                 <Command Local="THKXBD" Global="THKXBD" />
+                <Command Local="THEROC" Global="THEROC" />
             </Commands>
         </ComponentEntry>
     </Components>

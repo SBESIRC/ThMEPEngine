@@ -148,6 +148,7 @@
     <Compile Include="FloorHeatingCoil\Service\LineStringEx.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCoilInsertService.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCoilUtilServices.cs" />
+    <Compile Include="FloorHeatingCoil\Service\ThGeomUtil.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThMEPHVACCommonUtils.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThSelectFrameUtil.cs" />
     <Compile Include="FloorHeatingCoil\ThFloorHeatingCommon.cs" />

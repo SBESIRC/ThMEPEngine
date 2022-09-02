@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using ThCADExtension;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Service
 {
@@ -72,6 +73,31 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
 
             return i;
+        }
+
+        public static Polyline ProcessFrame(Polyline frame, int simplifyTol)
+        {
+            Polyline nFrame = null;
+            Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
+            if (nFrameNormal.Area > 10)
+            {
+                nFrameNormal = nFrameNormal.DPSimplify(simplifyTol);
+                nFrame = nFrameNormal;
+            }
+            return nFrame;
+        }
+
+        public static MPolygon ProcessMpoly(MPolygon mFrame, int simplifyTol)
+        {
+            var shell = mFrame.Shell();
+            var holes = mFrame.Holes();
+            shell = ProcessFrame(shell, simplifyTol);
+
+            holes = holes.Select(x => ProcessFrame(x, simplifyTol)).ToList();
+            var curve = holes.OfType<Curve>().ToList();
+
+            var mFrameR = ThMPolygonTool.CreateMPolygon(shell, curve);
+            return mFrameR;
         }
     }
 }

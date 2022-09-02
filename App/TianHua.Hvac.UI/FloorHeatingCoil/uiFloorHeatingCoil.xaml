@@ -7,7 +7,8 @@
              mc:Ignorable="d"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              Title="地暖盘管布置"
-             Width="600"
+             d:DesignHeight="450" d:DesignWidth="450"
+             WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
              Closing="window_Closing">
 
     <Window.Resources>
@@ -15,254 +16,148 @@
             <local:TrueFalseConverter x:Key="TrueFalseConverter"/>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="10 10 10 0">
+    <Grid Margin="10 10 10 10">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5*"/>
-            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="55*"/>
+            <ColumnDefinition Width="45*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" ></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Column="0">
+        <StackPanel Grid.Column="0" Margin="0 0 5 0">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" >
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column ="0" Content="土建前置条件："/>
-                        <cus:ImageButton Grid.Column ="1"  Margin="0 0 20 0"  Content="插入示例"/>
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="1" Content="1.房间和门框线"/>
-                <StackPanel Grid.Row="2">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column ="0">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" ></RowDefinition>
-                                    <RowDefinition Height="auto" ></RowDefinition>
-                                    <RowDefinition Height="auto" ></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <cus:ImageButton Grid.Row="0" Margin="20 0 30 10" Content="自动提取" Command="{Binding PickRoomOutlineCmd}"/>
-                                <cus:ImageButton Grid.Row="1" Margin="20 0 30 10" Content="绘房间" Command="{Binding DrawRoomOutlineCmd}" />
-                                <cus:ImageButton Grid.Row="2" Margin="20 0 30 0" Content="绘门" Command="{Binding DrawDoorOutlineCmd}"/>
-                            </Grid>
-                        </StackPanel>
-                        <cus:ImageButton Grid.Column="1" Margin="0 0 20 0" Content="检查连通性" Command="{Binding CheckRoomConnectivityCmd}" />
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="3" Content="2.障碍物框线"/>
-                <StackPanel Grid.Row="4">
-                    <Grid>
-                        <Grid.ColumnDefinitions >
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" ></RowDefinition>
-                            <RowDefinition Height="auto" ></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Label Grid.Column="0" Grid.Row="0" Margin="0 0 0 10" Content="1）图层图块配置"/>
-                        <cus:ImageButton Grid.Column="1" Grid.Row="0" Margin="0 0 20 10" Content="设置"/>
-                        <Label Grid.Column="0" Grid.Row="1"  Content="2）手绘框线"/>
-                        <cus:ImageButton Grid.Column="1" Grid.Row="1" Margin="0 0 20 0" Content="绘制" Command="{Binding DrawObstacleCmd}"/>
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="5" Content="参数指定"/>
-                <Label Grid.Row="6" Content="1.放置集分水器"/>
-                <StackPanel Grid.Row="7">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column ="0">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" ></RowDefinition>
-                                    <RowDefinition Height="auto" ></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" >
-                                    <Label Content="回路数：   "/>
-                                    <!--<cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding RouteNum,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>-->
-                                    <ComboBox Width="50"  SelectedItem="{Binding RouteNum,Mode=TwoWay}"
-                                                          ItemsSource="{Binding RouteNumList,Mode=OneWay}">
-                                    </ComboBox>
-                                    <Label Content="路"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                        <cus:ImageButton Grid.Column="1" Margin="0 0 20 0" Content="插入" Command="{Binding InsertWaterSeparatorCmd}"/>
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="8" Content="2.卫生间散热器(可无)"/>
-                <StackPanel IsEnabled="False" Grid.Row="9">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel IsEnabled="False" Grid.Column ="0" Orientation="Horizontal" >
-                            <Label Content="宽度：      " />
-                            <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" ></cus:InputTextBox>
-                            <Label Content="mm"/>
-                        </StackPanel>
-                        <cus:ImageButton Margin="0 0 20 0" Grid.Column ="1" Content="插入"/>
-                    </Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock  Grid.Row="0" Grid.Column ="0" Grid.ColumnSpan="2" Text ="土建前置条件："/>
+                <Button IsEnabled ="False" Grid.Row="0" Grid.Column ="2" Margin="0 3"  Content="插入示例"/>
+                <TextBlock Grid.Row="1" Grid.Column ="0" Grid.ColumnSpan="3" Text="1.房间和门框线"/>
 
-                </StackPanel>
-                <StackPanel Grid.Row="10">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column ="0" Content="3.伸缩缝（分割房间用）"/>
-                        <cus:ImageButton Grid.Column ="1" Margin="0 0 20 0" Content="绘制" Command="{Binding DrawRoomSeparatorCmd}"/>
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="11" Content="各区域盘管间距指定（可无）"/>
-                <StackPanel Grid.Row="12">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="4*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column ="0" Orientation="Horizontal" >
-                            <Label Content="盘管间距："/>
-                            <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDist,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
-                            <Label Content="mm"/>
-                        </StackPanel>
-                        <cus:ImageButton Grid.Column ="1" Margin="0 0 20 0" Content="插入" Command="{Binding InsertSuggestBlkCmd}"/>
-                    </Grid>
+                <Button Grid.Row="2" Grid.Column ="0" Grid.ColumnSpan="2" Margin="30 3" Content="自动提取" Command="{Binding PickRoomOutlineCmd}"/>
+                <Button Grid.Row="3" Grid.Column ="0" Grid.ColumnSpan="2" Margin="30 3" Content="绘房间" Command="{Binding DrawRoomOutlineCmd}" />
+                <Button Grid.Row="4" Grid.Column ="0" Grid.ColumnSpan="2" Margin="30 3" Content="绘门" Command="{Binding DrawDoorOutlineCmd}"/>
+                <Button Grid.Row="2" Grid.Column="2" Grid.RowSpan  ="3" Margin="0 3" Content="检查连通性" Command="{Binding CheckRoomConnectivityCmd}" />
 
+                <TextBlock Grid.Row="5" Grid.ColumnSpan="3" Text="2.障碍物框线"/>
+                <TextBlock Grid.Row="6" Grid.Column="0"  Grid.ColumnSpan="2" Text="1）图层图块配置"/>
+                <Button IsEnabled ="False" Grid.Row="6" Grid.Column="2" Margin="0 3" Content="设置"/>
+                <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="2）手绘框线"/>
+                <Button Grid.Row="7"  Grid.Column="2" Margin="0 3"  Content="绘制" Command="{Binding DrawObstacleCmd}"/>
+                <TextBlock Grid.Row="8"  Grid.ColumnSpan="3" Text="参数指定"/>
+                <TextBlock Grid.Row="9"  Grid.ColumnSpan="3" Text="1.放置集分水器"/>
+
+                <TextBlock  Grid.Row="10" Grid.Column="0" Text="回路数："/>
+                <StackPanel Grid.Row="10" Grid.Column="1"  Orientation="Horizontal" >
+                    <ComboBox Width="50"  SelectedItem="{Binding RouteNum,Mode=TwoWay}"
+                          ItemsSource="{Binding RouteNumList,Mode=OneWay}">
+                    </ComboBox>
+                    <TextBlock Text="路"/>
                 </StackPanel>
-                <StackPanel Grid.Row="13" Orientation="Horizontal">
-                    <Label Content="缺省间距："/>
-                    <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDistDefualt,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
-                    <Label Content="mm"/>
+                <Button Grid.Row="10" Grid.Column="2" Margin="0 3"  Content="插入" Command="{Binding InsertWaterSeparatorCmd}"/>
+
+                <TextBlock Grid.Row="11" Grid.ColumnSpan="3" Text="2.卫生间散热器(可无)"/>
+                <TextBlock IsEnabled="False"  Grid.Row="12" Grid.Column="0"  Text="宽度：" />
+                <StackPanel IsEnabled="False" Grid.Row="12" Grid.Column="1"  Orientation="Horizontal" >
+                    <cus:InputTextBox  Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" ></cus:InputTextBox>
+                    <TextBlock Text="mm"/>
+                </StackPanel>
+                <Button IsEnabled="False" Grid.Row="12" Grid.Column ="2" Margin="0 3" Content="插入"/>
+
+                <TextBlock Grid.Row="13" Grid.Column ="0" Grid.ColumnSpan="2" Text="3.伸缩缝（分割房间用）"/>
+                <Button Grid.Row="13"  Grid.Column ="2" Margin="0 3"  Content="绘制" Command="{Binding DrawRoomSeparatorCmd}"/>
+
+                <TextBlock Grid.Row="14" Grid.ColumnSpan="3" Text="各区域盘管间距指定（可无）"/>
+
+                <TextBlock Grid.Row="15" Grid.Column ="0" Text="盘管间距："/>
+                <StackPanel Grid.Row="15" Grid.Column="1"  Orientation="Horizontal" >
+                    <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDist,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+                    <TextBlock  Text="mm"/>
+                </StackPanel>
+                <Button Grid.Row="15" Grid.Column ="2" Margin="0 3" Content="插入" Command="{Binding InsertSuggestBlkCmd}"/>
+
+                <TextBlock Grid.Row="16" Grid.Column ="0" Text="缺省间距："/>
+                <StackPanel Grid.Row="16" Grid.Column="1"  Orientation="Horizontal" >
+                    <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDistDefualt,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+                    <TextBlock Text="mm"/>
                 </StackPanel>
             </Grid>
 
         </StackPanel>
-        <StackPanel Grid.Column="1" >
+        <StackPanel Grid.Column="1"  Margin="5 0 0 0" >
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
-                    <RowDefinition Height="auto" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
+                    <RowDefinition Height="24" ></RowDefinition>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
-                            <ColumnDefinition Width="6*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="5.后台参数配置："/>
-                        <cus:ImageButton  Grid.Column="1" Content="配置"/>
-                    </Grid>
-                </StackPanel>
-                <!--<Label Grid.Row="1" Content="6.生成方式选择："/>
-                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                    <RadioButton GroupName="rbProcessStep" Content="纯自动"/>
-                    <RadioButton GroupName="rbProcessStep" Content="分布生成"/>
-                </StackPanel>-->
-                <Label Grid.Row="1" Content="回路分配模式："/>
-                <StackPanel Grid.Row="2" >
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
-                            <ColumnDefinition Width="6*"/>
-                        </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" GroupName="rbDistributionMode" Content="公区优先" IsChecked="{Binding PublicRegionConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}" />
-                        <RadioButton Grid.Column="1" GroupName="rbDistributionMode" Content="平衡优先" IsChecked="{Binding PublicRegionConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}" />
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="3" Content="是否考虑主要功能房间独立回路："/>
-                <StackPanel Grid.Row="4">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
-                            <ColumnDefinition Width="6*"/>
-                        </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" GroupName="rbDistributionRoom" Content="是" IsChecked="{Binding IndependentRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
-                        <RadioButton Grid.Column="1" GroupName="rbDistributionRoom" Content="否" IsChecked="{Binding IndependentRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="5" Content="附属房间是否能跨越主房间和别的主房间同回路："/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="5*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="5.后台参数配置："/>
+                <Button IsEnabled ="False" Grid.Row="0" Grid.Column="1" Margin="0 3 50 3" Content="配置"/>
+
+                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="回路分配模式："/>
+                <RadioButton Grid.Row="2" Grid.Column="0" GroupName="rbDistributionMode" Content="公区优先" IsChecked="{Binding PublicRegionConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}" />
+                <RadioButton Grid.Row="2" Grid.Column="1" GroupName="rbDistributionMode" Content="平衡优先" IsChecked="{Binding PublicRegionConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}" />
+
+                <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="是否考虑主要功能房间独立回路："/>
+                <RadioButton Grid.Row="4" Grid.Column="0" GroupName="rbDistributionRoom" Content="是" IsChecked="{Binding IndependentRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+                <RadioButton Grid.Row="4" Grid.Column="1" GroupName="rbDistributionRoom" Content="否" IsChecked="{Binding IndependentRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+
+                <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Text="附属房间是否能跨越主房间和别的主房间同回路：" TextWrapping = "Wrap" VerticalAlignment="Bottom"  />
                 <!--这里和输入参数TF是反着的：能跨越主房间=没有限制 不能跨越主房间=有限制-->
-                <StackPanel Grid.Row="6">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
-                            <ColumnDefinition Width="6*"/>
-                        </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" GroupName="rbDistributionSubCrossMainRoom" Content="是" IsChecked="{Binding AuxiliaryRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
-                        <RadioButton Grid.Column="1" GroupName="rbDistributionSubCrossMainRoom" Content="否" IsChecked="{Binding AuxiliaryRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
-                    </Grid>
+                <RadioButton Grid.Row="6" Grid.Column="0" GroupName="rbDistributionSubCrossMainRoom" Content="是" IsChecked="{Binding AuxiliaryRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+                <RadioButton Grid.Row="6" Grid.Column="1" GroupName="rbDistributionSubCrossMainRoom" Content="否" IsChecked="{Binding AuxiliaryRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="最长回路限制："/>
+                <StackPanel  Grid.Row="7" Grid.Column="1" Orientation="Horizontal" >
+                    <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding TotalLenthConstraint,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                    <TextBlock Text="m"/>
                 </StackPanel>
-                <StackPanel Grid.Row="7">
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
-                            <ColumnDefinition Width="6*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Content="最长回路限制："/>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" >
-                            <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding TotalLenthConstraint,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
-                            <Label Content="m"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-                <Label Grid.Row="8" Content="生成集分水器所在房间管线逻辑："/>
-                <StackPanel Grid.Row="9" >
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
-                            <ColumnDefinition Width="6*"/>
-                        </Grid.ColumnDefinitions>
-                        <RadioButton Grid.Column="0" GroupName="rbWSConnectMode" Content="住宅模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
-                        <RadioButton Grid.Column="1" GroupName="rbWSConnectMode" Content="公建模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
-                    </Grid>
-                </StackPanel>
-                <cus:ImageButton  Grid.Row="10" Margin="20 10 20 10" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>
-                <cus:ImageButton Grid.Row="11" Margin="20 0 20 10" Content="生成地暖平面" Command="{Binding ShowRouteCmd}"/>
-                <StackPanel Grid.Row="12" Orientation="Horizontal">
-                    <Label Content="{Binding SelectFrame.Count }" ContentStringFormat="已选择房间数：{0}" />
-                    <cus:ImageButton Content="清除" Command="{Binding CleanSelectFrameCmd}"/>
-                </StackPanel>
+
+                <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Text="生成集分水器所在房间管线逻辑："/>
+                <RadioButton Grid.Row="9" Grid.Column="0" GroupName="rbWSConnectMode" Content="住宅模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+                <RadioButton Grid.Row="9" Grid.Column="1" GroupName="rbWSConnectMode" Content="公建模式" IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+
+                <Button Grid.Row="10" Grid.ColumnSpan="2" Margin="10 3" Content="分配回路" Command="{Binding DistributeRouteCmd}"/>
+                <Button Grid.Row="11" Grid.ColumnSpan="2" Margin="10 3" Content="生成地暖平面" Command="{Binding ShowRouteCmd}"/>
+
+                <Label Grid.Row="12"  Content="{Binding SelectFrame.Count }" ContentStringFormat="已选择房间数：{0}" />
+                <Button Grid.Row="12" Grid.Column="1" Margin="0 3 50 3"  Content="清除" Command="{Binding CleanSelectFrameCmd}"/>
+
             </Grid>
         </StackPanel>
     </Grid>

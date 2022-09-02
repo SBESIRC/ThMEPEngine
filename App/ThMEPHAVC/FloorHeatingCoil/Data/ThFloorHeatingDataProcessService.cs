@@ -25,7 +25,6 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 
-using ThMEPHVAC.Service;
 using ThMEPHVAC.FloorHeatingCoil.Model;
 using ThMEPHVAC.FloorHeatingCoil.Service;
 
@@ -79,6 +78,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             // Transform(ref selectFrames);
             ProjectOntoXYPlane();
             SelectObjInRoom(selectFrames);
+            CleanRoomBoundary();
             CleanSeparateLine();
             GenerateLineToRoomBoundary();
             var separateRooms = SeparateRoomWithLine();
@@ -557,6 +557,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             FurnitureObstacle.AddRange(tempFurnitureObstacle.Distinct());
             RoomSeparateLine.AddRange(tempRoomSeparatorLine.Distinct());
             RoomBoundary.AddRange(tempRoomBoundary.Distinct());
+        }
+
+        private void CleanRoomBoundary()
+        {
+            //RoomBoundary.ForEach(x => DrawUtils.ShowGeometry(x, "l0originalRoomBoundary"));
+            var roomBoundarySimplify = RoomBoundary.Select(x => ThGeomUtil.ProcessMpoly(x, 20)).ToList();
+            RoomBoundary.Clear();
+            RoomBoundary.AddRange(roomBoundarySimplify);
+            
         }
 
         private void PairRoomSetWithOriginalRoom()
