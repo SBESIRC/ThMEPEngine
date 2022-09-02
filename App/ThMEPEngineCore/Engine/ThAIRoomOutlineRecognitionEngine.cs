@@ -81,7 +81,8 @@ namespace ThMEPEngineCore.Engine
                 curves = roomSimplifer.Normalize(curves); // 处理狭长线
                 curves = roomSimplifer.MakeValid(curves); // 处理自交
                 curves = roomSimplifer.Simplify(curves);  // 处理简化线
-                curves = roomSimplifer.Filter(curves);
+                curves = roomSimplifer.Filter(curves);    // 过滤面积极小的线
+                curves = roomSimplifer.OverKill(curves);  // 去重
                 transformer.Reset(curves);
                 Elements.AddRange(curves.OfType<Polyline>().Select(o => ThIfcRoom.Create(o)));
                 var ellipseRoom = curves.OfType<Ellipse>().ToList().ToCollection();

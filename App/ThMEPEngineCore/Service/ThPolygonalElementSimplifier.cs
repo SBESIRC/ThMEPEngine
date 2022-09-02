@@ -11,6 +11,7 @@ namespace ThMEPEngineCore.Service
 {
     public class ThPolygonalElementSimplifier : ThBuildElementSimplifier
     {
+        public double SIMILARITYMEASURETOLERANCE = 0.99;
         public ThPolygonalElementSimplifier()
         {
             AREATOLERANCE = 1.0;
