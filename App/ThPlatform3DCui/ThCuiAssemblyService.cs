@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using ThCADExtension;
 
 namespace ThPlatform3DCui
 {
@@ -54,7 +55,7 @@ namespace ThPlatform3DCui
             {
                 // 从指定路径中装载
                 string filename = args.Name.Split(',')[0] + ".dll".ToLower();
-                return Assembly.LoadFrom(Path.Combine(Win64CommonPath(), filename));
+                return Assembly.LoadFrom(Path.Combine(ThBIMCommon.Win64CommonPath(), filename));
             }
             catch
             {
@@ -70,22 +71,6 @@ namespace ThPlatform3DCui
         public static void SubscribeAssemblyResolve()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-        }
-
-        private static string RootPath()
-        {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                @"Autodesk\ApplicationPlugins\ThPlatform3D.bundle");
-        }
-
-        private static string ContentsPath()
-        {
-            return Path.Combine(RootPath(), "Contents");
-        }
-
-        public static string Win64CommonPath()
-        {
-            return Path.Combine(ContentsPath(), "Win64", "Common");
         }
     }
 }
