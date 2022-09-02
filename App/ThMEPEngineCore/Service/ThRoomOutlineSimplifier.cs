@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.Service
             var bufferService = new ThNTSBufferService();
             firstObjs
                 .OfType<Entity>()
-                .Where(o => o is Polyline && o is MPolygon)
+                .Where(o => o is Polyline || o is MPolygon)
                 .ForEach(outerPolygon =>
                 {
                     if (!garbages.Contains(outerPolygon))
