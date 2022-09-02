@@ -58,7 +58,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             RawData singleRawdata = new RawData(roomSet);
             DataPreprocess dataPreprocess = new DataPreprocess(singleRawdata);
-            dataPreprocess.Pipeline();
+            dataPreprocess.PipelineA();
             RegionConnection = dataPreprocess.RegionConnection;
             MainRegionId = dataPreprocess.MainRegionId;
             RegionObbs = dataPreprocess.RegionObbs;
@@ -184,7 +184,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             List<int> indexList = new List<int>();
             for (int i = 0; i < RegionList.Count; i++) 
             {
-                if (RegionList[i].MainPipe!= null && RegionList[i].MainPipe.Count> 0 && RegionList[i].MainPipe[0] >= 1) {
+                if (RegionList[i].MainPipe!= null && RegionList[i].MainPipe.Count> 0 && RegionList[i].MainPipe[0] >= 0) {
                     indexList.Add(RegionList[i].MainPipe[0]);
                 }
             }
@@ -205,7 +205,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0)
+                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0 && RegionList[i].MainPipe[0] >= 0)
                 {
                     int mainPipeId = RegionList[i].MainPipe[0];
                     TmpPipeList[mainPipeId].DomainIdList.Add(i);
@@ -468,9 +468,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     RegionList[regionId].MainPipe[0] = i;
                 }
             }
-
-
-
 
 
             //记录管道

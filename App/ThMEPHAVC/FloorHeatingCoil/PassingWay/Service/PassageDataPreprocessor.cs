@@ -80,37 +80,49 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 // 计算入口方向
                 var pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_inputs[i].pin, points);
-                var next = (pre + 1) % points.Count;
-                if (Math.Abs(pipe_inputs[i].pin.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].in_buffer) < 1 ||
-                    Math.Abs(pipe_inputs[i].pin.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].in_buffer) < 1)
-                    pipe_inputs[i].in_near_wall = true;
-                var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
-                pipe_inputs[i].start_dir = (dir + 3) % 4;
+                int next = -1;
+                int dir = -10;
+                if (pre != -1)
+                {
+                    next = (pre + 1) % points.Count;
+                    if (Math.Abs(pipe_inputs[i].pin.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].in_buffer) < 1 ||
+                        Math.Abs(pipe_inputs[i].pin.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].in_buffer) < 1)
+                        pipe_inputs[i].in_near_wall = true;
+                    dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
+                    pipe_inputs[i].start_dir = (dir + 3) % 4;
+                }
                 // 计算出口方向
                 pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_inputs[i].pout, points);
-                next = (pre + 1) % points.Count;
-                if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) < 1 ||
-                    Math.Abs(pipe_inputs[i].pout.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].out_buffer) < 1)
-                    pipe_inputs[i].out_near_wall = true;
-                dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
-                pipe_inputs[i].end_dir = (dir + 1) % 4;
+                if (pre != -1)
+                {
+                    next = (pre + 1) % points.Count;
+                    if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) < 1 ||
+                        Math.Abs(pipe_inputs[i].pout.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].out_buffer) < 1)
+                        pipe_inputs[i].out_near_wall = true;
+                    dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
+                    pipe_inputs[i].end_dir = (dir + 1) % 4;
+                }
                 // 设置出口所在房间边的索引
                 pipe_inputs[i].end_offset = pre;
                 // 打印输入数据
                 PassageShowUtils.PrintMassage(i.ToString() + ":" + pipe_inputs[i].start_dir.ToString() + pipe_inputs[i].end_dir.ToString() +
-                                 "-" + (pipe_inputs[i].in_near_wall ? "T" : "F") + (pipe_inputs[i].out_near_wall ? "T" : "F") +
-                                 "-" + pipe_inputs[i].is_out_free);
+                                    "-" + (pipe_inputs[i].in_near_wall ? "T" : "F") + (pipe_inputs[i].out_near_wall ? "T" : "F") +
+                                    "-" + pipe_inputs[i].is_out_free);
+                
             }
             // 计算没有出口的主导管线方向
             if (!main_has_output)
             {
                 var pre = PassageWayUtils.GetSegIndexOnPolygon(main_pipe_input.pin, points);
-                var next = (pre + 1) % points.Count;
-                var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
-                main_pipe_input.start_dir = (dir + 3) % 4;
-                if (Math.Abs(main_pipe_input.pin.DistanceTo(points[pre]) - room_buffer - main_pipe_input.in_buffer) < 1 ||
-                    Math.Abs(main_pipe_input.pin.DistanceTo(points[next]) - room_buffer - main_pipe_input.in_buffer) < 1)
-                    main_pipe_input.in_near_wall = true;
+                if (pre != -1)
+                {
+                    var next = (pre + 1) % points.Count;
+                    var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
+                    main_pipe_input.start_dir = (dir + 3) % 4;
+                    if (Math.Abs(main_pipe_input.pin.DistanceTo(points[pre]) - room_buffer - main_pipe_input.in_buffer) < 1 ||
+                        Math.Abs(main_pipe_input.pin.DistanceTo(points[next]) - room_buffer - main_pipe_input.in_buffer) < 1)
+                        main_pipe_input.in_near_wall = true;
+                }
                 PassageShowUtils.PrintMassage("main:" + main_pipe_input.start_dir.ToString() + "-" + (main_pipe_input.in_near_wall ? "T" : "F"));
             }
         }

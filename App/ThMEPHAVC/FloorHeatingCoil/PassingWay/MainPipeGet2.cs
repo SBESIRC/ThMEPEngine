@@ -211,16 +211,20 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         public Polyline GetMainPipeArea(int mode,int isSmall)
         {
+            //容差
             double smallCoefficient = 1;
             if (isSmall == 1) smallCoefficient = 0.85;
 
+            //管道中心线
             List<Polyline> pipeInputs = new List<Polyline>();
             for (int i = 0; i < PipeList.Count; i++)
             {
                 pipeInputs.Add(PassageWayUtils.BuildPolyline(PipeList[i].poly));
             }
 
+
             // init region
+            //寻找可放置区域
             Polyline main_region = new Polyline();
             //region = region.Buffer(max_dw * 0.5).Cast<Polyline>().OrderByDescending(o => o.Area).First();
             if (pipeInputs.Count > 1)
@@ -233,10 +237,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 else
                     main_region = MainRegionCalculator.GetMainRegion(pipeInputs[main_index - 1], pipeInputs[main_index + 1], Room);
             }
+            DrawUtils.ShowGeometry(main_region, "l2OldMainArea", 6, lineWeightNum: 30);
 
+            //移除管道Buffer
             // init remove part
             DBObjectCollection rest0 = new DBObjectCollection();
-
             //rest.Add(shortest_way[main_index].Buffer(3));  //出口
             if (pipeInputs.Count > 1)
             {
@@ -255,6 +260,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         rest0.Add(PipeList[main_index + 1].Buffer(3*smallCoefficient));
                 }
             }
+            //移除主导管线管道Buffer
             // get rest
             if (mode == 0)
             {
@@ -264,7 +270,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
 
             rest0.OfType<Polyline>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l2Rest", 5, lineWeightNum: 30));
-            DrawUtils.ShowGeometry(main_region, "l2OldMainArea", 6, lineWeightNum: 30);
+           
 
             if (main_region.Area < 1000)
             {
@@ -274,6 +280,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
 
             var rest = main_region.Difference(rest0);
+
 
 
 

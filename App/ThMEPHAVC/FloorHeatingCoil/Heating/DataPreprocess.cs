@@ -25,6 +25,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
     class DataPreprocess
     {
         public RawData rawData1;
+        public List<Polyline> OldRegionObbs = new List<Polyline>();
         public List<Polyline> RegionObbs = new List<Polyline>();
         public List<Polyline> Door1Obbs = new List<Polyline>();
         public List<Polyline> Door2Obbs = new List<Polyline>();
@@ -80,6 +81,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //估算门与门之间的真实途经距离并保存
             EstimatedDoorToDoorDistance();
 
+            //处理散热器
+            if (Parameter.HaveRadiator)
+            {
+                RadiatiorProcess();
+            }
+
+
             //输出结果
             SaveResults();
         }
@@ -91,6 +99,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 Polyline pl = a.RoomBoundary;
                 RegionObbs.Add(pl);
+                OldRegionObbs.Add(a.OriginalBoundary);
             }
             ThCADCoreNTSSpatialIndex originalRegionIndex = new ThCADCoreNTSSpatialIndex(RegionObbs.ToCollection());
             ProcessedData.RegionIndex = originalRegionIndex;
@@ -121,6 +130,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Door2Obbs.Add(pl);
             }
             
+            //处理
+
 
             //建立空间索引
             
@@ -138,25 +149,39 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //寻找集水器所在的房间
         public int FindMainRegion()
         {
+            //判断是否读到集水器
+            if (rawData1.WaterSeparator == null) return 0 ;
+
             //处理集水器
-            if (rawData1.WaterSeparator.OBB == null) return 0 ;
-            Polyline waterPl = rawData1.WaterSeparator.OBB;
-            if (!waterPl.IsCCW()) waterPl.ReverseCurve();
-            for (int i = 0; i < waterPl.NumberOfVertices; i++) 
+            //Polyline waterPl = rawData1.WaterSeparator.OBB;
+            //if (!waterPl.IsCCW()) waterPl.ReverseCurve();
+            //for (int i = 0; i < waterPl.NumberOfVertices; i++) 
+            //{
+            //    Point3d pt0 = waterPl.GetPoint3dAt(i);
+            //    Point3d pt1 = waterPl.GetPoint3dAt((i + 1) % waterPl.NumberOfVertices);
+            //    Line thisLine = new Line(pt0, pt1);
+
+            //    if (thisLine.DistanceTo(rawData1.WaterSeparator.StartPts.Last(), false) < Parameter.SmallTolerance) 
+            //    {
+            //        WaterLine = thisLine;
+            //        Vector3d dir = pt1 - pt0;
+            //        WaterDir = new Vector3d(dir.Y, -dir.X, dir.Z).GetNormal();
+            //    }
+            //}
+
+            WaterDir = rawData1.WaterSeparator.DirLine.GetNormal();
+            Vector3d testVec = new Vector3d(-WaterDir.Y, WaterDir.X, 0);
+            if (testVec.DotProduct(rawData1.WaterSeparator.DirStartPt.GetNormal()) > 0.95)
             {
-                Point3d pt0 = waterPl.GetPoint3dAt(i);
-                Point3d pt1 = waterPl.GetPoint3dAt((i + 1) % waterPl.NumberOfVertices);
-                Line thisLine = new Line(pt0, pt1);
-
-                if (thisLine.DistanceTo(rawData1.WaterSeparator.StartPts.Last(), false) < Parameter.SmallTolerance) 
-                {
-                    WaterLine = thisLine;
-                    Vector3d dir = pt1 - pt0;
-                    WaterDir = new Vector3d(dir.Y, -dir.X, dir.Z).GetNormal();
-                }
+                WaterLine = new Line(rawData1.WaterSeparator.StartPts[0], rawData1.WaterSeparator.StartPts.Last());
+                ProcessedData.LeftToRight = false;
             }
-
-
+            else 
+            {
+                WaterLine = new Line(rawData1.WaterSeparator.StartPts.Last(), rawData1.WaterSeparator.StartPts[0]);
+                ProcessedData.LeftToRight = true;
+            }
+               
             int mainRegionId = -1;
 
             for (int i = 0;  i < this.RegionObbs.Count; i++)
@@ -199,6 +224,43 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
 
             return mainRegionId;
+        }
+
+        //处理散热器
+        public void RadiatiorProcess()
+        {
+            Point3d startPt0 = rawData1.BathRadiators[0].StartPts[0];
+            Point3d startPt1 = rawData1.BathRadiators[0].StartPts[1];
+            int i = 0;
+            for (i = 0; i < RegionList.Count; i++)
+            {
+                if (RegionList[i].OldPl.Contains(startPt0))
+                {
+                    ProcessedData.RadiatorRegion = i;
+                    break;
+                }
+            }
+
+            if (i == RegionList.Count)
+            {
+                Parameter.HaveRadiator = false;
+            }
+            else
+            {
+                ProcessedData.RadiatorPointList = rawData1.BathRadiators[0].StartPts;
+
+                Point3d center = startPt0 + (startPt1 - startPt0) * 0.5;
+                Point3d close = RegionList[ProcessedData.RadiatorRegion].OldPl.GetClosestPointTo(center, false);
+                //Vector3d nowDir = rawData1.BathRadiators[0].DirLine.GetNormal();
+                Vector3d dir = (close - center).GetNormal();
+                //if (dir.DotProduct(nowDir) > 0.8)
+                //{
+                //    ProcessedData.RadiatorDir = -nowDir;
+                //}
+                //else ProcessedData.RadiatorDir = nowDir;
+                ProcessedData.RadiatorDir = -dir;
+
+            }
         }
 
         public void RemoveObstacles()
@@ -528,10 +590,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //构造第一个Region
             regionIdQueue.Enqueue(MainRegionId);
             RegionList[MainRegionId] = new SingleRegion(regionCount, RegionObbs[MainRegionId], rawData1.Room[MainRegionId].SuggestDist);
+            RegionList[MainRegionId].OldPl = OldRegionObbs[MainRegionId];
             regionCount++;
             RegionList[MainRegionId].Level = 0;
             visited[MainRegionId] = 1;
             level[MainRegionId] = 0;
+            RegionList[MainRegionId].HaveEquipment = 1;
 
             //构造第一个Door
             Polyline zeroDoorObb = new Polyline();
@@ -566,6 +630,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         level[nextRegionId] = level[nowId] + 1;
 
                         RegionList[nextRegionId] = new SingleRegion(regionCount, RegionObbs[nextRegionId], rawData1.Room[nextRegionId].SuggestDist);
+                        RegionList[nextRegionId].OldPl = OldRegionObbs[nextRegionId];
+
                         regionCount++;
                         RegionList[nextRegionId].Level = level[nextRegionId];
                         SingleDoor newDoor = new SingleDoor(doorCount, RegionList[nowId], RegionList[nextRegionId], doorObb,type);
@@ -715,7 +781,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Point3d pt3 = upClearedPl.GetPoint3dAt((upLineIndex + 1) % upClearedPl.NumberOfVertices);
                 Line testLine = new Line(pt2, pt3);
 
-                if (pt0.DistanceTo(DoorList[i].DownFirst) < Parameter.SuggestDistanceWall * 1.5) 
+                if (pt0.DistanceTo(DoorList[i].DownFirst) < Parameter.SuggestDistanceWall * 1.2) 
                 {
                     Vector3d ex = pt0 - DoorList[i].DownFirst;
                     
@@ -726,7 +792,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         DoorList[i].UpSecond = newUp;
                     }
                 }
-                if (pt1.DistanceTo(DoorList[i].DownSecond) < Parameter.SuggestDistanceWall * 1.5)
+                if (pt1.DistanceTo(DoorList[i].DownSecond) < Parameter.SuggestDistanceWall * 1.2)
                 {
                     Vector3d ex = pt1 - DoorList[i].DownSecond;
                     Point3d newUp = DoorList[i].UpFirst + ex;
@@ -943,6 +1009,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public Line WaterSeparatorToDoorLine(ref Polyline regionObb) 
         {
+            //
             Line doorLine = new Line(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
             Point3d start = WaterLine.StartPoint;
             Point3d end = WaterLine.EndPoint;
@@ -952,7 +1019,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             DrawUtils.ShowGeometry(regionObb, "l3tmpRegionObb", 3, lineWeightNum: 30);
 
-            Line line0 = new Line(start- offset, start + offset);
+            Line line0 = new Line(start - offset, start + offset);
             Line line1 = new Line(end - offset, end + offset);
 
             //List<Point3d> doorFirstList = line0.Intersect(regionObb, Intersect.OnBothOperands).ToList();
@@ -989,8 +1056,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 doorLine = new Line(doorSecond + (start - end) ,doorSecond);
             }
+            Vector3d waterOffset = start - doorLine.StartPoint;
+            ProcessedData.WaterOffset = waterOffset;
 
             Polyline differArea = PolylineProcessService.CreateRectangle2(doorLine.StartPoint, doorLine.EndPoint, 5000);
+            DrawUtils.ShowGeometry(start, "l6starttest", 0);
             regionObb = regionObb.Difference(differArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
             PolylineProcessService.ClearPolyline(ref regionObb);
 
@@ -1010,19 +1080,55 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
 
             //doorLine = new Line(start, end);
+
+            return doorLine;
+        }
+
+        public Line WaterSeparatorToDoorLineBeside(ref Polyline regionObb) 
+        {
+            Line doorLine = new Line(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
+            Point3d start = WaterLine.StartPoint;
+            Point3d end = WaterLine.EndPoint;
+            Vector3d waterDir = WaterDir;
+
+            doorLine = new Line(start, end);
+            Polyline differArea = PolylineProcessService.CreateRectangle2(doorLine.StartPoint, doorLine.EndPoint, 100000);
+            regionObb = regionObb.Difference(differArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
+            PolylineProcessService.ClearPolyline(ref regionObb);
+
             return doorLine;
         }
 
         public void VirtualDoorProcess(SingleDoor sd) 
         {
-            Line downLine = WaterSeparatorToDoorLine(ref sd.DownstreamRegion.ClearedPl);
-            DrawUtils.ShowGeometry(downLine, "l1DoorLine", 3, lineWeightNum: 30);
+            Point3d start = WaterLine.StartPoint;
+            Point3d end = WaterLine.EndPoint;
+            Vector3d waterDir = WaterDir;
+            Polyline nowPl = sd.DownstreamRegion.ClearedPl;
+            Line downLine = new Line();
 
+            if (nowPl.Contains(start) && nowPl.Contains(end))
+            {
+                downLine = WaterSeparatorToDoorLineBeside(ref sd.DownstreamRegion.ClearedPl);
+            }
+            else
+            {
+                downLine = WaterSeparatorToDoorLine(ref sd.DownstreamRegion.ClearedPl);
+            }
+            ProcessedData.WaterDir = waterDir;
+            ProcessedData.WaterDirIndex = VectorProcessService.GetVecIndex(ProcessedData.WaterDir);
+            DrawUtils.ShowGeometry(downLine, "l1DoorLine", 3, lineWeightNum: 30);
             
             int index = 0;
             int reverse = 0;
             //FindPosition(downLine, sd.DownstreamRegion.ClearedPl, ref index, ref reverse);
             sd.DownLineIndex = index;
+
+            //集水器的start面朝右侧，原start-end是顺时针，作为出口应该正好相反，需要反一次。
+            //如果在函数WaterSeparatorToDoorLine内部没有反，那么后面反，如果反了，就不用再反了。
+            if ((downLine.EndPoint - downLine.StartPoint).GetNormal().DotProduct((end - start).GetNormal()) > 0.95) 
+                reverse = 1;
+            
             if (reverse == 1)
             {
                 sd.DownFirst = downLine.EndPoint;
@@ -1030,8 +1136,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
             else
             {
-                sd.DownFirst = downLine.StartPoint;
-                sd.DownSecond = downLine.EndPoint;
+                sd.DownFirst = downLine.StartPoint;   //这里其实反了一次了，所以不用再反了  
+                sd.DownSecond = downLine.EndPoint;    //原start == 现end == second
             }
         }
 
@@ -1241,6 +1347,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
         }
+
+        
 
         //保存结果
         public void SaveResults()

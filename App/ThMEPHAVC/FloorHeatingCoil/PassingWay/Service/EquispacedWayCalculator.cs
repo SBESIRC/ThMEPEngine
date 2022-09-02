@@ -23,13 +23,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
         Envelope env = null;
 
         public List<int> changed_index = new List<int>();
-        
+
         public EquispacedWayCalculator(
-            Polyline region, 
-            int main_index, 
-            double buffer, 
-            double room_buffer, 
-            List<PipeInput> pipe_inputs, 
+            Polyline region,
+            int main_index,
+            double buffer,
+            double room_buffer,
+            List<PipeInput> pipe_inputs,
             List<List<PipeSegment>> pipe_segments)
         {
             this.region = region;
@@ -128,12 +128,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 room_buffer = max_pw * 2;
             }
         }
-        List<Line> FindEquispacedSegment(int index, out List<int> idxs,out List<double> buffers)
+        List<Line> FindEquispacedSegment(int index, out List<int> idxs, out List<double> buffers)
         {
             List<Line> lines = new List<Line>();
             idxs = new List<int>();
             buffers = new List<double>();
-
             for (int i = 0; i < pipe_segments[index].Count; ++i)
             {
                 double axis = 0;
@@ -166,15 +165,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
                         else
                         {
-                            var out_axis= dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
-                            if (Math.Abs(axis - out_axis) > 10 && pipe_inputs[index].is_out_free == false)
+                            var out_axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
+                            if (Math.Abs(axis - out_axis) > 10)
                             {
-                                if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer) 
-                                    pipe_segments[index].Add(new PipeSegment(pipe_inputs[index].end_dir, pipe_inputs[index].out_buffer));
-                                else
-                                    axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
+                                var axis_point = dir % 2 == 0 ? new Point3d(pipe_inputs[index].pout.X, axis, 0) : new Point3d(axis, pipe_inputs[index].pout.Y, 0);
+                                if (pipe_inputs[index].is_out_free == false ||
+                                    !pipe_inputs[index].check(axis_point, pipe_segments[index][i].pw, room_buffer))
+                                {
+                                    if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer)
+                                        pipe_segments[index].Add(new PipeSegment(pipe_inputs[index].end_dir, pipe_inputs[index].out_buffer));
+                                    else
+                                        axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
+                                }
                             }
-
                         }
                         pipe_segments[index][i].equispaced = true;
                     }
@@ -227,7 +230,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             ret.Add(PassageWayUtils.BuildPolyline(lines.Last()));
             return ret;
         }
-        Line BuildLine(int dir,double axis)
+        Line BuildLine(int dir, double axis)
         {
             switch (dir)
             {

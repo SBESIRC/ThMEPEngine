@@ -373,6 +373,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             nowPipe.TotalLength = nowPipe.UpstreamLength + nowPipe.DownstreamLength;
 
 
+            //主房间判断
+            if (nowRegion.RegionType == 2) nowPipe.Independent = 1;
             //附属房间判断
             if (nowRegion.RegionType == 1)
             {
