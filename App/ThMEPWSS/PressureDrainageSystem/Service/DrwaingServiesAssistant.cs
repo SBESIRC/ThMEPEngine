@@ -199,7 +199,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         /// <param name="guidelines"></param>
         /// <param name="pt"></param>
-        public void CompareEachSystemUnit(List<List<Line>> guidelines, Point3d pt)
+        public void CompareEachSystemUnit(List<List<Line>> guidelines,List<Line> floorLines,double heightDisTofloorLine)
         {
             for (int i = 1; i < comparedEntitys.Count; i++)
             {
@@ -212,6 +212,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     bool same = IsSameSystemUnits(comparedEntitys[i], drainwellbrs[i], comparedEntitys[j], drainwellbrs[j]);
                     if (same)
                     {
+                        Point3d pt = floorLines[PipeLineSystemUnits[i].StartLayer].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(widthDisTofloorLineStartPt, -heightDisTofloorLine, 0)));
                         guidelines[j].Add(new Line(PipeLineSystemUnits[i].SameUnitsStartPt[0], pt));
                         guidelines.RemoveAt(i);
                         lineIdspump.RemoveAt(i);

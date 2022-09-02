@@ -140,8 +140,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         floorLine.TransformBy(Matrix3d.Displacement(new Vector3d(0, -floorLineSpace, 0)));
                         floorLines.Add(floorLine);
                     }
+                    var layerid = Modeldatas.FloorListDatas;
+                    var layername = "";
+                    if (i > 0)
+                    {
+                        layername = layerid[i - 1];
+                        layername = layername.Split('B').Last();
+                        if (!layername.Contains("M")) layername += "F";
+                    }
                     DBText bText = new DBText();
-                    string textstring = i == 0 ? "地库顶板" : "B" + i.ToString() + "F";
+                    string textstring = i == 0 ? "地库顶板" : "B" + layername;
                     DefinePropertiesOfCADDBTexts(bText, "W-NOTE", textstring, floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(textHeight, textHeight, 0))), textHeight);
                     bText.TransformBy(ucsmat);
                     bText.AddToCurrentSpace();
@@ -201,9 +209,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                Point3d ptloc = floorLines[0].StartPoint;//每一个排水单元绘制的起点
-                double heightDisTofloorLine = 590;//固定值        
-                ptloc = ptloc.TransformBy(Matrix3d.Displacement(new Vector3d(widthDisTofloorLineStartPt, -heightDisTofloorLine, 0)));
                 int effectiveUnitsCount = 0;//有效的排水系统单元数
                 if (Debug)
                 {
@@ -213,8 +218,17 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     catch (Exception ex) { }
                 }
+                var allfloorLines = new List<Line>(floorLines);
                 for (int i = 0; i < PipeLineSystemUnits.Count; i++)
                 {
+                    floorLines = new List<Line>(allfloorLines);
+                    for (int t = 0; t < PipeLineSystemUnits[i].StartLayer; t++)
+                    {
+                        floorLines.RemoveAt(t);
+                    }
+                    Point3d ptloc = floorLines[0].StartPoint;//每一个排水单元绘制的起点
+                    double heightDisTofloorLine = 590;//固定值        
+                    ptloc = ptloc.TransformBy(Matrix3d.Displacement(new Vector3d(widthDisTofloorLineStartPt, -heightDisTofloorLine, 0)));
                     try
                     {
                         int mxx = FindIndexStartVerticalPipe(PipeLineSystemUnits[i]);
@@ -324,7 +338,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 mark.TransformBy(Matrix3d.Displacement(Vector3d.YAxis * 200));
                                 entities.Add(mark);
                             }
-
+                            //layer_text添加一个字符用于比较和排序
+                            var layer_text = new DBText();
+                            DefinePropertiesOfCADDBTexts(layer_text, "0", "StartLayer:"+PipeLineSystemUnits[i].StartLayer.ToString(), new Point3d(), textHeight);
+                            entities.Add(layer_text);
                             entities.ForEach(o => comparedEntity.Add(o));
                             blocks.ForEach(o => comparedEntity.Add(o));
                             comparedEntitys.Add(comparedEntity);
@@ -342,6 +359,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         i--;
                     }
                 }
+                floorLines = allfloorLines;
                 return;
             }
         }
@@ -391,15 +409,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                 }
             }
-            Point3d pt = floorLines[0].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(widthDisTofloorLineStartPt, -heightDisTofloorLine, 0)));
+            
             List<List<Line>> guidelines = new();
             for (int i = 0; i < PipeLineSystemUnits.Count; i++)
             {
+                Point3d pt = floorLines[PipeLineSystemUnits[i].StartLayer].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(widthDisTofloorLineStartPt, -heightDisTofloorLine, 0)));
                 List<Line> lines = new List<Line>();
                 lines.Add(new Line(PipeLineSystemUnits[i].SameUnitsStartPt[0], pt));
                 guidelines.Add(lines);
             }
-            CompareEachSystemUnit(guidelines, pt);
+            CompareEachSystemUnit(guidelines, floorLines, heightDisTofloorLine);
             ProcessIdentifersInSameSystemUnits();
             for (int i = 0; i < identifiers.Count; i++)
             {
@@ -532,7 +551,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 double.TryParse(numstr, out num);
                                 serial += num / 10;
                             }
-                            break;
+                        }
+                        if (text.TextString.Contains("StartLayer"))
+                        {
+                            var split = text.TextString.Split(':').Last();
+                            var num=int.Parse(split);
+                            serial += num * 100;
                         }
                     }
                     DrawUnit unit = new DrawUnit(allEntities[i], allBlocks[i], testLines[i], ext, serial);
@@ -623,7 +647,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 for (int i = 0; i < floorLines.Count; i++)
                 {
                     floorLines[i].TransformBy(Matrix3d.Scaling((totalspacine + spacing + widthDisTofloorLineStartPt * 1.5) / floorLines[i].Length, floorLines[i].StartPoint));
-                    if (i > 0)
+                    if (false)
                     {
                         floorLines[i].AddToCurrentSpace();
                         DefinePropertiesOfCADObjects(floorLines[i], "W-NOTE");
@@ -639,8 +663,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 if (lin.Length == 1000) pts.Add(lin.StartPoint);
                             }
                         }
-                        var cc = (Curve)floorLines[0];
-                        if (pts.Count > 0)
+                        var cc = (Curve)floorLines[i];
+                        var points = pts.Cast<Point3d>().Where(p => floorLines[i].GetClosestPointTo(p, false).DistanceTo(p) < 0.1).ToList();
+                        pts = new Point3dCollection();
+                        points.ForEach(p => pts.Add(p));
+                        if (points.Count > 0)
                         {
                             var crvs = cc.GetSplitCurves(pts).Cast<Line>().ToList();
                             foreach (var e in crvs)
@@ -654,8 +681,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                         else
                         {
-                            DefinePropertiesOfCADObjects(floorLines[0], "W-NOTE");
-                            floorLines[0].AddToCurrentSpace();
+                            DefinePropertiesOfCADObjects(floorLines[i], "W-NOTE");
+                            floorLines[i].AddToCurrentSpace();
                         }
                     }
                 }
