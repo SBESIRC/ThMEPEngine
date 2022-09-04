@@ -8,5 +8,6 @@ message ThSUPolygon {
 message ThSUPolygonMesh {
     repeated ThTCHPoint3d points = 1;
     repeated ThSUPolygon polygons = 2;
+    repeated ThTCHVector3d normals = 3;
 }
 
