@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <DirectoryRef Id="DIR_Autoloader_Contents_Support">
+            <Component Id="CMP_Autoloader_PackageContents_Support_Structure_Plan_Path" Guid="{324C0C60-E91C-49E7-ACE2-5B55097A0313}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Structure_Plan_Path" Source="$(var.AutoloaderContentsPath)\Support\结构平面图.dwg" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Architecture_Template_Path" Guid="{061E0BF6-8740-455F-9DC8-D115C805DF47}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Architecture_Template_Path" Source="$(var.AutoloaderContentsPath)\Support\建筑平立剖图示意.dwg" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" Guid="{6C454254-2EA7-4EF8-B836-0BEBE5F7ECCA}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" Source="$(var.AutoloaderContentsPath)\Support\建筑门窗填充样式文件.dwg" KeyPath="yes" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsSupport">
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Structure_Plan_Path" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_Template_Path" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

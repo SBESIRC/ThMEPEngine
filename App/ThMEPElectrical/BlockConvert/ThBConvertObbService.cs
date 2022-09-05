@@ -15,7 +15,7 @@ namespace ThMEPElectrical.BlockConvert
     {
         public static Polyline BlockObb(AcadDatabase acadDatabase, ObjectId objectId, double scale)
         {
-            if (!objectId.Equals(ObjectId.Null))
+            if (!objectId.Equals(ObjectId.Null) && !objectId.IsErased)
             {
                 var block = acadDatabase.Element<BlockReference>(objectId, true);
                 var name = objectId.GetBlockName();

@@ -31,10 +31,7 @@ namespace ThMEPTCH.CAD
                             break;
                         case (DxfCode)10:
                             {
-                                var pt = (Point3d)tv.Value;
-                                door.BasePointX = pt.X;
-                                door.BasePointY = pt.Y;
-                                door.BasePointZ = pt.Z;
+                                door.BasePoint = (Point3d)tv.Value;
                             }
                             break;
                         case (DxfCode)40:
@@ -92,10 +89,7 @@ namespace ThMEPTCH.CAD
                             break;
                         case (DxfCode)10:
                             {
-                                var pt = (Point3d)tv.Value;
-                                window.BasePointX = pt.X;
-                                window.BasePointY = pt.Y;
-                                window.BasePointZ = pt.Z;
+                                window.BasePoint = (Point3d)tv.Value;
                             }
                             break;
                         case (DxfCode)40:
@@ -227,7 +221,7 @@ namespace ThMEPTCH.CAD
             {
                 return ThTCHDbCommon.DoorTypeOperationMapping[name];
             }
-            throw new NotSupportedException();
+            return DoorTypeOperationEnum.SWING;
         }
 
         private static WindowTypeEnum GetWindowType(TypedValue tv)

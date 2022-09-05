@@ -434,7 +434,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                 {
                     if (visirorDict.Any(c => c.Key.ToUpper().Equals(name.ToUpper())))
                         continue;
-                    visirorDict.Add(name,4);
+                    visirorDict.Add(name,2);
                 }
             }
         }

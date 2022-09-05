@@ -37,5 +37,21 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
             thLayoutOverflowTunnelCmd.SubExecute();
             this.ShowDialog();
         }
+
+        private void btnSewageFloorDrain_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+            ThLayoutSewageFloorDrainCmd thLayoutRainwaterInletCmd = new ThLayoutSewageFloorDrainCmd("W-DRAI-EQPM", "地漏平面");
+            thLayoutRainwaterInletCmd.SubExecute();
+            this.ShowDialog();
+        }
+
+        private void btnRainFloorDrain_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+            ThLayoutRainFloorDrainCmd thLayoutRainwaterInletCmd = new ThLayoutRainFloorDrainCmd("W-RAIN-EQPM", "地漏平面");
+            thLayoutRainwaterInletCmd.SubExecute();
+            this.ShowDialog();
+        }
     }
 }

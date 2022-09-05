@@ -59,6 +59,7 @@
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\CoordinateTransformation.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\FloorFramedSpliter.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\TangentPipeConvertion.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\TangentSymbMultiLeaderConvertion.cs" />
     <Compile Include="DrainageSystemAG\Models\StruParameters.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="DrainageADPrivate\Model\ThSaniterayTerminal.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADCommon.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADPrivateCmds.THHXDYZC.cs" />
+    <Compile Include="HydrantConnectPipe\Command\ThHydrantConnectPipeConnectCmd.cs" />
     <Compile Include="HydrantLayout\Data\ThHandleConflictService.cs" />
     <Compile Include="HydrantLayout\Data\ThCleanEntityService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantDoorExtractor.cs" />
@@ -215,7 +217,12 @@
     <Compile Include="Model\ThFireHydrant.cs" />
     <Compile Include="Model\ThPSPMParameter.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
+    <Compile Include="PressureDrainageSystem\DebugTools.cs" />
+    <Compile Include="Model\ThTCHPipeInfo.cs" />
     <Compile Include="PressureDrainageSystem\Service\DrwaingServiesAssistant.cs" />
+    <Compile Include="PressureDrainageSystem\Service\HorizontalPipeCollection.cs" />
+    <Compile Include="PressureDrainageSystem\Utils\BusinessDebug.cs" />
+    <Compile Include="PressureDrainageSystem\Utils\GeoExtension.cs" />
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmd.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmdEntrance.THPLBZ.cs" />

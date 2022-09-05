@@ -68,6 +68,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
                 originTransformer.Reset(x.route);
                 return new KeyValuePair<Point3d, Vector3d>(transPr, dir);
             }).ToList();
+            pipes.ForEach(x =>
+            {
+                if (x.originCircle != null)
+                {
+                    x.route = GeometryUtils.ShortenPolylineByCircle(x.route, new Circle(x.route.StartPoint, Vector3d.ZAxis, 75 * scale), true);
+                }
+            });
             InsertBlockService.InsertConnectPipe(pipes.Select(x => x.route).ToList(), ThWSSCommon.DraiLayerName, null);
             InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);

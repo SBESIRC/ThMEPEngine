@@ -13,7 +13,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         // 输入数据
         public Polyline region;
         public double buffer { get; set; } = 500;
-        public double room_buffer { get; set; } = 200;
+        public double room_buffer { get; set; } = 100;
         public List<PipeInput> pipe_inputs { get; set; } = new List<PipeInput>();
         public int main_index { get; set; } = -1;
         public int mode { get; set; } = 0;         // 0:正常模式/1:集水器模式
@@ -50,23 +50,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 pipe_inputs.Add(new PipeInput(pipe_in_list[i], pipe_out_list[i]));
                 pipe_inputs[i].passage_index = i;
             }
-            // 计算出入口方向
-            CalculateIODirection();
-            //// 计算推荐间距
-            //int count = 0;
-            //double max_pw = -1;
-            //for (int i = 0; i < pipe_inputs.Count; ++i)
-            //{
-            //    if (pipe_inputs[i].out_buffer > room_buffer && pipe_inputs[i].out_near_wall)
-            //    {
-            //        count++;
-            //        max_pw = Math.Max(max_pw, pipe_inputs[i].out_buffer);
-            //    }
-            //}
-            //this.buffer = count == 0 ? buffer : 4 * max_pw;
+            // 设置推荐间距
             this.buffer = buffer;
             // 设置距墙间距
             this.room_buffer = room_buffer;
+            // 计算出入口方向
+            CalculateIODirection();
             // 设置主导管线索引
             this.main_index = main_index;
             // 设置布置模式
@@ -80,42 +69,57 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 // 计算入口方向
                 var pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_inputs[i].pin, points);
-                var next = (pre + 1) % points.Count;
-                if (Math.Abs(pipe_inputs[i].pin.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].in_buffer) < 1 ||
-                    Math.Abs(pipe_inputs[i].pin.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].in_buffer) < 1)
-                    pipe_inputs[i].in_near_wall = true;
-                var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
-                pipe_inputs[i].start_dir = (dir + 3) % 4;
+                int next = -1;
+                int dir = -10;
+                if (pre != -1)
+                {
+                    next = (pre + 1) % points.Count;
+                    if (Math.Abs(pipe_inputs[i].pin.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].in_buffer) < 1 ||
+                        Math.Abs(pipe_inputs[i].pin.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].in_buffer) < 1)
+                        pipe_inputs[i].in_near_wall = true;
+                    dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
+                    pipe_inputs[i].start_dir = (dir + 3) % 4;
+                }
                 // 计算出口方向
                 pre = PassageWayUtils.GetSegIndexOnPolygon(pipe_inputs[i].pout, points);
-                next = (pre + 1) % points.Count;
-                if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) < 1 ||
-                    Math.Abs(pipe_inputs[i].pout.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].out_buffer) < 1)
-                    pipe_inputs[i].out_near_wall = true;
-                dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
-                pipe_inputs[i].end_dir = (dir + 1) % 4;
+                if (pre != -1)
+                {
+                    next = (pre + 1) % points.Count;
+                    if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) < 1 ||
+                        Math.Abs(pipe_inputs[i].pout.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].out_buffer) < 1)
+                        pipe_inputs[i].out_near_wall = true;
+                    dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
+                    pipe_inputs[i].end_dir = (dir + 1) % 4;
+                }
                 // 设置出口所在房间边的索引
                 pipe_inputs[i].end_offset = pre;
                 // 打印输入数据
                 PassageShowUtils.PrintMassage(i.ToString() + ":" + pipe_inputs[i].start_dir.ToString() + pipe_inputs[i].end_dir.ToString() +
-                                 "-" + (pipe_inputs[i].in_near_wall ? "T" : "F") + (pipe_inputs[i].out_near_wall ? "T" : "F") +
-                                 "-" + pipe_inputs[i].is_out_free);
+                                    "-" + (pipe_inputs[i].in_near_wall ? "T" : "F") + (pipe_inputs[i].out_near_wall ? "T" : "F") +
+                                    "-" + pipe_inputs[i].is_out_free);
+                
             }
             // 计算没有出口的主导管线方向
             if (!main_has_output)
             {
                 var pre = PassageWayUtils.GetSegIndexOnPolygon(main_pipe_input.pin, points);
-                var next = (pre + 1) % points.Count;
-                var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
-                main_pipe_input.start_dir = (dir + 3) % 4;
-                if (Math.Abs(main_pipe_input.pin.DistanceTo(points[pre]) - room_buffer - main_pipe_input.in_buffer) < 1 ||
-                    Math.Abs(main_pipe_input.pin.DistanceTo(points[next]) - room_buffer - main_pipe_input.in_buffer) < 1)
-                    main_pipe_input.in_near_wall = true;
+                if (pre != -1)
+                {
+                    var next = (pre + 1) % points.Count;
+                    var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
+                    main_pipe_input.start_dir = (dir + 3) % 4;
+                    if (Math.Abs(main_pipe_input.pin.DistanceTo(points[pre]) - room_buffer - main_pipe_input.in_buffer) < 1 ||
+                        Math.Abs(main_pipe_input.pin.DistanceTo(points[next]) - room_buffer - main_pipe_input.in_buffer) < 1)
+                        main_pipe_input.in_near_wall = true;
+                }
                 PassageShowUtils.PrintMassage("main:" + main_pipe_input.start_dir.ToString() + "-" + (main_pipe_input.in_near_wall ? "T" : "F"));
             }
         }
         int CheckMode(int mode)
         {
+            // 散热器房间
+            if (main_has_output && pipe_inputs.Count == 1)
+                return 2;
             // 用户指定按照集水器模式布置
             if (mode == 1) 
                 return 1;

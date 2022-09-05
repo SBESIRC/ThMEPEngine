@@ -24,16 +24,27 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.region = region;
             this.pipe_inputs = pipe_inputs;
 
+            check();
             indir = pipe_inputs[0].start_dir;
             outdir = pipe_inputs[0].end_dir;
+        }
+        public void check()
+        {
+            HashSet<int> end_dirs = new HashSet<int>();
+            foreach (var pipe_input in pipe_inputs)
+                end_dirs.Add(pipe_input.end_dir);
+            if (end_dirs.Count > 1)
+            {
+                //throw new NotSupportedException("住宅模式不支持含有多个门的输出。");
+                throw new NotSupportedException(ThFloorHeatingCommon.Error_privateOneDoor);
+            }
         }
         public void CalculatePipeline()
         {
             if (indir % 2 != outdir % 2)
                 CalculateDifferentIODirection();
-            else if (indir == outdir) 
+            else if (indir == outdir)
                 CalculateSameIODirection();
-
         }
         void CalculateDifferentIODirection()
         {
@@ -56,7 +67,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CalculateSameIODirection()
         {
-            for(int i = 0; i < pipe_inputs.Count; ++i)
+            for (int i = 0; i < pipe_inputs.Count; ++i)
             {
                 // calculate skeleton
                 List<Point3d> points = new List<Point3d>();

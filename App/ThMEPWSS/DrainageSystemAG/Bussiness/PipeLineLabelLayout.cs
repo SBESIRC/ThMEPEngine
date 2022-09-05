@@ -3,6 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
@@ -37,15 +39,19 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<RoomModel> _cretateFloorRooms;
         FloorFramed _createFloor;
         double _createFloorSpliteY;
-        public PipeLineLabelLayout(FloorFramed spliterfloor,double spliterY)
+        List<Polyline> _roomTypeSplitLines = new List<Polyline>();//楼层框定户型分隔线
+        Polyline _floorFramedBound { get; set; }
+        public PipeLineLabelLayout(FloorFramed spliterfloor, double spliterY, List<Polyline> roomTypeSplitLines)
         {
             _thisFloorPipes = new List<CreateBlockInfo>();
             _orderLabelPipes = new List<CreateBlockInfo>();
             _labelRoofDrains = new List<RoofPointInfo>();
             createBasicElements = new List<CreateBasicElement>();
             _obstacleEntities = new ObstacleEntities();
-            _pipeLabelText = new PipeLabelText(spliterfloor, spliterY);
+            _pipeLabelText = new PipeLabelText(spliterfloor, spliterY, roomTypeSplitLines);
             _cretateFloorRooms = new List<RoomModel>();
+            _roomTypeSplitLines = new List<Polyline>(roomTypeSplitLines);
+            _floorFramedBound = spliterfloor.outPolyline;
         }
         public void AddObstacleEntitys(List<Entity> entitys)
         {
@@ -118,24 +124,55 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
             var allPipeLabels = GetThisFloorAllLables();
-            for (int i = 0; i < floorSpaceX.Count - 1; i++)
+
+            //提取到属于该楼层框的户型分割线
+            _roomTypeSplitLines = _roomTypeSplitLines.Where(e => _floorFramedBound.Contains(ThCADExtension.ThCurveExtension.GetMidpoint(e)) || _floorFramedBound.IntersectWithEx(e).Count > 0).ToList();
+            if (_roomTypeSplitLines.Count >= 1)
             {
-                double minX = floorSpaceX[i];
-                double maxX = floorSpaceX[i + 1];
-                //获取该区域内的立管
-                var spacePipes = allPipeLabels.Where(c => c.BasePoint.X > minX && c.BasePoint.X < maxX).ToList();
-                if (spacePipes == null || spacePipes.Count < 1)
-                    continue;
-                var tmpBaseElements = createBasicElements;
-                var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
-                tmpBaseElements= createBasicElements.Except(tmpBaseElements).ToList();
-                if (null != addText && addText.Count > 0)
+                var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
+                for (int i = 0; i < floorSpceRegions.Count; i++)
                 {
-                    if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                    double minX = floorSpaceX[i];
+                    double maxX = floorSpaceX[i + 1];
+                    //获取该区域内的立管
+                    var spacePipes = allPipeLabels.Where(c => floorSpceRegions[i].Contains(c.BasePoint)).ToList();
+                    if (spacePipes == null || spacePipes.Count < 1)
+                        continue;
+                    var tmpBaseElements = createBasicElements;
+                    var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
+                    tmpBaseElements = createBasicElements.Except(tmpBaseElements).ToList();
+                    if (null != addText && addText.Count > 0)
                     {
-                        addText.ForEach(e => e.ConvertToTCHElement = true);
+                        if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                        {
+                            addText.ForEach(e => e.ConvertToTCHElement = true);
+                        }
+                        allTexts.AddRange(addText);
                     }
-                    allTexts.AddRange(addText);
+                }
+            }
+            else
+            {
+                //支持老版
+                for (int i = 0; i < floorSpaceX.Count - 1; i++)
+                {
+                    double minX = floorSpaceX[i];
+                    double maxX = floorSpaceX[i + 1];
+                    //获取该区域内的立管
+                    var spacePipes = allPipeLabels.Where(c => c.BasePoint.X > minX && c.BasePoint.X < maxX).ToList();
+                    if (spacePipes == null || spacePipes.Count < 1)
+                        continue;
+                    var tmpBaseElements = createBasicElements;
+                    var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
+                    tmpBaseElements = createBasicElements.Except(tmpBaseElements).ToList();
+                    if (null != addText && addText.Count > 0)
+                    {
+                        if (addText.Any(e => e.dbText.TextString.Contains("雨水斗")))
+                        {
+                            addText.ForEach(e => e.ConvertToTCHElement = true);
+                        }
+                        allTexts.AddRange(addText);
+                    }
                 }
             }
             if (createBasicElements.Count > 0)

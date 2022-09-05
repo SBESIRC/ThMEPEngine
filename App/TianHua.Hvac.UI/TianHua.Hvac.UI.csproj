@@ -87,6 +87,9 @@
     <Compile Include="FloorHeatingCoil\uiFloorHeatingCoil.xaml.cs">
       <DependentUpon>uiFloorHeatingCoil.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FloorHeatingCoil\uiFloorHeatingCoilSubSetting.xaml.cs">
+      <DependentUpon>uiFloorHeatingCoilSubSetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -347,6 +350,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="FloorHeatingCoil\uiFloorHeatingCoil.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FloorHeatingCoil\uiFloorHeatingCoilSubSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

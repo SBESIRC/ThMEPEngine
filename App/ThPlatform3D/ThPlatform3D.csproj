@@ -25,8 +25,118 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchitecturePlane\Print\ThAdjustWindowBlkYScaleService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThAEwallPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchElevationDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchPlanDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchPrintManager.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThArchSectionDrawingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThBeamPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThCommonPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThComponentBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorBlkConfigTable.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorMarkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorOutlinePrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThDoorStonePrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThElevationElementPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThHatchPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThImportDatabaseService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThKanXianPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThPlanMaterialMapConfig.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThPrintDrawingHeadService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThRailingPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThSectionMaterialMapConfig.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThSlabPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThTCHBlockMapConfig.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThTchDoorBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowBlkConfigTable.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowBlkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowMarkPrinter.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThWindowOutlinePrinter.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThAdjustTextBoundaryService.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThArchPlaneUtils.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThComponentOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorNumberCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorStoneCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThGeometryQuerier.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThNumberCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThWallThickReadService.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThWindowNumberCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThWindowOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\ThArchitectureGenerator.cs" />
+    <Compile Include="ArchitecturePlane\ThArchitecturePlaneCommon.cs" />
+    <Compile Include="Common\PlaneJsonConfig.cs" />
+    <Compile Include="Common\ThPlaneConfig.cs" />
+    <Compile Include="Common\ThPlanePrintParameter.cs" />
+    <Compile Include="Common\ThPlaneUtils.cs" />
+    <Compile Include="Common\ThPrintService.cs" />
+    <Compile Include="Common\ThSvgInput.cs" />
+    <Compile Include="Model\Printer\PrintConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThBeamTextBlkConverter.cs" />
+    <Compile Include="StructPlane\Print\ThColumnPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThHolePrinter.cs" />
+    <Compile Include="StructPlane\Print\ThShearwallPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThSlabAnnotationPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
+    <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThStairLineMarkPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThStruDrawingPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThStruPlanDrawingPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThStruWallColumnDrawingPrinter.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustBeamMarkPosService.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustDbTextRotationService.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustShortBeamLTypeService.cs" />
+    <Compile Include="StructPlane\Service\ThBeamLineCleaner.cs" />
+    <Compile Include="StructPlane\Service\ThBeamLineClipper.cs" />
+    <Compile Include="StructPlane\Service\ThBeamMarkCurveGrouper.cs" />
+    <Compile Include="StructPlane\Service\ThBeamMarkParseTool.cs" />
+    <Compile Include="StructPlane\Service\ThBuildStairSlabLineService.cs" />
+    <Compile Include="StructPlane\Service\ThColliearLineGrouper.cs" />
+    <Compile Include="StructPlane\Service\ThDoubleRowBeamMarkHandler.cs" />
+    <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
+    <Compile Include="StructPlane\Service\ThGeneratedBeamMarkFilter.cs" />
+    <Compile Include="StructPlane\Service\ThGeometryQuerier.cs" />
+    <Compile Include="StructPlane\Service\ThInsertBeamHandler.cs" />
+    <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
+    <Compile Include="StructPlane\Service\ThPrintDrawingHeadService.cs" />
+    <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
+    <Compile Include="StructPlane\Service\ThSlabFilter.cs" />
+    <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
+    <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
+    <Compile Include="StructPlane\Service\ThYdbToIfcConvertService.cs" />
+    <Compile Include="StructPlane\ThDrawingParameterConfig.cs" />
+    <Compile Include="StructPlane\ThStructurePlaneCommon.cs" />
+    <Compile Include="StructPlane\ThStructurePlaneGenerator.cs" />
     <Compile Include="ThPlatform3DApp.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
+      <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
+      <Name>ThDotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
+      <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
+      <Name>ThCADCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

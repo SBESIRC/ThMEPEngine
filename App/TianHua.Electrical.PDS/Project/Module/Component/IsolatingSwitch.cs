@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             ComponentType = ComponentType.QL;
 
-            var isolators = IsolatorConfiguration.isolatorInfos.Where(o => o.Poles == polesNum && o.Amps > calculateCurrent).ToList();
+            var isolators = IsolatorConfiguration.isolatorInfos.Where(o => o.Poles == polesNum && o.Amps >= calculateCurrent).ToList();
             if (isolators.Count == 0)
             {
                 throw new NotFoundComponentException("设备库内找不到对应规格的隔离开关");

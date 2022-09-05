@@ -58,7 +58,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             RawData singleRawdata = new RawData(roomSet);
             DataPreprocess dataPreprocess = new DataPreprocess(singleRawdata);
-            dataPreprocess.Pipeline();
+            dataPreprocess.PipelineA();
             RegionConnection = dataPreprocess.RegionConnection;
             MainRegionId = dataPreprocess.MainRegionId;
             RegionObbs = dataPreprocess.RegionObbs;
@@ -181,22 +181,47 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void CreateTmpPipeList()
         {
-            List<int> indexList = new List<int>();
-            for (int i = 0; i < RegionList.Count; i++) 
+
+            Dictionary<int, int> indexMap = new Dictionary<int, int>();
+            int num = 0;
+            for (int i = 0; i < RegionList.Count; i++)
             {
-                if (RegionList[i].MainPipe!= null && RegionList[i].MainPipe.Count> 0 && RegionList[i].MainPipe[0] >= 1) {
-                    indexList.Add(RegionList[i].MainPipe[0]);
+                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0 && RegionList[i].MainPipe[0] >= 0)
+                {
+                    if (!indexMap.ContainsKey(RegionList[i].MainPipe[0]))
+                    {
+                        indexMap.Add(RegionList[i].MainPipe[0], num);
+                        num++;
+                    }
                 }
             }
-            int maxIndex = indexList.FindByMax(x => x) + 1;
-            int minIndex = indexList.FindByMin(x => x);
 
-            for (int i = 0; i < RegionList.Count; i++) 
+            for (int i = 0; i < RegionList.Count; i++)
             {
-                if(RegionList[i].MainPipe!=null && RegionList[i].MainPipe.Count > 0)
-                RegionList[i].MainPipe[0] = RegionList[i].MainPipe[0] - minIndex;
+                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0 && RegionList[i].MainPipe[0] >= 0)
+                {
+                    RegionList[i].MainPipe[0] = indexMap[RegionList[i].MainPipe[0]];
+                }
             }
-            maxIndex = maxIndex - minIndex;
+            int maxIndex = num; 
+
+
+            //List<int> indexList = new List<int>();
+            //for (int i = 0; i < RegionList.Count; i++) 
+            //{
+            //    if (RegionList[i].MainPipe!= null && RegionList[i].MainPipe.Count> 0 && RegionList[i].MainPipe[0] >= 0) {
+            //        indexList.Add(RegionList[i].MainPipe[0]);
+            //    }
+            //}
+            //int maxIndex = indexList.FindByMax(x => x) + 1;
+            //int minIndex = indexList.FindByMin(x => x);
+
+            //for (int i = 0; i < RegionList.Count; i++) 
+            //{
+            //    if(RegionList[i].MainPipe!=null && RegionList[i].MainPipe.Count > 0)
+            //    RegionList[i].MainPipe[0] = RegionList[i].MainPipe[0] - minIndex;
+            //}
+            //maxIndex = maxIndex - minIndex;
 
             for (int i = 0; i < maxIndex ; i++)
             {
@@ -205,7 +230,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0)
+                if (RegionList[i].MainPipe != null && RegionList[i].MainPipe.Count > 0 && RegionList[i].MainPipe[0] >= 0)
                 {
                     int mainPipeId = RegionList[i].MainPipe[0];
                     TmpPipeList[mainPipeId].DomainIdList.Add(i);
@@ -468,9 +493,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     RegionList[regionId].MainPipe[0] = i;
                 }
             }
-
-
-
 
 
             //记录管道

@@ -125,6 +125,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public Polyline Extents;
         public string Label;
         public string WellTypeName;
+        public int Layer = 0;
     }
     public class LabelClass
     {
@@ -135,6 +136,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public Horizontal(Line line, bool isInitialLine = true)
         {
             Line = line;
+
             IsInitialLine = isInitialLine;
         }
         public Horizontal()
@@ -218,6 +220,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<int> verticalPipeId { get; set; }
         public List<Point3d> SameUnitsStartPt { get; set; }
         public string InitialLayer { get; set; }
+        public int StartLayer = 0;
     }
     public class PipeLineUnit
     {
@@ -247,6 +250,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public int[,] VertPipeConnectedArr { get; set; }
         public int DrainWellPipeIndex { get; set; }
         public int DrainMode { get; set; }
+        public bool IsDefault = false;
         public enum UnitDrainMode : int
         {
             CROSSROOFAndINTOWELL = 1,//穿顶板进水井-丢弃

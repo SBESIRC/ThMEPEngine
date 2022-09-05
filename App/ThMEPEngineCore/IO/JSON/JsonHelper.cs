@@ -21,6 +21,12 @@ namespace ThMEPEngineCore.IO.JSON
             return json;
         }
 
+        public static string SerializeObject(object o,Formatting format)
+        {
+            string json = JsonConvert.SerializeObject(o,format);
+            return json;
+        }
+
         /// <summary>
         /// 解析JSON字符串生成对象实体
         /// </summary>

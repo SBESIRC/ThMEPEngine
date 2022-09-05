@@ -35,6 +35,7 @@ namespace ThMEPWSS.Command
             CommandName = "THPSLY";
             ActionName = "生成";
             config = dic;
+            config.Remove("地漏");            //只取本图地漏
             paramSetting = _paramSetting;
             firstFloorPlane = _firstFloorPlane;
         }
@@ -56,10 +57,11 @@ namespace ThMEPWSS.Command
                     originTransformer.Transform(frame);
                     CalStructrueService.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
-                    if (paramSetting.SingleRowSetting != SingleRowSettingEnum.NotConsidered)        //不考虑一层出户不需要读取洁具立管
+                    verticalPipe.AddRange(frame.GetRainFloorDrainPipe(acad, originTransformer));      //雨水地漏当冷凝水管处理
+                    if (paramSetting.SingleRowSetting != SingleRowSettingEnum.NotConsidered)            //不考虑一层出户不需要读取洁具立管
                     {
-                        var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
-                        verticalPipe.AddRange(drainingEquipment);
+                        verticalPipe.AddRange(dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer));     //洁具立管
+                        verticalPipe.AddRange(frame.GetFloorDrainPipe(acad, originTransformer));                        //地漏
                     }
                     if (paramSetting.IndirectDrainageSetting == DrainageSettingEnum.RainwaterInlet13)
                     {

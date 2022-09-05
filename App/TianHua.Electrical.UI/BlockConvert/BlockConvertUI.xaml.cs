@@ -125,6 +125,7 @@ namespace TianHua.Electrical.UI.BlockConvert
         {
             FocusToCAD();
             BlockConvertVM.Zoom(table1.SelectedItem as BlockConvertInfo);
+            Refresh();
         }
 
         private void Refresh()

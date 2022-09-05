@@ -24,8 +24,9 @@ namespace ThMEPWSS.PressureDrainage.Model
             modeldatas.FloorLineSpace = viewmodel.UndpdsFloorLineSpace;
             modeldatas.FloorAreaList = viewmodel.FloorAreaList;
             modeldatas.FloorNumList = viewmodel.FloorNumList;
-            var pressDrainageDCollSvs = new PressureDrainageDataCollectionService();
-            pressDrainageDCollSvs.CollectData(viewmodel);
+            var pressDrainageDCollSvs = new PressureDrainageDataCollectionService(viewmodel);
+            pressDrainageDCollSvs.InitData();
+            pressDrainageDCollSvs.CollectData();
             modeldatas.FloorDict = new Dictionary<string, PressureDrainageSystemDiagramStorey>();
             for (int i = 0; i < modeldatas.FloorListDatas.Count; i++)
             {

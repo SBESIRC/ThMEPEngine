@@ -134,9 +134,9 @@ namespace ThMEPTCH.TCHXmlDataConvert
                 var checkId = string.Format(",{0},", wall.Uuid);
                 foreach (var door in doors)
                 {
-                    if (string.IsNullOrEmpty(door.Useage))
+                    if (string.IsNullOrEmpty(door.Usage))
                         continue;
-                    if (door.Useage.Contains(checkId))
+                    if (door.Usage.Contains(checkId))
                     {
                         wall.Doors.Add(door);
                         hisDoorIds.Add(door.Uuid);
@@ -144,9 +144,9 @@ namespace ThMEPTCH.TCHXmlDataConvert
                 }
                 foreach (var window in windows)
                 {
-                    if (string.IsNullOrEmpty(window.Useage))
+                    if (string.IsNullOrEmpty(window.Usage))
                         continue;
-                    if (window.Useage.Contains(checkId))
+                    if (window.Usage.Contains(checkId))
                     {
                         wall.Windows.Add(window);
                         hisWindowIds.Add(window.Uuid);
@@ -154,9 +154,9 @@ namespace ThMEPTCH.TCHXmlDataConvert
                 }
                 foreach (var opening in openings)
                 {
-                    if (string.IsNullOrEmpty(opening.Useage))
+                    if (string.IsNullOrEmpty(opening.Usage))
                         continue;
-                    if (opening.Useage.Contains(checkId))
+                    if (opening.Usage.Contains(checkId))
                     {
                         wall.Openings.Add(opening);
                         hisOpeingIds.Add(opening.Uuid);

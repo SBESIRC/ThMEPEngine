@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include Variable.wxi ?>
+	<Fragment>
+		<?if $(var.Configuration) = Debug ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_Control_Library" Guid="{5A01DA65-FDD9-4A14-876E-F24B51ADD618}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_Control_Library" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThControlLibraryWPF.dll" />
+			</Component>
+		</DirectoryRef>
+		<?elseif $(var.Configuration) = Release ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_Control_Library" Guid="{A05F6A7C-5080-45A0-BD7C-23D49C8010B3}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_Control_Library" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThControlLibraryWPF.dll" />
+			</Component>
+		</DirectoryRef>
+		<?endif?>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponentsWPF">
+			<?if $(var.Configuration) = Debug ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Control_Library" />
+			<?elseif $(var.Configuration) = Release ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Control_Library" />
+			<?endif?>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

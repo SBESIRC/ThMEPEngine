@@ -1,0 +1,30 @@
+﻿<cus:ThCustomWindow x:Class="Tianhua.Platform3D.UI.UI.RelatePaperUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:s="clr-namespace:System;assembly=mscorlib"             
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+                    Title=""                    
+                    SizeToContent="WidthAndHeight"
+                    ResizeMode="NoResize"
+                    MinWidth="300"
+                    MinHeight="400"
+             mc:Ignorable="d">
+    <StackPanel Margin="3,0" Orientation="Vertical">
+        <ListBox x:Name="lstBox" Height="360" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectionMode="Single"
+                 ItemsSource="{Binding Items,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox IsThreeState="False" Content="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                             IsChecked="{Binding IsSelected,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Right">
+            <Button Margin="10,0,0,0" TabIndex="1" x:Name="btnOK" Content="确  定" Width="60" Click="btnOK_Click"/>
+            <Button Margin="10,0,0,0" TabIndex="1" x:Name="btnCanel" Content="取  消" Width="60" Click="btnCanel_Click"/>
+        </StackPanel>
+    </StackPanel>    
+</cus:ThCustomWindow>

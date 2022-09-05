@@ -53,6 +53,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
+                var xclip = blockReference.XClipInfo();
                 if (blockReference is BlockReference blkref && IsDistributionElement(blkref))
                 {
                     HandleBlockReference(elements, blkref, matrix);
@@ -75,11 +76,27 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                             }
                         }
                     }
+                    if (xclip.IsValid)
+                    {
+                        xclip.TransformBy(matrix);
+                    }
                     foreach (ObjectId objId in objs)
                     {
                         var dbObj = acadDatabase.Element<Entity>(objId);
                         if (dbObj is BlockReference blockObj)
                         {
+                            if (xclip.IsValid)
+                            {
+                                if (blockObj.Bounds.HasValue)
+                                {
+                                    var extents = blockObj.GeometricExtents.ToRectangle();
+                                    extents.TransformBy(matrix);
+                                    if (!xclip.Contains(extents))
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
                             if (blockObj.BlockTableRecord.IsNull)
                             {
                                 continue;
@@ -98,6 +115,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 var name = ThMEPXRefService.OriginalFromXref(blkref.GetEffectiveName());
                 var type = GetEnumEquipmentType(name);
                 var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
+                if (type == EnumEquipmentType.floorDrain)
+                {
+                    centerPoint = blkref.Position;
+                }
                 var obb = blkref.ToOBBNoTCH();
                 centerPoint = centerPoint.TransformBy(matrix);
                 obb.TransformBy(matrix);
@@ -274,6 +295,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 var pt1 = equipModel.BlockReferenceGeo.GetPoint3dAt(0);
                 var pt2 = equipModel.BlockReferenceGeo.GetPoint3dAt(2);
                 var centerPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
+                if (equipModel.EnumEquipmentType == EnumEquipmentType.floorDrain)
+                {
+                    centerPt = equipModel.BlockPoint;
+                }
                 equipModel.DiranPoint = centerPt;
                 resModel.Add(equipModel);
             }

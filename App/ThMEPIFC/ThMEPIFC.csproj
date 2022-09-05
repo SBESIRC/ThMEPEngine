@@ -49,6 +49,7 @@
     <Compile Include="Ifc2x3\ThTGL2IFC2x3Builder.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3Factory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3GeExtension.cs" />
+    <Compile Include="ThMEPIFCExportCmds.cs" />
     <Compile Include="ThMEPIFCInternalCmds.cs" />
     <Compile Include="THModelMergeService.cs" />
     <Compile Include="ThTGL2GeoFileService.cs" />
@@ -96,6 +97,10 @@
       <Project>{ba9b9213-0d44-4913-94c5-5dc6c0172b31}</Project>
       <Name>ThMEPTCH</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\" />
+    <Folder Include="Service\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

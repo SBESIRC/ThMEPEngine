@@ -284,6 +284,14 @@ namespace ThMEPHVAC.EQPMFanSelect
                     {
                         pModel.InstallSpace = spliteStr[1];
                     }
+                    else 
+                    {
+                        var firstIndex = strValue.IndexOf("-");
+                        if (firstIndex > 0 && (firstIndex + 1 < strValue.Length)) 
+                        {
+                            pModel.InstallSpace = strValue.Substring(firstIndex + 1);
+                        }
+                    }
                 }
                 else if (attr.Key.Equals(EQPMFanCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER))
                 {

@@ -36,6 +36,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThAppTools.cs" />
     <Compile Include="ThArcExtension.cs" />
+    <Compile Include="ThBIMCommon.cs" />
     <Compile Include="ThBlockReferenceData.cs" />
     <Compile Include="ThBlockReferenceExtensions.cs" />
     <Compile Include="ThBlockReferenceTool.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="ThEnumExtension.cs" />
     <Compile Include="ThExtents3dExtension.cs" />
     <Compile Include="ThBlockImageTool.cs" />
+    <Compile Include="ThHyperLinkTool.cs" />
     <Compile Include="ThLineExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />

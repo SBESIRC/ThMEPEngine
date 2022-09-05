@@ -48,6 +48,7 @@ namespace ThMEPWSS.Command
         List<FloorFramed> floorFrameds = new List<FloorFramed>();
         List<FloorFramed> roofFloors = new List<FloorFramed>();
         FloorFramed livingHighestFloor = null;
+        List<Polyline> _roomTypeSplitLines = new List<Polyline>();//楼层框定户型分隔线
 
         List<Polyline> _allWalls;
         List<Polyline> _allColumns;
@@ -131,7 +132,7 @@ namespace ThMEPWSS.Command
                 }
             }
         }
-        public void Dispose(){}
+        public void Dispose() { }
         public override void SubExecute()
         {
             errorMsg = "";
@@ -212,7 +213,7 @@ namespace ThMEPWSS.Command
                 if (connectLines.Count > 0)
                     createBasicElems.AddRange(connectLines);
                 //厨房台盆转换连接
-                var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag == "FL").ToList());
+                var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "FcL")).ToList());
                 kitchenSinkConnect.InitData(kitchenRooms, toiletRooms, _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.kitchenBasin).ToList());
                 var addBasics = kitchenSinkConnect.SinkConvertorConnect();
                 if (null != addBasics && addBasics.Count > 0)
@@ -377,6 +378,14 @@ namespace ThMEPWSS.Command
             }
             catch { }
             _floorBlockEqums = InitFloorData(livingHighestFloor);
+            //获取户型分割线
+            using (var adb = AcadDatabase.Active())
+            {
+                var plys = adb.ModelSpace.OfType<Polyline>().Where(e => e.Layer.Equals("AI-户型分割线"));
+                _roomTypeSplitLines.AddRange(plys);
+                var lines = adb.ModelSpace.OfType<Line>().Where(e => e.Layer.Equals("AI-户型分割线"));
+                _roomTypeSplitLines.AddRange(lines.Select(e => FloorFramedSpliter.PolyFromLine(e)));
+            }
         }
         void RoofPipeLabelLayout() 
         {
@@ -454,7 +463,7 @@ namespace ThMEPWSS.Command
         void LivingFloorLabelLayout(double midY, List<RoomModel> thisFloorRooms) 
         {
             //标注处理
-            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY);
+            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY,_roomTypeSplitLines);
             pipelineLabel.InitFloorData(livingHighestFloor, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList(), thisFloorRooms);
             pipelineLabel.AddObstacleEntitys(_allWalls.Cast<Entity>().ToList());
             pipelineLabel.AddObstacleEntitys(_allWalls.Cast<Entity>().ToList());
@@ -564,7 +573,7 @@ namespace ThMEPWSS.Command
         }
         void RoofFloorLavelLayout(FloorFramed roofFloor,double midY) 
         {
-            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY);
+            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY,_roomTypeSplitLines);
             var roofTexts = createTextElems.Where(c => c.floorUid.Equals(roofFloor.floorUid) && c.dbText != null).Select(c=>c.dbText).ToList();
             var roofLayouts = createBlockInfos.Where(c => c.floorId.Equals(roofFloor.floorUid) && !string.IsNullOrEmpty(c.tag) && c.tag.Contains("Y1") ).ToList();
             var thisFloorY1 = new List<CreateBlockInfo>();

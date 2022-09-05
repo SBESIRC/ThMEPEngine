@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="Tianhua.Platform3D.UI.UI.BuildingStoreyTableUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+             mc:Ignorable="d" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+    <Grid Background="Transparent"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Style="{x:Null}" Content="楼层信息" HorizontalAlignment="Left"></Label>
+        <DataGrid Grid.Row="1" Style="{x:Null}" 
+                  Background="Transparent"  x:Name="datagrid1" AutoGenerateColumns="False" 
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                  HorizontalContentAlignment="Stretch"
+                  SelectionMode="Single" SelectionUnit="FullRow"
+                  BorderThickness="1,1,0,0" GridLinesVisibility="All"
+                  RowHeaderWidth="0"
+                  ColumnWidth="*"
+                  CanUserResizeColumns="True"
+                  IsReadOnly="True"
+                  CanUserAddRows="False">
+            <!--<DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="Background" Value="White"></Setter>
+                    <Setter Property="Foreground" Value="Black"></Setter>
+                    <Setter Property="BorderThickness" Value="0,0,1,1" />
+                    <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="BorderBrush" Value="#808080" />
+                    <Setter Property="TextOptions.TextFormattingMode" Value="Display"></Setter>
+                    <Setter Property="Height" Value="20"></Setter>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>-->
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="1*"  Header="楼层"  CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding StoreyName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="层高" Width="1*" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding Height,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="标高" Width="1*" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding Bottom_Elevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Width="2*" Header="图纸名称" CanUserSort="False" CanUserResize="True" Binding="{Binding PaperName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                   
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

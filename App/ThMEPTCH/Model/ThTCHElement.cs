@@ -24,7 +24,7 @@ namespace ThMEPTCH.Model
         /*这里预留20个序列数据，外部序列数字从21开始*/
         [ProtoMember(1)]
         public string Name { get; set; }
-        public string Useage { get; set; }
+        public string Usage { get; set; }
         [ProtoMember(2)]
         public string Uuid { get; set; }
         #region 几何信息
@@ -65,7 +65,6 @@ namespace ThMEPTCH.Model
         [ProtoMember(19)]
         public Dictionary<string, string> Properties { get; set; }
         #endregion
-
         public ThTCHElement()
         {
             Uuid = Guid.NewGuid().ToString();

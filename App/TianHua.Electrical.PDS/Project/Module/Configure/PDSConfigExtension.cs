@@ -459,6 +459,41 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                     });
                 }
             }
+
+            var Table2 = dataSet.Tables["KYJY(KYJV)"];
+            for (int i = 1; i < Table2.Rows.Count; i++)
+            {
+                var row = Table2.Rows[i];
+                string value;
+                if (!row[1].ToString().IsNullOrWhiteSpace())
+                {
+                    CableCondiutConfiguration.KYJY.Add(new ControlCableCondiutInfo()
+                    {
+                        WireSphere = double.Parse(row["控制线导体截面"].ToString()),
+                        NumberOfWires = int.Parse(row["控制线芯数"].ToString()),
+                        DIN_SC = (value = row["SC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                    });
+                }
+            }
+            var Table3 = dataSet.Tables["RYJ"];
+            for (int i = 1; i < Table3.Rows.Count; i++)
+            {
+                var row = Table3.Rows[i];
+                string value;
+                if (!row[1].ToString().IsNullOrWhiteSpace())
+                {
+                    CableCondiutConfiguration.RYJ.Add(new ControlCableCondiutInfo()
+                    {
+                        WireSphere = double.Parse(row["控制线导体截面"].ToString()),
+                        NumberOfWires = int.Parse(row["控制线芯数"].ToString()),
+                        DIN_SC = (value = row["SC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                    });
+                }
+            }
         }
 
         /// <summary>

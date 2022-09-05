@@ -202,7 +202,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override IsolatingSwitch CreatIsolatingSwitch()
         {
-            var isolatingSwitch =  new IsolatingSwitch(_calculateCurrent, _specialPolesNum);
+            var isolatingSwitch =  new IsolatingSwitch(_maxCalculateCurrent, _specialPolesNum);
             var ratedCurrent = isolatingSwitch.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
             isolatingSwitch.SetRatedCurrent(ratedCurrent);
             return isolatingSwitch;
@@ -210,7 +210,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public IsolatingSwitch CreatOneWayIsolatingSwitch()
         {
-            var isolatingSwitch = new IsolatingSwitch(_calculateCurrent, _polesNum);
+            var isolatingSwitch = new IsolatingSwitch(_maxCalculateCurrent, _polesNum);
             var ratedCurrent = isolatingSwitch.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
             isolatingSwitch.SetRatedCurrent(ratedCurrent);
             return isolatingSwitch;
@@ -250,7 +250,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public override OUVP CreatOUVP()
         {
             var ouvp = new OUVP(_calculateCurrent, _ouvpPolesNum);
-            var ratedCurrent = ouvp.GetRatedCurrents().First(o => o > _calculateCurrentMagnification);
+            var ratedCurrent = ouvp.GetRatedCurrents().FirstOrDefault(o => o > _calculateCurrentMagnification);
+            if (ratedCurrent <= 0)
+                ratedCurrent = ouvp.GetRatedCurrents().Last();
             ouvp.SetRatedCurrent(ratedCurrent);
             return ouvp;
         }

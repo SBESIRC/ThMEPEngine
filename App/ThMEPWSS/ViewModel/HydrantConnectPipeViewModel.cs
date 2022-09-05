@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
+
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPWSS.HydrantConnectPipe.Model;
 
 namespace ThMEPWSS.ViewModel
 {
-     public class HydrantConnectPipeViewModel : NotifyPropertyChangedBase, ICloneable
+    public class HydrantConnectPipeViewModel : NotifyPropertyChangedBase, ICloneable
     {
         private ThHydrantConnectPipeConfigInfo ConfigInfo = new ThHydrantConnectPipeConfigInfo();
         public ThHydrantConnectPipeConfigInfo GetConfigInfo()
@@ -69,5 +67,36 @@ namespace ThMEPWSS.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        public OutputType OutputType
+        {
+            get
+            {
+                return ConfigInfo.isTchPipe;
+            }
+            set
+            {
+                ConfigInfo.isTchPipe = value;
+                this.RaisePropertyChanged();
+            }
+        }
+    }
+
+    public enum OutputType
+    {
+        /// <summary>
+        /// CAD
+        /// </summary>
+        [Description("CAD")]
+        CAD = 0,
+        /// <summary>
+        /// TCH
+        /// </summary>
+        [Description("TCH")]
+        TCH = 1,
+        /// <summary>
+        /// by main ring
+        /// </summary>
+        [Description("ByMainRing")]
+        ByMainRing = 2,
     }
 }

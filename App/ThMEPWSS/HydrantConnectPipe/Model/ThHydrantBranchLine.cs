@@ -16,7 +16,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
     {
         public Polyline BranchPolylineObb { set; get; }
         public Polyline BranchPolyline { set; get; }
-        public List<Line> DrawLineLinst { set; get; }
+        public List<Line> DrawLineList { set; get; }
         public ThHydrantBranchLine()
         {
             BranchPolyline = new Polyline();
@@ -31,13 +31,13 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 var objcets = polyline.BufferPL(50);
                 var obb = objcets[0] as Polyline;
                 branchLine.BranchPolylineObb = obb;
-                branchLine.DrawLineLinst = branchLine.BranchPolyline.ToLines();
+                branchLine.DrawLineList = branchLine.BranchPolyline.ToLines();
             }
             return branchLine;
         }
         public void Draw(AcadDatabase acadDatabase)
         {
-            foreach (var l in DrawLineLinst)
+            foreach (var l in DrawLineList)
             {
                 acadDatabase.ModelSpace.Add(l);
                 l.Layer = "W-FRPT-HYDT-PIPE";
@@ -46,7 +46,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 l.ColorIndex = (int)ColorIndex.BYLAYER;
             }
         }
-        public void InsertValve(AcadDatabase acadDatabase, List<Line> avoidLines, string strMapScale)
+        public Point3d InsertValve(AcadDatabase acadDatabase, List<Line> lines, List<Line> avoidLines, string strMapScale, bool isTchPipeValve = false)
         {
             double scale = 1;
             switch (strMapScale)
@@ -60,31 +60,37 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 default:
                     break;
             }
-            List<Line> lines = BranchPolyline.ToLines();
-            if (lines.Count != 0)
+            var posPt = new Point3d();
+            double angle = 0.0;
+            bool isInsert = true;
+            var tmpLines = lines.OrderBy(o => o.Length).ToList();
+            var bakLines = lines.OrderBy(o => o.Length).ToList();
+            var line = tmpLines.Last();
+            int lineIndex = tmpLines.Count - 1;
+            while (!InsertValve(avoidLines, line, scale, out posPt, out angle))//考虑躲避
             {
-                var posPt = new Point3d();
-                double angle = 0.0;
-                bool isInsert = true;
-                var tmpLines = lines.OrderBy(o => o.Length).ToList();
-                var bakLines = lines.OrderBy(o => o.Length).ToList();
-                var line = tmpLines.Last();
-                int lineIndex = tmpLines.Count - 1;
-                while (!InsertValve(avoidLines, line, scale, out posPt, out angle))//考虑躲避
+                tmpLines.RemoveAt(tmpLines.Count - 1);
+                if (tmpLines.Count != 0)
                 {
-                    tmpLines.RemoveAt(tmpLines.Count - 1);
-                    if (tmpLines.Count != 0)
-                    {
-                        lineIndex--;
-                        line = tmpLines.Last();
-                    }
-                    else
-                    {
-                        isInsert = false;
-                        break;
-                    }
+                    lineIndex--;
+                    line = tmpLines.Last();
                 }
+                else
+                {
+                    isInsert = false;
+                    break;
+                }
+            }
 
+            if (isTchPipeValve)
+            {
+                if (!isInsert)
+                {
+                    InsertValve(line, out posPt, out angle);
+                }
+            }
+            else
+            {
                 if (!isInsert)
                 {
                     var tmpline = bakLines.Last();
@@ -107,8 +113,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                     bakLines.AddRange(brkLine);
                     //此线 pt 和angle 插入阀门
                 }
-                DrawLineLinst = bakLines;
+                DrawLineList = bakLines;
             }
+            return posPt;
         }
         private bool InsertValve(Line line, out Point3d pt, out double angle)//不考虑躲避
         {
@@ -217,7 +224,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 }
             }
 
-
             return true;
         }
         private List<Line> InsertValve(AcadDatabase acadDatabase, Line line, Point3d pt, double angle, double scale)
@@ -244,7 +250,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             var pt1 = pt + vector * (240.0 * scale);
             var valveLine = new Line(pt, pt1);
             var newLine = valveLine.ExtendLine(50.0);
-            var valveBox = newLine.Buffer(90*scale + 50.0);
+            var valveBox = newLine.Buffer(90 * scale + 50.0);
             foreach (var l in avoidLines)
             {
                 if (valveBox.IsIntersects(l))

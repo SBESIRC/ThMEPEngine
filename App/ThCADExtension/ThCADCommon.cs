@@ -99,14 +99,10 @@ namespace ThCADExtension
             return ElectricalDwgPath();
         }
 
-        // 结构专业图层
+        // 结构图层图块
         public static string StructTemplatePath()
         {
             return Path.Combine(SupportPath(), "结构图层图块.dwg");
-        }
-        public static string StructPlanePath()
-        {
-            return Path.Combine(SupportPath(), "结构平面图.dwg");
         }
 
         // 消防喷淋块
@@ -277,15 +273,6 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "配筋模板.dwg");
         }
 
-        // 建筑专业图层
-        public static string ArchitectureTemplatePath()
-        {
-            return Path.Combine(SupportPath(), "建筑平立剖图示意.dwg");
-        }
-        public static string ArchitectureDoorWindowTemplatePath()
-        {
-            return Path.Combine(SupportPath(), "建筑门窗填充样式文件.dwg");
-        }
         public static string ParkingStallTablePath()
         {
             return Path.Combine(SupportPath(), "地库指标表格.dwg");

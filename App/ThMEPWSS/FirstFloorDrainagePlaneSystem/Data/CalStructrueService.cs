@@ -394,6 +394,86 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         }
 
         /// <summary>
+        /// 提取地漏立管
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="acadDatabase"></param>
+        /// <returns></returns>
+        public static List<VerticalPipeModel> GetFloorDrainPipe(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        {
+            List<VerticalPipeModel> pipeLst = new List<VerticalPipeModel>();
+            var dxfNames = new string[]
+            {
+                 RXClass.GetClass(typeof(BlockReference)).DxfName,
+            };
+            var blockNames = new string[] { ThWSSCommon.FloorDrainingBlockName };
+            var layerNames = new string[] { ThWSSCommon.FloorDrainingLayerName };
+            var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                                                 o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames) &
+                                                 o.Dxf((int)DxfCode.BlockName) == string.Join(",", blockNames));
+            var result = Active.Editor.SelectAll(filterlist);
+            if (result.Status == PromptStatus.OK)
+            {
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var block = acadDatabase.Element<BlockReference>(obj);
+                    var copy = (BlockReference)block.Clone();
+                    originTransformer.Transform(copy);
+                    if (polyline.Contains(copy.Position))
+                    {
+                        var pt = copy.Position;
+                        VerticalPipeModel pipeModel = new VerticalPipeModel(pt, copy, VerticalPipeType.WasteWaterPipe);
+                        pipeModel.PipeCircle = new Circle(pipeModel.Position, Vector3d.ZAxis, 50);
+                        pipeModel.IsEuiqmentPipe = true;
+                        pipeModel.IsFloorDrainPipe = true;
+                        pipeLst.Add(pipeModel);
+                    }
+                }
+            }
+
+            return pipeLst;
+        }
+
+        /// <summary>
+        /// 提取地漏立管
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="acadDatabase"></param>
+        /// <returns></returns>
+        public static List<VerticalPipeModel> GetRainFloorDrainPipe(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        {
+            List<VerticalPipeModel> pipeLst = new List<VerticalPipeModel>();
+            var dxfNames = new string[]
+            {
+                 RXClass.GetClass(typeof(BlockReference)).DxfName,
+            };
+            var blockNames = new string[] { ThWSSCommon.FloorDrainingBlockName };
+            var layerNames = new string[] { ThWSSCommon.DisconnectionLayerName };
+            var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                                                 o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames) &
+                                                 o.Dxf((int)DxfCode.BlockName) == string.Join(",", blockNames));
+            var result = Active.Editor.SelectAll(filterlist);
+            if (result.Status == PromptStatus.OK)
+            {
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var block = acadDatabase.Element<BlockReference>(obj);
+                    var copy = (BlockReference)block.Clone();
+                    originTransformer.Transform(copy);
+                    if (polyline.Contains(copy.Position))
+                    {
+                        var pt = copy.Position;
+                        VerticalPipeModel pipeModel = new VerticalPipeModel(pt, copy, VerticalPipeType.CondensatePipe);
+                        pipeModel.PipeCircle = new Circle(pipeModel.Position, Vector3d.ZAxis, 75);
+                        pipeLst.Add(pipeModel);
+                    }
+                }
+            }
+
+            return pipeLst;
+        }
+
+        /// <summary>
         /// 提取室外污水主管
         /// </summary>
         /// <param name="polyline"></param>

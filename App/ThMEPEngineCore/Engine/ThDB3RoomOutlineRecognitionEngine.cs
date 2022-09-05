@@ -89,9 +89,9 @@ namespace ThMEPEngineCore.Engine
                     curves = simplifer.Simplify(curves);
                     curves = simplifer.MakeValid(curves);
                     curves = simplifer.Simplify(curves);
-                    if (curves.Count == 1)
+                    foreach (Polyline curve in curves.OfType<Polyline>().Where(r => r.Area > 100))
                     {
-                        var outline = curves[0] as Polyline;
+                        var outline = curve;
                         var room = ThIfcRoom.Create(outline);
                         var properties = ThPropertySet.CreateWithHyperlink2(o.Data as string);
                         if (properties.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))

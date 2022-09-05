@@ -6,12 +6,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
     class RegionModel
     {
+
     }
 
     public class SingleRegion
     {
         //自身属性
         public int RegionId = -1;
+        public Polyline OldPl = new Polyline();
         public Polyline OriginalPl = new Polyline();
         public double SuggestDist = 200;
         public Polyline ClearedPl = new Polyline();
@@ -20,9 +22,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //固定类型判别
         public int RegionType = -1;    //0:过道     1:附属房间    2:大房间;
         public int IsPublicRegion = 0; //0:非公区   1:小的公区    2:公区;
+        public int HaveEquipment = 0; // 0:无设备   1：集水器    2：散热器
 
         //可变类型判别
         public int IsDeadRoom = 0; //是否是要单独连一根的房间
+        public int IsRadiatorRoom = 0;
 
         //拓扑属性
         public int Level = -1;
@@ -31,7 +35,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public Dictionary<SingleRegion, SingleDoor> EntranceMap = new Dictionary<SingleRegion, SingleDoor>();
         public Dictionary<SingleRegion, SingleDoor> ExportMap = new Dictionary<SingleRegion, SingleDoor>();
         public SingleDoor MainEntrance;
-        
+
 
 
         //管道属性
@@ -104,9 +108,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
     }
 
-
-
-    class SinglePipe
+    public class SinglePipe
     {
         public int PipeId = -1;
         public double TotalLength = -1;

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:tControl ="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d">
@@ -18,12 +19,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="62"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Background="#F2F2F2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="70"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <StackPanel Style="{x:Null}" Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
@@ -39,8 +41,19 @@
                     <Label Style="{x:Null}" Content="未登录"></Label>
                 </StackPanel>
             </StackPanel>
-
-            <Image Grid.Column="1" Source="../Resources/Images/show.png" Height="62" Width="62" Margin="5,0,5,0"></Image>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <tControl:ImageButton Name="btnPushToSU" Width="30" Height="30" ImageTextLocation="ImageOnly" ToolTip="数据推送到SU"
+                                      ImageHeight="30" ImageWidth="30"
+                                      BorderThickness="0"
+                                      NormalImage="../Resources/Images/suIcon.png"
+                                      Click="btnPushToSU_Click"></tControl:ImageButton>
+                <tControl:ImageButton Name="btnPushToViewer" Width="30" Height="30" ImageTextLocation="ImageOnly" ToolTip="数据推送到Viewer"
+                                      ImageHeight="30" ImageWidth="30"
+                                      BorderThickness="0"
+                                      Margin="5,0,5,0"
+                                      NormalImage="../Resources/Images/show.png" Click="btnPushToViewer_Click"></tControl:ImageButton>
+            </StackPanel>
+            
         </Grid>
         <Grid Grid.Row="1">
             <hc:TabControl x:Name="tabTopFunction"
@@ -59,7 +72,6 @@
                         <Setter Property="Content" Value="{Binding UControl}"/>
                         <Setter Property="Background" Value="#F2F2F2"></Setter>
                         <Setter Property="BorderBrush" Value="#555555"/>
-                        <Setter Property="FontWeight" Value="ExtraBold"/>
                         <Setter Property="FontSize" Value="14"></Setter>
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
@@ -70,14 +82,15 @@
                 </hc:TabControl.ItemContainerStyle>
             </hc:TabControl>
         </Grid>
-        <Grid Grid.Row="2">
+        <GridSplitter Style="{x:Null}" Margin="0,2,0,2" Height="2" Grid.Row="2" HorizontalAlignment="Stretch" Background="#B5B5B5" BorderThickness="0" />
+        <Grid Grid.Row="3" x:Name="propGrid" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
-            <Border Style="{x:Null}" BorderThickness="0,1,0,0" BorderBrush="Black" VerticalAlignment="Top"></Border>
             <Grid Height="35" Margin="0,5,0,0" VerticalAlignment="Top">
-                <Label Style="{x:Null}" Content="属性栏" VerticalContentAlignment="Center"></Label>
+                <Label Style="{x:Null}" Content="属性信息" VerticalContentAlignment="Center"></Label>
+                <!--<Label Style="{x:Null}" Content="{Binding ShowTypeName,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"></Label>-->
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="属性复制" ></Button>
                     <Button Content="快速选择" Margin="10,0,10,0"></Button>
@@ -85,10 +98,25 @@
 
             </Grid>
             <DataGrid Style="{x:Null}" Grid.Row="1" Background="Transparent" Margin="5" 
-                      HeadersVisibility="All" BorderBrush="Black" BorderThickness="1">
+                      BorderBrush="Black" BorderThickness="1" CanUserAddRows="False"
+                      CanUserReorderColumns="False"
+                      AutoGenerateColumns ="False"
+                      HeadersVisibility="None"
+                      RowHeight="22"
+                      ItemsSource="{Binding Properties}"
+                      >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="属性名" Width="1*"></DataGridTextColumn>
-                    <DataGridTextColumn Header="属性值" Width="2*"></DataGridTextColumn>
+                    <DataGridTextColumn Header="属性名" Width="1*" IsReadOnly="True" 
+                                        Binding="{Binding Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                    <DataGridTemplateColumn Header="属性值" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Style="{x:Null}"
+                                    IsReadOnly="{Binding IsReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                    BorderThickness="0" Text="{Binding Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></TextBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

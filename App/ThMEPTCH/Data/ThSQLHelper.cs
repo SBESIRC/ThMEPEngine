@@ -31,14 +31,6 @@ namespace ThMEPTCH.Data
                 tableName, nameStr, valueStr);
             return insertSql;
         }
-        public static string TwtBlockSqlString(TCHTwtBlock tableModel)
-        {
-            string nameStr = "ID,Type,Number";
-            string valueStr = string.Format("{0},'{1}','{2}'", tableModel.ID, tableModel.Type, tableModel.Number.ToString().PadLeft(8, '0'));
-            string insertSql = string.Format("INSERT INTO {0} ({1}) values({2})",
-                "TwtBlock", nameStr, valueStr);
-            return insertSql;
-        }
         public static TCHTwtPoint PointToTwtPointModel(ulong Id, Point3d point)
         {
             TCHTwtPoint twtPoint = new TCHTwtPoint
@@ -81,16 +73,6 @@ namespace ThMEPTCH.Data
                 Z = Math.Round(vector.Z, 6).ToString(),
             };
             return tvwVector;
-        }
-        public static TCHTwtBlock ValueToTwtBlock(ulong id, string type, int number)
-        {
-            TCHTwtBlock twtBlock = new TCHTwtBlock
-            {
-                ID = id,
-                Type = type,
-                Number = number,
-            };
-            return twtBlock;
         }
     }
 }

@@ -1,0 +1,43 @@
+﻿<cus:ThCustomWindow x:Class="Tianhua.Platform3D.UI.UI.InitStoreyUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:s="clr-namespace:System;assembly=mscorlib"             
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+                    Title="初始化楼层"                    
+                    SizeToContent="WidthAndHeight"
+                    MinWidth="300"
+                    MinHeight="200"
+             mc:Ignorable="d">
+    <StackPanel Orientation="Vertical" Margin="3,3">
+        <GroupBox>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.4*"/>
+                    <ColumnDefinition Width="0.6*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="类型" />
+                <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="地下室" />
+                <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="地上塔楼" />
+                <Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="屋顶" />
+
+                <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="层数" />
+                <TextBox Grid.Row="1" Grid.Column="1" TabIndex="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100" IsReadOnly="False" Text="{Binding UnderGroundStoreyNumbers,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" TabIndex="2" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100" IsReadOnly="False" Text="{Binding AboveGroundStoreyNumbers,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                <TextBox Grid.Row="3" Grid.Column="1" TabIndex="3" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100" IsReadOnly="False" Text="{Binding RoofStoreyNumbers,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+            </Grid>
+        </GroupBox>
+        <StackPanel Margin="0,5,10,0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Margin="10,0,0,0" TabIndex="4" x:Name="btnOK" Content="确 定" Width="80" Click="btnOK_Click"></Button>
+            <Button Margin="5,0,0,0" TabIndex="5" x:Name="btnCancel" Content="取 消" Width="80" Click="btnCancel_Click"></Button>
+        </StackPanel>      
+    </StackPanel>    
+</cus:ThCustomWindow>

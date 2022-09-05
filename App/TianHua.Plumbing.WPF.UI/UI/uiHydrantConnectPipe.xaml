@@ -10,9 +10,10 @@
                     Title="消火栓连管"
                     SizeToContent="Height"
                     Width="160"
-                    Height="255"
+                    Height="350"
              mc:Ignorable="d" >
     <cus:ThCustomWindow.Resources>
+        <local:OutputOpsBooleanConverter x:Key="OutputOpsBooleanConverter"/>
         <x:Array x:Key="PSLists" Type ="sys:String">
             <sys:String>1:100</sys:String>
             <sys:String>1:150</sys:String>
@@ -26,27 +27,42 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" >
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5" >
                 <Label Content="出图比例:" Margin="0,0,5,0"></Label>
                 <ComboBox Width="70" ItemsSource="{Binding Source={StaticResource PSLists}}" SelectedIndex="1" SelectedValue="{Binding MapScale}"/>
             </StackPanel>
-            <Rectangle Margin="0,5,0,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+            <Border Margin="2,3,2,5" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3" >
+                <StackPanel>
+                    <Label Content="生成图元类型"></Label>
+                    <RadioButton x:Name="rbtCAD" Content="CAD" GroupName="Output" Margin="3,3" IsThreeState="False"
+                         IsChecked="{Binding OutputType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                        Converter={StaticResource OutputOpsBooleanConverter},ConverterParameter=0}"></RadioButton>
+                    <RadioButton x:Name="rbtTCH" Content="天正" GroupName="Output" Margin="3,3" IsThreeState="False"
+                         IsChecked="{Binding OutputType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                        Converter={StaticResource OutputOpsBooleanConverter},ConverterParameter=1}" Checked="rbtTCH_Checked"></RadioButton>
+                    <RadioButton x:Name="rbtByMainRing" Content="与主环一致" GroupName="Output" Margin="3,3,3,5" IsThreeState="False"
+                         IsChecked="{Binding OutputType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                        Converter={StaticResource OutputOpsBooleanConverter},ConverterParameter=2}" Checked="rbtByMainRing_Checked"></RadioButton>
+                </StackPanel>
+            </Border>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1">
-            <StackPanel Orientation="Vertical" Margin="0,5,0,0" >
-                <Label Content="阀门和管径"></Label>
-                <CheckBox Content="设置支管蝶阀" IsChecked="{Binding SetupValve}" Margin="10,5,0,0"/>
-                <CheckBox Content="标注支管规格" IsChecked="{Binding MarkSpecif}" Margin="10,15,0,0"/>
-                <CheckBox Content="覆盖已有支管" IsChecked="{Binding CoveredGraph}" Margin="10,15,0,0"/>
+            <Border Margin="2,3,2,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3" >
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0" >
+                    <Label Content="阀门和管径"></Label>
+                    <CheckBox Content="设置支管蝶阀" IsChecked="{Binding SetupValve}" Margin="3,3"/>
+                    <CheckBox Content="标注支管规格" IsChecked="{Binding MarkSpecif}" Margin="3,3"/>
+                    <CheckBox Content="覆盖已有支管" IsChecked="{Binding CoveredGraph}" Margin="3,3,3,5"/>
             </StackPanel>
+            </Border>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2">
-            <StackPanel Orientation="Horizontal"  Margin="0,5,0,0" >
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0" >
                 <Button x:Name="btnMarkLoop" Content="标记环管" Click="btnMarkLoop_Click"  Width="65" Height="25" />
-                <Button x:Name="btnConnectPipe" Content="连管" Click="btnConnectPipe_Click" Width="65" Height="25" Margin="10,0,0,0"/>
+                <Button x:Name="btnConnectPipe" Content="连管" Click="btnConnectPipe_Click" Width="65" Height="25" Margin="15,0,0,0"/>
             </StackPanel>
         </StackPanel>
-        <Button Name="btnHelp" Grid.Row="3" Content="视频教程" Click="btnHelp_Click" Width="145" Height="25" Margin="0,5,0,0"/>
-        
+        <Button Name="btnHelp" Grid.Row="3" Content="视频教程" Click="btnHelp_Click" Width="145" Height="25" Margin="0,8,0,5"/>
+
     </Grid>
 </cus:ThCustomWindow>

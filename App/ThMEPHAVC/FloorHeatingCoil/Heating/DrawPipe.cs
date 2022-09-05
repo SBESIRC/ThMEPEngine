@@ -34,6 +34,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<Polyline> WholePipeList = new List<Polyline>();
         public List<Polyline> FilletedPipeList = new List<Polyline>();
 
+        public List<int> DeletePipeList = new List<int>();
+
         public DrawPipe()
         {
 
@@ -47,7 +49,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             GetDrawnPipe();
 
             GetConnector();
-            
+
             DrawWholePipe();
 
             Fillet();
@@ -67,6 +69,69 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
+        public void GetRadiatorPipe()
+        {
+            int i = ProcessedData.RadiatorRegion;
+            SingleRegion nowRegion = RegionList[i];
+            double buffer_dis = -nowRegion.SuggestDist;
+
+            List<DrawPipeData> pipeInList = new List<DrawPipeData>();
+            List<DrawPipeData> pipeOutList = new List<DrawPipeData>();
+            int doorId = nowRegion.MainEntrance.DoorId;
+            for (int j = 0; j < nowRegion.MainEntrance.PipeIdList.Count; j++)
+            {
+                int pipeId = nowRegion.MainEntrance.PipeIdList[j];
+                PipePoint nowPipePoint = DoorPipeToPointMap[new Tuple<int, int>(doorId, pipeId)];
+
+                DrawPipeData drawPipeData0 = new DrawPipeData(nowPipePoint.PointList[2], nowPipePoint.PointList[3], nowPipePoint.NowDoor.DownSecond, nowPipePoint.NowDoor.DownFirst, nowPipePoint.FreeDegree, pipeId, doorId);
+                pipeInList.Add(drawPipeData0);
+
+                Vector3d vec0 = nowPipePoint.PointList[3] - nowPipePoint.PointList[2];
+                Point3d circleCenter = nowPipePoint.PointList[0] + vec0 / 2;
+                double radius = vec0.Length / 2;
+
+                DrawUtils.ShowGeometry(circleCenter, "l1Input1", 170, lineWeightNum: 30, (int)radius, "C");
+                if (nowPipePoint.FreeDegree != 0)
+                {
+                    DrawUtils.ShowGeometry(circleCenter, "l3Freedom", 0, lineWeightNum: 30, (int)radius, "C");
+                }
+            }
+
+            Line drawLine = new Line(pipeInList[0].DoorLeft, pipeInList[0].DoorRight);
+            DrawUtils.ShowGeometry(drawLine, "l1Input1Line", 200, lineWeightNum: 30);
+
+            int pipeId2 = nowRegion.MainEntrance.PipeIdList[0];
+            DrawPipeData drawPipeData1 = new DrawPipeData(ProcessedData.RadiatorPointList[1], ProcessedData.RadiatorPointList[0], ProcessedData.RadiatorPointList[1], ProcessedData.RadiatorPointList[0], 0, pipeId2, -1);
+            pipeOutList.Add(drawPipeData1);
+            //////if (i == 16)
+            //////{
+            //////    DrawUtils.ShowGeometry(nowRegion.ClearedPl, "l1testPl", 10, 30);
+            //////    DrawUtils.ShowGeometry(circleCenter, "l1testPoints", 5, lineWeightNum: 30, (int)radius, "C");
+            //////}
+
+            //// calculate pipeline
+
+            PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList,0, nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall, 2);
+            passagePipeGenerator.CalculatePipeline();
+            List<PipeOutput> nowOutputList = passagePipeGenerator.outputs;
+            nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l4PassingPipe", x.pipe_id % 7 + 1, 30));
+            nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.skeleton, "l4PassingSkeleton", x.pipe_id % 7 + 1, 30));
+
+            //局部保存结果
+            //List<int> list = passagePipeGenerator.pipe_id;
+            for (int n = 0; n < nowOutputList.Count; n++)
+            {
+                int pipeId = nowOutputList[n].pipe_id;
+                var regionPolyMap = PipePolyListMap[pipeId];
+                List<Polyline> newList = new List<Polyline>();
+                newList.Add(nowOutputList[n].shape);
+                regionPolyMap.Add(i, newList);
+
+                var regionCenterMap = PipeCenterLineListMap[pipeId];
+                regionCenterMap.Add(i, nowOutputList[n].skeleton);
+            }
+        }
+
         public void GetDrawnPipe()
         {
             for (int i = 0; i < RegionList.Count; i++)
@@ -75,6 +140,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     int stop = 5;
                 }
+
+                if (Parameter.HaveRadiator)
+                {
+                    if (i == ProcessedData.RadiatorRegion)
+                    {
+                        GetRadiatorPipe();
+                        continue;
+                    }
+                }
+
 
                 int mode = 0;
                 if (i == 0) mode = Parameter.PrivatePublicMode;
@@ -435,7 +510,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     int upRegionId = DoorList[doorId].UpstreamRegion.RegionId;
                     int downRegionId = DoorList[doorId].DownstreamRegion.RegionId;
 
-                    if (doorId == 14)
+                    if (doorId == 1)
                     {
                         int stop = 0;
                     }
@@ -453,8 +528,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     Polyline upPl = PipePolyListMap[i][upRegionId][0];
                     Polyline downPl = PipePolyListMap[i][downRegionId][0];
 
+
+                    //DrawUtils.ShowGeometry(downPl, "l8Test", 1, 30);
                     double upBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[0], ppList[1], upPl);
                     double downBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[2], ppList[3], downPl);
+
+
                     Polyline pl = PolylineProcessService.CreateRectangle3(centerLeft, centerRight, upBufferLength, downBufferLength);
 
                     DBObjectCollection a = new DBObjectCollection();
@@ -534,17 +613,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void DrawWholePipe()
         {
-            for (int i = 0; i < SinglePipeList.Count; i++) 
+            for (int i = 0; i < SinglePipeList.Count; i++)
             {
                 List<Polyline> tmpPolyList = new List<Polyline>();
 
-
-                foreach (var plList in PipePolyListMap[i]) 
+                foreach (var plList in PipePolyListMap[i])
                 {
                     tmpPolyList.AddRange(plList.Value);
                 }
 
-                for (int j = 0; j < tmpPolyList.Count; j++) 
+                for (int j = 0; j < tmpPolyList.Count; j++)
                 {
                     tmpPolyList[j].Closed = true;
                     //DrawUtils.ShowGeometry(tmpPolyList[i], "l4Why", 5, 30);
@@ -553,14 +631,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Polyline pl = new Polyline();
                 var plList2 = tmpPolyList.ToArray().ToCollection().UnionPolygons(false).Cast<Polyline>().ToList();
 
-                if (plList2.Count > 0) 
+                if (plList2.Count > 0)
                 {
                     pl = plList2.First();
                 }
-            
+
                 WholePipeList.Add(pl);
                 DrawUtils.ShowGeometry(pl, "l3WholePipe", 0, 30);
-                
+
                 //var plList2 = tmpPolyList.ToArray().ToCollection().UnionPolygons(false).Cast<Polyline>().ToList();
                 //if (plList2.Count > 1)
                 //{
@@ -601,6 +679,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 if (WholePipeList[i] == new Polyline() || WholePipeList[i].Area == 0)
                 {
+                    FilletedPipeList.Add(WholePipeList[i]);
                     continue;
                 }
                 var nowPipeInfo  = DoorPipeToPointMap[new Tuple<int, int>(0, i)];
@@ -611,9 +690,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 fixList.Add(pt0);
                 fixList.Add(pt1);
                 fixList.AddRange(PipeFixPointList[i]);
+                
+                //修线
                 WholePipeList[i] = PolylineProcessService.PlClearSmall(WholePipeList[i], fixList, 101);
                 DrawUtils.ShowGeometry(WholePipeList[i], "l5ClearSmall", 20 , 30);
-                var fillet_poly = FilletUtils.FilletPolyline(WholePipeList[i] , pt0, pt1);
+
+                //修正入口偏移
+                WholePipeList[i] = WaterSeparator.EntranceCorrection(WholePipeList[i], ProcessedData.WaterOffset, fixList);
+                Point3d pt2 = pt0 + ProcessedData.WaterOffset;
+                Point3d pt3 = pt1 + ProcessedData.WaterOffset;
+
+                //倒角
+                var fillet_poly = FilletUtils.FilletPolyline(WholePipeList[i] , pt2, pt3);
+                DrawUtils.ShowGeometry(pt0,"l5StartTest",20);
+                
                 DrawUtils.ShowGeometry(fillet_poly, "l4FilletedPipe", 0, 30);
                 FilletedPipeList.Add(fillet_poly);
             }
@@ -623,7 +713,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             for (int i = 0; i < FilletedPipeList.Count; i++) 
             {
-                SinglePipeList[i].ResultPolys.Add(FilletedPipeList[i]);
+                SinglePipeList[i].PipeId = i;
+
+                if (WholePipeList[i] != new Polyline() && WholePipeList[i].Area != 0)
+                {
+                    SinglePipeList[i].ResultPolys.Add(FilletedPipeList[i]);
+                }
+                
             }
         }
     }
@@ -636,6 +732,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public Point3d LeftPoint;    //管道精确点位
         public Point3d RightPoint;   //管道精确点位
         public Point3d CenterPoint;
+        public Vector3d OutDir;
 
         public Point3d DoorLeft;   //门的范围
         public Point3d DoorRight;

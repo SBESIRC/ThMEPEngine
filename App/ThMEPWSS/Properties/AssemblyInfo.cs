@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.40.0")]
-[assembly: AssemblyFileVersion("1.9.40.0")]
+[assembly: AssemblyVersion("1.9.41.0")]
+[assembly: AssemblyFileVersion("1.9.41.0")]
 
 [assembly: CommandClass(typeof(ThMEPWSS.ThPipeCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThSprayCmds))]
@@ -46,3 +46,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPWSS.ThDrainageADPrivateCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThFirstFloorDrainningPlaneSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPWSS.SprinklerDim.Cmd.ThSprinklerDimCmdEntrance))]
+[assembly: CommandClass(typeof(ThMEPWSS.PressureDrainageSystem.DebugCommand))]
+[assembly: CommandClass(typeof(ThMEPWSS.HydrantConnectPipe.Command.ThHydrantConnectPipeConnectCmd))]

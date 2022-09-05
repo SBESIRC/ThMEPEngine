@@ -78,16 +78,9 @@ namespace ThMEPHVAC
                 if (main_index_result.Status != PromptStatus.OK) return;
                 int main_index = main_index_result.Value;
                 // input freedom
-                var pouts_freedom = new List<int>();
+                var pouts_freedom = new List<int>(out_pipe_num);
                 for (int i = 0; i < out_pipe_num; i++)
-                {
-                    //string str = "is pout[" + i.ToString() + "] free?";
-                    //var free_result = Active.Editor.GetInteger(str);
-                    //if (free_result.Status != PromptStatus.OK) return;
-                    //pouts_freedom.Add(free_result.Value);
-                    pouts_freedom.Add(0); 
-                }
-                //pouts_freedom[2] = 1;
+                    pouts_freedom.Add(0);
                 // input pipe ins
                 List<DrawPipeData> pipe_in_list = new List<DrawPipeData>();
                 for (int i = 0; i < in_pipe_num; i++)
@@ -111,7 +104,7 @@ namespace ThMEPHVAC
                     pipe_out_list.Add(new DrawPipeData(circle.Center, circle.Radius, pouts_freedom[i], i));
                 }
 
-                double buffer = 600;
+                double buffer = 500;
                 double room_buffer = 100;
                 // core process
                 PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(room, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, 0);

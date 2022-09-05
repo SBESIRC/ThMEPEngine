@@ -68,12 +68,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acdb.Element<Polyline>(obj);
-                    selectPLines.Add(frame.Clone() as Polyline);
+                    var frameadd = frame.Clone() as Polyline;
+                    frameadd.Closed = true;
+                    frameadd = ThGeomUtil.ProcessFrame(frameadd,20);
+                    selectPLines.Add(frameadd);
                 }
 
             }
             return selectPLines;
         }
+
 
 
         //public static Point3dCollection GetFrameBlk()

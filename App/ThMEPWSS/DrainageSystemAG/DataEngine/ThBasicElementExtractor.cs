@@ -82,40 +82,6 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                             o.Results.AddRange(DoExtract(blkRef, mcs2wcs, o, true));
                         });
                     }
-                    else if (ent.GetType().Name.ToUpper().Contains("IMP"))
-                    {
-                        //自定义元素
-                        try
-                        {
-                            var dBObject = ThMEPTCHService.ExplodeTCHElement(ent);
-                            if (null == dBObject || dBObject.Count < 1)
-                                continue;
-                            foreach (Entity entity in dBObject)
-                            {
-                                if (entity is BlockReference block)
-                                {
-                                    Visitors.ForEach(o =>
-                                    {
-                                        o.Results.AddRange(DoExtract(block, Matrix3d.Identity, o, true));
-                                    });
-                                }
-                                else
-                                {
-                                    Visitors.ForEach(o =>
-                                    {
-                                        var results = new List<ThRawIfcAnnotationElementData>();
-                                        o.DoExtract(results, ent, Matrix3d.Identity);
-                                        o.Results.AddRange(results);
-                                    });
-                                }
-                            }
-                        }
-                        catch (System.Exception ex) 
-                        {
-                            //自定义元素无法炸开，这里不进行处理
-                        }
-                        
-                    }
                     else 
                     {
                         var name = ent.GetType().Name.ToUpper();
@@ -161,42 +127,10 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                             results.AddRange(DoExtract(blockObj, mcs2wcs, visitor, checkNotExternal));
                         }
                     }
-                    else if (dbObj.GetType().Name.ToUpper().Contains("IMP"))
-                    {
-                        //自定义元素
-                        try 
-                        {
-                            if (!ThMEPTCHService.IsTCHElement(dbObj))
-                                continue;
-                            var dBObject = ThMEPTCHService.ExplodeTCHElement(dbObj);
-                            if (null == dBObject || dBObject.Count < 1)
-                                continue;
-                            foreach (Entity entity in dBObject)
-                            {
-                                if (entity is BlockReference block)
-                                {
-                                    results.AddRange(DoExtract(block, matrix, visitor, checkNotExternal));
-                                }
-                                else
-                                {
-                                    visitor.DoExtract(results, dbObj, matrix);
-                                }
-                            }
-                        }
-                        catch (System.Exception ex)
-                        {
-                            //自定义元素可能会无法炸开，这里不进行处理
-                        }
-                        
-                    }
                     else
                     {
                         visitor.DoExtract(results, dbObj, matrix);
                     }
-                }
-                if (results.Count > 0) 
-                {
-                
                 }
                 // 过滤XClip外的图元信息
                 visitor.DoXClip(results, blockReference, matrix);

@@ -61,7 +61,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        public static void InsertCoil(List<Polyline> pipes, bool withColor = false)
+        public static void InsertCoil(List<Polyline> pipes,string layer, bool withColor = false)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -71,7 +71,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     {
                         var poly = pipes[i];
                         poly.Linetype = "ByLayer";
-                        poly.Layer = ThFloorHeatingCommon.Layer_Coil;
+                        poly.Layer =layer;
                         if (withColor == true)
                         {
                             poly.ColorIndex = i % 6;
@@ -91,19 +91,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
             attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Route, string.Format("HL{0}", routeS));
             attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Dist, string.Format("A={0}", sdS));
-            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length, string.Format("L≈{0}m", lengthS));
+            attNameValues.Add(ThFloorHeatingCommon.BlkSettingAttrName_RoomSuggest_Length, string.Format("L={0}m", lengthS));
 
             return attNameValues;
         }
 
-        public static void ShowConnectivity(List<Polyline> roomgraph, int colorIndex)
+        public static void ShowConnectivity(List<Polyline> roomgraph, string layer,int colorIndex)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 foreach (var poly in roomgraph)
                 {
                     poly.Linetype = "ByLayer";
-                    poly.Layer = ThFloorHeatingCommon.Layer_RoomSetFrame;
+                    poly.Layer = layer;
                     poly.ColorIndex = colorIndex;
                     var objid = acadDatabase.ModelSpace.Add(poly);
 

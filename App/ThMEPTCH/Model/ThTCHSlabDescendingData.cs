@@ -1,10 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using ProtoBuf;
+using System;
 
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHSlabDescendingData
+    public class ThTCHSlabDescendingData:ICloneable
     {
         /// <summary>
         /// 降板高度
@@ -35,5 +36,17 @@ namespace ThMEPTCH.Model
         /// </summary>
         [ProtoMember(15)]
         public Polyline Outline { get; set; }
+
+        public object Clone()
+        {
+            var clone = new ThTCHSlabDescendingData();
+            if(this.Outline != null)
+                clone.Outline = this.Outline.Clone() as Polyline;
+            clone.IsDescending = this.IsDescending;
+            clone.DescendingHeight = this.DescendingHeight;
+            clone.DescendingThickness = this.DescendingThickness;
+            clone.DescendingWrapThickness = this.DescendingWrapThickness;
+            return clone;
+        }
     }
 }

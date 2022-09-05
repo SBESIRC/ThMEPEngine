@@ -188,7 +188,7 @@ namespace TianHua.Hvac.UI
         }
 
         SmokeCalculateUI smokeCalculateUI;
-        [CommandMethod("TIANHUACAD", "THFYJS", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THZYSFJS", CommandFlags.Modal)]
         public void THFYJS()
         {
             if (smokeCalculateUI != null && smokeCalculateUI.IsLoaded)
@@ -239,18 +239,18 @@ namespace TianHua.Hvac.UI
         [CommandMethod("TIANHUACAD", "THDNPG", CommandFlags.Modal)]
         public void THDNPG()
         {
-            if (uiFloorHeatingCoil.Instance != null && uiFloorHeatingCoil.Instance.IsLoaded)
+            if (UiFloorHeatingCoil.Instance != null && UiFloorHeatingCoil.Instance.IsLoaded)
             {
-                if (!uiFloorHeatingCoil.Instance.IsVisible)
+                if (!UiFloorHeatingCoil.Instance.IsVisible)
                 {
-                    uiFloorHeatingCoil.Instance.Show();
+                    UiFloorHeatingCoil.Instance.Show();
                 }
                 return;
             }
 
-            uiFloorHeatingCoil.Instance.WindowStartupLocation =
+            UiFloorHeatingCoil.Instance.WindowStartupLocation =
                 System.Windows.WindowStartupLocation.CenterScreen;
-            AcadApp.ShowModelessWindow(uiFloorHeatingCoil.Instance);
+            AcadApp.ShowModelessWindow(UiFloorHeatingCoil.Instance);
         }
         #endregion
     }

@@ -20,6 +20,11 @@ namespace ThMEPEngineCore.Engine
             Visitors.Add(visitor);
         }
 
+        public void Accept(ThAnnotationElementExtractionVisitor[] visitors)
+        {
+            Visitors.AddRange(visitors);
+        }
+
         public void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))

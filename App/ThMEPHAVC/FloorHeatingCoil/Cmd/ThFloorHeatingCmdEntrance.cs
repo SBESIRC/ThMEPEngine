@@ -47,7 +47,7 @@ namespace ThMEPHVAC
                     return;
                 }
 
-                var transformer = ThMEPHVACCommonUtils.GetTransformer(selectFrames[0].Vertices());
+                var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
                 transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 var dataFactory = new ThFloorHeatingDataFactory()
@@ -59,6 +59,12 @@ namespace ThMEPHVAC
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
 
                 dataQuery.Print();
+
+                var roomSuggest = ThFloorHeatingCoilUtilServices.GetRoomSuggestData(acadDatabase.Database);
+                var roomPlSuggestDict = ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest, transformer);
+                ThFloorHeatingCoilUtilServices.PairRoomWithRoomSuggest(ref dataQuery.RoomSet, roomPlSuggestDict, 200);
+
+                dataQuery.RoomSet[0].Room.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.RoomBoundary.GetCenter(), x.SuggestDist.ToString(), "l0roomSuggest", hight: 200));
                 //dataQuery.Reset(transformer);
 
             }
@@ -79,7 +85,7 @@ namespace ThMEPHVAC
 
                 using (var cmd = new ThFloorHeatingCmd())
                 {
-                    cmd.Execute();
+                    cmd.SubExecute();
                 }
 
 

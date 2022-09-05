@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPLighting.Common;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -145,12 +146,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             ObjIds.AddRange(PrintLightBlocks(db));
         }
 
-        private void PrintTCHCableTray(List<Line> lines)
+        private void PrintTCHCableTray(List<Line> lines, ThMEPOriginTransformer transformer)
         {
             var service = new ThDrawTCHCableTrayService();
             service.Width = ArrangeParameter.Width;
             service.Height = ArrangeParameter.Height;
-            service.Draw(lines);
+            service.Draw(lines, transformer);
         }
 
         private ObjectIdList PrintCableTray(Database db)
@@ -210,8 +211,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 lines.AddRange(wires);
                 lines.AddRange(crossLinks);
                 ResetObjIds(ObjIds);
+                PrintTCHCableTray(lines, Transformer);
                 Transformer.Reset(lines.ToCollection());
-                PrintTCHCableTray(lines);
             }
             else
             {

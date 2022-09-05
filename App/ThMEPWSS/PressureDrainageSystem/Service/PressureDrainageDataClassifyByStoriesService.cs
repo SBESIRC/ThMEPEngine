@@ -115,15 +115,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         private void AppendDrainWellsToModeldates()
         {
-            Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells = new();
-            var extents = GetBoundaryExtendList(Viewmodel)[0];
-            foreach (var well in CollectDataService.CollectedData.DrainWells)
+            for (int layer = 0; layer < Modeldatas.FloorListDatas.Count; layer++)
             {
-                if (extents.Contains(well.Extents.GetCenter()))
+                Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].DrainWells = new();
+                var extents = GetBoundaryExtendList(Viewmodel)[layer];
+                foreach (var well in CollectDataService.CollectedData.DrainWells)
                 {
-                    Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells.Add(well);
+                    if (extents.Contains(well.Extents.GetCenter()))
+                    {
+                        Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].DrainWells.Add(well);
+                    }
                 }
-            }
+            }       
         }
 
         /// <summary>
@@ -133,47 +136,66 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                var ext = GetBoundaryExtendList(Viewmodel)[0];
-                Modeldatas.WallLines = new List<Polyline>();
-                DBObjectCollection objWalls = new();
-                DBObjectCollection objColumns = new();
-                DBObjectCollection objConcaveHull = new();
-                DBObjectCollection objTmpPlys = new();
-                foreach (var plyWalls in CollectDataService.CollectedData.WallPolyLines)
-                {
-                    if (ext.IsPointIn(plyWalls.GetMidpoint()))
-                    {
-                        objWalls.Add(plyWalls);
-                        objTmpPlys.Add(plyWalls);
-                        Modeldatas.WallLines.Add(plyWalls);
-                    }
-                }
-                foreach (var plyColumns in CollectDataService.CollectedData.ColumnsPolyLines)
-                {
-                    if (ext.IsPointIn(plyColumns.GetMidpoint()))
-                    {
-                        objColumns.Add(plyColumns);
-                        objTmpPlys.Add(plyColumns);
-                    }
-                }
-                var concaveBuilder = new ThMEPConcaveBuilder(objTmpPlys, 8000);
-                objConcaveHull = concaveBuilder.Build();
                 Modeldatas.Boundaries = new List<Polyline>();
-                Modeldatas.Boundaries.AddRange(objConcaveHull.Cast<Polyline>().ToList());
-                //删除在边界附近的可疑线段，不认为是内墙
-                if (Modeldatas.Boundaries.Count > 0)
+                Modeldatas.WallLines = new List<Polyline>();
+                var _boundaries = new List<List<Polyline>>();
+                var _wallLines = new List<List<Polyline>>();
+                for (int layer = 0; layer < Modeldatas.FloorListDatas.Count; layer++)
                 {
-                    var bound = Modeldatas.Boundaries.OrderByDescending(e => e.Area).First().BufferPL(5000).Cast<Polyline>().OrderBy(e => e.Area).First();
-                    for (int i = 0; i < Modeldatas.WallLines.Count; i++)
+                    var _boundaries_list = new List<Polyline>();
+                    var _wallLines_list= new List<Polyline>();
+
+                    var ext = GetBoundaryExtendList(Viewmodel)[layer];
+                    DBObjectCollection objWalls = new();
+                    DBObjectCollection objColumns = new();
+                    DBObjectCollection objConcaveHull = new();
+                    DBObjectCollection objTmpPlys = new();
+                    foreach (var plyWalls in CollectDataService.CollectedData.WallPolyLines)
                     {
-                        var pl = Modeldatas.WallLines[i];
-                        if (pl.Intersects(bound) || !bound.Contains(pl.GetMidpoint()))
+                        if (ext.IsPointIn(plyWalls.GetMidpoint()))
                         {
-                            Modeldatas.WallLines.RemoveAt(i);
-                            i--;
+                            objWalls.Add(plyWalls);
+                            objTmpPlys.Add(plyWalls);
+                            _wallLines_list.Add(plyWalls);
                         }
                     }
+                    foreach (var plyColumns in CollectDataService.CollectedData.ColumnsPolyLines)
+                    {
+                        if (ext.IsPointIn(plyColumns.GetMidpoint()))
+                        {
+                            objColumns.Add(plyColumns);
+                            objTmpPlys.Add(plyColumns);
+                        }
+                    }
+                    var concaveBuilder = new ThMEPConcaveBuilder(objTmpPlys, 8000);
+                    objConcaveHull = concaveBuilder.Build();
+
+                    _boundaries_list.AddRange(objConcaveHull.Cast<Polyline>().ToList());
+                    //删除在边界附近的可疑线段，不认为是内墙
+                    if (_boundaries_list.Count > 0)
+                    {
+                        var bounds = _boundaries_list.OrderByDescending(e => e.Area).First().BufferPL(5000).Cast<Polyline>().ToList();
+                        bounds = bounds.OrderByDescending(e => e.Area).ToList();
+                        if (bounds.Count >= 2)
+                        {
+                            var bound = bounds[1];
+                            for (int i = 0; i < _wallLines_list.Count; i++)
+                            {
+                                var pl = _wallLines_list[i];
+                                if (pl.Intersects(bound) || !bound.Contains(pl.GetMidpoint()))
+                                {
+                                    _wallLines_list.RemoveAt(i);
+                                    i--;
+                                }
+                            }
+                        }
+                    }
+                    _boundaries.Add(_boundaries_list);
+                    _wallLines.Add(_wallLines_list);
                 }
+                _boundaries.ForEach(e => Modeldatas.Boundaries.AddRange(e));
+                _wallLines.ForEach(e => Modeldatas.WallLines.AddRange(e));
+
                 //objConcaveHull.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objWalls.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
                 //objColumns.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);

@@ -1,0 +1,8 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThTCHSiteData.proto";
+
+message ThTCHProjectData {
+    ThTCHRootData root = 1;
+    ThTCHSiteData site = 2;
+}

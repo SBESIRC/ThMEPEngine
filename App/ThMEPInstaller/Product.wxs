@@ -26,8 +26,6 @@
             <ComponentGroupRef Id="ProductComponentsHVACWin64" />
             <ComponentGroupRef Id="ProductComponentsDevExpress" />
             <ComponentGroupRef Id="ProductComponentsWPF" />
-            <ComponentGroupRef Id="ProductComponentsAppXBim" />
-            <ComponentGroupRef Id="ProductComponentsAppMicrosoft" />
             <ComponentGroupRef Id="ProductComponentsLightingWin64" />
             <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
             <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />

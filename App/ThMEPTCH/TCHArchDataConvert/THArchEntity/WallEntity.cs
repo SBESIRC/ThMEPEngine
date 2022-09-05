@@ -26,7 +26,7 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         {
             get
             {
-                if (null == WallCenterCurve && null == OutLine)
+                if (null == WallCenterCurve && null == Outline)
                     return 0.0;
                 if (null != WallCenterCurve)
                 {
@@ -40,7 +40,7 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         {
             get
             {
-                if (null == WallCenterCurve && null == OutLine)
+                if (null == WallCenterCurve && null == Outline)
                     return 0.0;
                 if (null != WallCenterCurve)
                 {

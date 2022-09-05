@@ -929,12 +929,12 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         private void Load()
         {
-            var fullPath = ThCADCommon.TianhuaBuiltInWallColumnTablePath();
-            var fileInfo = new FileInfo(fullPath);
-            if (!fileInfo.Exists)
+            var fullPath = ThCADCommon.TianhuaBuiltInWallColumnTablePath();            
+            if (!File.Exists(fullPath))
             {
                 return;
             }
+            var fileInfo = new FileInfo(fullPath);
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             Package = new ExcelPackage(fileInfo);
         }

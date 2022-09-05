@@ -43,7 +43,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return boundary;
         }
 
-        public static void GetRecInfo(Polyline rec, ref Point3d center, ref Vector3d ShortDir,ref Vector3d LongSide,ref Vector3d ShortSide)
+        public static void GetRecInfo(Polyline rec, ref Point3d center, ref Vector3d ShortDir, ref Vector3d LongSide, ref Vector3d ShortSide)
         {
             var tol = new Tolerance(10, 10);
             Point3d pt1 = rec.GetPoint3dAt(0);
@@ -55,12 +55,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Vector3d vec1 = pt2 - pt1;
             Vector3d vec2 = pt3 - pt2;
             center = pt1 + 0.5 * vec1 + 0.5 * vec2;
-            
+
             if (vec1.Length > vec2.Length)
             {
                 LongSide = vec1;
                 ShortSide = vec2;
-                
+
             }
             else
             {
@@ -72,7 +72,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
 
         //单侧延伸
-        public static Polyline CreateRectangle2(Point3d pt0, Point3d pt1, double length) 
+        public static Polyline CreateRectangle2(Point3d pt0, Point3d pt1, double length)
         {
             Vector3d dir = pt1 - pt0;
             Vector3d clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
@@ -114,19 +114,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
 
         //清理polyline
-        static public Polyline PlRegularization2(Polyline originPl,double value)
+        static public Polyline PlRegularization2(Polyline originPl, double value)
         {
             //Polyline ClearedPl = OriginPl.Clone() as Polyline;
             var originalArea = originPl.Area;
-            Polyline ClearedPl = originPl.Buffer(-value/2).OfType<Polyline>().ToList().FindByMax(x=>x.Area);
+            Polyline ClearedPl = originPl.Buffer(-value / 2).OfType<Polyline>().ToList().FindByMax(x => x.Area);
             DrawUtils.ShowGeometry(ClearedPl, "l1bBufferedClearedPl", 4, lineWeightNum: 30);
 
-            Polyline newClearedPl = ClearedPl.Buffer(value/2).OfType<Polyline>().ToList().FindByMax(x => x.Area);
+            Polyline newClearedPl = ClearedPl.Buffer(value / 2).OfType<Polyline>().ToList().FindByMax(x => x.Area);
             var newArea = newClearedPl.Area;
 
             var proportion = newArea / originalArea;
 
-            if (proportion < 0.8) 
+            if (proportion < 0.8)
             {
                 int i = 0;
             }
@@ -209,29 +209,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Vector3d vec4 = pt4 - pt3;
 
                 int find = 0;
-                
-                if (vec2.Length < value && vec3.Length < value) 
+
+                if (vec2.Length < value && vec3.Length < value)
                 {
                     double angle = vec2.GetAngleTo(vec3, Vector3d.ZAxis);
-                    if ( angle < 1.5 *Math.PI + 0.1 && angle > 1.5 *Math.PI - 0.1) 
+                    if (angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1)
                     {
-                        if (vec1.Length > vec4.Length) 
+                        if (vec1.Length > vec4.Length)
                         {
                             Line lineStart = new Line(pt1, pt1 + vec2.GetNormal() * Parameter.ClearExtendLength);
                             Vector3d endVec = pt5 - pt4;
-                            Line lineEnd = new Line(pt4- endVec.GetNormal() * value *2, pt5 + endVec.GetNormal() * value * 2);
+                            Line lineEnd = new Line(pt4 - endVec.GetNormal() * value * 2, pt5 + endVec.GetNormal() * value * 2);
                             List<Point3d> intersectionList = lineStart.Intersect(lineEnd, Intersect.OnBothOperands);
                             if (intersectionList.Count > 0)
                             {
-                                Point3d intersectionPoint  = intersectionList.FindByMin(x => x.DistanceTo(pt1));
-                      
+                                Point3d intersectionPoint = intersectionList.FindByMin(x => x.DistanceTo(pt1));
+
                                 deleteList.Add((i + 2) % num);
                                 deleteList.Add((i + 3) % num);
                                 deleteList.Add((i + 4) % num);
 
-                                insertMap.Add(i+2,intersectionPoint);
+                                insertMap.Add(i + 2, intersectionPoint);
                                 find = 1;
-                            }               
+                            }
                         }
                         else   //vec1.Length < vec4.Length
                         {
@@ -264,9 +264,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     newClearedPl.RemoveVertexAt(i);
                 }
-                if (insertList.Contains(i)) 
+                if (insertList.Contains(i))
                 {
-                    newClearedPl.AddVertexAt(i, insertMap[i].ToPoint2D(),0,0,0);
+                    newClearedPl.AddVertexAt(i, insertMap[i].ToPoint2D(), 0, 0, 0);
                 }
             }
 
@@ -292,11 +292,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 double angle1 = vec1.GetAngleTo(vec3, Vector3d.ZAxis);
                 bool flag = false;
                 if (angle1 < 0.3 || angle1 > Math.PI * 2 - 0.3) flag = true;
-                
+
                 int find = 0;
                 double angle = vec1.GetAngleTo(vec2, Vector3d.ZAxis);
 
-                if (vec2.Length < value && angle < 1.5 * Math.PI + 0.1  && angle > 1.5 * Math.PI - 0.1 && flag)
+                if (vec2.Length < value && angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1 && flag)
                 {
                     Line lineStart = new Line(pt0, pt0 + vec1.GetNormal() * Parameter.ClearExtendLength);
                     Line lineEnd = new Line(pt3 - vec4.GetNormal() * value * 2, pt4 + vec4.GetNormal() * value * 2);
@@ -309,7 +309,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         deleteList.Add((i + 2) % num);
                         deleteList.Add((i + 3) % num);
 
-                        insertMap.Add((i+1)%num, intersectionPoint);
+                        insertMap.Add((i + 1) % num, intersectionPoint);
                         find = 1;
                     }
                 }
@@ -334,7 +334,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             insertMap.Clear();
             insertList.Clear();
             num = newClearedPl.NumberOfVertices;
-            for (int i = num-1; i >= 0;)
+            for (int i = num - 1; i >= 0;)
             {
                 Point3d pt0 = newClearedPl.GetPoint3dAt(i);
                 var pt1 = newClearedPl.GetPoint3dAt((i - 1 + num) % num);
@@ -367,7 +367,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         deleteList.Add((i - 2 + num) % num);
                         deleteList.Add((i - 3 + num) % num);
 
-                        insertMap.Add((i - 3+ num) % num, intersectionPoint);
+                        insertMap.Add((i - 3 + num) % num, intersectionPoint);
                         find = 1;
                     }
                 }
@@ -394,10 +394,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return newClearedPl;
         }
 
-        static public void ClearPolyline(ref Polyline newClearedPl,double value = 5) 
+        static public void ClearPolyline(ref Polyline newClearedPl, double value = 5)
         {
             if (!newClearedPl.IsCCW()) newClearedPl.ReverseCurve();
-            
+
             List<int> deleteList = new List<int>();
             int num = newClearedPl.NumberOfVertices;
 
@@ -421,7 +421,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     //if (newClearedPl.NumberOfVertices >= 4)
                     //{
-                        
+
                     //}
                     //else break;
 
@@ -510,31 +510,31 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return newPl;
         }
         //
-        static public Polyline ClearBends(Polyline originalPl, Polyline boundary, double dis) 
+        static public Polyline ClearBends(Polyline originalPl, Polyline boundary, double dis)
         {
             Polyline newPl = originalPl.Clone() as Polyline;
             newPl = ClearPolylineUnclosed(newPl);
 
-            Polyline newBoundary = boundary.Buffer(-50).OfType<Polyline>().ToList().OrderByDescending(x=>x.Area).First();
+            Polyline newBoundary = boundary.Buffer(-50).OfType<Polyline>().ToList().OrderByDescending(x => x.Area).First();
             int num = newPl.NumberOfVertices;
-            for (int i = num-3; i >= 0; i--) 
+            for (int i = num - 3; i >= 0; i--)
             {
                 if (i + 2 >= newPl.NumberOfVertices) continue;
                 //if (i == 0) continue;
                 Point3d pt0 = newPl.GetPoint3dAt(i);
-                Point3d pt1 = newPl.GetPoint3dAt(i+1);
-                Point3d pt2 = newPl.GetPoint3dAt(i+2);
+                Point3d pt1 = newPl.GetPoint3dAt(i + 1);
+                Point3d pt2 = newPl.GetPoint3dAt(i + 2);
 
-                if ((pt1 - pt0).Length < dis) 
+                if ((pt1 - pt0).Length < dis)
                 {
                     Point3d newPt = FindDiagonalPoint(pt0, pt1, pt2);
-                    if (newBoundary.Contains(newPt)) 
+                    if (newBoundary.Contains(newPt))
                     {
                         newPl.AddVertexAt(i, newPt.ToPoint2D(), 0, 0, 0);
-                        newPl.RemoveVertexAt(i+1);
-                        newPl.RemoveVertexAt(i+1);
-                        newPl.RemoveVertexAt(i+1);
-                        
+                        newPl.RemoveVertexAt(i + 1);
+                        newPl.RemoveVertexAt(i + 1);
+                        newPl.RemoveVertexAt(i + 1);
+
                     }
                 }
             }
@@ -542,7 +542,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return newPl;
         }
 
-        static public void ClearBendsTest(Polyline originalPl, Polyline boundary, double dis ,out Polyline newPl)
+        static public void ClearBendsTest(Polyline originalPl, Polyline boundary, double dis, out Polyline newPl)
         {
             newPl = originalPl.Clone() as Polyline;
             newPl = ClearPolylineUnclosed(newPl);
@@ -582,7 +582,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 bufferDis = 5;
             }
-            else if(Mode == 1) 
+            else if (Mode == 1)
             {
                 bufferDis = -50;
             }
@@ -603,10 +603,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     Point3d newPt1 = FindDiagonalPoint(pt0, pt1, pt2);
                     Point3d newPt2 = FindDiagonalPoint(pt1, pt2, pt3);
 
-                    bool ok1 = newBoundary.Contains(new Line(newPt1 ,pt2)) && newBoundary.Contains(new Line(newPt1, pt0));
+                    bool ok1 = newBoundary.Contains(new Line(newPt1, pt2)) && newBoundary.Contains(new Line(newPt1, pt0));
                     bool ok2 = newBoundary.Contains(new Line(newPt2, pt1)) && newBoundary.Contains(new Line(newPt2, pt3));
                     if (i + 3 == num - 1) ok2 = false;
-                    if (i  ==  0) ok1 = false;
+                    if (i == 0) ok1 = false;
 
 
                     if (i + 3 == newPl.NumberOfVertices) ok2 = false;
@@ -617,9 +617,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     if ((ok1 && ok2 && vec0.Length > vec2.Length) || (ok2 && !ok1))
                     {
                         newPl.AddVertexAt(i + 1, newPt2.ToPoint2D(), 0, 0, 0);
-                        newPl.RemoveVertexAt(i+2);
-                        newPl.RemoveVertexAt(i+2);
-                        newPl.RemoveVertexAt(i+2);
+                        newPl.RemoveVertexAt(i + 2);
+                        newPl.RemoveVertexAt(i + 2);
+                        newPl.RemoveVertexAt(i + 2);
                     }
                     else if ((ok1 && ok2 && vec0.Length < vec2.Length) || (!ok2 && ok1))
                     {
@@ -634,7 +634,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return newPl;
         }
 
-        static public Polyline ConvertToIntegerPolyline(Polyline originalPl) 
+        static public Polyline ConvertToIntegerPolyline(Polyline originalPl)
         {
             var newClearedPl = originalPl.Clone() as Polyline; //change copy
 
@@ -667,13 +667,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     x1 = (int)pt0.X;
                     y1 = (int)pt1.Y;
                 }
-                else 
+                else
                 {
                     continue;
                 }
 
                 newClearedPl.RemoveVertexAt(i);
-                newClearedPl.AddVertexAt(i, new Point2d(x0,y0), 0, 0, 0);
+                newClearedPl.AddVertexAt(i, new Point2d(x0, y0), 0, 0, 0);
 
                 newClearedPl.RemoveVertexAt((i + 1) % num);
                 newClearedPl.AddVertexAt((i + 1) % num, new Point2d(x1, y1), 0, 0, 0);
@@ -682,11 +682,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return newClearedPl;
         }
 
-        static public Point3d FindDiagonalPoint(Point3d pt0, Point3d pt1, Point3d pt2) 
+        static public Point3d FindDiagonalPoint(Point3d pt0, Point3d pt1, Point3d pt2)
         {
             Vector3d dir = pt1 - pt0;
             Point3d newPt = pt2 - dir;
-            return newPt; 
+            return newPt;
         }
 
         public static List<Polyline> GetCenterLine(Polyline poly)
@@ -709,7 +709,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 ClearedPl = ClearedPlList.FindByMax(x => x.Area);
             }
             else return originPl;
-            
+
             DrawUtils.ShowGeometry(ClearedPl, "l1bBufferedClearedPl", 4, lineWeightNum: 30);
 
             Polyline newClearedPl = ClearedPl.Buffer(value / 2).OfType<Polyline>().ToList().FindByMax(x => x.Area);
@@ -1018,8 +1018,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             double bufferDis = 0;
             bufferDis = 75;
-            
-            
+
+
             Polyline newBoundary = originPl.Buffer(bufferDis).OfType<Polyline>().ToList().OrderByDescending(x => x.Area).First();
 
             newPl = ClearSmallHelper1(newPl, newBoundary, fixList, value, 0);
@@ -1034,14 +1034,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
 
 
-        static public Polyline ClearSmallHelper1(Polyline originPl, Polyline newBoundary, List<Point3d> fixList, double value,int mode = 1) 
+        static public Polyline ClearSmallHelper1(Polyline originPl, Polyline newBoundary, List<Point3d> fixList, double value, int mode = 1)
         {
             Polyline newPl = originPl;
             var points = PassageWayUtils.GetPolyPoints(newPl);
             int num = newPl.NumberOfVertices;
             for (int i = num - 4; i >= 0; i--)
             {
-                if (i == 2) 
+                if (i == 2)
                 {
                     int stop = 0;
                 }
@@ -1061,9 +1061,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Vector3d vec1 = pt2 - pt1;
                 Vector3d vec2 = pt3 - pt2;
 
-                
+
                 bool isTurnBack = false;
-                if (vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95) 
+                if (vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
                     isTurnBack = true;
 
                 if (mode == 2) isTurnBack = true;
@@ -1105,9 +1105,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
 
                 //特殊折返
-                if (mode == 0) 
+                if (mode == 0)
                 {
-                    if (vec0.GetNormal().DotProduct(vec1.GetNormal()) < -0.95) 
+                    if (vec0.GetNormal().DotProduct(vec1.GetNormal()) < -0.95)
                     {
                         newPl.RemoveVertexAt(i + 1);
                     }
@@ -1122,7 +1122,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
 
 
-        static bool CheckFixPointSafe(Point3d pt0, Point3d pt1, Point3d pt2, List<Point3d> fixList) 
+        static bool CheckFixPointSafe(Point3d pt0, Point3d pt1, Point3d pt2, List<Point3d> fixList)
         {
             List<Point3d> ptList = new List<Point3d>();
             ptList.Add(pt0);
@@ -1131,12 +1131,39 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             Polyline newPl = PassageWayUtils.BuildPolyline(ptList);
 
-            for (int i = 0; i < fixList.Count; i++) 
+            for (int i = 0; i < fixList.Count; i++)
             {
-                double dis = newPl.GetClosestPointTo(fixList[i],false).DistanceTo(fixList[i]);
+                double dis = newPl.GetClosestPointTo(fixList[i], false).DistanceTo(fixList[i]);
                 if (dis < 5) return false;
             }
             return true;
+        }
+    }
+
+    class VectorProcessService
+    {
+        static public int GetVecIndex(Vector3d vec) 
+        {
+            Vector3d newVec = vec.GetNormal();
+
+            int res = -10;
+            if (newVec.DotProduct(new Vector3d(1, 0, 0)) > 0.95) 
+            {
+                res = 0;
+            }else if (newVec.DotProduct(new Vector3d(0, 1, 0)) > 0.95)
+            {
+                res = 1;
+            }
+            else if (newVec.DotProduct(new Vector3d(-1, 0, 0)) > 0.95)
+            {
+                res = 2;
+            }
+            else if (newVec.DotProduct(new Vector3d(0, -1, 0)) > 0.95)
+            {
+                res = 3;
+            }
+
+            return res;
         }
     }
 }

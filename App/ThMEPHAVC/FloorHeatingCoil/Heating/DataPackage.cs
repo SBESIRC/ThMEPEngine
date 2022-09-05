@@ -26,6 +26,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public ThFloorHeatingWaterSeparator WaterSeparator;
         public List<Polyline> Obstacle = new List<Polyline>();
         public List<Polyline> RoomSeparateLine = new List<Polyline>();
+        public List<ThFloorHeatingBathRadiator> BathRadiators { get; set; } = new List<ThFloorHeatingBathRadiator>();
         //output
 
         //默认构造函数
@@ -44,6 +45,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 newPl.AddVertexAt(1, line.EndPoint.ToPoint2D(), 0, 0, 0);
                 RoomSeparateLine.Add(newPl);
             }
+
+            if (roomSet.BathRadiators != null && roomSet.BathRadiators.Count > 0)
+            {
+                Parameter.HaveRadiator = true;
+                BathRadiators = roomSet.BathRadiators;
+            }
+            else 
+            {
+                Parameter.HaveRadiator = false;
+            }
         }
     }
 
@@ -60,6 +71,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         static public List<SinglePipe> PipeList = new List<SinglePipe>();
         static public Dictionary<Tuple<int, int>, PipePoint> DoorPipeToPointMap = new Dictionary<Tuple<int, int>, PipePoint>();
+
+        //散热器
+        public static int RadiatorRegion = -1;
+        public static List<Point3d> RadiatorPointList = new List<Point3d>();
+        public static Vector3d RadiatorDir = new Vector3d();
+
+        //集水器
+        public static bool LeftToRight = false;
+        public static Vector3d WaterDir = new Vector3d();
+        public static int WaterDirIndex = -10;
+        static public Vector3d WaterOffset = new Vector3d(0, 0, 0);
 
         public ProcessedData()
         {
@@ -99,6 +121,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public bool PublicRegionConstraint = true;     //公区约束
         static public bool AuxiliaryRoomConstraint = true;    //附属房间经过主房间之后是否能够和其他回路相连
         static public int PrivatePublicMode = 0;    // 0：自动/公建  1：住宅  2：自动
+
+        //识别得到状态
+        static public bool HaveRadiator = false;
 
         //
         static public double SuggestDistancePass = 600;

@@ -75,9 +75,9 @@ namespace ThMEPTCH.CAD
         private Polyline CreateOutline(TArchWall archWall)
         {
             var wallEntity = DBToTHEntityCommon.TArchWallToEntityWall(archWall,0,0,0,0,new Vector3d(0,0,0));
-            if(wallEntity.OutLine !=null)
+            if(wallEntity.Outline !=null)
             {
-                return wallEntity.OutLine.Shell();
+                return wallEntity.Outline.Shell();
             }
             else
             {

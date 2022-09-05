@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ThMEPTCH.TCHTables
+﻿namespace ThMEPTCH.TCHTables
 {
     struct TCHTwtBlock
     {
@@ -8,8 +6,9 @@ namespace ThMEPTCH.TCHTables
          *  ID     INT,
          *  Type   TEXT, 
          *  Number TEXT);*/
+
         public ulong ID;
         public string Type;
-        public Int32 Number;
+        public string Number;
     }
 }

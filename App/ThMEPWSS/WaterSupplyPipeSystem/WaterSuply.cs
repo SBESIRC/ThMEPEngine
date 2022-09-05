@@ -1,24 +1,25 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Catel.Linq;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ThCADExtension;
-using ThMEPWSS.Pipe.Service;
-using ThCADCore.NTS;
-using NFox.Cad;
-using ThMEPEngineCore.Model.Common;
-using ThMEPEngineCore.Model;
-using ThMEPWSS.Diagram.ViewModel;
-using ThMEPEngineCore.Engine;
 using System.Text.RegularExpressions;
 using System.Windows;
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Common;
+using ThMEPWSS.Pipe.Engine;
+using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.WaterSupplyPipeSystem.Data;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
 using ThMEPWSS.WaterSupplyPipeSystem.tool;
-using ThMEPWSS.Pipe.Engine;
-using ThMEPWSS.WaterSupplyPipeSystem.Data;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem
 {
@@ -142,8 +143,16 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             {
                 for (int j = 0; j < floorAreaList[0].Count; j++)
                 {
-                    var overlapHouse = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]);
-                    households[i, j] = GetDeduplicationHouseCnt( overlapHouse);
+                    if (floorAreaList[i].Count<=j)
+                    {
+                        households[i, j] = 0;
+                    }
+                    else
+                    {
+                        var overlapHouse = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]);
+                        households[i, j] = GetDeduplicationHouseCnt(overlapHouse);
+                    }
+                
                 }
             }
 
@@ -363,8 +372,14 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
 
                 for (int j = highestStorey[i] - 1; j >= lowestStorey[i] - 1; j--)
                 {
-                    var toolNums = floorCleanToolList[j][areaIndex].GetCleaningTools();//当前层的卫生洁具数
-                    var householdNum = floorCleanToolList[j][areaIndex].GetHouseholdNums();
+                    int[] toolNums = new int[8] {0,0,0,0,0,0,0,0};
+                    int householdNum = 0;
+                    if (floorCleanToolList[j].Count>areaIndex)
+                    {
+                        toolNums = floorCleanToolList[j][areaIndex].GetCleaningTools();//当前层的卫生洁具数
+                        householdNum = floorCleanToolList[j][areaIndex].GetHouseholdNums();
+                    }
+
                     if (householdNum == 0)
                     {
                         householdNum = maxHouseholdNums;
@@ -562,6 +577,41 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             return rectList;
         }
 
+        public static List<Point3dCollection> CreateRectList(ThStoreys sobj,ThCADCoreNTSSpatialIndex segIndex)
+        {
+            var floorRect = CreateFloorRect(sobj);//创建楼层框
+            var segs = segIndex.SelectCrossingPolygon(floorRect);
+            var plines = new List<Polyline>();
+            foreach(var obj in segs)
+            {
+                plines.Add(obj as Polyline);
+            }
+            var areas = DrainageSystemAG.Bussiness.FloorFramedSpliter.ConvertToCorrectSpliteLines(plines, floorRect);
+            var rectList = new List<Point3dCollection>();
+            rectList.Add(ConvertToCollection(floorRect));
+            foreach(var area in areas)
+            {
+                rectList.Add(ConvertToCollection(area));
+            }
+            return rectList;
+        }
+
+        public static Point3dCollection ConvertToCollection(Polyline pline)
+        {
+            var plinePts = pline.GetPoints().ToList();
+            var cnt = plinePts.Count;
+            var pts = new Point3d[cnt+1];
+            for(int i =0; i< plinePts.Count(); i++)
+            {
+                pts[i] = plinePts[i];
+            }
+            if (plinePts[0].DistanceTo(plinePts.Last())>1)
+            {
+                pts[cnt] = plinePts[0];
+            }
+            return new Point3dCollection(pts);
+        }
+
         public static Point3d CreateFloorPt(ThStoreys sobj)
         {
             var spt = sobj.ObjectId.GetBlockPosition();//获取楼层分割线的起始点
@@ -621,6 +671,34 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
 
             return FloorAreaList;
         }
+
+        public static List<List<Point3dCollection>> CreateFloorAreaList(List<ThIfcSpatialElement> elements, List<Polyline> segs)
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            var segSpatialIndex = new ThCADCoreNTSSpatialIndex(segs.ToCollection());
+            var FloorAreaList = new List<List<Point3dCollection>>();
+            foreach (var obj in elements)//遍历楼层
+            {
+                if (obj is ThStoreys)
+                {
+                    var sobj = obj as ThStoreys;
+                    var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
+                    if (!br.IsDynamicBlock) continue;
+                    if (sobj.StoreyType.ToString().Contains("StandardStorey"))
+                    {
+                        if (!sobj.StoreyNumber.Trim().StartsWith("-") && !sobj.StoreyNumber.Trim().StartsWith("B"))
+                        {
+                            var rectList = CreateRectList(sobj, segSpatialIndex);
+                            FloorAreaList.Add(rectList);//分区的多段线添加
+                        }
+
+                    }
+                }
+            }
+
+            return FloorAreaList;
+        }
+
 
         public static Polyline CreateFloorAreaList(ThIfcSpatialElement element)//创建当前楼层的框选
         {

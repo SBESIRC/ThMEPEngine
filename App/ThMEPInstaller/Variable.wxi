@@ -7,17 +7,17 @@
     <!-- The manufacturer, for setup package publisher and folder info -->
     <?define Manufacturer = "天华AI研究中心" ?>
     <!-- The version number of this setup package-->
-    <?define Version = "1.9.40" ?>
+    <?define Version = "1.9.41" ?>
     <!-- Bundle logo-->
     <?define Logo = "Resources\Logo.ico" ?>
     <!-- Bundle EULA rtf document-->
     <?define Eula = "Resources\License_zh-CN.rtf" ?>
     <!-- Product code -->
-    <?define ProductCode = "9502C312-3624-4649-9892-67B8BA7AD768" ?>
+    <?define ProductCode = "AF9D89F1-8929-4D5B-8F9D-B69577AD87D5" ?>
     <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
     <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
     <!-- Autoloader path. -->
-    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
+    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader\ThMEPEngine" ?>
     <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
     <!-- Output root path. -->
     <?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>
@@ -37,4 +37,6 @@
     <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
     <!-- Xbim Geometry Engine path -->
     <?define XbimGeoEngine = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry.Engine" ?>
+    <!-- Elevation Generator path -->
+    <?define ElevationGeneratorPath = "$(var.ProjectDir)\..\..\Externals\ElevationGenerator" ?>
 </Include>

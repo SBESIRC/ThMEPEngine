@@ -24,8 +24,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 点集重排列
             var points = PassageWayUtils.GetPolyPoints(shell);
             points = SmoothUtils.SmoothPoints(points);
-            var si = PassageWayUtils.GetPointIndex(start, points);
-            var ei = PassageWayUtils.GetPointIndex(end, points);
+            var si = PassageWayUtils.GetPointIndex(start, points,5);
+            var ei = PassageWayUtils.GetPointIndex(end, points,5);
 
             if (si == -1 || ei == -1) return shell;
 

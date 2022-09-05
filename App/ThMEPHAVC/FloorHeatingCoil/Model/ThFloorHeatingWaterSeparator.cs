@@ -10,7 +10,9 @@ using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
 
-using ThMEPHVAC.Service;
+using ThMEPEngineCore.Algorithm;
+//using ThMEPHVAC.Service ;
+using ThMEPHVAC.FloorHeatingCoil.Service;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
@@ -27,7 +29,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         public ThFloorHeatingWaterSeparator(BlockReference blk)
         {
             Blk = blk;
-            OBB = ThGeomUtil.GetVisibleOBB(blk);
+            OBB = GetOBB(blk);
             SetDir();
             SetStartPts();
 
@@ -55,13 +57,30 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
         private int GetStartPtCount()
         {
+            //var value = Blk.ObjectId.GetDynBlockValue(ThFloorHeatingCommon.BlkSettingAttrName_WaterSeparator);
+            //var length = Convert.ToInt32(value);
+            //var count = length / 50;
+            //count = count - 1;
 
             var value = Blk.ObjectId.GetDynBlockValue(ThFloorHeatingCommon.BlkSettingAttrName_WaterSeparator);
-            var length = Convert.ToInt32(value);
-            var count = length / 50;
-            count = count - 1;
-
+            var i = ThFloorHeatingCoilUtilServices.GetNumberFromString(value);
+            var count = Convert.ToInt32(i) * 2;
             return count;
+        }
+
+        public void Transform(ThMEPOriginTransformer transformer)
+        {
+            transformer.Transform(Blk);
+            transformer.Transform(OBB);
+            StartPts = StartPts.Select(x => transformer.Transform(x)).ToList();
+        }
+
+        private static Polyline GetOBB(BlockReference blk)
+        {
+            var objs = new DBObjectCollection();
+            blk.ExplodeWithVisible(objs);
+            var obb = objs.OfType<Polyline>().First();
+            return obb;
         }
 
         //private void SetStartPts2()
@@ -99,22 +118,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         public BlockReference Blk { get; private set; }
         public Polyline OBB { get; private set; }
         public List<Point3d> StartPts { get; private set; }
-        public Vector3d DirLine { get; private set; }
-        //public Vector3d DirStartPt { get; private set; }
 
         public ThFloorHeatingBathRadiator(BlockReference blk)
         {
             Blk = blk;
             OBB = ThGeomUtil.GetVisibleOBB(blk);
-            SetDir();
+            //SetDir();
             SetStartPts();
 
         }
-        private void SetDir()
-        {
-            var dir = new Vector3d(0, -1, 0);
-            DirLine = dir.TransformBy(Blk.BlockTransform).GetNormal();
-        }
+
         private void SetStartPts()
         {
             StartPts = new List<Point3d>();
@@ -141,6 +154,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
             StartPts.Add(p1);
             StartPts.Add(p2);
+        }
+
+        public void Transform(ThMEPOriginTransformer transformer)
+        {
+            transformer.Transform(Blk);
+            transformer.Transform(OBB);
+            StartPts = StartPts.Select(x => transformer.Transform(x)).ToList();
         }
 
 

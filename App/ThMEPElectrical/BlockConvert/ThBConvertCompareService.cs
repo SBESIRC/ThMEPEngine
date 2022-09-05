@@ -231,6 +231,7 @@ namespace ThMEPElectrical.BlockConvert
 
                     if (i == 0 || i == 1)
                     {
+                        var searchRepetitiveIds = new List<ObjectId>();
                         var localSearchIds = new List<ObjectId>();
                         targetEntitiesMap[i].ForEach(o =>
                         {
@@ -244,19 +245,24 @@ namespace ThMEPElectrical.BlockConvert
                             var targetLoadList = targetEntitiesMap[i].Where(e => GetLoadId(e.Value).Equals(loadId));
                             if (targetLoadList.Count() > 1)
                             {
-                                var result = new ThBConvertCompareModel
+                                var targetIdList = targetLoadList.Select(e => e.Value.ObjectId).Except(searchRepetitiveIds).ToList();
+                                if (targetIdList.Count > 0)
                                 {
-                                    Database = currentDb.Database,
-                                    TargetIdList = targetLoadList.Select(e => e.Value.ObjectId).ToList(),
-                                    Category = GetCategory(TarEntityInfos, targetLoadList.First().Value.ObjectId),
-                                    EquimentType = GetEquimentType(TarEntityInfos, targetLoadList.First().Value.ObjectId),
-                                    Type = ThBConvertCompareType.RepetitiveID,
-                                };
-                                CompareModels.Add(result);
+                                    var result = new ThBConvertCompareModel
+                                    {
+                                        Database = currentDb.Database,
+                                        TargetIdList = targetIdList,
+                                        Category = GetCategory(TarEntityInfos, targetLoadList.First().Value.ObjectId),
+                                        EquimentType = GetEquimentType(TarEntityInfos, targetLoadList.First().Value.ObjectId),
+                                        Type = ThBConvertCompareType.RepetitiveID,
+                                    };
+                                    CompareModels.Add(result);
+                                    searchRepetitiveIds.AddRange(result.TargetIdList);
+                                }
                             }
                             targetLoadList.ForEach(pair =>
                             {
-                                if (!searchedIds.Contains(pair.Value.ObjectId))
+                                if (!searchedIds.Contains(pair.Value.ObjectId) && !localSearchIds.Contains(pair.Value.ObjectId))
                                 {
                                     var result = new ThBConvertCompareModel
                                     {

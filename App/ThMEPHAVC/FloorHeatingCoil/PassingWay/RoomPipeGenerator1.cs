@@ -436,7 +436,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (inner_buffers.Count == 1)
                 {
                     var inner_buffer = inner_buffers[0];
-                    PassageShowUtils.ShowEntity(inner_buffer, node.depth % 2 + 3);
+                    //PassageShowUtils.ShowEntity(inner_buffer, node.depth % 2 + 3);
                     var inner_coords = PassageWayUtils.GetPolyPoints(inner_buffer);
                     if (inner_coords.Count == 4)
                     {
@@ -558,14 +558,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         var inner_poly = PassageWayUtils.BuildPolyline(inner_coords);
                         coords.Add(coords.First());
                         var shell_poly = PassageWayUtils.BuildPolyline(coords);
-                        var small_inner = PassageWayUtils.Buffer(inner_poly, -1);
-                        if (small_inner.Count == 0)
-                        {
-                            inner_poly.Dispose();
-                            shell_poly.Dispose();
-                            return;
-                        }
-                        inner_poly = small_inner.First();
+                        inner_poly = PassageWayUtils.Buffer(inner_poly, -1).First();
                         if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
                         {
                             inner_coords.RemoveAt(inner_coords.Count - 1);
@@ -607,6 +600,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         pre_index = PassageWayUtils.GetSegIndexOnPolygon(close_point, b_coords);
                     else
                         pre_index = (pre_index - 1 + b_coords.Count) % b_coords.Count;
+                    // 不能是斜边
+                    if (pre_index == -1)
+                        continue;
                     // 外轮廓与内轮廓断线同向
                     if (!PassageWayUtils.IsParallel(a_coords[i] - a_coords[i - 1], close_point - b_coords[pre_index]))
                         continue;

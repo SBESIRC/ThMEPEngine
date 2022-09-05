@@ -20,7 +20,7 @@ namespace ThMEPTCH.CAD
 
         public override bool IsBuildElement(Entity e)
         {
-            return e is Polyline;
+            return !e.Is95PercentStructureElement() && e is Polyline;
         }
 
         public override bool CheckLayerValid(Entity e)

@@ -156,6 +156,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 var angle = dir.GetAngleTo(checkDir, Vector3d.ZAxis);
                 angle %= (Math.PI * 2);
+                if (angle > Math.PI)
+                    angle = Math.PI * 2 - angle;
                 if (minAngle > angle)
                 {
                     minAngleDir = dir;
