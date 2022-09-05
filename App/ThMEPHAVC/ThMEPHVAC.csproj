@@ -96,7 +96,7 @@
     <Compile Include="FloorHeatingCoil\Data\ThRoomSuperBoundaryProcessService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThWaterSeparatorExtractor.cs" />
-    <Compile Include="FloorHeatingCoil\Engine\ThFloorHeatingCreateSingleRegionEngin.cs" />
+    <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCreateService.cs" />
     <Compile Include="FloorHeatingCoil\Heating\AdjustPolyline.cs" />
     <Compile Include="FloorHeatingCoil\Heating\ClearSingleBuffer.cs" />
     <Compile Include="FloorHeatingCoil\Heating\DataPackage.cs" />
@@ -460,6 +460,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="FloorHeatingCoil\Engine\" />
     <Folder Include="SmokeProofSystem\MarkEngine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

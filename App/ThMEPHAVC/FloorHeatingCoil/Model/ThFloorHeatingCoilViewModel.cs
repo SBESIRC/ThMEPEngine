@@ -220,13 +220,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             ThFloorHeatingSubCmd.CheckRoomConnectivity(this);
         }
 
-        public ICommand DistributeRouteCmd => new RelayCommand(DistributeRoute);
-        private void DistributeRoute()
-        {
-            SaveSetting();
-            FocusToCAD();
-            ThFloorHeatingSubCmd.DistributeRoute(this);
-        }
+        //public ICommand DistributeRouteCmd => new RelayCommand(DistributeRoute);
+        //private void DistributeRoute()
+        //{
+        //    SaveSetting();
+        //    FocusToCAD();
+        //    ThFloorHeatingSubCmd.DistributeRoute(this);
+        //}
+
         public ICommand ShowRouteCmd => new RelayCommand(ShowRoute);
         private void ShowRoute()
         {

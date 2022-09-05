@@ -35,7 +35,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public Dictionary<SingleRegion, SingleDoor> EntranceMap = new Dictionary<SingleRegion, SingleDoor>();
         public Dictionary<SingleRegion, SingleDoor> ExportMap = new Dictionary<SingleRegion, SingleDoor>();
         public SingleDoor MainEntrance;
-        
+
 
 
         //管道属性
@@ -108,7 +108,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
     }
 
-    class SinglePipe
+    public class SinglePipe
     {
         public int PipeId = -1;
         public double TotalLength = -1;
