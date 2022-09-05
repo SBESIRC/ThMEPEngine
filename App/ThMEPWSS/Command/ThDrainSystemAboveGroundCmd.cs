@@ -213,7 +213,7 @@ namespace ThMEPWSS.Command
                 if (connectLines.Count > 0)
                     createBasicElems.AddRange(connectLines);
                 //厨房台盆转换连接
-                var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag == "FL").ToList());
+                var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "FcL")).ToList());
                 kitchenSinkConnect.InitData(kitchenRooms, toiletRooms, _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.kitchenBasin).ToList());
                 var addBasics = kitchenSinkConnect.SinkConvertorConnect();
                 if (null != addBasics && addBasics.Count > 0)

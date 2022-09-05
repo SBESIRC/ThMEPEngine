@@ -34,20 +34,6 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
             {
                 HandleBlockReference(elements, blkref, matrix);
             }
-            else if (dbObj.GetType().ToString().ToUpper().Contains("IMPENTITY")) 
-            {
-                //自定义实体，直接炸开继续循环获取
-                try 
-                {
-                    var explodes = ThMEPTCHService.ExplodeTCHElement(dbObj);
-                    if (null != explodes && explodes.Count > 0)
-                        foreach (Entity entity in explodes)
-                            DoExtract(elements, entity, matrix);
-                }
-                catch (Exception ex) 
-                { }
-                
-            }
         }
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
