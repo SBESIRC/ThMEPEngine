@@ -38,7 +38,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         // NTS 数据结构
         //public Polygon Basement;//地库，面域部分为可布置区域
-        public Polygon WallLine;//初始边界线
+        public Polygon WallLine;//初始边界线(输入边界）
         public List<LineSegment> BorderLines;//可动边界线
         public List<SegLine> SegLines = new List<SegLine>();// 初始分区线
         public List<Polygon> Obstacles; // 初始障碍物,不包含坡道
@@ -49,7 +49,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<ORamp> Ramps = new List<ORamp>();// 坡道
         public List<Polygon> Buildings; // 初始障碍物,包含坡道
         //public Polygon SegLineBoundary;//智能边界，外部障碍物为可穿障碍物
-        public Polygon BaseLineBoundary;//基线边界（包含内部孔），基线边界内的分割线的部分用来求基线
+        //public Polygon BaseLineBoundary;//基线边界（包含内部孔），基线边界内的分割线的部分用来求基线
 
         //public List<LineSegment> VaildLanes;//分区线等价车道线
         //public List<Polygon> InnerBuildings; //不可穿障碍物（中间障碍物）,包含坡道
@@ -290,7 +290,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private void UpdateBoundaries()
         {
             var bufferDistance = (ParameterStock.RoadWidth / 2) - SegLineEx.SegTol;
-            var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            //var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物c
+
+            var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(ParameterStock.BuildingTolerance, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+
+            //#################用建筑物外包框和边界求新地库边界#############
+            //var newWallLines =  WallLine.Union(new MultiPolygon( BuildingBounds.ToArray()).Buffer(-ParameterStock.BuildingTolerance,MitreParam)).Get<Polygon>(true);
+            //var newWallLine = newWallLines.OrderBy(x => x.Area).Last();
+            //newWallLine.ToDbMPolygon().AddToCurrentSpace();
+
+            //#################建筑物外接矩形求边界####################
             //Geometry obbs =new MultiPolygon(BuildingBounds.Select(b=>b.GetObb()).ToArray());
             //var convexHull =(Polygon) obbs.ConvexHull();
             //var borders = obbs.Get<Polygon>(true);
@@ -309,8 +318,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //BuildingBounds.ForEach(p => p.GetObb().ToDbMPolygon().AddToCurrentSpace());
             //BuildingBounds.ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
             var bufferedWallLine = WallLine.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
-            BaseLineBoundary = bufferedWallLine.Difference( new MultiPolygon(BuildingBounds.ToArray())).
-                Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+            //BaseLineBoundary = bufferedWallLine.Difference( new MultiPolygon(BuildingBounds.ToArray())).
+            //    Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+
             var outerBounds = new List<Polygon>();
             var innerBounds = new List<Polygon>();
             //建筑外轮廓分类
@@ -462,7 +472,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //5.判断起始、终结线是否明确 + 更新连接关系
             isVaild = FilteringSegLines(SegLines);
             //6.获取有效车道
-            SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
+            SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex);
             //7.求迭代范围
             SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
             //ShowLowerUpperBound();

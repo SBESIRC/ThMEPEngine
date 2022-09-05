@@ -10,6 +10,8 @@ using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.OTools;
+using NetTopologySuite.Operation.Buffer;
+
 namespace ThParkingStall.Core.OInterProcess
 {
     public static class OInterParameter
@@ -31,8 +33,8 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<ORamp> _Ramps;// 坡道
         public static List<ORamp> Ramps { get{return _Ramps;} }// 坡道
 
-        public static Polygon _BaseLineBoundary;
-        public static Polygon BaseLineBoundary { get { return _BaseLineBoundary; } } //基线边界（包含内部孔），基线边界内的分割线的部分用来求基线
+        //public static Polygon _BaseLineBoundary;
+        //public static Polygon BaseLineBoundary { get { return _BaseLineBoundary; } } //基线边界（包含内部孔），基线边界内的分割线的部分用来求基线
 
         private static MNTSSpatialIndex _BuildingSpatialIndex;//所有障碍物，包含坡道的spatialindex
         public static MNTSSpatialIndex BuildingSpatialIndex { get { return _BuildingSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
@@ -42,6 +44,10 @@ namespace ThParkingStall.Core.OInterProcess
         public static MNTSSpatialIndex BoundarySpatialIndex { get { return _BoundarySpatialIndex; } }//边界打成断线 + 障碍物 + 坡道的spatialindex(所有边界）
 
         public static List<(List<int>, List<int>)> SeglineIndex;//分区线（起始终止点连接关系），数量为0则连到边界，其余为其他分区线的index
+
+        private static List<Polygon> _BuildingBounds;
+        public static List<Polygon> BuildingBounds { get { return _BuildingBounds; } }//建筑物外包框
+        static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
         public static void Init(DataWraper dataWraper)
         {
             var oWarper = dataWraper.oParamWraper;
@@ -51,11 +57,15 @@ namespace ThParkingStall.Core.OInterProcess
             _BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
             _Ramps = oWarper.Ramps;
 
-            var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
-            var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
-            var bufferedWallLine = TotalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
-            _BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
-                Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+            var buildingtol = 3000;
+            //var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
+            _BuildingBounds = new MultiPolygon(new MultiPolygon(Buildings.ToArray()).Buffer(buildingtol, MitreParam).
+                Union().Get<Polygon>(true).ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            _TotalArea = _TotalArea.Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true).OrderBy(p=>p.Area).Last();
+
+            //var bufferedWallLine = TotalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
+            //_BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
+            //    Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
 
             SeglineIndex = oWarper.seglineIndex;
             var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
@@ -75,8 +85,8 @@ namespace ThParkingStall.Core.OInterProcess
             var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
             var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
             var bufferedWallLine = totalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
-            _BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
-                Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
+            //_BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
+            //    Get<Polygon>(false).OrderBy(p => p.Area).Last();//内缩后的边界 - 外扩后的建筑
             //_BaseLineBoundary = baseLineBoundary;
             SeglineIndex = seglineIndex;
             var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
@@ -160,7 +170,7 @@ namespace ThParkingStall.Core.OInterProcess
                     newSegLines.Add(InitSegLines[i].GetMovedLine(genome.OGenes[0][i]));
                 }
             }
-            if(newWallLine == null) newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex, BaseLineBoundary);//注意边界可变的情况存在bug
+            if(newWallLine == null) newSegLines.UpdateSegLines(SeglineIndex, TotalArea, BoundarySpatialIndex);//注意边界可变的情况存在bug
             else
             {
                 var allObjs = newWallLine.Shell.ToLineStrings().Cast<Geometry>().ToList();
