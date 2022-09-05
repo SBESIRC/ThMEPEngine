@@ -1177,7 +1177,7 @@ namespace TianHua.AutoCAD.ThCui
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("楼层框线",
                     "天华楼层框线",
-                    "THLCKX",
+                    "THLCKXUI",
                     "天华楼层框线",
                     "IDI_THCAD_THLCKX_SMALL",
                     "IDI_THCAD_THLCKX_LARGE",
