@@ -17,7 +17,7 @@
     <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
     <?define UpgradeCode = "5108574F-42CB-42CF-A3F5-90A80EA8C29D" ?>
     <!-- Autoloader path. -->
-    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\Autoloader-Platform3D" ?>
+    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\Autoloader\ThPlatform3D" ?>
     <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
     <!-- Output root path. -->
     <?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>

@@ -17,7 +17,7 @@
     <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
     <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
     <!-- Autoloader path. -->
-    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
+    <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader\ThMEPEngine" ?>
     <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
     <!-- Output root path. -->
     <?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>
