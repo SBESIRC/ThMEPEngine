@@ -805,10 +805,10 @@ namespace ThMEPTCH.Services
 
             return res;
         }
-        
+
         List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
         {
-            var res = new Dictionary<int, LevelElevation>();
+            var res = new List<LevelElevation>();
             var storeyConfig = jsonConfigs.First().Value;//经过确认，暂时认为只有一栋楼不考虑多楼情况，支取First
             foreach (var floor in floorBlocks)
             {
@@ -819,19 +819,12 @@ namespace ThMEPTCH.Services
                     var heigth = config.Height;
                     var storeyName = config.StoreyName;
                     var elevation = config.Bottom_Elevation;
-                    var floorNum = CalculateFloorNumber(storeyName);
-                    res.Add(floorNum, new LevelElevation { Num = floorNum.ToString(), Elevation = elevation, LevelHeight = heigth, FloorName = name });
+                    res.Add(new LevelElevation { Num = storeyName, Elevation = elevation, LevelHeight = heigth, FloorName = name });
                 });
             }
-            return res.OrderBy(o => o.Key).Select(o => o.Value).ToList();
+            return res.OrderBy(o => o.Elevation).ToList();
         }
 
-        int CalculateFloorNumber(string floorName)
-        {
-            bool IsBasement = false;
-            IsBasement = floorName[0] == 'B';
-            return IsBasement ? -1 : 1 * int.Parse(floorName.Replace("B", "").Replace("F", ""));
-        }
         void InitFloorDBEntity(List<TArchEntity> allTArchEntitys, List<THStructureEntity> allDBEntitys)
         {
             var addTArchColl = new DBObjectCollection();
