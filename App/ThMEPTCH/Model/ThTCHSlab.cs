@@ -46,7 +46,7 @@ namespace ThMEPTCH.Model
             var clone = new ThTCHSlab();
             clone.Descendings = new List<ThTCHSlabDescendingData>();
             clone.Uuid = this.Uuid;
-            clone.Useage = this.Useage;
+            clone.Usage = this.Usage;
             clone.ZOffSet = this.ZOffSet;
             clone.ExtrudedDirection = this.ExtrudedDirection;
             clone.Height = this.Height;

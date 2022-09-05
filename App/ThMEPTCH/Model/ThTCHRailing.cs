@@ -16,7 +16,7 @@ namespace ThMEPTCH.Model
         {
             var clone = new ThTCHRailing();
             clone.Uuid = this.Uuid;
-            clone.Useage = this.Useage;
+            clone.Usage = this.Usage;
             if (null != this.Outline)
                 clone.Outline = this.Outline.Clone() as Entity;
             clone.ExtrudedDirection = this.ExtrudedDirection;
