@@ -25,6 +25,7 @@
     <Compile Include="Microsoft.wxs" />
     <Compile Include="Platform3D.wxs" />
     <Compile Include="Product.wxs" />
+    <Compile Include="Support.wxs" />
     <Compile Include="System.wxs" />
     <Compile Include="WPF.wxs" />
     <Compile Include="XBim.wxs" />

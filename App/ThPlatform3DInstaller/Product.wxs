@@ -13,6 +13,7 @@
         <Property Id="ARPPRODUCTICON" Value="Logo.ico" />
         <Feature Id="ProductFeature" Title="ThPlatform3DInstaller" Level="1">
             <ComponentGroupRef Id="ProductComponents" />
+            <ComponentGroupRef Id="ProductComponentsSupport" />
             <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppSystem" />
