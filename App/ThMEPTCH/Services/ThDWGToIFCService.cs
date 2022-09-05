@@ -241,14 +241,28 @@ namespace ThMEPTCH.Services
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHWall>().ToList())
                     {
                         var copyItem = item.Clone() as ThTCHWall;
+                        copyItem.Uuid += buildingStorey.Number;
                         if (Math.Abs(copyItem.Height) < 10)
                             copyItem.Height = floor.LevelHeight;
+                        foreach (var door in copyItem.Doors)
+                        {
+                            door.Uuid += buildingStorey.Number;
+                        }
+                        foreach (var window in copyItem.Windows)
+                        {
+                            window.Uuid += buildingStorey.Number;
+                        }
+                        foreach (var opening in copyItem.Openings)
+                        {
+                            opening.Uuid += buildingStorey.Number;
+                        }
                         walls.Add(copyItem);
                     }
                     var columns = new List<ThTCHColumn>();
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHColumn>().ToList())
                     {
                         var copyItem = item.Clone() as ThTCHColumn;
+                        copyItem.Uuid += buildingStorey.Number;
                         if (Math.Abs(copyItem.Height) < 10)
                             copyItem.Height = floor.LevelHeight;
                         columns.Add(copyItem);
@@ -257,6 +271,7 @@ namespace ThMEPTCH.Services
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHBeam>().ToList())
                     {
                         var copyItem = item.Clone() as ThTCHBeam;
+                        copyItem.Uuid += buildingStorey.Number;
                         if (Math.Abs(copyItem.Height) > 10)
                         {
                             copyItem.ZOffSet = floor.LevelHeight + item.ZOffSet - item.Height;
@@ -284,22 +299,27 @@ namespace ThMEPTCH.Services
                         }
                     }
                     var slabs = levelEntitys.FloorEntitys.OfType<ThTCHSlab>().ToList();
-                    buildingStorey.Slabs.AddRange(slabs);
+                    foreach (var item in slabs)
+                    {
+                        var copyItem = item.Clone() as ThTCHSlab;
+                        copyItem.Uuid += buildingStorey.Number;
+                        buildingStorey.Slabs.Add(copyItem);
+                    }
+                    //buildingStorey.Slabs.AddRange(slabs);
                     var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailing>().ToList();
-                    buildingStorey.Railings.AddRange(railings);
+                    foreach (var railing in railings)
+                    {
+                        var copyItem = railing.Clone() as ThTCHRailing;
+                        copyItem.Uuid += buildingStorey.Number;
+                        buildingStorey.Railings.Add(copyItem);
+                    }
+                    //buildingStorey.Railings.AddRange(railings);
                     buildingStorey.Walls.AddRange(walls);
                     buildingStorey.Columns.AddRange(columns);
                     buildingStorey.Beams.AddRange(beams);
                 }
                 thBuilding.Storeys.Add(buildingStorey);
             }
-            //spatialIndex = null;
-            //entitySpatialIndex = null;
-            //entityBases = null;
-            //entityDic = null;
-            //cadCurveEntitys = null;
-            //cadEntityDic = null;
-            //archDBData = null;
             thSite.Building = thBuilding;
             thPrj.Site = thSite;
             return thPrj;
