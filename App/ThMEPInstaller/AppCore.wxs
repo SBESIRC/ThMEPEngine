@@ -35,9 +35,6 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Debug" Guid="{03EBBCA7-0EF5-410B-AB73-8F199BCF8472}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPTCH.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Debug" Guid="{924B281B-9CC9-4682-B3B6-5F11BBF46DF6}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPIFC.dll" />
-        </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIO_Debug" Guid="{7372839E-4AB3-4E21-B400-7268F95CE2B5}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIO_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPIO.dll" />
         </Component>
@@ -73,9 +70,6 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Debug" Guid="{EC04EB90-E9B2-42D3-A1E8-AC0BDE515FE3}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPTCH.dll" />
-        </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Debug" Guid="{3EC92A00-D781-4579-846A-13365FCA4736}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPIFC.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIO_Debug" Guid="{8C8328CA-C54B-468D-BB18-524C0EEFDE2C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIO_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPIO.dll" />
@@ -114,9 +108,6 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Release" Guid="{27A51F9A-5667-4A6C-AB32-8AD5509019C2}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPTCH.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Release" Guid="{299A2DDC-DCE6-4461-AF15-1083E859FB58}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPIFC.dll" />
-        </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIO_Release" Guid="{567C7157-BD13-4E9B-B82B-A53548EA1F74}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIO_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPIO.dll" />
         </Component>
@@ -153,9 +144,6 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Release" Guid="{F2EDE2BE-22FB-48D7-A687-11FC623B39E8}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPTCH.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Release" Guid="{1456AD50-B66A-41AA-A0EA-74EE433BF3CA}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPIFC.dll" />
-        </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIO_Release" Guid="{DBBC2B00-9CEA-4907-996E-BCC69E0B1DF5}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIO_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPIO.dll" />
         </Component>
@@ -185,8 +173,6 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIO_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIO_Debug" />
         <?elseif $(var.Configuration) = Release ?>
@@ -210,8 +196,6 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPTCH_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPTCH_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIFC_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIFC_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIO_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIO_Release" />
         <?endif?>
