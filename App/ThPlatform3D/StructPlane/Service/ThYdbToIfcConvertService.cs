@@ -14,20 +14,14 @@ namespace ThPlatform3D.StructPlane.Service
         {
             get
             {
-                //var exePath = GetLocalPath();
                 var exePath = GetWin64CommonPath();
                 return Path.Combine(exePath, "ydb2ifc.exe");
             }
         }
 
-        private string GetLocalPath()
-        {
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        }
-
         private string GetWin64CommonPath()
         {
-            return ThCADCommon.Win64CommonPath();
+            return ThBIMCommon.Win64CommonPath();
         }
 
         public string Convert(string ydbFile)

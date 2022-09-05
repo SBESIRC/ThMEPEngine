@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
+﻿using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThCADExtension;
@@ -31,13 +29,13 @@ namespace ThPlatform3D.Common
         /// 成图类型
         /// 写到config.json        
         /// </summary>
-        public string ImageType 
+        public string ImageType
         {
             get
             {
                 return DrawingType.GetDrawingType();
             }
-        } 
+        }
         /// <summary>
         /// 成图类型
         /// </summary>
@@ -71,7 +69,7 @@ namespace ThPlatform3D.Common
                 return BuildArgument(SvgConfigFilePath, IfcFilePath, SvgSavePath, LogSavePath);
             }
         }
-        public string BuildArgument(string svgConfigFilePath,string ifcFilePath,string svgSavePath,string logSavePath)
+        public string BuildArgument(string svgConfigFilePath, string ifcFilePath, string svgSavePath, string logSavePath)
         {
             return
                    "--config_path " + AddQuotationMarks(ModifyPath(svgConfigFilePath)) +
@@ -104,7 +102,7 @@ namespace ThPlatform3D.Common
         {
             get
             {
-                if(File.Exists(IfcFilePath))
+                if (File.Exists(IfcFilePath))
                 {
                     return Path.GetFileNameWithoutExtension(IfcFilePath);
                 }
@@ -119,15 +117,15 @@ namespace ThPlatform3D.Common
             JsonConfig = new PlaneJsonConfig();
         }
         public void Configure()
-        { 
+        {
             SetSavePath();
 
-            if(DrawingType == DrawingType.Elevation)
+            if (DrawingType == DrawingType.Elevation)
             {
                 // 对于立面图，Svg保存路径要给绝对路径
                 JsonConfig.SvgConfig.save_path = GetSingleFullSvgSavePath(SvgSavePath, 1, "elevation");
             }
-            else if(DrawingType == DrawingType.Section)
+            else if (DrawingType == DrawingType.Section)
             {
                 // 对于剖面图，Svg保存路径要给绝对路径
                 JsonConfig.SvgConfig.save_path = GetSingleFullSvgSavePath(SvgSavePath, 1, "section");
@@ -145,17 +143,17 @@ namespace ThPlatform3D.Common
             {
                 return;
             }
-            SetValues(svgConfig,JsonConfig);
+            SetValues(svgConfig, JsonConfig);
             WriteJson(SvgConfigFilePath, svgConfig);
         }
 
-        private string GetSingleFullSvgSavePath(string svgSavePath,int floorNo,string type)
+        private string GetSingleFullSvgSavePath(string svgSavePath, int floorNo, string type)
         {
-            if(!string.IsNullOrEmpty(IfcFilePath))
-            { 
+            if (!string.IsNullOrEmpty(IfcFilePath))
+            {
                 // 获取Ifc路径
                 var ifcFileName = Path.GetFileNameWithoutExtension(IfcFilePath);
-                var outputSvgName = ifcFileName + "-" + floorNo + "-" + type+".svg";
+                var outputSvgName = ifcFileName + "-" + floorNo + "-" + type + ".svg";
                 return Path.Combine(svgSavePath, outputSvgName);
             }
             else
@@ -166,31 +164,23 @@ namespace ThPlatform3D.Common
 
         private string GetSvgConfgFilePath()
         {
-            //var path = GetLocalPath();
             var path = GetWin64CommonPath();
-            return Path.Combine(path,"config.json");
+            return Path.Combine(path, "config.json");
         }
 
         private string GetWin64CommonPath()
         {
-            return ThCADCommon.Win64CommonPath();
-        }
-
-        private string GetLocalPath()
-        {
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            return ThBIMCommon.Win64CommonPath();
         }
 
         private string GetSvgDefaultSavePath()
         {
             return Path.GetTempPath();
-            //return Path.Combine(Environment.GetEnvironmentVariable("windir"),"TEMP");
         }
 
         private string GetLogDefaultSavePath()
         {
             return Path.GetTempPath();
-            //return Path.Combine(Environment.GetEnvironmentVariable("windir"),"TEMP");
         }
 
         private void SetSavePath()
@@ -220,7 +210,7 @@ namespace ThPlatform3D.Common
             }
         }
 
-        private void SetValues(JObject jObject,PlaneJsonConfig jsonConfig)
+        private void SetValues(JObject jObject, PlaneJsonConfig jsonConfig)
         {
             try
             {
@@ -247,7 +237,7 @@ namespace ThPlatform3D.Common
 
         public string ModifyPath(string path)
         {
-            return path.Replace("\\","/");
+            return path.Replace("\\", "/");
         }
 
         private bool CheckValid()
@@ -257,7 +247,7 @@ namespace ThPlatform3D.Common
             {
                 return false;
             }
-            if(!File.Exists(IfcFilePath))
+            if (!File.Exists(IfcFilePath))
             {
                 return false;
             }
@@ -266,7 +256,7 @@ namespace ThPlatform3D.Common
                 return false;
             }
             return true;
-        }        
+        }
         /// <summary>
         /// 写入JSON文件
         /// </summary>
