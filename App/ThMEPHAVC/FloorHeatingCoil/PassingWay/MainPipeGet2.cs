@@ -312,6 +312,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     if (isSmall == 1) MainReigonListCopy = interNewRegionList;
                     else MainReigonList = interNewRegionList;
                     DrawUtils.ShowGeometry(interNewRegionList, "l2MainArea", 170, lineWeightNum: 30);
+                    IfFind = true;
                 }
                 else
                 {

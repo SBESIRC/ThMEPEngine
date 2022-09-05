@@ -90,7 +90,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
             EquispacedWayCalculator equispacedWayCalculator = new EquispacedWayCalculator(region, main_index, buffer, room_buffer, pipe_inputs, pipe_segments);
             // 建立方向树
             equispacedWayCalculator.BuildDirTree(0, pipe_inputs.Count - 1, 0);
-            
+
+            // 检查末段是否满足需求
+            equispacedWayCalculator.CheckDir();
+            equispacedWayCalculator.BuildDirTree(0, pipe_inputs.Count - 1, 0);
+            equispacedWayCalculator.CheckDir();
+            equispacedWayCalculator.BuildDirTree(0, pipe_inputs.Count - 1, 0);
+            equispacedWayCalculator.CheckDir();
+            equispacedWayCalculator.BuildDirTree(0, pipe_inputs.Count - 1, 0);
+
             // 打印方向分组信息
             equispacedWayCalculator.ShowDirWay();
 
@@ -227,7 +235,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 DBObjectCollection shape = new DBObjectCollection();
                 foreach (var rest_shape in mainPipeGet.BufferedPipeList)
                     shape.Add(rest_shape);
-                main_output.shape = shape.UnionPolygons().Cast<Polyline>().First();
+                main_output.shape = shape.UnionPolygons().Cast<Polyline>().FindByMax(x=>x.Area);
             }
             // 添加至输出列表
             if (main_index == outputs.Count)

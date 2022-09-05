@@ -56,6 +56,59 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             if (depth > 0)
             {
+                // update s,e
+                var last_dir = pipe_segments[left][depth - 1].dir;
+                switch (last_dir * 10 + dir)
+                {
+                    case 01://右上
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].start = Math.Max(pipe_segments[i][depth - 1].start, pipe_segments[i - 1][depth - 1].start);
+                        for (int i = right - 1; i >= left; --i)
+                            pipe_segments[i][depth - 1].end = Math.Min(pipe_segments[i][depth - 1].end, pipe_segments[i + 1][depth - 1].end);
+                        break;
+                    case 03://右下
+                        for (int i = right - 1; i >= left; --i) 
+                            pipe_segments[i][depth - 1].start = Math.Max(pipe_segments[i][depth - 1].start, pipe_segments[i + 1][depth - 1].start);
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].end = Math.Min(pipe_segments[i][depth - 1].end, pipe_segments[i - 1][depth - 1].end);
+                        break;
+                    case 10://上右
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].start = Math.Max(pipe_segments[i][depth - 1].start, pipe_segments[i - 1][depth - 1].start);
+                        for (int i = right - 1; i >= left; --i)
+                            pipe_segments[i][depth - 1].end = Math.Min(pipe_segments[i][depth - 1].end, pipe_segments[i + 1][depth - 1].end);
+                        break;
+                    case 12://上左
+                        for (int i = right - 1; i >= left; --i)
+                            pipe_segments[i][depth - 1].start = Math.Max(pipe_segments[i][depth - 1].start, pipe_segments[i + 1][depth - 1].start);
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].end = Math.Min(pipe_segments[i][depth - 1].end, pipe_segments[i - 1][depth - 1].end);
+                        break;
+                    case 21://左上
+                        for (int i = right - 1; i >= left; --i) 
+                            pipe_segments[i][depth - 1].start = Math.Min(pipe_segments[i][depth - 1].start, pipe_segments[i + 1][depth - 1].start);
+                        for (int i = left + 1; i <= right; ++i) 
+                            pipe_segments[i][depth - 1].end = Math.Max(pipe_segments[i][depth - 1].end, pipe_segments[i - 1][depth - 1].end);
+                        break;
+                    case 23://左下
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].start = Math.Min(pipe_segments[i][depth - 1].start, pipe_segments[i - 1][depth - 1].start);
+                        for (int i = right - 1; i >= left; --i)
+                            pipe_segments[i][depth - 1].end = Math.Max(pipe_segments[i][depth - 1].end, pipe_segments[i + 1][depth - 1].end);
+                        break;
+                    case 32://下左
+                        for (int i = right - 1; i >= left; --i)
+                            pipe_segments[i][depth - 1].start = Math.Min(pipe_segments[i][depth - 1].start, pipe_segments[i + 1][depth - 1].start);
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].end = Math.Max(pipe_segments[i][depth - 1].end, pipe_segments[i - 1][depth - 1].end);
+                        break;
+                    case 30://下右
+                        for (int i = left + 1; i <= right; ++i)
+                            pipe_segments[i][depth - 1].start = Math.Min(pipe_segments[i][depth - 1].start, pipe_segments[i - 1][depth - 1].start);
+                        for (int i = right - 1; i >= left; --i)
+                            pipe_segments[i][depth - 1].end = Math.Max(pipe_segments[i][depth - 1].end, pipe_segments[i + 1][depth - 1].end);
+                        break;
+                }
                 // check if node contain main pipe
                 int mid_index = right >= main_index && left <= main_index ? main_index : (right + left) / 2;
                 for (int i = left; i <= right; ++i)
@@ -71,8 +124,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     var e = pipe_segments[i][depth - 1].end;
                     int pipe_num = 0;
                     for (int j = left; j <= right; ++j)
-                        if (pipe_segments[j][depth - 1].start == s && pipe_segments[j][depth - 1].end == e)
-                            pipe_num++;
+                    {
+                        // 只计算范围包含在内的线
+                        if (last_dir<=1)// s<e
+                        {
+                            if (pipe_segments[j][depth - 1].start >= s && pipe_segments[j][depth - 1].end <= e)
+                                pipe_num++;
+                        }
+                        else// s>e
+                        {
+                            if (pipe_segments[j][depth - 1].start >= s && pipe_segments[j][depth - 1].end <= e)
+                                pipe_num++;
+                        }
+                    }
                     // set distribution
                     pipe_segments[i][depth].equispaced = (pipe_num - 0.5) * buffer + 2 * room_buffer > Math.Abs(e - s);
                     // set segment width
@@ -102,6 +166,78 @@ namespace ThMEPHVAC.FloorHeatingCoil
             while (end_idx <= right && pipe_segments[end_idx].Count > depth + 1 && pipe_segments[end_idx][depth + 1].dir == right_dir)
                 end_idx++;
             BuildDirTree(start_idx, end_idx - 1, depth + 1, false);
+        }
+        public void CheckDir(bool show = false)
+        {
+            for(int index = 0; index < pipe_inputs.Count; ++index)
+            {
+                if (index == 1)
+                    index = 1;
+                List<Point3d> poly = new List<Point3d>();
+                List<double> buffers = new List<double>();
+                poly.Add(pipe_inputs[index].pin);
+                buffers.Add(pipe_inputs[index].in_buffer);
+                for (int i = 0; i < pipe_segments[index].Count; ++i)
+                {
+                    double axis = 0;
+                    var dir = pipe_segments[index][i].dir;
+                    // calculate first segment
+                    if (i == 0)
+                        axis = dir % 2 == 0 ? pipe_inputs[index].pin.Y : pipe_inputs[index].pin.X;
+                    // calculate middle segments
+                    else
+                    {
+                        var s = pipe_segments[index][i - 1].start;
+                        var e = pipe_segments[index][i - 1].end;
+                        double offset = 0;
+                        if (pipe_segments[index][i].equispaced)
+                            offset = pipe_segments[index][i].pw * (pipe_segments[index][i].offset * 4 + 3);
+                        else
+                            offset = pipe_segments[index][i].pw * (pipe_segments[index][i].offset * 4 + 1) + room_buffer;
+                        if (pipe_segments[index][i].close_to)
+                            axis = e - Math.Sign(e - s) * offset;
+                        else
+                            axis = s + Math.Sign(e - s) * offset;
+                    }
+                    // adjust last segment
+                    if (i == pipe_segments[index].Count - 1)
+                    {
+                        if (dir == pipe_inputs[index].end_dir)
+                        {
+                            if (pipe_segments[index][i].equispaced == true) 
+                            {
+                                var axis_point = dir % 2 == 0 ? new Point3d(pipe_inputs[index].pout.X, axis, 0) : new Point3d(axis, pipe_inputs[index].pout.Y, 0);
+                                var out_axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
+                                if (Math.Abs(axis - out_axis) > 10)
+                                {
+                                    if (pipe_inputs[index].is_out_free == false ||
+                                        !pipe_inputs[index].check(axis_point, pipe_segments[index][i].pw, room_buffer))
+                                    {
+                                        if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer)
+                                        {
+                                            var new_ps = new PipeSegment();
+                                            new_ps.dir = PassageWayUtils.GetDirBetweenTwoPoint(axis_point, pipe_inputs[index].pout);
+                                            new_ps.start = dir % 2 == 0 ? poly.Last().X : poly.Last().Y;
+                                            new_ps.end = dir % 2 == 0 ? axis_point.X : axis_point.Y;
+                                            pipe_segments[index].Add(new_ps);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (i > 0)
+                    {
+                        var last_dir = pipe_segments[index][i - 1].dir;
+                        if (last_dir % 2 == 0)
+                            poly.Add(new Point3d(axis, poly.Last().Y, 0));
+                        else
+                            poly.Add(new Point3d(poly.Last().X, axis, 0));
+                    }
+                }
+                if(show)
+                    PassageShowUtils.ShowEntity(PassageWayUtils.BuildPolyline(poly), index);
+            }
         }
         public List<Polyline> Calculate(int index, out List<Line> lines, out List<double> buffers)
         {

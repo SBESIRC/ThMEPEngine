@@ -510,7 +510,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     int upRegionId = DoorList[doorId].UpstreamRegion.RegionId;
                     int downRegionId = DoorList[doorId].DownstreamRegion.RegionId;
 
-                    if (doorId == 14)
+                    if (doorId == 1)
                     {
                         int stop = 0;
                     }
@@ -528,8 +528,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     Polyline upPl = PipePolyListMap[i][upRegionId][0];
                     Polyline downPl = PipePolyListMap[i][downRegionId][0];
 
+
+                    //DrawUtils.ShowGeometry(downPl, "l8Test", 1, 30);
                     double upBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[0], ppList[1], upPl);
                     double downBufferLength = internalDistanceHalf + GetConnectorOuterDis(ppList[2], ppList[3], downPl);
+
+
                     Polyline pl = PolylineProcessService.CreateRectangle3(centerLeft, centerRight, upBufferLength, downBufferLength);
 
                     DBObjectCollection a = new DBObjectCollection();

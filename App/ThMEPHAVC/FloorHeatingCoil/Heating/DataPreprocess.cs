@@ -1096,6 +1096,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             regionObb = regionObb.Difference(differArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
             PolylineProcessService.ClearPolyline(ref regionObb);
 
+            ProcessedData.WaterOffset = new Vector3d(0,0,0);
             return doorLine;
         }
 
@@ -1347,8 +1348,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
         }
-
-        
 
         //保存结果
         public void SaveResults()

@@ -75,7 +75,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         public bool check(Point3d p, double hpw, double rb)
         {
-            if (PassageWayUtils.PointOnSegment(p, door_left, door_right))
+            if (!PassageWayUtils.PointOnSegment(p, door_left, door_right))
                 return false;
             return p.DistanceTo(door_left) > hpw + rb && p.DistanceTo(door_right) > hpw + rb;
         }

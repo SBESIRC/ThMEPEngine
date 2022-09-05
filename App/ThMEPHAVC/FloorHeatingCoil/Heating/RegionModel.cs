@@ -108,8 +108,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
     }
 
-
-
     class SinglePipe
     {
         public int PipeId = -1;

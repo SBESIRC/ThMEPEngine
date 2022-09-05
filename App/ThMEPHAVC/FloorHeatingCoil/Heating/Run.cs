@@ -86,11 +86,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Parameter.TotalLength = 120000;
             
             Parameter.AuxiliaryRoomConstraint = true;
-            Parameter.IndependentRoomConstraint = false;
+            Parameter.IndependentRoomConstraint = true;
             Parameter.PublicRegionConstraint = true;
 
             Parameter.SuggestDistanceWall = 100;
-            Parameter.SuggestDistanceRoom = 250;
+            Parameter.SuggestDistanceRoom = 200;
         }
 
         class DataPass

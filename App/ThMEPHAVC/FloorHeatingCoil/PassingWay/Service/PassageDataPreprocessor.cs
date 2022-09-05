@@ -13,7 +13,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         // 输入数据
         public Polyline region;
         public double buffer { get; set; } = 500;
-        public double room_buffer { get; set; } = 200;
+        public double room_buffer { get; set; } = 100;
         public List<PipeInput> pipe_inputs { get; set; } = new List<PipeInput>();
         public int main_index { get; set; } = -1;
         public int mode { get; set; } = 0;         // 0:正常模式/1:集水器模式
@@ -50,23 +50,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 pipe_inputs.Add(new PipeInput(pipe_in_list[i], pipe_out_list[i]));
                 pipe_inputs[i].passage_index = i;
             }
-            // 计算出入口方向
-            CalculateIODirection();
-            //// 计算推荐间距
-            //int count = 0;
-            //double max_pw = -1;
-            //for (int i = 0; i < pipe_inputs.Count; ++i)
-            //{
-            //    if (pipe_inputs[i].out_buffer > room_buffer && pipe_inputs[i].out_near_wall)
-            //    {
-            //        count++;
-            //        max_pw = Math.Max(max_pw, pipe_inputs[i].out_buffer);
-            //    }
-            //}
-            //this.buffer = count == 0 ? buffer : 4 * max_pw;
+            // 设置推荐间距
             this.buffer = buffer;
             // 设置距墙间距
             this.room_buffer = room_buffer;
+            // 计算出入口方向
+            CalculateIODirection();
             // 设置主导管线索引
             this.main_index = main_index;
             // 设置布置模式
