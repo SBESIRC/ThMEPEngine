@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ElevationGenerator" Guid="{2628FD18-144C-4441-9633-8B9CCD467424}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ElevationGenerator" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_YDB2IFC" Guid="{33123272-9CA6-4BB7-B496-E988D9681A4A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_YDB2IFC" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\ydb2ifc.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_IfcOpenShell" Guid="{4E9246CA-D63C-48DA-94E7-06ACEBED6AA1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_IfcOpenShell" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_JsonCpp" Guid="{8B4EFC30-E241-4DEE-A8EE-C7742013D38E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_JsonCpp" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Config" Guid="{95759390-6DD0-4745-988B-B01E2A6884B8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Config" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Color" Guid="{E15905AA-5742-4420-833C-4B2D4A7AE746}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Color" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppElevationGenerator">
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ElevationGenerator" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_IfcOpenShell" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_JsonCpp" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Config" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Color" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_YDB2IFC" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

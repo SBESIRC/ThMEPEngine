@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Diagnostics;
+using ThCADExtension;
 
 namespace ThPlatform3D.StructPlane.Service
 {
@@ -13,10 +14,20 @@ namespace ThPlatform3D.StructPlane.Service
         {
             get
             {
-                // exe路径要和当前Dll路径在一个地方     
-                var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                return Path.Combine(currentDllPath, "ydb2ifc.exe");
+                //var exePath = GetLocalPath();
+                var exePath = GetWin64CommonPath();
+                return Path.Combine(exePath, "ydb2ifc.exe");
             }
+        }
+
+        private string GetLocalPath()
+        {
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
+
+        private string GetWin64CommonPath()
+        {
+            return ThCADCommon.Win64CommonPath();
         }
 
         public string Convert(string ydbFile)

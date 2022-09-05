@@ -16,7 +16,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         }
         private static bool ImportDoorWindowTemplate(Database database)
         {
-            var doorWindowTemplateDwgPath = ThCADCommon.ArchitectureDoorWindowTemplatePath();            
+            var doorWindowTemplateDwgPath = ThBIMCommon.ArchitectureDoorWindowTemplatePath();            
             if(!File.Exists(doorWindowTemplateDwgPath))
             {
                 return false;
@@ -66,7 +66,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         }
         private static bool ImportPlaneTemplate(Database database)
         {
-            var planeTemplateDwgPath = ThCADCommon.ArchitectureTemplatePath();            
+            var planeTemplateDwgPath = ThBIMCommon.ArchitectureTemplatePath();            
             if (!File.Exists(planeTemplateDwgPath))
             {
                 return false;

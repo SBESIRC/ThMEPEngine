@@ -20,6 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppCore.wxs" />
+    <Compile Include="ElevationGenerator.wxs" />
     <Compile Include="External.wxs" />
     <Compile Include="Microsoft.wxs" />
     <Compile Include="Platform3D.wxs" />

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using AcHelper.Commands;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPEngineCore.Model;
@@ -14,19 +14,18 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace Tianhua.Platform3D.UI.Command
 {
-    public class ThStructurePlaneCmd : ThMEPBaseCommand, IDisposable
+    public class ThStructurePlaneCmd : IAcadCommand, IDisposable
     {
         public ThStructurePlaneCmd()
         {
-            ActionName = "结构成图";
-            CommandName = "THSMBT";
+            //
         }
         public void Dispose()
         {
             //
         }
 
-        public override void SubExecute()
+        public void Execute()
         {
             // 选择文件名
             var fileName = SelectFile();

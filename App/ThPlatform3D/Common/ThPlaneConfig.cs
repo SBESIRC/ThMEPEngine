@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ThCADExtension;
 using ThMEPEngineCore.IO.SVG;
 
 namespace ThPlatform3D.Common
@@ -58,9 +59,9 @@ namespace ThPlatform3D.Common
         {
             get
             {
-                // exe路径要和当前Dll路径在一个地方     
-                var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                return Path.Combine(currentDllPath, "elevation-generator.exe");
+                //var exePath = GetLocalPath(); // exe路径要和当前Dll路径在一个地方     
+                var exePath = GetWin64CommonPath();
+                return Path.Combine(exePath, "elevation-generator.exe");
             }
         }
         public string Arguments
@@ -165,8 +166,19 @@ namespace ThPlatform3D.Common
 
         private string GetSvgConfgFilePath()
         {
-            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            //var path = GetLocalPath();
+            var path = GetWin64CommonPath();
             return Path.Combine(path,"config.json");
+        }
+
+        private string GetWin64CommonPath()
+        {
+            return ThCADCommon.Win64CommonPath();
+        }
+
+        private string GetLocalPath()
+        {
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
         private string GetSvgDefaultSavePath()

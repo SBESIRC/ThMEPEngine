@@ -27,4 +27,6 @@
     <?define 64bitNative = "x64" ?>
     <!-- Xbim Geometry Engine path -->
     <?define XbimGeoEngine = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry.Engine" ?>
+    <!-- Elevation Generator path -->
+    <?define ElevationGeneratorPath = "$(var.ProjectDir)\..\..\Externals\ElevationGenerator" ?>
 </Include>

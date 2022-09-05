@@ -346,7 +346,7 @@ namespace ThPlatform3D.StructPlane.Service
         public static void ImportStruPlaneTemplate(this Database database)
         {
             using (var acadDb = AcadDatabase.Use(database))
-            using (var blockDb = AcadDatabase.Open(ThCADCommon.StructPlanePath(), DwgOpenMode.ReadOnly, false))
+            using (var blockDb = AcadDatabase.Open(ThBIMCommon.StructPlanePath(), DwgOpenMode.ReadOnly, false))
             {
                 // 导入图层
                 ThPrintLayerManager.AllLayers.ForEach(layer =>
