@@ -85,7 +85,7 @@ namespace ThMEPLighting.ParkingStall.Business
                 }
                 position = longLine.StartPoint;
                 var angle = Vector3d.XAxis.GetAngleTo(longDir, Vector3d.ZAxis);
-                var addPLine = item.BigGroupInfo.BigGroupPoly;
+                var addPLine = item.BigGroupInfo.BigGroupPoly.Clone() as Polyline;
                 if (null != m_OriginTransformer)
                 {
                     position = m_OriginTransformer.Reset(position);
