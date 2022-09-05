@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Common;
@@ -715,95 +716,10 @@ namespace ThMEPTCH.Services
                 return floorOrigins;
             }
         }
+
         Polyline GetFloorBlockOutLine(BlockReference floor)
         {
-            var rect = floor.GeometricExtents;
-            var minPt = rect.MinPoint;
-            var maxPt = rect.MaxPoint;
-            var pt1 = new Point3d(minPt.X, minPt.Y, 0);
-            var pt2 = new Point3d(maxPt.X, minPt.Y, 0);
-            var pt3 = new Point3d(maxPt.X, maxPt.Y, 0);
-            var pt4 = new Point3d(minPt.X, maxPt.Y, 0);
-            Polyline outPLine = new Polyline();
-            outPLine.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(1, pt2.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(2, pt3.ToPoint2D(), 0, 0, 0);
-            outPLine.AddVertexAt(3, pt4.ToPoint2D(), 0, 0, 0);
-            outPLine.Closed = true;
-            return outPLine;
-        }
-        List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks)
-        {
-            var res = new List<LevelElevation>();
-            if (floorBlocks.Count == 2 && floorBlocks.Any(o => o.FloorName == "1F") && floorBlocks.Any(o => o.FloorName == "构架"))
-            {
-                res.Add(new LevelElevation { Num = "1", Elevation = -4900, LevelHeight = 4860, FloorName = "1F" });
-                res.Add(new LevelElevation { Num = "35", Elevation = 98500, LevelHeight = 4400, FloorName = "构架" });
-                return res;
-            }
-            double firstFloorHeight = 5300;
-            double levelHeight = 3150;
-            double startElevtion = 0.0;
-            foreach (var floor in floorBlocks)
-            {
-                var name = floor.FloorName;
-                var floorCalculator = new FloorCalculator(name);
-                var floorStrs = floorCalculator.Floors;
-                foreach (var str in floorStrs)
-                {
-                    int floorNum = 0;
-                    string result = System.Text.RegularExpressions.Regex.Replace(str, @"[^0-9]+", "");
-                    if (int.TryParse(result, out floorNum))
-                    {
-                        res.Add(new LevelElevation { Num = floorNum.ToString(), Elevation = 0, LevelHeight = levelHeight, FloorName = name });
-                    }
-                }
-            }
-            if (res.Count < 1)
-            {
-                return res;
-            }
-            res = res.OrderBy(c => Convert.ToInt32(c.Num)).ToList();
-            res.First().Elevation = startElevtion;
-            res.First().LevelHeight = firstFloorHeight;
-            var elevtion = startElevtion + firstFloorHeight;
-            for (int i = 1; i < res.Count; i++)
-            {
-                var level = res[i];
-                level.Elevation = elevtion;
-                level.LevelHeight = levelHeight;
-                elevtion += levelHeight;
-            }
-
-            //res.Add(new LevelElevtion { Num = 1, Elevtion = 0, LevelHeight = 5300, FloorName = "BZ1" });
-            //res.Add(new LevelElevtion { Num = 2, Elevtion = 5300, LevelHeight = 3150, FloorName = "BZ2" });
-            //res.Add(new LevelElevtion { Num = 3, Elevtion = 8450, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 4, Elevtion = 11600, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 5, Elevtion = 14750, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 6, Elevtion = 17900, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 7, Elevtion = 21050, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 8, Elevtion = 24200, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 9, Elevtion = 27350, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 10, Elevtion = 30500, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 11, Elevtion = 33650, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 12, Elevtion = 36800, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 13, Elevtion = 39950, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 14, Elevtion = 43100, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 15, Elevtion = 46250, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 16, Elevtion = 49400, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 17, Elevtion = 52550, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 18, Elevtion = 55700, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 19, Elevtion = 58850, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 20, Elevtion = 62000, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 21, Elevtion = 65150, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 22, Elevtion = 68300, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 23, Elevtion = 71450, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 24, Elevtion = 74600, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 25, Elevtion = 77750, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 26, Elevtion = 80900, LevelHeight = 3150, FloorName = "BZ3" });
-            //res.Add(new LevelElevtion { Num = 27, Elevtion = 84050, LevelHeight = 3150, FloorName = "BZ4" });
-
-            return res;
+            return floor.GeometricExtents.ToRectangle();
         }
 
         List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
