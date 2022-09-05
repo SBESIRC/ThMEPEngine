@@ -85,7 +85,7 @@ namespace ThMEPHVAC
 
                 using (var cmd = new ThFloorHeatingCmd())
                 {
-                    cmd.Execute();
+                    cmd.SubExecute();
                 }
 
 

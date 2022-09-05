@@ -72,6 +72,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             var polygon_points = GetBufferPolyline(index, buffer_polygon, turn_left);
             ConvertToIntersectWay(index, polygon_points, turn_left);
+            //if (index == 2)
+            //{
+            //    if (buffer_polygon != null)
+            //        PassageShowUtils.ShowEntity(buffer_polygon,4);
+            //    if (polygon_points != null)
+            //        PassageShowUtils.ShowPoints(polygon_points);
+            //    foreach (var poly in equispaced_segments[index])
+            //        PassageShowUtils.ShowEntity(poly);
+            //}
+
             GetIntersectWayBuffer(index);
             // 第二阶段相交测试
             if (CheckIntersection(index, turn_left))
@@ -341,7 +351,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             else
                                 polygon_points[polygon_points.Count - 1] = new Point3d(polygon_points.Last().X, last2_point.Y, 0);
                             polygon_points.Add(last2_point);
-                        }
+                }
                     }
                 }
                 polygon_points.Add(last_point);
@@ -502,7 +512,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         target_points.RemoveAt(c - 3);
                         buffs.RemoveAt(c-2);
                         buffs.RemoveAt(c-3);
-                     }
+                    }
                     else if (buffs[c - 4] == buffer / 4) 
                     {
                         target_points[c - 4] += dp;

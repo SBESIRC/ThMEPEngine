@@ -71,17 +71,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             }
         }
 
-        public static void DistributeRoute(ThFloorHeatingCoilViewModel vm)
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                using (var cmd = new ThFloorHeatingDistributeCmd(vm))
-                {
-                    cmd.SubExecute();
-                }
-            }
-        }
+        //public static void DistributeRoute(ThFloorHeatingCoilViewModel vm)
+        //{
+        //    using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        using (var cmd = new ThFloorHeatingDistributeCmd(vm))
+        //        {
+        //            cmd.SubExecute();
+        //        }
+        //    }
+        //}
 
         public static void ShowRoute(ThFloorHeatingCoilViewModel vm)
         {
@@ -90,7 +90,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             {
                 using (var cmd = new ThFloorHeatingShowRouteCmd(vm))
                 {
-                    cmd.SubExecute();
+                    cmd.Execute();
                 }
             }
         }
