@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Linq2Acad;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Extension;
@@ -50,7 +51,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             ExtractBathRadiator(database, framePts);
         }
 
-       
+
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
         {
@@ -183,5 +184,43 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             return blkName;
         }
 
+        public static List<Polyline> ExtractPolylineMsNotClone(Database database, List<string> layers)
+        {
+            var polys = new List<Polyline>();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var Polys = acadDatabase.ModelSpace
+                  .OfType<Polyline>()
+                  .Where(o => IsElementLayer(o.Layer, layers))
+                  .OfType<Polyline>()
+                  .ToList();
+
+                polys.AddRange(Polys);
+            }
+
+            return polys;
+        }
+
+        private static bool IsElementLayer(string layer, List<string> layers)
+        {
+            var breturn = false;
+            if (layers == null || layers.Count == 0)
+            {
+                //不考虑图层
+                breturn = true;
+            }
+            else
+            {
+                foreach (var layerContainer in layers)
+                {
+                    if (layerContainer.ToUpper() == layer.ToUpper())
+                    {
+                        breturn = true;
+                        break;
+                    }
+                }
+            }
+            return breturn;
+        }
     }
 }

@@ -61,7 +61,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        public static void InsertCoil(List<Polyline> pipes,string layer, bool withColor = false)
+        public static void InsertCoil(List<Polyline> pipes, string layer, bool withColor = false)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -71,7 +71,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     {
                         var poly = pipes[i];
                         poly.Linetype = "ByLayer";
-                        poly.Layer =layer;
+                        poly.Layer = layer;
                         if (withColor == true)
                         {
                             poly.ColorIndex = i % 6;
@@ -96,7 +96,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             return attNameValues;
         }
 
-        public static void ShowConnectivity(List<Polyline> roomgraph, string layer,int colorIndex)
+        public static void ShowConnectivity(List<Polyline> roomgraph, string layer, int colorIndex)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -192,6 +192,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     if (null == layer)
                         continue;
                     currentDb.Layers.Import(layer, true);
+
+                    LayerTools.UnLockLayer(database, item);
+                    LayerTools.UnFrozenLayer(database, item);
+                    LayerTools.UnOffLayer(database, item);
                 }
             }
         }

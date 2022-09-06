@@ -18,7 +18,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
     public class ThFloorHeatingWaterSeparator
     {
-        public BlockReference Blk { get; private set; }
+        private BlockReference Blk { get; set; }
         public Polyline OBB { get; private set; }
         public List<Point3d> StartPts { get; private set; }
         public Vector3d DirLine { get; private set; }
@@ -70,7 +70,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
         public void Transform(ThMEPOriginTransformer transformer)
         {
-            transformer.Transform(Blk);
+            //transformer.Transform(Blk);
             transformer.Transform(OBB);
             StartPts = StartPts.Select(x => transformer.Transform(x)).ToList();
         }
@@ -115,7 +115,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
     public class ThFloorHeatingBathRadiator
     {
-        public BlockReference Blk { get; private set; }
+        private BlockReference Blk { get; set; }
         public Polyline OBB { get; private set; }
         public List<Point3d> StartPts { get; private set; }
 
@@ -158,7 +158,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
         public void Transform(ThMEPOriginTransformer transformer)
         {
-            transformer.Transform(Blk);
+            //transformer.Transform(Blk);
             transformer.Transform(OBB);
             StartPts = StartPts.Select(x => transformer.Transform(x)).ToList();
         }

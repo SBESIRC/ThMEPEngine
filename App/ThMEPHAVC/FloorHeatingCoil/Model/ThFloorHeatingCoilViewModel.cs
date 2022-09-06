@@ -97,7 +97,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
-       
+
         private ObservableCollection<int> _RouteNumList { get; set; }
         public ObservableCollection<int> RouteNumList
         {
@@ -187,7 +187,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        public Dictionary<Polyline, BlockReference> RoomPlSuggestDict { get; set; }
+        //public Dictionary<Polyline, BlockReference> RoomPlSuggestDict { get; set; }
         #endregion
 
 
@@ -203,7 +203,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             RouteNumList = new ObservableCollection<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
             SuggestDist = 250;
             SuggestDistDefualt = 200;
-            RoomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
+            //RoomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
             ConvexEdgeTol = 150;
             MainRoomEdgeTol = 2000;
             SuggestDistWall = 100;
@@ -241,7 +241,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         {
             SelectFrame.Clear();
             ProcessedData.Clear();
-            RoomPlSuggestDict.Clear();
+            //  RoomPlSuggestDict.Clear();
         }
 
         public ICommand PickRoomOutlineCmd => new RelayCommand(PickRoomOutline);

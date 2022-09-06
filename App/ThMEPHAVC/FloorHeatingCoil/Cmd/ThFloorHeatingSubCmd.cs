@@ -45,8 +45,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     return;
                 }
 
-                var transformer = ThMEPHVACCommonUtils.GetTransformer(selectFrames[0].Vertices());
-                transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, true);//暂用（0，0，0） 需要改！
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
 

@@ -47,8 +47,9 @@ namespace ThMEPHVAC
                     return;
                 }
 
-                var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
-                transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                //var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
+                //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, false);
 
                 var dataFactory = new ThFloorHeatingDataFactory()
                 {
@@ -57,19 +58,20 @@ namespace ThMEPHVAC
                 };
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
-
                 dataQuery.Print();
 
-                var roomSuggest = ThFloorHeatingCoilUtilServices.GetRoomSuggestData(acadDatabase.Database);
-                var roomPlSuggestDict = ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest, transformer);
+                var roomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
+                var roomSuggest = ThFloorHeatingCoilUtilServices.GetRoomSuggestData(acadDatabase.Database, transformer);
+                ThFloorHeatingCoilUtilServices.PairRoomPlWithRoomSuggest(dataQuery.RoomSet[0].Room, roomSuggest, ref roomPlSuggestDict);
                 ThFloorHeatingCoilUtilServices.PairRoomWithRoomSuggest(ref dataQuery.RoomSet, roomPlSuggestDict, 200);
 
-                dataQuery.RoomSet[0].Room.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.RoomBoundary.GetCenter(), x.SuggestDist.ToString(), "l0roomSuggest", hight: 200));
-                //dataQuery.Reset(transformer);
+                dataQuery.RoomSet[0].Room.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.RoomBoundary.GetCenterInPolyline(), x.SuggestDist.ToString(), "l0roomSuggest", hight: 200));
+
 
             }
         }
 
+        [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThFloorHeating", CommandFlags.Modal)]
         public void ThFloorHeating()
         {
@@ -91,5 +93,8 @@ namespace ThMEPHVAC
 
             }
         }
+
+
+
     }
 }

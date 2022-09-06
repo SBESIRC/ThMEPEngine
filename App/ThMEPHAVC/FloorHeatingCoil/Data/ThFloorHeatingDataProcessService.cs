@@ -75,7 +75,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public void ProcessDataWithRoom(List<Polyline> selectFrames)
         {
             ProcessedRowData();
-            // Transform(ref selectFrames);
+            Transform(ref selectFrames);
             ProjectOntoXYPlane();
             SelectObjInRoom(selectFrames);
             CleanRoomBoundary();
@@ -84,6 +84,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             var separateRooms = SeparateRoomWithLine();
             CreateRoomSetInRoomFrames(separateRooms);
             PairRoomSetWithOriginalRoom();
+            selectFrames.ForEach(x => Transformer.Reset(x));
         }
 
         private void ProcessedRowData()

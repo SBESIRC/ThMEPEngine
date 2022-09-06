@@ -27,7 +27,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 {
     public class ThFloorHeatingCreateService
     {
-        public static ThFloorHeatingDataProcessService CreateSRData(ThFloorHeatingCoilViewModel vm)
+        /// <summary>
+        /// data: (0,0,0) selectFrame:far away
+        /// </summary>
+        /// <param name="vm"></param>
+        /// <param name="selectFrames"></param>
+        /// <param name="transformer"></param>
+        /// <returns></returns>
+        public static ThFloorHeatingDataProcessService CreateSRData(ThFloorHeatingCoilViewModel vm, ref List<Polyline> selectFrames, ref ThMEPOriginTransformer transformer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -35,14 +42,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                 {
                     ThSelectFrameUtil.SelectPolyline().ForEach(x => vm.SelectFrame.Add(x));
                 }
-                var selectFrames = vm.SelectFrame.ToList();
+                selectFrames.AddRange(vm.SelectFrame.ToList());
                 if (selectFrames.Count == 0)
                 {
+                    transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
                     return new ThFloorHeatingDataProcessService();
                 }
 
-                var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
-                transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                //transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
+                //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames,false);
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
 
@@ -133,7 +142,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
         }
 
-        public static void UpdateSRSuggestBlock(List<SingleRegion> regionList, List<SinglePipe> pipeList, Dictionary<Polyline, BlockReference> roomPlSuggestDict, bool updateWaterSeparatorRoom)
+        public static void UpdateSRSuggestBlock(List<SingleRegion> regionList, List<SinglePipe> pipeList, Dictionary<Polyline, BlockReference> roomPlSuggestDict, bool updateWaterSeparatorRoom, ThMEPOriginTransformer transformer)
         {
             var routeDict = SortSingleRegionRoute(pipeList);
 
@@ -160,13 +169,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                         //住宅模式跳过集分水器在的房间
                         continue;
                     }
-                    var insertPt = sr.ClearedPl.GetCenter();
+                    var insertPt = sr.ClearedPl.GetCenterInPolyline();
+                    transformer.Reset(ref insertPt);
                     ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route + 1, suggestDist, length, ThFloorHeatingCommon.BlkName_RoomSuggest, true);
                 }
             }
         }
 
-        private static Dictionary<int, int> SortSingleRegionRoute( List<SinglePipe> pipeList)
+        private static Dictionary<int, int> SortSingleRegionRoute(List<SinglePipe> pipeList)
         {
             var routeDict = new Dictionary<int, int>();
             var realIdx = 0;
