@@ -7,6 +7,7 @@ using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -214,12 +215,13 @@ namespace ThPlatform3D.StructPlane
                     var blkName = GetDrawingBlkName();
                     var blkIds = FilterBlockObjIds(acadDb,o); // 要打块的元素
                     var blkObjs = Clone(acadDb,blkIds);
+                    blkObjs.OfType<Entity>().ForEach(e => ThHyperLinkTool.Add(e, "Major:Structure"));
                     var blockId = BuildBlock(acadDb,blkObjs, blkName);
                     if (blockId != ObjectId.Null)
                     {
                         var blkId  = InsertBlock(acadDb,"0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
                         var blkEntity = acadDb.Element<Entity>(blkId, true);
-                        ThCADExtension.ThHyperLinkTool.Add(blkEntity,"Major: Structure");
+                        ThHyperLinkTool.Add(blkEntity,"Major:Structure");
                         Erase(acadDb,blkIds);
                     }
                     o.OfType<ObjectId>().Where(x => !x.IsErased && x.IsValid).ForEach(x =>
