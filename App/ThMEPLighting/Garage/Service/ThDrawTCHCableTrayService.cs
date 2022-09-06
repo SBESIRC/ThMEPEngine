@@ -12,7 +12,6 @@ using ThCADExtension;
 using ThMEPTCH.Model;
 using ThMEPEngineCore.CAD;
 using ThMEPTCH.TCHDrawServices;
-using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Garage.Model;
 
@@ -31,13 +30,6 @@ namespace ThMEPLighting.Garage.Service
         // 需要在近似原点附近处理
         public void Draw(List<Line> cableTrays, ThMEPOriginTransformer transformer)
         {
-            // 断线处理
-            var collection = cableTrays.ToCollection();
-            collection = ThLaneLineExtendEngine.LineExtendAndMerge(collection);
-            collection = ThLaneLineEngine.Noding(collection);
-            collection = ThLaneLineEngine.CleanZeroCurves(collection);
-            cableTrays = collection.OfType<Line>().ToList();
-
             var service = new TCHDrawCableTrayService();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(cableTrays.ToCollection());
             var elbowInputs = new List<ElbowInput>();

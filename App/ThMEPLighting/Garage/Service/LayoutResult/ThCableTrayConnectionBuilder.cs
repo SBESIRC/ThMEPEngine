@@ -9,8 +9,9 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPLighting.Common;
-using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
@@ -205,11 +206,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 打印天正桥架(因为天正桥架获取不到它的ObjectId)
             if (ArrangeParameter.IsTCHCableTray)
             {
-                var lines = new List<Line>();
-                var crossLinks = new List<Line>();
-                var wires = CutTerminal(crossLinks);
-                lines.AddRange(wires);
-                lines.AddRange(crossLinks);
+                var lines = CutLightingLines(FdxLines);
+                lines.AddRange(FdxLines);
                 ResetObjIds(ObjIds);
                 PrintTCHCableTray(lines, Transformer);
                 Transformer.Reset(lines.ToCollection());
@@ -218,6 +216,46 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 ResetObjIds(ObjIds);
             }
+        }
+
+        private List<Line> CutLightingLines(List<Line> nonLightinglines, double tolerance = 10.0)
+        {
+            var results = new List<Line>();
+            var nonLightingLineIndex = new ThCADCoreNTSSpatialIndex(nonLightinglines.ToCollection());
+            var grapgEdges = Graphs.SelectMany(o => o.GraphEdges);
+            var firstEdges = grapgEdges.Where(o => o.EdgePattern.Equals(EdgePattern.First)).Select(o => o.Edge).ToList();
+            var firstEdgesIndex = new ThCADCoreNTSSpatialIndex(firstEdges.ToCollection());
+            var secondEdges = grapgEdges.Where(o => o.EdgePattern.Equals(EdgePattern.Second)).Select(o => o.Edge).ToList();
+            var secondEdgesIndex = new ThCADCoreNTSSpatialIndex(secondEdges.ToCollection());
+
+            CutLightingLines(results, firstEdges, nonLightingLineIndex, secondEdgesIndex, tolerance);
+            CutLightingLines(results, secondEdges, nonLightingLineIndex, firstEdgesIndex, tolerance);
+            results.RemoveAll(o => o.Length < 10.0);
+            return results;
+        }
+
+        private void CutLightingLines(List<Line> results, List<Line> edges, ThCADCoreNTSSpatialIndex nonLightingLineIndex,
+            ThCADCoreNTSSpatialIndex otherEdgesIndex, double tolerance)
+        {
+            edges.ForEach(o =>
+            {
+                var direction = o.LineDirection();
+                var reduceLine = new Line(o.StartPoint + tolerance * direction, o.EndPoint - tolerance * direction);
+                var buffer = reduceLine.Buffer(tolerance);
+                var nonLightingLineFilter = nonLightingLineIndex.SelectCrossingPolygon(buffer).OfType<Line>();
+                var edgeFilter = otherEdgesIndex.SelectCrossingPolygon(buffer).OfType<Line>();
+                if (nonLightingLineFilter.Count() + edgeFilter.Count() > 0)
+                {
+                    var filter = nonLightingLineFilter.Count() > 0 ? nonLightingLineFilter.First() : edgeFilter.First();
+                    var intersection = o.GetClosestPointTo(filter.StartPoint, true);
+                    results.Add(new Line(o.StartPoint, intersection));
+                    results.Add(new Line(intersection, o.EndPoint));
+                }
+                else
+                {
+                    results.Add(o);
+                }
+            });
         }
     }
 }

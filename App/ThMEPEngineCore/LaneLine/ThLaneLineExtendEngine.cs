@@ -6,8 +6,6 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.KdTree;
-using NetTopologySuite.Operation.Overlay;
-using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.LaneLine
@@ -107,7 +105,7 @@ namespace ThMEPEngineCore.LaneLine
                         mergeLine.Add(x);
                     }
                 });
-                if(mergeLine.Count > 0)
+                if (mergeLine.Count > 0)
                 {
                     mergeLine.Add(line);
                     ThLaneLineMergeExtension.Merge(mergeLine).OfType<Line>().ForEach(x => results.Add(x));

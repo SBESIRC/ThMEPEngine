@@ -86,7 +86,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             lightingLines = ThLaneLineMergeExtension.Merge(lightingLines.ToCollection()).OfType<Line>().ToList();
 
             // 延伸非灯线，缩进单排线槽线
-            Extend(regionBorder.FdxCenterLines, lightingLines);
+            regionBorder.FdxCenterLines = Extend(regionBorder.FdxCenterLines, lightingLines);
             Shorten(regionBorder.SingleRowLines, lightingLines);
 
             // 在交叉处对线进行延伸
@@ -329,42 +329,60 @@ namespace ThMEPLighting.Garage.Service.Arrange
             }
         }
 
-        private void Extend(List<Line> nonLightingLines, List<Line> lightingLines)
+        private List<Line> Extend(List<Line> nonLightingLines, List<Line> lightingLines)
         {
+            var results = new List<Line>();
+            var extends = new List<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lightingLines.ToCollection());
             for (var i = 0; i < nonLightingLines.Count; i++)
             {
                 var buffer = nonLightingLines[i].BufferSquare(10.0);
                 var filter = buffer.SelectCrossingEntities(spatialIndex);
+                // 是否需要多做一次空间索引有待考虑
                 if (filter.Count > 0)
                 {
                     // 终点延伸
-                    var endNewLine = new Line(nonLightingLines[i].StartPoint,
+                    var endNewLine = new Line(nonLightingLines[i].EndPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2,
                         nonLightingLines[i].EndPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                     var pointSquare = endNewLine.EndPoint.CreateSquare(10.0);
                     var endExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
 
                     // 起点延伸
                     var startNewLine = new Line(nonLightingLines[i].StartPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2,
-                        nonLightingLines[i].EndPoint);
+                        nonLightingLines[i].StartPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                     pointSquare = startNewLine.StartPoint.CreateSquare(10.0);
                     var startExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
 
-                    if (endExtendSearch.Count > 0 && startExtendSearch.Count > 0)
+                    if (endExtendSearch.Count > 0)
                     {
-                        nonLightingLines[i] = new Line(nonLightingLines[i].StartPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2,
-                        nonLightingLines[i].EndPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
+                        nonLightingLines[i] = new Line(nonLightingLines[i].StartPoint,
+                            nonLightingLines[i].EndPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
+                        extends.Add(endNewLine);
                     }
-                    else if (endExtendSearch.Count > 0)
+                    if (startExtendSearch.Count > 0)
                     {
-                        nonLightingLines[i] = endNewLine;
-                    }
-                    else if (startExtendSearch.Count > 0)
-                    {
-                        nonLightingLines[i] = startNewLine;
+                        nonLightingLines[i] = new Line(nonLightingLines[i].EndPoint,
+                            nonLightingLines[i].StartPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
+                        extends.Add(startNewLine);
                     }
                 }
             }
+
+            for (var i = 0; i < extends.Count; i++)
+            {
+                if (results.Any(o => o.StartPoint.DistanceTo(extends[i].StartPoint) < 1.0
+                    && o.EndPoint.DistanceTo(extends[i].EndPoint) < 1.0))
+                {
+                    continue;
+                }
+                else
+                {
+                    results.Add(extends[i]);
+                }
+            }
+
+            results.AddRange(nonLightingLines);
+            return results;
         }
 
         private void Shorten(List<Line> singleRowLines, List<Line> lightingLines)
