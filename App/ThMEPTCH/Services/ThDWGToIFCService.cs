@@ -73,7 +73,7 @@ namespace ThMEPTCH.Services
             return ThIfcStoreyParseTool.DeSerialize(jsonPath);
         }
 
-        public ThTCHProject DWGToProject(bool isMemoryStory, bool railingToRegion,bool isSelectFloor = false)
+        public ThTCHProject DWGToProject(bool isMemoryStory, bool railingToRegion, bool isSelectFloor = false, bool IsStructure = false)
         {
             string prjId = "";
             string prjName = "测试项目";
@@ -304,6 +304,8 @@ namespace ThMEPTCH.Services
                     {
                         var copyItem = item.Clone() as ThTCHSlab;
                         copyItem.Uuid += buildingStorey.Number;
+                        if (IsStructure)
+                            (copyItem.Outline as Polyline).Elevation += buildingStorey.Height;
                         buildingStorey.Slabs.Add(copyItem);
                     }
                     //buildingStorey.Slabs.AddRange(slabs);
@@ -890,7 +892,7 @@ namespace ThMEPTCH.Services
             var pl = slab.Outline.Clone() as Polyline;
             pl.TransformBy(matrix);
             //pl.Closed = false;
-            pl.Elevation = (4400 + slab.RelativeBG);
+            pl.Elevation = slab.RelativeBG;
             var newSlab = new ThTCHSlab(pl, slab.Height, Vector3d.ZAxis);
             newSlab.Uuid = projectId + slab.Uuid;
             return newSlab;

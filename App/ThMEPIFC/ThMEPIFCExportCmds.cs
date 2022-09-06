@@ -27,7 +27,7 @@ namespace ThMEPIFC
                 // 读取并解析CAD图纸数据
                 ThStopWatchService.Start();
                 var service = new ThDWGToIFCService(string.Empty);
-                var project = service.DWGToProject(false, false, true);
+                var project = service.DWGToProject(false, false, true, true);
                 if (project.IsNull())
                     return;
                 ThStopWatchService.Stop();

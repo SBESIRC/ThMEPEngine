@@ -206,11 +206,8 @@ namespace ThMEPIFC
             //处理5%
             foreach (ThTCHBuildingStorey BuildingStorey in tchProject.Site.Building.Storeys)
             {
-                var bigStorey = StoreyDic.FirstOrDefault(o => o.Item1.ToString() == BuildingStorey.Number);
-                if (bigStorey.IsNull())
-                {
                     var Storey_z = BuildingStorey.Elevation;
-                    bigStorey = StoreyDic.FirstOrDefault(o => Math.Abs(o.Item2 - Storey_z) <= 200);
+                    var bigStorey = StoreyDic.FirstOrDefault(o => Math.Abs(o.Item2 - Storey_z) <= 200);
                     if (bigStorey.IsNull())
                     {
                         if (Math.Abs(Storey_z - (StoreyDic.Last().Item2 + StoreyDic.Last().Item3)) <= 200)
@@ -241,12 +238,13 @@ namespace ThMEPIFC
                             bigStorey = StoreyDic.FirstOrDefault(o => Storey_z - o.Item2 > -200);
                         }
                     }
-                }
                 var storeyName = bigStorey.Item1.ToString().Replace('-', 'B');
                 var storey = bigBuildings.BuildingStoreys.FirstOrDefault(o => o.Name==storeyName) as Xbim.Ifc2x3.ProductExtension.IfcBuildingStorey;
                 if (storey.IsNull())
                 {
                     BuildingStorey.Number = storeyName;
+                    BuildingStorey.Properties["FloorNo"] = storeyName;
+                    BuildingStorey.Properties["StdFlrNo"] = storeyName;
                     storey = ThTGL2IFC2x3Factory.CreateStorey(bigModel, bigBuildings, BuildingStorey);
                 }
                 var CreatWalls = new List<Xbim.Ifc2x3.SharedBldgElements.IfcWall>();
