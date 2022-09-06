@@ -20,7 +20,7 @@ namespace ThPlatform3D.StructPlane.Print
     internal class ThStruPlanDrawingPrinter:ThStruDrawingPrinter
     {
         private AnnotationPrintConfig _beamTextConfig;
-        public ThStruPlanDrawingPrinter(ThSvgInput input,ThPlanePrintParameter printParameter) 
+        public ThStruPlanDrawingPrinter(ThSvgParseInfo input,ThPlanePrintParameter printParameter) 
             :base(input, printParameter)
         {
             _beamTextConfig = ThBeamPrinter.GetBeamTextConfig(_printParameter.DrawingScale);

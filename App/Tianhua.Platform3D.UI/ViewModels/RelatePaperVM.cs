@@ -67,7 +67,7 @@ namespace TianHua.Platform3D.UI.ViewModels
                            var attrValue = equalAttributes.First().Value;
                            if(!string.IsNullOrEmpty(attrValue))
                            {
-                               var handle = o.Handle.Value.ToString();
+                               var handle = o.Handle.ToString();
                                bool isExisted = results.Where(x => x.PaperFrameHandle == handle).Any();
                                if (!isExisted)
                                {

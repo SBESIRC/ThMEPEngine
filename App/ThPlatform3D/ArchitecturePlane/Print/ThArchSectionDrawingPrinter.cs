@@ -18,7 +18,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
     /// </summary>
     internal class ThArchSectionDrawingPrinter : ThArchDrawingPrinter
     {
-        public ThArchSectionDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
+        public ThArchSectionDrawingPrinter(ThSvgParseInfo input, ThPlanePrintParameter printParameter)
             : base(input, printParameter)
         {
         }

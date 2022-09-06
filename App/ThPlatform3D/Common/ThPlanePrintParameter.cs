@@ -1,4 +1,6 @@
-﻿namespace ThPlatform3D.Common
+﻿using Autodesk.AutoCAD.Geometry;
+
+namespace ThPlatform3D.Common
 {
     /// <summary>
     /// 通用的打印参数
@@ -27,5 +29,17 @@
         /// 默认板厚
         /// </summary>
         public double DefaultSlabThick { get; set; }
+
+        /// <summary>
+        /// 第一层图框插入的基点
+        /// </summary>
+
+        public Point3d BasePoint { get; set; } = Point3d.Origin;
+
+        public Point3d GetFloorBasePoint(int naturalIndex)
+        {
+            //naturalIndex从1开始
+            return BasePoint + new Vector3d(0, (naturalIndex - 1) * FloorSpacing, 0);
+        }
     }
 }

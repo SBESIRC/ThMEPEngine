@@ -1,17 +1,21 @@
 ﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO.SVG;
 
-namespace ThPlatform3D.Common
+namespace ThMEPEngineCore.IO.SVG
 {
-    internal class ThSvgInput
+    public class ThSvgParseInfo
     {
+        /// <summary>
+        /// 单体名称
+        /// </summary>
+        public string BuildingName { get; set; }
         public List<ThGeometry> Geos { get; set; }
         public List<ThFloorInfo> FloorInfos { get; set; }
         public List<ThComponentInfo> ComponentInfos { get; set; }
         public Dictionary<string, string> DocProperties { get; set; }
-        public ThSvgInput()
+        public ThSvgParseInfo()
         {
+            BuildingName = "";
             Geos = new List<ThGeometry>();
             FloorInfos = new List<ThFloorInfo>();
             ComponentInfos = new List<ThComponentInfo>();

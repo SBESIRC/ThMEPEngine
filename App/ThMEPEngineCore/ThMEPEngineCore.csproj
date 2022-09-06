@@ -252,6 +252,7 @@
     <Compile Include="IO\SVG\ThComponentInfo.cs" />
     <Compile Include="IO\SVG\ThFloorInfo.cs" />
     <Compile Include="IO\SVG\ThArchitectureSVGReader.cs" />
+    <Compile Include="IO\SVG\ThSvgParseInfo.cs" />
     <Compile Include="IO\ThTextureMaterialManager.cs" />
     <Compile Include="IO\ThIfcCategoryManager.cs" />
     <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />

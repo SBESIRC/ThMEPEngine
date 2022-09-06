@@ -55,6 +55,15 @@ namespace Tianhua.Platform3D.UI
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THAMBTUI", CommandFlags.Modal)]
+        public void THAUTSC()
+        {
+            using (var cmd = new ThArchitecturePlaneCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         #region 平台CAD相关事件
         private void PlatformAddEvents() 
         {

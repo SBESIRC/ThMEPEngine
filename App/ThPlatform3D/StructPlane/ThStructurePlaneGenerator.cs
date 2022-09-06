@@ -321,24 +321,21 @@ namespace ThPlatform3D.StructPlane
         {
             var svg = new ThStructureSVGReader();
             svg.ReadFromFile(svgFile);
+            var svgInput = svg.ParseInfo;
 
             // 移动
-            if(flrNaturalNumber>1)
+            if (flrNaturalNumber>1)
             {
                 var moveDir = new Vector3d(0, PrintParameter.FloorSpacing * (flrNaturalNumber - 1), 0);
                 var mt = Matrix3d.Displacement(moveDir);
-                svg.Geos.ForEach(o => o.Boundary.TransformBy(mt));
+                svgInput.Geos.ForEach(o => o.Boundary.TransformBy(mt));
             }
             
             // 对剪力墙造洞
             var buildAreaSevice = new ThWallBuildAreaService();
-            var passGeos = buildAreaSevice.BuildArea(svg.Geos);
-            var svgInput = new ThSvgInput()
-            {
-                Geos = passGeos,
-                FloorInfos = svg.FloorInfos,
-                DocProperties = svg.DocProperties,
-            };
+            var passGeos = buildAreaSevice.BuildArea(svgInput.Geos);
+            svgInput.Geos = passGeos;
+            
             var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
             printer.Print(Active.Database);
             return printer;
@@ -348,19 +345,20 @@ namespace ThPlatform3D.StructPlane
         {
             var svg = new ThStructureSVGReader();
             svg.ReadFromFile(svgFile);
+            var svgInput = svg.ParseInfo;
 
             // 移动
             if (flrNaturalNumber > 1)
             {
                 var moveDir = new Vector3d(0, PrintParameter.FloorSpacing * (flrNaturalNumber - 1), 0);
                 var mt = Matrix3d.Displacement(moveDir);
-                svg.Geos.ForEach(o => o.Boundary.TransformBy(mt));
+                svgInput.Geos.ForEach(o => o.Boundary.TransformBy(mt));
             }
 
             #region ---------- 数据处理 ----------
             // 对剪力墙造洞
             var buildAreaSevice = new ThWallBuildAreaService();
-            var newGeos = buildAreaSevice.BuildArea(svg.Geos);
+            var newGeos = buildAreaSevice.BuildArea(svgInput.Geos);
 
             // 梁处理
             // 用下层墙、柱对梁线进行Trim+合并梁线
@@ -383,12 +381,7 @@ namespace ThPlatform3D.StructPlane
             #endregion
 
             // 打印
-            var svgInput = new ThSvgInput()
-            {
-                Geos = passGeos,
-                FloorInfos = svg.FloorInfos,
-                DocProperties = svg.DocProperties,
-            };
+            svgInput.Geos = passGeos;           
             var printer = new ThStruPlanDrawingPrinter(svgInput, PrintParameter);
             printer.Print(Active.Database);
             return printer;

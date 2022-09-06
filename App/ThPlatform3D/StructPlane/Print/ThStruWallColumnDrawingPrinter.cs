@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.Common;
 using ThPlatform3D.StructPlane.Service;
 
@@ -12,7 +13,7 @@ namespace ThPlatform3D.StructPlane.Print
 {
     internal class ThStruWallColumnDrawingPrinter : ThStruDrawingPrinter
     {
-        public ThStruWallColumnDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
+        public ThStruWallColumnDrawingPrinter(ThSvgParseInfo input, ThPlanePrintParameter printParameter)
             :base(input, printParameter)
         {
         }

@@ -18,7 +18,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
     /// </summary>
     internal class ThArchPlanDrawingPrinter: ThArchDrawingPrinter
     {
-        public ThArchPlanDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter) 
+        public ThArchPlanDrawingPrinter(ThSvgParseInfo input, ThPlanePrintParameter printParameter) 
             :base(input, printParameter)
         {              
         }

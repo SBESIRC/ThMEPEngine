@@ -30,6 +30,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThArchitecturePlaneCmd.cs" />
     <Compile Include="Command\ThStructurePlaneCmd.cs" />
     <Compile Include="Converter\EnumBooleanConverter.cs" />
     <Compile Include="EventMonitor\ObjectSelectEvent.cs" />
