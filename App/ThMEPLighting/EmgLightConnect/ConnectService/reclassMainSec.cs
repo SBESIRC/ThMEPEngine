@@ -84,7 +84,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 //tolLane = 6000;
                 //没有主块的线
                 yTransValue = allBlkDict.Where(x => side.secBlk.Contains(x.Key) && Math.Abs(x.Value.Y) <= tolLane).Select(x => x.Value.Y).ToList();
-                if (yTransValue .Count ==0)
+                if (yTransValue.Count == 0)
                 {
                     yTransValue = allBlkDict.Where(x => side.secBlk.Contains(x.Key)).Select(x => x.Value.Y).ToList();
                 }
@@ -130,7 +130,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     //remain blk 只有一个块时
                     movedLaneList.Add((moveLanePoly, side.reMainBlk));
                 }
-
                 else
                 {
                     var offsetStEdPt = getMoveLaneSegStartEndPt(offsetList, side.Matrix);
@@ -288,7 +287,30 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     offsetList = getNewOffsetSeg(checkIntersectPoly, lanePoly, offset);
                     DrawUtils.ShowGeometry(checkIntersectPoly, "l0movedLanePoly");
                 }
+
+                //check offsetList：检查一些只有一个主点一个副点但是一组没卡出偏移线的情况
+                for (int i = offsetList.Count - 1; i >= 0; i--)
+                {
+                    var offSetL = offsetList[i];
+                    for (int j = offSetL.Item2.Count - 1; j >= 0; j--)
+                    {
+                        if (offSetL.Item2[j].Length < 1)
+                        {
+                            offSetL.Item2.RemoveAt(j);
+                        }
+                    }
+                    if (offSetL.Item2.Count == 0)
+                    {
+                        offsetList.RemoveAt(i);
+                    }
+                }
+                if (offsetList .Count ==0 )
+                {
+                    moveLanePoly = new Polyline();
+                    lanePoly = new Polyline();
+                }
             }
+
             return offsetList;
 
         }
@@ -533,17 +555,20 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
 
             Algorithms.PolyClean_RemoveDuplicatedVertex(lanePoly);
-            var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
-
-            if (newReMainPointList.Count > 1)
+            var movelineTempObj = lanePoly.GetOffsetCurves(distance * dir);
+            if (movelineTempObj.Count > 0)
             {
-                moveLine = drawEmgPipeService.cutPolyline(newReMainPointList.First(), newReMainPointList.Last(), moveLineTemp);
-            }
-            else
-            {
-                moveLine = moveLineTemp;
-            }
+                var moveLineTemp = movelineTempObj[0] as Polyline;
 
+                if (newReMainPointList.Count > 1)
+                {
+                    moveLine = drawEmgPipeService.cutPolyline(newReMainPointList.First(), newReMainPointList.Last(), moveLineTemp);
+                }
+                else
+                {
+                    moveLine = moveLineTemp;
+                }
+            }
             return (moveLine, newReMainPointList);
         }
 
