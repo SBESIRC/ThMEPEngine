@@ -260,7 +260,6 @@ namespace ThMEPArchitecture.MultiProcess
             var obsVertices = new List<Coordinate>();
             var lanes = new List<LineSegment>();
             var obstacles = new List<Polygon>();
-            foreach (var subArea in subAreas)
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
             ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
             //OPostProcessEntry postProcessEntry = new OPostProcessEntry(subAreas);
