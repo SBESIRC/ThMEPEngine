@@ -61,7 +61,7 @@ namespace ThMEPTCH.CAD
                 return null;
             }
             Polyline p = new Polyline();
-            p.AddVertexAt(0, tchPolyline.Points[int.Parse(tchPolyline.Segments.First().Index.Last().ToString())].ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(0, tchPolyline.Points[int.Parse(tchPolyline.Segments.First().Index.First().ToString())].ToPoint2d(), 0, 0, 0);
             int index = 1;
             foreach (var segment in tchPolyline.Segments)
             {
@@ -82,6 +82,15 @@ namespace ThMEPTCH.CAD
             return p;
         }
 
+        public static void ZOffSet(this ThTCHPolyline tchPolyline,double offset)
+        {
+            if (tchPolyline.IsNull())
+            {
+                return;
+            }
+            tchPolyline.Points.ForEach(p => p.Z += offset);
+        }
+
         public static ThTCHPoint3d ToTCHPoint(this Point3d point)
         {
             return new ThTCHPoint3d() { X = point.X, Y = point.Y, Z = point.Z };
@@ -100,6 +109,11 @@ namespace ThMEPTCH.CAD
         public static Point3d ToPoint3d(this ThTCHPoint3d point)
         {
             return new Point3d(point.X, point.Y, point.Z);
+        }
+
+        public static ThTCHVector3d ToTCHVector(this Vector3d vector)
+        {
+            return new ThTCHVector3d() { X = vector.X, Y = vector.Y, Z = vector.Z };
         }
     }
 }

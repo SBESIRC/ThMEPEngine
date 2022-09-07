@@ -4,6 +4,8 @@ import "ThTCHWallData.proto";
 import "ThTCHDoorData.proto";
 import "ThTCHGeometry.proto";
 import "ThTCHWindowData.proto";
+import "ThTCHSlabData.proto";
+import "ThTCHRailingData.proto";
 import "ThTCHOpeningData.proto";
 
 message ThTCHBuildingStoreyData {
@@ -27,4 +29,6 @@ message ThTCHBuildingStoreyData {
     repeated ThTCHWallData walls = 7;
     repeated ThTCHDoorData doors = 8;
     repeated ThTCHWindowData windows = 9;
+    repeated ThTCHSlabData slabs = 10;
+    repeated ThTCHRailingData railings = 11;
 }

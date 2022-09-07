@@ -434,8 +434,10 @@ namespace ThMEPTCH.TCHArchDataConvert
         {
             var newDoor = new ThTCHDoorData();
             newDoor.BuildElement = new ThTCHBuiltElementData();
-            newDoor.BuildElement.Width = entity.Width;
+            newDoor.BuildElement.Length = entity.Width;
+            newDoor.BuildElement.Width = entity.Thickness;
             newDoor.BuildElement.Origin = entity.BasePoint.ToTCHPoint();
+            newDoor.BuildElement.XVector = Vector3d.XAxis.RotateBy(entity.Rotation, Vector3d.ZAxis).ToTCHVector();
             newDoor.BuildElement.Height = entity.Height;
             newDoor.BuildElement.Root = new ThTCHRootData();
             newDoor.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();
@@ -453,8 +455,10 @@ namespace ThMEPTCH.TCHArchDataConvert
         {
             var newWindow = new ThTCHWindowData();
             newWindow.BuildElement = new ThTCHBuiltElementData();
-            newWindow.BuildElement.Width = entity.Width;
+            newWindow.BuildElement.Length = entity.Width;
+            newWindow.BuildElement.Width = entity.Thickness;
             newWindow.BuildElement.Origin = entity.BasePoint.ToTCHPoint();
+            newWindow.BuildElement.XVector = Vector3d.XAxis.RotateBy(entity.Rotation, Vector3d.ZAxis).ToTCHVector();
             newWindow.BuildElement.Height = entity.Height;
             newWindow.BuildElement.Root = new ThTCHRootData();
             newWindow.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();

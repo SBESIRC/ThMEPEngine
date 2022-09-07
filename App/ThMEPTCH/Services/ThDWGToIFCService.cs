@@ -389,8 +389,8 @@ namespace ThMEPTCH.Services
                 var walls = entityConvert.WallDataDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
                 floor.FloorEntitys.AddRange(walls);
 
-                var allSlabs = new List<ThTCHSlab>();
-                var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailing>();
+                var allSlabs = new List<ThTCHSlabData>();
+                var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailingData>();
                 var railingColls = new DBObjectCollection();
                 foreach (var item in curveEntities)
                 {
@@ -398,8 +398,8 @@ namespace ThMEPTCH.Services
                     {
                         if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
                         {
-                            var slab = CreateSlab(slab1, matrix);
-                            slab.Uuid = prjId + item.Id;
+                            var slab = CreateSlabData(slab1, matrix);
+                            slab.BuildElement.Root.GlobalId = prjId + item.Id;
                             allSlabs.Add(slab);
                         }
                     }
@@ -409,15 +409,15 @@ namespace ThMEPTCH.Services
                         {
                             var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
                             railingColls.Add(pLine);
-                            var railing = CreateRailing(pLine);
+                            var railing = CreateRailingData(pLine);
                             if (railingToRegion)
                             {
-                                var centerline = railing.Outline as Polyline;
-                                var outlines = centerline.BufferFlatPL(railing.Width / 2.0);
-                                railing.Outline = outlines[0] as Polyline;
+                                var centerline = pLine;
+                                var outlines = centerline.BufferFlatPL(railing.BuildElement.Width / 2.0);
+                                railing.BuildElement.Outline = (outlines[0] as Polyline).ToTCHPolyline();
                             }
-                            railing.Height = ralingHeight;
-                            railing.Uuid = prjId + item.Id;
+                            railing.BuildElement.Height = ralingHeight;
+                            railing.BuildElement.Root.GlobalId = prjId + item.Id;
                             thisRailingEntitys.Add(pLine, railing);
                         }
                     }
@@ -439,9 +439,8 @@ namespace ThMEPTCH.Services
                         if (hisPLines.Any(c => c == polyline))
                             continue;
                         var railing = thisRailingEntitys[polyline];
-                        (railing.Outline as Polyline).Elevation = (wall.BuildElement.Outline.ToPolyline()).Elevation + wall.BuildElement.Height;
-                        railing.ZOffSet = wall.BuildElement.Height;
-                        railing.Height = 800;
+                        railing.BuildElement.Outline.ZOffSet(wall.BuildElement.Height);
+                        railing.BuildElement.Height = 800;
                     }
                 }
                 floor.FloorEntitys.AddRange(allSlabs);
@@ -490,8 +489,37 @@ namespace ThMEPTCH.Services
                         var copyItem = item.Clone();
                         if (Math.Abs(copyItem.BuildElement.Height) < 10)
                             copyItem.BuildElement.Height = floor.LevelHeight;
+                        foreach (var door in copyItem.Doors)
+                        {
+                            door.BuildElement.Root.GlobalId += buildingStorey.Number;
+                        }
+                        foreach (var window in copyItem.Windows)
+                        {
+                            window.BuildElement.Root.GlobalId += buildingStorey.Number;
+                        }
+                        foreach (var opening in copyItem.Openings)
+                        {
+                            opening.BuildElement.Root.GlobalId += buildingStorey.Number;
+                        }
                         walls.Add(copyItem);
                     }
+
+                    var slabs = levelEntitys.FloorEntitys.OfType<ThTCHSlabData>().ToList();
+                    foreach (var item in slabs)
+                    {
+                        var copyItem = item.Clone();
+                        copyItem.BuildElement.Root.GlobalId += buildingStorey.Number;
+                        buildingStorey.Slabs.Add(copyItem);
+                    }
+
+                    var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailingData>().ToList();
+                    foreach (var railing in railings)
+                    {
+                        var copyItem = railing.Clone();
+                        copyItem.BuildElement.Root.GlobalId += buildingStorey.Number;
+                        buildingStorey.Railings.Add(copyItem);
+                    }
+
                     buildingStorey.Walls.AddRange(walls);
                 }
                 thTCHBuildingData.Storeys.Add(buildingStorey);
@@ -817,6 +845,17 @@ namespace ThMEPTCH.Services
             };
         }
 
+        private ThTCHRailingData CreateRailingData(Polyline pline)
+        {
+            var railing = new ThTCHRailingData();
+            railing.BuildElement = new ThTCHBuiltElementData();
+            railing.BuildElement.Root = new ThTCHRootData();
+            railing.BuildElement.Height = 1200;
+            railing.BuildElement.Width = 60;
+            railing.BuildElement.Outline = pline.ToTCHPolyline();
+            return railing;
+        }
+
         private ThTCHSlab CreateSlab(SlabPolyline slabPolyline, Matrix3d matrix)
         {
             var outPLine = slabPolyline.OutPolyline.GetTransformedCopy(matrix) as Polyline;
@@ -856,6 +895,40 @@ namespace ThMEPTCH.Services
                         Outline = innerPLine,
                         IsDescending = false,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
+                    });
+                }
+            }
+            return slab;
+        }
+
+        private ThTCHSlabData CreateSlabData(SlabPolyline slabPolyline, Matrix3d matrix)
+        {
+            var outPLine = slabPolyline.OutPolyline.GetTransformedCopy(matrix) as Polyline;
+            var slab = new ThTCHSlabData();
+            slab.BuildElement = new ThTCHBuiltElementData();
+            slab.BuildElement.Root = new ThTCHRootData();
+            slab.BuildElement.Outline = outPLine.ToTCHPolyline();
+            slab.BuildElement.Height = slabPolyline.Thickness;
+            foreach (var item in slabPolyline.InnerSlabOpenings)
+            {
+                var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
+                if (!item.IsOpening)
+                {
+                    slab.Descendings.Add(new ThTCHDescendingData()
+                    {
+                        Outline = innerPLine.ToTCHPolyline(),
+                        IsDescending = true,
+                        DescendingHeight = Math.Abs(item.LowerPlateHeight),
+                        DescendingThickness = item.Thickness,
+                        DescendingWrapThickness = 50,
+                    });
+                }
+                else
+                {
+                    slab.Descendings.Add(new ThTCHDescendingData()
+                    {
+                        Outline = innerPLine.ToTCHPolyline(),
+                        IsDescending = false,
                     });
                 }
             }

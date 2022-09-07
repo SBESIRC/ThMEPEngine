@@ -25,17 +25,19 @@ public static partial class ThTCHBuildingStoreyDataReflection {
           "Ch1UaFRDSEJ1aWxkaW5nU3RvcmV5RGF0YS5wcm90bxoTVGhUQ0hSb290RGF0",
           "YS5wcm90bxoTVGhUQ0hXYWxsRGF0YS5wcm90bxoTVGhUQ0hEb29yRGF0YS5w",
           "cm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90bxoVVGhUQ0hXaW5kb3dEYXRhLnBy",
-          "b3RvGhZUaFRDSE9wZW5pbmdEYXRhLnByb3RvIvkBChdUaFRDSEJ1aWxkaW5n",
+          "b3RvGhNUaFRDSFNsYWJEYXRhLnByb3RvGhZUaFRDSFJhaWxpbmdEYXRhLnBy",
+          "b3RvGhZUaFRDSE9wZW5pbmdEYXRhLnByb3RvIr0CChdUaFRDSEJ1aWxkaW5n",
           "U3RvcmV5RGF0YRIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290RGF0YRIOCgZu",
           "dW1iZXIYAiABKAkSDgoGaGVpZ2h0GAMgASgBEhEKCWVsZXZhdGlvbhgEIAEo",
           "ARINCgV1c2FnZRgFIAEoCRIdCgZvcmlnaW4YBiABKAsyDS5UaFRDSFBvaW50",
           "M2QSHQoFd2FsbHMYByADKAsyDi5UaFRDSFdhbGxEYXRhEh0KBWRvb3JzGAgg",
           "AygLMg4uVGhUQ0hEb29yRGF0YRIhCgd3aW5kb3dzGAkgAygLMhAuVGhUQ0hX",
-          "aW5kb3dEYXRhYgZwcm90bzM="));
+          "aW5kb3dEYXRhEh0KBXNsYWJzGAogAygLMg4uVGhUQ0hTbGFiRGF0YRIjCghy",
+          "YWlsaW5ncxgLIAMoCzIRLlRoVENIUmFpbGluZ0RhdGFiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHWallDataReflection.Descriptor, global::ThTCHDoorDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThTCHWindowDataReflection.Descriptor, global::ThTCHOpeningDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHWallDataReflection.Descriptor, global::ThTCHDoorDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThTCHWindowDataReflection.Descriptor, global::ThTCHSlabDataReflection.Descriptor, global::ThTCHRailingDataReflection.Descriptor, global::ThTCHOpeningDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHBuildingStoreyData), global::ThTCHBuildingStoreyData.Parser, new[]{ "Root", "Number", "Height", "Elevation", "Usage", "Origin", "Walls", "Doors", "Windows" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHBuildingStoreyData), global::ThTCHBuildingStoreyData.Parser, new[]{ "Root", "Number", "Height", "Elevation", "Usage", "Origin", "Walls", "Doors", "Windows", "Slabs", "Railings" }, null, null, null, null)
         }));
   }
   #endregion
@@ -85,6 +87,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     walls_ = other.walls_.Clone();
     doors_ = other.doors_.Clone();
     windows_ = other.windows_.Clone();
+    slabs_ = other.slabs_.Clone();
+    railings_ = other.railings_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -214,6 +218,28 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     get { return windows_; }
   }
 
+  /// <summary>Field number for the "slabs" field.</summary>
+  public const int SlabsFieldNumber = 10;
+  private static readonly pb::FieldCodec<global::ThTCHSlabData> _repeated_slabs_codec
+      = pb::FieldCodec.ForMessage(82, global::ThTCHSlabData.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHSlabData> slabs_ = new pbc::RepeatedField<global::ThTCHSlabData>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHSlabData> Slabs {
+    get { return slabs_; }
+  }
+
+  /// <summary>Field number for the "railings" field.</summary>
+  public const int RailingsFieldNumber = 11;
+  private static readonly pb::FieldCodec<global::ThTCHRailingData> _repeated_railings_codec
+      = pb::FieldCodec.ForMessage(90, global::ThTCHRailingData.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHRailingData> railings_ = new pbc::RepeatedField<global::ThTCHRailingData>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHRailingData> Railings {
+    get { return railings_; }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -238,6 +264,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     if(!walls_.Equals(other.walls_)) return false;
     if(!doors_.Equals(other.doors_)) return false;
     if(!windows_.Equals(other.windows_)) return false;
+    if(!slabs_.Equals(other.slabs_)) return false;
+    if(!railings_.Equals(other.railings_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -254,6 +282,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     hash ^= walls_.GetHashCode();
     hash ^= doors_.GetHashCode();
     hash ^= windows_.GetHashCode();
+    hash ^= slabs_.GetHashCode();
+    hash ^= railings_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -299,6 +329,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     walls_.WriteTo(output, _repeated_walls_codec);
     doors_.WriteTo(output, _repeated_doors_codec);
     windows_.WriteTo(output, _repeated_windows_codec);
+    slabs_.WriteTo(output, _repeated_slabs_codec);
+    railings_.WriteTo(output, _repeated_railings_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -336,6 +368,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     walls_.WriteTo(ref output, _repeated_walls_codec);
     doors_.WriteTo(ref output, _repeated_doors_codec);
     windows_.WriteTo(ref output, _repeated_windows_codec);
+    slabs_.WriteTo(ref output, _repeated_slabs_codec);
+    railings_.WriteTo(ref output, _repeated_railings_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -367,6 +401,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     size += walls_.CalculateSize(_repeated_walls_codec);
     size += doors_.CalculateSize(_repeated_doors_codec);
     size += windows_.CalculateSize(_repeated_windows_codec);
+    size += slabs_.CalculateSize(_repeated_slabs_codec);
+    size += railings_.CalculateSize(_repeated_railings_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -406,6 +442,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     walls_.Add(other.walls_);
     doors_.Add(other.doors_);
     windows_.Add(other.windows_);
+    slabs_.Add(other.slabs_);
+    railings_.Add(other.railings_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -463,6 +501,14 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
           windows_.AddEntriesFrom(input, _repeated_windows_codec);
           break;
         }
+        case 82: {
+          slabs_.AddEntriesFrom(input, _repeated_slabs_codec);
+          break;
+        }
+        case 90: {
+          railings_.AddEntriesFrom(input, _repeated_railings_codec);
+          break;
+        }
       }
     }
   #endif
@@ -518,6 +564,14 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
         }
         case 74: {
           windows_.AddEntriesFrom(ref input, _repeated_windows_codec);
+          break;
+        }
+        case 82: {
+          slabs_.AddEntriesFrom(ref input, _repeated_slabs_codec);
+          break;
+        }
+        case 90: {
+          railings_.AddEntriesFrom(ref input, _repeated_railings_codec);
           break;
         }
       }

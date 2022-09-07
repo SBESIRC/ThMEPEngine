@@ -1,0 +1,10 @@
+syntax = "proto3";
+import "ThTCHGeometry.proto";
+
+message ThTCHDescendingData{
+    ThTCHPolyline outline = 1;
+    bool is_descending = 2;
+    double descending_height = 3;
+    double descending_thickness = 4;
+    double descending_wrap_thickness = 5;
+}

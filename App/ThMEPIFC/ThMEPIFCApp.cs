@@ -308,7 +308,7 @@ namespace ThMEPIFC
             var startDate = System.DateTime.Now;
             // 读入并解析TGL XML文件
             var service = new ThDWGToIFCService(filePath);
-            var project = service.DWGToProjectData(true, false);
+            var project = service.DWGToProjectData(true, true);
             if (project == null)
             {
                 return;
