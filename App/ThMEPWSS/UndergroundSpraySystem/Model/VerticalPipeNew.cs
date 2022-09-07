@@ -67,7 +67,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
                 }
                 sprayIn.Verticals = GetVerticals();
-                //Draw.Verticals(sprayIn.Verticals);
+                Draw.Verticals(sprayIn.Verticals);
             }
         }
 
@@ -112,11 +112,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
         }
 
-        public List<Point3dEx> GetVerticals()
+        public Dictionary<Point3dEx, double> GetVerticals()
         {
-            var verticals = new List<Point3dEx>();
+            var verticals = new Dictionary<Point3dEx,double>();
             DBObjs.Cast<Entity>()
-                .ForEach(e => verticals.Add(new Point3dEx((e as Circle).Center)));
+                .ForEach(e => verticals.Add(new Point3dEx((e as Circle).Center), (e as Circle).Radius));
             return verticals;
         }
 

@@ -237,7 +237,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         }
 
 
-        public static void Verticals(List<Point3dEx> pts)
+        public static void Verticals(Dictionary<Point3dEx,double> pts)
         {
 #if DEBUG
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -247,9 +247,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
                 }
-                foreach (var pt in pts)
+                foreach (var pair in pts)
                 {
-                    var circle = new Circle(pt._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0, 0, 1), 500);
+                    var circle = new Circle(pair.Key._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0, 0, 1), pair.Value);
                     circle.LayerId = DbHelper.GetLayerId(layerNames);
                     acadDatabase.CurrentSpace.Add(circle);
                 }
