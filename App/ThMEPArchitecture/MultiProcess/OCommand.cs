@@ -35,6 +35,7 @@ using System.IO.MemoryMappedFiles;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess;
+using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -251,33 +252,18 @@ namespace ThMEPArchitecture.MultiProcess
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = OInterParameter.GetOSubAreas(solution);
-            subAreas.ForEach(s =>s.UpdateParkingCnts());
-            var ParkingStallCount = subAreas.Where(s =>s.Count>0).Sum(s =>s.Count);
-            var walls = new List<LineString>();
-            var cars = new List<ThParkingStall.Core.MPartitionLayout.InfoCar>();
-            var pillars = new List<Polygon>();
-            var iniPillars = new List<Polygon>();
-            var obsVertices = new List<Coordinate>();
-            var lanes = new List<LineSegment>();
-            var obstacles = new List<Polygon>();
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
-            ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
+            var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
             //OPostProcessEntry postProcessEntry = new OPostProcessEntry(subAreas);
             //var obliqueMPartition = postProcessEntry.Execute();
             foreach (var subArea in subAreas)
             {
                 MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
                 subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
-
-                walls.AddRange(subArea.obliqueMPartition.Walls);
-                cars.AddRange(subArea.obliqueMPartition.Cars);
-                pillars.AddRange(subArea.obliqueMPartition.Pillars);
-                iniPillars.AddRange(subArea.obliqueMPartition.IniPillar);
-                obsVertices.AddRange(subArea.obliqueMPartition.ObstacleVertexes);
-                lanes.AddRange(subArea.obliqueMPartition.IniLanes.Select(e => e.Line));
-                obstacles.AddRange(subArea.obliqueMPartition.Obstacles);
             }
-            var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, obstacles, cars);
+            GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
+            var caledBound= globalBusiness.CalBound();
+            //Display(caledBound);
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
