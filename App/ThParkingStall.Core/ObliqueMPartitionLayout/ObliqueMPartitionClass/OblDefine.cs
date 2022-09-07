@@ -87,13 +87,14 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public Polygon OutBoundary;
         public List<LineSegment> OutputLanes;
         private Polygon BoundingBox;
-        private double MaxLength;
+        public static double MaxLength;
         public MNTSSpatialIndex ObstaclesSpatialIndex;
         public MNTSSpatialIndex CarBoxesSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
         public MNTSSpatialIndex LaneSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
         public MNTSSpatialIndex LaneBufferSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
         public MNTSSpatialIndex CarSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
         public List<Lane> IniLanes = new List<Lane>();
+        public List<Lane> InitialLanes = new List<Lane>();
         public List<Polygon> CarSpots = new List<Polygon>();
         public List<Polygon> Pillars = new List<Polygon>();
         private List<Polygon> CarBoxes = new List<Polygon>();
@@ -106,6 +107,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public List<Polygon> BuildingBoxes = new List<Polygon>();
         public List<Ramp> RampList = new List<Ramp>();
         public List<Polygon> IniPillar = new List<Polygon>();
+        public Polygon CaledBound { get; set; }
         /// <summary>
         /// 在判断生成车道的优先级时记载上一条生成车道的方向，法向，用于提高相同车道方向生成的优先级
         /// </summary>
@@ -156,6 +158,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double LayoutScareFactor_Adjacent = 0.7;
         public static double LayoutScareFactor_betweenBuilds = 0.7;
         public static double LayoutScareFactor_SingleVert = 0.7;
+
+        public bool AllowCompactedLane = false;
+        public bool hasCompactedLane = false;
+        private int CalCompactLaneCount = 0;
         /// <summary>
         /// 如果生成车道线与上一根方向一致，则乘以比例权重系数
         /// </summary>
@@ -178,11 +184,13 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         {
             AccurateCalculate = accurate;
             GenerateParkingSpaces();
+            CaledBound =MParkingPartitionPro.CalBoundary(Boundary, Pillars, IniLanes, Obstacles, Cars);
             return CarSpots.Count;
         }
         public void GenerateParkingSpaces()
         {
-            PreProcess();
+            if (!hasCompactedLane)
+                PreProcess();
             if (!QuickCalculate)
             {
                 GenerateLanes();
@@ -196,6 +204,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             //ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
             PostProcess();
+            if (!hasCompactedLane && AllowCompactedLane)
+                CompactLane();
         }
 
         private void InitialzeDatas(List<LineSegment> iniLanes)
@@ -247,6 +257,50 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             Obstacles.ForEach(e => ObstacleVertexes.AddRange(e.Coordinates));
             IniLaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)));
+        }
+        private void ClearNecessaryElements()
+        {
+            IniLanes = new List<Lane>();
+            OutputLanes = new List<LineSegment>();
+            OutEnsuredLanes = new List<LineSegment>();
+            OutUnsuredLanes = new List<LineSegment>();
+            CarSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+            CarSpots = new List<Polygon>();
+            Pillars = new List<Polygon>();
+            Cars = new List<InfoCar>();
+            IniPillar = new List<Polygon>();
+            LaneBufferSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+            LaneBoxes = new List<Polygon>();
+            LaneSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+
+            //CarBoxesSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+            //CarBoxes = new List<Polygon>();
+            //CarBoxesPlus = new List<CarBoxPlus>();
+            //CarModules = new List<CarModule>();
+        }
+
+        private void Update(List<Lane> newlanes, List<Lane> eldlanes)
+        {
+            IniLanes = new List<Lane>(newlanes);
+
+            var add_carBoxes = new List<Polygon>();
+            var add_carBoxes_plus = new List<CarBoxPlus>();
+            var add_modules = new List<CarModule>();
+
+            CarBoxes = add_carBoxes.Distinct().ToList();
+            CarBoxesPlus = add_carBoxes_plus.Distinct().ToList();
+            CarModules = add_modules.Distinct().ToList();
+            CarBoxesSpatialIndex = new MNTSSpatialIndex(CarBoxes);
+            CarBoxesSpatialIndex.Update(IniLanes.Select(e => PolyFromLine(e.Line)).ToArray(), new List<Polygon>());
+            foreach (var ln in IniLanes)
+            {
+                ln.CanExtend = true;
+                ln.CanBeMoved = true;
+                //ln.IsGeneratedForLoopThrough = false;
+                //ln.IsAdjLaneForProcessLoopThroughEnd = false;
+                ln.GEndAdjLine = false;
+                ln.GStartAdjLine = false;
+            }
         }
         public MParkingPartitionPro ConvertToMParkingPartitionPro()
         {

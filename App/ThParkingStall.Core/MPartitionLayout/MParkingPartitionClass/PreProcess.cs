@@ -21,6 +21,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             EliminateInvalidLanes();
             ConvertRampDatas();
             CorrectWallsWithTinyAngles();
+            foreach (var lane in IniLanes)
+                InitialLanes.Add(lane);
         }
 
         /// <summary>

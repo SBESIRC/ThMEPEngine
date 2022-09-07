@@ -209,10 +209,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 //第二个半模块的Box
                 var plcarbox = PolyFromLines(linesplitbound, linesplitboundback);
                 plcarbox = plcarbox.Scale(ScareFactorForCollisionCheck);
-                var linesplitcarboxes = SplitLineBySpacialIndexInPoly(linesplitbound, plcarbox, CarBoxesSpatialIndex, false)
-                    .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
-                    .Where(e => !IsInAnyBoxes(e.MidPoint/*.TransformBy(Matrix3d.Displacement(-vec.GetNormal())) * 200*/, carBoxesStrTree, true))
-                    .Where(e => IsConnectedToLane(e));
+                var linesplitcarboxes = SplitLineBySpacialIndexInPoly(linesplitbound, plcarbox, CarBoxesSpatialIndex, false);
+                linesplitcarboxes = linesplitcarboxes.Where(e => e.Length > LengthCanGIntegralModulesConnectSingle).ToList();
+                linesplitcarboxes = linesplitcarboxes.Where(e => !IsInAnyBoxes(e.MidPoint/*.TransformBy(Matrix3d.Displacement(-vec.GetNormal())) * 200*/, carBoxesStrTree, true)).ToList();
+                linesplitcarboxes = linesplitcarboxes.Where(e => IsConnectedToLane(e)).ToList();
 
                 #region 一种CASE：生成背靠背模块车道线的前方有与车道模块的短边平行，做一次分割操作，返回车道位置：1模块的位置
                 //解决车道线与车道模块短边平行长度不够的情况
@@ -347,7 +347,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 {
                     var dis_start = l.ClosestPoint(split.P0).Distance(split.P0);
                     var dis_end = l.ClosestPoint(split.P1).Distance(split.P1);
-                    if (IsParallelLine(l, split) && dis_start < DisLaneWidth / 2 && dis_end < DisLaneWidth / 2)
+                    if (IsParallelLine(l, split) && dis_start < DisLaneWidth / 2 && dis_end < DisLaneWidth / 2
+                        && dis_start>10 && dis_end>10)
                     {
                         quit_repeat = true;
                         break;
@@ -425,75 +426,163 @@ namespace ThParkingStall.Core.MPartitionLayout
                 addlane_buffer = addlane_buffer.Scale(ScareFactorForCollisionCheck);
                 if (ObstaclesSpatialIndex.SelectCrossingGeometry(addlane_buffer).Count() > 0) return false;
 
-                //生成判断条件估计比较生成单排车位数generatecars_count与不生成单排用PerpMoudle生成车位数孰多
-                #region 构造MParkingPartitionPro调用车位生成方法，看生成孤立单排的实际车位数量
-                MParkingPartitionPro tmpro = new MParkingPartitionPro();
-                tmpro.Walls = Walls;
-                tmpro.Boundary = Boundary;
-                var tmpro_lane = new LineSegment(addlane);
-                if (IsConnectedToLane(tmpro_lane)) tmpro_lane.P0 = tmpro_lane.P0.Translation(Vector(tmpro_lane).Normalize() * DisLaneWidth / 2);
-                if (IsConnectedToLane(tmpro_lane, false)) tmpro_lane.P1 = tmpro_lane.P1.Translation(-Vector(tmpro_lane).Normalize() * DisLaneWidth / 2);
-                tmpro.IniLanes.Add(new Lane(tmpro_lane, vec.Normalize()));
-                tmpro.Obstacles = Obstacles;
-                tmpro.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                var vertlanes = tmpro.GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
-                foreach (var k in vertlanes)
+                //单模块车道与车道的相交判断
+                var lane_split_points = new List<Coordinate>();
+                foreach (var ln in IniLanes.Where(e => !IsParallelLine(e.Line,addlane)).Select(e => e.Line))
                 {
-                    var vl = k.Line;
-                    var line = new LineSegment(vl);
-                    line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
-                    var line_align_backback_rest = new LineSegment();
-                    tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), DisVertCarWidth, DisVertCarLength
-                        , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, true);
+                    lane_split_points.AddRange(ln.IntersectPoint(addlane));
                 }
-                tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-                vertlanes = tmpro.GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
-                SortLaneByDirection(vertlanes, LayoutMode);
-                foreach (var k in vertlanes)
+                lane_split_points=SortAlongCurve(lane_split_points, addlane.ToLineString());
+                var lane_splits=SplitLine(addlane, lane_split_points).Where(e => IsConnectedToLane(e)).Where(e => {
+                    if (IsConnectedToLaneDouble(e)) return e.Length > LengthCanGIntegralModulesConnectDouble;
+                    else return e.Length > LengthCanGIntegralModulesConnectSingle;
+                } );
+                foreach (var lane_split in lane_splits)
                 {
-                    var vl = k.Line;
-                    UnifyLaneDirection(ref vl, IniLanes);
-                    var line = new LineSegment(vl);
-                    line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
-                    var line_align_backback_rest = new LineSegment();
-                    tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
-                        , ref line_align_backback_rest, true, false, false, false, true, true, false);
-                }
-                var generatecars_count = tmpro.Cars.Count;
-                generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));
-                #endregion
+                    //生成判断条件估计比较生成单排车位数generatecars_count与不生成单排用PerpMoudle生成车位数孰多
+                    #region 构造MParkingPartitionPro调用车位生成方法，看生成孤立单排的实际车位数量
+                    MParkingPartitionPro tmpro = new MParkingPartitionPro();
+                    tmpro.Walls = Walls;
+                    tmpro.Boundary = Boundary;
+                    var tmpro_lane = new LineSegment(lane_split);
+                    if (IsConnectedToLane(tmpro_lane)) tmpro_lane.P0 = tmpro_lane.P0.Translation(Vector(tmpro_lane).Normalize() * DisLaneWidth / 2);
+                    if (IsConnectedToLane(tmpro_lane, false)) tmpro_lane.P1 = tmpro_lane.P1.Translation(-Vector(tmpro_lane).Normalize() * DisLaneWidth / 2);
+                    tmpro.IniLanes.Add(new Lane(tmpro_lane, vec.Normalize()));
+                    tmpro.Obstacles = Obstacles;
+                    tmpro.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                    var vertlanes = tmpro.GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
+                    foreach (var k in vertlanes)
+                    {
+                        var vl = k.Line;
+                        var line = new LineSegment(vl);
+                        line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                        var line_align_backback_rest = new LineSegment();
+                        tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), DisVertCarWidth, DisVertCarLength
+                            , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, true);
+                    }
+                    tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+                    vertlanes = tmpro.GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
+                    SortLaneByDirection(vertlanes, LayoutMode);
+                    foreach (var k in vertlanes)
+                    {
+                        var vl = k.Line;
+                        UnifyLaneDirection(ref vl, IniLanes);
+                        var line = new LineSegment(vl);
+                        line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                        var line_align_backback_rest = new LineSegment();
+                        tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
+                            , ref line_align_backback_rest, true, false, false, false, true, true, false);
+                    }
+                    var generatecars_count = tmpro.Cars.Count;
+                    generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));
+                    #endregion
 
-                #region 估计不生成单排的车位数estimated_cars_count,estimated_this_fullcount
-                var estimated_module_count = addlane.Length / DisModulus;
-                var pl_forward = plback.Translation(vec.Normalize() * DisCarAndHalfLane);
-                var crosseded_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(pl_forward).Cast<Polygon>();
-                var crossed_points = new List<Coordinate>();
-                foreach (var crossed in crosseded_obs)
-                {
-                    crossed_points.AddRange(crossed.IntersectPoint(pl_forward));
-                    crossed_points.AddRange(crossed.Coordinates.Where(p => pl_forward.Contains(p)));
-                }
-                crossed_points = crossed_points.OrderBy(p => splitori.ClosestPoint(p, true).Distance(p)).ToList();
-                var estimated_depth_count = (splitori.ClosestPoint(addlane.MidPoint, true).Distance(addlane.MidPoint)) / DisVertCarWidth;
-                if (crossed_points.Count > 0)
-                {
-                    var crossed_point = crossed_points.First();
-                    estimated_depth_count = (splitori.ClosestPoint(crossed_point, true).Distance(crossed_point)) / DisVertCarWidth;
-                }
-                var estimated_cars_count = ((int)Math.Floor(estimated_depth_count * estimated_module_count));
-                var estimated_this_fullcount = ((int)Math.Floor(tmpro_lane.Length / (DisVertCarWidth * 3 + DisPillarLength) * 3));
-                #endregion
+                    #region 估计不生成单排的车位数estimated_cars_count,estimated_this_fullcount
+                    var estimated_module_count = lane_split.Length / DisModulus;
+                    var pl_forward = plback.Translation(vec.Normalize() * DisCarAndHalfLane);
+                    var crosseded_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(pl_forward).Cast<Polygon>();
+                    var crossed_points = new List<Coordinate>();
+                    foreach (var crossed in crosseded_obs)
+                    {
+                        crossed_points.AddRange(crossed.IntersectPoint(pl_forward));
+                        crossed_points.AddRange(crossed.Coordinates.Where(p => pl_forward.Contains(p)));
+                    }
+                    crossed_points = crossed_points.OrderBy(p => splitori.ClosestPoint(p, true).Distance(p)).ToList();
+                    var estimated_depth_count = (splitori.ClosestPoint(lane_split.MidPoint, true).Distance(lane_split.MidPoint)) / DisVertCarWidth;
+                    if (crossed_points.Count > 0)
+                    {
+                        var crossed_point = crossed_points.First();
+                        estimated_depth_count = (splitori.ClosestPoint(crossed_point, true).Distance(crossed_point)) / DisVertCarWidth;
+                    }
+                    var estimated_cars_count = ((int)Math.Floor(estimated_depth_count * estimated_module_count));
+                    var estimated_this_fullcount = ((int)Math.Floor(tmpro_lane.Length / (DisVertCarWidth * 3 + DisPillarLength) * 3));
+                    #endregion
 
-                //生成参数赋值
-                if (generatecars_count > estimated_cars_count * SingleVertModulePlacementFactor && tmpro.Cars.Count >= (estimated_this_fullcount / 3 + 2) * SingleVertModulePlacementFactor)
-                {
-                    mod.IsInBackBackModule = true;
-                    paras.CarBoxesToAdd.Add(plback);
-                    paras.CarModulesToAdd.Add(mod);
-                    Lane ln = new Lane(addlane, vec);
-                    paras.LanesToAdd.Add(ln);
-                    generate_lane_length += splitori.Length;
+                    //生成参数赋值
+                    if (generatecars_count > estimated_cars_count * SingleVertModulePlacementFactor && tmpro.Cars.Count >= (estimated_this_fullcount / 3 + 2) * SingleVertModulePlacementFactor)
+                    {
+                        mod.IsInBackBackModule = true;
+                        var split_pl = PolyFromLines(lane_split.Translation(-vec.Normalize() * (DisCarAndHalfLane + DisLaneWidth / 2)),
+                            lane_split.Translation(-vec.Normalize() * DisLaneWidth / 2));
+                        paras.CarBoxesToAdd.Add(/*plback */split_pl);
+                        mod.Box = split_pl;
+                        mod.Line = new LineSegment(splitori.ClosestPoint(lane_split.P0), splitori.ClosestPoint(lane_split.P1));
+                        paras.CarModulesToAdd.Add(mod);
+                        Lane ln = new Lane(lane_split, vec);
+                        paras.LanesToAdd.Add(ln);
+                        generate_lane_length += splitori.Length;
+                    }
                 }
+
+                ////生成判断条件估计比较生成单排车位数generatecars_count与不生成单排用PerpMoudle生成车位数孰多
+                //#region 构造MParkingPartitionPro调用车位生成方法，看生成孤立单排的实际车位数量
+                //MParkingPartitionPro tmpro = new MParkingPartitionPro();
+                //tmpro.Walls = Walls;
+                //tmpro.Boundary = Boundary;
+                //var tmpro_lane = new LineSegment(addlane);
+                //if (IsConnectedToLane(tmpro_lane)) tmpro_lane.P0 = tmpro_lane.P0.Translation(Vector(tmpro_lane).Normalize() * DisLaneWidth / 2);
+                //if (IsConnectedToLane(tmpro_lane, false)) tmpro_lane.P1 = tmpro_lane.P1.Translation(-Vector(tmpro_lane).Normalize() * DisLaneWidth / 2);
+                //tmpro.IniLanes.Add(new Lane(tmpro_lane, vec.Normalize()));
+                //tmpro.Obstacles = Obstacles;
+                //tmpro.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                //var vertlanes = tmpro.GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
+                //foreach (var k in vertlanes)
+                //{
+                //    var vl = k.Line;
+                //    var line = new LineSegment(vl);
+                //    line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                //    var line_align_backback_rest = new LineSegment();
+                //    tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), DisVertCarWidth, DisVertCarLength
+                //        , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, true);
+                //}
+                //tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+                //vertlanes = tmpro.GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
+                //SortLaneByDirection(vertlanes, LayoutMode);
+                //foreach (var k in vertlanes)
+                //{
+                //    var vl = k.Line;
+                //    UnifyLaneDirection(ref vl, IniLanes);
+                //    var line = new LineSegment(vl);
+                //    line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                //    var line_align_backback_rest = new LineSegment();
+                //    tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
+                //        , ref line_align_backback_rest, true, false, false, false, true, true, false);
+                //}
+                //var generatecars_count = tmpro.Cars.Count;
+                //generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));
+                //#endregion
+
+                //#region 估计不生成单排的车位数estimated_cars_count,estimated_this_fullcount
+                //var estimated_module_count = addlane.Length / DisModulus;
+                //var pl_forward = plback.Translation(vec.Normalize() * DisCarAndHalfLane);
+                //var crosseded_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(pl_forward).Cast<Polygon>();
+                //var crossed_points = new List<Coordinate>();
+                //foreach (var crossed in crosseded_obs)
+                //{
+                //    crossed_points.AddRange(crossed.IntersectPoint(pl_forward));
+                //    crossed_points.AddRange(crossed.Coordinates.Where(p => pl_forward.Contains(p)));
+                //}
+                //crossed_points = crossed_points.OrderBy(p => splitori.ClosestPoint(p, true).Distance(p)).ToList();
+                //var estimated_depth_count = (splitori.ClosestPoint(addlane.MidPoint, true).Distance(addlane.MidPoint)) / DisVertCarWidth;
+                //if (crossed_points.Count > 0)
+                //{
+                //    var crossed_point = crossed_points.First();
+                //    estimated_depth_count = (splitori.ClosestPoint(crossed_point, true).Distance(crossed_point)) / DisVertCarWidth;
+                //}
+                //var estimated_cars_count = ((int)Math.Floor(estimated_depth_count * estimated_module_count));
+                //var estimated_this_fullcount = ((int)Math.Floor(tmpro_lane.Length / (DisVertCarWidth * 3 + DisPillarLength) * 3));
+                //#endregion
+
+                ////生成参数赋值
+                //if (generatecars_count > estimated_cars_count * SingleVertModulePlacementFactor && tmpro.Cars.Count >= (estimated_this_fullcount / 3 + 2) * SingleVertModulePlacementFactor)
+                //{
+                //    mod.IsInBackBackModule = true;
+                //    paras.CarBoxesToAdd.Add(plback);
+                //    paras.CarModulesToAdd.Add(mod);
+                //    Lane ln = new Lane(addlane, vec);
+                //    paras.LanesToAdd.Add(ln);
+                //    generate_lane_length += splitori.Length;
+                //}
             }
             return true;
         }
@@ -512,7 +601,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 {
                     var dis_start = l.ClosestPoint(split.P0).Distance(split.P0);
                     var dis_end = l.ClosestPoint(split.P1).Distance(split.P1);
-                    if (IsParallelLine(l, split) && dis_start < DisLaneWidth / 2 && dis_end < DisLaneWidth / 2)
+                    if (IsParallelLine(l, split) && dis_start < DisLaneWidth / 2 && dis_end < DisLaneWidth / 2 
+                        && dis_start>10 && dis_end>10)
                     {
                         quit_repeat = true;
                         break;
@@ -850,10 +940,16 @@ namespace ThParkingStall.Core.MPartitionLayout
                         var pt_on_generate_lane = generate_line.MidPoint;
                         var pt_on_iniLane = lane.ClosestPoint(pt_on_generate_lane);
                         var split_lane = new LineSegment(pt_on_generate_lane, pt_on_iniLane);
-                        var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
-                        tmpLanesToAdd.Add(new Lane(split_lane, split_vec));
-                        tmpLanesToAdd.Add(new Lane(split_lane, -split_vec));
-                        generate_split_lanes.Add(split_lane);
+                        //向量垂直，即剪切线在两根车道范围内
+                        if (Vector(split_lane).Normalize().Dot(Vector(lane).Normalize()) == 0)
+                        {
+                            var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
+                            var lane_a = new Lane(split_lane, split_vec);
+                            var lane_b = new Lane(split_lane, -split_vec);
+                            tmpLanesToAdd.Add(lane_a);
+                            tmpLanesToAdd.Add(lane_b);
+                            generate_split_lanes.Add(split_lane);
+                        }
                     }
                 }
                 else if (paras.CarModulesToAdd.Count == 2)
@@ -882,12 +978,14 @@ namespace ThParkingStall.Core.MPartitionLayout
                 foreach (var generate_split_lane in generate_split_lanes)
                 {
                     var generate_split_lane_buffer = generate_split_lane.Buffer(DisLaneWidth / 2);
-                    var crossed_modules = paras.CarModulesToAdd.Where(e => e.Box.Intersects(generate_split_lane_buffer));
+                    var crossed_modules = paras.CarModulesToAdd.Where(e => e.Box.IntersectPoint(generate_split_lane_buffer).Count()>0);
                     var temp_modules = new List<CarModule>();
                     foreach (var module in crossed_modules)
                     {
-
-                        var lstrings = SplitCurveByNTS(module.Box, generate_split_lane_buffer)
+                        var cutter_edges = generate_split_lane_buffer.GetEdges().OrderByDescending(e => e.Length).Take(2)
+                            .Select(e => e.Scale(1.1)).ToList();
+                        var cutter = PolyFromLines(cutter_edges[0], new LineSegment(cutter_edges[1].P1, cutter_edges[1].P0));
+                        var lstrings = SplitCurveByNTS(module.Box, cutter)
                             .Where(e => e.Length > 1);
                         var boxes = lstrings.Select(e => PolyFromPoints(e.Coordinates.ToList())).ToList();
                         var lines = SplitLine(module.Line, generate_split_lane_buffer)
@@ -912,8 +1010,6 @@ namespace ThParkingStall.Core.MPartitionLayout
                     paras.CarModulesToAdd = paras.CarModulesToAdd.Except(crossed_modules).ToList();
                     paras.CarModulesToAdd.AddRange(temp_modules);
                 }
-
-
                 #endregion
             }
         }

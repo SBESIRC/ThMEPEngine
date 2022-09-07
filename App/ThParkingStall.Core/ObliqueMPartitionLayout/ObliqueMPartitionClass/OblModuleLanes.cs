@@ -171,7 +171,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 var linesplitcarboxes = SplitLineBySpacialIndexInPoly(linesplitbound, plcarbox, CarBoxesSpatialIndex, false, true)
                     .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
                     .Where(e => !IsInAnyBoxes(e.MidPoint/*.TransformBy(Matrix3d.Displacement(-vec.GetNormal())) * 200*/, carBoxesStrTree, true))
-                    .Where(e => IsConnectedToLane(e));
+                    .Where(e => IsConnectedToLane(e,IniLanes));
                 #endregion
 
                 #region 一种CASE：生成背靠背模块的车道线前方有与车道模块的短边平行，做一次分割操作，返回车道位置：1模块的位置
@@ -206,7 +206,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         {
                             var ep = new LineSegment(e);
                             ep = TranslateReservedConnection(ep, -vec * DisLaneWidth / 2);
-                            if (IsConnectedToLane(ep))
+                            if (IsConnectedToLane(ep, IniLanes))
                             {
                                 return true;
                             }
@@ -259,7 +259,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             //与原始车道线模块不相接判断，回到1模块的位置
                             var tmpline = new LineSegment(e);
                             tmpline = TranslateReservedConnection(tmpline, -vec * DisLaneWidth / 2);
-                            if (!IsConnectedToLane(tmpline)) return false;
+                            if (!IsConnectedToLane(tmpline,IniLanes)) return false;
                             //生成车道线与原车道线平行完全错位了，没有共同部分的处理
                             var ptonlane = lane.ClosestPoint(e.MidPoint);
                             var ptone = e.ClosestPoint(ptonlane);
@@ -307,7 +307,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 {
                     var dis_start = l.ClosestPoint(split.P0).Distance(split.P0);
                     var dis_end = l.ClosestPoint(split.P1).Distance(split.P1);
-                    if (IsParallelLine(l, split) && dis_start < DisLaneWidth / 2 && dis_end < DisLaneWidth / 2)
+                    if (IsParallelLine(l, split) && dis_start < DisLaneWidth / 2 && dis_end < DisLaneWidth / 2
+                          && dis_start > 10 && dis_end > 10)
                     {
                         quit_repeat = true;
                         break;
@@ -353,8 +354,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
                 //预生成车道的长度等条件判断
                 double dis_connected_double = 0;
-                if (IsConnectedToLane(split, true) && IsConnectedToLane(split, false) && split.Length < LengthCanGIntegralModulesConnectDouble) continue;
-                if (IsConnectedToLane(split, true) && IsConnectedToLane(split, false))
+                if (IsConnectedToLane(split, true,IniLanes) && IsConnectedToLane(split, false, IniLanes) && split.Length < LengthCanGIntegralModulesConnectDouble) continue;
+                if (IsConnectedToLane(split, true, IniLanes) && IsConnectedToLane(split, false, IniLanes))
                 {
                     dis_connected_double = DisVertCarLengthBackBack + DisLaneWidth / 2;
                 }

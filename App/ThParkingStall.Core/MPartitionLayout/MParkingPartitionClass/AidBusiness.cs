@@ -112,7 +112,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else return false;
             }
         }
-        private bool IsConnectedToLane(LineSegment line, bool Startpoint,List<LineSegment> lanes)
+        public bool IsConnectedToLane(LineSegment line, bool Startpoint,List<LineSegment> lanes)
         {
             if (Startpoint)
             {
@@ -244,8 +244,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 //e.Line.Buffer(DisLaneWidth / 2 - 10));
                 var la = new LineSegment(e.Line);
                 var lb = new LineSegment(e.Line);
-                la=la.Translation(Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
-                lb=lb.Translation(-Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
+                la = la.Translation(Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
+                lb = lb.Translation(-Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
                 var py = PolyFromLines(la, lb);
                 return py;
             }));
@@ -254,8 +254,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 //e.Line.Buffer(DisLaneWidth / 2 - 10));
                 var la = new LineSegment(e.Line);
                 var lb = new LineSegment(e.Line);
-                la=la.Translation(Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
-                lb=lb.Translation(-Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
+                la = la.Translation(Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
+                lb = lb.Translation(-Vector(la).GetPerpendicularVector().Normalize() * (DisLaneWidth / 2 - 10));
                 var py = PolyFromLines(la, lb);
                 return py;
             }));
@@ -285,7 +285,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             CollisionD = collisionD;
             return pl;
         }
-        private bool CloseToWall(Coordinate point,LineSegment line)
+        private bool CloseToWall(Coordinate point, LineSegment line)
         {
             if (Walls.Count == 0) return false;
             double tol = 10;
@@ -311,13 +311,13 @@ namespace ThParkingStall.Core.MPartitionLayout
             var lanestrings = lanes.Select(e => e.ToLineString()).ToList();
             if (lanes.Count > 0)
             {
-                if (ClosestPointInCurves(line.P1, lanes.Select(e =>e.ToLineString()).ToList()) < 1 && ClosestPointInCurves(line.P0, lanes.Select(e => e.ToLineString()).ToList()) < 1)
+                if (ClosestPointInCurves(line.P1, lanes.Select(e => e.ToLineString()).ToList()) < 1 && ClosestPointInCurves(line.P0, lanes.Select(e => e.ToLineString()).ToList()) < 1)
                 {
                     //if (line.P0.X - line.P1.X > 1000) line=new LineSegment(line.P1,line.P0);
                     //else if (lanes.Count == 0 && line.P0.Y - line.P1.Y > 1000) line = new LineSegment(line.P1, line.P0);
                     var startline = lanes.Where(e => e.ClosestPoint(line.P0).Distance(line.P0) < 1).OrderByDescending(e => e.Length).First();
                     var endline = lanes.Where(e => e.ClosestPoint(line.P1).Distance(line.P1) < 1).OrderByDescending(e => e.Length).First();
-                    if(endline.Length>startline.Length) line = new LineSegment(line.P1, line.P0);
+                    if (endline.Length > startline.Length) line = new LineSegment(line.P1, line.P0);
                     //else
                     //{
                     //    if (line.P0.X - line.P1.X > 1000) line = new LineSegment(line.P1, line.P0);
@@ -333,6 +333,43 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else if (lanes.Count == 0 && line.P0.Y - line.P1.Y > 1000) line = new LineSegment(line.P1, line.P0);
             }
             lane = line;
+        }
+        bool IsMatchCarBox_Lane(Polygon polygon, Lane lane,ref LineSegment base_line)
+        {
+            double tol = 10;
+            var edges = polygon.GetEdges().OrderByDescending(e => e.Length).Take(2);
+            var cond_distance = false;
+            var cond_contain = false;
+            var p_a = lane.Line.MidPoint.Translation(lane.Vec.Normalize() * 1000);
+            var p_b = lane.Line.MidPoint.Translation(-lane.Vec.Normalize() * 1000);
+            var dist_a= edges.Select(e => e.ClosestPoint(p_a,true).Distance(p_a)).Sum();
+            var dist_b= edges.Select(e => e.ClosestPoint(p_b, true).Distance(p_b)).Sum();
+            if(dist_a<dist_b)
+                cond_contain = true;
+
+            var edge = edges.OrderBy(e => e.ClosestPoint(lane.Line.MidPoint).Distance(lane.Line.MidPoint)).First();
+            if (polygon.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < tol && polygon.ClosestPoint(lane.Line.P1).Distance(lane.Line.P1) < tol)
+                cond_distance = true;
+            else if (lane.Line.ClosestPoint(edge.P0).Distance(edge.P0) < tol && lane.Line.ClosestPoint(edge.P1).Distance(edge.P1) < tol)
+                cond_distance = true;
+
+            base_line = edge;
+            if (cond_distance && cond_contain)
+                return true;
+            return false;
+
+            //var edge = edges.OrderBy(e => e.ClosestPoint(line.MidPoint).Distance(line.MidPoint)).First();
+            //if (line.ClosestPoint(edge.P0).Distance(edge.P0) < tol && line.ClosestPoint(edge.P1).Distance(edge.P1) < tol)
+            //    return true;
+        }
+        public static bool HasOverlay(LineSegment a, LineSegment b)
+        {
+            if (Vector(a).Dot(Vector(b).GetPerpendicularVector()) != 0)
+                return false;
+            var pt_on_b = b.ClosestPoint(a.P0);
+            var pt_on_a = a.ClosestPoint(pt_on_b);
+            if (pt_on_a.Distance(pt_on_b) < 1) return true;
+            return false;
         }
         private class LocCar
         {
@@ -570,7 +607,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             Pillars = Pillars.Except(pillars_to_remove).ToList();
         }
-        private Polygon ConvertVertCarToCollisionCar(LineSegment baseline, Vector2D vec)
+        public static Polygon ConvertVertCarToCollisionCar(LineSegment baseline, Vector2D vec)
         {
             var collisionD = CollisionD;
             CollisionD = 300;
@@ -604,7 +641,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             CollisionD = collisionD;
             return pl;
         }
-
         private void RemoveDuplicatedLanes(List<Lane> lanes)
         {
             if (lanes.Count < 2) return;

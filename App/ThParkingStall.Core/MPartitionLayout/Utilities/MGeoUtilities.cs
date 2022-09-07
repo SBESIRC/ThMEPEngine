@@ -19,6 +19,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             vec = new Vector2D(vec.X, vec.Y);
             return vec;
         }
+        public static bool IsAdverseVector(Vector2D a, Vector2D b,double tol=0.000001)
+        {
+            var value = a.X + b.X + a.Y + b.Y;
+            if (Math.Abs(value) < tol) return true;
+            else return false;
+        }
         public static bool IsHorizontalLine(LineSegment line, double degreetol = 1)
         {
             double angle = Math.Abs(Vector(line).AngleTo(Vector2D.Create(0, 1)));
@@ -543,7 +549,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             { 
             foreach (var crossed in selectedBoxes)
                 {
-                    if (crossed.ClosestPoint(pt).Distance(pt) < 1) return true;
+                    if (crossed.ClosestPoint(pt).Distance(pt) < 1)
+                        return true;
                 }
                     return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
             }

@@ -17,6 +17,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public void PreProcess()
         {
             ConvertRampDatas();
+            foreach (var lane in IniLanes)
+                InitialLanes.Add(lane);
         }
         private void GetValidPartOfLaneJudgeByObstacles()
         {

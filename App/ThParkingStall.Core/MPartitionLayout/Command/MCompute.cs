@@ -63,6 +63,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var iniPillars = new List<Polygon>();
                 var obsVertices = new List<Coordinate>();
                 var lanes = new List<LineSegment>();
+                var obstacles=new List<Polygon>();
 
                 foreach (var subArea in subAreas)
                 {
@@ -72,19 +73,21 @@ namespace ThParkingStall.Core.MPartitionLayout
                     iniPillars.AddRange(subArea.mParkingPartitionPro.IniPillar);
                     obsVertices.AddRange(subArea.mParkingPartitionPro.ObstacleVertexes);
                     lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
+                    obstacles.AddRange(subArea.mParkingPartitionPro.Obstacles);
                 }
-                RemoveDuplicatedLines(lanes);
-                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
-                //MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
-                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
-                MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
-                MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
+                //RemoveDuplicatedLines(lanes);
+                //MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+                ////MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
+                //MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+                //MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
+                //MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
                 mParkingPartition = new MParkingPartitionPro();
                 mParkingPartition.Cars = cars;
                 mParkingPartition.Pillars = pillars;
-                //mParkingPartition.OutputLanes = lanes;
+                mParkingPartition.OutputLanes = lanes;
+                var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, obstacles, cars);
 
-                mParkingPartition.OutputLanes = new List<LineSegment>();
+                //mParkingPartition.OutputLanes = new List<LineSegment>();
                 var ensuredLanes = new List<LineSegment>();
                 var unsuredLanes = new List<LineSegment>();
                 foreach (var subArea in subAreas)

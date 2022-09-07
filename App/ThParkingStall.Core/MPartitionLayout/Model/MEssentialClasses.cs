@@ -26,6 +26,23 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool CanExtend = true;
         public bool IsGeneratedForLoopThrough = false;
         public bool IsAdjLaneForProcessLoopThroughEnd = false;
+        public bool NotCopyReverseForLaneCompaction=false;
+        public void Copy(Lane lane)
+        {
+            CanBeMoved=lane.CanBeMoved;
+            GStartAdjLine=lane.GStartAdjLine;
+            GEndAdjLine=lane.GEndAdjLine;
+            CanExtend=lane.CanExtend;
+            IsGeneratedForLoopThrough=lane.IsGeneratedForLoopThrough;
+            IsAdjLaneForProcessLoopThroughEnd=lane.IsAdjLaneForProcessLoopThroughEnd;
+            NotCopyReverseForLaneCompaction=lane.NotCopyReverseForLaneCompaction;
+        }
+        public Lane Clone()
+        {
+            var res = new Lane(new LineSegment(Line), Vec, CanBeMoved);
+            res.Copy(this);
+            return res;
+        }
     }
     public class CarBoxPlus
     {
@@ -54,6 +71,13 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool IsInBackBackModule = false;
         public bool IsInVertUnsureModule = false;
         public bool IsSingleModule=false;//针对单box7850与车位5300，在生成新车道有可能碰车位做特殊处理时的标记
+        public void Copy(CarModule module)
+        {
+            GenerateCars=module.GenerateCars;
+            IsInBackBackModule = module.IsInBackBackModule;
+            IsInVertUnsureModule=module.IsInVertUnsureModule;
+            IsSingleModule=module.IsSingleModule;
+        }
     }
     public class GenerateLaneParas
     {

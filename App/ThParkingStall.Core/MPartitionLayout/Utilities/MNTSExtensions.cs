@@ -240,7 +240,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static List<LineString> GetSplitCurves(this LineString lineString, List<Coordinate> points)
         {
-            points=SortAlongCurve(points, lineString);
+            if (points.Count == 0) return new List<LineString>() { new LineString(lineString.Coordinates) };
+            points =SortAlongCurve(points, lineString);
             List<LineString> results = new List<LineString>();
             List<List<Coordinate>> coords = new List<List<Coordinate>>();
             coords.Add(new List<Coordinate>() { lineString.Coordinates.ToList()[0] });

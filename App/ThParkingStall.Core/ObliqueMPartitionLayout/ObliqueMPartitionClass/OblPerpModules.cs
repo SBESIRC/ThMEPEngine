@@ -17,6 +17,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public void GeneratePerpModules()
         {
             double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
+            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var lanes = GeneratePerpModuleLanes(mindistance, DisBackBackModulus, true, null, true, null, true);
             GeneratePerpModuleBoxes(lanes);
         }
@@ -229,7 +230,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             //如果与车道相连接，剔除头尾不能排车位的部分
                             if (transform_start_edge_for_perp_module && split.Length > DisLaneWidth / 2 + DisVertCarLength)
                             {
-                                if (ClosestPointInLines(split.P0, split, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, split))) < 10)
+                                if (ClosestPointInLines(split.P0, split, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, split))) < 10+ DisLaneWidth / 2)
                                     split.P0 = split.P0.Translation(Vector(split).Normalize() * (DisLaneWidth / 2 + DisVertCarLength));
                             }
                             if (ClosestPointInLines(split.P0, split, IniLanes.Select(e => e.Line).Where(e => !IsParallelLine(e, split))) < 10)

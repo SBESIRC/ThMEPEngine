@@ -264,8 +264,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             double dis_connected_double = 0;
             var para_lanes_add = new List<LineSegment>();
             if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move, ref perpLine, ref para_lanes_add)) return generate_lane_length;
-            if (IsConnectedToLaneDouble(iniobsplit) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
-            if (IsConnectedToLaneDouble(iniobsplit))
+            if (IsConnectedToLaneDouble(iniobsplit,IniLanes) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
+            if (IsConnectedToLaneDouble(iniobsplit,IniLanes))
             {
                 dis_connected_double = DisCarAndHalfLane;
             }

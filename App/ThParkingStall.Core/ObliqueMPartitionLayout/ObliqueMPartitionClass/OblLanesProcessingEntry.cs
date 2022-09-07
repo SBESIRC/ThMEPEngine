@@ -94,10 +94,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 IniLanes.AddRange(paras.LanesToAdd);
                 foreach (var lane in paras.LanesToAdd)
                 {
-                    if (IsConnectedToLaneDouble(lane.Line)) IniLanes.Add(lane);
+                    if (IsConnectedToLaneDouble(lane.Line,IniLanes)) IniLanes.Add(lane);
                     else
                     {
-                        if (IsConnectedToLane(lane.Line, false))
+                        if (IsConnectedToLane(lane.Line, false,IniLanes))
                             lane.Line = new LineSegment(lane.Line.P1, lane.Line.P0);
                         //如果只生成一个modulebox，宽度是7850，车位是5300，如果在后续生成车道的过程中有可能碰车位，这时应该缩短车道，作特殊处理
                         var modified_lane = lane.Line;

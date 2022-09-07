@@ -173,6 +173,44 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (dis < tol) return true;
             else return false;
         }
+        private static void RemoveDuplicatedLanes(List<Lane> lanes)
+        {
+            if (lanes.Count < 2) return;
+            for (int i = 1; i < lanes.Count; i++)
+            {
+                for (int j = 0; j < i; j++)
+                {
+                    var exLane = lanes[j];
+                    var lane = lanes[i];
+                    var cond = IsSameLineIgnoreDirection(exLane.Line, lane.Line);
+                    cond = cond && exLane.Vec.IsParallel(lane.Vec) && exLane.Vec.Dot(lane.Vec) > 0;
+                    cond = cond && exLane.IsGeneratedForLoopThrough.Equals(lane.IsGeneratedForLoopThrough);
+                    if (cond)
+                    {
+                        lanes.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+        }
+        public static bool HasOverlay(LineSegment a, LineSegment b)
+        {
+            if (Vector(a).Dot(Vector(b).GetPerpendicularVector()) != 0)
+                return false;
+            var pt_on_b = b.ClosestPoint(a.P0);
+            var pt_on_a = a.ClosestPoint(pt_on_b);
+            if (pt_on_a.Distance(pt_on_b) < 1) return true;
+            return false;
+        }
+        private static bool IsSameLineIgnoreDirection(LineSegment a, LineSegment b)
+        {
+            if (a.P0.Distance(b.P0) < 1 && a.P1.Distance(b.P1) < 1)
+                return true;
+            else if (a.P1.Distance(b.P0) < 1 && a.P0.Distance(b.P1) < 1)
+                return true;
+            else return false;
+        }
         public static void SortLaneByDirection(List<Lane> lanes, int mode, Vector2D parentDir)
         {
             var comparer = new LaneComparer(mode, DisCarAndHalfLaneBackBack, parentDir);
@@ -228,7 +266,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 return 0;
             }
         }
-        private bool IsConnectedToLane(LineSegment line)
+        private static bool IsConnectedToLane(LineSegment line,List<Lane> IniLanes)
         {
             var nonParallelLanes = IniLanes.Where(e => !IsParallelLine(e.Line, line)).Select(e => e.Line);
             if (ClosestPointInLines(line.P0, line, nonParallelLanes) < 10
@@ -236,7 +274,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 return true;
             else return false;
         }
-        private bool IsConnectedToLane(LineSegment line, bool Startpoint)
+        private static bool IsConnectedToLane(LineSegment line, bool Startpoint, List<Lane> IniLanes)
         {
             var nonParallelLanes = IniLanes.Where(e => !IsParallelLine(e.Line, line)).Select(e => e.Line);
             if (Startpoint)
@@ -263,9 +301,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 else return false;
             }
         }
-        public bool IsConnectedToLaneDouble(LineSegment line)
+        public static bool IsConnectedToLaneDouble(LineSegment line,List<Lane> IniLanes)
         {
-            if (IsConnectedToLane(line, true) && IsConnectedToLane(line, false)) return true;
+            if (IsConnectedToLane(line, true,IniLanes) && IsConnectedToLane(line, false,IniLanes)) return true;
             else return false;
         }
         private List<LineSegment> SplitBufferLineByPoly(LineSegment line, double distance, Polygon cutter)

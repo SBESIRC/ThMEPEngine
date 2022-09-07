@@ -56,6 +56,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="ThMEPArchitecture">
+      <HintPath>..\ThMEPArchitecture\bin\Release-NET46\ThMEPArchitecture.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InterProcess\DataWraper.cs" />
@@ -71,6 +74,8 @@
     <Compile Include="MPartitionLayout\Model\MNTSSpatialIndex.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\AdjacentLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\CarsGeneration.cs" />
+    <Compile Include="MPartitionLayout\MParkingPartitionClass\BoundaryCalculation.cs" />
+    <Compile Include="MPartitionLayout\MParkingPartitionClass\LaneCompaction.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\InsertionBuildLanes.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\LanesProcessingEntry.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionClass\LoopThroughEnd.cs" />
@@ -98,6 +103,7 @@
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPerpModules.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPreProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OLaneCompaction.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\OGlobalProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\OPostProcessingEndLanes.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\OPostProcessEntry.cs" />
