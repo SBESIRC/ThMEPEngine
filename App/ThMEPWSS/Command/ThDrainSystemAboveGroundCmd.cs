@@ -135,63 +135,65 @@ namespace ThMEPWSS.Command
         public void Dispose() { }
         public override void SubExecute()
         {
-            errorMsg = "";
-            if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
-                return;
-            Active.Document.LockDocument();
-            var verPipes = new List<ThTCHVerticalPipe>();
-            var tchPipeService = new TCHDrawVerticalPipeService();
-            var symbMultiLeaders = new List<ThTCHSymbMultiLeader>();
-            var tchsymbMultiLeaderService = new TCHDrawSymbMultiLeaderService();
-            using (AcadDatabase acdb = AcadDatabase.Active())
+            try
             {
-                //所有的楼层框 必须有顶层，没有时不进行后续的生成
-                _wcs2UCS = Active.Editor.WCS2UCS();
-                _roomEngine = new ThRoomDataEngine();
-                var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
-                if (!CheckData(floorFrameds))
-                {
-                    if (!string.IsNullOrEmpty(errorMsg))
-                        Active.Database.GetEditor().WriteMessage(errorMsg);
+                errorMsg = "";
+                if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
                     return;
-                }
-                ThMEPEngineCoreLayerUtils.CreateAILayer(acdb.Database, "W-辅助", 253);
-                InitData(acdb.Database);
-                ConvertCoordinateToUCS(ref floorFrameds, ref _allWalls,
-                    ref _allColumns, ref _allRailings, ref _allBeams, ref _floorBlockEqums, _wcs2UCS);
-                var ptest = livingHighestFloor.blockOutPointCollection.Cast<Point3d>().First();
-                ptest = ptest.TransformBy(_wcs2UCS);
-                ptest = ptest.TransformBy(_wcs2UCS.Inverse());
-                var allRooms = GetRooms(livingHighestFloor.blockOutPointCollection, Active.Editor.UCS2WCS());
-                var tubeBlocks = new List<BlockReference>();
-                var flueBlocks = new List<BlockReference>();
-                foreach (var item in _floorBlockEqums)
+                Active.Document.LockDocument();
+                var verPipes = new List<ThTCHVerticalPipe>();
+                var tchPipeService = new TCHDrawVerticalPipeService();
+                var symbMultiLeaders = new List<ThTCHSymbMultiLeader>();
+                var tchsymbMultiLeaderService = new TCHDrawSymbMultiLeaderService();
+                using (AcadDatabase acdb = AcadDatabase.Active())
                 {
-                    if (item.enumEquipmentType == EnumEquipmentType.waterTubeWell)
-                        tubeBlocks.AddRange(item.blockReferences);
-                    else if (item.enumEquipmentType == EnumEquipmentType.flueWell)
-                        flueBlocks.AddRange(item.blockReferences);
-                }
-                var tubeFlueRooms = _roomEngine.TubeFlueWellToRoom(tubeBlocks, flueBlocks);
-                var rooms = _roomEngine.GetRoomModelRooms(allRooms, tubeFlueRooms);
-                rooms = rooms.Where(c => c.outLine.Area > 100).ToList();
-                //对设备数据进行分类
-                var classifyEqumBlock = new ClassifyEqumBlockByRoomSpace(rooms, _floorBlockEqums);
-                _classifyResult = classifyEqumBlock.GetClassifyEquipments();
-                //对房间进行分类处理
-                var tRooms = _roomEngine.GetTubeWellRooms(rooms);
-                var tubeRooms = DrainSysAGCommon.GetTubeWellRoomRelation(rooms.Where(c => c.roomTypeName == Model.EnumRoomType.Toilet || c.roomTypeName == Model.EnumRoomType.Kitchen).ToList(), tRooms);
-                var kitchenRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Kitchen).ToList();
-                var toiletRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Toilet).ToList();
-                //标准层、非标层的房间布置逻辑 地漏转换
-                var wastewaterRisers = _classifyResult.Where(e => e.enumEquipmentType == EnumEquipmentType.wastewaterRiser).ToList();
-                var rainRisers = _classifyResult.Where(e => e.enumEquipmentType == EnumEquipmentType.balconyRiser).ToList();
-                var blocks = FloorDrainConvert.FloorDrainConvertToBlock(livingHighestFloor.floorUid,
-                    _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.floorDrain).ToList(),
-                    _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.washingMachine).ToList(), wastewaterRisers, rainRisers);
-                if (null != blocks && blocks.Count > 0)
-                    createBlockInfos.AddRange(blocks);
-                var converterTypes = new List<EnumEquipmentType>
+                    //所有的楼层框 必须有顶层，没有时不进行后续的生成
+                    _wcs2UCS = Active.Editor.WCS2UCS();
+                    _roomEngine = new ThRoomDataEngine();
+                    var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
+                    if (!CheckData(floorFrameds))
+                    {
+                        if (!string.IsNullOrEmpty(errorMsg))
+                            Active.Database.GetEditor().WriteMessage(errorMsg);
+                        return;
+                    }
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acdb.Database, "W-辅助", 253);
+                    InitData(acdb.Database);
+                    ConvertCoordinateToUCS(ref floorFrameds, ref _allWalls,
+                        ref _allColumns, ref _allRailings, ref _allBeams, ref _floorBlockEqums, _wcs2UCS);
+                    var ptest = livingHighestFloor.blockOutPointCollection.Cast<Point3d>().First();
+                    ptest = ptest.TransformBy(_wcs2UCS);
+                    ptest = ptest.TransformBy(_wcs2UCS.Inverse());
+                    var allRooms = GetRooms(livingHighestFloor.blockOutPointCollection, Active.Editor.UCS2WCS());
+                    var tubeBlocks = new List<BlockReference>();
+                    var flueBlocks = new List<BlockReference>();
+                    foreach (var item in _floorBlockEqums)
+                    {
+                        if (item.enumEquipmentType == EnumEquipmentType.waterTubeWell)
+                            tubeBlocks.AddRange(item.blockReferences);
+                        else if (item.enumEquipmentType == EnumEquipmentType.flueWell)
+                            flueBlocks.AddRange(item.blockReferences);
+                    }
+                    var tubeFlueRooms = _roomEngine.TubeFlueWellToRoom(tubeBlocks, flueBlocks);
+                    var rooms = _roomEngine.GetRoomModelRooms(allRooms, tubeFlueRooms);
+                    rooms = rooms.Where(c => c.outLine.Area > 100).ToList();
+                    //对设备数据进行分类
+                    var classifyEqumBlock = new ClassifyEqumBlockByRoomSpace(rooms, _floorBlockEqums);
+                    _classifyResult = classifyEqumBlock.GetClassifyEquipments();
+                    //对房间进行分类处理
+                    var tRooms = _roomEngine.GetTubeWellRooms(rooms);
+                    var tubeRooms = DrainSysAGCommon.GetTubeWellRoomRelation(rooms.Where(c => c.roomTypeName == Model.EnumRoomType.Toilet || c.roomTypeName == Model.EnumRoomType.Kitchen).ToList(), tRooms);
+                    var kitchenRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Kitchen).ToList();
+                    var toiletRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Toilet).ToList();
+                    //标准层、非标层的房间布置逻辑 地漏转换
+                    var wastewaterRisers = _classifyResult.Where(e => e.enumEquipmentType == EnumEquipmentType.wastewaterRiser).ToList();
+                    var rainRisers = _classifyResult.Where(e => e.enumEquipmentType == EnumEquipmentType.balconyRiser).ToList();
+                    var blocks = FloorDrainConvert.FloorDrainConvertToBlock(livingHighestFloor.floorUid,
+                        _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.floorDrain).ToList(),
+                        _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.washingMachine).ToList(), wastewaterRisers, rainRisers);
+                    if (null != blocks && blocks.Count > 0)
+                        createBlockInfos.AddRange(blocks);
+                    var converterTypes = new List<EnumEquipmentType>
                 {
                     EnumEquipmentType.sewageWasteRiser,
                     EnumEquipmentType.sewageWaterRiser,
@@ -203,129 +205,134 @@ namespace ThMEPWSS.Command
                     EnumEquipmentType.condensateRiser,
                     EnumEquipmentType.roofRainRiser,
                 };
-                var pipeConverter = RaisePipeConvert.ConvetPipeToBlock(livingHighestFloor.floorUid, _classifyResult.Where(c => converterTypes.Any(x => x == c.enumEquipmentType)).ToList());
-                if (null != pipeConverter && pipeConverter.Count > 0)
-                    createBlockInfos.AddRange(pipeConverter);
-                //PL和TL增加连线
-                var pipeConnectPipe = new PipeConnectPipe(pipeConverter.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("PL")).ToList(),
-                    pipeConverter.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("TL")).ToList());
-                var connectLines = pipeConnectPipe.GetConnectLines();
-                if (connectLines.Count > 0)
-                    createBasicElems.AddRange(connectLines);
-                //厨房台盆转换连接
-                var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "FcL")).ToList());
-                kitchenSinkConnect.InitData(kitchenRooms, toiletRooms, _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.kitchenBasin).ToList());
-                var addBasics = kitchenSinkConnect.SinkConvertorConnect();
-                if (null != addBasics && addBasics.Count > 0)
-                    createBasicElems.AddRange(addBasics);
-                //阳台逻辑
-                var balconyRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Balcony).ToList();
-                var corridorRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Corridor).ToList();
-                var equpBlockRoomTypes = new List<EnumRoomType>
+                    var pipeConverter = RaisePipeConvert.ConvetPipeToBlock(livingHighestFloor.floorUid, _classifyResult.Where(c => converterTypes.Any(x => x == c.enumEquipmentType)).ToList());
+                    if (null != pipeConverter && pipeConverter.Count > 0)
+                        createBlockInfos.AddRange(pipeConverter);
+                    //PL和TL增加连线
+                    var pipeConnectPipe = new PipeConnectPipe(pipeConverter.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("PL")).ToList(),
+                        pipeConverter.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("TL")).ToList());
+                    var connectLines = pipeConnectPipe.GetConnectLines();
+                    if (connectLines.Count > 0)
+                        createBasicElems.AddRange(connectLines);
+                    //厨房台盆转换连接
+                    var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "FcL")).ToList());
+                    kitchenSinkConnect.InitData(kitchenRooms, toiletRooms, _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.kitchenBasin).ToList());
+                    var addBasics = kitchenSinkConnect.SinkConvertorConnect();
+                    if (null != addBasics && addBasics.Count > 0)
+                        createBasicElems.AddRange(addBasics);
+                    //阳台逻辑
+                    var balconyRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Balcony).ToList();
+                    var corridorRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Corridor).ToList();
+                    var equpBlockRoomTypes = new List<EnumRoomType>
                 {
                     EnumRoomType.Other,
                     EnumRoomType.Corridor,
                     EnumRoomType.Balcony,
                     EnumRoomType.EquipmentPlatform
                 };
-                var equpBlocks = _classifyResult.Where(c => equpBlockRoomTypes.Any(x => x == c.enumRoomType)).ToList();
-                var otherRooms = new List<RoomModel>();
-                foreach (var room in rooms)
-                {
-                    if (room == null || room.roomTypeName == EnumRoomType.Balcony || room.roomTypeName == EnumRoomType.Corridor)
-                        continue;
-                    otherRooms.Add(room);
-                }
-                var parameters = new StruParameters();
-                parameters.Walls.AddRange(_allWalls);
-                parameters.Columns.AddRange(_allColumns);
-                parameters.Beams.AddRange(_allBeams);
-                var balconyCorridorEqu = new BalconyCorridorEquPlatform(livingHighestFloor.floorUid, balconyRooms, corridorRooms, otherRooms, equpBlocks, parameters);
-                balconyCorridorEqu.LayoutConnect(createBlockInfos, out List<string> changeY1ToFLIds, out List<string> changeDrainToFDrainIds);
-                if ((null != changeY1ToFLIds && changeY1ToFLIds.Count > 0) || (null != changeDrainToFDrainIds && changeDrainToFDrainIds.Count > 0))
-                {
-                    foreach (var item in createBlockInfos)
+                    var equpBlocks = _classifyResult.Where(c => equpBlockRoomTypes.Any(x => x == c.enumRoomType)).ToList();
+                    var otherRooms = new List<RoomModel>();
+                    foreach (var room in rooms)
                     {
-                        if (item.equipmentType != EnumEquipmentType.balconyRiser && item.equipmentType != EnumEquipmentType.floorDrain)
+                        if (room == null || room.roomTypeName == EnumRoomType.Balcony || room.roomTypeName == EnumRoomType.Corridor)
                             continue;
-                        if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId))
+                        otherRooms.Add(room);
+                    }
+                    var parameters = new StruParameters();
+                    parameters.Walls.AddRange(_allWalls);
+                    parameters.Columns.AddRange(_allColumns);
+                    parameters.Beams.AddRange(_allBeams);
+                    var balconyCorridorEqu = new BalconyCorridorEquPlatform(livingHighestFloor.floorUid, balconyRooms, corridorRooms, otherRooms, equpBlocks, parameters);
+                    balconyCorridorEqu.LayoutConnect(createBlockInfos, out List<string> changeY1ToFLIds, out List<string> changeDrainToFDrainIds);
+                    if ((null != changeY1ToFLIds && changeY1ToFLIds.Count > 0) || (null != changeDrainToFDrainIds && changeDrainToFDrainIds.Count > 0))
+                    {
+                        foreach (var item in createBlockInfos)
                         {
-                            item.tag = "FL";
-                            item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
+                            if (item.equipmentType != EnumEquipmentType.balconyRiser && item.equipmentType != EnumEquipmentType.floorDrain)
+                                continue;
+                            if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId))
+                            {
+                                item.tag = "FL";
+                                item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
+                            }
                         }
                     }
+                    _pipeDrainConnectLines.Clear();
+                    if (balconyCorridorEqu.createBasicElements != null && balconyCorridorEqu.createBasicElements.Count > 0)
+                    {
+                        createBasicElems.AddRange(balconyCorridorEqu.createBasicElements);
+                        foreach (var item in balconyCorridorEqu.createBasicElements)
+                        {
+                            if (item.baseCurce is Line)
+                                _pipeDrainConnectLines.Add(item);
+                        }
+                    }
+                    if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
+                        createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
+                    if (balconyCorridorEqu.createDBTextElements != null && balconyCorridorEqu.createDBTextElements.Count > 0)
+                        createTextElems.AddRange(balconyCorridorEqu.createDBTextElements);
+                    //卫生间PL添加清扫口
+                    List<string> pipeTags = new List<string> { "PL", "FL", "FyL", "FcL", "TL", "DL", "WL" };
+                    var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();
+                    ToiletRoomCleanout roomCleanout = new ToiletRoomCleanout(livingHighestFloor.floorUid, toiletRooms, pipes);
+                    var addClean = roomCleanout.GetCreateCleanout(_classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.toilet).ToList());
+                    if (null != addClean && addClean.Count > 0)
+                        createBlockInfos.AddRange(addClean);
+                    var midY = LivingFloorMidY(rooms, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList());
+                    RoofPipeLabelLayout();
+                    LivingFloorLabelLayout(midY, rooms);
+                    CopyToOtherFloor(midY);
+                    BreakPipeConnectByY1Lines(_pipeDrainConnectLines, _roofY1ConvertLines);
+                    //屋面立管碰撞检查
+                    var roofCheck = new RoofCollisionCheck(roofFloors, _allRailings);
+                    var addPLines = roofCheck.GetCheckResults(createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "PL")).ToList());
+                    createBasicElems.AddRange(addPLines);
+                    var pipeElems = new List<CreateBlockInfo>();
+                    var tempElems = new List<CreateBlockInfo>();
+                    tempElems.AddRange(createBlockInfos);
+                    createBlockInfos.Clear();
+                    pipeTags.Add("Y2L");
+                    pipeTags.Add("Y1L");
+                    pipeTags.Add("YyL");
+                    pipeTags.Add("NL");
+                    foreach (var item in tempElems)
+                    {
+                        if (string.IsNullOrEmpty(item.tag))
+                        {
+                            createBlockInfos.Add(item);
+                        }
+                        else if (pipeTags.Any(c => c == item.tag))
+                        {
+                            pipeElems.Add(item);
+                            createBlockInfos.Add(item);
+                        }
+                        else
+                        {
+                            createBlockInfos.Add(item);
+                        }
+                    }
+                    //var notCreateLineIds = new List<string>();
+                    //var notCreateTextIds = new List<string>();
+                    //ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
+                    //ConvertToTCHSymbMultiLeader(ref createBasicElems,ref createTextElems, ref symbMultiLeaders);
+                    //createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                    //createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                    ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
+                    var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
+                    var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
+                    var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
                 }
-                _pipeDrainConnectLines.Clear();
-                if (balconyCorridorEqu.createBasicElements != null && balconyCorridorEqu.createBasicElements.Count > 0)
-                {
-                    createBasicElems.AddRange(balconyCorridorEqu.createBasicElements);
-                    foreach (var item in balconyCorridorEqu.createBasicElements)
-                    {
-                        if (item.baseCurce is Line)
-                            _pipeDrainConnectLines.Add(item);
-                    }
-                }
-                if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
-                    createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
-                if (balconyCorridorEqu.createDBTextElements != null && balconyCorridorEqu.createDBTextElements.Count > 0)
-                    createTextElems.AddRange(balconyCorridorEqu.createDBTextElements);
-                //卫生间PL添加清扫口
-                List<string> pipeTags = new List<string> { "PL", "FL", "FyL", "FcL", "TL", "DL", "WL" };
-                var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();
-                ToiletRoomCleanout roomCleanout = new ToiletRoomCleanout(livingHighestFloor.floorUid, toiletRooms, pipes);
-                var addClean = roomCleanout.GetCreateCleanout(_classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.toilet).ToList());
-                if (null != addClean && addClean.Count > 0)
-                    createBlockInfos.AddRange(addClean);
-                var midY = LivingFloorMidY(rooms, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList());
-                RoofPipeLabelLayout();
-                LivingFloorLabelLayout(midY, rooms);
-                CopyToOtherFloor(midY);
-                BreakPipeConnectByY1Lines(_pipeDrainConnectLines, _roofY1ConvertLines);
-                //屋面立管碰撞检查
-                var roofCheck = new RoofCollisionCheck(roofFloors, _allRailings);
-                var addPLines = roofCheck.GetCheckResults(createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "PL")).ToList());
-                createBasicElems.AddRange(addPLines);
-                var pipeElems = new List<CreateBlockInfo>();
-                var tempElems = new List<CreateBlockInfo>();
-                tempElems.AddRange(createBlockInfos);
-                createBlockInfos.Clear();
-                pipeTags.Add("Y2L");
-                pipeTags.Add("Y1L");
-                pipeTags.Add("YyL");
-                pipeTags.Add("NL");
-                foreach (var item in tempElems)
-                {
-                    if (string.IsNullOrEmpty(item.tag))
-                    {
-                        createBlockInfos.Add(item);
-                    }
-                    else if (pipeTags.Any(c => c == item.tag))
-                    {
-                        pipeElems.Add(item);
-                        createBlockInfos.Add(item);
-                    }
-                    else
-                    {
-                        createBlockInfos.Add(item);
-                    }
-                }
-                //var notCreateLineIds = new List<string>();
-                //var notCreateTextIds = new List<string>();
-                //ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
-                //ConvertToTCHSymbMultiLeader(ref createBasicElems,ref createTextElems, ref symbMultiLeaders);
-                //createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
-                //createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
-                ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
-                var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
-                var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
-                var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
+                //ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
+                //ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
+                //tchPipeService.InitPipe(verPipes);
+                //tchPipeService.DrawExecute(false);
+                //tchsymbMultiLeaderService.Init(symbMultiLeaders);
+                //tchsymbMultiLeaderService.DrawExecute(false,false);
             }
-            //ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
-            //ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
-            //tchPipeService.InitPipe(verPipes);
-            //tchPipeService.DrawExecute(false);
-            //tchsymbMultiLeaderService.Init(symbMultiLeaders);
-            //tchsymbMultiLeaderService.DrawExecute(false,false);
+            catch (Exception ex)
+            {
+                ;
+            }
         }
         void InitData(Database database)
         {
