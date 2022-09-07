@@ -70,10 +70,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
+    <Compile Include="CAD\ThTArchWallExtension.cs" />
+    <Compile Include="Data\ThSUBuildingElementData.cs" />
     <Compile Include="Data\ThSUCompDefinitionData.cs" />
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
+    <Compile Include="Data\ThSUProjectData.cs" />
     <Compile Include="Data\ThTCHBuildingData.cs" />
     <Compile Include="Data\ThTCHBuildingStoreyData.cs" />
     <Compile Include="Data\ThTCHBuiltElementData.cs" />

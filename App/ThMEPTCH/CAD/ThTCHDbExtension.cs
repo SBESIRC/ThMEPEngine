@@ -184,16 +184,12 @@ namespace ThMEPTCH.CAD
                     Id = (ulong)ThMEPDbUniqueIdService.UniqueId(tch, uid, matrix),
 
                     // 几何信息
-                    StartPointX = transCurve.StartPoint.X,
-                    StartPointY = transCurve.StartPoint.Y,
-                    StartPointZ = transCurve.StartPoint.Z,
-                    EndPointX = transCurve.EndPoint.X,
-                    EndPointY = transCurve.EndPoint.Y,
-                    EndPointZ = transCurve.EndPoint.Z,
+                    StartPoint = transCurve.StartPoint,
+                    EndPoint = transCurve.EndPoint,
                     LeftWidth = acadObj.LeftWidth,
                     RightWidth = acadObj.RightWidth,
                     Height = acadObj.Height,
-                    Elevtion = acadObj.Elevation,
+                    Elevation = acadObj.Elevation,
 
                     // 圆弧信息
                     Bulge = Bulge(),
