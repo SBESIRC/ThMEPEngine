@@ -207,6 +207,19 @@
   <ItemGroup>
     <Resource Include="Resources\Images\suIcon.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\bottomHeightAdjust.png" />
+    <Resource Include="Resources\Images\location.png" />
+    <Resource Include="Resources\Images\modelingBox.png" />
+    <Resource Include="Resources\Images\section.png" />
+    <Resource Include="Resources\Images\viewManage.png" />
+    <Resource Include="Resources\Images\viewUpdata.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\opening.png" />
+    <Resource Include="Resources\Images\railing.png" />
+    <Resource Include="Resources\Images\slab.png" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
