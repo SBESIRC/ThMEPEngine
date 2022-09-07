@@ -9,7 +9,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         public static ThHydrantConnectPipeConfigInfo ConfigInfo;
 
         [CommandMethod("TIANHUACAD", "THFHPC", CommandFlags.Modal)]
-        public void THMEPGARAGELAYOUT()
+        public void THFHPC()
         {
             if (ConfigInfo == null)
             {
