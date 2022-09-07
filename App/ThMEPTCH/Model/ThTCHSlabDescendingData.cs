@@ -5,7 +5,7 @@ using System;
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHSlabDescendingData:ICloneable
+    public class ThTCHSlabDescendingData : ICloneable
     {
         /// <summary>
         /// 降板高度
@@ -32,16 +32,24 @@ namespace ThMEPTCH.Model
         public bool IsDescending { get; set; }
 
         /// <summary>
-        /// 降板轮廓线
+        /// 降板内轮廓线
         /// </summary>
         [ProtoMember(15)]
         public Polyline Outline { get; set; }
 
+        /// <summary>
+        /// 降板外轮廓线
+        /// </summary>
+        [ProtoMember(16)]
+        public Polyline OutlineBuffer { get; set; }
+
         public object Clone()
         {
             var clone = new ThTCHSlabDescendingData();
-            if(this.Outline != null)
+            if (this.Outline != null)
                 clone.Outline = this.Outline.Clone() as Polyline;
+            if (this.OutlineBuffer != null)
+                clone.OutlineBuffer = this.OutlineBuffer.Clone() as Polyline;
             clone.IsDescending = this.IsDescending;
             clone.DescendingHeight = this.DescendingHeight;
             clone.DescendingThickness = this.DescendingThickness;

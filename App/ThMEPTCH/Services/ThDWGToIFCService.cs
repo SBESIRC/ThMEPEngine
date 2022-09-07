@@ -13,7 +13,6 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Common;
 using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
 using ThMEPTCH.TCHArchDataConvert;
@@ -82,7 +81,7 @@ namespace ThMEPTCH.Services
             {
                 prjName = Active.DocumentName;
                 prjId = Active.Document.UnmanagedObject.ToString();
-                jsonConfig =  GetStoreyJsonFile(Active.Document.Name);
+                jsonConfig = GetStoreyJsonFile(Active.Document.Name);
             }
             if (jsonConfig.Count == 0)
             {
@@ -97,7 +96,7 @@ namespace ThMEPTCH.Services
             var thBuilding = new ThTCHBuilding();
             thBuilding.Uuid = prjId + "Building";
             var floorOrigin = GetFloorBlockPolylines(isSelectFloor);
-            if(floorOrigin.Count < 1)
+            if (floorOrigin.Count < 1)
             {
                 return null;
             }
@@ -195,7 +194,7 @@ namespace ThMEPTCH.Services
 
             var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
             //var floorData = GetBlockElevtionValue(floorOrigin);
-            if(floorData.Count < 1)
+            if (floorData.Count < 1)
             {
                 Active.Database.GetEditor().WriteMessage("未能找到相对应的楼层数据信息，请检查。");
                 return null;
@@ -349,7 +348,7 @@ namespace ThMEPTCH.Services
             {
                 prjName = Active.DocumentName;
                 prjId = Active.Document.UnmanagedObject.ToString();
-                jsonConfig =  GetStoreyJsonFile(Active.Document.Name);
+                jsonConfig = GetStoreyJsonFile(Active.Document.Name);
             }
             if (jsonConfig.Count == 0)
             {
@@ -512,6 +511,7 @@ namespace ThMEPTCH.Services
             var allSlabs = new List<SlabPolyline>();
             var hisCoordinates = new List<Point3d>();
             var slabTextSpIndex = new ThCADCoreNTSSpatialIndex(textColl);
+            var maxHeight = 0.0;
             foreach (var item in slabPolylines)
             {
                 var addSlab = new SlabPolyline(item, slabThickness);
@@ -522,7 +522,7 @@ namespace ThMEPTCH.Services
                     allSlabs.Add(addSlab);
                     continue;
                 }
-                double height = 0.0;
+                var height = 0.0;
                 foreach (var obj in insertText)
                 {
                     if (obj is DBText text)
@@ -543,11 +543,12 @@ namespace ThMEPTCH.Services
                     }
                 }
                 addSlab.LowerPlateHeight = height;
+                maxHeight = maxHeight <= height ? maxHeight : height;
                 allSlabs.Add(addSlab);
             }
             allSlabs = allSlabs.OrderByDescending(c => c.OutPolyline.Area).ToList();
 
-            List<int> hisIndex = new List<int>();
+            var hisIndex = new List<int>();
             for (int i = 0; i < allSlabs.Count; i++)
             {
                 if (hisIndex.Any(c => c == i))
@@ -573,7 +574,10 @@ namespace ThMEPTCH.Services
                     if (area / pLine.Area < 0.8)
                         continue;
                     if (Math.Abs(innerSlab.LowerPlateHeight) < 1)
+                    {
                         innerSlab.IsOpening = true;
+                        innerSlab.LowerPlateHeight = maxHeight;
+                    }
                     else
                     {
                     }
@@ -819,16 +823,30 @@ namespace ThMEPTCH.Services
             var slab = new ThTCHSlab(outPLine, slabPolyline.Thickness, Vector3d.ZAxis);
             foreach (var item in slabPolyline.InnerSlabOpenings)
             {
+                var descendingWrapThickness = 50.0;
                 var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
                 if (!item.IsOpening)
                 {
+                    var outlineBuffer = innerPLine.Buffer(descendingWrapThickness).OfType<Polyline>()
+                        .OrderByDescending(p => p.Area).FirstOrDefault();
+                    if (outlineBuffer.IsNull())
+                    {
+                        continue;
+                    }
+                    outlineBuffer = outlineBuffer.Intersection(new DBObjectCollection { outPLine}).OfType<Polyline>()
+                        .OrderByDescending(p => p.Area).FirstOrDefault();
+                    if (outlineBuffer.IsNull())
+                    {
+                        continue;
+                    }
                     slab.Descendings.Add(new ThTCHSlabDescendingData()
                     {
                         Outline = innerPLine,
+                        OutlineBuffer = outlineBuffer,
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.Thickness,
-                        DescendingWrapThickness = 50,
+                        DescendingWrapThickness = descendingWrapThickness,
                     });
                 }
                 else
@@ -836,6 +854,8 @@ namespace ThMEPTCH.Services
                     slab.Descendings.Add(new ThTCHSlabDescendingData()
                     {
                         Outline = innerPLine,
+                        IsDescending = false,
+                        DescendingHeight = Math.Abs(item.LowerPlateHeight),
                     });
                 }
             }
