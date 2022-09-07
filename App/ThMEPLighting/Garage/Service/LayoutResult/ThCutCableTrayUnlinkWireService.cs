@@ -153,13 +153,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             return first.IntersectWithEx(second, Intersect.ExtendBoth);
         }
+
         private List<Tuple<Line, bool, bool>> Find()
         {
             var results = new List<Tuple<Line, bool, bool>>();
             WireDict.Where(o => o.Value.Count > 0).ForEach(o =>
                 {
-                    bool isStartLink = IsPortLinkObjs(o.Key, true);
-                    bool isEndLink = IsPortLinkObjs(o.Key, false);
+                    var isStartLink = IsPortLinkObjs(o.Key, true);
+                    var isEndLink = IsPortLinkObjs(o.Key, false);
                     if (!isStartLink || !isEndLink)
                     {
                         results.Add(Tuple.Create(o.Key, isStartLink, isEndLink));

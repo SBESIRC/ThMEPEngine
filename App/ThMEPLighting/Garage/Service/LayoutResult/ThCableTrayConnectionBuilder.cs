@@ -221,15 +221,37 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private List<Line> CutLightingLines(List<Line> nonLightinglines, double tolerance = 10.0)
         {
             var results = new List<Line>();
-            var nonLightingLineIndex = new ThCADCoreNTSSpatialIndex(nonLightinglines.ToCollection());
+            var wireDict = CreateWireDict(Graphs.SelectMany(o => o.GraphEdges).ToList());
+            var unLinkWires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength, FdxLines).OfType<Line>().ToList();
+            var firstLines = new List<Line>();
+            var secondLines = new List<Line>();
             var grapgEdges = Graphs.SelectMany(o => o.GraphEdges);
             var firstEdges = grapgEdges.Where(o => o.EdgePattern.Equals(EdgePattern.First)).Select(o => o.Edge).ToList();
-            var firstEdgesIndex = new ThCADCoreNTSSpatialIndex(firstEdges.ToCollection());
-            var secondEdges = grapgEdges.Where(o => o.EdgePattern.Equals(EdgePattern.Second)).Select(o => o.Edge).ToList();
-            var secondEdgesIndex = new ThCADCoreNTSSpatialIndex(secondEdges.ToCollection());
+            unLinkWires.ForEach(o =>
+            {
+                var center = o.GetCenter();
+                var tag = false;
+                foreach (var edge in firstEdges)
+                {
+                    if (edge.DistanceTo(center, false) < 10.0)
+                    {
+                        firstLines.Add(o);
+                        tag = true;
+                        break;
+                    }
+                }
+                if (!tag)
+                {
+                    secondLines.Add(o);
+                }
+            });
 
-            CutLightingLines(results, firstEdges, nonLightingLineIndex, secondEdgesIndex, tolerance);
-            CutLightingLines(results, secondEdges, nonLightingLineIndex, firstEdgesIndex, tolerance);
+            var nonLightingLineIndex = new ThCADCoreNTSSpatialIndex(nonLightinglines.ToCollection());
+            var firstEdgesIndex = new ThCADCoreNTSSpatialIndex(firstLines.ToCollection());
+            var secondEdgesIndex = new ThCADCoreNTSSpatialIndex(secondLines.ToCollection());
+
+            CutLightingLines(results, firstLines, nonLightingLineIndex, secondEdgesIndex, tolerance);
+            CutLightingLines(results, secondLines, nonLightingLineIndex, firstEdgesIndex, tolerance);
             results.RemoveAll(o => o.Length < 10.0);
             return results;
         }
