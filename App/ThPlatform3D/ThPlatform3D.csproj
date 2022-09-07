@@ -68,6 +68,11 @@
     <Compile Include="ArchitecturePlane\Service\ThWindowOutlineCreator.cs" />
     <Compile Include="ArchitecturePlane\ThArchitectureGenerator.cs" />
     <Compile Include="ArchitecturePlane\ThArchitecturePlaneCommon.cs" />
+    <Compile Include="Command\ThDropSlabDrawCmd.cs" />
+    <Compile Include="Command\ThSlabDrawCmd.cs" />
+    <Compile Include="Command\ThWallHoleDrawCmd.cs" />
+    <Compile Include="Command\ThRailDrawCmd.cs" />
+    <Compile Include="Command\ThInsertBasePointCmd.cs" />
     <Compile Include="Common\PlaneJsonConfig.cs" />
     <Compile Include="Common\ThPlaneConfig.cs" />
     <Compile Include="Common\ThPlanePrintParameter.cs" />
