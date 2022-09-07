@@ -37,6 +37,7 @@ namespace ThPlatform3D.Command
             }
             else
             {
+                Active.Document.Window.Focus();
                 SetCurrentDbConfig(ltr);
                 Active.Database.ObjectAppended += Database_ObjectAppended;
                 Active.Editor.Command("_.PLINE");
@@ -65,14 +66,6 @@ namespace ThPlatform3D.Command
                         }
                     }
                 }
-            }
-        }
-
-        private void Database_ObjectAppended(object sender, ObjectEventArgs e)
-        {
-            if(e.DBObject is Curve)
-            {
-                _collectObjs.Add(e.DBObject);
             }
         }
 

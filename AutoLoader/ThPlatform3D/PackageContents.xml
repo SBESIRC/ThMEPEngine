@@ -45,6 +45,11 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThPlatform3D.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform" AppName="ThPlatform3D" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+				<Command Local="THBPI" Global="THBPI" />
+				<Command Local="THJBHZ" Global="THJBHZ" />
+				<Command Local="THLBHZ" Global="THLBHZ" />
+				<Command Local="THLGHZ" Global="THLGHZ" />
+				<Command Local="THQDHZ" Global="THQDHZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -53,6 +58,11 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThPlatform3D.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform" AppName="ThPlatform3D" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+				<Command Local="THBPI" Global="THBPI" />
+				<Command Local="THJBHZ" Global="THJBHZ" />
+				<Command Local="THLBHZ" Global="THLBHZ" />
+				<Command Local="THLGHZ" Global="THLGHZ" />
+				<Command Local="THQDHZ" Global="THQDHZ" />
             </Commands>
         </ComponentEntry>
     </Components>

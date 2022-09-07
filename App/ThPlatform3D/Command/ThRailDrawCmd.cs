@@ -31,6 +31,7 @@ namespace ThPlatform3D.Command
             }
             else
             {
+                Active.Document.Window.Focus();
                 SetCurrentDbConfig(ltr);
                 Active.Database.ObjectAppended += Database_ObjectAppended;
                 Active.Editor.Command("_.PLINE");
