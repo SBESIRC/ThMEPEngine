@@ -1,0 +1,138 @@
+﻿<UserControl x:Class="Tianhua.Platform3D.UI.UControls.DesignUControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UControls"
+             mc:Ignorable="d" 
+             FontSize="12"
+             xmlns:tControl ="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             Foreground="#555555">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="TextForeground" Color="#555555"/>
+            <SolidColorBrush x:Key="GridBorderBrush" Color="#B9B9B9"/>
+            <Style x:Key="DesignBorder" TargetType="{x:Type Border}">
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="BorderBrush" Value="{StaticResource GridBorderBrush}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <!--<Setter Property="BorderBrush">
+                    <Setter.Value>
+                        <VisualBrush>
+                            <VisualBrush.Visual>
+                                <Rectangle StrokeDashArray="2 2" 
+                                           StrokeThickness="{TemplateBinding BorderThickness}"
+                                           Stroke="#B9B9B9" 
+                                           RadiusX="0"
+                                           RadiusY="0"
+                                           VerticalAlignment="Stretch"
+                                           HorizontalAlignment="Stretch"
+                                   />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Setter.Value>
+                </Setter>-->
+            </Style>
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+            </Style>
+
+            <Style TargetType="{x:Type tControl:ImageButton}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+                <Setter Property="MouseOverBackground" Value="Transparent"/>
+                <Setter Property="MouseOverForeground" Value="Black"/>
+                <Setter Property="Margin" Value="5,0,0,0"/>
+                <Setter Property="TextMargin" Value="5,0,5,0"/>
+                <Setter Property="ImageTextLocation" Value="ImageInTextLeft"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="ImageHeight" Value="16"/>
+                <Setter Property="ImageWidth" Value="16"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Background="White" Margin="5" x:Name="mainGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <!--视图行 start-->
+            <Border BorderThickness="0,0,1,1" Grid.Row="0" Grid.Column="0" Style="{StaticResource DesignBorder}"/>
+            <Label Content="视图" />
+
+            <Grid Grid.Row="0" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Border BorderThickness="0,0,0,1" Grid.RowSpan="99"
+                    Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                    Style="{StaticResource DesignBorder}"/>
+                <tControl:ImageButton Grid.Row="0" Grid.Column="0"
+                              NormalImage="../Resources/Images/suIcon.png" Content="视图更新"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THDB2Push"></tControl:ImageButton>
+                <tControl:ImageButton Grid.Row="0" Grid.Column="1"
+                              NormalImage="../Resources/Images/suIcon.png" Content="视图管理"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THDB2Push"></tControl:ImageButton>
+            </Grid>
+
+            <!--视图行 end-->
+            <!--建模准备 start-->
+            <Border BorderThickness="0,0,1,1" Grid.Row="1" Grid.Column="0" Style="{StaticResource DesignBorder}"/>
+            <Label Content="建模&#x0a;准备" Grid.Row="1" Grid.Column="0"/>
+
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"></RowDefinition>
+                    <RowDefinition Height="25"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Border BorderThickness="0,0,0,1" Grid.Row="0" Grid.RowSpan="99" Grid.Column="0" Grid.ColumnSpan="2" 
+                    Style="{StaticResource DesignBorder}"/>
+                <tControl:ImageButton Grid.Row="0" Grid.Column="0"
+                              NormalImage="../Resources/Images/suIcon.png" Content="视图更新"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THDB2Push"></tControl:ImageButton>
+                <tControl:ImageButton Grid.Row="0" Grid.Column="1"
+                              NormalImage="../Resources/Images/suIcon.png" Content="视图管理"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THDB2Push"></tControl:ImageButton>
+            </Grid>
+
+            <!--视图行 end-->
+            <!--<Border Grid.Row="0" Grid.Column="0" BorderThickness="1" >
+            <Border.BorderBrush>
+                <VisualBrush>
+                    <VisualBrush.Visual>
+                        <Rectangle StrokeDashArray="4 2" Stroke="Gray" StrokeThickness="1"
+                  Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
+                  Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Border.BorderBrush>
+        </Border>-->
+        </Grid>
+    </ScrollViewer>
+</UserControl>

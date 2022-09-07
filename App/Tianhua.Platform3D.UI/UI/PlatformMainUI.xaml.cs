@@ -4,6 +4,7 @@ using HandyControl.Interactivity;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Tianhua.Platform3D.UI.UControls;
 using Tianhua.Platform3D.UI.ViewModels;
 using hControl = HandyControl.Controls;
 
@@ -31,7 +32,7 @@ namespace Tianhua.Platform3D.UI.UI
         {
             mainViewModel = new MainFunctionViewModel();
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("楼层", new StoreyElevationSetUI()));
-            mainViewModel.FunctionTableItems.Add(new FunctionTabItem("设计", null));
+            mainViewModel.FunctionTableItems.Add(new FunctionTabItem("设计", new DesignUControl()));
             tabTopFunction.DataContext = mainViewModel;
             tabTopFunction.SelectedIndex = 1;
         }
