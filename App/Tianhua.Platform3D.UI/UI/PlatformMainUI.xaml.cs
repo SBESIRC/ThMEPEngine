@@ -1,7 +1,9 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using HandyControl.Interactivity;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Tianhua.Platform3D.UI.ViewModels;
 using hControl = HandyControl.Controls;
 
@@ -16,8 +18,6 @@ namespace Tianhua.Platform3D.UI.UI
         public PlatformMainUI()
         {
             InitializeComponent();
-            TabControl test = new hControl.TabControl();
-            
             this.Loaded += PlatformMainUI_Loaded;
         }
 
@@ -31,15 +31,14 @@ namespace Tianhua.Platform3D.UI.UI
         {
             mainViewModel = new MainFunctionViewModel();
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("楼层", new StoreyElevationSetUI()));
-            mainViewModel.FunctionTableItems.Add(new FunctionTabItem("轴网", null));
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("设计", null));
-            mainViewModel.FunctionTableItems.Add(new FunctionTabItem("组装", null));
             tabTopFunction.DataContext = mainViewModel;
-            tabTopFunction.SelectedIndex = 2;
+            tabTopFunction.SelectedIndex = 1;
         }
 
         private void InitPropertyViewModel() 
         {
+            PropertiesViewModel.Instacne.InitPropertyGrid(propertyGrid);
             propGrid.DataContext = PropertiesViewModel.Instacne;
         }
         #region 页面相应事件
@@ -59,5 +58,10 @@ namespace Tianhua.Platform3D.UI.UI
             CommandHandlerBase.ExecuteFromCommandLine(false, cmdName);
         }
         #endregion
+
+        private void propertyGrid_SelectedObjectChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+
+        }
     }
 }

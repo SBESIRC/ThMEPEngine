@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tianhua.Platform3D.UI.PropertyServices.PropertyVMoldels;
 
 namespace Tianhua.Platform3D.UI.PropertyServices
 {
@@ -9,6 +10,7 @@ namespace Tianhua.Platform3D.UI.PropertyServices
     {
         private string assemblyPath = "";
         private List<PropertySvrCache> propertySvrCaches { get; }
+        public ITHProperty LastSvrCache { get; protected set; }
         public PropertyService()
         {
             assemblyPath = this.GetType().Assembly.Location.ToString();
@@ -31,29 +33,27 @@ namespace Tianhua.Platform3D.UI.PropertyServices
                 propertySvrCaches.Add(temp);
             }
         }
-        public string GetShowTypeProperties(ObjectId objectId, out Dictionary<string, object> properties)
+        public bool GetShowProperties(ObjectId objectId, out PropertyVMBase properties)
         {
-            string resType = string.Empty;
-            properties = new Dictionary<string, object>();
+            bool isVaild = false;
+            properties = null;
             foreach (var svr in propertySvrCaches)
             {
                 if (svr.Instacne == null)
                     svr.Instacne = Activator.CreateInstance(svr.PType) as ITHProperty;
                 if (null == svr.Instacne)
                     continue;
-                svr.Instacne.InitObjectId(objectId);
-                svr.Instacne.CheckAndGetData();
-                if (!svr.Instacne.IsVaild)
+                if (!svr.Instacne.CheckVaild(objectId))
                     continue;
-                resType = svr.TypeName;
-                foreach (var item in svr.Instacne.Properties)
-                {
-                    properties.Add(item.Key, item.Value);
-                }
+                LastSvrCache = svr.Instacne;
+                svr.Instacne.GetVMProperty(objectId, out properties);
+                isVaild = true;
                 break;
             }
-            return resType;
+            return isVaild;
         }
+    
+       
     }
     class PropertySvrCache
     {
