@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
+using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 
 namespace ThParkingStall.Core.MPartitionLayout
 {
@@ -86,7 +87,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 mParkingPartition.Pillars = pillars;
                 mParkingPartition.OutputLanes = lanes;
                 var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, obstacles, cars);
-
+                Display(newbound);
                 //mParkingPartition.OutputLanes = new List<LineSegment>();
                 var ensuredLanes = new List<LineSegment>();
                 var unsuredLanes = new List<LineSegment>();

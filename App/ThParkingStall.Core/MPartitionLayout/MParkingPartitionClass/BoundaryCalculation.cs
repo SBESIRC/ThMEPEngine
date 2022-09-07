@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
+using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Concurrent;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThParkingStall.Core.Tools;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
 namespace ThParkingStall.Core.MPartitionLayout
@@ -35,7 +37,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             polys.AddRange(Cars.Where(e => e.CarLayoutMode == 1).Select(e => e.Polyline));
             polys = polys.Select(e =>
              {
-                 var g = e.BufferPL(buffer_tol);
+                 BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
+                 var g = e.Buffer(buffer_tol, MitreParam);
                  if (g is Polygon)
                  {
                      var shell = ((Polygon)g).Shell;
@@ -69,7 +72,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             polys.AddRange(cars.Where(e => e.CarLayoutMode == 1).Select(e => e.Polyline));
             polys = polys.Select(e =>
             {
-                var g = e.BufferPL(buffer_tol);
+                BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
+                var g = e.Buffer(buffer_tol, MitreParam);
                 if (g is Polygon)
                 {
                     var shell = ((Polygon)g).Shell;
@@ -112,24 +116,16 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             var bound = new Polygon(new LinearRing(new Coordinate[0]));
             Polygon union;
-            Polygon hole;
             if (unions is Polygon)
                 union = (Polygon)unions;
             else if (unions is MultiPolygon)
                 union = (Polygon)((MultiPolygon)unions).Geometries.Where(e => e is Polygon polygon).OrderByDescending(polygon => polygon.Area).First();
             else
                 return bound;
-
-            var shrinked_pl = ((Polygon)union).BufferPL(buffer_tol);
-            if (shrinked_pl is Polygon)
-            {
-                var holes = ((Polygon)shrinked_pl).Holes.OrderByDescending(e => e.Area);
-                if (holes.Any())
-                {
-                    hole = new Polygon(holes.First());
-                    bound = hole;
-                }
-            }
+            BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
+            var buffer = union.Buffer(-buffer_tol, MitreParam);
+            if(buffer is Polygon pl)
+                return pl;
             return bound;
         }
     }

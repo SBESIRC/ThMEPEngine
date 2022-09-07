@@ -263,7 +263,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
             var caledBound= globalBusiness.CalBound();
-            //Display(caledBound);
+            Display(caledBound);
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
