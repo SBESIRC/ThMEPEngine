@@ -1,75 +1,71 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
-using DotNetARX;
-using AcHelper.Commands;
 using ThCADExtension;
-using ThMEPEngineCore;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 
 namespace ThPlatform3D.Command
 {
-    public class ThDropSlabDrawCmd : IAcadCommand, IDisposable
+    public class ThDropSlabDrawCmd : ThDrawBaseCmd
     {
         private const string DropSlabLayerName = "TH-降板";
         private const string DropSlabMarkLayerName = "TH-降板";
         private const string DropSlabMarkTextStyle = "TH-STYLE3";        
-        private DBObjectCollection _collectObjs;
 
         public ThDropSlabDrawCmd()
         {
-            _collectObjs = new DBObjectCollection(); 
         }
 
-        public void Dispose()
-        {
-            //
-        }
-
-        public void Execute()
+        public override void Execute()
         {
             ImportTemplate();
 
-            OpenLayer();
+            OpenLayer(new List<string> { "0", DropSlabLayerName, DropSlabMarkLayerName });
 
             DrawSlab();
         }
 
         private void DrawSlab()
         {
-            var oldLayer = GetCurrentLayer();
-            SetCurrentLayer(DropSlabLayerName);
-            Active.Database.ObjectAppended += Database_ObjectAppended;
-            Active.Editor.Command("_.PLINE");
-            Active.Database.ObjectAppended -= Database_ObjectAppended;
-
-            if(_collectObjs.Count>0)
+            var ltr = GetLTR(DropSlabLayerName);
+            if (ltr == null)
             {
-                var pdo = new PromptDoubleOptions("\n请输入降板相对标高(或跳过)");
-                pdo.AllowNone = true;
-                pdo.AllowArbitraryInput = true;
-                pdo.AllowZero = true;
-                var pdr = Active.Editor.GetDouble(pdo);
-                if(pdr.Status == PromptStatus.OK)
+                return;
+            }
+            else
+            {
+                SetCurrentDbConfig(ltr);
+                Active.Database.ObjectAppended += Database_ObjectAppended;
+                Active.Editor.Command("_.PLINE");
+                Active.Database.ObjectAppended -= Database_ObjectAppended;
+                if (_collectObjs.Count > 0)
                 {
-                    var ppr = Active.Editor.GetPoint("\n请选择降板标注的基点");
-                    if(ppr.Status == PromptStatus.OK)
+                    SetStyle(DropSlabLayerName);
+                    var pdo = new PromptDoubleOptions("\n请输入降板相对标高(或跳过)");
+                    pdo.AllowNone = true;
+                    pdo.AllowArbitraryInput = true;
+                    pdo.AllowZero = true;
+                    var pdr = Active.Editor.GetDouble(pdo);
+                    if (pdr.Status == PromptStatus.OK)
                     {
-                        using (var acadDb = AcadDatabase.Active())
+                        var ppr = Active.Editor.GetPoint("\n请选择降板标注的基点");
+                        if (ppr.Status == PromptStatus.OK)
                         {
-                            var wcsPt = ppr.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                            var text = CreateMark(wcsPt, pdr.Value, DropSlabMarkLayerName, DropSlabMarkTextStyle);
-                            var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
-                            text.Rotation = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
-                            acadDb.ModelSpace.Add(text);
-                        }  
+                            using (var acadDb = AcadDatabase.Active())
+                            {
+                                var wcsPt = ppr.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                                var text = CreateMark(wcsPt, pdr.Value, DropSlabMarkLayerName, DropSlabMarkTextStyle);
+                                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                                text.Rotation = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+                                acadDb.ModelSpace.Add(text);
+                            }
+                        }
                     }
                 }
             }
-            SetCurrentLayer(oldLayer);
         }
 
         private void Database_ObjectAppended(object sender, ObjectEventArgs e)
@@ -106,31 +102,6 @@ namespace ThPlatform3D.Command
 
                 // 导入文字样式
                 acadDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(DropSlabMarkTextStyle), true);
-            }
-        }
-
-        private void OpenLayer()
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                acadDb.Database.OpenAILayer("0");
-                acadDb.Database.OpenAILayer(DropSlabLayerName);
-            }
-        }
-
-        private string GetCurrentLayer()
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                return acdb.Element<LayerTableRecord>(acdb.Database.Clayer).Name;
-            }
-        }
-
-        private void SetCurrentLayer(string layerName)
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                acdb.Database.SetCurrentLayer(layerName);
             }
         }
     }

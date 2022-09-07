@@ -85,11 +85,11 @@
                 <Border BorderThickness="0,0,0,1" Grid.RowSpan="99"
                     Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
                     Style="{StaticResource DesignBorder}"/>
-                <tControl:ImageButton Grid.Row="0" Grid.Column="0"
+                <tControl:ImageButton Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
                               NormalImage="../Resources/Images/suIcon.png" Content="视图更新"
                               Command="{Binding OnButtonClickCommand}"
                               CommandParameter="THDB2Push"></tControl:ImageButton>
-                <tControl:ImageButton Grid.Row="0" Grid.Column="1"
+                <tControl:ImageButton Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left"
                               NormalImage="../Resources/Images/suIcon.png" Content="视图管理"
                               Command="{Binding OnButtonClickCommand}"
                               CommandParameter="THDB2Push"></tControl:ImageButton>
@@ -111,14 +111,46 @@
                 </Grid.ColumnDefinitions>
                 <Border BorderThickness="0,0,0,1" Grid.Row="0" Grid.RowSpan="99" Grid.Column="0" Grid.ColumnSpan="2" 
                     Style="{StaticResource DesignBorder}"/>
-                <tControl:ImageButton Grid.Row="0" Grid.Column="0"
-                              NormalImage="../Resources/Images/suIcon.png" Content="视图更新"
+                <tControl:ImageButton Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
+                              NormalImage="../Resources/Images/suIcon.png" Content="定位点"
                               Command="{Binding OnButtonClickCommand}"
-                              CommandParameter="THDB2Push"></tControl:ImageButton>
-                <tControl:ImageButton Grid.Row="0" Grid.Column="1"
-                              NormalImage="../Resources/Images/suIcon.png" Content="视图管理"
+                              CommandParameter="THBPI"></tControl:ImageButton>
+                
+            </Grid>
+            
+            <Border BorderThickness="0,0,1,1" Grid.Row="2" Grid.Column="0" Style="{StaticResource DesignBorder}"/>
+            <Label Content="主体&#x0a;绘制" Grid.Row="2" Grid.Column="0"/>
+            <Grid Grid.Row="2" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"></RowDefinition>
+                    <RowDefinition Height="25"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.25*"></ColumnDefinition>
+                    <ColumnDefinition Width="0.35*"></ColumnDefinition>
+                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Border BorderThickness="0,0,0,1" Grid.Row="0" Grid.RowSpan="99" Grid.Column="0" Grid.ColumnSpan="2" 
+                    Style="{StaticResource DesignBorder}"/>
+                <tControl:ImageButton Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
+                              NormalImage="../Resources/Images/suIcon.png" Content="楼板"
                               Command="{Binding OnButtonClickCommand}"
-                              CommandParameter="THDB2Push"></tControl:ImageButton>
+                              CommandParameter="THLBHZ"></tControl:ImageButton>
+                <tControl:ImageButton Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"
+                              NormalImage="../Resources/Images/suIcon.png" Content="栏杆"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THLGHZ"></tControl:ImageButton>
+
+                <tControl:ImageButton Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left"
+                              NormalImage="../Resources/Images/suIcon.png" Content="降板"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THJBHZ"></tControl:ImageButton>
+                <tControl:ImageButton Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"
+                              NormalImage="../Resources/Images/suIcon.png" Content="墙上开洞"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THQDHZ"></tControl:ImageButton>
+                <TextBlock Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Text="注：墙门窗请&#x0a;使用天正绘制" 
+                           VerticalAlignment="Center" HorizontalAlignment="Left"/>
             </Grid>
 
             <!--视图行 end-->

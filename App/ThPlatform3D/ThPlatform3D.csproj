@@ -69,6 +69,7 @@
     <Compile Include="ArchitecturePlane\ThArchitectureGenerator.cs" />
     <Compile Include="ArchitecturePlane\ThArchitecturePlaneCommon.cs" />
     <Compile Include="Command\ThDropSlabDrawCmd.cs" />
+    <Compile Include="Command\ThDrawBaseCmd.cs" />
     <Compile Include="Command\ThSlabDrawCmd.cs" />
     <Compile Include="Command\ThWallHoleDrawCmd.cs" />
     <Compile Include="Command\ThRailDrawCmd.cs" />

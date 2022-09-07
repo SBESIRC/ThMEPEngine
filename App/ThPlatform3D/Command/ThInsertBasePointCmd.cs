@@ -1,37 +1,30 @@
 ﻿using AcHelper;
-using AcHelper.Commands;
-using System;
 using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
-using ThMEPEngineCore;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 
 namespace ThPlatform3D.Command
 {
     /// <summary>
     /// 定位点插入
     /// </summary>
-    public class ThInsertBasePointCmd : IAcadCommand, IDisposable
+    public class ThInsertBasePointCmd : ThDrawBaseCmd
     {
         private const string BasePointLayerName = "DEFPOINTS";
         private const string BasePointBlockName = "BASEPOINT";
         public ThInsertBasePointCmd()
         {
-            //
-        }
-        public void Dispose()
-        {
-            //
         }
 
-        public void Execute()
+        public override void Execute()
         {
             ImportTemplate();
 
-            OpenLayer();
+            OpenLayer(new List<string> { "0", BasePointLayerName });
 
             UserInteract();
         }
@@ -62,15 +55,6 @@ namespace ThPlatform3D.Command
                 var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
                 return acadDb.ModelSpace.ObjectId.InsertBlockReference(
                     BasePointLayerName, BasePointBlockName, pos, new Scale3d(), angle);
-            }
-        }
-
-        private void OpenLayer()
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                acadDb.Database.OpenAILayer("0");
-                acadDb.Database.OpenAILayer(BasePointLayerName);
             }
         }
 
