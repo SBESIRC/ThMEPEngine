@@ -11,7 +11,6 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         public Curve LeftCurve { get; set; }
         public Curve RightCurve { get; set; }
         public Curve CenterCurve { get; set; }
-        public double Elevation { get; set; }
         public double LeftWidth { get; set; }
         public double RightWidth { get; set; }
         public double Height { get; set; }
