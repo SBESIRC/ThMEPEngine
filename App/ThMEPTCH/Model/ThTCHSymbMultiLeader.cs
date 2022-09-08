@@ -52,5 +52,7 @@ namespace ThMEPTCH.Model
         public int IsParallel = 0;//引线平行
         [ProtoMember(15)]
         public int IsMask = 0;//背景屏蔽
+        [ProtoMember(16)]
+        public double LayoutRotation = 0;//背景屏蔽
     }
 }

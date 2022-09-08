@@ -123,7 +123,28 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         Dictionary<int, List<CreateBlockInfo>> GetPipeAreaInfo(List<CreateBlockInfo> thisFloorPipes)
         {
             var pipeArea = new Dictionary<int, List<CreateBlockInfo>>();
+            List<double> spliteX = GetSpliteXBySpliteFloor();
+            double floorStartX = _createFloor.floorBlock.Position.X;
+            double floorEndX = floorStartX + _createFloor.width;
+            List<double> floorSpaceX = new List<double>();
+            floorSpaceX.Add(floorStartX);
+            floorSpaceX.Add(floorEndX);
+            foreach (var x in spliteX)
+            {
+                if (x <= floorStartX || x >= floorEndX)
+                    continue;
+                floorSpaceX.Add(x);
+            }
+            floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
             //提取到属于该楼层框的户型分割线
+            double refY = _floorFramedBound.GetCentroidPoint().Y;
+            var eldSpaceX = new List<double>(floorSpaceX);
+            if (eldSpaceX.Count > 2)
+            {
+                eldSpaceX.RemoveAt(0);
+                eldSpaceX.RemoveAt(eldSpaceX.Count - 1);
+            }
+            eldSpaceX.ForEach(d => _roomTypeSplitLines.Add(FloorFramedSpliter.PolyFromLine(new Line(new Point3d(d, refY - 1, 0), new Point3d(d, refY + 1, 0)))));
             _roomTypeSplitLines = _roomTypeSplitLines.Where(e => _floorFramedBound.Contains(ThCADExtension.ThCurveExtension.GetMidpoint(e)) || _floorFramedBound.IntersectWithEx(e).Count > 0).ToList();
             if (_roomTypeSplitLines.Count >= 1)
             {
@@ -139,19 +160,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             else
             {
                 //支持老版
-                List<double> spliteX = GetSpliteXBySpliteFloor();
-                double floorStartX = _createFloor.floorBlock.Position.X;
-                double floorEndX = floorStartX + _createFloor.width;
-                List<double> floorSpaceX = new List<double>();
-                floorSpaceX.Add(floorStartX);
-                floorSpaceX.Add(floorEndX);
-                foreach (var x in spliteX)
-                {
-                    if (x <= floorStartX || x >= floorEndX)
-                        continue;
-                    floorSpaceX.Add(x);
-                }
-                floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
                 for (int i = 0; i < floorSpaceX.Count - 1; i++)
                 {
                     double minX = floorSpaceX[i];

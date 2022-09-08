@@ -124,8 +124,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 //ThDrainSysADUIService.Instance.layerNames = config;
                 //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
                 ThMEPWSS.Common.Utils.FocusToCAD();
-                //CommandHandlerBase.ExecuteFromCommandLine(false, "THTCHPIPIMP");
-                //ThMEPWSS.Common.Utils.FocusToCAD();
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THTCHPIPIMP");
+                ThMEPWSS.Common.Utils.FocusToCAD();
             }
             catch (Exception ex)
             {

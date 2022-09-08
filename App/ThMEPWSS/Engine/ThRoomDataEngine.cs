@@ -316,15 +316,19 @@ namespace ThMEPWSS.Engine
         }
         private bool IsKitchen(string roomName)
         {
-            //1)	包含“厨房” //2)	单字“厨” //3)	包含“西厨”
-            var roomNameContains = new List<string>{"厨房","西厨"};
+            //只要带“厨”字均认为是厨房；
             if (string.IsNullOrEmpty(roomName))
                 return false;
-            if (roomNameContains.Any(c => roomName.Contains(c)))
-                return true;
-            if (roomName.Equals("厨"))
-                return true;
-            return false;
+            return roomName.Contains("厨");
+            ////1)	包含“厨房” //2)	单字“厨” //3)	包含“西厨”
+            //var roomNameContains = new List<string>{"厨房","西厨"};
+            //if (string.IsNullOrEmpty(roomName))
+            //    return false;
+            //if (roomNameContains.Any(c => roomName.Contains(c)))
+            //    return true;
+            //if (roomName.Equals("厨"))
+            //    return true;
+            //return false;
         }
         private bool IsBalcony(string roomName)
         {

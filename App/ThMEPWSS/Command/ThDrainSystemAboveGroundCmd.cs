@@ -311,23 +311,23 @@ namespace ThMEPWSS.Command
                             createBlockInfos.Add(item);
                         }
                     }
-                    //var notCreateLineIds = new List<string>();
-                    //var notCreateTextIds = new List<string>();
-                    //ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
-                    //ConvertToTCHSymbMultiLeader(ref createBasicElems,ref createTextElems, ref symbMultiLeaders);
-                    //createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
-                    //createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                    var notCreateLineIds = new List<string>();
+                    var notCreateTextIds = new List<string>();
+                    ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
+                    ConvertToTCHSymbMultiLeader(ref createBasicElems, ref createTextElems, ref symbMultiLeaders);
+                    createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                    createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                     ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
                     var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                     var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
                     var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
                 }
-                //ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
-                //ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
-                //tchPipeService.InitPipe(verPipes);
-                //tchPipeService.DrawExecute(false);
-                //tchsymbMultiLeaderService.Init(symbMultiLeaders);
-                //tchsymbMultiLeaderService.DrawExecute(false,false);
+                ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
+                ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
+                tchPipeService.InitPipe(verPipes);
+                tchPipeService.DrawExecute(false);
+                tchsymbMultiLeaderService.Init(symbMultiLeaders);
+                tchsymbMultiLeaderService.DrawExecute(false, false);
             }
             catch (Exception ex)
             {
@@ -423,11 +423,12 @@ namespace ThMEPWSS.Command
             #region 通气管伸顶，TL等三个图块为一组时，只认TL；其他情况下，不认TL
             var tLBlocks = copyToRoofBlocks.Where(e => e.tag.ToUpper().Equals("TL")).ToList();
             var removedBks = new List<CreateBlockInfo>();
+            var blackNames = new string[] { "TL", "FCL", "FYL" };
             for (int i = 0; i < tLBlocks.Count; i++)
             {
                 var rec = tLBlocks[i].createPoint.CreateSquare(400);
                 var crossedbks = copyToRoofBlocks.Where(e => e.createPoint.CreateSquare(200).Intersects(rec))
-                    .Where(e => !e.tag.ToUpper().Equals("TL")).ToList();
+                    .Where(e => !blackNames.Contains(e.tag.ToUpper())).ToList();
                 if (crossedbks.Count == 2)
                     removedBks.AddRange(crossedbks);
                 else
@@ -470,7 +471,7 @@ namespace ThMEPWSS.Command
         void LivingFloorLabelLayout(double midY, List<RoomModel> thisFloorRooms) 
         {
             //标注处理
-            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY,_roomTypeSplitLines);
+            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY,_roomTypeSplitLines,floorFrameds);
             pipelineLabel.InitFloorData(livingHighestFloor, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList(), thisFloorRooms);
             pipelineLabel.AddObstacleEntitys(_allWalls.Cast<Entity>().ToList());
             pipelineLabel.AddObstacleEntitys(_allWalls.Cast<Entity>().ToList());
@@ -580,7 +581,7 @@ namespace ThMEPWSS.Command
         }
         void RoofFloorLavelLayout(FloorFramed roofFloor,double midY) 
         {
-            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY,_roomTypeSplitLines);
+            var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY,_roomTypeSplitLines,floorFrameds);
             var roofTexts = createTextElems.Where(c => c.floorUid.Equals(roofFloor.floorUid) && c.dbText != null).Select(c=>c.dbText).ToList();
             var roofLayouts = createBlockInfos.Where(c => c.floorId.Equals(roofFloor.floorUid) && !string.IsNullOrEmpty(c.tag) && c.tag.Contains("Y1") ).ToList();
             var thisFloorY1 = new List<CreateBlockInfo>();

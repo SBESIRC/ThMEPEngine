@@ -130,6 +130,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         }
         public static void ConvertTCHPipeToWCS(ref List<ThTCHVerticalPipe>pipes,Matrix3d matrix)
         {
+            var uxAxis = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis;
+            var angle = uxAxis.GetAngleTo(Vector3d.XAxis);
+            angle = angle / Math.PI * 180;
             for (int i = 0; i < pipes.Count; i++)
             {
                 var pipe = pipes[i];
@@ -137,16 +140,21 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 pipe.TurnPoint = pipe.TurnPoint.TransformBy(matrix);
                 pipe.PipeTopPoint = pipe.PipeTopPoint.TransformBy(matrix);
                 pipe.TextDirection = pipe.TextDirection.TransformBy(matrix);
+                pipe.LayoutRotation = angle;
                 pipes[i] = pipe;
             }
         }
         public static void ConvertSymbMultiLeadersToWCS(ref List<ThTCHSymbMultiLeader> leaders, Matrix3d matrix)
         {
+            var uxAxis = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis;
+            var angle = uxAxis.GetAngleTo(Vector3d.XAxis);
+            angle = angle / Math.PI * 180;
             for (int i = 0; i < leaders.Count; i++)
             {
                 var leader = leaders[i];
                 leader.BasePoint= leader.BasePoint.TransformBy(matrix);
                 leader.TextLineLocPoint = leader.TextLineLocPoint.TransformBy(matrix);
+                leader.LayoutRotation= angle;
                 leaders[i] = leader;
             }
         }

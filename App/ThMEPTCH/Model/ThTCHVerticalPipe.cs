@@ -46,5 +46,7 @@ namespace ThMEPTCH.Model
         public double Spacing;
         [ProtoMember(20)]
         public int FloorType;
+        [ProtoMember(21)]
+        public double LayoutRotation;
     }
 }

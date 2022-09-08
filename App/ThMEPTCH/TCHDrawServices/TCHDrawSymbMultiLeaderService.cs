@@ -68,6 +68,7 @@ namespace ThMEPTCH.TCHDrawServices
                 BaseLen = item.BaseLen,
                 IsParallel = item.IsParallel,
                 IsMask = item.IsMask,
+                LayoutRotation=item.LayoutRotation,
             };
             return thTCHSymbMultiLeader;
         }
