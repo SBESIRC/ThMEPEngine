@@ -169,14 +169,35 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
-        /// 天正开洞（门，窗等）
+        /// 天正窗
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="e"></param>
         /// <returns></returns>
-        public static bool IsTCHOpening(this Entity entity)
+        public static bool IsTCHWindow(this Entity e)
+        {
+            return e.IsTCHOpening() && Kind(e).Contains("窗");
+        }
+
+        /// <summary>
+        /// 天正门
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static bool IsTCHDoor(this Entity e)
+        {
+            return e.IsTCHOpening() && Kind(e).Contains("门");
+        }
+
+        private static bool IsTCHOpening(this Entity entity)
         {
             var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("OPENING");
+        }
+
+        private static string Kind(this Entity e)
+        {
+            dynamic obj = e.AcadObject;
+            return obj.GetKind as string;
         }
 
         /// <summary>

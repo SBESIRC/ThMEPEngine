@@ -29,34 +29,34 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
         }
 
         [DisplayName("建筑顶标高")]
-        public double A11_SlabTopElevation
+        public double A11_TopElevation
         {
-            get { return property.SlabTopElevation; }
+            get { return property.TopElevation; }
             set
             {
-                property.SlabTopElevation = value;
+                property.TopElevation = value;
                 this.RaisePropertyChanged();
             }
         }
 
         [DisplayName("结构板厚")]
-        public double A12_SlabThickness
+        public double A12_Thickness
         {
-            get { return property.SlabThickness; }
+            get { return property.Thickness; }
             set
             {
-                property.SlabThickness = value;
+                property.Thickness = value;
                 this.RaisePropertyChanged();
             }
         }
 
         [DisplayName("建筑面层厚度")]
-        public double A13_SlabBuildingSurfaceThickness
+        public double A13_SurfaceThickness
         {
-            get { return property.SlabBuildingSurfaceThickness; }
+            get { return property.SurfaceThickness; }
             set
             {
-                property.SlabBuildingSurfaceThickness = value;
+                property.SurfaceThickness = value;
                 this.RaisePropertyChanged();
             }
         }

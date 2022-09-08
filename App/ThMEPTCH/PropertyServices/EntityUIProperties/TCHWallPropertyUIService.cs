@@ -4,38 +4,36 @@ using System.Linq;
 using ThMEPTCH.PropertyServices.EntityProperties;
 using ThMEPTCH.PropertyServices.PropertyModels;
 using ThMEPTCH.PropertyServices.PropertyVMoldels;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPTCH.PropertyServices.EntityUIProperties
 {
-    [Property("栏杆", "")]
-    class RailingPropertiesUIService : PropertyUIServiceBase
+    [PropertyAttribute("天正墙体", "")]
+    class TCHWallPropertyUIService : PropertyUIServiceBase
     {
-        public RailingPropertiesUIService() 
+        public override string ShowTypeName => "天正墙体";
+        public TCHWallPropertyUIService()
         {
-            serviceBase = new RailingPropertiesService();
+            serviceBase = new TCHWallPropertyService();
         }
-        public override string ShowTypeName => "栏杆-900";
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckCurveLayerVaild(objectId, "TH-栏杆");
+            return CheckTCHEntityVaild(objectId, (e) => { return e.IsTCHWall(); });
         }
-
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
             //这里暂时还没有处理完，后面继续处理
             PropertyVMBase propertyVM = null;
-            var allRailingVMs = properties.OfType<RailingPropertyVM>().ToList();
-            if (allRailingVMs.Count < 1)
-            {
+            var allTCHWallVMs = properties.OfType<TCHWallPropertyVM>().ToList();
+            if (allTCHWallVMs.Count < 1)
                 return null;
-            }
-            propertyVM = allRailingVMs.First().Clone() as RailingPropertyVM;
+            propertyVM = allTCHWallVMs.First().Clone() as TCHWallPropertyVM;
             return propertyVM;
         }
         protected override PropertyVMBase PropertyToVM(PropertyBase property)
         {
-            var railingProp = property as RailingProperty;
-            var vmProp = new RailingPropertyVM(ShowTypeName, railingProp);
+            var tchWallProp = property as TCHWallProperty;
+            var vmProp = new TCHWallPropertyVM(ShowTypeName, tchWallProp);
             return vmProp;
         }
     }

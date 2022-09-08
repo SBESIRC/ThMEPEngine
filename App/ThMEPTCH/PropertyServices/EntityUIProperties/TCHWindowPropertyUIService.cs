@@ -4,37 +4,36 @@ using System.Linq;
 using ThMEPTCH.PropertyServices.EntityProperties;
 using ThMEPTCH.PropertyServices.PropertyModels;
 using ThMEPTCH.PropertyServices.PropertyVMoldels;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPTCH.PropertyServices.EntityUIProperties
 {
-    [Property("墙体洞口", "")]
-    class HolePropertiesUIService : PropertyUIServiceBase
+    [Property("天正普通窗", "")]
+    class TCHWindowPropertyUIService : PropertyUIServiceBase
     {
-        public HolePropertiesUIService() 
+        public override string ShowTypeName => "天正普通窗";
+        public TCHWindowPropertyUIService()
         {
-            serviceBase = new HolePropertiesService();
+            serviceBase = new TCHWindowPropertyService();
         }
-        public override string ShowTypeName => "墙体洞口";
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckCurveLayerVaild(objectId, "TH-墙洞");
+            return CheckTCHEntityVaild(objectId, (e) => { return e.IsTCHWindow(); });
         }
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
             //这里暂时还没有处理完，后面继续处理
             PropertyVMBase propertyVM = null;
-            var allHoleVMs = properties.OfType<HolePropertyVM>().ToList();
-            if (allHoleVMs.Count < 1)
-            {
+            var allTCHWallVMs = properties.OfType<TCHWindowPropertyVM>().ToList();
+            if (allTCHWallVMs.Count < 1)
                 return null;
-            }
-            propertyVM = allHoleVMs.First().Clone() as HolePropertyVM;
+            propertyVM = allTCHWallVMs.First().Clone() as TCHWindowPropertyVM;
             return propertyVM;
         }
         protected override PropertyVMBase PropertyToVM(PropertyBase property)
         {
-            var slabHoleProp = property as HoleProperty;
-            var vmProp = new HolePropertyVM(ShowTypeName, slabHoleProp);
+            var tchWindowProp = property as TCHWindowProperty;
+            var vmProp = new TCHWindowPropertyVM(ShowTypeName, tchWindowProp);
             return vmProp;
         }
     }

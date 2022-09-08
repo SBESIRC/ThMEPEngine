@@ -7,32 +7,34 @@ using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace ThMEPTCH.PropertyServices.EntityUIProperties
 {
-    [PropertyAttribute("楼板", "")]
-    class SlabPropertyUIService : PropertyUIServiceBase
+    [Property("降板", "")]
+    class DescendingPropertyUIService : PropertyUIServiceBase
     {
-        public override string ShowTypeName => "楼板";
-        public SlabPropertyUIService()
+        public DescendingPropertyUIService() 
         {
-            serviceBase = new SlabPropertyService();
+            serviceBase = new DescendingPropertyService();
         }
+        public override string ShowTypeName => "降板";
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckCurveLayerVaild(objectId, "楼板");
+            return CheckCurveLayerVaild(objectId, "TH-降板");
         }
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
             //这里暂时还没有处理完，后面继续处理
             PropertyVMBase propertyVM = null;
-            var allSlabVMs = properties.OfType<SlabPropertyVM>().ToList();
-            if (allSlabVMs.Count < 1)
+            var allDescendingVMs = properties.OfType<DescendingPropertyVM>().ToList();
+            if (allDescendingVMs.Count < 1)
+            {
                 return null;
-            propertyVM = allSlabVMs.First().Clone() as SlabPropertyVM;
+            }
+            propertyVM = allDescendingVMs.First().Clone() as DescendingPropertyVM;
             return propertyVM;
         }
         protected override PropertyVMBase PropertyToVM(PropertyBase property)
         {
-            var slabProp = property as SlabProperty;
-            var vmProp = new SlabPropertyVM(ShowTypeName, slabProp);
+            var descendingProp = property as DescendingProperty;
+            var vmProp = new DescendingPropertyVM(ShowTypeName, descendingProp);
             return vmProp;
         }
     }

@@ -1,40 +1,40 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
 using System.Linq;
-using ThMEPTCH.PropertyServices.PropertyEnums;
 using ThMEPTCH.PropertyServices.PropertyModels;
 
 namespace ThMEPTCH.PropertyServices.EntityProperties
 {
-    class SlabPropertyService : PropertyServiceBase
+    class TCHWindowPropertyService : PropertyServiceBase
     {
         protected override PropertyBase DefaultProperties(ObjectId objectId)
         {
-            var property = new SlabProperty(objectId)
+            var property = new TCHWindowProperty(objectId)
             {
-                Material = "材质",
-                EnumMaterial = EnumSlabMaterial.ReinforcedConcrete,
-                TopElevation = 0.0,
-                Thickness = 100.0,
-                SurfaceThickness = 50.0,
+                Statistics = false,
+                BottomElevation = 900,
+                Height = 1200,
+                NumberPrefix = "C",
+                NumberPostfix = "",
             };
             return property;
         }
         protected override TypedValueList PropertyToXDataValue(PropertyBase property)
         {
-            var slabProp = property as SlabProperty;
+            var tchWindowProp = property as TCHWindowProperty;
             TypedValueList valueList = new TypedValueList
             {
-                { (int)DxfCode.ExtendedDataAsciiString, ((int)slabProp.EnumMaterial).ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, slabProp.TopElevation.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, slabProp.Thickness.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, slabProp.SurfaceThickness.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, tchWindowProp.Statistics.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, tchWindowProp.BottomElevation.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, tchWindowProp.Height.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, tchWindowProp.NumberPrefix.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, tchWindowProp.NumberPostfix.ToString()},
             };
             return valueList;
         }
         protected override PropertyBase XDataProperties(ObjectId objectId, TypedValueList typedValues)
         {
-            var property = new SlabProperty(objectId);
+            var property = new TCHWindowProperty(objectId);
             //读取XData（第0个是AppName，不需要读取）,这边读数据的顺序要和写入数据的顺序一致
             for (int i = 1; i < typedValues.Count; i++)
             {
@@ -42,18 +42,19 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                 switch (i)
                 {
                     case 1:
-                        var enumInt = int.Parse(strData);
-                        property.Material = strData;
-                        property.EnumMaterial = (EnumSlabMaterial)enumInt;
+                        property.Statistics = strData.Equals("1");
                         break;
                     case 2:
-                        property.TopElevation = double.Parse(strData);
+                        property.BottomElevation = double.Parse(strData);
                         break;
                     case 3:
-                        property.Thickness = double.Parse(strData);
+                        property.Height = double.Parse(strData);
                         break;
                     case 4:
-                        property.SurfaceThickness = double.Parse(strData);
+                        property.NumberPrefix = strData;
+                        break;
+                    case 5:
+                        property.NumberPostfix = strData;
                         break;
                 }
             }

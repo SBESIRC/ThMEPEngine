@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using ThMEPTCH.PropertyServices.PropertyModels;
 using ThMEPTCH.PropertyServices.PropertyVMoldels;
@@ -64,6 +65,23 @@ namespace ThMEPTCH.PropertyServices
                     {
                         isVaild = true;
                     }
+                }
+            }
+            return isVaild;
+        }
+        protected bool CheckTCHEntityVaild(ObjectId objectId, Func<Entity, bool> f)
+        {
+            var isVaild = false;
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var entity = acadDb.ModelSpace.Element(objectId);
+                if (null == entity || entity.IsErased)
+                {
+                    return isVaild;
+                }
+                if (f(entity))
+                {
+                    isVaild = true;
                 }
             }
             return isVaild;

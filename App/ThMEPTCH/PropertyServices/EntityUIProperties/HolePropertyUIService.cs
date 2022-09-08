@@ -7,32 +7,34 @@ using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace ThMEPTCH.PropertyServices.EntityUIProperties
 {
-    [PropertyAttribute("楼板", "")]
-    class SlabPropertyUIService : PropertyUIServiceBase
+    [Property("墙体洞口", "")]
+    class HolePropertyUIService : PropertyUIServiceBase
     {
-        public override string ShowTypeName => "楼板";
-        public SlabPropertyUIService()
+        public HolePropertyUIService() 
         {
-            serviceBase = new SlabPropertyService();
+            serviceBase = new HolePropertyService();
         }
+        public override string ShowTypeName => "墙体洞口";
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckCurveLayerVaild(objectId, "楼板");
+            return CheckCurveLayerVaild(objectId, "TH-墙洞");
         }
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
             //这里暂时还没有处理完，后面继续处理
             PropertyVMBase propertyVM = null;
-            var allSlabVMs = properties.OfType<SlabPropertyVM>().ToList();
-            if (allSlabVMs.Count < 1)
+            var allHoleVMs = properties.OfType<HolePropertyVM>().ToList();
+            if (allHoleVMs.Count < 1)
+            {
                 return null;
-            propertyVM = allSlabVMs.First().Clone() as SlabPropertyVM;
+            }
+            propertyVM = allHoleVMs.First().Clone() as HolePropertyVM;
             return propertyVM;
         }
         protected override PropertyVMBase PropertyToVM(PropertyBase property)
         {
-            var slabProp = property as SlabProperty;
-            var vmProp = new SlabPropertyVM(ShowTypeName, slabProp);
+            var slabHoleProp = property as HoleProperty;
+            var vmProp = new HolePropertyVM(ShowTypeName, slabHoleProp);
             return vmProp;
         }
     }

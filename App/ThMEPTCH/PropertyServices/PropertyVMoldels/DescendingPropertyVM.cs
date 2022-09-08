@@ -14,34 +14,34 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
         }
 
         [DisplayName("结构降板厚度")]
-        public double A10_DescendingThickness
+        public double A10_Thickness
         {
-            get { return property.DescendingThickness; }
+            get { return property.Thickness; }
             set
             {
-                property.DescendingThickness = value;
+                property.Thickness = value;
                 this.RaisePropertyChanged();
             }
         }
 
         [DisplayName("结构包围厚度")]
-        public double A11_DescendingWrapThickness
+        public double A11_WrapThickness
         {
-            get { return property.DescendingWrapThickness; }
+            get { return property.WrapThickness; }
             set
             {
-                property.DescendingWrapThickness = value;
+                property.WrapThickness = value;
                 this.RaisePropertyChanged();
             }
         }
 
         [DisplayName("建筑面层厚度")]
-        public double A12_DescendingSurfaceThickness
+        public double A12_SurfaceThickness
         {
-            get { return property.DescendingSurfaceThickness; }
+            get { return property.SurfaceThickness; }
             set
             {
-                property.DescendingSurfaceThickness = value;
+                property.SurfaceThickness = value;
                 this.RaisePropertyChanged();
             }
         }

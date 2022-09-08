@@ -1,26 +1,17 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.PropertyServices.PropertyModels
 {
-    class HoleProperty : PropertyBase
+    class TCHDoorProperty : PropertyBase
     {
         /// <summary>
-        /// 是否忽略尺寸标注
+        /// 是否门窗统计
         /// </summary>
-        public bool ShowDimension { get; set; }
+        public bool Statistics { get; set; }
 
         /// <summary>
-        /// 是否遮挡元素
-        /// </summary>
-        public bool Hidden { get; set; }
-
-        /// <summary>
-        /// 底高
-        /// </summary>
-        public double BottomElevation { get; set; }
-
-        /// <summary>
-        /// 洞高
+        /// 门高
         /// </summary>
         public double Height { get; set; }
 
@@ -35,26 +26,24 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         public string NumberPostfix { get; set; }
 
         /// <summary>
-        /// 立面显示
+        /// 安全出口
         /// </summary>
-        public bool ElevationDisplay { get; set; }
+        public bool Entrance { get; set; }
 
-        public HoleProperty(ObjectId objectId) : base(objectId)
+        public TCHDoorProperty(ObjectId objectId) : base(objectId)
         {
 
         }
 
         public override object Clone()
         {
-            var clone = new HoleProperty(this.ObjId)
+            var clone = new TCHDoorProperty(this.ObjId)
             {
-                ShowDimension = this.ShowDimension,
-                Hidden = this.Hidden,
-                BottomElevation = this.BottomElevation,
+                Statistics = this.Statistics,
                 Height = this.Height,
                 NumberPrefix = this.NumberPrefix,
                 NumberPostfix = this.NumberPostfix,
-                ElevationDisplay = this.ElevationDisplay,
+                Entrance = this.Entrance,
             };
             return clone;
         }

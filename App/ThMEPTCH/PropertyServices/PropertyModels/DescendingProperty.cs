@@ -7,17 +7,17 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         /// <summary>
         /// 结构降板厚度
         /// </summary>
-        public double DescendingThickness { get; set; }
+        public double Thickness { get; set; }
 
         /// <summary>
         /// 结构包围厚度
         /// </summary>
-        public double DescendingWrapThickness { get; set; }
+        public double WrapThickness { get; set; }
 
         /// <summary>
         /// 建筑面层厚度
         /// </summary>
-        public double DescendingSurfaceThickness { get; set; }
+        public double SurfaceThickness { get; set; }
 
         public DescendingProperty(ObjectId objectId) : base(objectId)
         {
@@ -28,9 +28,9 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         {
             var clone = new DescendingProperty(this.ObjId)
             {
-                DescendingThickness = this.DescendingThickness,
-                DescendingWrapThickness = this.DescendingWrapThickness,
-                DescendingSurfaceThickness = this.DescendingSurfaceThickness,
+                Thickness = this.Thickness,
+                WrapThickness = this.WrapThickness,
+                SurfaceThickness = this.SurfaceThickness,
             };
             return clone;
         }

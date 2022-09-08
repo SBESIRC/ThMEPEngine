@@ -5,15 +5,15 @@ using ThMEPTCH.PropertyServices.PropertyModels;
 
 namespace ThMEPTCH.PropertyServices.EntityProperties
 {
-    class RailingPropertiesService : PropertyServiceBase
+    class RailingPropertyService : PropertyServiceBase
     {
         protected override PropertyBase DefaultProperties(ObjectId objectId)
         {
             var property = new RailingProperty(objectId)
             {
-                RailingBottomHeight = 0.0,
-                RailingHeight = 900.0,
-                RailingThickness = 40.0,
+                BottomElevation = 0.0,
+                Height = 900.0,
+                Thickness = 40.0,
             };
             return property;
         }
@@ -22,9 +22,9 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
             var railingProp = property as RailingProperty;
             TypedValueList valueList = new TypedValueList
             {
-                { (int)DxfCode.ExtendedDataAsciiString, railingProp.RailingBottomHeight.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, railingProp.RailingHeight.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, railingProp.RailingThickness.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, railingProp.BottomElevation.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, railingProp.Height.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, railingProp.Thickness.ToString()},
             };
             return valueList;
         }
@@ -38,13 +38,13 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                 switch (i)
                 {
                     case 1:
-                        property.RailingBottomHeight = double.Parse(strData);
+                        property.BottomElevation = double.Parse(strData);
                         break;
                     case 2:
-                        property.RailingHeight = double.Parse(strData);
+                        property.Height = double.Parse(strData);
                         break;
                     case 3:
-                        property.RailingThickness = double.Parse(strData);
+                        property.Thickness = double.Parse(strData);
                         break;
                 }
             }

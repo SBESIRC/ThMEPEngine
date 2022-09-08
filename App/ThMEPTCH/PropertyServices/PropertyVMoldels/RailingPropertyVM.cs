@@ -14,34 +14,34 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
         }
 
         [DisplayName("底高")]
-        public double A10_RailingBottomHeight
+        public double A10_BottomHeight
         {
-            get { return property.RailingBottomHeight; }
+            get { return property.BottomElevation; }
             set
             {
-                property.RailingBottomHeight = value;
+                property.BottomElevation = value;
                 this.RaisePropertyChanged();
             }
         }
 
         [DisplayName("栏杆高")]
-        public double A11_RailingHeight
+        public double A11_Height
         {
-            get { return property.RailingHeight; }
+            get { return property.Height; }
             set
             {
-                property.RailingHeight = value;
+                property.Height = value;
                 this.RaisePropertyChanged();
             }
         }
 
         [DisplayName("厚度")]
-        public double A12_RailingThickness
+        public double A12_Thickness
         {
-            get { return property.RailingThickness; }
+            get { return property.Thickness; }
             set
             {
-                property.RailingThickness = value;
+                property.Thickness = value;
                 this.RaisePropertyChanged();
             }
         }

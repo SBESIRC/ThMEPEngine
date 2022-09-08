@@ -7,34 +7,35 @@ using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace ThMEPTCH.PropertyServices.EntityUIProperties
 {
-    [Property("降板", "")]
-    class DescendingPropertiesUIService : PropertyUIServiceBase
+    [Property("栏杆", "")]
+    class RailingPropertyUIService : PropertyUIServiceBase
     {
-        public DescendingPropertiesUIService() 
+        public RailingPropertyUIService() 
         {
-            serviceBase = new DescendingPropertiesService();
+            serviceBase = new RailingPropertyService();
         }
-        public override string ShowTypeName => "降板";
+        public override string ShowTypeName => "栏杆";
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckCurveLayerVaild(objectId, "TH-降板");
+            return CheckCurveLayerVaild(objectId, "TH-栏杆");
         }
+
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
             //这里暂时还没有处理完，后面继续处理
             PropertyVMBase propertyVM = null;
-            var allDescendingVMs = properties.OfType<DescendingPropertyVM>().ToList();
-            if (allDescendingVMs.Count < 1)
+            var allRailingVMs = properties.OfType<RailingPropertyVM>().ToList();
+            if (allRailingVMs.Count < 1)
             {
                 return null;
             }
-            propertyVM = allDescendingVMs.First().Clone() as DescendingPropertyVM;
+            propertyVM = allRailingVMs.First().Clone() as RailingPropertyVM;
             return propertyVM;
         }
         protected override PropertyVMBase PropertyToVM(PropertyBase property)
         {
-            var descendingProp = property as DescendingProperty;
-            var vmProp = new DescendingPropertyVM(ShowTypeName, descendingProp);
+            var railingProp = property as RailingProperty;
+            var vmProp = new RailingPropertyVM(ShowTypeName, railingProp);
             return vmProp;
         }
     }

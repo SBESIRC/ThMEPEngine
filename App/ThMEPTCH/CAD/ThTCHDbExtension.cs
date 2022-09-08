@@ -196,6 +196,8 @@ namespace ThMEPTCH.CAD
                     IsArc = IsArc(),
                 };
 
+                // 从XData获取墙高和底高
+
                 return wall;
             }
         }

@@ -2,17 +2,12 @@
 
 namespace ThMEPTCH.PropertyServices.PropertyModels
 {
-    class HoleProperty : PropertyBase
+    class TCHWindowProperty : PropertyBase
     {
         /// <summary>
-        /// 是否忽略尺寸标注
+        /// 是否门窗统计
         /// </summary>
-        public bool ShowDimension { get; set; }
-
-        /// <summary>
-        /// 是否遮挡元素
-        /// </summary>
-        public bool Hidden { get; set; }
+        public bool Statistics { get; set; }
 
         /// <summary>
         /// 底高
@@ -20,7 +15,7 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         public double BottomElevation { get; set; }
 
         /// <summary>
-        /// 洞高
+        /// 窗高
         /// </summary>
         public double Height { get; set; }
 
@@ -34,27 +29,20 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         /// </summary>
         public string NumberPostfix { get; set; }
 
-        /// <summary>
-        /// 立面显示
-        /// </summary>
-        public bool ElevationDisplay { get; set; }
-
-        public HoleProperty(ObjectId objectId) : base(objectId)
+        public TCHWindowProperty(ObjectId objectId) : base(objectId)
         {
 
         }
 
         public override object Clone()
         {
-            var clone = new HoleProperty(this.ObjId)
+            var clone = new TCHWindowProperty(this.ObjId)
             {
-                ShowDimension = this.ShowDimension,
-                Hidden = this.Hidden,
+                Statistics = this.Statistics,
                 BottomElevation = this.BottomElevation,
                 Height = this.Height,
                 NumberPrefix = this.NumberPrefix,
                 NumberPostfix = this.NumberPostfix,
-                ElevationDisplay = this.ElevationDisplay,
             };
             return clone;
         }

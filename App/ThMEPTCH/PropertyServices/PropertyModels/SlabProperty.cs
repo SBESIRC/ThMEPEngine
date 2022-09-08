@@ -15,17 +15,17 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         /// <summary>
         /// 建筑顶标高
         /// </summary>
-        public double SlabTopElevation { get; set; }
+        public double TopElevation { get; set; }
 
         /// <summary>
         /// 结构板厚
         /// </summary>
-        public double SlabThickness { get; set; }
+        public double Thickness { get; set; }
 
         /// <summary>
         /// 建筑面层厚度
         /// </summary>
-        public double SlabBuildingSurfaceThickness { get; set; }
+        public double SurfaceThickness { get; set; }
 
         public SlabProperty(ObjectId objectId) : base(objectId)
         {
@@ -38,9 +38,9 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
             {
                 Material = this.Material,
                 EnumMaterial = this.EnumMaterial,
-                SlabTopElevation = this.SlabTopElevation,
-                SlabThickness = this.SlabThickness,
-                SlabBuildingSurfaceThickness = this.SlabBuildingSurfaceThickness,
+                TopElevation = this.TopElevation,
+                Thickness = this.Thickness,
+                SurfaceThickness = this.SurfaceThickness,
             };
             return clone;
         }
