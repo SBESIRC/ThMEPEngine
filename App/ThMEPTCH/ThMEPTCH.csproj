@@ -138,7 +138,6 @@
     <Compile Include="PropertyServices\PropertyVMoldels\TCHDoorPropertyVM.cs" />
     <Compile Include="PropertyServices\PropertyVMoldels\TCHWallPropertyVM.cs" />
     <Compile Include="PropertyServices\PropertyVMoldels\TCHWindowPropertyVM.cs" />
-    <Compile Include="Services\THDBFFLBuilder.cs" />
     <Compile Include="CAD\THDBFFLExtractionVisitor.cs" />
     <Compile Include="CAD\THDBFFLMarkExtractionVisitor.cs" />
     <Compile Include="CAD\THDBRailingExtractionVisitor.cs" />
@@ -160,7 +159,6 @@
     <Compile Include="CAD\ThTCHDoorExtractionVisitor.cs" />
     <Compile Include="CAD\ThTCHPolylineExtension.cs" />
     <Compile Include="CAD\ThTCHWindowExtractionVisitor.cs" />
-    <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Model\SurrogateModel\Matrix3DSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Point3DCollectionSurrogate.cs" />
@@ -202,9 +200,6 @@
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThEditStoreyInfo.cs" />
     <Compile Include="Services\ThIfcStoreyParseTool.cs" />
-    <Compile Include="Services\ThMEPTCHTool.cs" />
-    <Compile Include="Services\ThTCHArchDBService.cs" />
-    <Compile Include="Services\ThTGLXMLService.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchDBData.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchSQL.cs" />
@@ -252,41 +247,10 @@
     <Compile Include="TCHTables\TCHTwtVector.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipe.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipeDim.cs" />
-    <Compile Include="TCHXmlDataConvert\ITCHXmlConvert.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHConvertAttribute.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHConvertBase.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlOpeningToThIfcDoorWindow.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlSLabToThIfcFloor.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlWallToThIfcWall.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHXmlDataConvertService.cs" />
-    <Compile Include="TCHXmlDataConvert\XmConvertCommon.cs" />
-    <Compile Include="TCHXmlModels\Content.cs" />
-    <Compile Include="TCHXmlModels\Entity_Collection.cs" />
-    <Compile Include="TCHXmlModels\Tangent_obj_data.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlAngle.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlDouble.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlInt.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlPoint.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlString.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlMatrix3d.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCHFloor.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_SLab.cs" />
-    <Compile Include="TCHXmlModels\TCHOpeningAttributes\Lib_Block.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Baseline.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\DrawPara.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Height.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Link_WinDoor.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\TCHXmlBaseModel.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCHXmlEntity.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_OPENING.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_WALL.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Width.cs" />
     <Compile Include="ThMEPTCHApp.cs" />
     <Compile Include="ThMEPTCHCommon.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TCHXmlModels\TCHAttributes\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
