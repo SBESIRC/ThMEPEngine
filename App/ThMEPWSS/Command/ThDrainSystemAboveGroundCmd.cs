@@ -311,27 +311,26 @@ namespace ThMEPWSS.Command
                             createBlockInfos.Add(item);
                         }
                     }
-                    var notCreateLineIds = new List<string>();
-                    var notCreateTextIds = new List<string>();
-                    ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
-                    ConvertToTCHSymbMultiLeader(ref createBasicElems, ref createTextElems, ref symbMultiLeaders);
-                    createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
-                    createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                    //var notCreateLineIds = new List<string>();
+                    //var notCreateTextIds = new List<string>();
+                    //ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
+                    //ConvertToTCHSymbMultiLeader(ref createBasicElems, ref createTextElems, ref symbMultiLeaders);
+                    //createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                    //createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                     ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
                     var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                     var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
                     var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
                 }
-                ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
-                ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
-                tchPipeService.InitPipe(verPipes);
-                tchPipeService.DrawExecute(false);
-                tchsymbMultiLeaderService.Init(symbMultiLeaders);
-                tchsymbMultiLeaderService.DrawExecute(false, false);
+                //ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
+                //ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
+                //tchPipeService.InitPipe(verPipes);
+                //tchPipeService.DrawExecute(false);
+                //tchsymbMultiLeaderService.Init(symbMultiLeaders);
+                //tchsymbMultiLeaderService.DrawExecute(false, false);
             }
             catch (Exception ex)
             {
-                ;
             }
         }
         void InitData(Database database)
