@@ -124,8 +124,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 return bound;
             BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
             var buffer = union.Buffer(-buffer_tol, MitreParam);
-            if(buffer is Polygon pl)
+            if (buffer is Polygon pl)
                 return pl;
+            else if (buffer is MultiPolygon pls)
+                return pls.Geometries.Cast<Polygon>().OrderByDescending(e => e.Area).First();
             return bound;
         }
     }
