@@ -7,7 +7,6 @@ namespace ThMEPTCH.PropertyServices
 {
     public interface ITHProperty
     {
-        string XDataAppName { get; }
         string ShowTypeName { get; }
         bool CheckVaild(ObjectId objectId);
         bool GetProperty(ObjectId objectId, out PropertyBase property, bool checkId);

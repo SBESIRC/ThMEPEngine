@@ -97,6 +97,10 @@
     <Compile Include="PropertyServices\EntityProperties\HolePropertiesService.cs" />
     <Compile Include="PropertyServices\EntityProperties\RailingPropertiesService.cs" />
     <Compile Include="PropertyServices\EntityProperties\SlabPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\DescendingPropertiesUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\HolePropertiesUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\RailingPropertiesUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\SlabPropertyUIService.cs" />
     <Compile Include="PropertyServices\EnumPropertyEditor.cs" />
     <Compile Include="PropertyServices\ITHProperty.cs" />
     <Compile Include="PropertyServices\PropertyAttribute.cs" />
@@ -108,6 +112,7 @@
     <Compile Include="PropertyServices\PropertyModels\SlabProperty.cs" />
     <Compile Include="PropertyServices\PropertyService.cs" />
     <Compile Include="PropertyServices\PropertyServiceBase.cs" />
+    <Compile Include="PropertyServices\PropertyUIServiceBase.cs" />
     <Compile Include="PropertyServices\PropertyVMoldels\DescendingPropertyVM.cs" />
     <Compile Include="PropertyServices\PropertyVMoldels\NoPropertyVM.cs" />
     <Compile Include="PropertyServices\PropertyVMoldels\PropertyVMBase.cs" />

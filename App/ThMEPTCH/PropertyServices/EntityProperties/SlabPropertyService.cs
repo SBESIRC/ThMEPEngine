@@ -1,37 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
-using Linq2Acad;
-using System.Collections.Generic;
 using System.Linq;
 using ThMEPTCH.PropertyServices.PropertyEnums;
 using ThMEPTCH.PropertyServices.PropertyModels;
-using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace ThMEPTCH.PropertyServices.EntityProperties
 {
-    [Property("楼板", "")]
     class SlabPropertyService : PropertyServiceBase
     {
-        public override string ShowTypeName => "楼板";
-
-        public override string XDataAppName => "THProperty";
-
-        public override bool CheckVaild(ObjectId objectId)
-        {
-            return CheckVaild(objectId, "TH-楼板");
-        }
-
-        public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
-        {
-            //这里暂时还没有处理完，后面继续处理
-            PropertyVMBase propertyVM = null;
-            var allSlabVMs = properties.OfType<SlabPropertyVM>().ToList();
-            if (allSlabVMs.Count < 1)
-                return null;
-            propertyVM = allSlabVMs.First().Clone() as SlabPropertyVM;
-            return propertyVM;
-        }
-
         protected override PropertyBase DefaultProperties(ObjectId objectId)
         {
             var property = new SlabProperty(objectId)
@@ -44,14 +20,6 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
             };
             return property;
         }
-
-        protected override PropertyVMBase PropertyToVM(PropertyBase property)
-        {
-            var slabProp = property as SlabProperty;
-            var vmProp = new SlabPropertyVM(ShowTypeName, slabProp);
-            return vmProp;
-        }
-
         protected override TypedValueList PropertyToXDataValue(PropertyBase property)
         {
             var slabProp = property as SlabProperty;
@@ -64,7 +32,6 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
             };
             return valueList;
         }
-
         protected override PropertyBase XDataProperties(ObjectId objectId, TypedValueList typedValues)
         {
             var property = new SlabProperty(objectId);
