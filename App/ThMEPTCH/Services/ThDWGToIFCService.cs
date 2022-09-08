@@ -639,11 +639,11 @@ namespace ThMEPTCH.Services
                 {
                     new THDBFFLExtractionVisitor()
                     {
-                        LayerFilter = new List<string> { "楼板", "降板" },
+                        LayerFilter = new List<string> { "TH-楼板", "TH-降板" },
                     },
                     new THDBRailingExtractionVisitor()
                     {
-                        LayerFilter = new List<string> { "栏杆" },
+                        LayerFilter = new List<string> { "TH-栏杆" },
                     },
                 };
                 var extractor = new ThBuildingElementExtractor();
@@ -655,7 +655,7 @@ namespace ThMEPTCH.Services
                 {
                     new THDBFFLMarkExtractionVisitor()
                     {
-                        LayerFilter = new List<string> { "降板" },
+                        LayerFilter = new List<string> { "TH-降板" },
                     }
                 };
                 var annoExtractor = new ThAnnotationElementExtractor();

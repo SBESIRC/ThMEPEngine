@@ -17,7 +17,7 @@ namespace ThMEPTCH.PropertyServices.EntityUIProperties
         }
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckCurveLayerVaild(objectId,"楼板");
+            return CheckCurveLayerVaild(objectId,"TH-楼板");
         }
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
