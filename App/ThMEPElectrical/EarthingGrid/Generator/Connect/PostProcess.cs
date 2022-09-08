@@ -84,7 +84,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                     isClose = true;
                     outline.Closed = true;
                 }
-                
+                if (outline.Area < 10)
+                {
+                    continue;
+                }
                 var shell = outline.Buffer(bufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
                 var holes = outline.Buffer(-bufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());
