@@ -62,12 +62,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                         {
                             return;
                         }
-
-                        foreach(var floor in storeysRecEngine.Elements)
+                        var readStoreyTypeStrings = new string[] { "标准层" , "非标层" ,"楼层"};
+                        foreach (var floor in storeysRecEngine.Elements)
                         {
                             if(floor is ThStoreys f)
                             {
-                                if(f.StoreyTypeString == "标准层" || f.StoreyTypeString == "非标层")
+                                if(readStoreyTypeStrings.Contains(f.StoreyTypeString))
                                 {
                                     var model = new ThFloorModel();
                                     model.FloorName = f.StoreyNumber;
