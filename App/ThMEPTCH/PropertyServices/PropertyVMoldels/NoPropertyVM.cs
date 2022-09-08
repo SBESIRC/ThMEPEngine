@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tianhua.Platform3D.UI.PropertyServices.PropertyVMoldels
+﻿namespace ThMEPTCH.PropertyServices.PropertyVMoldels
 {
     class NoPropertyVM : PropertyVMBase
     {

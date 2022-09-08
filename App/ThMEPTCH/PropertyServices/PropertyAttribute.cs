@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Tianhua.Platform3D.UI.PropertyServices
+namespace ThMEPTCH.PropertyServices
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class PropertyAttribute : Attribute

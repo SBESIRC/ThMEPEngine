@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
-using ThCADExtension;
+using ThControlLibraryWPF.ControlUtils;
 
-namespace Tianhua.Platform3D.UI.PropertyServices
+namespace ThControlLibraryWPF
 {
     public class EnumDescriptionConverter<T> : IValueConverter where T : Enum
     {
         object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Enum myEnum = (Enum)value;
-            return myEnum.GetEnumDescription();
+            return CommonUtil.GetEnumDescription(myEnum);
         }
 
         object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string item = (string)value;
-            return item.GetEnumName<T>();
+            return CommonUtil.GetEnumItemByDescription<T>(item);
         }
     }
 }

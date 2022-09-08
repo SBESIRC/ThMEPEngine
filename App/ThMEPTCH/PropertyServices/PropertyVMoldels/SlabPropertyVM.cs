@@ -1,9 +1,9 @@
 ﻿using HandyControl.Controls;
 using System.ComponentModel;
-using Tianhua.Platform3D.UI.Enums;
-using Tianhua.Platform3D.UI.PropertyServices.PropertyModels;
+using ThMEPTCH.PropertyServices.PropertyEnums;
+using ThMEPTCH.PropertyServices.PropertyModels;
 
-namespace Tianhua.Platform3D.UI.PropertyServices.PropertyVMoldels
+namespace ThMEPTCH.PropertyServices.PropertyVMoldels
 {
     [TypeConverter(typeof(ExpandableObjectConverter))]
     class SlabPropertyVM : PropertyVMBase

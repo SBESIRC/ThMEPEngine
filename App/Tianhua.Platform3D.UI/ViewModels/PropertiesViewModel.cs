@@ -1,12 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using HandyControl.Controls;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using ThControlLibraryWPF.ControlUtils;
-using Tianhua.Platform3D.UI.PropertyServices;
-using Tianhua.Platform3D.UI.PropertyServices.PropertyVMoldels;
+using ThMEPTCH.PropertyServices;
+using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace Tianhua.Platform3D.UI.ViewModels
 {
@@ -47,7 +46,7 @@ namespace Tianhua.Platform3D.UI.ViewModels
                 var entityOldProperty = EntityProperties.Find(c => c.EntityId == id).Properties;
                 var oldType = entityOldProperty.GetType();
                 oldType.GetProperty(fieldName).SetValue(entityOldProperty, value);
-                propertyService.LastSvrCache.SetProperty(id, entityOldProperty.Property);
+                propertyService.LastSvrCache.SetProperty(id, entityOldProperty.Property,false);
             }
         }
 
@@ -139,8 +138,7 @@ namespace Tianhua.Platform3D.UI.ViewModels
             PropertyVMBase propertyVM = null;
             if (EntityProperties.Count < 1)
             {
-                propertyVM = new NoPropertyVM("未选择");
-                propertyVM.A01_ShowTypeName = "=未选择=";
+                propertyVM = propertyService.GetNoSelectVMProperty();
             }
             else 
             {
@@ -149,8 +147,7 @@ namespace Tianhua.Platform3D.UI.ViewModels
                 IsMultipleType = types.Count > 1;
                 if (IsMultipleType)
                 {
-                    propertyVM = new NoPropertyVM("多类别");
-                    propertyVM.A01_ShowTypeName = "多类别(*)";
+                    propertyVM = propertyService.GetMultiSelectVMProperty();
                 }
                 else 
                 {

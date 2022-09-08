@@ -6,8 +6,9 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using ThCADExtension;
+using ThControlLibraryWPF;
 
-namespace Tianhua.Platform3D.UI.PropertyServices
+namespace ThMEPTCH.PropertyServices
 {
     public class EnumPropertyEditor<T> : PropertyEditorBase where T : Enum
     {

@@ -33,21 +33,9 @@
     <Compile Include="Command\ThArchitecturePlaneCmd.cs" />
     <Compile Include="Command\ThStructurePlaneCmd.cs" />
     <Compile Include="Converter\EnumBooleanConverter.cs" />
-    <Compile Include="Enums\EnumSlabMaterial.cs" />
     <Compile Include="EventMonitor\ObjectSelectEvent.cs" />
     <Compile Include="Platform3DUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyServices\EntityProperties\SlabPropertyService.cs" />
-    <Compile Include="PropertyServices\EnumDescriptionConverter.cs" />
-    <Compile Include="PropertyServices\EnumPropertyEditor.cs" />
-    <Compile Include="PropertyServices\ITHProperty.cs" />
-    <Compile Include="PropertyServices\PropertyAttribute.cs" />
-    <Compile Include="PropertyServices\PropertyModels\PropertyBase.cs" />
-    <Compile Include="PropertyServices\PropertyModels\SlabProperty.cs" />
-    <Compile Include="PropertyServices\PropertyService.cs" />
-    <Compile Include="PropertyServices\PropertyVMoldels\NoPropertyVM.cs" />
-    <Compile Include="PropertyServices\PropertyVMoldels\PropertyVMBase.cs" />
-    <Compile Include="PropertyServices\PropertyVMoldels\SlabPropertyVM.cs" />
     <Compile Include="StructurePlane\DrawingParameterSetModel.cs" />
     <Compile Include="StructurePlane\DrawingParameterSetUI.xaml.cs">
       <DependentUpon>DrawingParameterSetUI.xaml</DependentUpon>

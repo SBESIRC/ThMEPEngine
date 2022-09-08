@@ -2,11 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tianhua.Platform3D.UI.PropertyServices.PropertyVMoldels;
+using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
-namespace Tianhua.Platform3D.UI.PropertyServices
+namespace ThMEPTCH.PropertyServices
 {
-    class PropertyService
+    public class PropertyService
     {
         private string assemblyPath = "";
         private List<PropertySvrCache> propertySvrCaches { get; }
@@ -46,14 +46,24 @@ namespace Tianhua.Platform3D.UI.PropertyServices
                 if (!svr.Instacne.CheckVaild(objectId))
                     continue;
                 LastSvrCache = svr.Instacne;
-                svr.Instacne.GetVMProperty(objectId, out properties);
+                svr.Instacne.GetVMProperty(objectId, out properties,false);
                 isVaild = true;
                 break;
             }
             return isVaild;
         }
-    
-       
+        public PropertyVMBase GetNoSelectVMProperty() 
+        {
+            var propertyVM = new NoPropertyVM("未选择");
+            propertyVM.A01_ShowTypeName = "=未选择=";
+            return propertyVM;
+        }
+        public PropertyVMBase GetMultiSelectVMProperty()
+        {
+            var propertyVM = new NoPropertyVM("多类别");
+            propertyVM.A01_ShowTypeName = "多类别(*)";
+            return propertyVM;
+        }
     }
     class PropertySvrCache
     {

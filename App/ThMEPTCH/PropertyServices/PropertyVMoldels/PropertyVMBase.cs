@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
-using Tianhua.Platform3D.UI.PropertyServices.PropertyModels;
+using ThMEPTCH.PropertyServices.PropertyModels;
 
-namespace Tianhua.Platform3D.UI.PropertyServices.PropertyVMoldels
+namespace ThMEPTCH.PropertyServices.PropertyVMoldels
 {
     public abstract class PropertyVMBase : NotifyPropertyChangedBase,ICloneable
     {
