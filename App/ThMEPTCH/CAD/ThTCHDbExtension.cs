@@ -11,7 +11,7 @@ using ThMEPTCH.PropertyServices.PropertyModels;
 
 namespace ThMEPTCH.CAD
 {
-    public static class ThTCHDbExtension
+    public static partial class ThTCHDbExtension
     {
         public static TArchDoor LoadDoorFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
         {

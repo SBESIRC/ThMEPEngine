@@ -3,24 +3,19 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using AcHelper;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Runtime;
-using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThFlowSegmentExtractor
+    public class ThFlowFittingExtractor
     {
-        private List<ThFlowSegmentExtractionVisitor> Visitors { get; set; }
+        private List<ThFlowFittingExtractionVisitor> Visitors { get; set; }
 
-        public ThFlowSegmentExtractor()
+        public ThFlowFittingExtractor()
         {
-            Visitors = new List<ThFlowSegmentExtractionVisitor>();
+            Visitors = new List<ThFlowFittingExtractionVisitor>();
         }
 
-        public void Accept(ThFlowSegmentExtractionVisitor visitor)
+        public void Accept(ThFlowFittingExtractionVisitor visitor)
         {
             Visitors.Add(visitor);
         }
@@ -63,9 +58,24 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private List<ThRawIfcFlowSegmentData> DoExtract(Entity e, ThFlowSegmentExtractionVisitor visitor)
+        public void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
         {
-            var results = new List<ThRawIfcFlowSegmentData>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach (ObjectId objId in dbObjs)
+                {
+                    var e = acadDatabase.Element<Entity>(objId);
+                    Visitors.ForEach(v =>
+                    {
+                        v.Results.AddRange(DoExtract(e, v));
+                    });
+                }
+            }
+        }
+
+        private List<ThRawIfcFlowFittingData> DoExtract(Entity e, ThFlowFittingExtractionVisitor visitor)
+        {
+            var results = new List<ThRawIfcFlowFittingData>();
             if (visitor.CheckLayerValid(e))
             {
                 visitor.DoExtract(results, e);
@@ -73,17 +83,17 @@ namespace ThMEPEngineCore.Engine
             return results;
         }
 
-        private List<ThRawIfcFlowSegmentData> DoExtract(
+        private List<ThRawIfcFlowFittingData> DoExtract(
             BlockReference blockReference, Matrix3d matrix,
-            ThFlowSegmentExtractionVisitor visitor)
+            ThFlowFittingExtractionVisitor visitor)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
-                var results = new List<ThRawIfcFlowSegmentData>();
-                if (visitor.IsFlowSegmentBlockReference(blockReference))
+                var results = new List<ThRawIfcFlowFittingData>();
+                if (visitor.IsFlowFittingBlockReference(blockReference))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                    if (visitor.IsFlowSegmentBlock(blockTableRecord))
+                    if (visitor.IsFlowFittingBlock(blockTableRecord))
                     {
                         // 提取图元信息
                         foreach (var objId in blockTableRecord)
@@ -95,9 +105,9 @@ namespace ThMEPEngineCore.Engine
                                 {
                                     continue;
                                 }
-                                if (visitor.IsFlowSegmentBlockReference(blockObj))
+                                if (visitor.IsFlowFittingBlockReference(blockObj))
                                 {
-                                    if (visitor.CheckLayerValid(blockObj) && visitor.IsFlowSegment(blockObj))
+                                    if (visitor.CheckLayerValid(blockObj) && visitor.IsFlowFitting(blockObj))
                                     {
                                         visitor.DoExtract(results, blockObj, matrix);
                                         continue;

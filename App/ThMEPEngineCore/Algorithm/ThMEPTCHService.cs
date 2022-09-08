@@ -28,6 +28,16 @@ namespace ThMEPEngineCore.Algorithm
         public const string DXF_OPENING = "TCH_OPENING";
 
         /// <summary>
+        /// 天正桥架
+        /// </summary>
+        public const string DXF_CABLETRY = "TCH_CABLETRY";
+
+        /// <summary>
+        /// 天正弯通
+        /// </summary>
+        public const string DXF_EFITTING = "TCH_EFITTING";
+
+        /// <summary>
         /// 是否是天正元素
         /// </summary>
         /// <param name="entity"></param>
@@ -198,6 +208,28 @@ namespace ThMEPEngineCore.Algorithm
         {
             dynamic obj = e.AcadObject;
             return obj.GetKind as string;
+        }
+
+        /// <summary>
+        /// 天正桥架
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHCableCarrierSegment(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("CABLETRY");
+        }
+
+        /// <summary>
+        /// 天正弯通（弯通，三通）
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHCableCarrierFitting(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("EFITTING");
         }
 
         /// <summary>

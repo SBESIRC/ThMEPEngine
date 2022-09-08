@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
     <Compile Include="CAD\ThTArchWallExtension.cs" />
+    <Compile Include="CAD\ThTCHEDbExtension.cs" />
     <Compile Include="Data\ThSUBuildingElementData.cs" />
     <Compile Include="Data\ThSUCompDefinitionData.cs" />
     <Compile Include="Data\ThSUComponentData.cs" />
@@ -93,6 +94,12 @@
     <Compile Include="Data\ThTCHSlabData.cs" />
     <Compile Include="Data\ThTCHWallData.cs" />
     <Compile Include="Data\ThTCHWindowData.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierFittingExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierFittingExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierSegmentExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierSegmentExtractionVisitor.cs" />
+    <Compile Include="Model\ThTCHCableCarrierFitting.cs" />
+    <Compile Include="Model\ThTCHCableCarrierSegment.cs" />
     <Compile Include="PropertyServices\EntityProperties\DescendingPropertyService.cs" />
     <Compile Include="PropertyServices\EntityProperties\HolePropertyService.cs" />
     <Compile Include="PropertyServices\EntityProperties\RailingPropertyService.cs" />
