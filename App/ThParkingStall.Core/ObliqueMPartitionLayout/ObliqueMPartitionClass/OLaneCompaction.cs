@@ -654,10 +654,55 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 var intersected_parallel_car_point = intersected_parallel_car_points.First();
                 var dist = line.ClosestPoint(intersected_parallel_car_point).Distance(intersected_parallel_car_point);
                 dist = dist - DisPillarLength - DisLaneWidth / 2;
+                if (Math.Abs(dist) < 0.0001)
+                    dist = 0;
                 if (dist > 0)
                     dis_parallel_car = dist;
                 else
                     dis_parallel_car = double.NegativeInfinity;
+
+                //new Case test
+                //if (dist == 0)
+                //{
+                //    var dir_pl = PolyFromLines(line, line.Translation(lane.Lane.Vec.Normalize() * maxLength));
+                //    rec = PolyFromLines(line, line.Translation(vec.Normalize() * maxLength));
+                //    rec = rec.Scale(ScareFactorForCollisionCheck);
+                //    var intersected_lanes = IniLanes.Where(e => line.ClosestPoint(e.Line.P0).Distance(e.Line.P0) <0.1 
+                //    || line.ClosestPoint(e.Line.P1).Distance(e.Line.P1) < 0.1).ToList();
+                //    intersected_lanes= intersected_lanes.Where(e => rec.Contains(e.Line.MidPoint)).ToList();
+                //    intersected_lanes = intersected_lanes.Where(e => !IsConnectedToLaneDouble(e.Line, IniLanes)).ToList();
+                //    for (int j = 0; j < intersected_lanes.Count; j++)
+                //    {
+                //        if (IsConnectedToLane(intersected_lanes[j].Line, false, IniLanes))
+                //        {
+                //            intersected_lanes[j].Line = new LineSegment(intersected_lanes[j].Line.P1, intersected_lanes[j].Line.P0);
+                //        }
+                //    }
+                //    var connected_lane_tests = intersected_lanes.Select(e => e.Line).ToList();
+                //    var movable_dist = new Dictionary<LineSegment, double>();
+                //    var _testcars = CarSpatialIndex.SelectCrossingGeometry(rec).Cast<Polygon>();
+                //    foreach (var intersected_lane in connected_lane_tests)
+                //    {
+                //        var _buffer = intersected_lane.Buffer(3000);
+                //        var _crossed_cars = _testcars.Where(e => e.IntersectPoint(_buffer).Count() > 0);
+                //        var _crossed_cars_points = new List<Coordinate>();
+                //        foreach (var _crossed_car in _crossed_cars)
+                //            _crossed_cars_points.AddRange(_crossed_car.Coordinates);
+                //        _crossed_cars_points = _crossed_cars_points.Select(p => intersected_lane.ClosestPoint(p)).ToList();
+                //        _crossed_cars_points = _crossed_cars_points.OrderBy(p => p.Distance(intersected_lane.P1)).ToList();
+                //        if (_crossed_cars_points.Count > 0)
+                //        {
+                //            var _crossed_cars_point = _crossed_cars_points.First();
+                //            var _crossed_cars_point_dist_end = _crossed_cars_point.Distance(intersected_lane.P1);
+                //            movable_dist.Add(intersected_lane, _crossed_cars_point_dist_end);
+                //        }
+                //    }
+                //    var min_movable_dist= movable_dist.Values.Min();
+                //    if (min_movable_dist > 0)
+                //    {
+                //        dis_parallel_car = min_movable_dist;
+                //    }
+                //}
             }
             #endregion
 
