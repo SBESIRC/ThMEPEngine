@@ -1,73 +1,70 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
-using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
-using ThMEPTCH.PropertyServices.PropertyEnums;
 using ThMEPTCH.PropertyServices.PropertyModels;
 using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace ThMEPTCH.PropertyServices.EntityProperties
 {
-    [Property("楼板", "")]
-    class SlabPropertyService : PropertyServiceBase
+    [Property("栏杆", "")]
+    class RailingPropertiesService : PropertyServiceBase
     {
-        public override string ShowTypeName => "楼板";
+        public override string ShowTypeName => "栏杆-900";
 
         public override string XDataAppName => "THProperty";
 
         public override bool CheckVaild(ObjectId objectId)
         {
-            return CheckVaild(objectId, "TH-楼板");
+            return CheckVaild(objectId, "TH-栏杆");
         }
 
         public override PropertyVMBase MergePropertyVM(List<PropertyVMBase> properties)
         {
             //这里暂时还没有处理完，后面继续处理
             PropertyVMBase propertyVM = null;
-            var allSlabVMs = properties.OfType<SlabPropertyVM>().ToList();
-            if (allSlabVMs.Count < 1)
+            var allRailingVMs = properties.OfType<RailingPropertyVM>().ToList();
+            if (allRailingVMs.Count < 1)
+            {
                 return null;
-            propertyVM = allSlabVMs.First().Clone() as SlabPropertyVM;
+            }
+            propertyVM = allRailingVMs.First().Clone() as RailingPropertyVM;
             return propertyVM;
         }
 
         protected override PropertyBase DefaultProperties(ObjectId objectId)
         {
-            var property = new SlabProperty(objectId)
+            var property = new RailingProperty(objectId)
             {
-                Material = "材质",
-                EnumMaterial = EnumSlabMaterial.ReinforcedConcrete,
-                SlabTopElevation = 0.0,
-                SlabThickness = 100.0,
-                SlabBuildingSurfaceThickness = 50.0,
+                RailingBottomHeight = 0.0,
+                RailingHeight = 900.0,
+                RailingThickness = 40.0,
             };
             return property;
         }
 
         protected override PropertyVMBase PropertyToVM(PropertyBase property)
         {
-            var slabProp = property as SlabProperty;
-            var vmProp = new SlabPropertyVM(ShowTypeName, slabProp);
+            var railingProp = property as RailingProperty;
+            var vmProp = new RailingPropertyVM(ShowTypeName, railingProp);
             return vmProp;
         }
 
         protected override TypedValueList PropertyToXDataValue(PropertyBase property)
         {
-            var slabProp = property as SlabProperty;
+            var railingProp = property as RailingProperty;
             TypedValueList valueList = new TypedValueList
             {
-                { (int)DxfCode.ExtendedDataAsciiString, ((int)slabProp.EnumMaterial).ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, slabProp.SlabTopElevation.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, slabProp.SlabThickness.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, slabProp.SlabBuildingSurfaceThickness.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, railingProp.RailingBottomHeight.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, railingProp.RailingHeight.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, railingProp.RailingThickness.ToString()},
             };
             return valueList;
         }
 
         protected override PropertyBase XDataProperties(ObjectId objectId, TypedValueList typedValues)
         {
-            var property = new SlabProperty(objectId);
+            var property = new RailingProperty(objectId);
             //读取XData（第0个是AppName，不需要读取）,这边读数据的顺序要和写入数据的顺序一致
             for (int i = 1; i < typedValues.Count; i++)
             {
@@ -75,18 +72,13 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                 switch (i)
                 {
                     case 1:
-                        var enumInt = int.Parse(strData);
-                        property.Material = strData;
-                        property.EnumMaterial = (EnumSlabMaterial)enumInt;
+                        property.RailingBottomHeight = double.Parse(strData);
                         break;
                     case 2:
-                        property.SlabTopElevation = double.Parse(strData);
+                        property.RailingHeight = double.Parse(strData);
                         break;
                     case 3:
-                        property.SlabThickness = double.Parse(strData);
-                        break;
-                    case 4:
-                        property.SlabBuildingSurfaceThickness = double.Parse(strData);
+                        property.RailingThickness = double.Parse(strData);
                         break;
                 }
             }

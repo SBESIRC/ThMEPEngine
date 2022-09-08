@@ -5,13 +5,16 @@ using ThMEPTCH.PropertyServices.PropertyModels;
 
 namespace ThMEPTCH.PropertyServices.PropertyVMoldels
 {
-    public abstract class PropertyVMBase : NotifyPropertyChangedBase,ICloneable
+    public abstract class PropertyVMBase : NotifyPropertyChangedBase, ICloneable
     {
         [Browsable(false)]
         public string TypeName { get; }
+
         [Browsable(false)]
         public PropertyBase Property { get; protected set; }
-        private string showTypeName { get; set; }
+
+        private string _showTypeName;
+
         /*
          用数字开头是PropertyGrid字段排序问题
          */
@@ -20,19 +23,21 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
         [DisplayName("构件名")]
         public string A01_ShowTypeName
         {
-            get { return showTypeName; }
+            get { return _showTypeName; }
             set
             {
-                showTypeName = value;
+                _showTypeName = value;
                 this.RaisePropertyChanged();
             }
         }
-        public PropertyVMBase(string typeName, PropertyBase property) 
+
+        public PropertyVMBase(string typeName, PropertyBase property)
         {
             TypeName = typeName;
             Property = property;
             A01_ShowTypeName = string.Format("{0}({1})", TypeName, 1);
         }
+
         [Browsable(false)]
         public abstract object Clone();
     }

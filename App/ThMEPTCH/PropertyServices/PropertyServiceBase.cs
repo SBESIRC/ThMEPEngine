@@ -27,6 +27,7 @@ namespace ThMEPTCH.PropertyServices
             property = GetProperty(objectId);
             return true;
         }
+
         public virtual bool GetVMProperty(ObjectId objectId, out PropertyVMBase property, bool checkId) 
         {
             property = null;
@@ -52,10 +53,15 @@ namespace ThMEPTCH.PropertyServices
             }
             return SetXDataValue(objectId, property);
         }
+
         protected abstract PropertyBase DefaultProperties(ObjectId objectId);
+
         protected abstract PropertyBase XDataProperties(ObjectId objectId, TypedValueList typedValues);
+
         protected abstract TypedValueList PropertyToXDataValue(PropertyBase property);
+
         protected abstract PropertyVMBase PropertyToVM(PropertyBase property);
+
         protected TypedValueList GetXDataValue(ObjectId objectId)
         {
             var m_DocumentLock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
@@ -68,6 +74,7 @@ namespace ThMEPTCH.PropertyServices
             m_DocumentLock.Dispose();
             return valueList;
         }
+
         protected bool SetXDataValue(ObjectId objectId,PropertyBase property)
         {
             var xdataValues = PropertyToXDataValue(property);
@@ -81,6 +88,7 @@ namespace ThMEPTCH.PropertyServices
             m_DocumentLock.Dispose();
             return true;
         }
+
         protected PropertyBase GetProperty(ObjectId objectId) 
         {
             PropertyBase property = null;
@@ -94,6 +102,27 @@ namespace ThMEPTCH.PropertyServices
                 property = XDataProperties(objectId, valueList);
             }
             return property;
+        }
+
+        public bool CheckVaild(ObjectId objectId, string layer)
+        {
+            var isVaild = false;
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var entity = acadDb.ModelSpace.Element(objectId);
+                if (null == entity || entity.IsErased)
+                {
+                    return isVaild;
+                }
+                if (entity is Curve polyline)
+                {
+                    if (polyline.Layer.Contains(layer))
+                    {
+                        isVaild = true;
+                    }
+                }
+            }
+            return isVaild;
         }
     }
 }

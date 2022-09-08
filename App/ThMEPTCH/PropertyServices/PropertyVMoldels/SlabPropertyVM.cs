@@ -9,10 +9,12 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
     class SlabPropertyVM : PropertyVMBase
     {
         private SlabProperty property { get; }
+
         public SlabPropertyVM(string typeName, SlabProperty slabProperty) : base(typeName, slabProperty)
         {
             property = slabProperty;
         }
+
         [Browsable(true)]
         [DisplayName("材质")]
         [Editor(typeof(EnumPropertyEditor<EnumSlabMaterial>), typeof(PropertyEditorBase))]
@@ -25,17 +27,19 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
                 this.RaisePropertyChanged();
             }
         }
+
         [DisplayName("建筑顶标高")]
         public double A11_SlabTopElevation
         {
             get { return property.SlabTopElevation; }
-            set 
+            set
             {
                 property.SlabTopElevation = value;
                 this.RaisePropertyChanged();
             }
         }
-        [DisplayName("板厚")]
+
+        [DisplayName("结构板厚")]
         public double A12_SlabThickness
         {
             get { return property.SlabThickness; }
@@ -45,7 +49,8 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
                 this.RaisePropertyChanged();
             }
         }
-        [DisplayName("面层厚度")]
+
+        [DisplayName("建筑面层厚度")]
         public double A13_SlabBuildingSurfaceThickness
         {
             get { return property.SlabBuildingSurfaceThickness; }
