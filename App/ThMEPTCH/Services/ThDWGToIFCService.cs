@@ -15,6 +15,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
+using ThMEPTCH.PropertyServices.PropertyModels;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
@@ -143,6 +144,10 @@ namespace ThMEPTCH.Services
                         if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
                         {
                             var slab = CreateSlab(slab1, matrix);
+                            if (item.Property is SlabProperty slabProp)
+                            {
+                                slab.ZOffSet = slabProp.TopElevation;
+                            }
                             slab.Uuid = prjId + item.Id;
                             allSlabs.Add(slab);
                         }
@@ -154,13 +159,16 @@ namespace ThMEPTCH.Services
                             var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
                             railingColls.Add(pLine);
                             var railing = CreateRailing(pLine);
-                            if (railingToRegion)
+                            var prop = item.Property as RailingProperty;
+                            if(railingToRegion)
                             {
                                 var centerline = railing.Outline as Polyline;
                                 var outlines = centerline.BufferFlatPL(railing.Width / 2.0);
                                 railing.Outline = outlines[0] as Polyline;
                             }
-                            railing.Height = ralingHeight;
+                            railing.Height = prop.Height;
+                            railing.Width = prop.Thickness;
+                            railing.ZOffSet = prop.BottomElevation;
                             railing.Uuid = prjId + item.Id;
                             thisRailingEntitys.Add(pLine, railing);
                         }
@@ -531,18 +539,30 @@ namespace ThMEPTCH.Services
 
         private List<FloorCurveEntity> BuildFloorSlab(List<FloorCurveEntity> data, DBObjectCollection textColl)
         {
-            var slabPolylines = data.Select(o => o.EntityCurve)
-                .OfType<Polyline>()
-                .OrderBy(o => o.Area)
-                .ToList();
-
+            var dicData = new Dictionary<Polyline, FloorCurveEntity>();
+            foreach (var item in data) 
+            {
+                dicData.Add(item.EntityCurve as Polyline, item);
+            }
+            var slabPolylines = dicData.Keys.OrderBy(o => o.Area).ToList();
             var allSlabs = new List<SlabPolyline>();
             var hisCoordinates = new List<Point3d>();
             var slabTextSpIndex = new ThCADCoreNTSSpatialIndex(textColl);
             var maxHeight = 0.0;
             foreach (var item in slabPolylines)
             {
+                var itemTemp = dicData[item];
                 var addSlab = new SlabPolyline(item, slabThickness);
+                if (itemTemp.Property is SlabProperty slabProp) 
+                {
+                    addSlab.Thickness = slabProp.Thickness + slabProp.SurfaceThickness;
+                    addSlab.OutPolyline.Elevation = slabProp.TopElevation;
+                }
+                else if(itemTemp.Property is DescendingProperty desProp)
+                {
+                    addSlab.Thickness = desProp.WrapThickness + desProp.SurfaceThickness;
+                    addSlab.SurroundingThickness = desProp.WrapThickness + desProp.SurfaceThickness;
+                }
                 var insertText = slabTextSpIndex.SelectCrossingPolygon(item);
                 var insertText1 = slabTextSpIndex.SelectWindowPolygon(item);
                 if (insertText.Count < 1)
@@ -862,11 +882,10 @@ namespace ThMEPTCH.Services
             var slab = new ThTCHSlab(outPLine, slabPolyline.Thickness, Vector3d.ZAxis);
             foreach (var item in slabPolyline.InnerSlabOpenings)
             {
-                var descendingWrapThickness = 50.0;
                 var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
                 if (!item.IsOpening)
                 {
-                    var outlineBuffer = innerPLine.Buffer(descendingWrapThickness).OfType<Polyline>()
+                    var outlineBuffer = innerPLine.Buffer(item.SurroundingThickness).OfType<Polyline>()
                         .OrderByDescending(p => p.Area).FirstOrDefault();
                     if (outlineBuffer.IsNull())
                     {
@@ -885,7 +904,7 @@ namespace ThMEPTCH.Services
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.Thickness,
-                        DescendingWrapThickness = descendingWrapThickness,
+                        DescendingWrapThickness = item.SurroundingThickness,
                     });
                 }
                 else

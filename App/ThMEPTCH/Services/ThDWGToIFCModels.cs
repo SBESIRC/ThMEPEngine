@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPTCH.PropertyServices.PropertyModels;
 
 namespace ThMEPTCH.Services
 {
@@ -24,12 +25,14 @@ namespace ThMEPTCH.Services
     {
         public ulong Id { get; }
         public Entity EntityCurve { get; }
+        public PropertyBase Property { get; }
         public string EntitySystem { get; }
         public object FloorEntity { get; set; }
-        public FloorCurveEntity(ulong id, Entity curve, string system)
+        public FloorCurveEntity(ulong id, Entity curve, string system, PropertyBase property)
         {
             EntityCurve = curve;
             EntitySystem = system;
+            Property = property;
             Id = id;
         }
     }
@@ -58,6 +61,7 @@ namespace ThMEPTCH.Services
         public bool IsOpening { get; set; }
         public double Thickness { get; set; }
         public double LowerPlateHeight { get; set; }
+        public double SurroundingThickness { get; set; }
         public List<SlabPolyline> InnerSlabOpenings { get; }
         public SlabPolyline(Polyline polyline, double thickness)
         {

@@ -5,6 +5,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPTCH.Services;
 using ThMEPEngineCore.CAD;
+using ThMEPTCH.PropertyServices.EntityProperties;
 
 namespace ThMEPTCH.CAD
 {
@@ -53,7 +54,9 @@ namespace ThMEPTCH.CAD
 
         private FloorCurveEntity CreateFloorCurveEntity(Entity e, Matrix3d matrix, int uid)
         {
-            return new FloorCurveEntity(GetUniqueId(e, matrix, uid), GetOutline(e, matrix), "栏杆");
+            var svr = new RailingPropertyService();
+            var prop = svr.GetProperty(e.ObjectId);
+            return new FloorCurveEntity(GetUniqueId(e, matrix, uid), GetOutline(e, matrix), "栏杆", prop);
         }
 
         private Entity GetOutline(Entity e, Matrix3d matrix)

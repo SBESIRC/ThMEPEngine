@@ -5,6 +5,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPTCH.Services;
+using ThMEPTCH.PropertyServices.EntityProperties;
 
 namespace ThMEPTCH.CAD
 {
@@ -53,7 +54,14 @@ namespace ThMEPTCH.CAD
 
         private FloorCurveEntity CreateFloorCurveEntity(Entity e, Matrix3d matrix, int uid)
         {
-            return new FloorCurveEntity(GetUniqueId(e, matrix, uid), GetOutline(e, matrix), "楼板");
+            var svr = new SlabPropertyService();
+            var prop = svr.GetProperty(e.ObjectId);
+            if (e.Layer.Contains("降板")) 
+            {
+                var desSvr = new DescendingPropertyService();
+                prop = desSvr.GetProperty(e.ObjectId);
+            }
+            return new FloorCurveEntity(GetUniqueId(e, matrix, uid), GetOutline(e, matrix), "楼板", prop);
         }
 
         private Entity GetOutline(Entity e, Matrix3d matrix)
