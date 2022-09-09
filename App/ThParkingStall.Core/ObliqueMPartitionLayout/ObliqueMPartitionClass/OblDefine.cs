@@ -185,7 +185,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         {
             AccurateCalculate = accurate;
             GenerateParkingSpaces();
-            CaledBound =MParkingPartitionPro.CalBoundary(Boundary, Pillars, IniLanes, Obstacles, Cars);
+            CaledBound =MParkingPartitionPro.CalBoundary(Boundary, Pillars, IniLanes, BuildingBoxes, Cars);
             return CarSpots.Count;
         }
         public void GenerateParkingSpaces()

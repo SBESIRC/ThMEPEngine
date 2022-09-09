@@ -58,7 +58,7 @@ namespace ThParkingStall.Core.OInterProcess
                     obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, Buildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();
                     obliqueMPartition.OutBoundary = Region;
-                    obliqueMPartition.BuildingBoxes = new List<Polygon>();
+                    obliqueMPartition.BuildingBoxes = BuildingBounds;
                     obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(Buildings);
                     obliqueMPartition.QuickCalculate = !IgnoreCache && VMStock.SpeedUpMode;
 #if DEBUG

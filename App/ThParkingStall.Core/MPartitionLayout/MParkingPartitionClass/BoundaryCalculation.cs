@@ -16,12 +16,26 @@ namespace ThParkingStall.Core.MPartitionLayout
 {
     public partial class MParkingPartitionPro
     {
-        public static Polygon CalBoundary(Polygon Boundary,List<Polygon> Pillars,List<Lane> IniLanes,List<Polygon> Obstacles,
+        public static Polygon CalBoundary(Polygon Boundary,List<Polygon> Pillars,List<Lane> IniLanes,List<Polygon> buildingBounds,
             List<InfoCar> Cars)
         {
             double buffer_tol = 10000;
             var caledBound = Boundary.Clone();
+            BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
 
+            for (int i = 0; i < buildingBounds.Count; i++)
+            {
+                var box=buildingBounds[i];
+                if (box.Scale(ScareFactorForCollisionCheck).IntersectPoint(Boundary).Count() > 0)
+                {
+                    var geos=box.Difference(Boundary);
+                    var cut = box.Difference(geos);
+                    if (cut is Polygon)
+                        buildingBounds[i] = (Polygon)cut;
+                    else if (cut is MultiPolygon)
+                        buildingBounds[i] = (Polygon)((MultiPolygon)cut).Geometries.OrderByDescending(e => e.Area).First();
+                }
+            }
             var polys = new List<Polygon>();
             polys.AddRange(Pillars);
             polys.AddRange(IniLanes.Select(e =>
@@ -31,13 +45,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else
                     return e.Line.Buffer(DisLaneWidth / 2);
             }));
-            polys.AddRange(Obstacles);
+            polys.AddRange(buildingBounds);
             polys.AddRange(Cars.Where(e => e.CarLayoutMode != 1).Select(e =>
                   ConvertVertCarToCollisionCar(e.Polyline.GetEdges().OrderBy(edge => edge.ClosestPoint(e.Point).Distance(e.Point)).First(), e.Vector)));
             polys.AddRange(Cars.Where(e => e.CarLayoutMode == 1).Select(e => e.Polyline));
             polys = polys.Select(e =>
-             {
-                 BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
+             {         
                  var g = e.Buffer(buffer_tol, MitreParam);
                  if (g is Polygon)
                  {
@@ -55,6 +68,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             double buffer_tol = 10000;
             var bound = new Polygon(new LinearRing(new Coordinate[0]));
+            BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
 
             var polys = new List<Polygon>();
             polys.AddRange(pillars);
@@ -72,7 +86,6 @@ namespace ThParkingStall.Core.MPartitionLayout
             polys.AddRange(cars.Where(e => e.CarLayoutMode == 1).Select(e => e.Polyline));
             polys = polys.Select(e =>
             {
-                BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
                 var g = e.Buffer(buffer_tol, MitreParam);
                 if (g is Polygon)
                 {
