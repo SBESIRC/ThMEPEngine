@@ -529,7 +529,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (haveBeam) 
                 {
                     //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
-                    var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
+                    var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other, nearPipe.uid);
                     var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
                     addBlock.rotateAngle = angle % (Math.PI * 2);
                     addBlock.dymBlockAttr.Add("可见性", "普通套管");
@@ -559,12 +559,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     upText.Position = upTextPt;
                     var btTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(btHeight + 30);
                     btText.Position = btTextPt;
-                    createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
-                    createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                    createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, nearPipe.uid, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                    createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, nearPipe.uid, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
                 }
                 tempPoints = tempPoints.Where(c => !points.Any(x => x.DistanceTo(c) < 5)).ToList();
             }
-            
+
             return true;
         }
         Line NearRoomLine(Polyline roomPLine,Point3d pipeCenterPoint) 

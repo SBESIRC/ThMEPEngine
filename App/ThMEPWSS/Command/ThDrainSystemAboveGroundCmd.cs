@@ -39,6 +39,7 @@ namespace ThMEPWSS.Command
     public class ThDrainSystemAboveGroundCmd : ThMEPBaseCommand, IDisposable
     {
         public string errorMsg = "";
+        public bool OutputTCHElements = false;//输出天正元素
         Engine.ThWallColumnsEngine _wallColumnsEngine = null;
         ThRoomDataEngine _roomEngine = null;
         DoorWindowEngine _doorWindowEngine = null;
@@ -141,10 +142,6 @@ namespace ThMEPWSS.Command
                 if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
                     return;
                 Active.Document.LockDocument();
-                var verPipes = new List<ThTCHVerticalPipe>();
-                var tchPipeService = new TCHDrawVerticalPipeService();
-                var symbMultiLeaders = new List<ThTCHSymbMultiLeader>();
-                var tchsymbMultiLeaderService = new TCHDrawSymbMultiLeaderService();
                 using (AcadDatabase acdb = AcadDatabase.Active())
                 {
                     //所有的楼层框 必须有顶层，没有时不进行后续的生成
@@ -287,52 +284,168 @@ namespace ThMEPWSS.Command
                     var roofCheck = new RoofCollisionCheck(roofFloors, _allRailings);
                     var addPLines = roofCheck.GetCheckResults(createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "PL")).ToList());
                     createBasicElems.AddRange(addPLines);
-                    var pipeElems = new List<CreateBlockInfo>();
-                    var tempElems = new List<CreateBlockInfo>();
-                    tempElems.AddRange(createBlockInfos);
-                    createBlockInfos.Clear();
-                    pipeTags.Add("Y2L");
-                    pipeTags.Add("Y1L");
-                    pipeTags.Add("YyL");
-                    pipeTags.Add("NL");
-                    foreach (var item in tempElems)
+                    
+                    if (OutputTCHElements)
                     {
-                        if (string.IsNullOrEmpty(item.tag))
-                        {
-                            createBlockInfos.Add(item);
-                        }
-                        else if (pipeTags.Any(c => c == item.tag))
-                        {
-                            pipeElems.Add(item);
-                            createBlockInfos.Add(item);
-                        }
-                        else
-                        {
-                            createBlockInfos.Add(item);
-                        }
+                        PrintTCHElements(pipeTags);
                     }
-                    //var notCreateLineIds = new List<string>();
-                    //var notCreateTextIds = new List<string>();
-                    //ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
-                    //ConvertToTCHSymbMultiLeader(ref createBasicElems, ref createTextElems, ref symbMultiLeaders);
-                    //createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
-                    //createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
-                    ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
-                    var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
-                    var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
-                    var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
+                    else
+                    {
+                        PrintCADElements();
+                    }
                 }
-                //ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
-                //ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
-                //tchPipeService.InitPipe(verPipes);
-                //tchPipeService.DrawExecute(false);
-                //tchsymbMultiLeaderService.Init(symbMultiLeaders);
-                //tchsymbMultiLeaderService.DrawExecute(false, false);
             }
             catch (Exception ex)
             {
+                ;
             }
         }
+        void PrintCADElements()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
+                var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
+                var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
+                var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
+                var topRainSystemElements = new List<CreateResult>();
+                var topWasteSystemElements = new List<CreateResult>();
+                var objs = new List<List<CreateResult>>() { createBlocks, createElems, createTexts };
+                foreach (var list in objs)
+                {
+                    var validList = list.Where(e => IsInHighestFloor(e)).Where(e => e.tag == null || (!e.tag.Equals(DrainSysAGCommon.NOTCOPYTAG)));
+                    foreach (var obj in validList)
+                    {
+                        var objLayer = obj.Layer.ToUpper();
+                        if (objLayer.Contains("RAIN"))
+                            topRainSystemElements.Add(obj);
+                        else if (objLayer.Contains("DRAI"))
+                            topWasteSystemElements.Add(obj);
+                        else if (objLayer.Contains("BUSH"))
+                        {
+                            var belongedId = obj.belongBlockId;
+                            var belongs = createBlocks.Where(e => e.belongBlockId.Equals(belongedId)).Except(new CreateResult[] { obj });
+                            if (belongs.Any())
+                            {
+                                if (belongs.First().Layer.ToUpper().Contains("RAIN"))
+                                    topRainSystemElements.Add(obj);
+                                else if (belongs.First().Layer.ToUpper().Contains("DRAI"))
+                                    topWasteSystemElements.Add(obj);
+                            }
+                            else { }
+                        }
+                        else { }
+                    }
+                }
+                var topRainSystemBlock_id = WriteToBlockReference("雨水设备", topRainSystemElements.Select(e => e.objectId.GetEntity()).ToArray());
+                var topWasteSystemBlock_id = WriteToBlockReference("污废水设备", topWasteSystemElements.Select(e => e.objectId.GetEntity()).ToArray());
+                CopyIntegralBlocksToOtherFloor(new ObjectId[] { topRainSystemBlock_id, topWasteSystemBlock_id });
+            }
+        }
+        void PrintTCHElements(List<string> pipeTags)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var verPipes = new List<ThTCHVerticalPipe>();
+                var tchPipeService = new TCHDrawVerticalPipeService();
+                var symbMultiLeaders = new List<ThTCHSymbMultiLeader>();
+                var tchsymbMultiLeaderService = new TCHDrawSymbMultiLeaderService();
+                var pipeElems = new List<CreateBlockInfo>();
+                var tempElems = new List<CreateBlockInfo>();
+                tempElems.AddRange(createBlockInfos);
+                createBlockInfos.Clear();
+                pipeTags.Add("Y2L");
+                pipeTags.Add("Y1L");
+                pipeTags.Add("YyL");
+                pipeTags.Add("NL");
+                foreach (var item in tempElems)
+                {
+                    if (string.IsNullOrEmpty(item.tag))
+                    {
+                        createBlockInfos.Add(item);
+                    }
+                    else if (pipeTags.Any(c => c == item.tag))
+                    {
+                        pipeElems.Add(item);
+                        createBlockInfos.Add(item);
+                    }
+                    else
+                    {
+                        createBlockInfos.Add(item);
+                    }
+                }
+                var notCreateLineIds = new List<string>();
+                var notCreateTextIds = new List<string>();
+                ConvertElemToTCHPipes(pipeElems, createBasicElems, createTextElems, notCreateLineIds, notCreateTextIds, ref verPipes);
+                ConvertToTCHSymbMultiLeader(ref createBasicElems, ref createTextElems, ref symbMultiLeaders);
+                createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
+                var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
+                var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
+                var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
+                ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
+                ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
+                tchPipeService.InitPipe(verPipes);
+                tchPipeService.DrawExecute(false);
+                tchsymbMultiLeaderService.Init(symbMultiLeaders);
+                tchsymbMultiLeaderService.DrawExecute(false, false);
+            }
+        }
+        void CopyIntegralBlocksToOtherFloor(ObjectId[] ids)
+        {
+            var locP = livingHighestFloor.datumPoint;
+            foreach (var item in floorFrameds)
+            {
+                if (item.floorType.Contains("屋面") || item.floorUid.Equals(livingHighestFloor.floorUid))
+                    continue;
+                var targetP = item.datumPoint;
+                var mat = Matrix3d.Displacement(PipeLineLabelLayout.CreateVector(locP, targetP));
+                var brs = ids.Select(e => e.GetEntity() as BlockReference);
+                foreach (var br in brs)
+                {
+                    var copy_br=br.Clone() as BlockReference;
+                    copy_br.TransformBy(mat);
+                    copy_br.AddToCurrentSpace();
+                }
+            }
+            return;
+        }
+        bool IsInHighestFloor(CreateResult obj)
+        {
+            return obj.floorUid.Equals(livingHighestFloor.floorUid);
+        }
+        ObjectId WriteToBlockReference(string blockName, Entity[] entities)
+        {
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                //if (!adb.Layers.Contains(LayerName))
+                //    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, LayerName, 0);
+                BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                try
+                {
+                    BlockTableRecord record = new BlockTableRecord();
+                    record.Name = blockName;
+                    entities.ForEach(e => record.AppendEntity(e.Clone() as Entity));
+                    bt.UpgradeOpen();
+                    bt.Add(record);
+                    adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
+                    bt.DowngradeOpen();
+                }
+                catch { }
+                entities.ForEach(e => e.Erase());
+                BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
+                BlockReference br = new BlockReference(Point3d.Origin, bt[blockName]);
+                br.ScaleFactors = new Scale3d(1);
+                br.Rotation = 0;
+                br.Layer = "0";
+                //br.Layer = LayerName;
+                space.DowngradeOpen();
+                var id = adb.ModelSpace.ObjectId.InsertBlockReference("0", blockName, Point3d.Origin, new Scale3d(1),0);
+                return id;
+            }
+        }
+
         void InitData(Database database)
         {
             _pipeDrainConnectLines.Clear();
@@ -536,18 +649,21 @@ namespace ThMEPWSS.Command
                     RoofFloorLavelLayout(item, midY);
                 }
             }
-            //复制到其它非屋面楼层
-            foreach (var item in floorFrameds)
+            if (OutputTCHElements)
             {
-                if (item.floorType.Contains("屋面") || item.floorUid.Equals(livingHighestFloor.floorUid))
-                    continue;
-                var copyBlocks = copyToOtherFloor.CopyAllToFloor(item, out List<CreateBasicElement> copyElems, out List<CreateDBTextElement> copyTexts);
-                if (copyBlocks != null && copyBlocks.Count > 0)
-                    createBlockInfos.AddRange(copyBlocks);
-                if (copyElems != null && copyElems.Count > 0)
-                    createBasicElems.AddRange(copyElems);
-                if (copyTexts != null && copyTexts.Count > 0)
-                    createTextElems.AddRange(copyTexts);
+                //复制到其它非屋面楼层
+                foreach (var item in floorFrameds)
+                {
+                    if (item.floorType.Contains("屋面") || item.floorUid.Equals(livingHighestFloor.floorUid))
+                        continue;
+                    var copyBlocks = copyToOtherFloor.CopyAllToFloor(item, out List<CreateBasicElement> copyElems, out List<CreateDBTextElement> copyTexts);
+                    if (copyBlocks != null && copyBlocks.Count > 0)
+                        createBlockInfos.AddRange(copyBlocks);
+                    if (copyElems != null && copyElems.Count > 0)
+                        createBasicElems.AddRange(copyElems);
+                    if (copyTexts != null && copyTexts.Count > 0)
+                        createTextElems.AddRange(copyTexts);
+                }
             }
         }
         List<ThIfcRoom> GetRooms(Point3dCollection collection,Matrix3d wcs2UCS) 

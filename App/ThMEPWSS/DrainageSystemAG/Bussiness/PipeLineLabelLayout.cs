@@ -106,7 +106,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             if (null != thisFloorRoofDrain && thisFloorRoofDrain.Count > 0)
                 _labelRoofDrains.AddRange(thisFloorRoofDrain);
         }
-        static Vector3d CreateVector(Point3d ps, Point3d pe)
+        public static Vector3d CreateVector(Point3d ps, Point3d pe)
         {
             return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
         }
