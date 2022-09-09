@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include Variable.wxi ?>
+	<Fragment>
+		<?if $(var.Configuration) = Debug ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" Guid="{A0C624A7-1552-4F19-B066-CBD76A56467A}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\CommunityToolkit.Mvvm.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" Guid="{E68E5280-7FF1-4D5B-822B-1C26A74033EE}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.Bcl.AsyncInterfaces.dll" />
+			</Component>
+		</DirectoryRef>
+		<?elseif $(var.Configuration) = Release ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" Guid="{BCF64AE4-BA69-458B-91ED-1BD515F94097}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\CommunityToolkit.Mvvm.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" Guid="{8E3E1DDA-B574-4A23-A886-6370B107DE70}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.Bcl.AsyncInterfaces.dll" />
+			</Component>
+		</DirectoryRef>
+		<?endif?>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponentsAppToolkitMvvm">
+			<?if $(var.Configuration) = Debug ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" />
+			<?elseif $(var.Configuration) = Release ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ToolkitMvvm_AsyncInterfaces" />
+			<?endif?>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

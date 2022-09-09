@@ -20,6 +20,7 @@
             <ComponentGroupRef Id="ProductComponentsAppXBim" />
             <ComponentGroupRef Id="ProductComponentsWPF" />
             <ComponentGroupRef Id="ProductComponentsAppMicrosoft" />
+            <ComponentGroupRef Id="ProductComponentsAppToolkitMvvm" />
             <ComponentGroupRef Id="ProductComponentsAppPlatform3DWin64" />
             <ComponentGroupRef Id="ProductComponentsAppElevationGenerator" />
         </Feature>

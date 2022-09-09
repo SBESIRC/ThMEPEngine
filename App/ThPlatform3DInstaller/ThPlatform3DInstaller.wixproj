@@ -27,6 +27,7 @@
     <Compile Include="Product.wxs" />
     <Compile Include="Support.wxs" />
     <Compile Include="System.wxs" />
+    <Compile Include="ToolkitMvvm.wxs" />
     <Compile Include="WPF.wxs" />
     <Compile Include="XBim.wxs" />
   </ItemGroup>
