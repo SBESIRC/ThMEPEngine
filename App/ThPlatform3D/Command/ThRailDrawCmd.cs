@@ -36,6 +36,7 @@ namespace ThPlatform3D.Command
                 Active.Database.ObjectAppended += Database_ObjectAppended;
                 Active.Editor.Command("_.PLINE");
                 Active.Database.ObjectAppended -= Database_ObjectAppended;
+                FilterCollectObjs();
                 SetStyle(RailLayerName); // 设置绘制对象的样式
             }
         }

@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
+using NFox.Cad;
 
 namespace ThPlatform3D.Command
 {
@@ -90,6 +91,14 @@ namespace ThPlatform3D.Command
             {
                 _collectObjs.Add(e.DBObject);
             }
+        }
+
+        protected void FilterCollectObjs()
+        {
+            _collectObjs = _collectObjs
+                .OfType<Entity>()
+                .Where(o => !o.IsErased && !o.IsDisposed)
+                .ToCollection();
         }
     }
 }
