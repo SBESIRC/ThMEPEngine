@@ -81,6 +81,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/Tianhua.Platform3D.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform UI" AppName="ThPlatform3DUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="TH3D" Global="TH3D" />
                 <Command Local="THSMBTUI" Global="THSMBTUI" />
             </Commands>
         </ComponentEntry>
