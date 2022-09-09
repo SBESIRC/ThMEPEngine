@@ -93,6 +93,7 @@
     <Compile Include="FloorHeatingCoil\Data\ThFloorHeatingRoomMarkExtractor.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThHandleConflictService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThHVACHandleNonClosedPolylineService.cs" />
+    <Compile Include="FloorHeatingCoil\Data\ThObstacleLineRecognitionEngine.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThRoomSuperBoundaryProcessService.cs" />
     <Compile Include="FloorHeatingCoil\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCreateService.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCoilInsertService.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingCoilUtilServices.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThGeomUtil.cs" />
+    <Compile Include="FloorHeatingCoil\Service\ThFloorHeatingObstacleSettingService.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThMEPHVACCommonUtils.cs" />
     <Compile Include="FloorHeatingCoil\Service\ThSelectFrameUtil.cs" />
     <Compile Include="FloorHeatingCoil\ThFloorHeatingCommon.cs" />

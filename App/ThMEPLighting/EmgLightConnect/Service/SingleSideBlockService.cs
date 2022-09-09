@@ -24,6 +24,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
         {
             //mainPt:如果应急指示灯和疏散灯一组，则存疏散灯坐标.否则存应急灯
             //groupPt:如果应急指示灯和疏散灯一组，则存应急指示灯
+            //20220907:发现有图纸将紧急出口和应急指示灯一组，此时这两个灯不会成组在groupPt里，如果刚好一组只有一个点位，则后面会因为只有一个点位切不出偏移车道线而报错。
+            //目前在后面硬加了“检测切不出来线当成当前组织有一个主点位处理”不报错的逻辑，且能连出线，单看图纸看不出来哪里有问题，但其实这里逻辑不太对。
+            //需要后期加“应急指示灯和副图块也能成组但当做副图块看的”逻辑优化。
 
             mainPt = new List<BlockReference>();
             groupPt = new Dictionary<Point3d, Point3d>();

@@ -31,6 +31,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
     {
         ThFloorHeatingCoilViewModel CoilViewModel;
         public static UiFloorHeatingCoil Instance;
+        uiFloorHeatingCoilObstacle ObstacleUI;
 
         static UiFloorHeatingCoil()
         {
@@ -48,6 +49,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
                 CoilViewModel = new ThFloorHeatingCoilViewModel();
             }
             DataContext = CoilViewModel;
+
         }
 
         private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -56,8 +58,26 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
             e.Cancel = true;
             this.Hide();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (ObstacleUI == null)
+            {
+                ObstacleUI = new uiFloorHeatingCoilObstacle(CoilViewModel);
+            }
+
+            CoilViewModel.UpdateHighLight();
+
+            ObstacleUI.WindowStartupLocation =
+                System.Windows.WindowStartupLocation.CenterScreen;
+
+            Autodesk.AutoCAD.ApplicationServices.Application.ShowModelessWindow  (ObstacleUI);
+        //  ObstacleUI.ShowDialog();
+
+            
+        }
     }
-   
+
     public class TrueFalseConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

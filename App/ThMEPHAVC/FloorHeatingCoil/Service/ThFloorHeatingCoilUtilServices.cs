@@ -68,7 +68,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
             return transformer;
         }
-        public static ThFloorHeatingDataProcessService GetData(AcadDatabase acadDatabase, List<Polyline> selectFrames, ThMEPOriginTransformer transformer)
+        public static ThFloorHeatingDataProcessService GetData(AcadDatabase acadDatabase, List<Polyline> selectFrames, ThMEPOriginTransformer transformer, bool withUI)
         {
             var dataFactory = new ThFloorHeatingDataFactory()
             {
@@ -78,14 +78,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
             var dataQuery = new ThFloorHeatingDataProcessService()
             {
-                WithUI = ThFloorHeatingCoilSetting.Instance.WithUI,
+                WithUI = withUI,
                 Transformer = transformer,
                 InputExtractors = dataFactory.Extractors,
-                FurnitureObstacleData = dataFactory.SanitaryTerminal,
                 RoomSeparateLine = dataFactory.RoomSeparateLine,
                 WaterSeparatorData = dataFactory.WaterSeparator,
                 BathRadiatorData = dataFactory.BathRadiator,
-                FurnitureObstacleDataTemp = dataFactory.SenitaryTerminalOBBTemp,
+                FurnitureObstacle = dataFactory.ObstacleObb,
 
             };
             dataQuery.ProcessDataWithRoom(selectFrames);
@@ -123,8 +122,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
 
             //  Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
-
-
 
         }
 
@@ -204,7 +201,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     }
                 }
             }
-
         }
 
 

@@ -144,8 +144,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
     }
 
-
-
     internal class ThSanitaryTerminalRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public List<string> LayerFilter { get; set; } = new List<string>();
@@ -183,8 +181,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
         {
             var collection = datas.Select(o => o.Geometry).ToCollection();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(collection);
-            var pipes = spatialIndex.SelectCrossingPolygon(polygon);
+            var pipes = new DBObjectCollection();
+            if (polygon.Count > 0)
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(collection);
+                pipes = spatialIndex.SelectCrossingPolygon(polygon);
+            }
+            else
+            {
+                pipes = collection;
+            }
+
             datas.Where(o => pipes.Contains(o.Geometry)).ForEach(o =>
             {
                 Elements.Add(new ThIfcDistributionFlowElement()

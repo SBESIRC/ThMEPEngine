@@ -18,14 +18,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
     {
         public static Polyline GetVisibleOBB(BlockReference blk)
         {
-            var objs = new DBObjectCollection();
-            blk.ExplodeWithVisible(objs);
-            var curves = objs.OfType<Entity>()
-                .Where(e => e is Curve).ToCollection();
-            curves = Tesslate(curves);
-            curves = curves.OfType<Curve>().Where(o => o != null && o.GetLength() > 1e-6).ToCollection();
-            var obb = curves.GetMinimumRectangle();
+            Polyline obb = null;
+            try
+            {
+                var objs = new DBObjectCollection();
+                blk.ExplodeWithVisible(objs);
+                var curves = objs.OfType<Entity>()
+                    .Where(e => e is Curve).ToCollection();
+                curves = Tesslate(curves);
+                curves = curves.OfType<Curve>().Where(o => o != null && o.GetLength() > 1e-6).ToCollection();
+                obb = curves.GetMinimumRectangle();
+            }
+            catch (Exception ex)
+            {
+
+            }
             return obb;
+        }
+
+        public static Polyline GetAABB(BlockReference blk)
+        {
+            var rectangle = blk.GeometricExtents.ToRectangle();
+            //rectangle.TransformBy(blk.BlockTransform);
+            return rectangle;
         }
 
         private static DBObjectCollection Tesslate(DBObjectCollection curves,

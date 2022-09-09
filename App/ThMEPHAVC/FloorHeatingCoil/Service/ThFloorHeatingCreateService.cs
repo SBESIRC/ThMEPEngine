@@ -34,7 +34,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
         /// <param name="selectFrames"></param>
         /// <param name="transformer"></param>
         /// <returns></returns>
-        public static ThFloorHeatingDataProcessService CreateSRData(ThFloorHeatingCoilViewModel vm, ref List<Polyline> selectFrames, ref ThMEPOriginTransformer transformer)
+        public static ThFloorHeatingDataProcessService CreateSRData(ThFloorHeatingCoilViewModel vm, ref List<Polyline> selectFrames, ref ThMEPOriginTransformer transformer,bool withUI)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -53,7 +53,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                 //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
                 transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames,false);
 
-                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
+                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer, withUI);
 
                 return dataQuery;
             }

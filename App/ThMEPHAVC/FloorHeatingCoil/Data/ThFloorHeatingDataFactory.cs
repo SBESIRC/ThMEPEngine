@@ -29,14 +29,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
         //----output
         public List<ThExtractorBase> Extractors { get; set; }
-        public List<ThIfcDistributionFlowElement> SanitaryTerminal { get; set; } = new List<ThIfcDistributionFlowElement>();
-        public List<Polyline> SenitaryTerminalOBBTemp { get; set; } = new List<Polyline>();
+        public List<Polyline> ObstacleObb { get; set; } = new List<Polyline>();
         public List<Line> RoomSeparateLine { get; set; } = new List<Line>();
-        //public List<DBText> RoomSuggestDist { get; set; } = new List<DBText>();
         public List<BlockReference> WaterSeparator { get; set; } = new List<BlockReference>();
         public List<BlockReference> BathRadiator { get; set; } = new List<BlockReference>();
-        //public List<BlockReference> RoomRouteSuggestBlk { get; set; } = new List<BlockReference>();
-        //   public List<Polyline> RoomSetFrame { get; set; } = new List<Polyline>();
 
         public ThFloorHeatingDataFactory()
         {
@@ -45,13 +41,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
         {
             ExtractBasicArchitechObject(database, framePts);
             ExtractFurnitureObstacle(database, framePts);
-            ExtractFurnitureObstacleTemp(database, framePts);
             ExtractRoomSeparateLine(database, framePts);
             ExtractWaterSeparator(database, framePts);
             ExtractBathRadiator(database, framePts);
         }
-
-
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
         {
@@ -87,37 +80,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             });
 
         }
+
         private void ExtractFurnitureObstacle(Database database, Point3dCollection framePts)
-        {
-            var extractBlkList = new List<string>();
-            foreach (var blkType in ThFloorHeatingCommon.ObstacleTypeList)
-            {
-                var list = QueryBlkNames(blkType);
-                if (list != null)
-                {
-                    extractBlkList.AddRange(list);
-                }
-
-            }
-            extractBlkList = extractBlkList.Distinct().ToList();
-
-            if (extractBlkList.Count == 0)
-            {
-                return;
-            }
-
-            var sanitaryTerminalExtractor = new ThSanitaryTerminalRecognitionEngine()
-            {
-                BlockNameList = extractBlkList,
-                LayerFilter = new List<string>(),
-            };
-
-            sanitaryTerminalExtractor.Recognize(database, framePts);
-            //sanitaryTerminalExtractor.Elements.ForEach(x => SanitaryTerminal.Add(x.Outline as BlockReference));
-            SanitaryTerminal.AddRange(sanitaryTerminalExtractor.Elements);
-        }
-
-        private void ExtractFurnitureObstacleTemp(Database database, Point3dCollection framePts)
         {
             var extractService = new ThExtractPolylineService()
             {
@@ -128,7 +92,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             foreach (var poly in extractService.Polys)
             {
                 poly.Closed = true;
-                SenitaryTerminalOBBTemp.Add(poly);
+                ObstacleObb.Add(poly);
             }
         }
 
@@ -156,7 +120,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         private void ExtractWaterSeparator(Database database, Point3dCollection framePts)
         {
-            //var extractService = new ThBlockReferenceExtractor()
             var extractService = new ThExtractBlockReferenceService()
             {
                 BlockName = ThFloorHeatingCommon.BlkName_WaterSeparator,
@@ -167,21 +130,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         private void ExtractBathRadiator(Database database, Point3dCollection framePts)
         {
-            //var extractService = new ThBlockReferenceExtractor()
             var extractService = new ThExtractBlockReferenceService()
             {
                 BlockName = ThFloorHeatingCommon.BlkName_BathRadiator,
             };
             extractService.Extract(database, framePts);
             BathRadiator.AddRange(extractService.Blocks);
-        }
-
-        private List<string> QueryBlkNames(string category)
-        {
-            var blkName = new List<string>();
-
-            BlockNameDict.TryGetValue(category, out blkName);
-            return blkName;
         }
 
         public static List<Polyline> ExtractPolylineMsNotClone(Database database, List<string> layers)

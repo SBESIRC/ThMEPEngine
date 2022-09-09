@@ -18,7 +18,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
     public class ThFloorHeatingWaterSeparator
     {
-        private BlockReference Blk { get; set; }
+        public BlockReference Blk { get; set; }
         public Polyline OBB { get; private set; }
         public List<Point3d> StartPts { get; private set; }
         public Vector3d DirLine { get; private set; }

@@ -61,7 +61,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        public static void InsertCoil(List<Polyline> pipes, string layer, bool withColor = false)
+        public static void InsertPolyline(List<Polyline> pipes, string layer, bool withColor = false)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

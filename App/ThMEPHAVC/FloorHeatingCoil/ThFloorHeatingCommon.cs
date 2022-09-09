@@ -8,14 +8,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
 {
     public class ThFloorHeatingCommon
     {
-        public static List<string> ObstacleTypeList = new List<string>(){ "坐便器" ,
-                                                                        "单盆洗手台" ,
-                                                                        "厨房洗涤盆" ,
-                                                                        "淋浴器" ,
-                                                                        "洗衣机" ,
-                                                                        "拖把池" ,
-                                                                        "浴缸" ,
-                                                                        };
+        //public static List<string> ObstacleTypeList = new List<string>(){ "坐便器" ,
+        //                                                                "单盆洗手台" ,
+        //                                                                "厨房洗涤盆" ,
+        //                                                                "淋浴器" ,
+        //                                                                "洗衣机" ,
+        //                                                                "拖把池" ,
+        //                                                                "浴缸" ,
+        //                                                                };
 
         public static string Layer_RoomSeparate = "AI-地暖伸缩缝";
         public static string Layer_Obstacle = "AI-地暖障碍物";

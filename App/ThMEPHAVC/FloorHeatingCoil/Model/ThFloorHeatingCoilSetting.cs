@@ -11,7 +11,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
     public class ThFloorHeatingCoilSetting
     {
-        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
+        //public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
         public bool WithUI = false;
         //public List<Polyline> SelectFrame { get; set; } = new List<Polyline>();
 

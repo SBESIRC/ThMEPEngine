@@ -18,6 +18,7 @@ using ThControlLibraryWPF.ControlUtils;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 
 using ThMEPEngineCore;
 using ThMEPHVAC.FloorHeatingCoil.Cmd;
@@ -28,7 +29,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 {
     public class ThFloorHeatingCoilViewModel : NotifyPropertyChangedBase
     {
-        #region UI Binding
+        #region UI right
         //----------------右---------------------------------
         private int _PublicRegionConstraint { get; set; }
         public int PublicRegionConstraint
@@ -85,8 +86,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        //----------------左---------------------------------
+        #endregion
 
+        #region UI left
         private int _RouteNum { get; set; }
         public int RouteNum
         {
@@ -129,8 +131,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
+        #endregion
 
-        //---------sub setting------
+        #region sub setting
         private int _ConvexEdgeTol { get; set; }
         public int ConvexEdgeTol
         {
@@ -141,7 +144,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
-
         private int _MainRoomEdgeTol { get; set; }
         public int MainRoomEdgeTol
         {
@@ -172,6 +174,52 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
+        #endregion
+
+        #region obstacle config
+        private ObservableCollection<ObstacleBlkLayerNameModel> _ObstacleBlkNameList { get; set; }
+        public ObservableCollection<ObstacleBlkLayerNameModel> ObstacleBlkNameList
+        {
+            get { return _ObstacleBlkNameList; }
+            set
+            {
+                _ObstacleBlkNameList = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<ObstacleBlkLayerNameModel> _ObstacleLayerNameList { get; set; }
+        public ObservableCollection<ObstacleBlkLayerNameModel> ObstacleLayerNameList
+        {
+            get { return _ObstacleLayerNameList; }
+            set
+            {
+                _ObstacleLayerNameList = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObstacleBlkLayerNameModel _SelectBlkName { get; set; }
+        public ObstacleBlkLayerNameModel SelectBlkName
+        {
+            get { return _SelectBlkName; }
+            set
+            {
+                _SelectBlkName = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObstacleBlkLayerNameModel _SelectLayerName { get; set; }
+        public ObstacleBlkLayerNameModel SelectLayerName
+        {
+            get { return _SelectLayerName; }
+            set
+            {
+                _SelectLayerName = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
         #endregion
 
@@ -187,10 +235,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             }
         }
 
-        //public Dictionary<Polyline, BlockReference> RoomPlSuggestDict { get; set; }
+        public List<Polyline> HighlightList { get; set; }
+
         #endregion
-
-
         public ThFloorHeatingCoilViewModel()
         {
             SelectFrame = new ObservableCollection<Polyline>();
@@ -203,11 +250,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             RouteNumList = new ObservableCollection<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
             SuggestDist = 250;
             SuggestDistDefualt = 200;
-            //RoomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
             ConvexEdgeTol = 150;
             MainRoomEdgeTol = 2000;
             SuggestDistWall = 100;
             FilletRadius = 80;
+            ObstacleBlkNameList = new ObservableCollection<ObstacleBlkLayerNameModel>();
+            ObstacleLayerNameList = new ObservableCollection<ObstacleBlkLayerNameModel>();
+            HighlightList = new List<Polyline>();
+            //ObstalceDefualtLayerFrames = new List<Polyline>();
         }
 
 
@@ -219,14 +269,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             FocusToCAD();
             ThFloorHeatingSubCmd.CheckRoomConnectivity(this);
         }
-
-        //public ICommand DistributeRouteCmd => new RelayCommand(DistributeRoute);
-        //private void DistributeRoute()
-        //{
-        //    SaveSetting();
-        //    FocusToCAD();
-        //    ThFloorHeatingSubCmd.DistributeRoute(this);
-        //}
 
         public ICommand ShowRouteCmd => new RelayCommand(ShowRoute);
         private void ShowRoute()
@@ -269,7 +311,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
-
         public ICommand DrawDoorOutlineCmd => new RelayCommand(DrawDoorOutline);
         private void DrawDoorOutline()
         {
@@ -289,7 +330,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 CommandHandlerBase.ExecuteFromCommandLine(false, "_.PLINE");
             }
         }
-
         public ICommand DrawObstacleCmd => new RelayCommand(DrawObstacle);
         private void DrawObstacle()
         {
@@ -344,9 +384,62 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             ThFloorHeatingSubCmd.InsertSuggestBlk(this);
         }
 
+        public ICommand AddObstacleBlkCmd => new RelayCommand<string>(type => AddObstacle(0));
+        public ICommand RemoveObstacleBlkCmd => new RelayCommand<string>(type => RemoveObstacle(0));
+        public ICommand AddObstacleLayerCmd => new RelayCommand<string>(type => AddObstacle(1));
+        public ICommand RemoveObstacleLayerCmd => new RelayCommand<string>(type => RemoveObstacle(1));
+
+        /// <summary>
+        /// addType:0:blk 1:layer
+        /// </summary>
+        /// <param name="addType"></param>
+        private void AddObstacle(int addType)
+        {
+            FocusToCAD();
+            ThFloorHeatingSubCmd.AddObstacle(this, addType);
+        }
+        private void RemoveObstacle(int addType)
+        {
+            ThFloorHeatingSubCmd.RemoveObstacle(this, addType);
+        }
+        public ICommand SaveObstacleFrameCmd => new RelayCommand(SaveObstacleFrame);
+        private void SaveObstacleFrame()
+        {
+            ThFloorHeatingSubCmd.SaveObstacleFrame(this);
+        }
+
         #endregion
 
         #region function
+
+        public void CleanHighlight()
+        {
+            var intCol = new IntegerCollection();
+            foreach (var frame in HighlightList)
+            {
+                cadGraph.TransientManager.CurrentTransientManager.EraseTransient(frame, intCol);
+            }
+            HighlightList.Clear();
+
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
+        }
+
+        public void UpdateHighLight()
+        {
+            CleanHighlight();
+
+            HighlightList.AddRange(ObstacleBlkNameList.SelectMany(x => x.ObsFrames));
+            HighlightList.AddRange(ObstacleLayerNameList.SelectMany(x => x.ObsFrames));
+
+            var intCol = new IntegerCollection();
+            foreach (var frame in HighlightList)
+            {
+                cadGraph.TransientManager.CurrentTransientManager.AddTransient(frame, cadGraph.TransientDrawingMode.Highlight, 1, intCol);
+            }
+
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
+        }
+
         private void SaveSetting()
         {
             ThFloorHeatingCoilSetting.Instance.WithUI = true;
@@ -363,5 +456,23 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         #endregion
     }
 
+    public class ObstacleBlkLayerNameModel : NotifyPropertyChangedBase
+    {
+        private string _BlkLayerName { get; set; }
+        public string BlkLayerName
+        {
+            get { return _BlkLayerName; }
+            set
+            {
+                _BlkLayerName = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        public List<Polyline> ObsFrames { get; set; } = new List<Polyline>();
 
+        public ObstacleBlkLayerNameModel(string blkName)
+        {
+            this.BlkLayerName = blkName;
+        }
+    }
 }

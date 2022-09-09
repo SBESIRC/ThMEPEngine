@@ -35,11 +35,7 @@ namespace ThMEPHVAC
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ThFloorHeatingCoilSetting.Instance.WithUI = false;
-                var blkNameDict = new Dictionary<string, List<string>> {
-                    {"单盆洗手台",new List<string> {"A-Toilate-1"} }
-                                };
-
-
+                var withUI = ThFloorHeatingCoilSetting.Instance.WithUI;
                 //画框，提数据，转数据
                 var selectFrames = ThSelectFrameUtil.SelectPolyline();
                 if (selectFrames.Count == 0)
@@ -54,10 +50,10 @@ namespace ThMEPHVAC
                 var dataFactory = new ThFloorHeatingDataFactory()
                 {
                     Transformer = transformer,
-                    BlockNameDict = blkNameDict,
+
                 };
 
-                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer);
+                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer,withUI);
                 dataQuery.Print();
 
                 var roomPlSuggestDict = new Dictionary<Polyline, BlockReference>();
@@ -78,11 +74,6 @@ namespace ThMEPHVAC
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-
-                ThFloorHeatingCoilSetting.Instance.BlockNameDict = new Dictionary<string, List<string>>
-                {
-                    { "单盆洗手台",new List<string> {"A-Toilate-1"} },
-                };
                 ThFloorHeatingCoilSetting.Instance.WithUI = false;
 
                 using (var cmd = new ThFloorHeatingCmd())

@@ -61,7 +61,7 @@
 
                 <TextBlock Grid.Row="5" Grid.ColumnSpan="3" Text="2.障碍物框线"/>
                 <TextBlock Grid.Row="6" Grid.Column="0"  Grid.ColumnSpan="2" Text="1）图层图块配置"/>
-                <Button IsEnabled ="False" Grid.Row="6" Grid.Column="2" Margin="0 3" Content="设置"/>
+                <Button Grid.Row="6" Grid.Column="2" Margin="0 3" Content="设置" Click="Button_Click"/>
                 <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="2）手绘框线"/>
                 <Button Grid.Row="7"  Grid.Column="2" Margin="0 3"  Content="绘制" Command="{Binding DrawObstacleCmd}"/>
                 <TextBlock Grid.Row="8"  Grid.ColumnSpan="3" Text="参数指定"/>
