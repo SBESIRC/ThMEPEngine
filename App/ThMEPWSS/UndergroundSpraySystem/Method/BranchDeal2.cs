@@ -38,14 +38,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     var pt = branchLoop[i];
 
-                    if (!sprayIn.PtTypeDic[pt].Contains("AlarmValve") && sprayIn.PtDic[pt].Count < 3)
-                    {
-                        branchLoop.Remove(pt);
-                    }
-                    else
-                    {
+                    //if (!sprayIn.PtTypeDic[pt].Contains("AlarmValve") && sprayIn.PtDic[pt].Count < 3)
+                    //{
+                    //    branchLoop.Remove(pt);
+                    //}
+                    //else
+                    //{
                         GetAlarmText(pt, sprayIn);
-                    }
+                    //}
                 }
 
                 for (int i = 0; i < branchLoop.Count; i++)
@@ -161,6 +161,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         {
                             if(!flowType.Equals(""))
                             spraySystem.FlowDIc.Add(ept,flowType);
+                            sprayIn.TermPtDic[ept].Type = 1;
                         }
                     }
                 }
@@ -187,9 +188,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             if (!flag) return;
             if(stopwatch.Elapsed.TotalSeconds > 5)
             {
-                stopwatch.Stop();
-                flag = false;
-                return;
+                //stopwatch.Stop();
+                //flag = false;
+                //return;
             }
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
@@ -204,7 +205,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                         hasValve = true;
                     }
-
+                    if (sprayIn.PtTypeDic[pt].Contains("Flow"))
+                    {
+                        hasFlow = true;
+                    }
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.FlowBlocks);
                     var rec = pt._pt.GetRect(50);
                     var qureys = spatialIndex.SelectCrossingPolygon(rec);
@@ -233,6 +237,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             {
                 if (visited.Contains(p)) continue;
                 if (branchLoop.Contains(p)) continue;
+
                 tempPath.Add(p);
                 visited.Add(p);
                 DfsBranch(start, p, target, branchLoop, tempPath, visited, sprayIn, ref hasValve, ref hasFlow, stopwatch, flag, ref flowType);

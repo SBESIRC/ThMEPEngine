@@ -122,7 +122,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     var blkName = bkr.Name.ToUpper();
                     return blkName.Contains("减压阀") || 
-                        (blkName.Contains("VALVE") && (blkName.Contains("301") || blkName.Contains("673")));
+                        (blkName.Contains("VALVE") && (blkName.Contains("301") || blkName.Contains("673") || blkName.Contains("437")));
                 }
             }
             return false; 

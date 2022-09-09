@@ -217,11 +217,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static void CreatFlowBlocks(DBObjectCollection flowblocks, SprayIn sprayIn)
+        public static void CreatFlowBlocks(List<Polyline> flowblocks, SprayIn sprayIn)
         {
             foreach (var objs in flowblocks)
             {
-                sprayIn.FlowBlocks.Add((DBObject)objs);
+                sprayIn.FlowBlocks.Add(objs);
             }
         }
 

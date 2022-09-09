@@ -46,26 +46,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                    .ToList();
 
                 var spatialIndex1 = new ThCADCoreNTSSpatialIndex(Results1.ToCollection());
-
                 //spatialIndex不支持圆
                 var map = new Dictionary<Polyline, Circle>();
                 Results2.ForEach(o => map.Add(o.ToRectangle(), o));
                 var spatialIndex2 = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
-
                 var spatialIndex3 = new ThCADCoreNTSSpatialIndex(Results3.ToCollection());
+                
+                var dbObjs1 = spatialIndex1.SelectCrossingPolygon(selectArea);
+                var dbObjs2 = spatialIndex2.SelectCrossingPolygon(selectArea);
+                var dbObjs3 = spatialIndex3.SelectCrossingPolygon(selectArea);
 
-                foreach (var polygon in sprayIn.FloorRectDic.Values)
-                {
-                    var dbObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
-                    var dbObjs2 = spatialIndex2.SelectCrossingPolygon(polygon);
-                    var dbObjs3 = spatialIndex3.SelectCrossingPolygon(polygon);
+                dbObjs1.Cast<Entity>().ForEach(e => ExplodeTchPipe(e));
 
-                    dbObjs1.Cast<Entity>().ForEach(e => ExplodeTchPipe(e));
+                dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(map[e as Polyline]));
 
-                    dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(map[e as Polyline]));
-
-                    dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
-                }
+                dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
+                
                 sprayIn.Verticals = GetVerticals();
                 Draw.Verticals(sprayIn.Verticals);
             }

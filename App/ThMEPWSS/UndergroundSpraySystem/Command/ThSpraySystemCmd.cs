@@ -97,7 +97,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             var alarmPts = alarmValve.Extract(curDb.Database, selectArea);
             var sprayType = CheckSprayType.IsAcrossFloor(sprayIn, alarmPts);
 
-            var rstGetInput = SpraySysWithAcrossFloor.GetInput2(curDb, sprayIn, selectArea, startPt);//提取输入参数
+            var rstGetInput = SpraySysWithAcrossFloor.GetInput(curDb, sprayIn, selectArea, startPt);//提取输入参数
             if (!rstGetInput) return;
             if (sprayType == 0)
             {

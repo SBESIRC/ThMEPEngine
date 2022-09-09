@@ -38,7 +38,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         public static List<Line> DealPipeLines(List<Line> pipeLines, List<Point3d> alarmPts, SprayIn sprayIn)
         {
             pipeLines = PipeLineAutoConnect2(pipeLines, sprayIn);//1. 对齐的线自动连接
-
             pipeLines = ConnectVerticalLine(pipeLines, sprayIn);//2. 依靠立管的线连接
 
             pipeLines = ConnectWithAlarmValve(pipeLines, sprayIn, alarmPts);//3. 连接报警阀连接的线
@@ -75,9 +74,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
                 if (ptDic.ContainsKey(pt1) && ptDic.ContainsKey(pt2))
                 {
-                    if (ptDic[pt1].Count >= 2 || ptDic[pt2].Count >= 2)
+                    if (ptDic[pt1].Count > 1 && ptDic[pt2].Count > 1)
                     {
-                        continue;
+                        continue;//邻接点数都大于1，跳过
                     }
                 }
                 var line = new Line(pt1._pt, pt2._pt);
@@ -88,19 +87,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 }
             }
 
-            //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-            if (GLineConnectList.Count() > 0)
-            {
-                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
-                var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
-                var tmpLines = new List<Line>();
-                foreach (var l in lineColl)
-                {
-                    tmpLines.Add(l as Line);
-                }
-                var cleanLines = LineMerge.CleanLaneLines(tmpLines);
-                return cleanLines;
-            }
+            ////处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+            //if (GLineConnectList.Count() > 0)
+            //{
+            //    ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+            //    var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
+            //    var tmpLines = new List<Line>();
+            //    foreach (var l in lineColl)
+            //    {
+            //        tmpLines.Add(l as Line);
+            //    }
+            //    var cleanLines = LineMerge.CleanLaneLines(tmpLines);
+            //    return cleanLines;
+            //}
 
             return lineList;//merge
         }
@@ -273,6 +272,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 {
                     var l = obj as Line;
                     lineList.Remove(l);
+                    Draw.Lines(new List<Line>() { l},"删除线");
                     pts.Add(l.StartPoint);
                     pts.Add(l.EndPoint);
                 }
