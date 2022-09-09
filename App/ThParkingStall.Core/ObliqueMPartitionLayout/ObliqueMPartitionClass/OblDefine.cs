@@ -34,6 +34,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             PillarNetLength = VMStock.ColumnSizeOfParalleToRoad;
             PillarNetDepth = VMStock.ColumnSizeOfPerpendicularToRoad;
             ThicknessOfPillarConstruct = VMStock.ColumnAdditionalSize;
+            AllowCompactedLane = VMStock.BoundaryShrink;
             //VMStock缺少RunMode参数
             //LayoutMode = ((int)VMStock.RunMode);
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;

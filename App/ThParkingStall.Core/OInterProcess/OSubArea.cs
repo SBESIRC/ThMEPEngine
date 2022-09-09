@@ -21,13 +21,13 @@ namespace ThParkingStall.Core.OInterProcess
         //public readonly List<LineString> SegLines;//该区域全部分区线
         public readonly List<Polygon> Buildings; //该区域全部建筑物,包含坡道
         public readonly List<ORamp> Ramps;//该区域全部的坡道
-        //public readonly List<Polygon> BoundingBoxes;//该区域所有建筑物的bounding box
+        public readonly List<Polygon> BuildingBounds;//该区域所有建筑物的BuildingBounds
         public int Count = -3;//车位总数
         public double Area;
         public OSubAreaKey Key;//该子区域的key
         public ObliqueMPartition obliqueMPartition;
         static object lockObj = new object();
-        public OSubArea(Polygon area, List<LineSegment> vaildLanes, List<LineString> walls,List<Polygon> buildings,List<ORamp> ramps = null)
+        public OSubArea(Polygon area, List<LineSegment> vaildLanes, List<LineString> walls,List<Polygon> buildings,List<ORamp> ramps = null,List<Polygon> buildingBounds = null)
         {
             Region = area;
             VaildLanes = vaildLanes;
@@ -35,7 +35,9 @@ namespace ThParkingStall.Core.OInterProcess
             Buildings = buildings;
             Ramps = ramps;
             Area = area.Area * 0.001 * 0.001;
-            Key = new OSubAreaKey(this, OInterParameter.BorderLines==null|| OInterParameter.BorderLines.Count == 0);
+            bool IncludeWall = (OInterParameter.BorderLines != null && OInterParameter.BorderLines.Count == 0 ) || OInterParameter.Center!= null;
+            Key = new OSubAreaKey(this, IncludeWall);
+            BuildingBounds = buildingBounds;
         }
 
         public void UpdateParkingCnts(bool IgnoreCache = false)
@@ -69,6 +71,7 @@ namespace ThParkingStall.Core.OInterProcess
                     fs.Close();
 #endif
                     obliqueMPartition.Process(true);
+                    Area = obliqueMPartition.CaledBound.Area;
                     var lane_segs=obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
                     var car_plys=obliqueMPartition.Cars.Select(e =>e.Polyline).ToList();
                     var column_plys = obliqueMPartition.Pillars;
@@ -95,10 +98,10 @@ namespace ThParkingStall.Core.OInterProcess
     {
         private HashSet<Coordinate> WallCoors;//边界顶点
         private HashSet<Coordinate> LaneCoors;//车道顶点
-        public OSubAreaKey(OSubArea oSubArea,bool ignoreWall = false)
+        public OSubAreaKey(OSubArea oSubArea,bool IncludeWall = true)
         {
             var wallCoors = new List<Coordinate>();
-            if(!ignoreWall)oSubArea.Walls.ForEach(w => wallCoors.AddRange(w.Coordinates));
+            if(IncludeWall) oSubArea.Walls.ForEach(w => wallCoors.AddRange(w.Coordinates));
             var laneCoors = new List<Coordinate>();
             oSubArea.VaildLanes.ForEach(l => { laneCoors.Add(l.P0);laneCoors.Add(l.P1);});
             WallCoors = wallCoors.GroupAndFilter();

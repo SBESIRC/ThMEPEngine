@@ -11,6 +11,8 @@ using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.OTools;
 using NetTopologySuite.Operation.Buffer;
+using NetTopologySuite.Algorithm;
+using NetTopologySuite.Mathematics;
 
 namespace ThParkingStall.Core.OInterProcess
 {
@@ -47,7 +49,14 @@ namespace ThParkingStall.Core.OInterProcess
 
         private static List<Polygon> _BuildingBounds;
         public static List<Polygon> BuildingBounds { get { return _BuildingBounds; } }//建筑物外包框
+        private static MNTSSpatialIndex _BuildingBoundSPIndex;
+        public static MNTSSpatialIndex BuildingBoundSPIndex { get { return _BuildingBoundSPIndex; } }
         static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
+
+        private static double[] _MaxMoveDistances;
+        public static double[] MaxMoveDistances { get { return _MaxMoveDistances; } }//扇形移动最大距离
+        private static Coordinate _Center;
+        public static Coordinate Center { get { return _Center; } }//点集移动中心
         public static void Init(DataWraper dataWraper)
         {
             var oWarper = dataWraper.oParamWraper;
@@ -72,6 +81,9 @@ namespace ThParkingStall.Core.OInterProcess
             allObjs.AddRange(Buildings);
             _BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
             _BorderLines = oWarper.borderLines;
+            _MaxMoveDistances = oWarper.MaxMoveDistances;
+            _Center = oWarper.Center;
+            _BuildingBoundSPIndex = new MNTSSpatialIndex(BuildingBounds);
         }
         public static void Init(Polygon totalArea,List<SegLine> segLines,List<Polygon> buildings,List<ORamp> ramps,
              List<(List<int>, List<int>)> seglineIndex,List<LineSegment> borderLines = null)
@@ -124,13 +136,10 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<OSubArea> GetOSubAreas(Genome genome)
         {
             var subAreas = new List<OSubArea>();
-            Polygon newWallLine = null;
-            if (BorderLines != null && genome != null)
-            {
-                newWallLine = ProcessToWallLine(genome);
-                if (newWallLine == null) return subAreas;
+            var newWallLine = ProcessToWallLine(genome);
+            if (newWallLine != null) 
                 genome.Area = newWallLine.Area * 0.001 * 0.001;
-            }
+            else if(genome!=null) genome.Area = TotalArea.Area * 0.001 * 0.001;
             var newSegs = ProcessToSegLines(genome, newWallLine);
             var SegLineStrings = newSegs.Select(l =>l.Splitter).ToList().ToLineStrings();
             var vaildLanes = newSegs.Select(l => l.VaildLane).ToList().ToLineStrings();
@@ -149,8 +158,10 @@ namespace ThParkingStall.Core.OInterProcess
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
                 var walls = SegLineStrings.GetWalls(area.Shell);
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+                
                 var subRamps = Ramps.Where(r => area.Contains(r.InsertPt)).ToList();
-                var subArea = new OSubArea(area, subLanes, walls, subBuildings,subRamps);
+                var subBuildingBounds = BuildingBoundSPIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+                var subArea = new OSubArea(area, subLanes, walls, subBuildings,subRamps, subBuildingBounds);
                 subAreas.Add(subArea);
             }
             return subAreas;
@@ -197,20 +208,49 @@ namespace ThParkingStall.Core.OInterProcess
 
         public static Polygon ProcessToWallLine(Genome genome)
         {
-            if(BorderLines == null || !genome.OGenes.ContainsKey(1))
+            if(genome == null) return null;
+            if (BorderLines != null && genome.OGenes.ContainsKey(1))
             {
-                return null;
+                var newBorderLines = new List<LineSegment>();
+                for (int i = 0; i < BorderLines.Count; i++)
+                {
+                    var moveDist = genome.OGenes[1][i].dDNAs.First().Value;
+                    newBorderLines.Add(BorderLines[i].Translate(BorderLines[i].NormalVector().Multiply(moveDist)));
+                }
+                var areas = newBorderLines.GetPolygons().OrderBy(p => p.Area);
+                if (areas.Count() == 0) return null;
+                var AllArea = areas.Last().Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true);
+                genome.Area = AllArea.Sum(p => p.Area);
+                var area = AllArea.OrderBy(p=>p.Area).Last();
+                return area;
             }
-            var newBorderLines = new List<LineSegment>();
-            for(int i = 0; i < BorderLines.Count; i++)
+            if(Center!= null && genome.OGenes.ContainsKey(2))
             {
-                var moveDist = genome.OGenes[1][i].dDNAs.First().Value;
-                newBorderLines.Add(BorderLines[i].Translate(BorderLines[i].NormalVector().Multiply(moveDist)));
+                var coordinates = new List<Coordinate>();
+                var Ogenes = genome.OGenes[2];
+                var Count = MaxMoveDistances.Count();
+                var angleStepSize = AngleUtility.PiTimes2 / Count;
+                for (int i = 0; i < MaxMoveDistances.Count(); i++)
+                {
+                    var DistProp = Ogenes[i].dDNAs[0].Value;
+                    var AngleProp = Ogenes[i].dDNAs[1].Value;
+                    var StartAngle = angleStepSize * i;
+                    var EndAngle = angleStepSize * (i + 1);
+                    var angle = AngleProp * StartAngle + (1 - AngleProp) * EndAngle;
+                    var Distance = MaxMoveDistances[i]*DistProp;
+                    var Vector = new Vector2D(Math.Cos(angle), Math.Sin(angle));
+                    var coordinate = Vector.Multiply(Distance).Translate(Center);
+                    coordinates.Add(coordinate);
+                }
+                coordinates.Add(coordinates.First());
+                var centerPt = Center.ToPoint();
+                var AllArea = new Polygon(new LinearRing(coordinates.ToArray())).Intersection(TotalArea).
+                    Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true);
+                genome.Area = AllArea.Sum(p => p.Area);
+                var newTotalArea = AllArea.Where(p =>p.Contains(centerPt)).OrderBy(p=>p.Area).Last();
+                return newTotalArea;
             }
-            var areas = newBorderLines.GetPolygons().OrderBy(p=>p.Area);
-            if(areas.Count() == 0) return null;
-            else return areas.Last();
-
+            return null;
         }
     }
 }

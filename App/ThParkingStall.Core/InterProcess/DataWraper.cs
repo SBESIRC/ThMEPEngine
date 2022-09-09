@@ -69,6 +69,8 @@ namespace ThParkingStall.Core.InterProcess
         public double SingleVertModulePlacementFactor = 1.0;
         //加速运算
         public bool SpeedUpMode = false;
+        //边界收缩
+        public bool BoundaryShrink = false;
         #endregion
         public Chromosome chromosome = null;//正交基因记录
         public Genome genome = null;//斜交基因记录
@@ -98,6 +100,8 @@ namespace ThParkingStall.Core.InterProcess
         public List<ORamp> Ramps;//坡道
         public List<(List<int>, List<int>)> seglineIndex;//每根分区线初始以及终点接到哪
         public List<LineSegment> borderLines = null;//可动边界
+        public double[] MaxMoveDistances;////扇形移动最大距离
+        public Coordinate Center;//点集圆心
         //缺一个可动边界的连接关系
     }
     public class ProgramDebug

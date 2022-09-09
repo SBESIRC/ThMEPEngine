@@ -96,6 +96,8 @@ namespace ThMEPArchitecture.MultiProcess
             oWraper.Ramps = oLayoutData.Ramps;
             oWraper.seglineIndex = oLayoutData.SeglineIndex;
             oWraper.borderLines = oLayoutData.BorderLines;
+            oWraper.MaxMoveDistances = oLayoutData.MaxMoveDistances;
+            oWraper.Center = oLayoutData.Center;
             dataWraper.oParamWraper = oWraper;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
@@ -182,6 +184,7 @@ namespace ThMEPArchitecture.MultiProcess
             //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
             datawraper.SingleVertModulePlacementFactor = ParameterStock.SingleVertModulePlacementFactor;
             datawraper.SpeedUpMode = vm.SpeedUpMode;
+            datawraper.BoundaryShrink = vm.BoundaryShrink;
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {

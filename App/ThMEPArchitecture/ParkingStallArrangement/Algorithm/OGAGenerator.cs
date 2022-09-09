@@ -46,6 +46,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int Max_SelectionSize;
         double EliminateRate;
         double GoldenRatio;
+        double InitLenProp;//初代长度平均比例
 
         int TargetParkingCntMin;
         int TargetParkingCntMax;
@@ -108,6 +109,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             TargetParkingCntMin = parameterViewModel.TargetParkingCntMin;
             TargetParkingCntMax = parameterViewModel.TargetParkingCntMax;
             AreaMax = ParameterStock.AreaMax;
+
+            InitLenProp =Math.Sqrt(1-parameterViewModel.AreaShrinkProp);
         }
 
         private void ReclaimMemory()
@@ -185,6 +188,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     solution.Add(new OGene(1, relativeValue));
                 }
             }
+            else if(OInterParameter.Center != null)
+            {
+                for (int i = 0; i < OInterParameter.MaxMoveDistances.Count(); i++)
+                {
+                    var RandDist = RandNormalInRange(InitLenProp, 0.2, 0.2, 1);
+                    var RandAngle = RandDoubleInRange(0, 1);
+                    solution.Add(new OGene(RandDist, RandAngle));//取最大可布置区域
+                }
+            }
             return solution;
         }
         public List<Genome> CreateFirstPopulation()
@@ -196,7 +208,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 foreach (var l in OInterParameter.BorderLines)
                 {
-                    orgSolution.Add(new OGene(1, 0));
+                    orgSolution.Add(new OGene(1, 0.0));
+                }
+            }
+            else if(OInterParameter.Center != null)
+            {
+                for(int i = 0; i < OInterParameter.MaxMoveDistances.Count(); i++)
+                {
+                    orgSolution.Add(new OGene(InitLenProp, 0.5));//取最大可布置区域
                 }
             }
             solutions.Add(orgSolution);
@@ -285,8 +304,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var initSingnal = CreateMutex("Mutex", idx);
                 initSingnals.Add(initSingnal);
                 initSingnal.ReleaseMutex();
-                //var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
-                var proc = CreateSubProcess(idx, true, ParameterStock.ThreadCount);
+                var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
+                //var proc = CreateSubProcess(idx, true, ParameterStock.ThreadCount);
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
@@ -387,7 +406,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             CalculateMP(inputSolution);
 #endif
             List<Genome> sorted;
-            if (ParameterStock.BorderlineMoveRange == 0)
+            if (ParameterStock.BorderlineMoveRange == 0&& OInterParameter.Center == null)
             {
                 sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
                 maxNums = sorted.First().ParkingStallCount;
@@ -539,18 +558,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private Genome Crossover(Genome s1, Genome s2)
         {
             var newS = new Genome();
-            
             foreach(var k in s1.OGenes.Keys)
             {
-                for(int i = 0;i < s1.OGenes[k].Count; i++)
+                if(k == 2)//连续基因交叉
                 {
-                    if(RandDouble() < 0.5)
+                    int startIdx = RandInt(s1.OGenes[k].Count);
+                    for(int i =0;i< s1.OGenes[k].Count; i++)
                     {
-                        newS.Add(s1.OGenes[k][i]);
+                        var index = (startIdx+i) % s1.OGenes[k].Count;
+                        if(i < s1.OGenes[k].Count/2)newS.Add(s1.OGenes[k][index]);
+                        else newS.Add(s2.OGenes[k][index]);
                     }
-                    else
+                }
+                else
+                {
+                    for (int i = 0; i < s1.OGenes[k].Count; i++)
                     {
-                        newS.Add(s2.OGenes[k][i]);
+                        if (RandDouble() < 0.5)
+                        {
+                            newS.Add(s1.OGenes[k][i]);
+                        }
+                        else
+                        {
+                            newS.Add(s2.OGenes[k][i]);
+                        }
                     }
                 }
             }
@@ -656,9 +687,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 break;
                             case 1:
                                 var orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
-                                var std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
+                                double std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
                                 double relativeValue = RandNormalInRange(orgValue, std, -ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = relativeValue;
+                                break;
+                            case 2:
+
+                                //if (RandDouble() < 0.5)
+                                //{
+                                //    std = 1 / (10);
+                                //    var orgDistProp = s[i].OGenes[geneType][j].dDNAs[0].Value;
+                                //    var RandDistProp = RandNormalInRange(orgDistProp, std, 0, 1);
+                                //    s[i].OGenes[geneType][j].dDNAs[0].Value = RandDistProp;
+                                //}
+                                //else
+                                //{
+                                //    std = 1 / (4);
+                                //    var orgAngleProp = s[i].OGenes[geneType][j].dDNAs[1].Value;
+                                //    var RandAngleProp = RandNormalInRange(orgAngleProp, std, 0, 1);
+                                //    s[i].OGenes[geneType][j].dDNAs[1].Value = RandAngleProp;
+                                //}
+                                std = 1 / (10);
+                                var orgDistProp = s[i].OGenes[geneType][j].dDNAs[0].Value;
+                                var RandDistProp = RandNormalInRange(orgDistProp, std, 0, 1);
+                                s[i].OGenes[geneType][j].dDNAs[0].Value = RandDistProp;
+                                var orgAngleProp = s[i].OGenes[geneType][j].dDNAs[1].Value;
+                                var RandAngleProp = RandNormalInRange(orgAngleProp, std, 0, 1);
+                                s[i].OGenes[geneType][j].dDNAs[1].Value = RandAngleProp;
                                 break;
                             default:
                                 throw new NotImplementedException("Do not have this type now");
@@ -712,6 +767,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 std = ParameterViewModel.BorderlineMoveRange / lamda;//2sigma 原则，从mean到边界概率为95.45%
                                 double relativeValue = RandNormalInRange(orgValue, std, -ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = relativeValue;
+                                break;
+                            case 2:
+                                
+                                //if (RandDouble() < 0.5)
+                                //{
+                                //    std = 1 / (lamda + 6);
+                                //    var orgDistProp = s[i].OGenes[geneType][j].dDNAs[0].Value;
+                                //    var RandDistProp = RandNormalInRange(orgDistProp, std, 0, 1);
+                                //    s[i].OGenes[geneType][j].dDNAs[0].Value = RandDistProp;
+                                //}
+                                //else
+                                //{
+                                //    std = 1 / (lamda );
+                                //    var orgAngleProp = s[i].OGenes[geneType][j].dDNAs[1].Value;
+                                //    var RandAngleProp = RandNormalInRange(orgAngleProp, std, 0, 1);
+                                //    s[i].OGenes[geneType][j].dDNAs[1].Value = RandAngleProp;
+                                //}
+                                std = 1 / (lamda+6 );
+                                var orgDistProp = s[i].OGenes[geneType][j].dDNAs[0].Value;
+                                var RandDistProp = RandNormalInRange(orgDistProp, std, 0, 1);
+                                s[i].OGenes[geneType][j].dDNAs[0].Value = RandDistProp;
+                                var orgAngleProp = s[i].OGenes[geneType][j].dDNAs[1].Value;
+                                var RandAngleProp = RandNormalInRange(orgAngleProp, std, 0, 1);
+                                s[i].OGenes[geneType][j].dDNAs[1].Value = RandAngleProp;
                                 break;
                             default:
                                 throw new NotImplementedException("Do not have this type now");

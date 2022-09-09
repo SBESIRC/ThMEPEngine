@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
@@ -25,11 +26,15 @@ using ThParkingStall.Core.Tools;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 using SegLineEx = ThParkingStall.Core.OTools.SegLineEx;
 using ThMEPArchitecture.ParkingStallArrangement.General;
+using NetTopologySuite.Mathematics;
+using System.Diagnostics;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
     public class OLayoutData
     {
         public List<Polyline> CAD_WallLines = new List<Polyline>();// 提取到的cad边界线
+        public List<Polyline> CAD_MaxWallLines = new List<Polyline>();//提取到的cad最大范围
         public List<Line> CAD_BorderLines = new List<Line>();//提取到的可移动边界线
 
         public List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分区线
@@ -38,13 +43,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         // NTS 数据结构
         //public Polygon Basement;//地库，面域部分为可布置区域
-        public Polygon WallLine;//初始边界线(输入边界）
+        public Polygon WallLine;//初始边界线(输入边界）,输入用地红线则为最大可建范围
+        //public Polygon MaxWallLine;//边界最大范围
         public List<LineSegment> BorderLines;//可动边界线
         public List<SegLine> SegLines = new List<SegLine>();// 初始分区线
         public List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public List<Polygon> RampPolgons;//坡道polygon
 
         double MaxArea;//最大地库面积
+        public Coordinate Center;//点集移动中心
+        public double[] MaxMoveDistances;//扇形移动最大距离
         // NTS 衍生数据
         public List<ORamp> Ramps = new List<ORamp>();// 坡道
         public List<Polygon> Buildings; // 初始障碍物,包含坡道
@@ -89,11 +97,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 succeed = false;
                 return;
             }
-            if(CAD_WallLines.Count != 0)
+            if (CAD_WallLines.Count != 0)//固定边界
             {
                 WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
             }
-            else if(CAD_BorderLines.Count != 0)
+            else if(CAD_BorderLines.Count != 0)//输入线+边界迭代
             {
                 BorderLines = CAD_BorderLines.Select(l => l.ToNTSLineSegment().OExtend(1)).ToList();
                 var areas = BorderLines.GetPolygons().OrderBy(plgn => plgn.Area);
@@ -105,6 +113,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     return;
                 }
                 WallLine = areas.Last();
+            }
+            else if(CAD_MaxWallLines.Count != 0)//无输入，边界迭代
+            {
+                WallLine = CAD_MaxWallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
+                UpdateBoundPoints(ParameterStock.BoundPointCnt);
             }
             else
             {
@@ -153,6 +166,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 else if (ent is Line line)
                 {
                     CAD_BorderLines.Add(line);
+                }
+            }
+            if (layerName.Contains("最大可建范围"))
+            {
+                if(ent is Polyline pline)
+                {
+                    if (pline.IsVaild(CloseTol))
+                    {
+                        CAD_MaxWallLines.Add(pline.GetClosed());
+                    }
                 }
             }
             if (layerName.Contains("障碍物"))
@@ -334,7 +357,148 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //outerBounds.ForEach(b => b.ToDbMPolygon(3, "外边界").AddToCurrentSpace());
             //innerBounds.ForEach(b => b.ToDbMPolygon(4, "内边界").AddToCurrentSpace());
         }
+        private void UpdateBoundPoints(int Counts = 8,int chunks = 100)//获取边界点集
+        {
+            ////求最小外接圆
+            //var boundingCircle = new MinimumBoundingCircle(MaxWallLine);
+            //var center = boundingCircle.GetCentre();
+            //var radius = boundingCircle.GetRadius();
+            //var center = MaxWallLine.Centroid.Coordinate;
+            //var radius = MaxWallLine.Coordinates.Max(c =>c.Distance(center));
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            double radius;
+            //(center, radius) = GetCenter2(chunks,Counts);
+            (Center, radius) = GetCenter(chunks);
 
+            stopWatch.Stop();
+            Active.Editor.WriteLine("找中心时间"+stopWatch.Elapsed.TotalSeconds);
+            Center.MarkPoint(radius);
+            var angleStepSize = AngleUtility.PiTimes2 / Counts;
+            MaxMoveDistances = new double[Counts];
+            for (int i = 0; i < Counts; i++)
+            {
+                var StartAngle = angleStepSize * i;
+                var MidAngle = angleStepSize * (i+0.5);
+                var EndAngle = angleStepSize*(i+1);
+                var StartVector = new Vector2D(Math.Cos(StartAngle), Math.Sin(StartAngle));
+                var MidVector = new Vector2D(Math.Cos(MidAngle), Math.Sin(MidAngle));
+                var EndVector = new Vector2D(Math.Cos(EndAngle), Math.Sin(EndAngle));
+                var StartPt = StartVector.Multiply(radius).Translate(Center);//旋转的第一个点
+                var MidPt = MidVector.Multiply(radius/Math.Cos(MidAngle-StartAngle)).Translate(Center);//旋转的中点
+                var EndPt = EndVector.Multiply(radius).Translate(Center);//旋转的终点
+                var sector =new Polygon( new LinearRing(new Coordinate[] { Center, StartPt, MidPt, EndPt, Center }));
+                sector.ToDbMPolygon().AddToCurrentSpace();
+                var intSection = sector.Intersection(WallLine.Shell);
+                MaxMoveDistances[i] = intSection.Coordinates.Max(c => c.Distance(Center));
+                intSection.Coordinates.OrderBy(c => c.Distance(Center)).Last().MarkPoint();
+
+            }
+        }
+
+        private (Coordinate,double) GetCenter(int chunks)
+        {
+            //var boundingCircle = new MinimumBoundingCircle(WallLine);
+            //var Mcenter = boundingCircle.GetCentre();
+            //var Mradius = boundingCircle.GetRadius();
+            var Mcenter = WallLine.Centroid.Coordinate;
+            var Mradius = WallLine.Coordinates.Max(c =>c.Distance(Center));
+            if(WallLine.Contains(Mcenter.ToPoint())) return(Mcenter,Mradius);
+            var envelop = WallLine.EnvelopeInternal;
+            var X_StepSize = (envelop.MaxX - envelop.MinX)/chunks;
+            var Y_StepSize = (envelop.MaxY - envelop.MinY)/chunks;
+            var min_radius = double.MaxValue;
+            var min_center = envelop.Centre;
+            for (var i = 0; i < chunks; i++)
+            {
+                for(var j = 0; j < chunks; j++)
+                {
+                    var X_start = envelop.MinX + i*X_StepSize;
+                    var X_end = envelop.MinX + (i+1)*X_StepSize;
+                    var Y_start = envelop.MinY + j*Y_StepSize;
+                    var Y_end = envelop.MinY + (j+1)*Y_StepSize;
+                    var center = new Coordinate((X_start+X_end)/2, (Y_start+Y_end)/2);
+                    if (WallLine.Contains(center.ToPoint()))
+                    {
+                        double radius = 0;
+                        foreach(var coordinate in WallLine.Coordinates)
+                        {
+                            radius = Math.Max(center.Distance(coordinate), radius);
+                            if (radius > min_radius) break;
+                        }
+                        if(radius < min_radius)
+                        {
+                            min_radius = radius;
+                            min_center = center;
+                        }
+                    }
+                }
+            }
+            return (min_center,min_radius);
+        }
+        //private (Coordinate, double) GetCenter2(int chunks,int Counts)
+        //{
+        //    var boundingCircle = new MinimumBoundingCircle(MaxWallLine);
+        //    var Mcenter = boundingCircle.GetCentre();
+        //    var Mradius = boundingCircle.GetRadius();
+        //    if (MaxWallLine.Contains(Mcenter.ToPoint())) return (Mcenter, Mradius);
+        //    var envelop = MaxWallLine.EnvelopeInternal;
+        //    var X_StepSize = (envelop.MaxX - envelop.MinX) / chunks;
+        //    var Y_StepSize = (envelop.MaxY - envelop.MinY) / chunks;
+        //    var min_radius = double.MaxValue;
+        //    var min_center = envelop.Centre;
+        //    var min_Area = double.MaxValue;
+        //    for (var i = 0; i < chunks; i++)
+        //    {
+        //        for (var j = 0; j < chunks; j++)
+        //        {
+        //            var X_start = envelop.MinX + i * X_StepSize;
+        //            var X_end = envelop.MinX + (i + 1) * X_StepSize;
+        //            var Y_start = envelop.MinY + j * Y_StepSize;
+        //            var Y_end = envelop.MinY + (j + 1) * Y_StepSize;
+        //            var center = new Coordinate((X_start + X_end) / 2, (Y_start + Y_end) / 2);
+        //            if (MaxWallLine.Contains(center.ToPoint()))
+        //            {
+        //                var radius = MaxWallLine.Coordinates.Max(c => c.Distance(center));
+        //                var area = GetSectorArea(center, MaxWallLine.Coordinates.Max(c => c.Distance(center)), Counts);
+        //                if (area < min_Area)
+        //                {
+        //                    min_radius = radius;
+        //                    min_center = center;
+        //                    min_Area = area;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return (min_center, min_radius);
+        //}
+        //private double GetSectorArea(Coordinate center,double radius,int Counts)
+        //{
+        //    var angleStepSize = AngleUtility.PiTimes2 / Counts;
+        //    //var MaxMoveDistances = new List<double>();
+        //    var totalArea = 0.0;
+        //    for (int i = 0; i < Counts; i++)
+        //    {
+        //        var StartAngle = angleStepSize * i;
+        //        var MidAngle = angleStepSize * (i + 0.5);
+        //        var EndAngle = angleStepSize * (i + 1);
+        //        var StartVector = new Vector2D(Math.Cos(StartAngle), Math.Sin(StartAngle));
+        //        var MidVector = new Vector2D(Math.Cos(MidAngle), Math.Sin(MidAngle));
+        //        var EndVector = new Vector2D(Math.Cos(EndAngle), Math.Sin(EndAngle));
+        //        var StartPt = StartVector.Multiply(radius).Translate(center);//旋转的第一个点
+        //        var MidPt = MidVector.Multiply(radius / Math.Cos(MidAngle - StartAngle)).Translate(center);//旋转的中点
+        //        var EndPt = EndVector.Multiply(radius).Translate(center);//旋转的终点
+        //        var sector = new Polygon(new LinearRing(new Coordinate[] { center, StartPt, MidPt, EndPt, center }));
+        //        //sector.ToDbMPolygon().AddToCurrentSpace();
+        //        var intSection = sector.Intersection(MaxWallLine.Shell);
+        //        var moveDist = intSection.Coordinates.Max(c => c.Distance(center));
+        //        totalArea += Math.PI * moveDist * moveDist / Counts;
+        //        //intSection.Coordinates.OrderBy(c => c.Distance(center)).Last().MarkPoint();
+
+        //    }
+        //    return totalArea;
+        //}
         private Polygon _GetInitBound(List<Polygon> BuildingBounds)
         {
             var obbs = BuildingBounds.Select(b => b.GetObb());

@@ -573,6 +573,40 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("TargetParkingCntMax");
             }
         }
+        private bool _BoundaryShrink = false;
+        public bool BoundaryShrink
+        {
+            get { return _BoundaryShrink; }
+            set
+            {
+                _BoundaryShrink = value;
+                RaisePropertyChanged("BoundaryShrink");
+            }
+        }
+
+        //面积平均缩减比例
+        private double _AreaShrinkProp = 0.2;
+        public double AreaShrinkProp
+        {
+            get { return _AreaShrinkProp; }
+            set
+            {
+                _AreaShrinkProp = value;
+                RaisePropertyChanged("AreaShrinkProp");
+            }
+        }
+        private int _BoundPointCnt = 8;
+        public int BoundPointCnt
+        {
+            get
+            { return _BoundPointCnt; }
+            set
+            {
+                _BoundPointCnt = value;
+                RaisePropertyChanged("BoundPointCnt");
+            }
+        }
+
         //变异概率
         private double _MutationRate = 0.382;
         public double MutationRate
@@ -871,7 +905,15 @@ namespace ThMEPArchitecture.ViewModel
                 }
             }
         }
-
+        private static int _BoundPointCnt = 8;
+        public static int BoundPointCnt
+        {
+            get
+            {
+                if (Setted) return _BoundPointCnt;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
         public static bool AddBoundSegLines;
         public static double BuildingArea;//建筑面积（m^2)
         public static double TotalArea;//地库面积（m^2)
@@ -905,6 +947,7 @@ namespace ThMEPArchitecture.ViewModel
             _ThreadCount = vm.ThreadCount;
             AddBoundSegLines = vm.AddBoundSegLines;
             BorderlineMoveRange = vm.BorderlineMoveRange;
+            _BoundPointCnt = vm.BoundPointCnt;
             var hp = HiddenParameter.ReadOrCreateDefault();
             if (ReadHiddenParameter)
             {

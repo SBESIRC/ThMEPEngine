@@ -120,6 +120,11 @@ namespace ThParkingStall.Core.OInterProcess
             dDNAs = new List<DDNA> { dDNA };
             //IsComplete = true;
         }
+        public OGene(double distance,double angle)//边界点集基因
+        {
+            GeneType = 2;
+            dDNAs = new List<DDNA> { new DDNA(2, distance), new DDNA(2, angle) };//第一个为极坐标长度，第二个为极坐标角度
+        }
         public OGene Clone()
         {
             var clone = new OGene(GeneType);
@@ -159,7 +164,7 @@ namespace ThParkingStall.Core.OInterProcess
     [Serializable]
     public class DDNA//double DNA
     {
-        public int DNA_Type { get; set; }//DNA类型，为分割线法向基因（0），或是边界DNA（1），或后续添加
+        public int DNA_Type { get; set; }//DNA类型，为分割线法向基因（0），或是边界DNA（1），或边界点集DNA（2）角度或长度
         public double Value;//绝对基因则value代表绝对值。相对基因，若为正则相对于最小值增加，若为负则相对最大值减少
         public bool IsRelative;//是否为相对值
         //public bool IsLowerBound;//是否为最小值,只有当dna是相对dna，且value为0时生效。false则为上边界
@@ -175,6 +180,9 @@ namespace ThParkingStall.Core.OInterProcess
                     break;
                 case 1:
                     IsRelative = true;
+                    break;
+                case 2:
+                    IsRelative = false;
                     break;
             }
         }

@@ -206,6 +206,9 @@ namespace ThParkingStall.Core.InterProcess
         //加速运算
         private static bool _SpeedUpMode;
         public static bool SpeedUpMode{get { return _SpeedUpMode; }}
+        //边界迭代
+        private static bool _BoundaryShrink;
+        public static bool BoundaryShrink { get { return _BoundaryShrink; }}
         public static void Init(DataWraper datawraper)
         {
             _RunMode = datawraper.RunMode;
@@ -257,6 +260,8 @@ namespace ThParkingStall.Core.InterProcess
             _SingleVertModulePlacementFactor = datawraper.SingleVertModulePlacementFactor;
             //加速运算模式
             _SpeedUpMode = datawraper.SpeedUpMode;
+            //边界迭代
+            _BoundaryShrink = datawraper.BoundaryShrink;
         }
     }
 }
