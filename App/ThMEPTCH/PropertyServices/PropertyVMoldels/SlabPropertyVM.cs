@@ -9,12 +9,10 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
     class SlabPropertyVM : PropertyVMBase
     {
         private SlabProperty property { get; }
-
         public SlabPropertyVM(string typeName, SlabProperty slabProperty) : base(typeName, slabProperty)
         {
             property = slabProperty;
         }
-
         [Browsable(true)]
         [DisplayName("材质")]
         [Editor(typeof(EnumPropertyEditor<EnumSlabMaterial>), typeof(PropertyEditorBase))]
@@ -27,8 +25,8 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
                 this.RaisePropertyChanged();
             }
         }
-
         [DisplayName("建筑顶标高")]
+        [Editor(typeof(THNumPropertyEditor), typeof(PropertyEditorBase))]
         public double A11_TopElevation
         {
             get { return property.TopElevation; }
@@ -38,19 +36,21 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
                 this.RaisePropertyChanged();
             }
         }
-
         [DisplayName("结构板厚")]
-        public double A12_Thickness
+        [THNumberRangeAttribute(0.0, double.MaxValue)]
+        [Editor(typeof(THNumPropertyEditor), typeof(PropertyEditorBase))]
+        public int A12_Thickness
         {
-            get { return property.Thickness; }
+            get { return (int)property.Thickness; }
             set
             {
                 property.Thickness = value;
                 this.RaisePropertyChanged();
             }
         }
-
         [DisplayName("建筑面层厚度")]
+        [THNumberRangeAttribute(0.0, double.MaxValue)]
+        [Editor(typeof(THNumPropertyEditor), typeof(PropertyEditorBase))]
         public double A13_SurfaceThickness
         {
             get { return property.SurfaceThickness; }
@@ -60,7 +60,6 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
                 this.RaisePropertyChanged();
             }
         }
-
         public override object Clone()
         {
             var clone = new SlabPropertyVM(this.TypeName, this.property.Clone() as SlabProperty);
