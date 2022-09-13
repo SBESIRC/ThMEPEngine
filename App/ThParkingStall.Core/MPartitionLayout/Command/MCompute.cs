@@ -101,42 +101,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 
                 return cars.Count;
             }
-            if (false)
-            {
-                var walls = new List<LineString>();
-                var cars = new List<InfoCar>();
-                var pillars = new List<Polygon>();
-                var iniPillars = new List<Polygon>();
-                var obsVertices = new List<Coordinate>();
-                var lanes = new List<LineSegment>();
-                foreach (var subArea in subAreas)
-                {
-                    walls.AddRange(subArea.mParkingPartitionPro.Walls);
-                    cars.AddRange(subArea.mParkingPartitionPro.Cars);
-                    pillars.AddRange(subArea.mParkingPartitionPro.Pillars);
-                    iniPillars.AddRange(subArea.mParkingPartitionPro.IniPillar);
-                    obsVertices.AddRange(subArea.mParkingPartitionPro.ObstacleVertexes);
-                    lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
-                }
-                RemoveDuplicatedLines(lanes);
-                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
-                MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
-                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
-                MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
-                MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
-                mParkingPartition = new MParkingPartitionPro();
-                mParkingPartition.Cars = cars;
-                mParkingPartition.Pillars = pillars;
-                mParkingPartition.OutputLanes = lanes;
-                return cars.Count;
-            }
-            else
-            {
-                return subAreas.Sum(sa => sa.Count);
-            }
-            //if (display)
-            //    mParkingPartitionPros.AddRange(subAreas.Select(subarea => subarea.mParkingPartitionPro));
-            //return subAreas.Sum(sa => sa.Count);
+            return subAreas.Sum(sa => sa.Count);
         }
         public static MParkingPartitionPro ConvertSubAreaToMParkingPartitionPro(this SubArea subArea)
         {
