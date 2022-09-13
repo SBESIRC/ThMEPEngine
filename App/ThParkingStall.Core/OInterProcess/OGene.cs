@@ -43,6 +43,7 @@ namespace ThParkingStall.Core.OInterProcess
         //以下三个参数随基因变化而变，不参与克隆与数据传输
         public int ParkingStallCount = -1;
         public double Area = OInterParameter.TotalArea.Area * 0.001 * 0.001;
+        public double ExtraArea = 0;
         public double score;
         public void Add(OGene oGene)
         {

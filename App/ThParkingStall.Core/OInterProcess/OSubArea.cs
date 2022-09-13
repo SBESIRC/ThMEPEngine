@@ -48,6 +48,7 @@ namespace ThParkingStall.Core.OInterProcess
                 {
                     var layoutResult = OCached.GetLayoutResult(this);
                     Count = layoutResult.ParkingCnt;
+                    Area = layoutResult.Area;
                     MCompute.CatchedTimes += 1;
                 }
             }
@@ -71,6 +72,7 @@ namespace ThParkingStall.Core.OInterProcess
                     fs.Close();
 #endif
                     obliqueMPartition.Process(true);
+                    //有bug，暂时不接
                     Area = obliqueMPartition.CaledBound.Area;
                     var lane_segs=obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
                     var car_plys=obliqueMPartition.Cars.Select(e =>e.Polyline).ToList();

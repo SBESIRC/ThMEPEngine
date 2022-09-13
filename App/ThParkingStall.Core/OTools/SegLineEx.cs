@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
 using ThParkingStall.Core.Tools;
 using static ThParkingStall.Core.Tools.ListEx;
+using NetTopologySuite.Operation.Overlay;
 namespace ThParkingStall.Core.OTools
 {
     public static class SegLineEx
@@ -269,7 +271,10 @@ namespace ThParkingStall.Core.OTools
                 bool posConnect = SeglineIndex[i].Item2.Count == 0 /*|| baseLines.Slice(SeglineIndex[i].Item2).Contains(null)*/;
                 var extended = baseLine.OExtend(MaxDistance).ToLineString();//无限延长+相交
                 var basePt = new Point(baseLine.MidPoint);//基线中点
-                var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
+                var intersection = OverlayNGRobust.Overlay(extended,shell,SpatialFunction.Intersection).
+                    Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
+
+                //var intersection = extended.Intersection(shell).Get<LineString>().OrderBy(lstr => basePt.Distance(lstr)).First();//筛选延长后与地库交集
                 boundPts = intersection.Coordinates.PositiveOrder();
                 if (!negConnect)//需连到其他分割线
                 {

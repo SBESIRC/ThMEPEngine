@@ -254,6 +254,8 @@ namespace ThParkingStall.Core
                         }
                         else subAreas.ForEach(s => s.UpdateParkingCnts());
                         var ParkingCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
+                        genome.Area = (subAreas.Sum(s => s.Area) + genome.ExtraArea)*0.001 * 0.001;
+                        //Logger?.Information(genome.Area.ToString() +","+(genome.ExtraArea*0.001*0.001).ToString());
                         if (LogAllInfo)
                         {
                             Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");

@@ -222,6 +222,7 @@ namespace ThParkingStall.Core.OInterProcess
                 var AllArea = areas.Last().Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true);
                 genome.Area = AllArea.Sum(p => p.Area);
                 var area = AllArea.OrderBy(p=>p.Area).Last();
+                genome.ExtraArea = genome.Area - area.Area;
                 return area;
             }
             if(Center!= null && genome.OGenes.ContainsKey(2))
@@ -248,6 +249,7 @@ namespace ThParkingStall.Core.OInterProcess
                     Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true);
                 genome.Area = AllArea.Sum(p => p.Area);
                 var newTotalArea = AllArea.Where(p =>p.Contains(centerPt)).OrderBy(p=>p.Area).Last();
+                genome.ExtraArea = genome.Area - newTotalArea.Area;
                 return newTotalArea;
             }
             return null;

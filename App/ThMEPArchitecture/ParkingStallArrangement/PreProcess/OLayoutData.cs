@@ -403,7 +403,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //var Mcenter = boundingCircle.GetCentre();
             //var Mradius = boundingCircle.GetRadius();
             var Mcenter = WallLine.Centroid.Coordinate;
-            var Mradius = WallLine.Coordinates.Max(c =>c.Distance(Center));
+            var Mradius = WallLine.Coordinates.Max(c =>c.Distance(Mcenter));
             if(WallLine.Contains(Mcenter.ToPoint())) return(Mcenter,Mradius);
             var envelop = WallLine.EnvelopeInternal;
             var X_StepSize = (envelop.MaxX - envelop.MinX)/chunks;
