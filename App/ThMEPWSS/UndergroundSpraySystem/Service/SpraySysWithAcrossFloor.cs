@@ -35,11 +35,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.LeadLines = leadLine.GetLines();
             var alarmValve = new AlarmValveTCH();
             var alarmPts = alarmValve.Extract(database, selectArea);
-  
 
             pipeLines = LineTools.DealPipeLines(pipeLines, alarmPts, sprayIn);
-            //Draw.Lines(pipeLines, "喷淋管线");
-            //return false;
 
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             DicTools.CreatePtTypeDic(sprayIn.PtDic.Keys.ToList(), "MainLoop", sprayIn);
