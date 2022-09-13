@@ -342,6 +342,17 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     var textLineEp = layoutDir.outDirection.X < 0 ? textStartPoint : textStartPoint + Vector3d.XAxis.MultiplyBy(textWidth);
                     var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), txtLineLayer, pipe.BelongId, "LG_BSLJX");
                     createBasicElements.Add(s);
+                    var _mainLine = new Line(pipe.BasePoint, lineStartPoint);
+                    if (matched_pipeName)
+                    {
+                        var addLine1 = new CreateBasicElement(_createFloor.floorUid, _mainLine, ThWSSCommon.Layout_PipeWastDrainTextLayerName, pipe.BelongId, "LG_BSLJX");
+                        createBasicElements.Add(addLine1);
+                    }
+                    else
+                    {
+                        var addLine = new CreateBasicElement(_createFloor.floorUid, _mainLine, ThWSSCommon.Layout_PipeRainTextLayerName, pipe.BelongId, "LG_BSLJX");
+                        createBasicElements.Add(addLine);
+                    }
                     if (i != thisLinePipes.Count - 1)
                     {
                         var maxPoint = text.GeometricExtents.MaxPoint;
@@ -356,23 +367,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     {
                         retText.Add(new CreateDBTextElement(_createFloor.floorUid, btText.Position, btText, pipe.BelongId, txtLineLayer, ThWSSCommon.Layout_TextStyle));
                     }
-                }
+                }                          
                 var startPipe = layoutDir.direction.Y < 0 ? thisLinePipes.Last() : thisLinePipes.First();
                 var lineSp = new Point3d(centerPoint.X, startPipe.BasePoint.Y, 0);
                 var lineEp = layoutDir.direction.Y < 0 ? createPoint : lineStartPoint;
                 var mainLine = new Line(lineSp, lineEp);
-                if (plCount > 0) 
-                {
-                    //有废水立管,则添加一根废水对应线
-                    var addLine1 = new CreateBasicElement(_createFloor.floorUid, (Line)mainLine.Clone(), ThWSSCommon.Layout_PipeWastDrainTextLayerName, connectPipeIds, "LG_BSLJX");
-                    createBasicElements.Add(addLine1);
-                }
-                if(plCount != thisLinePipes.Count)
-                {
-                    //还有雨水、阳台等立管，则加入一根雨水对应线
-                    var addLine = new CreateBasicElement(_createFloor.floorUid, (Line)mainLine.Clone(), ThWSSCommon.Layout_PipeRainTextLayerName, connectPipeIds, "LG_BSLJX");
-                    createBasicElements.Add(addLine);
-                }
                 //将主线加入到后续的避让线中
                 _obstacleEntities.AddMainLine(mainLine);
             }

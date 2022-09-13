@@ -665,6 +665,13 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         continue;
                     createBasicElements.Add(new CreateBasicElement(_floorId, moveLine, layerName,item.pipeBlockUid,"DLLG_LJX"));
                 }
+                foreach (var id in item.connectBlockIds)
+                {
+                    var drain = _balconyDrains.Find(c => c.belongBlockId.Equals(id));
+                    if (null == drain)
+                        continue;
+                    drain.layerName = layerName;
+                }
             }
         }
         Line MoveLineToCircleOut(Line line, List<Circle> checkCircles)
