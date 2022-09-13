@@ -66,7 +66,8 @@ namespace ThParkingStall.Core.MPartitionLayout
 
         public static Polygon CalIntegralBound(List<Polygon> pillars, List<LineSegment> lanes, List<Polygon> obstacles, List<InfoCar> cars)
         {
-            double buffer_tol = 10000;
+            //距离参数给到10000时，有的case比较粗放，精确到5000
+            double buffer_tol = 5000;
             var bound = new Polygon(new LinearRing(new Coordinate[0]));
             BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
 
