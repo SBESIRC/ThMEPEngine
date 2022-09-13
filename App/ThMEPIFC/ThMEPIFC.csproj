@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0"
+  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -62,12 +63,8 @@
     <PackageReference Include="Google.Protobuf">
       <Version>3.21.5</Version>
     </PackageReference>
-    <PackageReference Include="Xbim.Essentials">
-      <Version>5.1.341</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.Geometry">
-      <Version>5.1.437</Version>
-    </PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -98,6 +95,38 @@
   <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="Service\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xbim.Common">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Ifc.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc2x3">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Ifc2x3.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc4">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Ifc4.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.IO.Esent">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.IO.Esent.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.IO.MemoryModel">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.IO.MemoryModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Tessellator">
+      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Tessellator.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Geometry.Engine64">
+      <HintPath>..\..\Externals\Xbim.Geometry\Xbim.Geometry.Engine64.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.ModelGeometry.Scene">
+      <HintPath>..\..\Externals\Xbim.Geometry\Xbim.ModelGeometry.Scene.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Geometry.Engine.Interop">
+      <HintPath>..\..\Externals\Xbim.Geometry\Xbim.Geometry.Engine.Interop.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

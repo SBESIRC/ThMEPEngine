@@ -25,8 +25,10 @@
     <?define LanuageIdentifier = "zh-CN" ?>
     <!-- Native. -->
     <?define 64bitNative = "x64" ?>
-    <!-- Xbim Geometry Engine path -->
-    <?define XbimGeoEngine = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry.Engine" ?>
+    <!-- Xbim.Geometry path -->
+    <?define XbimGeometry = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry" ?>
+    <!-- Xbim.Essentials path -->
+    <?define XbimEssentials = "$(var.ProjectDir)\..\..\Externals\Xbim.Essentials" ?>
     <!-- Elevation Generator path -->
     <?define ElevationGeneratorPath = "$(var.ProjectDir)\..\..\Externals\ElevationGenerator" ?>
 </Include>
