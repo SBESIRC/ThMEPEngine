@@ -37,7 +37,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
             var polys = new List<Polygon>();
-            polys.AddRange(Pillars);
+            //polys.AddRange(Pillars);
             polys.AddRange(IniLanes.Select(e =>
             {
                 if (Boundary.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint) < DisLaneWidth / 2)
@@ -47,7 +47,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }));
             polys.AddRange(buildingBounds);
             polys.AddRange(Cars.Where(e => e.CarLayoutMode != 1).Select(e =>
-                  ConvertVertCarToCollisionCar(e.Polyline.GetEdges().OrderBy(edge => edge.ClosestPoint(e.Point).Distance(e.Point)).First(), e.Vector)));
+                  ConvertVertCarToCollisionCarRec(e.Polyline.GetEdges().OrderBy(edge => edge.ClosestPoint(e.Point).Distance(e.Point)).First(), e.Vector)));
             polys.AddRange(Cars.Where(e => e.CarLayoutMode == 1).Select(e => e.Polyline));
             polys = polys.Select(e =>
              {         
@@ -72,7 +72,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
 
             var polys = new List<Polygon>();
-            polys.AddRange(pillars);
+            //polys.AddRange(pillars);
             ModifyLanes(ref lanes, cars.Select(e => e.Polyline).ToList());
             polys.AddRange(lanes.Select(e =>
             {
@@ -83,7 +83,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }));
             polys.AddRange(obstacles);
             polys.AddRange(cars.Where(e => e.CarLayoutMode != 1).Select(e =>
-                  ConvertVertCarToCollisionCar(e.Polyline.GetEdges().OrderBy(edge => edge.ClosestPoint(e.Point).Distance(e.Point)).First(), e.Vector)));
+                  ConvertVertCarToCollisionCarRec(e.Polyline.GetEdges().OrderBy(edge => edge.ClosestPoint(e.Point).Distance(e.Point)).First(), e.Vector)));
             polys.AddRange(cars.Where(e => e.CarLayoutMode == 1).Select(e => e.Polyline));
             polys = polys.Select(e =>
             {

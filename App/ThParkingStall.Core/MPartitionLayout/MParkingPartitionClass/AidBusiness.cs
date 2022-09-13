@@ -607,6 +607,16 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             Pillars = Pillars.Except(pillars_to_remove).ToList();
         }
+        public static Polygon ConvertVertCarToCollisionCarRec(LineSegment baseline, Vector2D vec)
+        {
+            var collisionD = CollisionD;
+            CollisionD = 300;
+            vec = vec.Normalize();
+            var line = baseline.Scale((baseline.Length + CollisionD * 2) / baseline.Length);
+            var pl = PolyFromLines(line, line.Translation(vec * DisVertCarLength));
+            CollisionD = collisionD;
+            return pl;
+        }
         public static Polygon ConvertVertCarToCollisionCar(LineSegment baseline, Vector2D vec)
         {
             var collisionD = CollisionD;
