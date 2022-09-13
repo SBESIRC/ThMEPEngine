@@ -25,13 +25,14 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             var cars = new List<InfoCar>();
             var pillars = new List<Polygon>();
             var lanes = new List<LineSegment>();
-            var obstacles = new List<Polygon>();
+            //var obstacles = new List<Polygon>();
+            var obstacles = OInterParameter.BuildingBounds;
             foreach (var subArea in OSubAreas)
             {
                 cars.AddRange(subArea.obliqueMPartition.Cars);
                 pillars.AddRange(subArea.obliqueMPartition.Pillars);
                 lanes.AddRange(subArea.obliqueMPartition.IniLanes.Select(e => e.Line));
-                obstacles.AddRange(subArea.obliqueMPartition.Obstacles);
+                //obstacles.AddRange(subArea.obliqueMPartition.Obstacles);
             }
             var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, obstacles, cars);
             return newbound;

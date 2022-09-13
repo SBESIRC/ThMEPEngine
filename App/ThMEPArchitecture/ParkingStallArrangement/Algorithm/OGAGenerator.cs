@@ -442,7 +442,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information(strCnt);
             var maxCnt = sorted[0].ParkingStallCount;
             DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
-            var areaPerStall = ParameterStock.TotalArea / maxCnt;
+            var areaPerStall = sorted[0].Area / maxCnt;
             DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
             //System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<Genome>();

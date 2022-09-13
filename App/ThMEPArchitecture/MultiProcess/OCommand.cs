@@ -254,6 +254,7 @@ namespace ThMEPArchitecture.MultiProcess
             var subAreas = OInterParameter.GetOSubAreas(solution);
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
             var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
+            
             //OPostProcessEntry postProcessEntry = new OPostProcessEntry(subAreas);
             //var obliqueMPartition = postProcessEntry.Execute();
             foreach (var subArea in subAreas)
@@ -279,7 +280,7 @@ namespace ThMEPArchitecture.MultiProcess
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");
-                var areaPerStall = ParameterStock.TotalArea / ParkingStallCount;
+                var areaPerStall = caledBound.Area*0.001*0.001 / ParkingStallCount;
                 DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
 
