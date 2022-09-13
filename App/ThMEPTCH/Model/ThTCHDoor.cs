@@ -8,8 +8,13 @@ namespace ThMEPTCH.Model
     [ProtoContract]
     public class ThTCHDoor : ThTCHElement, ICloneable
     {
-        private ThTCHDoor(){ }
+        private ThTCHDoor() { }
         private double Angle { get; set; }
+        [ProtoMember(21)]
+        public uint Swing { get; set; }
+        [ProtoMember(22)]
+        public uint OperationType { get; set; }
+
         /// <summary>
         /// 矩形门的构造
         /// </summary>
@@ -18,7 +23,7 @@ namespace ThMEPTCH.Model
         /// <param name="height">高度（门高）</param>
         /// <param name="width">宽度（门厚）</param>
         /// <param name="angle">旋转角度（计算X轴方向）</param>
-        public ThTCHDoor(Point3d centerPoint,double length,double height,double width,double angle) 
+        public ThTCHDoor(Point3d centerPoint, double length, double height, double width, double angle, uint swing, uint operationType)
         {
             ExtrudedDirection = Vector3d.ZAxis;
             Origin = centerPoint;
@@ -27,15 +32,18 @@ namespace ThMEPTCH.Model
             Height = height;
             Width = width;
             Angle = angle;
+            Swing = swing;
+            OperationType = operationType;
         }
+
         public object Clone()
         {
             if (this == null)
                 return null;
-            var door = new ThTCHDoor(this.Origin, this.Length, this.Height, this.Width, this.Angle);
+            var door = new ThTCHDoor(this.Origin, this.Length, this.Height, this.Width, this.Angle, this.Swing, this.OperationType);
             door.XVector = this.XVector;
             door.Uuid = this.Uuid;
-            if (this.Outline != null) 
+            if (this.Outline != null)
             {
                 door.Outline = this.Outline.Clone() as Entity;
             }

@@ -425,7 +425,8 @@ namespace ThMEPTCH.TCHArchDataConvert
 
         ThTCHDoor DoorEntityToTCHDoor(DoorEntity entity)
         {
-            var newDoor = new ThTCHDoor(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
+            var newDoor = new ThTCHDoor(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation,
+                (uint)entity.Swing, (uint)entity.OperationType);
             newDoor.Uuid = projectId + entity.DBId.ToString();
             return newDoor;
         }
@@ -446,7 +447,7 @@ namespace ThMEPTCH.TCHArchDataConvert
 
         ThTCHWindow WindowEntityToTCHWindow(WindowEntity entity)
         {
-            var newWindow = new ThTCHWindow(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
+            var newWindow = new ThTCHWindow(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation, (uint)entity.WindowType);
             newWindow.Uuid = projectId + entity.DBId;
             return newWindow;
         }

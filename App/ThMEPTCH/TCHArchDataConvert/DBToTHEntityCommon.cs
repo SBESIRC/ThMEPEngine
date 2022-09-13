@@ -139,6 +139,8 @@ namespace ThMEPTCH.TCHArchDataConvert
                 Thickness = arch.Thickness,
                 BasePoint = arch.BasePoint,
                 Outline = GetDoorOutline(arch),
+                Swing = arch.Swing,
+                OperationType = arch.OperationType,
             };
             return entity;
         }
@@ -158,6 +160,7 @@ namespace ThMEPTCH.TCHArchDataConvert
                 Thickness = arch.Thickness,
                 BasePoint = arch.BasePoint,
                 Outline = GetWindowOutline(arch),
+                WindowType = arch.WindowType,
             };
             return entity;
         }

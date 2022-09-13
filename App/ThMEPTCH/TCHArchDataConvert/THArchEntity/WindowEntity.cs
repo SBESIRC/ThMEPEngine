@@ -10,7 +10,9 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         public double Thickness { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
-        public WindowEntity(TArchEntity archEntity):base(archEntity)
+        public WindowTypeEnum WindowType { get; set; }
+
+        public WindowEntity(TArchEntity archEntity) : base(archEntity)
         {
         }
 
