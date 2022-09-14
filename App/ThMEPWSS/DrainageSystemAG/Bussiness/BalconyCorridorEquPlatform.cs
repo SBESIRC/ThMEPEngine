@@ -553,8 +553,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     var maxWidth = Math.Max(upWidth, btWidth);
                     var leftDir = Vector3d.XAxis;
 
-                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
-                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp + leftDir.MultiplyBy(maxWidth + 100)), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
+                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, nearPipe.uid, ""));
+                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp + leftDir.MultiplyBy(maxWidth + 100)), ThWSSCommon.Layout_PipeCasingTextLayerName, nearPipe.uid, ""));
                     var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(10);
                     upText.Position = upTextPt;
                     var btTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(btHeight + 30);
@@ -670,7 +670,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     var drain = _balconyDrains.Find(c => c.belongBlockId.Equals(id));
                     if (null == drain)
                         continue;
-                    drain.layerName = layerName;
+                    drain.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                 }
             }
         }

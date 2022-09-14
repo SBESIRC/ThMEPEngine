@@ -36,15 +36,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             createTextElems = createTextElems.Except(texts).ToList();
             var texts_up = texts.Where(e => e.dbText.TextString.Contains("雨水斗"));
             texts = texts.Except(texts_up);
-            GenerateTCHSymMultiLeader(ref createBasicElems, ref symbMultiLeaders, texts_up, texts);
+            GenerateTCHSymMultiLeader(ref createBasicElems, ref symbMultiLeaders, texts_up, texts, "W-RAIN-NOTE");
             texts = createTextElems.Where(e => e.layerName.Equals("W-BUSH-NOTE"));
             createTextElems = createTextElems.Except(texts).ToList();
             texts_up = texts.Where(e => e.dbText.TextString.Contains("DN"));
             texts = texts.Except(texts_up);
-            GenerateTCHSymMultiLeader(ref createBasicElems, ref symbMultiLeaders, texts_up, texts);
+            GenerateTCHSymMultiLeader(ref createBasicElems, ref symbMultiLeaders, texts_up, texts, "W-BUSH-NOTE");
         }
 
-        private static void GenerateTCHSymMultiLeader(ref List<CreateBasicElement> createBasicElems, ref List<ThTCHSymbMultiLeader> symbMultiLeaders,IEnumerable<CreateDBTextElement> texts_up, IEnumerable<CreateDBTextElement> texts)
+        private static void GenerateTCHSymMultiLeader(ref List<CreateBasicElement> createBasicElems, ref List<ThTCHSymbMultiLeader> symbMultiLeaders,IEnumerable<CreateDBTextElement> texts_up, IEnumerable<CreateDBTextElement> texts,
+            string layerName)
         {
             foreach (var text in texts_up)
             {
@@ -70,7 +71,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                             locpoint = firstelement.baseCurce.StartPoint;
                             basepoint = firstelement.baseCurce.EndPoint;
                         }
-                        ThTCHSymbMultiLeader symbMultiLeader = new ThTCHSymbMultiLeader(basepoint, locpoint, line.Length / 100, text.dbText.TextString, corresponding_text, "W-RAIN-NOTE");
+                        ThTCHSymbMultiLeader symbMultiLeader = new ThTCHSymbMultiLeader(basepoint, locpoint, line.Length / 100, text.dbText.TextString, corresponding_text, layerName);
                         symbMultiLeaders.Add(symbMultiLeader);
                     }
                 }
