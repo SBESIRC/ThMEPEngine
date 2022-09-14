@@ -59,9 +59,9 @@ namespace ThMEPTCH.PropertyServices
                 {
                     return isVaild;
                 }
-                if (entity is Curve curve)
+                if (entity is Polyline polyline)
                 {
-                    if (curve.Layer.Contains(layer))
+                    if (polyline.Layer.Equals(layer))
                     {
                         isVaild = true;
                     }

@@ -29,7 +29,7 @@ namespace ThMEPTCH.Model
         {
 
         }
-        public ThTCHWall(Point3d startPt,Point3d endPt,double width,double height) 
+        public ThTCHWall(Point3d startPt, Point3d endPt, double width, double height)
         {
             Init();
             Width = width;
@@ -38,7 +38,7 @@ namespace ThMEPTCH.Model
             XVector = (endPt - startPt).GetNormal();
             Origin = startPt + XVector.MultiplyBy(Length / 2);
         }
-        public ThTCHWall(Polyline outPline, double height) 
+        public ThTCHWall(Polyline outPline, double height)
         {
             Init();
             XVector = Vector3d.XAxis;
@@ -60,23 +60,23 @@ namespace ThMEPTCH.Model
             ThTCHWall cloneWall = null;
             if (Outline != null)
             {
-                if (this.Outline is Polyline polyline) 
+                if (this.Outline is Polyline polyline)
                 {
                     var cloneLine = polyline.Clone() as Polyline;
                     cloneWall = new ThTCHWall(cloneLine, this.Height);
                     cloneWall.Width = this.Width;
                 }
             }
-            else 
+            else
             {
                 var sp = this.Origin - this.XVector.MultiplyBy(Length / 2);
-                var ep = this.Origin + this.XVector.MultiplyBy(Length/2);
-                cloneWall = new ThTCHWall(sp, ep,this.Width,this.Height);
+                var ep = this.Origin + this.XVector.MultiplyBy(Length / 2);
+                cloneWall = new ThTCHWall(sp, ep, this.Width, this.Height);
             }
-            if (cloneWall != null) 
+            if (cloneWall != null)
             {
                 cloneWall.Uuid = this.Uuid;
-                foreach (var item in this.Openings) 
+                foreach (var item in this.Openings)
                 {
                     cloneWall.Openings.Add(item.Clone() as ThTCHOpening);
                 }

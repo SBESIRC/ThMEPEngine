@@ -1,8 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using System;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPTCH.Model
 {

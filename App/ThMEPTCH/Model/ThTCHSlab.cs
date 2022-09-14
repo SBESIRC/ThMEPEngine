@@ -52,7 +52,7 @@ namespace ThMEPTCH.Model
             clone.Height = this.Height;
             if (this.Outline != null)
                 clone.Outline = this.Outline.Clone() as Entity;
-            if (null != this.Descendings) 
+            if (null != this.Descendings)
             {
                 foreach (var item in this.Descendings)
                 {
@@ -61,7 +61,7 @@ namespace ThMEPTCH.Model
             }
             foreach (var item in this.Properties)
             {
-                clone.Properties.Add(item.Key,item.Value);
+                clone.Properties.Add(item.Key, item.Value);
             }
             return clone;
         }
