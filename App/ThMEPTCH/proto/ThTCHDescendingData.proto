@@ -7,4 +7,5 @@ message ThTCHDescendingData{
     double descending_height = 3;
     double descending_thickness = 4;
     double descending_wrap_thickness = 5;
+    ThTCHPolyline outline_buffer = 6;
 }

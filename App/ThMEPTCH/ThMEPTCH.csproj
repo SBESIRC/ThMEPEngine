@@ -80,6 +80,7 @@
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
+    <Compile Include="Data\ThSUMaterialData.cs" />
     <Compile Include="Data\ThSUProjectData.cs" />
     <Compile Include="Data\ThTCHBuildingData.cs" />
     <Compile Include="Data\ThTCHBuildingStoreyData.cs" />
@@ -301,6 +302,7 @@
     <None Include="proto\ThSUComponentData.proto" />
     <None Include="proto\ThSUFaceData.proto" />
     <None Include="proto\ThSUGeometry.proto" />
+    <None Include="proto\ThSUMaterialData.proto" />
     <None Include="proto\ThSUProjectData.proto" />
     <None Include="proto\ThTCHBuildingData.proto" />
     <None Include="proto\ThTCHBuildingStoreyData.proto" />

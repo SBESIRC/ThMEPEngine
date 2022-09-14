@@ -22,13 +22,14 @@ public static partial class ThSUFaceDataReflection {
   static ThSUFaceDataReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90byIuCgxU",
-          "aFNVRmFjZURhdGESHgoEbWVzaBgBIAEoCzIQLlRoU1VQb2x5Z29uTWVzaGIG",
-          "cHJvdG8z"));
+          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90bxoWVGhT",
+          "VU1hdGVyaWFsRGF0YS5wcm90byJlCgxUaFNVRmFjZURhdGESHgoEbWVzaBgB",
+          "IAEoCzIQLlRoU1VQb2x5Z29uTWVzaBIoCghtYXRlcmlhbBgCIAEoCzIRLlRo",
+          "U1VNYXRlcmlhbERhdGFIAIgBAUILCglfbWF0ZXJpYWxiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh", "Material" }, new[]{ "Material" }, null, null, null)
         }));
   }
   #endregion
@@ -70,6 +71,7 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThSUFaceData(ThSUFaceData other) : this() {
     mesh_ = other.mesh_ != null ? other.mesh_.Clone() : null;
+    material_ = other.material_ != null ? other.material_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -91,6 +93,18 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     }
   }
 
+  /// <summary>Field number for the "material" field.</summary>
+  public const int MaterialFieldNumber = 2;
+  private global::ThSUMaterialData material_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThSUMaterialData Material {
+    get { return material_; }
+    set {
+      material_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -107,6 +121,7 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
       return true;
     }
     if (!object.Equals(Mesh, other.Mesh)) return false;
+    if (!object.Equals(Material, other.Material)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -115,6 +130,7 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   public override int GetHashCode() {
     int hash = 1;
     if (mesh_ != null) hash ^= Mesh.GetHashCode();
+    if (material_ != null) hash ^= Material.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -137,6 +153,10 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
       output.WriteRawTag(10);
       output.WriteMessage(Mesh);
     }
+    if (material_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(Material);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -151,6 +171,10 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
       output.WriteRawTag(10);
       output.WriteMessage(Mesh);
     }
+    if (material_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(Material);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -163,6 +187,9 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     int size = 0;
     if (mesh_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Mesh);
+    }
+    if (material_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Material);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -181,6 +208,12 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
         Mesh = new global::ThSUPolygonMesh();
       }
       Mesh.MergeFrom(other.Mesh);
+    }
+    if (other.material_ != null) {
+      if (material_ == null) {
+        Material = new global::ThSUMaterialData();
+      }
+      Material.MergeFrom(other.Material);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -204,6 +237,13 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
           input.ReadMessage(Mesh);
           break;
         }
+        case 18: {
+          if (material_ == null) {
+            Material = new global::ThSUMaterialData();
+          }
+          input.ReadMessage(Material);
+          break;
+        }
       }
     }
   #endif
@@ -224,6 +264,13 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
             Mesh = new global::ThSUPolygonMesh();
           }
           input.ReadMessage(Mesh);
+          break;
+        }
+        case 18: {
+          if (material_ == null) {
+            Material = new global::ThSUMaterialData();
+          }
+          input.ReadMessage(Material);
           break;
         }
       }

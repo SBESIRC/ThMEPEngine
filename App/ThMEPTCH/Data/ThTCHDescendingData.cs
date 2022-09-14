@@ -23,15 +23,15 @@ public static partial class ThTCHDescendingDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChlUaFRDSERlc2NlbmRpbmdEYXRhLnByb3RvGhNUaFRDSEdlb21ldHJ5LnBy",
-          "b3RvIqkBChNUaFRDSERlc2NlbmRpbmdEYXRhEh8KB291dGxpbmUYASABKAsy",
+          "b3RvItEBChNUaFRDSERlc2NlbmRpbmdEYXRhEh8KB291dGxpbmUYASABKAsy",
           "Di5UaFRDSFBvbHlsaW5lEhUKDWlzX2Rlc2NlbmRpbmcYAiABKAgSGQoRZGVz",
           "Y2VuZGluZ19oZWlnaHQYAyABKAESHAoUZGVzY2VuZGluZ190aGlja25lc3MY",
-          "BCABKAESIQoZZGVzY2VuZGluZ193cmFwX3RoaWNrbmVzcxgFIAEoAWIGcHJv",
-          "dG8z"));
+          "BCABKAESIQoZZGVzY2VuZGluZ193cmFwX3RoaWNrbmVzcxgFIAEoARImCg5v",
+          "dXRsaW5lX2J1ZmZlchgGIAEoCzIOLlRoVENIUG9seWxpbmViBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHDescendingData), global::ThTCHDescendingData.Parser, new[]{ "Outline", "IsDescending", "DescendingHeight", "DescendingThickness", "DescendingWrapThickness" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHDescendingData), global::ThTCHDescendingData.Parser, new[]{ "Outline", "IsDescending", "DescendingHeight", "DescendingThickness", "DescendingWrapThickness", "OutlineBuffer" }, null, null, null, null)
         }));
   }
   #endregion
@@ -77,6 +77,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     descendingHeight_ = other.descendingHeight_;
     descendingThickness_ = other.descendingThickness_;
     descendingWrapThickness_ = other.descendingWrapThickness_;
+    outlineBuffer_ = other.outlineBuffer_ != null ? other.outlineBuffer_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -146,6 +147,18 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     }
   }
 
+  /// <summary>Field number for the "outline_buffer" field.</summary>
+  public const int OutlineBufferFieldNumber = 6;
+  private global::ThTCHPolyline outlineBuffer_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHPolyline OutlineBuffer {
+    get { return outlineBuffer_; }
+    set {
+      outlineBuffer_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -166,6 +179,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(DescendingHeight, other.DescendingHeight)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(DescendingThickness, other.DescendingThickness)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(DescendingWrapThickness, other.DescendingWrapThickness)) return false;
+    if (!object.Equals(OutlineBuffer, other.OutlineBuffer)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -178,6 +192,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     if (DescendingHeight != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(DescendingHeight);
     if (DescendingThickness != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(DescendingThickness);
     if (DescendingWrapThickness != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(DescendingWrapThickness);
+    if (outlineBuffer_ != null) hash ^= OutlineBuffer.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -216,6 +231,10 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
       output.WriteRawTag(41);
       output.WriteDouble(DescendingWrapThickness);
     }
+    if (outlineBuffer_ != null) {
+      output.WriteRawTag(50);
+      output.WriteMessage(OutlineBuffer);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -246,6 +265,10 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
       output.WriteRawTag(41);
       output.WriteDouble(DescendingWrapThickness);
     }
+    if (outlineBuffer_ != null) {
+      output.WriteRawTag(50);
+      output.WriteMessage(OutlineBuffer);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -270,6 +293,9 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     }
     if (DescendingWrapThickness != 0D) {
       size += 1 + 8;
+    }
+    if (outlineBuffer_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(OutlineBuffer);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -300,6 +326,12 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     }
     if (other.DescendingWrapThickness != 0D) {
       DescendingWrapThickness = other.DescendingWrapThickness;
+    }
+    if (other.outlineBuffer_ != null) {
+      if (outlineBuffer_ == null) {
+        OutlineBuffer = new global::ThTCHPolyline();
+      }
+      OutlineBuffer.MergeFrom(other.OutlineBuffer);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -339,6 +371,13 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
           DescendingWrapThickness = input.ReadDouble();
           break;
         }
+        case 50: {
+          if (outlineBuffer_ == null) {
+            OutlineBuffer = new global::ThTCHPolyline();
+          }
+          input.ReadMessage(OutlineBuffer);
+          break;
+        }
       }
     }
   #endif
@@ -375,6 +414,13 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
         }
         case 41: {
           DescendingWrapThickness = input.ReadDouble();
+          break;
+        }
+        case 50: {
+          if (outlineBuffer_ == null) {
+            OutlineBuffer = new global::ThTCHPolyline();
+          }
+          input.ReadMessage(OutlineBuffer);
           break;
         }
       }

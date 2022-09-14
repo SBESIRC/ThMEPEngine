@@ -1,8 +1,10 @@
 syntax = "proto3";
 import "ThTCHGeometry.proto";
+import "ThSUMaterialData.proto";
 import "ThSUCompDefinitionData.proto";
 
 message ThSUComponentData {
     ThSUCompDefinitionData definition = 1;
     ThTCHMatrix3d transformations = 2;
+    ThSUMaterialData material = 3;
 }

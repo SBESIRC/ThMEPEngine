@@ -468,12 +468,6 @@ namespace ThMEPTCH.Services
                             var pLine = polyline.GetTransformedCopy(matrix) as Polyline;
                             railingColls.Add(pLine);
                             var railing = CreateRailingData(pLine);
-                            if (railingToRegion)
-                            {
-                                var centerline = pLine;
-                                var outlines = centerline.BufferFlatPL(railing.BuildElement.Width / 2.0);
-                                railing.BuildElement.Outline = (outlines[0] as Polyline).ToTCHPolyline();
-                            }
                             railing.BuildElement.Height = ralingHeight;
                             railing.BuildElement.Root.GlobalId = prjId + item.Id;
                             thisRailingEntitys.Add(pLine, railing);
@@ -514,8 +508,8 @@ namespace ThMEPTCH.Services
                     continue;
                 var buildingStorey = new ThTCHBuildingStoreyData();
                 buildingStorey.Root = new ThTCHRootData();
-                buildingStorey.Root.GlobalId = prjId + floor.Num.ToString() + "F";
-                buildingStorey.Root.Name = floor.Num.ToString() + "F";
+                buildingStorey.Root.GlobalId = prjId + floor.Num.ToString();
+                buildingStorey.Root.Name = floor.Num.ToString();
                 buildingStorey.Root.Description = "ThDefinition" + floor.FloorName;
                 buildingStorey.Number = floor.Num.ToString();
                 buildingStorey.Height = floor.LevelHeight;
@@ -933,12 +927,15 @@ namespace ThMEPTCH.Services
 
         private ThTCHRailingData CreateRailingData(Polyline pline)
         {
+            var centerline = pline;
+            var width = 60;
+            var outlines = centerline.BufferFlatPL(width / 2.0)[0] as Polyline;
             var railing = new ThTCHRailingData();
             railing.BuildElement = new ThTCHBuiltElementData();
             railing.BuildElement.Root = new ThTCHRootData();
             railing.BuildElement.Height = 1200;
-            railing.BuildElement.Width = 60;
-            railing.BuildElement.Outline = pline.ToTCHPolyline();
+            railing.BuildElement.Width = width;
+            railing.BuildElement.Outline = outlines.ToTCHPolyline();
             return railing;
         }
 
@@ -1007,9 +1004,22 @@ namespace ThMEPTCH.Services
             slab.BuildElement.Height = slabPolyline.Thickness;
             foreach (var item in slabPolyline.InnerSlabOpenings)
             {
+                var descendingWrapThickness = 50.0;
                 var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
                 if (!item.IsOpening)
                 {
+                    var outlineBuffer = innerPLine.Buffer(descendingWrapThickness).OfType<Polyline>()
+                        .OrderByDescending(p => p.Area).FirstOrDefault();
+                    if (outlineBuffer.IsNull())
+                    {
+                        continue;
+                    }
+                    outlineBuffer = outlineBuffer.Intersection(new DBObjectCollection { outPLine }).OfType<Polyline>()
+                        .OrderByDescending(p => p.Area).FirstOrDefault();
+                    if (outlineBuffer.IsNull())
+                    {
+                        continue;
+                    }
                     slab.Descendings.Add(new ThTCHDescendingData()
                     {
                         Outline = innerPLine.ToTCHPolyline(),
@@ -1017,6 +1027,7 @@ namespace ThMEPTCH.Services
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.Thickness,
                         DescendingWrapThickness = 50,
+                        OutlineBuffer = outlineBuffer.ToTCHPolyline(),
                     });
                 }
                 else
