@@ -111,6 +111,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
         }
 
+        //主导管线带出口
         public void Pipeline2() 
         {
             GetMainPipeArea(0,0);
@@ -119,6 +120,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (MainReigonListCopy.Count == 0) return;
             if (CheckSmallBetter()) MainReigonList = MainReigonListCopy;
 
+            //将最外层框线构造成房间
             List<Polyline> MainRegionListRoom = new List<Polyline>();
             for (int i = 0; i < MainReigonList.Count; i++)
             {
@@ -131,16 +133,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
             for (int i = 0; i < MainRegionListRoom.Count; i++)
             {
-                Point3d pin = new Point3d();
-                Point3d point = new Point3d();
+                Point3d pin = new Point3d();     //主导管线最短路径上的点
+                Point3d point = new Point3d();   //要连接的剩余区域最外层框线上的点
                 FindPin2(MainReigonList[i], ref pin, ref point);
                 if (point == new Point3d() || (point - pin).Length> Buffer*1.5) continue;
 
-                DrawUtils.ShowGeometry(MainReigonList[i], "l4MainShell", 5 , 30);
+                //此处是为了将最外层框线上的点生造成房间，因此point点要变换
+                Point3d newPt = pin + (pin - point).GetNormal() * Buffer;
                 Polyline pinToPoint = new Polyline();
-
-                pinToPoint.AddVertexAt(0, pin.ToPoint2D(), 0, 0, 0);
+                pinToPoint.AddVertexAt(0, newPt.ToPoint2D(), 0, 0, 0);
                 pinToPoint.AddVertexAt(0, point.ToPoint2D(), 0, 0, 0);
+                DrawUtils.ShowGeometry(MainReigonList[i], "l4MainShell", 5, 30);
+                DrawUtils.ShowGeometry(MainPipeRoad, "l4MainPipeRoad", 0, 30);
+                DrawUtils.ShowGeometry(pinToPoint, "l8Tmp", 1, 30);
                 point = IntersectUtils.PolylineIntersectionPolyline(MainRegionListRoom[i],pinToPoint).First();
 
                 double pinBuffer = GetPinBuffer(pin,point);
@@ -161,7 +166,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 Polyline chatou = line0.Buffer(pinBuffer);
                 BufferedPipeList.Add(chatou);
                 DrawUtils.ShowGeometry(BufferedPipeList, "l4SinglePipe", pipeInList[0].PipeId % 7 + 1, 30);
-                DrawUtils.ShowGeometry(MainPipeRoad, "l4MainPipeRoad", pipeInList[0].PipeId % 7 + 1, 30);
             }
 
             //DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
@@ -176,12 +180,27 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (MainReigonListCopy.Count == 0) return;
             if (CheckSmallBetter()) MainReigonList = MainReigonListCopy;
 
+            Point3d point = MainPipeRoad.StartPoint;  //起点
             List<Polyline> MainRegionListRoom = new List<Polyline>();
             for (int i = 0; i < MainReigonList.Count; i++)
             {
                 Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, Parameter.SuggestDistanceWall).First();
                 DrawUtils.ShowGeometry(mainReigonListRoom, "l2AdjustedRoom", 4, lineWeightNum: 30);
-                MainRegionListRoom.Add(mainReigonListRoom);
+
+                double disToStart = mainReigonListRoom.GetClosestPointTo(point,false).DistanceTo(point);
+                if (disToStart < 2000)
+                {
+                    MainRegionListRoom.Add(mainReigonListRoom);
+                }
+                else
+                {
+                    if (mainReigonListRoom.Area > 6000000)
+                    {
+                        ProcessedData.HaveVirtualPipe = true;
+                        ProcessedData.VirtualPlNow = mainReigonListRoom;
+                        return;
+                    }
+                }
             }
 
             if (!IfFind) return;
@@ -189,7 +208,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             for (int i = 0; i < MainRegionListRoom.Count; i++)
             {
                 Point3d pin = new Point3d();
-                Point3d point = MainPipeRoad.StartPoint;
                 double halfBuffer = PipeList[main_index].buff[0];
                 DrawUtils.ShowGeometry(point, "l4SPin", 0, 30, (int)halfBuffer);
 
@@ -279,12 +297,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 return new Polyline();
             }
 
+
+            //注意此处，如果是Pipeline3，即主导管线没有出口的情况，理论上只能出来一个区域，这里需要进一步修改
             var rest = main_region.Difference(rest0);
-
-
-
-
             List<Polyline> newRegionList = rest.OfType<Polyline>().ToList();
+
+
 
             //var newRoom = AdjustBufferRoom();
             var newRoom = Room;
@@ -382,7 +400,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             return node;
         }
 
-
         BufferTreeNode GetClearedBufferTree(Polyline poly, bool flag = false)
         {
             //if (!poly.IsCCW()) poly.ReverseCurve();
@@ -425,7 +442,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             return node;
         }
-
 
         void GetSkeleton(BufferTreeNode node)
         {

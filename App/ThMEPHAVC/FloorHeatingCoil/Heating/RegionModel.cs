@@ -15,7 +15,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public int RegionId = -1;
         public Polyline OldPl = new Polyline();
         public Polyline OriginalPl = new Polyline();
-        public double SuggestDist = 200;
+        public double SuggestDist = 0;
         public Polyline ClearedPl = new Polyline();
         public double UsedPipeLength = 0;
 

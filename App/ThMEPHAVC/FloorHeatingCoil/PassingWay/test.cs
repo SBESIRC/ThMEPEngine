@@ -41,7 +41,7 @@ namespace ThMEPHVAC
                 List<DrawPipeData> pipe_in = new List<DrawPipeData>();
                 pipe_in.Add(new DrawPipeData(circle.Center, circle.Radius, 0, 0));
                 // input room_buffer
-                double buffer = 500;
+                double buffer = 600;
                 double room_buffer = 100;
                 // core process
                 RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(room, pipe_in, buffer, room_buffer);
@@ -105,7 +105,7 @@ namespace ThMEPHVAC
                 }
 
                 double buffer = 500;
-                double room_buffer = 100;
+                double room_buffer = 200;
                 // core process
                 PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(room, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, 0);
                 passagePipeGenerator.CalculatePipeline();

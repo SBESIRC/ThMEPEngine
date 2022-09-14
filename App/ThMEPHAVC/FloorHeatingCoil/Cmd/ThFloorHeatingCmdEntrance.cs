@@ -80,12 +80,7 @@ namespace ThMEPHVAC
                 {
                     cmd.SubExecute();
                 }
-
-
             }
         }
-
-
-
     }
 }

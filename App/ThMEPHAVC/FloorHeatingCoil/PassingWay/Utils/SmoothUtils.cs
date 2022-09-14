@@ -44,12 +44,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 points.RemoveAt(0);
             return points;
         }
-        public static void RoundXY(ref List<Point3d> points)
+        public static void RoundXY(ref List<Point3d> points, bool is_round = true, bool is_closed = true)
         {
-            for (int i = 0; i < points.Count; ++i)
-                points[i] = new Point3d((int)points[i].X, (int)points[i].Y, 0);
+            if (is_round)
+            {
+                for (int i = 0; i < points.Count; ++i)
+                    points[i] = new Point3d((int)points[i].X, (int)points[i].Y, 0);
+            }
             for(int i = 0; i < points.Count; ++i)
             {
+                if (!is_closed && i == points.Count - 1) continue;
                 var next = (i + 1) % points.Count;
                 var dx = points[next].X - points[i].X;
                 var dy = points[next].Y - points[i].Y;

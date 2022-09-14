@@ -46,6 +46,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //开始找点
             FindPointNew();
 
+            CheckFreedomAgain();
+
             SaveResult();
 
             Draw();
@@ -81,7 +83,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) + 2 * pipeSpaceing)
             {
                 tmpDis = downDoor.Length / (nowDoor.PipeIdList.Count * 2 + 1);
-                tmpDis = ((int)tmpDis / 20) * 20;
+                tmpDis = ((int)tmpDis / 10) * 10;
             }
             else 
             {
@@ -1019,9 +1021,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void CheckFreedomAgain() 
         {
-            for (int i = 0; i < DoorList.Count; i++)
+            for (int i = 1; i < DoorList.Count; i++)
             {
-                if (DoorPointTypeMap[i].Type == 2) 
+
+                if (i == 7) 
+                {
+                    int stop = 0;
+                }
+                if (DoorPointTypeMap.ContainsKey(i) && DoorPointTypeMap[i].Type == 2) 
                 {
                     SingleDoor nowDoor = DoorList[i];
 
@@ -1032,9 +1039,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         {
                             for (int j = 0; j < nowDoor.PipeIdList.Count; j++) {
                                 int pipeId = nowDoor.PipeIdList[j];
-                                if (DoorPipeToPointMap.ContainsKey(new Tuple<int, int>(i, j))) 
+                                if (DoorPipeToPointMap.ContainsKey(new Tuple<int, int>(i, pipeId))) 
                                 {
-                                    DoorPipeToPointMap[new Tuple<int, int>(i, j)].FreeDegree = 0;
+                                    DoorPipeToPointMap[new Tuple<int, int>(i, pipeId)].FreeDegree = 0;
                                 }
                             }
                         }

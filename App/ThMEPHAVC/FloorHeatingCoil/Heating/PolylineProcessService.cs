@@ -142,7 +142,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //清理Polyline 
             ClearPolyline(ref newClearedPl);
 
-            //第三筛 筛除外凸耳朵
+            //第三筛 筛除外凸耳朵 ,必须是类似门的结构
             deleteList = new List<int>();
             num = newClearedPl.NumberOfVertices;
             for (int i = 0; i < num;)
@@ -163,11 +163,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                 double angle = line0.GetAngleTo(line1, Vector3d.ZAxis);
 
-                if (angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1)
+                if (angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1)   //逆时针情况，外凸，因此转270度
                 {
-                    if (line1.Length < value && line3.Length < value && dProduct < 0)
+                    if (line1.Length < value && line3.Length < value && dProduct < 0) 
                     {
-                        if (Math.Abs(line1.Length - line3.Length) < 10)
+                        if (Math.Abs(line1.Length - line3.Length) < 10)           //保证对称
                         {
                             deleteList.Add(i);
                             deleteList.Add((i + num - 1) % num);
@@ -188,7 +188,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
 
-            //第四筛
+            //第四筛 
             deleteList.Clear();
             num = newClearedPl.NumberOfVertices;
             Dictionary<int, Point3d> insertMap = new Dictionary<int, Point3d>();
@@ -210,7 +210,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                 int find = 0;
 
-                if (vec2.Length < value && vec3.Length < value)
+                if (vec2.Length < value && vec3.Length < value)     //类似于墙角的形状
                 {
                     double angle = vec2.GetAngleTo(vec3, Vector3d.ZAxis);
                     if (angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1)
@@ -229,7 +229,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                 deleteList.Add((i + 3) % num);
                                 deleteList.Add((i + 4) % num);
 
-                                insertMap.Add(i + 2, intersectionPoint);
+                                insertMap.Add((i + 2) % num, intersectionPoint);
                                 find = 1;
                             }
                         }

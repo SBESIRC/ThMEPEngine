@@ -691,7 +691,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             foreach (SingleRegion sr in RegionList)
             {
                 //清理Region框线
-                if (sr.RegionId == 1)
+                if (sr.RegionId == 0)
                 {
                     int stop = 0;
                 }
@@ -832,8 +832,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
 
             IdentifyTheTypeOfRoom();
-           
-
         }
 
         public void IdentifyTheTypeOfRoom() 

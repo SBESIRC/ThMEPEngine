@@ -159,41 +159,46 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 // 内缩外扩得到real_poly
                 var inner_polys = PassageWayUtils.Buffer(next_buffer, -buffer / 4 * buffer_coefficent + 1, 1e-3);
                 var real_polys = new List<Polyline>();
+                double real_area = 0;
                 foreach (var inner_poly in inner_polys)
                 {
                     var real_poly = PassageWayUtils.Buffer(inner_poly, buffer / 4 * buffer_coefficent - 1, 1e-3).Cast<Polyline>().First();
                     real_polys.Add(real_poly);
+                    real_area += real_poly.Area;
                 }
-                // 求差
-                var rest_polys = next_buffer.Difference(real_polys.ToCollection()).Cast<Polyline>().ToList();
-                // 删除：1、与多个real_poly中相交的rest_poly   2、不足推荐宽度的rest_poly
-                for (int i = rest_polys.Count - 1; i >= 0; --i)
+                if (next_buffer.Area - real_area > 5)
                 {
-                    var smaller_rest = PassageWayUtils.Buffer(rest_polys[i], -buffer / 4 * buffer_coefficent + 1, 1e-3);
-                    if(smaller_rest.Count==0)
+                    // 求差
+                    var rest_polys = next_buffer.Difference(real_polys.ToCollection()).Cast<Polyline>().ToList();
+                    // 删除：1、与多个real_poly中相交的rest_poly   2、不足推荐宽度的rest_poly
+                    for (int i = rest_polys.Count - 1; i >= 0; --i)
                     {
-                        rest_polys[i].Dispose();
-                        rest_polys.RemoveAt(i);
-                        continue;
-                    }
-                    int count = 0;
-                    foreach (var real_poly in real_polys)
-                    {
-                        if (rest_polys[i].ToNTSPolygon().Intersects(real_poly.ToNTSPolygon()))
+                        var smaller_rest = PassageWayUtils.Buffer(rest_polys[i], -buffer / 4 * buffer_coefficent + 1, 1e-3);
+                        if (smaller_rest.Count == 0)
                         {
-                            count++;
-                            if (count > 1)
-                                break;
+                            rest_polys[i].Dispose();
+                            rest_polys.RemoveAt(i);
+                            continue;
+                        }
+                        int count = 0;
+                        foreach (var real_poly in real_polys)
+                        {
+                            if (rest_polys[i].ToNTSPolygon().Intersects(real_poly.ToNTSPolygon()))
+                            {
+                                count++;
+                                if (count > 1)
+                                    break;
+                            }
+                        }
+                        if (count > 1)
+                        {
+                            rest_polys[i].Dispose();
+                            rest_polys.RemoveAt(i);
                         }
                     }
-                    if (count > 1)
-                    {
-                        rest_polys[i].Dispose();
-                        rest_polys.RemoveAt(i);
-                    }
+                    // 添加结果
+                    real_polys.AddRange(rest_polys);
                 }
-                // 添加结果
-                real_polys.AddRange(rest_polys);
                 ret.AddRange(real_polys.ToCollection().UnionPolygons().Cast<Polyline>());
             }
             return ret;
@@ -558,14 +563,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         var inner_poly = PassageWayUtils.BuildPolyline(inner_coords);
                         coords.Add(coords.First());
                         var shell_poly = PassageWayUtils.BuildPolyline(coords);
-                        inner_poly = PassageWayUtils.Buffer(inner_poly, -1).First();
-                        if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
+                        //PassageShowUtils.ShowEntity(inner_poly);
+                        var buffer_inner_poly = PassageWayUtils.Buffer(inner_poly, -1);
+                        if(buffer_inner_poly.Count>0)
                         {
-                            inner_coords.RemoveAt(inner_coords.Count - 1);
-                            var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
-                            if (index != -1)
+                            inner_poly = buffer_inner_poly.First();
+                            if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
                             {
-                                output_coords.InsertRange(index + 1, inner_coords);
+                                inner_coords.RemoveAt(inner_coords.Count - 1);
+                                var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
+                                if (index != -1)
+                                {
+                                    output_coords.InsertRange(index + 1, inner_coords);
+                                }
                             }
                         }
                         inner_poly.Dispose();

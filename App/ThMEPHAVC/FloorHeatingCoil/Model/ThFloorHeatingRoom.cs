@@ -20,7 +20,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             RoomBoundary = room;
             Name = new List<string>();
             SuggestDist = ThFloorHeatingCommon.DefaultValue_SuggestDist;
-
+            //SuggestDist = 300;
         }
 
         public void SetName(List<string> name)

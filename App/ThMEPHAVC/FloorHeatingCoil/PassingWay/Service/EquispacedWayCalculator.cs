@@ -39,12 +39,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.pipe_inputs = pipe_inputs;
             this.pipe_segments = pipe_segments;
 
-            this.env = region.ToNTSPolygon().EnvelopeInternal;
+            this.env = region.ToNTSPolygon().EnvelopeInternal; //水平外包围盒
         }
-        public void BuildDirTree(int left, int right, int depth, bool side = true)
+
+        //left right：管道index ，depth：递归层数   side：t左f右
+        public void BuildDirTree(int left, int right, int depth, bool side = true) 
         {
             if (right < left) return;
             var dir = pipe_segments[left][depth].dir;
+
+            //对该层进行操作，操作目的为记录信息;
             if (depth == 0)
             {
                 for (int i = left; i <= right; ++i)
@@ -110,15 +114,20 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         break;
                 }
                 // check if node contain main pipe
-                int mid_index = right >= main_index && left <= main_index ? main_index : (right + left) / 2;
+                //为某一组方向构造虚拟的主导管线
+                //int mid_index = right >= main_index && left <= main_index ? main_index : (right + left) / 2;
+                int mid_index = main_index;
                 for (int i = left; i <= right; ++i)
                 {
                     // set side
-                    pipe_segments[i][depth].side = side;
+                    pipe_segments[i][depth].side = side;  //上一层级到当前层级是左转还是右转
                     // set close_to
-                    pipe_segments[i][depth].close_to = side ^ (i <= mid_index);
+                    pipe_segments[i][depth].close_to = side ^ (i <= mid_index); //短还是长
                     // set offset
-                    pipe_segments[i][depth].offset = i <= mid_index ? (i - left) : (right - i);
+                    //to do
+                    pipe_segments[i][depth].offset = i <= mid_index ? (i - left) : (right - i);//当前均匀分布下第几根管线
+                    
+                    
                     // calculate the same group pipe num
                     var s = pipe_segments[i][depth - 1].start;
                     var e = pipe_segments[i][depth - 1].end;
@@ -146,6 +155,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         pipe_segments[i][depth].pw = buffer / 4;
                 }
             }
+            
             // calculate child'dir
             var left_dir = (dir + 1) % 4;
             var right_dir = (dir + 3) % 4;
@@ -159,6 +169,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 end_idx++;
             BuildDirTree(start_idx, end_idx - 1, depth + 1, true);
             // calculate RRRR's start and end
+            //递归
             start_idx = end_idx;
             while (start_idx <= right && pipe_segments[start_idx].Count <= depth + 1)
                 start_idx++;
@@ -167,6 +178,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 end_idx++;
             BuildDirTree(start_idx, end_idx - 1, depth + 1, false);
         }
+        
+        //
         public void CheckDir(bool show = false)
         {
             for(int index = 0; index < pipe_inputs.Count; ++index)
@@ -292,6 +305,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         axis = s + Math.Sign(e - s) * offset;
                 }
                 // adjust last segment
+                // 倒数第二段怎么加
                 if (i == pipe_segments[index].Count - 1)
                 {
                     if (dir == pipe_inputs[index].end_dir)
