@@ -81,7 +81,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
 
             //与边界相交：如果是背靠背，1模块+1半车道相交后再偏移回1模块深度的距离作与边界相交处理，再偏移至1模块+1半车道的位置
             offsetlane = offsetlane.Scale(20);
-            var _splits = SplitLine(offsetlane, Boundary);
+            //var _splits = SplitLine(offsetlane, Boundary);
+            var _splits = SplitBufferLineByPoly(offsetlane, DisLaneWidth / 2, Boundary);
             var splits = new List<LineSegment>();
             if (!isBackBackModule)
             {

@@ -308,7 +308,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         }
         private List<LineSegment> SplitBufferLineByPoly(LineSegment line, double distance, Polygon cutter)
         {
-            return SplitLine(line, cutter);
             var pl = BufferReservedConnection(line,distance);
             var splits = SplitCurve(cutter, pl);
             if (splits.Count() == 1)
